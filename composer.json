@@ -1,8 +1,21 @@
 {
-    "name": "league/uri",
+    "name": "league/uri-components",
     "type": "library",
-    "description" : "URI manipulation library",
-    "keywords": ["url", "uri", "rfc3986", "psr-7", "parse_url", "http", "https", "ws", "ftp", "data-uri"],
+    "description" : "URI components manipulation library",
+    "keywords": [
+        "url",
+        "uri",
+        "rfc3986",
+        "components",
+        "scheme",
+        "userinfo",
+        "host",
+        "port",
+        "authority",
+        "path",
+        "query",
+        "fragment"
+    ],
     "license": "MIT",
     "homepage": "http://uri.thephpleague.com",
     "authors": [
@@ -11,32 +24,27 @@
             "email" : "nyamsprod@gmail.com",
             "homepage" : "https://nyamsprod.com"
         }
-    ],
-    "support": {
-        "forum": "https://groups.google.com/forum/#!forum/thephpleague",
-        "issues": "https://github.com/thephpleague/uri/issues"
-    },
+    ]   ,
     "require": {
         "ext-mbstring" : "*",
         "ext-intl" : "*",
         "ext-fileinfo": "*",
         "jeremykendall/php-domain-parser": "^3.0",
-        "php" : ">=5.5.9",
-        "psr/http-message": "^1.0"
+        "php" : ">=5.6.0",
+        "league/uri-interfaces": "dev-master"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^1.9",
-        "phpunit/phpunit" : "^4.0"
+        "friendsofphp/php-cs-fixer": "^1.12",
+        "phpunit/phpunit" : "^5.0"
     },
     "autoload": {
         "psr-4": {
-            "League\\Uri\\": "src"
-        },
-        "files": ["src/functions_include.php"]
+            "League\\Uri\\Components\\": "src"
+        }
     },
     "autoload-dev": {
         "psr-4": {
-            "League\\Uri\\Test\\": "test"
+            "LeagueTest\\Uri\\Components\\": "test"
         }
     },
     "scripts": {
@@ -46,7 +54,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "4.2.x-dev"
+            "dev-master": "1.0.x-dev"
         }
     },
     "config": {
