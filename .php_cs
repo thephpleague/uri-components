@@ -1,9 +1,9 @@
 <?php
 
 $header = <<<'EOF'
-This file is part of League\Uri, a URI manipulation library
+This file is part of League\Uri\Components, a URI components manipulation library
 
-@copyright 2015 Ignace Nyamagana Butera. All rights reserved
+@copyright 2016 Ignace Nyamagana Butera. All rights reserved
 @license MIT See LICENSE.md at the root of the project for more info
 EOF;
 
