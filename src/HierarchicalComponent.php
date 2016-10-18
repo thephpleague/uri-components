@@ -13,6 +13,7 @@
 namespace League\Uri\Components;
 
 use League\Uri\Components\Traits\ImmutableCollection;
+use League\Uri\Components\Traits\ImmutableComponent;
 
 /**
  * An abstract class to ease collection like object manipulation
@@ -25,6 +26,7 @@ use League\Uri\Components\Traits\ImmutableCollection;
 abstract class HierarchicalComponent
 {
     use ImmutableCollection;
+    use ImmutableComponent;
 
     const IS_ABSOLUTE = 1;
 
@@ -94,7 +96,7 @@ abstract class HierarchicalComponent
      */
     public function isDefined()
     {
-        return null === $this->getContent();
+        return null !== $this->getContent();
     }
 
     /**

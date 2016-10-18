@@ -160,7 +160,7 @@ class Query implements CollectionComponent
      */
     public function isDefined()
     {
-        null === $this->getContent();
+        return null !== $this->getContent();
     }
 
     /**
@@ -228,7 +228,7 @@ class Query implements CollectionComponent
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified data
      *
-     * @param string $value
+     * @param string|null $value
      *
      * @return static
      */

@@ -34,6 +34,23 @@ class QueryTest extends AbstractTestCase
         $this->assertContains('query', $res);
     }
 
+    public function testSetState()
+    {
+        $generateComponent = eval('return '.var_export($this->query, true).';');
+        $this->assertEquals($this->query, $generateComponent);
+    }
+
+    public function testDefined()
+    {
+        $this->assertTrue($this->query->isDefined());
+        $this->assertFalse($this->query->withContent(null)->isDefined());
+    }
+
+    public function testWithContent()
+    {
+        $this->assertSame($this->query, $this->query->withContent('kingkong=toto'));
+    }
+
     /**
      * @param $str
      * @expectedException InvalidArgumentException

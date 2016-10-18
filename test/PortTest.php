@@ -29,6 +29,13 @@ class PortTest extends AbstractTestCase
         $this->assertSame('443', $port->__toString());
     }
 
+    public function testSetState()
+    {
+        $component = new Port(42);
+        $generateComponent = eval('return '.var_export($component, true).';');
+        $this->assertEquals($component, $generateComponent);
+    }
+
     /**
      * @param  $input
      * @param  $expected
