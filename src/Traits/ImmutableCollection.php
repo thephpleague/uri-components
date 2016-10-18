@@ -27,8 +27,6 @@ use Traversable;
  */
 trait ImmutableCollection
 {
-    use ImmutableComponent;
-
     /**
      * The component Data
      *

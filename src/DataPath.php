@@ -121,7 +121,7 @@ class DataPath extends Component implements PathComponent
     {
         if (!mb_detect_encoding($path, 'US-ASCII', true)
             || false === strpos($path, ',')
-            || false !== strpos($path, '\n')
+            || false !== strpos($path, "\n")
         ) {
             throw new InvalidArgumentException(
                 sprintf('The submitted path `%s` is invalid according to RFC2937', $path)

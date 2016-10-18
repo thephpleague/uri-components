@@ -22,6 +22,8 @@ namespace League\Uri\Components\Traits;
  */
 trait QueryParser
 {
+    use ImmutableComponent;
+
     /**
      * Parse a query string into an associative array
      *
@@ -78,15 +80,6 @@ trait QueryParser
 
         return $res;
     }
-
-    /**
-     * Decode a component according to RFC3986
-     *
-     * @param string $str
-     *
-     * @return string
-     */
-    abstract protected static function decodeComponent($str);
 
     /**
      * Build a query string from an associative array
@@ -162,14 +155,4 @@ trait QueryParser
             return self::encode($str, $regexp);
         };
     }
-
-    /**
-     * Encode a component string
-     *
-     * @param string $str    The string to encode
-     * @param string $regexp a regular expression
-     *
-     * @return string
-     */
-    abstract protected static function encode($str, $regexp);
 }

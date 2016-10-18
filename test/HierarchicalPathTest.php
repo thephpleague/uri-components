@@ -26,6 +26,20 @@ class HierarchicalPathTest extends AbstractTestCase
         $this->assertContains('path', $res);
     }
 
+    public function testSetState()
+    {
+        $component = new Path('yolo');
+        $generateComponent = eval('return '.var_export($component, true).';');
+        $this->assertEquals($component, $generateComponent);
+    }
+
+    public function testDefined()
+    {
+        $component = new Path('yolo');
+        $this->assertTrue($component->isDefined());
+        $this->assertTrue($component->withContent(null)->isDefined());
+    }
+
     /**
      * @param string $raw
      * @param string $parsed
@@ -80,12 +94,6 @@ class HierarchicalPathTest extends AbstractTestCase
             'float' => [1.2],
             'reserved chars' => ['foo?bar'],
         ];
-    }
-
-    public function testIsNull()
-    {
-        $this->assertFalse((new Path(null))->isDefined());
-        $this->assertFalse((new Path(''))->isDefined());
     }
 
     public function testWithContent()

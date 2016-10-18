@@ -181,7 +181,7 @@ class UserInfo implements UriComponent
      */
     public function isDefined()
     {
-        return null === $this->getContent();
+        return null !== $this->getContent();
     }
 
     /**

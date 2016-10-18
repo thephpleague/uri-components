@@ -34,6 +34,13 @@ class HostTest extends AbstractTestCase
         $this->assertEquals($host, $generateHost);
     }
 
+    public function testDefined()
+    {
+        $component = new Host('yolo');
+        $this->assertTrue($component->isDefined());
+        $this->assertFalse($component->withContent(null)->isDefined());
+    }
+
     public function testWithContent()
     {
         $host = new Host('uri.thephpleague.com');

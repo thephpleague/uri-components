@@ -23,6 +23,13 @@ class SchemeTest extends AbstractTestCase
         $this->assertContains('scheme', $res);
     }
 
+    public function testSetState()
+    {
+        $component = new Scheme('ignace');
+        $generateComponent = eval('return '.var_export($component, true).';');
+        $this->assertEquals($component, $generateComponent);
+    }
+
     public function testWithValue()
     {
         $scheme = new Scheme('ftp');

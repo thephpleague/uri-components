@@ -94,7 +94,7 @@ trait PathInfo
      */
     public function isDefined()
     {
-        return null === $this->getContent();
+        return null !== $this->getContent();
     }
 
     /**

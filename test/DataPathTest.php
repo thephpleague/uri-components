@@ -22,6 +22,13 @@ class DataPathTest extends AbstractTestCase
         Path::createFromPath($path);
     }
 
+    public function testSetState()
+    {
+        $component = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $generateComponent = eval('return '.var_export($component, true).';');
+        $this->assertEquals($component, $generateComponent);
+    }
+
     public function invalidDataUriPath()
     {
         return [
@@ -37,23 +44,29 @@ class DataPathTest extends AbstractTestCase
         $this->assertSame($uri, $uri->withContent((string) $uri));
     }
 
+    public function testDefaultConstructor()
+    {
+        $this->assertSame('text/plain;charset=us-ascii,', (string) (new Path('text/plain;,')));
+    }
+
     /**
      * @dataProvider validFilePath
      * @param $path
      * @param $expected
      */
-    public function testCreateFromPath($path, $expected)
+    public function testCreateFromPath($path, $mimetype, $mediatype)
     {
         $uri = Path::createFromPath(__DIR__.'/data/'.$path);
-        $this->assertSame($expected, $uri->getMimeType());
+        $this->assertSame($mimetype, $uri->getMimeType());
+        $this->assertSame($mediatype, $uri->getMediaType());
     }
 
     public function validFilePath()
     {
         return [
-            'text file' => ['hello-world.txt', 'text/plain'],
-            'img file' => ['red-nose.gif', 'image/gif'],
-            'vcard file' => ['john-doe.vcf', 'text/x-vcard'],
+            'text file' => ['hello-world.txt', 'text/plain', 'text/plain;charset=us-ascii'],
+            'img file' => ['red-nose.gif', 'image/gif', 'image/gif;charset=binary'],
+            'vcard file' => ['john-doe.vcf', 'text/x-vcard', 'text/x-vcard;charset=us-ascii'],
         ];
     }
 
@@ -232,5 +245,29 @@ class DataPathTest extends AbstractTestCase
         var_dump($path);
         $res = ob_get_clean();
         $this->assertContains($path->__toString(), $res);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidBase64Encoded()
+    {
+        new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidComponent()
+    {
+        new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidMimetype()
+    {
+        new Path('data:toto\\bar;foo=bar,');
     }
 }
