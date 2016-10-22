@@ -36,40 +36,15 @@ class Port extends Component implements UriComponent
      */
     protected function validate($data)
     {
-        if ('' === $data) {
-            throw new InvalidArgumentException('Expected port to be a int or null; received an empty string');
-        }
-
-        return $this->validatePort($data);
-    }
-
-    /**
-     * Validate a Port number
-     *
-     * @param mixed $port the port number
-     *
-     * @throws InvalidArgumentException If the port number is invalid
-     *
-     * @return null|int
-     */
-    protected function validatePort($port)
-    {
-        if (is_bool($port)) {
-            throw new InvalidArgumentException('The submitted port is invalid');
-        }
-
-        if (in_array($port, [null, ''])) {
+        if (null === $data) {
             return null;
         }
-        $res = filter_var($port, FILTER_VALIDATE_INT, ['options' => [
-            'min_range' => 1,
-            'max_range' => 65535,
-        ]]);
-        if (false === $res) {
-            throw new InvalidArgumentException('The submitted port is invalid');
+
+        if (!is_int($data) || $data < 1 || $data > 65535) {
+            throw new InvalidArgumentException(sprintf('Expected port to be a int or null; received %s', gettype($data)));
         }
 
-        return $res;
+        return $data;
     }
 
     /**

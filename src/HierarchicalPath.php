@@ -55,7 +55,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
         }
 
         $path = implode(static::$separator, static::validateIterator($data));
-        if (self::IS_ABSOLUTE === $type) {
+        if (static::IS_ABSOLUTE === $type) {
             $path = static::$separator.$path;
         }
 
@@ -74,9 +74,9 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
         }
 
         $path = $this->validateString($path);
-        $this->isAbsolute = self::IS_RELATIVE;
+        $this->isAbsolute = static::IS_RELATIVE;
         if (static::$separator === substr($path, 0, 1)) {
-            $this->isAbsolute = self::IS_ABSOLUTE;
+            $this->isAbsolute = static::IS_ABSOLUTE;
             $path = substr($path, 1, strlen($path));
         }
 
@@ -163,16 +163,26 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
     }
 
     /**
+     * Return the decoded string representation of the component
+     *
+     * @return string
+     */
+    public function getDecoded()
+    {
+        $front_delimiter = '';
+        if ($this->isAbsolute === static::IS_ABSOLUTE) {
+            $front_delimiter = static::$separator;
+        }
+
+        return $front_delimiter.implode(static::$separator, $this->data);
+    }
+
+    /**
      * @inheritdoc
      */
     public function getContent()
     {
-        $front_delimiter = '';
-        if ($this->isAbsolute === self::IS_ABSOLUTE) {
-            $front_delimiter = static::$separator;
-        }
-
-        return $this->encodePath($front_delimiter.implode(static::$separator, $this->data));
+        return $this->encodePath($this->getDecoded());
     }
 
     /**
