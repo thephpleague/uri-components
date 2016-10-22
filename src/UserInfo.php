@@ -47,7 +47,7 @@ class UserInfo implements UriComponent
     /**
      * Create a new instance of UserInfo
      *
-     * @param string      $user
+     * @param string|null $user
      * @param string|null $pass
      */
     public function __construct($user = null, $pass = null)
@@ -73,19 +73,15 @@ class UserInfo implements UriComponent
             return $str;
         }
 
-        if (!is_string($str) || preg_match(',[/:@?#],', $str)) {
-            throw new InvalidArgumentException(sprintf(
-                'The encoded user string `%s` contains invalid characters `/:@?#`',
-                $str
-            ));
+        $str = $this->validateString($str);
+        if (!preg_match(',[/:@?#],', $str)) {
+            return $this->decodeComponent($str);
         }
 
-        $regexp = '/(?:[^'
-            .self::$unreservedChars
-            .self::$subdelimChars
-            .']+|%(?!'.self::$encodedChars.'))/x';
-
-        return $this->encode($this->decodeComponent($str), $regexp);
+        throw new InvalidArgumentException(sprintf(
+            'The encoded user string `%s` contains invalid characters `/:@?#`',
+            $str
+        ));
     }
 
     /**
@@ -103,19 +99,15 @@ class UserInfo implements UriComponent
             return $str;
         }
 
-        if (!is_string($str) || preg_match(',[/@?#],', $str)) {
-            throw new InvalidArgumentException(sprintf(
-                'The encoded pass string `%s` contains invalid characters `/@?#`',
-                $str
-            ));
+        $str = $this->validateString($str);
+        if (!preg_match(',[/@?#],', $str)) {
+            return $this->decodeComponent($str);
         }
 
-        $regexp = '/(?:[^'
-            .self::$unreservedChars
-            .self::$subdelimChars
-            .']+|%(?!'.self::$encodedChars.'))/x';
-
-        return $this->encode($this->decodeComponent($str), $regexp);
+        throw new InvalidArgumentException(sprintf(
+            'The encoded pass string `%s` contains invalid characters `/@?#`',
+            $str
+        ));
     }
 
     /**
@@ -161,17 +153,24 @@ class UserInfo implements UriComponent
      */
     public function getContent()
     {
-        $userInfo = $this->user;
-        if ('' == $userInfo) {
-            return $this->user;
+        if (null === $this->user) {
+            return null;
         }
 
-        $pass = $this->pass;
-        if ('' == $pass) {
+        static $regexp;
+        if (null === $regexp) {
+            $regexp = '/(?:[^'
+                .static::$unreservedChars
+                .static::$subdelimChars
+                .']+|%(?!'.static::$encodedChars.'))/x';
+        }
+
+        $userInfo = $this->encode($this->user, $regexp);
+        if ('' == $userInfo || in_array($this->pass, [null, ''], true)) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$pass;
+        return $userInfo.':'.$this->encode($this->pass, $regexp);
     }
 
     /**
@@ -254,7 +253,7 @@ class UserInfo implements UriComponent
     {
         $user = $this->filterUser($this->validateString($user));
         $pass = $this->filterPass($pass);
-        if ('' == $user) {
+        if (in_array($user, [null, ''], true)) {
             $pass = null;
         }
         

@@ -64,7 +64,7 @@ trait Hostname
      */
     protected function validateStringHost($str)
     {
-        $host = $this->lower($this->setIsAbsolute($str));
+        $host = strtolower($this->setIsAbsolute($str));
         $raw_labels = explode('.', $host);
         $labels = array_map(function ($value) {
             return idn_to_ascii($value);
@@ -86,20 +86,6 @@ trait Hostname
      * @return string
      */
     abstract protected function setIsAbsolute($str);
-
-    /**
-     * Convert to lowercase a string without modifying unicode characters
-     *
-     * @param string $str
-     *
-     * @return string
-     */
-    protected function lower($str)
-    {
-        return preg_replace_callback('/[A-Z]+/', function ($matches) {
-            return strtolower($matches[0]);
-        }, $str);
-    }
 
     /**
      * Validate a String Label

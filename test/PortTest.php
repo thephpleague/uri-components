@@ -25,8 +25,7 @@ class PortTest extends AbstractTestCase
 
     public function testPortSetter()
     {
-        $port = new Port(new Port(443));
-        $this->assertSame('443', $port->__toString());
+        $this->assertSame('443', (new Port(443))->__toString());
     }
 
     public function testSetState()
@@ -49,7 +48,6 @@ class PortTest extends AbstractTestCase
     public function getToIntProvider()
     {
         return [
-            ['443', 443],
             [null, null],
             [23, 23],
         ];
@@ -60,9 +58,10 @@ class PortTest extends AbstractTestCase
         return [
             'empty string' => [''],
             'string' => ['toto'],
-            'invalid port number too low' => ['-23'],
-            'invalid port number too high' => ['10000000'],
-            'invalid port number' => ['0'],
+            'numeric string' => ['443'],
+            'invalid port number too low' => [-23],
+            'invalid port number too high' => [10000000],
+            'invalid port number' => [0],
             'bool' => [true],
             'Std Class' => [(object) 'foo'],
             'float' => [1.2],
@@ -95,7 +94,7 @@ class PortTest extends AbstractTestCase
     public function getUriComponentProvider()
     {
         return [
-            ['443', ':443'],
+            [443, ':443'],
             [null, ''],
             [23, ':23'],
         ];

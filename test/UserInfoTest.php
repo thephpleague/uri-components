@@ -73,6 +73,7 @@ class UserInfoTest extends AbstractTestCase
             'no password' => ['user', 'user', '', 'user'],
             'no login but has password' => [':pass', '', '', ''],
             'empty all' => ['', '', '', ''],
+            'encoded chars' => ['foo%40bar:bar%40foo', 'foo@bar', 'bar@foo', 'foo%40bar:bar%40foo'],
         ];
     }
 

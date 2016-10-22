@@ -54,10 +54,6 @@ class Fragment extends Component implements UriComponent
      */
     public function getDecoded()
     {
-        if (null === $this->data) {
-            return null;
-        }
-
         return $this->data;
     }
 
