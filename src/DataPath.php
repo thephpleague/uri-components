@@ -187,7 +187,8 @@ class DataPath extends Component implements PathComponent
     {
         $properties = explode('=', $parameter);
 
-        return 2 != count($properties) || mb_strtolower($properties[0], 'UTF-8') === static::BINARY_PARAMETER;
+        return 2 != count($properties)
+            || mb_strtolower($properties[0], 'UTF-8') === static::BINARY_PARAMETER;
     }
 
     /**

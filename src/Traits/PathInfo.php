@@ -42,7 +42,7 @@ trait PathInfo
      */
     protected function filterEncodedPath($str)
     {
-        if (!preg_match(',[?#],', $str)) {
+        if (strlen($str) === strcspn($str, '?#')) {
             return $str;
         }
 
