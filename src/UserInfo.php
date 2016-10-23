@@ -74,7 +74,7 @@ class UserInfo implements UriComponent
         }
 
         $str = $this->validateString($str);
-        if (!preg_match(',[/:@?#],', $str)) {
+        if (strlen($str) === strcspn($str, '/:@?#')) {
             return $this->decodeComponent($str);
         }
 
@@ -100,7 +100,7 @@ class UserInfo implements UriComponent
         }
 
         $str = $this->validateString($str);
-        if (!preg_match(',[/@?#],', $str)) {
+        if (strlen($str) === strcspn($str, '/@?#')) {
             return $this->decodeComponent($str);
         }
 
