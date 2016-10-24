@@ -22,6 +22,15 @@ class DataPathTest extends AbstractTestCase
         Path::createFromPath($path);
     }
 
+    /**
+     * @dataProvider invalidDataUriPath
+     * @expectedException InvalidArgumentException
+     */
+    public function testConstructorFailed($path)
+    {
+        new Path($path);
+    }
+
     public function testSetState()
     {
         $component = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');

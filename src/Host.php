@@ -105,6 +105,37 @@ class Host extends HierarchicalComponent implements CollectionComponent
     }
 
     /**
+     * Return a host from an IP address
+     *
+     * @param string $ip
+     *
+     * @throws InvalidArgumentException If the IP is invalid or unrecognized
+     *
+     * @return static
+     */
+    public static function createFromIp($ip)
+    {
+        $ip = static::validateString($ip);
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return new static($ip);
+        }
+
+        if (false !== strpos($ip, '%')) {
+            $parts = explode('%', rawurldecode($ip));
+            $ip = array_shift($parts).'%25'.rawurlencode((string) array_shift($parts));
+
+            return new static('['.$ip.']');
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return new static('['.$ip.']');
+        }
+
+        throw new InvalidArgumentException('Please verify the submitted IP');
+    }
+
+    /**
      * New instance
      *
      * @param null|string $host
@@ -325,7 +356,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
     public function withoutZoneIdentifier()
     {
         if ($this->hasZoneIdentifier) {
-            return $this->withContent(substr($this->data[0], 0, strpos($this->data[0], '%')));
+            return $this->withContent('['.substr($this->data[0], 0, strpos($this->data[0], '%')).']');
         }
 
         return $this;

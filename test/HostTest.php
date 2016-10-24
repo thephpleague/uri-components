@@ -70,10 +70,8 @@ class HostTest extends AbstractTestCase
     {
         return [
             'ipv4' => ['127.0.0.1', true, true, false, '127.0.0.1'],
-            'naked ipv6' => ['::1', true, false, true, '[::1]'],
             'ipv6' => ['[::1]', true, false, true, '[::1]'],
             'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]'],
-            'scoped naked ipv6' => ['fe80:1234::%251', true, false, true, '[fe80:1234::%251]'],
             'normalized' => ['Master.EXAMPLE.cOm', false, false, false, 'master.example.com'],
             'empty string' => ['', false, false, false, ''],
             'null' => [null, false, false, false, ''],
@@ -112,6 +110,9 @@ class HostTest extends AbstractTestCase
             'Invalid IPv4 format' => ['[127.0.0.1]'],
             'Invalid IPv6 format' => ['[[::1]]'],
             'Invalid IPv6 format 2' => ['[::1'],
+            'naked ipv6' => ['::1'],
+            'scoped naked ipv6' => ['fe80:1234::%251'],
+            'invalid character in scope ipv6' => ['fe80:1234::%25%23'],
             'space character in starting label' => ['example. com'],
             'invalid character in host label' => ["examp\0le.com"],
             'invalid IP with scope' => ['[127.2.0.1%253]'],
@@ -249,7 +250,6 @@ class HostTest extends AbstractTestCase
         return [
             'array' => [['com', 'example', 'www'], Host::IS_RELATIVE, 'www.example.com'],
             'iterator' => [new ArrayIterator(['com', 'example', 'www']), Host::IS_RELATIVE, 'www.example.com'],
-            'host object' => [new Host('::1'), Host::IS_RELATIVE, '[::1]'],
             'ip 1' => [[127, 0, 0, 1], Host::IS_RELATIVE, '1.0.0.127'],
             'ip 2' => [['127.0', '0.1'], Host::IS_RELATIVE, '0.1.127.0'],
             'ip 3' => [['127.0.0.1'], Host::IS_RELATIVE, '127.0.0.1'],
@@ -281,6 +281,40 @@ class HostTest extends AbstractTestCase
             'object' => [new \stdClass(), Host::IS_RELATIVE],
             'ipv6 FQDN' => [['::1'], Host::IS_ABSOLUTE],
             'unknown flag' => [['all', 'is', 'good'], 23],
+        ];
+    }
+
+    /**
+     * @dataProvider createFromIpValid
+     */
+    public function testCreateFromIp($input, $expected)
+    {
+        $this->assertSame($expected, Host::createFromIp($input)->__toString());
+    }
+
+    public function createFromIpValid()
+    {
+        return [
+            'ipv4' => ['127.0.0.1', '127.0.0.1'],
+            'ipv6' => ['::1', '[::1]'],
+            'ipv6 with scope' => ['fe80:1234::%1', '[fe80:1234::%251]'],
+        ];
+    }
+
+    /**
+     * @dataProvider createFromIpFailed
+     * @expectedException \InvalidArgumentException
+     */
+    public function testCreateFromIpFailed($input)
+    {
+        Host::createFromIp($input);
+    }
+
+    public function createFromIpFailed()
+    {
+        return [
+            'false ipv4' => ['127.0.0', '127.0.0'],
+            'hostname' => ['example.com'],
         ];
     }
 
@@ -336,8 +370,8 @@ class HostTest extends AbstractTestCase
             'hostname host' => ['example.com', 'example.com'],
             'ipv4 host' => ['127.0.0.1', '127.0.0.1'],
             'ipv6 host' => ['[::1]', '[::1]'],
-            'ipv6 scoped (1)' => ['fe80::%251', '[fe80::]'],
-            'ipv6 scoped (2)' => ['fe80::%1', '[fe80::]'],
+            'ipv6 scoped (1)' => ['[fe80::%251]', '[fe80::]'],
+            'ipv6 scoped (2)' => ['[fe80::%1]', '[fe80::]'],
         ];
     }
 
@@ -357,7 +391,7 @@ class HostTest extends AbstractTestCase
             ['127.0.0.1', false],
             ['www.example.com', false],
             ['[::1]', false],
-            ['fe80::%251', true],
+            ['[fe80::%251]', true],
         ];
     }
 
@@ -440,8 +474,7 @@ class HostTest extends AbstractTestCase
         return [
             ['master.example.com', 'shop', 2, 'shop.example.com'],
             ['master.example.com', 'master', 2, 'master.example.com'],
-            ['', '::1', 0, '[::1]'],
-            ['toto', '::1', 23, 'toto'],
+            ['toto', '[::1]', 23, 'toto'],
             ['127.0.0.1', 'secure.example.com', 2, '127.0.0.1'],
             ['secure.example.com', '127.0.0.1', 0, 'secure.example.127.0.0.1'],
         ];
