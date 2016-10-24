@@ -86,16 +86,16 @@ trait HostIp
      */
     protected function filterIpv6Host($str)
     {
-        preg_match(',^(?P<ldelim>[\[]?)(?P<ipv6>.*?)(?P<rdelim>[\]]?)$,', $str, $matches);
-        if (!in_array(strlen($matches['ldelim'].$matches['rdelim']), [0, 2])) {
+        if (!preg_match(',^\[(?<ipv6>.*)\]$,', $str, $matches)) {
             return false;
         }
 
-        if (false === strpos($str, '%')) {
-            return filter_var($matches['ipv6'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+        $ipv6 = $matches['ipv6'];
+        if (false === strpos($ipv6, '%')) {
+            return filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
         }
 
-        return $this->validateScopedIpv6($matches['ipv6']);
+        return $this->validateScopedIpv6($ipv6);
     }
 
     /**

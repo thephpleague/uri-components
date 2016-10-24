@@ -98,9 +98,10 @@ class DataPath extends Component implements PathComponent
         }
 
         if (!mb_detect_encoding($path, 'US-ASCII', true) || false === strpos($path, ',')) {
-            throw new InvalidArgumentException(
-                sprintf('The submitted path `%s` is invalid according to RFC2937', $path)
-            );
+            throw new InvalidArgumentException(sprintf(
+                'The submitted path `%s` is invalid according to RFC2937',
+                $path
+            ));
         }
 
         $parts = explode(',', $path, 2);
@@ -112,12 +113,7 @@ class DataPath extends Component implements PathComponent
         $this->mimetype = $this->filterMimeType($mimetype);
         $this->parameters = $this->filterParameters($parameters);
         $this->validateDocument();
-        return $this->format(
-            $this->mimetype,
-            $this->getParameters(),
-            $this->isBinaryData,
-            $this->document
-        );
+        return $this->format($this->mimetype, $this->getParameters(), $this->isBinaryData, $this->document);
     }
 
     /**
@@ -197,6 +193,29 @@ class DataPath extends Component implements PathComponent
         if (false === $res || $this->document !== base64_encode($res)) {
             throw new InvalidArgumentException('The path data is invalid');
         }
+    }
+
+    /**
+     * Format the DataURI string
+     *
+     * @param string $mimetype
+     * @param string $parameters
+     * @param bool   $isBinaryData
+     * @param string $data
+     *
+     * @return string
+     */
+    protected static function format($mimetype, $parameters, $isBinaryData, $data)
+    {
+        if ('' != $parameters) {
+            $parameters = ';'.$parameters;
+        }
+
+        if ($isBinaryData) {
+            $parameters .= ';'.static::BINARY_PARAMETER;
+        }
+
+        return static::encodePath($mimetype.$parameters.','.$data);
     }
 
     /**
@@ -294,29 +313,6 @@ class DataPath extends Component implements PathComponent
     }
 
     /**
-     * Format the DataURI string
-     *
-     * @param string $mimetype
-     * @param string $parameters
-     * @param bool   $isBinaryData
-     * @param string $data
-     *
-     * @return string
-     */
-    protected static function format($mimetype, $parameters, $isBinaryData, $data)
-    {
-        if ('' != $parameters) {
-            $parameters = ';'.$parameters;
-        }
-
-        if ($isBinaryData) {
-            $parameters .= ';'.static::BINARY_PARAMETER;
-        }
-
-        return static::encodePath($mimetype.$parameters.','.$data);
-    }
-
-    /**
      * Returns an instance where the data part is base64 encoded
      *
      * This method MUST retain the state of the current instance, and return
@@ -380,10 +376,6 @@ class DataPath extends Component implements PathComponent
     {
         if ($parameters === $this->getParameters()) {
             return $this;
-        }
-
-        if (preg_match(',(;|^)'.static::BINARY_PARAMETER.'$,', $parameters)) {
-            throw new InvalidArgumentException('The parameter data is invalid');
         }
 
         return new static($this->format(
