@@ -79,12 +79,7 @@ class DataPath extends Component implements PathComponent
      */
     public function __construct($path = '')
     {
-        $path = $this->validateString($path);
-        if ('' === $path) {
-            $path = static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',';
-        }
-
-        $this->validate($path);
+        $this->data = $this->validate($this->validateString($path));
     }
 
     /**
@@ -94,39 +89,35 @@ class DataPath extends Component implements PathComponent
      */
     protected function validate($path)
     {
-        $this->assertValidComponent($path);
-        $parts = explode(',', $path, 2);
-        $mediatype = array_shift($parts);
-        $this->document = (string) array_shift($parts);
-        $mimetype = static::DEFAULT_MIMETYPE;
-        $parameters = static::DEFAULT_PARAMETER;
-        if ('' !== $mediatype) {
-            $mediatype = explode(';', $mediatype, 2);
-            $mimetype = array_shift($mediatype);
-            $parameters = (string) array_shift($mediatype);
+        if ('' === $path) {
+            $this->document = '';
+            $this->mimetype = static::DEFAULT_MIMETYPE;
+            $this->parameters = [static::DEFAULT_PARAMETER];
+            $this->isBinaryData = false;
+            return static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',';
         }
-        $this->mimetype = $this->filterMimeType($mimetype);
-        $this->parameters = $this->filterParameters($parameters);
-        if ($this->isBinaryData) {
-            $this->validateDocument();
-        }
-    }
 
-    /**
-     * Assert the component content is valid
-     *
-     * @throws InvalidArgumentException If the submitted path is invalid
-     */
-    protected function assertValidComponent($path)
-    {
-        if (!mb_detect_encoding($path, 'US-ASCII', true)
-            || false === strpos($path, ',')
-            || false !== strpos($path, "\n")
-        ) {
+        if (!mb_detect_encoding($path, 'US-ASCII', true) || false === strpos($path, ',')) {
             throw new InvalidArgumentException(
                 sprintf('The submitted path `%s` is invalid according to RFC2937', $path)
             );
         }
+
+        $parts = explode(',', $path, 2);
+        $mediatype = array_shift($parts);
+        $this->document = (string) array_shift($parts);
+        $mediatype = explode(';', $mediatype, 2);
+        $mimetype = array_shift($mediatype);
+        $parameters = (string) array_shift($mediatype);
+        $this->mimetype = $this->filterMimeType($mimetype);
+        $this->parameters = $this->filterParameters($parameters);
+        $this->validateDocument();
+        return $this->format(
+            $this->mimetype,
+            $this->getParameters(),
+            $this->isBinaryData,
+            $this->document
+        );
     }
 
     /**
@@ -198,6 +189,10 @@ class DataPath extends Component implements PathComponent
      */
     protected function validateDocument()
     {
+        if (!$this->isBinaryData) {
+            return;
+        }
+
         $res = base64_decode($this->document, true);
         if (false === $res || $this->document !== base64_encode($res)) {
             throw new InvalidArgumentException('The path data is invalid');
@@ -295,12 +290,7 @@ class DataPath extends Component implements PathComponent
      */
     public function getContent()
     {
-        return $this->format(
-            $this->mimetype,
-            $this->getParameters(),
-            $this->isBinaryData,
-            $this->document
-        );
+        return $this->data;
     }
 
     /**
@@ -432,11 +422,6 @@ class DataPath extends Component implements PathComponent
      */
     public static function __set_state(array $properties)
     {
-        return new static(static::format(
-            $properties['mimetype'],
-            implode(';', $properties['parameters']),
-            $properties['isBinaryData'],
-            $properties['document']
-        ));
+        return new static($properties['data']);
     }
 }
