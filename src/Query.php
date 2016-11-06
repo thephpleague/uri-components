@@ -54,6 +54,13 @@ class Query implements CollectionComponent
     protected $preserveDelimiter = false;
 
     /**
+     * Parsed Query data using PHP's rules
+     *
+     * @var array
+     */
+    protected $parseData = [];
+
+    /**
      * return a new Query instance from an Array or a traversable object
      *
      * @param Traversable|array $data
@@ -79,6 +86,7 @@ class Query implements CollectionComponent
     {
         $this->data = $this->validate($data);
         $this->preserveDelimiter = null !== $data;
+        $this->parseQuery();
     }
 
     /**
@@ -97,6 +105,83 @@ class Query implements CollectionComponent
         $str = $this->filterEncodedQuery($this->validateString($str));
 
         return static::parse($str, static::$separator);
+    }
+
+    /**
+     * Parse The query like parse_str but wihout mangling the results array keys.
+     */
+    protected function parseQuery()
+    {
+        $data = [];
+        foreach ($this->data as $name => $value) {
+            $name = trim($name);
+            $value = $this->formatParsedValue($value);
+            $this->parseQueryPairs($name, $value, $data);
+        }
+
+        $this->parseData = $data;
+    }
+
+    /**
+     * Format the value of the parse query array
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    protected function formatParsedValue($value)
+    {
+        if (is_array($value)) {
+            $value = array_pop($value);
+        }
+
+        if (null !== $value) {
+            $value = rawurldecode($value);
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * Parse a query pairs like parse_str but wihout mangling the results array keys.
+     *
+     * @param string $name  the query pair key
+     * @param string $value the formatted value
+     * @param array  &$data the result array passed by reference
+     */
+    protected function parseQueryPairs($name, $value, array &$data)
+    {
+        if ('' === $name) {
+            return;
+        }
+
+        if (false === ($left_bracket_pos = strpos($name, '['))) {
+            $data[$name] = $value;
+            return;
+        }
+
+        if (false === ($right_bracket_pos = strpos($name, ']', $left_bracket_pos))) {
+            $data[$name] = $value;
+            return;
+        }
+
+        $key = substr($name, 0, $left_bracket_pos);
+        if (!array_key_exists($key, $data) || !is_array($data[$key])) {
+            $data[$key] = [];
+        }
+
+        $index = substr($name, $left_bracket_pos + 1, $right_bracket_pos - $left_bracket_pos - 1);
+        if ('' === $index) {
+            $data[$key][] = $value;
+            return;
+        }
+
+        $remaining = substr($name, $right_bracket_pos + 1);
+        if ('[' !== substr($remaining, 0, 1) || false === strpos($remaining, ']', 1)) {
+            $remaining = '';
+        }
+
+        $this->parseQueryPairs($index.$remaining, $value, $data[$key]);
     }
 
     /**
@@ -217,6 +302,41 @@ class Query implements CollectionComponent
         $offset = $this->decodeComponent($offset);
         if (isset($this->data[$offset])) {
             return $this->data[$offset];
+        }
+
+        return $default;
+    }
+
+    /**
+     * Retrieve the query string parse as variables store in an array like parse_str
+     *
+     * The string is parse following parse_str rules but does not apply variable
+     * mangling on the variable names
+     *
+     * @return array
+     */
+    public function getParsedQuery()
+    {
+        return $this->parseData;
+    }
+
+    /**
+     * Retrieves a single parsed query parameter.
+     *
+     * Retrieves a single parsed query parameter. If the parameter has not been set,
+     * returns the default value provided.
+     *
+     * @param string $offset  the parameter name
+     * @param mixed  $default Default value to return if the parameter does not exist.
+     *
+     * @return mixed
+     */
+    public function getParsedValue($offset, $default = null)
+    {
+        $offset = $this->validateString($offset);
+        $offset = $this->decodeComponent($offset);
+        if (isset($this->parseData[$offset])) {
+            return $this->parseData[$offset];
         }
 
         return $default;
