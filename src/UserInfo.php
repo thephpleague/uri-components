@@ -256,7 +256,7 @@ class UserInfo implements UriComponent
         if (in_array($user, [null, ''], true)) {
             $pass = null;
         }
-        
+
         if ($user === $this->user && $pass === $this->pass) {
             return $this;
         }
