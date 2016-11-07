@@ -13,9 +13,7 @@
 namespace League\Uri\Components;
 
 use InvalidArgumentException;
-use League\Uri\Components\Traits\HostIp;
-use League\Uri\Components\Traits\Hostname;
-use League\Uri\Components\Traits\HostnameInfo;
+use League\Uri\Components\Traits\HostInfo;
 use League\Uri\Interfaces\CollectionComponent;
 use Traversable;
 
@@ -35,11 +33,35 @@ use Traversable;
  */
 class Host extends HierarchicalComponent implements CollectionComponent
 {
-    use HostIp;
+    use HostInfo;
 
-    use Hostname;
+    /**
+     * Tell whether the Host is in Unicode form or not
+     *
+     * @var bool
+     */
+    protected $isIdn = false;
 
-    use HostnameInfo;
+    /**
+     * Tell whether the Host is an IPv4
+     *
+     * @var bool
+     */
+    protected $host_as_ipv4 = false;
+
+    /**
+     * Tell whether the Host is an IPv6
+     *
+     * @var bool
+     */
+    protected $host_as_ipv6 = false;
+
+    /**
+     * Tell whether the Host contains a ZoneID
+     *
+     * @var bool
+     */
+    protected $has_zone_identifier = false;
 
     /**
      * HierarchicalComponent delimiter
@@ -143,33 +165,70 @@ class Host extends HierarchicalComponent implements CollectionComponent
     public function __construct($host = null)
     {
         $this->data = $this->validate($host);
-        $this->host = !$this->isIp() ? $this->__toString() : $this->data[0];
     }
 
     /**
      * validate the submitted data
      *
-     * @param string $str
+     * @param string $host
      *
      * @return array
      */
-    protected function validate($str)
+    protected function validate($host)
     {
-        if (null === $str) {
+        if (null === $host) {
             return [];
         }
 
-        $str = $this->validateString($str);
-        if ('' === $str) {
+        $host = $this->validateString($host);
+        if ('' === $host) {
             return [''];
         }
 
-        $res = $this->validateIpHost($str);
-        if (!empty($res)) {
-            return $res;
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $this->host_as_ipv4 = true;
+
+            return [$host];
         }
 
-        return $this->validateStringHost($str);
+        if ($this->isValidHostnameIpv6($host)) {
+            $this->host_as_ipv6 = true;
+            $this->has_zone_identifier = false !== strpos($host, '%');
+
+            return [$host];
+        }
+
+        if ($this->isValidHostname($host)) {
+            $host = strtolower($this->setIsAbsolute($host));
+            $raw_labels = explode('.', $host);
+            $labels = array_map('idn_to_ascii', $raw_labels);
+            $this->isIdn = $raw_labels !== $labels;
+
+            return array_reverse(array_map('idn_to_utf8', $labels));
+        }
+
+        throw new InvalidArgumentException(sprintf('The submitted host `%s` is invalid', $host));
+    }
+
+    /**
+     * Format an label collection for string representation of the Host
+     *
+     * @param array $labels  host labels
+     * @param bool  $convert should we transcode the labels into their ascii equivalent
+     *
+     * @return array
+     */
+    protected function convertToAscii(array $labels, $convert)
+    {
+        if (!$convert) {
+            return $labels;
+        }
+
+        if (in_array($labels, [[], ['']], true)) {
+            return $labels;
+        }
+
+        return array_map('idn_to_ascii', $labels);
     }
 
     /**
@@ -201,7 +260,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
      */
     public function isIp()
     {
-        return $this->hostAsIpv4 || $this->hostAsIpv6;
+        return $this->host_as_ipv4 || $this->host_as_ipv6;
     }
 
     /**
@@ -211,7 +270,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
      */
     public function isIpv4()
     {
-        return $this->hostAsIpv4;
+        return $this->host_as_ipv4;
     }
 
     /**
@@ -221,7 +280,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
      */
     public function isIpv6()
     {
-        return $this->hostAsIpv6;
+        return $this->host_as_ipv6;
     }
 
     /**
@@ -233,7 +292,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
      */
     public function hasZoneIdentifier()
     {
-        return $this->hasZoneIdentifier;
+        return $this->has_zone_identifier;
     }
 
     /**
@@ -276,10 +335,35 @@ class Host extends HierarchicalComponent implements CollectionComponent
         }
 
         if ($this->isIp()) {
-            return $this->formatIp($this->data[0]);
+            return $this->data[0];
         }
 
         return $this->format($this->getLabels(), $this->isAbsolute);
+    }
+
+    /**
+     * Retrieve the IP component If the Host is an IP adress.
+     *
+     * If the host is a domain name this method will return null
+     *
+     * @return string
+     */
+    public function getIp()
+    {
+        if ($this->host_as_ipv4) {
+            return $this->data[0];
+        }
+
+        if (!$this->host_as_ipv6) {
+            return null;
+        }
+
+        $ip = substr($this->data[0], 1, -1);
+        if (false === ($pos = strpos($ip, '%'))) {
+            return $ip;
+        }
+
+        return substr($ip, 0, $pos);
     }
 
     /**
@@ -355,25 +439,11 @@ class Host extends HierarchicalComponent implements CollectionComponent
      */
     public function withoutZoneIdentifier()
     {
-        if ($this->hasZoneIdentifier) {
-            return $this->withContent('['.substr($this->data[0], 0, strpos($this->data[0], '%')).']');
+        if (!$this->has_zone_identifier) {
+            return $this;
         }
 
-        return $this;
-    }
-
-    /**
-     * Validated the Host Label Count
-     *
-     * @param array $labels Host labels
-     *
-     * @throws InvalidArgumentException If the validation fails
-     */
-    protected function assertLabelsCount(array $labels)
-    {
-        if (127 <= count(array_merge($this->data, $labels))) {
-            throw new InvalidArgumentException('Invalid Hostname, verify labels count');
-        }
+        return $this->withContent(substr($this->data[0], 0, strpos($this->data[0], '%')).']');
     }
 
     /**

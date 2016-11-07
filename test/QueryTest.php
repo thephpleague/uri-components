@@ -467,9 +467,11 @@ class QueryTest extends AbstractTestCase
     /**
      * @dataProvider parsedQueryProvider
      */
-    public function testParsedQuery($query, $expected)
+    public function testParsedQuery($query, $name, $expectedData, $expectedValue)
     {
-        $this->assertSame($expected, (new Query($query))->getParsedQuery());
+        $component = new Query($query);
+        $this->assertSame($expectedData, $component->getParsed());
+        $this->assertSame($expectedValue, $component->getParsedValue($name));
     }
 
     public function parsedQueryProvider()
@@ -477,52 +479,66 @@ class QueryTest extends AbstractTestCase
         return [
             [
                 'query' => '&&',
+                'name' => 'toto',
                 'expected' => [],
+                'value' => null,
             ],
             [
                 'query' => 'arr[1=sid&arr[4][2=fred',
+                'name' => 'arr',
                 'expected' => [
                     'arr[1' => 'sid',
                     'arr' => ['4' => 'fred'],
                 ],
+                'value' => ['4' => 'fred'],
             ],
             [
                 'query' => 'arr1]=sid&arr[4]2]=fred',
+                'name' => 'arr',
                 'expected' => [
                     'arr1]' => 'sid',
                     'arr' => ['4' => 'fred'],
                 ],
+                'value' => ['4' => 'fred'],
             ],
             [
                 'query' => 'arr[one=sid&arr[4][two=fred',
+                'name' => 'arr',
                 'expected' => [
                     'arr[one' => 'sid',
                     'arr' => ['4' => 'fred'],
                 ],
+                'value' => ['4' => 'fred'],
             ],
             [
                 'query' => 'first=%41&second=%a&third=%b',
+                'name' => 'first',
                 'expected' => [
                     'first' => 'A',
                     'second' => '%a',
                     'third' => '%b',
                 ],
+                'value' => 'A',
             ],
             [
                 'query' => 'arr.test[1]=sid&arr test[4][two]=fred',
+                'name' => 'arr.test',
                 'expected' => [
                     'arr.test' => ['1' => 'sid'],
                     'arr test' => ['4' => ['two' => 'fred']],
                 ],
+                'value' => ['1' => 'sid'],
             ],
             [
                 'query' => 'foo&bar=&baz=bar&fo.o',
+                'name' => 'bar',
                 'expected' => [
                     'foo' => '',
                     'bar' => '',
                     'baz' => 'bar',
                     'fo.o' => '',
                 ],
+                'value' => '',
             ],
         ];
     }

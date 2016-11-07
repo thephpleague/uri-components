@@ -23,7 +23,7 @@ use Pdp\PublicSuffixListManager;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-trait HostnameInfo
+trait HostInfo
 {
     /**
      * Pdp Parser
@@ -50,6 +50,27 @@ trait HostnameInfo
      * @var bool
      */
     protected $hostnameInfoLoaded = false;
+
+    /**
+     * Valid Start Label characters
+     *
+     * @var string
+     */
+    protected static $starting_label_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    /**
+     * IPv6 Local Link Prefix
+     *
+     * @var string
+     */
+    protected static $local_link_prefix = '1111111010';
+
+    /**
+     * Invalid Zone Identifier characters
+     *
+     * @var string
+     */
+    protected static $invalid_uri_chars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
 
     /**
      * Return the host public suffix
@@ -128,6 +149,85 @@ trait HostnameInfo
         }
 
         $this->hostnameInfoLoaded = true;
+    }
+
+    /**
+     * validate an Ipv6 Hostname
+     *
+     * @see http://tools.ietf.org/html/rfc6874#section-2
+     * @see http://tools.ietf.org/html/rfc6874#section-4
+     *
+     * @param string $ipv6
+     *
+     * @return bool
+     */
+    protected function isValidHostnameIpv6($ipv6)
+    {
+        if (false === strpos($ipv6, '[') || false === strpos($ipv6, ']')) {
+            return false;
+        }
+
+        $ipv6 = substr($ipv6, 1, -1);
+        if (false === ($pos = strpos($ipv6, '%'))) {
+            return (bool) filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+        }
+
+        $scope_raw = substr($ipv6, $pos);
+        if (strlen($scope_raw) !== mb_strlen($scope_raw)) {
+            return false;
+        }
+
+        $scope = rawurldecode($scope_raw);
+        if (strlen($scope) !== strcspn($scope, '?#@[]'.self::$invalid_uri_chars)) {
+            return false;
+        }
+
+        $ipv6 = substr($ipv6, 0, $pos);
+        if (!filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return false;
+        }
+
+        $reducer = function ($carry, $char) {
+            return $carry.str_pad(decbin(ord($char)), 8, '0', STR_PAD_LEFT);
+        };
+
+        $res = array_reduce(str_split(unpack('A16', inet_pton($ipv6))[1]), $reducer, '');
+
+        return substr($res, 0, 10) === self::$local_link_prefix;
+    }
+
+    /**
+     * Returns whether the hostname is valid
+     *
+     * @param string $host
+     *
+     * @return bool
+     */
+    protected function isValidHostname($host)
+    {
+        if ('.' === mb_substr($host, -1, 1, 'UTF-8')) {
+            $host = mb_substr($host, 0, -1, 'UTF-8');
+        }
+
+        $labels = array_map('idn_to_ascii', explode('.', $host));
+
+        return 127 > count($labels) && $labels === array_filter($labels, [$this, 'isValidHostLabel']);
+    }
+
+    /**
+     * Returns whether the host label is valid
+     *
+     * @param string $label
+     *
+     * @return bool
+     */
+    protected function isValidHostLabel($label)
+    {
+        $pos = strlen($label);
+        $delimiters = $label[0].$label[$pos - 1];
+
+        return 2 === strspn($delimiters, static::$starting_label_chars)
+            && $pos === strspn($label, static::$starting_label_chars.'-');
     }
 
     /**

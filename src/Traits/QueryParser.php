@@ -155,4 +155,110 @@ trait QueryParser
             return self::encode($str, $regexp);
         };
     }
+
+    /**
+     * Returns the stores variables as elements of an array.
+     *
+     * The result is similar as PHP parse_str when used with its
+     * second argument with the difference that variable names are
+     * not mangled.
+     *
+     * @see http://php.net/parse_str
+     * @see https://wiki.php.net/rfc/on_demand_name_mangling
+     *
+     * @param array $pairs the query string pairs
+     *
+     * @return array
+     */
+    protected function getPhpVariables(array $pairs)
+    {
+        $data = [];
+        foreach ($pairs as $name => $value) {
+            $name = trim($name);
+            $value = $this->formatParsedValue($value);
+            $this->extractPhpVariable($name, $value, $data);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Format the value of the parse query array
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    protected function formatParsedValue($value)
+    {
+        if (is_array($value)) {
+            $value = array_pop($value);
+        }
+
+        if (null !== $value) {
+            $value = rawurldecode($value);
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * Parse a query pairs like parse_str but wihout mangling the results array keys.
+     *
+     * <ul>
+     * <li>empty name are not saved</li>
+     * <li>If the value from name is duplicated its corresponding value will
+     * be overwritten</li>
+     * <li>if no "[" is detected the value is added to the return array with the name as index</li>
+     * <li>if no "]" is detected after detecting a "[" the value is added to the return array with the name as index</li>
+     * <li>if there's a mismatch in bracket usage the remaining part is dropped</li>
+     * <li>“.” and “ ” are not converted to “_”</li>
+     * <li>If there is no “]”, then the first “[” is not converted to becomes an “_”</li>
+     * </ul>
+     *
+     * @see https://php.net/parse_str
+     * @see https://wiki.php.net/rfc/on_demand_name_mangling
+     * @see https://github.com/php/php-src/blob/master/ext/standard/tests/strings/parse_str_basic1.phpt
+     * @see https://github.com/php/php-src/blob/master/ext/standard/tests/strings/parse_str_basic2.phpt
+     * @see https://github.com/php/php-src/blob/master/ext/standard/tests/strings/parse_str_basic3.phpt
+     * @see https://github.com/php/php-src/blob/master/ext/standard/tests/strings/parse_str_basic4.phpt
+     *
+     * @param string $name  the query pair key
+     * @param string $value the formatted value
+     * @param array  &$data the result array passed by reference
+     */
+    protected function extractPhpVariable($name, $value, array &$data)
+    {
+        if ('' === $name) {
+            return;
+        }
+
+        if (false === ($left_bracket_pos = strpos($name, '['))) {
+            $data[$name] = $value;
+            return;
+        }
+
+        if (false === ($right_bracket_pos = strpos($name, ']', $left_bracket_pos))) {
+            $data[$name] = $value;
+            return;
+        }
+
+        $key = substr($name, 0, $left_bracket_pos);
+        if (!array_key_exists($key, $data) || !is_array($data[$key])) {
+            $data[$key] = [];
+        }
+
+        $index = substr($name, $left_bracket_pos + 1, $right_bracket_pos - $left_bracket_pos - 1);
+        if ('' === $index) {
+            $data[$key][] = $value;
+            return;
+        }
+
+        $remaining = substr($name, $right_bracket_pos + 1);
+        if ('[' !== substr($remaining, 0, 1) || false === strpos($remaining, ']', 1)) {
+            $remaining = '';
+        }
+
+        $this->extractPhpVariable($index.$remaining, $value, $data[$key]);
+    }
 }

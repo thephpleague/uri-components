@@ -57,29 +57,30 @@ class HostTest extends AbstractTestCase
      * @param $uri
      * @dataProvider validHostProvider
      */
-    public function testValidHost($host, $isIp, $isIpv4, $isIpv6, $uri)
+    public function testValidHost($host, $isIp, $isIpv4, $isIpv6, $uri, $ip)
     {
         $host = new Host($host);
         $this->assertSame($isIp, $host->isIp());
         $this->assertSame($isIpv4, $host->isIpv4());
         $this->assertSame($isIpv6, $host->isIpv6());
         $this->assertSame($uri, $host->getUriComponent());
+        $this->assertSame($ip, $host->getIp());
     }
 
     public function validHostProvider()
     {
         return [
-            'ipv4' => ['127.0.0.1', true, true, false, '127.0.0.1'],
-            'ipv6' => ['[::1]', true, false, true, '[::1]'],
-            'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]'],
-            'normalized' => ['Master.EXAMPLE.cOm', false, false, false, 'master.example.com'],
-            'empty string' => ['', false, false, false, ''],
-            'null' => [null, false, false, false, ''],
-            'dot ending' => ['example.com.', false, false, false, 'example.com.'],
-            'partial numeric' => ['23.42c.two', false, false, false, '23.42c.two'],
-            'all numeric' => ['98.3.2', false, false, false, '98.3.2'],
-            'invalid punycode' => ['xn--fsqu00a.xn--g6w131251d', false, false, false, 'xn--fsqu00a.xn--g6w131251d'],
-            'mix IP format with host label' => ['toto.127.0.0.1', false, false, false, 'toto.127.0.0.1'],
+            'ipv4' => ['127.0.0.1', true, true, false, '127.0.0.1', '127.0.0.1'],
+            'ipv6' => ['[::1]', true, false, true, '[::1]', '::1'],
+            'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]', 'fe80:1234::'],
+            'normalized' => ['Master.EXAMPLE.cOm', false, false, false, 'master.example.com', null],
+            'empty string' => ['', false, false, false, '', null],
+            'null' => [null, false, false, false, '', null],
+            'dot ending' => ['example.com.', false, false, false, 'example.com.', null],
+            'partial numeric' => ['23.42c.two', false, false, false, '23.42c.two', null],
+            'all numeric' => ['98.3.2', false, false, false, '98.3.2', null],
+            'invalid punycode' => ['xn--fsqu00a.xn--g6w131251d', false, false, false, 'xn--fsqu00a.xn--g6w131251d', null],
+            'mix IP format with host label' => ['toto.127.0.0.1', false, false, false, 'toto.127.0.0.1', null],
         ];
     }
 
@@ -112,13 +113,13 @@ class HostTest extends AbstractTestCase
             'Invalid IPv6 format 2' => ['[::1'],
             'naked ipv6' => ['::1'],
             'scoped naked ipv6' => ['fe80:1234::%251'],
-            'invalid character in scope ipv6' => ['fe80:1234::%25%23'],
+            'invalid character in scope ipv6' => ['[fe80:1234::%25%23]'],
             'space character in starting label' => ['example. com'],
             'invalid character in host label' => ["examp\0le.com"],
             'invalid IP with scope' => ['[127.2.0.1%253]'],
-            'invalid scope IPv6' => ['ab23::1234%251'],
-            'invalid scope ID' => ['fe80::1234%25?@'],
-            'invalid scope ID with utf8 character' => ['fe80::1234%25€'],
+            'invalid scope IPv6' => ['[ab23::1234%251]'],
+            'invalid scope ID' => ['[fe80::1234%25?@]'],
+            'invalid scope ID with utf8 character' => ['[fe80::1234%25€]'],
             'bool' => [true],
             'Std Class' => [(object) 'foo'],
             'float' => [1.2],
