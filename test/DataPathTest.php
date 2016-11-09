@@ -53,9 +53,32 @@ class DataPathTest extends AbstractTestCase
         $this->assertSame($uri, $uri->withContent((string) $uri));
     }
 
-    public function testDefaultConstructor()
+    /**
+     * @dataProvider validPathContent
+     * @param $path
+     * @param $expected
+     */
+    public function testDefaultConstructor($path, $expected)
     {
-        $this->assertSame('text/plain;charset=us-ascii,', (string) (new Path('text/plain;,')));
+        $this->assertSame($expected, (string) (new Path($path)));
+    }
+
+    public function validPathContent()
+    {
+        return [
+            [
+                'path' => 'text/plain;,',
+                'expected' => 'text/plain;charset=us-ascii,',
+            ],
+            [
+                'path' => ',',
+                'expected' => 'text/plain;charset=us-ascii,',
+            ],
+            [
+                'path' => '',
+                'expected' => 'text/plain;charset=us-ascii,',
+            ],
+        ];
     }
 
     /**

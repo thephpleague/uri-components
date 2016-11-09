@@ -363,7 +363,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
             return $ip;
         }
 
-        return substr($ip, 0, $pos);
+        return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
     }
 
     /**

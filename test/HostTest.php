@@ -72,7 +72,7 @@ class HostTest extends AbstractTestCase
         return [
             'ipv4' => ['127.0.0.1', true, true, false, '127.0.0.1', '127.0.0.1'],
             'ipv6' => ['[::1]', true, false, true, '[::1]', '::1'],
-            'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]', 'fe80:1234::'],
+            'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]', 'fe80:1234::%1'],
             'normalized' => ['Master.EXAMPLE.cOm', false, false, false, 'master.example.com', null],
             'empty string' => ['', false, false, false, '', null],
             'null' => [null, false, false, false, '', null],
