@@ -119,7 +119,7 @@ class DataPath extends Component implements PathComponent
     /**
      * Filter the mimeType property
      *
-     * @param string $mimetype
+     * @param string|null $mimetype
      *
      * @throws InvalidArgumentException If the mimetype is invalid
      *
@@ -127,6 +127,10 @@ class DataPath extends Component implements PathComponent
      */
     protected function filterMimeType($mimetype)
     {
+        if (in_array($mimetype, [null, ''], true)) {
+            return static::DEFAULT_MIMETYPE;
+        }
+
         if (!preg_match(static::REGEXP_MIMETYPE, $mimetype)) {
             throw new InvalidArgumentException(sprintf('invalid mimeType, `%s`', $mimetype));
         }
