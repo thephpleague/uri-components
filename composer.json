@@ -26,12 +26,12 @@
         }
     ]   ,
     "require": {
+        "php" : ">=5.6.0",
         "ext-mbstring" : "*",
         "ext-intl" : "*",
         "ext-fileinfo": "*",
         "jeremykendall/php-domain-parser": "^3.0",
-        "php" : ">=5.6.0",
-        "league/uri-interfaces": "dev-master"
+        "league/uri-interfaces": "^0.1.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^1.0",
