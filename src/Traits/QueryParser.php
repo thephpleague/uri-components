@@ -144,12 +144,8 @@ trait QueryParser
     protected static function getEncoder($separator)
     {
         $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
-        $subdelimChars = str_replace($separator, '', "!$'()*+,;=%:@?/&");
-        $regexp = '/(?:[^'
-            .self::$unreservedChars
-            .preg_quote($subdelimChars, '/')
-            .']+|%(?!'.self::$encodedChars
-            .'))/x';
+        $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&");
+        $regexp = '/(%[A-Fa-f0-9]{2})|[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+/u';
 
         return function ($str) use ($regexp) {
             return self::encode($str, $regexp);
