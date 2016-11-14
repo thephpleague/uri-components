@@ -92,6 +92,7 @@ class QueryTest extends AbstractTestCase
         $unreserved = 'a-zA-Z0-9.-_~!$&\'()*+,;=:@';
 
         return [
+            'bug fix issue 84' => ['fào=?%25bar&q=v%61lue', '?f%C3%A0o=?%25bar&q=v%61lue'],
             'string' => ['kingkong=toto', '?kingkong=toto'],
             'null' => [null, ''],
             'empty string' => ['', '?'],
