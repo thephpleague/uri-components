@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 0.2.1
+
+### Added
+
+- None
+
+### Fixed
+
+- issue [#84](https://github.com/thephpleague/uri/issues/84). Query string is not well encoded.
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
 ## 0.2.0
 
 ### Added
