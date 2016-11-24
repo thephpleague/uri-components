@@ -2,9 +2,8 @@
 
 namespace LeagueTest\Uri\Components;
 
-use InvalidArgumentException;
 use League\Uri\Components\DataPath as Path;
-use RuntimeException;
+use League\Uri\Components\Exception;
 use SplFileObject;
 
 /**
@@ -14,20 +13,20 @@ class DataPathTest extends AbstractTestCase
 {
     /**
      * @dataProvider invalidDataUriPath
-     * @expectedException RuntimeException
      * @param $path
      */
     public function testCreateFromPathFailed($path)
     {
+        $this->expectException(Exception::class);
         Path::createFromPath($path);
     }
 
     /**
      * @dataProvider invalidDataUriPath
-     * @expectedException InvalidArgumentException
      */
     public function testConstructorFailed($path)
     {
+        $this->expectException(Exception::class);
         new Path($path);
     }
 
@@ -119,13 +118,13 @@ class DataPathTest extends AbstractTestCase
 
     /**
      * @dataProvider invalidParametersString
-     * @expectedException InvalidArgumentException
      *
      * @param string $path
      * @param string $parameters
      */
     public function testWithParametersFailedWithInvalidParameters($path, $parameters)
     {
+        $this->expectException(Exception::class);
         Path::createFromPath($path)->withParameters($parameters);
     }
 
@@ -143,38 +142,30 @@ class DataPathTest extends AbstractTestCase
         ];
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testInvalidSetterThrowException()
     {
+        $this->expectException(Exception::class);
         $path = new Path();
         $path->unknownProperty = true;
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testInvalidGetterThrowException()
     {
+        $this->expectException(Exception::class);
         $path = new Path();
         $path->unknownProperty;
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testInvalidIssetThrowException()
     {
+        $this->expectException(Exception::class);
         $path = new Path();
         isset($path->unknownProperty);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testInvalidUnssetThrowException()
     {
+        $this->expectException(Exception::class);
         $path = new Path();
         unset($path->unknownProperty);
     }
@@ -207,11 +198,11 @@ class DataPathTest extends AbstractTestCase
 
     /**
      * @dataProvider invalidParameters
-     * @expectedException InvalidArgumentException
      * @param $parameters
      */
     public function testUpdateParametersFailed($parameters)
     {
+        $this->expectException(Exception::class);
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
@@ -253,14 +244,6 @@ class DataPathTest extends AbstractTestCase
         unlink($newFilePath);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
-    public function testSaveFailedWithUnReachableFilePath()
-    {
-        Path::createFromPath(__DIR__.'/data/hello-world.txt')->save('/usr/bin/yolo', 'w');
-    }
-
     public function testDataPathConstructor()
     {
         $this->assertSame('text/plain;charset=us-ascii,', (string) new Path());
@@ -279,27 +262,21 @@ class DataPathTest extends AbstractTestCase
         $this->assertContains($path->__toString(), $res);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidBase64Encoded()
     {
+        $this->expectException(Exception::class);
         new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidComponent()
     {
+        $this->expectException(Exception::class);
         new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidMimetype()
     {
+        $this->expectException(Exception::class);
         new Path('data:toto\\bar;foo=bar,');
     }
 }

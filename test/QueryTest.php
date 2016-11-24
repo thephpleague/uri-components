@@ -3,7 +3,7 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
-use InvalidArgumentException;
+use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
 
 /**
@@ -53,11 +53,11 @@ class QueryTest extends AbstractTestCase
 
     /**
      * @param $str
-     * @expectedException InvalidArgumentException
      * @dataProvider failedConstructor
      */
     public function testFailedConstructor($str)
     {
+        $this->expectException(Exception::class);
         new Query($str);
     }
 
@@ -123,11 +123,11 @@ class QueryTest extends AbstractTestCase
 
     /**
      * @param $input
-     * @expectedException \InvalidArgumentException
      * @dataProvider createFromPairsFailedProvider
      */
     public function testcreateFromPairsFailed($input)
     {
+        $this->expectException(Exception::class);
         Query::createFromPairs($input);
     }
 
@@ -312,12 +312,12 @@ class QueryTest extends AbstractTestCase
 
     /**
      * @dataProvider invalidFilter
-     * @expectedException InvalidArgumentException
      * @param $callable
      * @param $flag
      */
     public function testFilterOffsetsFailed($callable, $flag)
     {
+        $this->expectException(Exception::class);
         Query::createFromPairs([])->filter($callable, $flag);
     }
 
@@ -332,11 +332,11 @@ class QueryTest extends AbstractTestCase
 
     /**
      * @dataProvider invalidQueryStrings
-     * @expectedException InvalidArgumentException
      * @param $query
      */
     public function testWithQueryRaisesExceptionForInvalidQueryStrings($query)
     {
+        $this->expectException(Exception::class);
         new Query($query);
     }
 

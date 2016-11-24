@@ -12,7 +12,7 @@
  */
 namespace League\Uri\Components\Traits;
 
-use InvalidArgumentException;
+use League\Uri\Components\Exception;
 
 /**
  * Value object representing a URI path component.
@@ -34,22 +34,19 @@ trait PathInfo
     /**
      * Filter the encoded path string
      *
-     * @param string $str the encoded path
+     * @param string $path the encoded path
      *
-     * @throws InvalidArgumentException If the encoded path is invalid
+     * @throws Exception If the encoded path is invalid
      *
      * @return string
      */
-    protected function filterEncodedPath($str)
+    protected function filterEncodedPath($path)
     {
-        if (strlen($str) === strcspn($str, '?#')) {
-            return $str;
+        if (strlen($path) === strcspn($path, '?#')) {
+            return $path;
         }
 
-        throw new InvalidArgumentException(sprintf(
-            'The encoded path `%s` contains invalid characters',
-            $str
-        ));
+        throw new Exception(sprintf('The encoded path `%s` contains invalid characters', $path));
     }
 
     /**
@@ -86,16 +83,6 @@ trait PathInfo
      * @return mixed
      */
     abstract public function getContent();
-
-    /**
-     * Returns whether or not the component is defined.
-     *
-     * @return bool
-     */
-    public function isDefined()
-    {
-        return null !== $this->getContent();
-    }
 
     /**
      * Returns an instance without dot segments

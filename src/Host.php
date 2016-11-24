@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use InvalidArgumentException;
 use League\Uri\Components\Traits\HostInfo;
 use League\Uri\Interfaces\CollectionComponent;
 use Traversable;
@@ -83,8 +82,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
      * @param Traversable|string[] $data The segments list
      * @param int                  $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws InvalidArgumentException If $data is invalid
-     * @throws InvalidArgumentException If $type is not a recognized constant
+     * @throws Exception If $type is not a recognized constant
      *
      * @return static
      */
@@ -94,7 +92,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
 
         $data = static::validateIterator($data);
         if (!isset($type_list[$type])) {
-            throw new InvalidArgumentException('Please verify the submitted constant');
+            throw Exception::fromInvalidFlag($type);
         }
 
         if ([] === $data) {
@@ -131,7 +129,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
      *
      * @param string $ip
      *
-     * @throws InvalidArgumentException If the IP is invalid or unrecognized
+     * @throws Exception If the IP is invalid or unrecognized
      *
      * @return static
      */
@@ -154,7 +152,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
             return new static('['.$ip.']');
         }
 
-        throw new InvalidArgumentException('Please verify the submitted IP');
+        throw new Exception(sprintf('Please verify the submitted IP: %s', $ip));
     }
 
     /**
@@ -171,6 +169,8 @@ class Host extends HierarchicalComponent implements CollectionComponent
      * validate the submitted data
      *
      * @param string $host
+     *
+     * @throws Exception If the host is invalid
      *
      * @return array
      */
@@ -207,7 +207,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
             return array_reverse(array_map('idn_to_utf8', $labels));
         }
 
-        throw new InvalidArgumentException(sprintf('The submitted host `%s` is invalid', $host));
+        throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
     }
 
     /**

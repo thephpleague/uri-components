@@ -15,6 +15,7 @@ namespace League\Uri\Components\Traits;
 use ArrayIterator;
 use InvalidArgumentException;
 use League\Uri\Components\Collection;
+use League\Uri\Components\Exception;
 use Traversable;
 
 /**
@@ -132,7 +133,7 @@ trait ImmutableCollection
         static $flags_list = [0 => 1, ARRAY_FILTER_USE_BOTH => 1, ARRAY_FILTER_USE_KEY => 1];
 
         if (!isset($flags_list[$flag])) {
-            throw new InvalidArgumentException('Invalid or Unknown flag parameter');
+            throw Exception::fromInvalidFlag($flag);
         }
 
         return $this->newCollectionInstance(array_filter($this->data, $callable, $flag));
@@ -157,6 +158,6 @@ trait ImmutableCollection
             return $data;
         }
 
-        throw new InvalidArgumentException('Data passed to the method must be an iterable');
+        throw Exception::fromInvalidIterable($data);
     }
 }

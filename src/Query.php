@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use InvalidArgumentException;
 use League\Uri\Components\Traits\ImmutableCollection;
 use League\Uri\Components\Traits\QueryParser;
 use League\Uri\Interfaces\CollectionComponent;
@@ -112,7 +111,7 @@ class Query implements CollectionComponent
      *
      * @param string $str the encoded query
      *
-     * @throws InvalidArgumentException If the encoded query is invalid
+     * @throws Exception If the encoded query is invalid
      *
      * @return string
      */
@@ -122,10 +121,7 @@ class Query implements CollectionComponent
             return $str;
         }
 
-        throw new InvalidArgumentException(sprintf(
-            'The encoded query `%s` contains invalid characters',
-            $str
-        ));
+        throw new Exception(sprintf('The encoded query `%s` contains invalid characters', $str));
     }
 
     /**
@@ -159,16 +155,6 @@ class Query implements CollectionComponent
         }
 
         return static::build($this->data, static::$separator);
-    }
-
-    /**
-     * Returns whether or not the component is defined.
-     *
-     * @return bool
-     */
-    public function isDefined()
-    {
-        return null !== $this->getContent();
     }
 
     /**

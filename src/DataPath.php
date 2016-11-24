@@ -73,6 +73,37 @@ class DataPath extends Component implements PathComponent
     protected $document;
 
     /**
+     * @inheritdoc
+     */
+    public static function __set_state(array $properties)
+    {
+        return new static($properties['data']);
+    }
+
+    /**
+     * Create a new instance from a file path
+     *
+     * @param string $path
+     *
+     * @throws RuntimeException If the File is not readable
+     *
+     * @return static
+     */
+    public static function createFromPath($path)
+    {
+        if (!file_exists($path) || !is_readable($path)) {
+            throw new Exception(sprintf('`%s` does not exist or is not readabele', $path));
+        }
+
+        return new static(static::format(
+            str_replace(' ', '', (new \finfo(FILEINFO_MIME))->file($path)),
+            '',
+            true,
+            base64_encode(file_get_contents($path))
+        ));
+    }
+
+    /**
      * new instance
      *
      * @param string $path the component value
@@ -98,7 +129,7 @@ class DataPath extends Component implements PathComponent
         }
 
         if (!mb_detect_encoding($path, 'US-ASCII', true) || false === strpos($path, ',')) {
-            throw new InvalidArgumentException(sprintf(
+            throw new Exception(sprintf(
                 'The submitted path `%s` is invalid according to RFC2937',
                 $path
             ));
@@ -132,7 +163,7 @@ class DataPath extends Component implements PathComponent
         }
 
         if (!preg_match(static::REGEXP_MIMETYPE, $mimetype)) {
-            throw new InvalidArgumentException(sprintf('invalid mimeType, `%s`', $mimetype));
+            throw new Exception(sprintf('invalid mimeType, `%s`', $mimetype));
         }
 
         return $mimetype;
@@ -161,7 +192,7 @@ class DataPath extends Component implements PathComponent
 
         $params = array_filter(explode(';', $parameters));
         if (!empty(array_filter($params, [$this, 'validateParameter']))) {
-            throw new InvalidArgumentException(sprintf('invalid mediatype parameters, `%s`', $parameters));
+            throw new Exception(sprintf('invalid mediatype parameters, `%s`', $parameters));
         }
 
         return $params;
@@ -195,7 +226,7 @@ class DataPath extends Component implements PathComponent
 
         $res = base64_decode($this->document, true);
         if (false === $res || $this->document !== base64_encode($res)) {
-            throw new InvalidArgumentException('The path data is invalid');
+            throw new Exception(sprintf('invalid document, `%s`', $this->document));
         }
     }
 
@@ -388,36 +419,5 @@ class DataPath extends Component implements PathComponent
             $this->isBinaryData,
             $this->document
         ));
-    }
-
-    /**
-     * Create a new instance from a file path
-     *
-     * @param string $path
-     *
-     * @throws RuntimeException If the File is not readable
-     *
-     * @return static
-     */
-    public static function createFromPath($path)
-    {
-        if (!is_readable($path)) {
-            throw new RuntimeException(sprintf('The specified file `%s` is not readable', $path));
-        }
-
-        return new static(static::format(
-            str_replace(' ', '', (new \finfo(FILEINFO_MIME))->file($path)),
-            '',
-            true,
-            base64_encode(file_get_contents($path))
-        ));
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function __set_state(array $properties)
-    {
-        return new static($properties['data']);
     }
 }

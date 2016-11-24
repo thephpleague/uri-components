@@ -29,7 +29,7 @@ abstract class Component
     /**
      * The component data
      *
-     * @var int|string
+     * @var mixed
      */
     protected $data;
 
@@ -77,16 +77,6 @@ abstract class Component
     public function getContent()
     {
         return $this->data;
-    }
-
-    /**
-     * Returns whether or not the component is defined.
-     *
-     * @return bool
-     */
-    public function isDefined()
-    {
-        return null === $this->getContent();
     }
 
     /**

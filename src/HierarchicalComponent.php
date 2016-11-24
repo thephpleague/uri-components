@@ -90,16 +90,6 @@ abstract class HierarchicalComponent
     abstract public function getContent();
 
     /**
-     * Returns whether or not the component is defined.
-     *
-     * @return bool
-     */
-    public function isDefined()
-    {
-        return null !== $this->getContent();
-    }
-
-    /**
      * Returns the instance string representation; If the
      * instance is not defined an empty string is returned
      *

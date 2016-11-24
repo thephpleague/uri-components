@@ -3,7 +3,7 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
-use InvalidArgumentException;
+use League\Uri\Components\Exception;
 use League\Uri\Components\Host;
 use LogicException;
 
@@ -87,10 +87,10 @@ class HostTest extends AbstractTestCase
     /**
      * @param string $invalid
      * @dataProvider       invalidHostProvider
-     * @expectedException \InvalidArgumentException
      */
     public function testInvalidHost($invalid)
     {
+        $this->expectException(Exception::class);
         new Host($invalid);
     }
 
@@ -266,10 +266,10 @@ class HostTest extends AbstractTestCase
      * @param $input
      * @param $is_absolute
      * @dataProvider createFromLabelsInvalid
-     * @expectedException \InvalidArgumentException
      */
     public function testcreateFromLabelsFailed($input, $is_absolute)
     {
+        $this->expectException(Exception::class);
         Host::createFromLabels($input, $is_absolute);
     }
 
@@ -304,10 +304,10 @@ class HostTest extends AbstractTestCase
 
     /**
      * @dataProvider createFromIpFailed
-     * @expectedException \InvalidArgumentException
      */
     public function testCreateFromIpFailed($input)
     {
+        $this->expectException(Exception::class);
         Host::createFromIp($input);
     }
 
@@ -419,11 +419,9 @@ class HostTest extends AbstractTestCase
         ];
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testPrependIpFailed()
     {
+        $this->expectException(Exception::class);
         (new Host('::1'))->prepend(new Host('foo'));
     }
 
@@ -481,11 +479,9 @@ class HostTest extends AbstractTestCase
         ];
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testReplaceIpMustFailed()
     {
+        $this->expectException(Exception::class);
         (new Host('secure.example.com'))->replace(2, '[::1]');
     }
 

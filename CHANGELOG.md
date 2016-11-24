@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next
+
+### Added
+
+- League\Uri\Components\Exception as the base exception for the library
+
+### Fixed
+
+- None
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
 ## 0.2.1
 
 ### Added

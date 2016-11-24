@@ -2,6 +2,7 @@
 
 namespace LeagueTest\Uri\Components;
 
+use League\Uri\Components\Exception;
 use League\Uri\Components\Port;
 
 /**
@@ -73,11 +74,10 @@ class PortTest extends AbstractTestCase
      * @param $port
      *
      * @dataProvider invalidPortProvider
-     *
-     * @expectedException \InvalidArgumentException
      */
     public function testFailedPort($port)
     {
+        $this->expectException(Exception::class);
         new Port($port);
     }
 

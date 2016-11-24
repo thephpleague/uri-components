@@ -3,7 +3,7 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
-use InvalidArgumentException;
+use League\Uri\Components\Exception;
 use League\Uri\Components\HierarchicalPath as Path;
 
 /**
@@ -78,11 +78,11 @@ class HierarchicalPathTest extends AbstractTestCase
 
     /**
      * @param $str
-     * @expectedException InvalidArgumentException
      * @dataProvider failedConstructor
      */
     public function testInvalidPath($str)
     {
+        $this->expectException(Exception::class);
         new Path($str);
     }
 
@@ -177,10 +177,10 @@ class HierarchicalPathTest extends AbstractTestCase
      * @param $input
      * @param $flags
      * @dataProvider createFromSegmentsInvalid
-     * @expectedException \InvalidArgumentException
      */
     public function testCreateFromSegmentsFailed($input, $flags)
     {
+        $this->expectException(Exception::class);
         Path::createFromSegments($input, $flags);
     }
 
@@ -416,13 +416,13 @@ class HierarchicalPathTest extends AbstractTestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
      * @dataProvider invalidExtension
      *
      * @param string $extension
      */
     public function testWithExtensionWithInvalidExtension($extension)
     {
+        $this->expectException(Exception::class);
         (new Path())->withExtension($extension);
     }
 

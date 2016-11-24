@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use InvalidArgumentException;
 use League\Uri\Components\Traits\PathInfo;
 use League\Uri\Interfaces\CollectionComponent;
 use League\Uri\Interfaces\PathComponent;
@@ -41,8 +40,8 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
      * @param Traversable|string[] $data The segments list
      * @param int                  $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws InvalidArgumentException If $data is invalid
-     * @throws InvalidArgumentException If $type is not a recognized constant
+     * @throws Exception If $data is invalid
+     * @throws Exception If $type is not a recognized constant
      *
      * @return static
      */
@@ -51,7 +50,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
         if (!isset($type_list[$type])) {
-            throw new InvalidArgumentException('Please verify the submitted constant');
+            throw Exception::fromInvalidFlag($type);
         }
 
         $path = implode(static::$separator, static::validateIterator($data));
@@ -274,8 +273,6 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
      * @param string $extension the new extension
      *                          can preceeded with or without the dot (.) character
      *
-     * @throws InvalidArgumentException If the extension is invalid
-     *
      * @return static
      */
     public function withExtension($extension)
@@ -332,18 +329,18 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
      *
      * @param string $extension the new extension to use
      *
-     * @throws InvalidArgumentException If the extension is not valid
+     * @throws Exception If the extension is not valid
      *
      * @return string
      */
     protected function formatExtension($extension)
     {
         if (0 === strpos($extension, '.')) {
-            throw new InvalidArgumentException('an extension sequence can not contain a leading `.` character');
+            throw new Exception('an extension sequence can not contain a leading `.` character');
         }
 
         if (strpos($extension, static::$separator)) {
-            throw new InvalidArgumentException('an extension sequence can not contain a path delimiter');
+            throw new Exception('an extension sequence can not contain a path delimiter');
         }
 
         return implode(static::$separator, $this->validate($extension));
