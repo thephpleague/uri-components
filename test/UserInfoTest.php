@@ -2,6 +2,7 @@
 
 namespace LeagueTest\Uri\Components;
 
+use League\Uri\Components\Exception;
 use League\Uri\Components\UserInfo;
 
 /**
@@ -86,30 +87,6 @@ class UserInfoTest extends AbstractTestCase
         $this->assertSame($conn, $conn->withContent('user:pass'));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testWithContentThrowsInvalidArgumentException()
-    {
-        (new UserInfo())->withContent([]);
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testConstructorThrowsInvalidArgumentException1()
-    {
-        new UserInfo('tot:o');
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testConstructorThrowsInvalidArgumentException2()
-    {
-        new UserInfo('toto', 'p@ass');
-    }
-
     public function testSetState()
     {
         $conn = new UserInfo('user', 'pass');
@@ -137,11 +114,27 @@ class UserInfoTest extends AbstractTestCase
         ];
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
+    public function testWithContentThrowsInvalidArgumentException()
+    {
+        $this->expectException(Exception::class);
+        (new UserInfo())->withContent([]);
+    }
+
+    public function testConstructorThrowsInvalidArgumentException1()
+    {
+        $this->expectException(Exception::class);
+        new UserInfo('tot:o');
+    }
+
+    public function testConstructorThrowsInvalidArgumentException2()
+    {
+        $this->expectException(Exception::class);
+        new UserInfo('toto', 'p@ass');
+    }
+
     public function testWithUserInfoThrowException()
     {
+        $this->expectException(Exception::class);
         (new UserInfo('user', 'pass'))->withUserInfo(null);
     }
 }

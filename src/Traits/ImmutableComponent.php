@@ -12,7 +12,7 @@
  */
 namespace League\Uri\Components\Traits;
 
-use InvalidArgumentException;
+use League\Uri\Components\Exception;
 
 /**
  * Common methods for a URI component Value Object
@@ -167,14 +167,11 @@ trait ImmutableComponent
     protected static function validateString($str)
     {
         if (!is_string($str)) {
-            throw new InvalidArgumentException(sprintf(
-                'Expected data to be a string; received "%s"',
-                (is_object($str) ? get_class($str) : gettype($str))
-            ));
+            throw Exception::fromInvalidString($str);
         }
 
         if (strlen($str) !== strcspn($str, self::$invalidUriChars)) {
-            throw new InvalidArgumentException(sprintf(
+            throw new Exception(sprintf(
                 'the submitted string `%s` contains invalid characters',
                 $str
             ));
@@ -184,11 +181,28 @@ trait ImmutableComponent
     }
 
     /**
+     * The component raw data
+     *
+     * @return mixed
+     */
+    abstract public function getContent();
+
+    /**
+     * Returns whether or not the component is defined.
+     *
+     * @return bool
+     */
+    public function isDefined()
+    {
+        return null !== $this->getContent();
+    }
+
+    /**
      * @inheritdoc
      */
     public function __set($property, $value)
     {
-        throw new InvalidArgumentException(sprintf('%s is an undefined property', $property));
+        throw Exception::fromInaccessibleProperty($property);
     }
 
     /**
@@ -196,7 +210,7 @@ trait ImmutableComponent
      */
     public function __isset($property)
     {
-        throw new InvalidArgumentException(sprintf('%s is an undefined property', $property));
+        throw Exception::fromInaccessibleProperty($property);
     }
 
     /**
@@ -204,7 +218,7 @@ trait ImmutableComponent
      */
     public function __unset($property)
     {
-        throw new InvalidArgumentException(sprintf('%s is an undefined property', $property));
+        throw Exception::fromInaccessibleProperty($property);
     }
 
     /**
@@ -212,6 +226,6 @@ trait ImmutableComponent
      */
     public function __get($property)
     {
-        throw new InvalidArgumentException(sprintf('%s is an undefined property', $property));
+        throw Exception::fromInaccessibleProperty($property);
     }
 }

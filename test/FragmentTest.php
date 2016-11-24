@@ -2,7 +2,7 @@
 
 namespace LeagueTest\Uri\Components;
 
-use InvalidArgumentException;
+use League\Uri\Components\Exception;
 use League\Uri\Components\Fragment;
 
 /**
@@ -42,8 +42,8 @@ class FragmentTest extends AbstractTestCase
 
     public function testIsNull()
     {
-        $this->assertTrue((new Fragment(null))->isDefined());
-        $this->assertFalse((new Fragment(''))->isDefined());
+        $this->assertFalse((new Fragment(null))->isDefined());
+        $this->assertTrue((new Fragment(''))->isDefined());
     }
 
     /**
@@ -72,11 +72,11 @@ class FragmentTest extends AbstractTestCase
 
     /**
      * @param $str
-     * @expectedException InvalidArgumentException
      * @dataProvider failedConstructor
      */
     public function testInvalidFragment($str)
     {
+        $this->expectException(Exception::class);
         new Fragment($str);
     }
 

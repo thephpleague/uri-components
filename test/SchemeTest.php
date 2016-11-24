@@ -2,6 +2,7 @@
 
 namespace LeagueTest\Uri\Components;
 
+use League\Uri\Components\Exception;
 use League\Uri\Components\Scheme;
 
 /**
@@ -70,10 +71,10 @@ class SchemeTest extends AbstractTestCase
     /**
      * @param  $scheme
      * @dataProvider invalidSchemeProvider
-     * @expectedException \InvalidArgumentException
      */
     public function testInvalidScheme($scheme)
     {
+        $this->expectException(Exception::class);
         new Scheme($scheme);
     }
 

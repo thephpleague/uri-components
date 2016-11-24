@@ -2,7 +2,7 @@
 
 namespace LeagueTest\Uri\Components;
 
-use InvalidArgumentException;
+use League\Uri\Components\Exception;
 use League\Uri\Components\Path;
 
 /**
@@ -56,10 +56,10 @@ class PathTest extends AbstractTestCase
     /**
      * @param $raw
      * @dataProvider invalidDataProvider
-     * @expectedException InvalidArgumentException
      */
     public function testFailedConstructor($raw)
     {
+        $this->expectException(Exception::class);
         new Path($raw);
     }
 

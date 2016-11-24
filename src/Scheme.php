@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use InvalidArgumentException;
 use League\Uri\Interfaces\Component as UriComponent;
 
 /**
@@ -42,7 +41,7 @@ class Scheme extends Component implements UriComponent
 
         $scheme = $this->validateString($scheme);
         if (!preg_match(',^[a-z]([-a-z0-9+.]+)?$,i', $scheme)) {
-            throw new InvalidArgumentException(sprintf("Invalid Submitted scheme: '%s'", $scheme));
+            throw new Exception(sprintf("Invalid Submitted scheme: '%s'", $scheme));
         }
 
         return strtolower($scheme);

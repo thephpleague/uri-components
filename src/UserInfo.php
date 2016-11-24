@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use InvalidArgumentException;
 use League\Uri\Components\Traits\ImmutableComponent;
 use League\Uri\Interfaces\Component as UriComponent;
 
@@ -63,7 +62,7 @@ class UserInfo implements UriComponent
      *
      * @param string|null $str
      *
-     * @throws InvalidArgumentException If the content is invalid
+     * @throws Exception If the content is invalid
      *
      * @return string|null
      */
@@ -78,7 +77,7 @@ class UserInfo implements UriComponent
             return $this->decodeComponent($str);
         }
 
-        throw new InvalidArgumentException(sprintf(
+        throw new Exception(sprintf(
             'The encoded user string `%s` contains invalid characters `/:@?#`',
             $str
         ));
@@ -89,7 +88,7 @@ class UserInfo implements UriComponent
      *
      * @param string|null $str
      *
-     * @throws InvalidArgumentException If the content is invalid
+     * @throws Exception If the content is invalid
      *
      * @return string|null
      */
@@ -104,7 +103,7 @@ class UserInfo implements UriComponent
             return $this->decodeComponent($str);
         }
 
-        throw new InvalidArgumentException(sprintf(
+        throw new Exception(sprintf(
             'The encoded pass string `%s` contains invalid characters `/@?#`',
             $str
         ));
@@ -153,7 +152,7 @@ class UserInfo implements UriComponent
      */
     public function getContent()
     {
-        if (null === $this->user) {
+        if ('' == $this->user) {
             return null;
         }
 
@@ -166,21 +165,11 @@ class UserInfo implements UriComponent
         }
 
         $userInfo = $this->encode($this->user, $regexp);
-        if ('' == $userInfo || in_array($this->pass, [null, ''], true)) {
+        if ('' == $this->pass) {
             return $userInfo;
         }
 
         return $userInfo.':'.$this->encode($this->pass, $regexp);
-    }
-
-    /**
-     * Returns whether or not the component is defined.
-     *
-     * @return bool
-     */
-    public function isDefined()
-    {
-        return null !== $this->getContent();
     }
 
     /**
@@ -224,7 +213,7 @@ class UserInfo implements UriComponent
         }
 
         if (null !== $content && !is_string($content)) {
-            throw new InvalidArgumentException(sprintf(
+            throw new Exception(sprintf(
                 'Expected data to be a string or NULL; received "%s"',
                 gettype($content)
             ));
@@ -244,8 +233,6 @@ class UserInfo implements UriComponent
      * An empty user is equivalent to removing the user information.
      *
      * @param string $user The user to use with the new instance.
-     *
-     * @throws InvalidArgumentException for invalid user.
      *
      * @return static
      */
