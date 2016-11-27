@@ -12,6 +12,9 @@
  */
 namespace League\Uri\Components\Traits;
 
+use League\Uri\Components\Exception;
+use League\Uri\Components\Query;
+
 /**
  * a class to parse a URI query string according to RFC3986
  *
@@ -45,7 +48,7 @@ trait QueryParser
         }
 
         foreach (explode($separator, $str) as $pair) {
-            $res = self::parsePair($res, $pair);
+            $res = self::parsePair($res, $pair, $separator);
         }
 
         return $res;
@@ -54,18 +57,20 @@ trait QueryParser
     /**
      * Parse a query string pair
      *
-     * @param array  $res  The associative array to add the pair to
-     * @param string $pair The query string pair
+     * @param array  $res       The associative array to add the pair to
+     * @param string $pair      The query string pair
+     * @param string $separator The query string separator
      *
      * @return array
      */
-    protected static function parsePair(array $res, $pair)
+    protected static function parsePair(array $res, $pair, $separator)
     {
+        $encoded_sep = rawurlencode($separator);
         $param = explode('=', $pair, 2);
         $key = self::decodeComponent(array_shift($param));
         $value = array_shift($param);
         if (null !== $value) {
-            $value = self::decodeComponent($value);
+            $value = str_replace($encoded_sep, $separator, self::decodeComponent($value));
         }
 
         if (!array_key_exists($key, $res)) {
@@ -89,24 +94,25 @@ trait QueryParser
      *
      *    - it does not modify parameters keys
      *
-     * @param array  $arr       Query string parameters
+     * @param array  $pairs     Query pairs
      * @param string $separator Query string separator
+     * @param int    $enc_type  Query encoding type
      *
      * @return string
      */
-    public static function build(array $arr, $separator = '&')
+    public static function build(array $pairs, $separator = '&', $enc_type = Query::RFC3986)
     {
-        $encoder = self::getEncoder($separator);
-        $arr = array_map(function ($value) {
+        $encoder = self::getEncoder($separator, $enc_type);
+        $normalized_pairs = array_map(function ($value) {
             return !is_array($value) ? [$value] : $value;
-        }, $arr);
+        }, $pairs);
 
-        $pairs = [];
-        foreach ($arr as $key => $value) {
-            $pairs = array_merge($pairs, self::buildPair($encoder, $value, $key));
+        $arr = [];
+        foreach ($normalized_pairs as $key => $value) {
+            $arr = array_merge($arr, self::buildPair($encoder, $value, $key));
         }
 
-        return implode($separator, $pairs);
+        return implode($separator, $arr);
     }
 
     /**
@@ -137,23 +143,58 @@ trait QueryParser
     /**
      *subject Return the query string encoding mechanism
      *
-     * @param int|bool $encodingType
+     * @param string $separator
+     * @param int    $enc_type
      *
      * @return callable
      */
-    protected static function getEncoder($separator)
+    protected static function getEncoder($separator, $enc_type)
     {
-        $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
-        $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&");
-        $regexp = '/(%[A-Fa-f0-9]{2})|[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+/u';
+        if (Query::RFC3987 == $enc_type) {
+            return function ($str) use ($separator) {
+                $pattern = str_split(self::$invalidUriChars);
+                $pattern[] = '#';
+                $pattern[] = $separator;
 
-        return function ($str) use ($regexp) {
-            return self::encode($str, $regexp);
-        };
+                return str_replace($pattern, array_map('rawurlencode', $pattern), $str);
+            };
+        }
+
+        if (Query::RFC3986 == $enc_type) {
+            $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
+            $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
+
+            $regexp = '/(?:[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+|%(?![A-Fa-f0-9]{2}))/u';
+            return function ($str) use ($regexp) {
+                return self::encode($str, $regexp);
+            };
+        }
+
+        throw new Exception('Unknown encoding type');
     }
 
     /**
-     * Returns the stores variables as elements of an array.
+     * Returns the store PHP variables as elements of an array.
+     *
+     * The result is similar as PHP parse_str when used with its
+     * second argument with the difference that variable names are
+     * not mangled.
+     *
+     * @see http://php.net/parse_str
+     * @see https://wiki.php.net/rfc/on_demand_name_mangling
+     *
+     * @param string $str       the query string
+     * @param string $separator a the query string single character separator
+     *
+     * @return array
+     */
+    public static function extract($str, $separator = '&')
+    {
+        return self::extractFromPairs(self::parse($str, $separator));
+    }
+
+    /**
+     * Returns the store PHP variables as elements of an array.
      *
      * The result is similar as PHP parse_str when used with its
      * second argument with the difference that variable names are
@@ -166,13 +207,17 @@ trait QueryParser
      *
      * @return array
      */
-    protected function getPhpVariables(array $pairs)
+    protected static function extractFromPairs(array $pairs)
     {
         $data = [];
         foreach ($pairs as $name => $value) {
-            $name = trim($name);
-            $value = $this->formatParsedValue($value);
-            $this->extractPhpVariable($name, $value, $data);
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+
+            foreach ($value as $val) {
+                self::extractPhpVariable(trim($name), self::formatParsedValue($val), $data);
+            }
         }
 
         return $data;
@@ -185,17 +230,13 @@ trait QueryParser
      *
      * @return string
      */
-    protected function formatParsedValue($value)
+    protected static function formatParsedValue($value)
     {
-        if (is_array($value)) {
-            $value = array_pop($value);
+        if (null === $value) {
+            return '';
         }
 
-        if (null !== $value) {
-            $value = rawurldecode($value);
-        }
-
-        return (string) $value;
+        return rawurldecode($value);
     }
 
     /**
@@ -223,7 +264,7 @@ trait QueryParser
      * @param string $value the formatted value
      * @param array  &$data the result array passed by reference
      */
-    protected function extractPhpVariable($name, $value, array &$data)
+    protected static function extractPhpVariable($name, $value, array &$data)
     {
         if ('' === $name) {
             return;
@@ -255,6 +296,6 @@ trait QueryParser
             $remaining = '';
         }
 
-        $this->extractPhpVariable($index.$remaining, $value, $data[$key]);
+        self::extractPhpVariable($index.$remaining, $value, $data[$key]);
     }
 }

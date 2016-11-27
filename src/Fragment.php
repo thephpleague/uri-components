@@ -30,31 +30,47 @@ use League\Uri\Interfaces\Component as UriComponent;
  */
 class Fragment extends Component implements UriComponent
 {
+
     /**
-     * Returns the component literal value
+     * Returns the instance content encoded in RFC3986 or RFC3987.
+     *
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
      *
      * @return string|null
      */
-    public function getContent()
+    public function getContent($enc_type = self::RFC3986)
     {
-        if (null === $this->data) {
-            return null;
+        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
+            throw new Exception('Unsupported or Unknown Encoding');
         }
 
-        $regexp = '/(?:[^'.self::$unreservedChars.self::$subdelimChars.'\:\/@\?]+
-            |%(?!'.self::$encodedChars.'))/x';
+        if ('' == $this->data) {
+            return $this->data;
+        }
+
+        if (self::RFC3987 == $enc_type) {
+            $pattern = str_split(self::$invalidUriChars);
+
+            return str_replace($pattern, array_map('rawurlencode', $pattern), $this->data);
+        }
+
+        $regexp = '/(?:[^'
+            .self::$unreservedChars
+            .self::$subdelimChars
+            .'\:\/@\?]+|%(?!'
+            .self::$encodedChars.'))/ux';
 
         return $this->encode($this->data, $regexp);
-    }
-
-    /**
-     * Return the decoded string representation of the component
-     *
-     * @return null|string
-     */
-    public function getDecoded()
-    {
-        return $this->data;
     }
 
     /**

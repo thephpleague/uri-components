@@ -14,6 +14,7 @@ namespace League\Uri\Components;
 
 use League\Uri\Components\Traits\ImmutableCollection;
 use League\Uri\Components\Traits\ImmutableComponent;
+use League\Uri\Interfaces\Component as UriComponent;
 
 /**
  * An abstract class to ease collection like object manipulation
@@ -83,11 +84,23 @@ abstract class HierarchicalComponent
     }
 
     /**
-     * Returns the component literal value
+     * Returns the instance content encoded in RFC3986 or RFC3987.
+     *
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
      *
      * @return string|null
      */
-    abstract public function getContent();
+    abstract public function getContent($enc_type = UriComponent::RFC3986);
 
     /**
      * Returns the instance string representation; If the

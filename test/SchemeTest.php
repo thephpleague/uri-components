@@ -90,4 +90,10 @@ class SchemeTest extends AbstractTestCase
             'array' => [['foo']],
         ];
     }
+
+    public function testInvalidEncodingTypeThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Scheme('http'))->getContent('RFC1738');
+    }
 }

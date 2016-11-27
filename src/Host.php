@@ -326,9 +326,23 @@ class Host extends HierarchicalComponent implements CollectionComponent
     }
 
     /**
-     * @inheritdoc
+     * Returns the instance content encoded in RFC3986 or RFC3987.
+     *
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
+     *
+     * @return string|null
      */
-    public function getContent()
+    public function getContent($enc_type = self::RFC3986)
     {
         if ([] === $this->data) {
             return null;
@@ -338,7 +352,15 @@ class Host extends HierarchicalComponent implements CollectionComponent
             return $this->data[0];
         }
 
-        return $this->format($this->getLabels(), $this->isAbsolute);
+        if ($enc_type == self::RFC3987) {
+            return $this->format($this->data, $this->isAbsolute);
+        }
+
+        if ($enc_type == self::RFC3986) {
+            return $this->format($this->getLabels(), $this->isAbsolute);
+        }
+
+        throw new Exception('Unsupported or Unknown Encoding');
     }
 
     /**

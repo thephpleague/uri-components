@@ -53,13 +53,6 @@ class Query implements CollectionComponent
     protected $preserveDelimiter = false;
 
     /**
-     * Parsed Query data using PHP's rules
-     *
-     * @var array
-     */
-    protected $parseData = [];
-
-    /**
      * return a new Query instance from an Array or a traversable object
      *
      * @param Traversable|array $data
@@ -77,6 +70,18 @@ class Query implements CollectionComponent
     }
 
     /**
+     * @inheritdoc
+     */
+    public static function __set_state(array $properties)
+    {
+        $component = new static();
+        $component->data = $properties['data'];
+        $component->preserveDelimiter = $properties['preserveDelimiter'];
+
+        return $component;
+    }
+
+    /**
      * a new instance
      *
      * @param string $data
@@ -85,7 +90,6 @@ class Query implements CollectionComponent
     {
         $this->data = $this->validate($data);
         $this->preserveDelimiter = null !== $data;
-        $this->parseData = $this->getPhpVariables($this->data);
     }
 
     /**
@@ -101,27 +105,12 @@ class Query implements CollectionComponent
             return [];
         }
 
-        $str = $this->filterEncodedQuery($this->validateString($str));
-
-        return static::parse($str, static::$separator);
-    }
-
-    /**
-     * Filter the encoded query string
-     *
-     * @param string $str the encoded query
-     *
-     * @throws Exception If the encoded query is invalid
-     *
-     * @return string
-     */
-    protected function filterEncodedQuery($str)
-    {
-        if (false === strpos($str, '#')) {
-            return $str;
+        $str = $this->validateString($str);
+        if (false !== strpos($str, '#')) {
+            throw new Exception(sprintf('The encoded query `%s` contains invalid characters', $str));
         }
 
-        throw new Exception(sprintf('The encoded query `%s` contains invalid characters', $str));
+        return static::parse($str, static::$separator);
     }
 
     /**
@@ -133,28 +122,33 @@ class Query implements CollectionComponent
     }
 
     /**
-     * @inheritdoc
-     */
-    public static function __set_state(array $properties)
-    {
-        $component = static::createFromPairs($properties['data']);
-        $component->preserveDelimiter = $properties['preserveDelimiter'];
-
-        return $component;
-    }
-
-    /**
-     * Returns the component literal value.
+     * Returns the instance content encoded in RFC3986 or RFC3987.
      *
-     * @return null|string
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
+     *
+     * @return string|null
      */
-    public function getContent()
+    public function getContent($enc_type = self::RFC3986)
     {
+        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
+            throw new Exception('Unsupported or Unknown Encoding');
+        }
+
         if (!$this->preserveDelimiter) {
             return null;
         }
 
-        return static::build($this->data, static::$separator);
+        return static::build($this->data, static::$separator, $enc_type);
     }
 
     /**
@@ -207,49 +201,9 @@ class Query implements CollectionComponent
      */
     public function getValue($offset, $default = null)
     {
-        $offset = $this->validateString($offset);
-        $offset = $this->decodeComponent($offset);
+        $offset = $this->decodeComponent($this->validateString($offset));
         if (isset($this->data[$offset])) {
             return $this->data[$offset];
-        }
-
-        return $default;
-    }
-
-    /**
-     * Returns the stores PHP variables as elements of an array.
-     *
-     * The result is similar as PHP parse_str when used with its
-     * second argument with the difference that variable names are
-     * not mangled.
-     *
-     * @see http://php.net/parse_str
-     * @see https://wiki.php.net/rfc/on_demand_name_mangling
-     *
-     * @return array
-     */
-    public function getParsed()
-    {
-        return $this->parseData;
-    }
-
-    /**
-     * Retrieves a single store php variable value.
-     *
-     * Retrieves a single store variable. If the variable has not been set,
-     * returns the default value provided.
-     *
-     * @param string $name    The parameter name
-     * @param mixed  $default Default value to return if the parameter does not exist.
-     *
-     * @return mixed
-     */
-    public function getParsedValue($name, $default = null)
-    {
-        $name = $this->validateString($name);
-        $name = $this->decodeComponent($name);
-        if (isset($this->parseData[$name])) {
-            return $this->parseData[$name];
         }
 
         return $default;
@@ -287,7 +241,7 @@ class Query implements CollectionComponent
     public function merge($query)
     {
         $pairs = !$query instanceof self ? $this->validate($query) : $query->getPairs();
-        if ($this->data === $pairs) {
+        if (in_array($pairs, [$this->data, []], true)) {
             return $this;
         }
 
@@ -325,10 +279,10 @@ class Query implements CollectionComponent
      */
     public function hasKey($offset)
     {
-        $offset = $this->validateString($offset);
-        $offset = $this->decodeComponent($offset);
-
-        return array_key_exists($offset, $this->data);
+        return array_key_exists(
+            $this->decodeComponent($this->validateString($offset)),
+            $this->data
+        );
     }
 
     /**
@@ -340,7 +294,11 @@ class Query implements CollectionComponent
             return array_keys($this->data);
         }
 
-        return array_keys($this->data, $this->decodeComponent(func_get_arg(0)), true);
+        return array_keys(
+            $this->data,
+            $this->decodeComponent($this->validateString(func_get_arg(0))),
+            true
+        );
     }
 
     /**
@@ -350,10 +308,14 @@ class Query implements CollectionComponent
     {
         $data = $this->data;
         foreach ($offsets as $offset) {
-            unset($data[$this->decodeComponent($offset)]);
+            unset($data[$this->decodeComponent($this->validateString($offset))]);
         }
 
-        return $this->newCollectionInstance($data);
+        if ($data === $this->data) {
+            return $this;
+        }
+
+        return static::createFromPairs($data);
     }
 
     /**

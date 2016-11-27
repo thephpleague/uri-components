@@ -71,6 +71,24 @@ class FragmentTest extends AbstractTestCase
     }
 
     /**
+     * @dataProvider getContentProvider
+     */
+    public function testGetContent($input, $enc_type, $expected)
+    {
+        $this->assertSame($expected, (new Fragment($input))->getContent($enc_type));
+    }
+
+    public function getContentProvider()
+    {
+        return [
+            ['€', Fragment::RFC3987, '€'],
+            ['€', Fragment::RFC3986, '%E2%82%AC'],
+            ['%E2%82%AC', Fragment::RFC3987, '€'],
+            ['%E2%82%AC', Fragment::RFC3986, '%E2%82%AC'],
+        ];
+    }
+
+    /**
      * @param $str
      * @dataProvider failedConstructor
      */
@@ -88,6 +106,12 @@ class FragmentTest extends AbstractTestCase
             'float' => [1.2],
             'array' => [['foo']],
         ];
+    }
+
+    public function testInvalidEncodingTypeThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Fragment('host'))->getContent('RFC1738');
     }
 
     /**
