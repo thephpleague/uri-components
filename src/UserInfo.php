@@ -116,7 +116,16 @@ class UserInfo implements UriComponent
      */
     public function getUser()
     {
-        return (string) $this->user;
+        if ('' == $this->user) {
+            return '';
+        }
+
+        $regexp = '/(?:[^'
+            .static::$unreservedChars
+            .static::$subdelimChars
+            .']+|%(?!'.static::$encodedChars.'))/x';
+
+        return $this->encode($this->user, $regexp);
     }
 
     /**
@@ -126,7 +135,16 @@ class UserInfo implements UriComponent
      */
     public function getPass()
     {
-        return (string) $this->pass;
+        if ('' == $this->pass) {
+            return '';
+        }
+
+        $regexp = '/(?:[^'
+            .static::$unreservedChars
+            .static::$subdelimChars
+            .']+|%(?!'.static::$encodedChars.'))/x';
+
+        return $this->encode($this->pass, $regexp);
     }
 
     /**
@@ -146,31 +164,82 @@ class UserInfo implements UriComponent
     }
 
     /**
-     * Returns the component literal value.
+     * Returns the instance content encoded in RFC3986 or RFC3987.
      *
-     * @return null|string
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
+     *
+     * @return string|null
      */
-    public function getContent()
+    public function getContent($enc_type = self::RFC3986)
     {
-        if ('' == $this->user) {
+        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
+            throw new Exception('Unsupported or Unknown Encoding');
+        }
+
+        if (null === $this->user) {
             return null;
         }
 
-        static $regexp;
-        if (null === $regexp) {
-            $regexp = '/(?:[^'
-                .static::$unreservedChars
-                .static::$subdelimChars
-                .']+|%(?!'.static::$encodedChars.'))/x';
+        if ($enc_type == self::RFC3987) {
+            return $this->toRFC3987();
         }
 
+        return $this->toRFC3986();
+    }
+
+    /**
+     * Convert the URI component value into an IRI component value.
+     *
+     * @return null|string
+     */
+    protected function toRFC3986()
+    {
+        $regexp = '/(?:[^'
+            .static::$unreservedChars
+            .static::$subdelimChars
+            .']+|%(?!'.static::$encodedChars.'))/x';
+
         $userInfo = $this->encode($this->user, $regexp);
-        if ('' == $this->pass) {
+        if (null === $this->pass) {
             return $userInfo;
         }
 
         return $userInfo.':'.$this->encode($this->pass, $regexp);
     }
+
+    /**
+     * Convert the URI component value into an IRI component value.
+     *
+     * @return null|string
+     */
+    protected function toRFC3987()
+    {
+        $userInfo = str_replace(
+            ['?', '/', ':', '@', '#'],
+            ['%3F', '%2F', '%3A', '%40', '%23'],
+            $this->user
+        );
+        if (null == $this->pass) {
+            return $userInfo;
+        }
+
+        return $userInfo.':'.str_replace(
+            ['?', '/', '@', '#'],
+            ['%3F', '%2F', '%40', '%23'],
+            $this->pass
+        );
+    }
+
 
     /**
      * Returns the instance string representation; If the

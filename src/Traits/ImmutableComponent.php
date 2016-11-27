@@ -12,7 +12,9 @@
  */
 namespace League\Uri\Components\Traits;
 
+use League\Uri\Components\Component;
 use League\Uri\Components\Exception;
+use League\Uri\Interfaces\Component as UriComponent;
 
 /**
  * Common methods for a URI component Value Object
@@ -24,7 +26,6 @@ use League\Uri\Components\Exception;
  */
 trait ImmutableComponent
 {
-
     /**
      * Invalid Characters
      *
@@ -81,14 +82,12 @@ trait ImmutableComponent
     protected static function encode($str, $regexp)
     {
         $encoder = function (array $matches) {
-            if (preg_match('/^[A-Za-z0-9_\-\.~]$/', rawurldecode($matches[0]))) {
-                return $matches[0];
-            }
-
             return rawurlencode($matches[0]);
         };
 
-        return preg_replace_callback($regexp, $encoder, $str);
+        $res = preg_replace_callback($regexp, $encoder, $str);
+
+        return $res;
     }
 
     /**
@@ -121,6 +120,10 @@ trait ImmutableComponent
     {
         $regexp = ',%'.$pattern.',i';
         $decoder = function (array $matches) use ($regexp) {
+            if (strpos("!$&'()*+,;=%", rawurldecode($matches[0]))) {
+                return $matches[0];
+            }
+
             if (preg_match($regexp, $matches[0])) {
                 return strtoupper($matches[0]);
             }
@@ -181,13 +184,6 @@ trait ImmutableComponent
     }
 
     /**
-     * The component raw data
-     *
-     * @return mixed
-     */
-    abstract public function getContent();
-
-    /**
      * Returns whether or not the component is defined.
      *
      * @return bool
@@ -196,6 +192,25 @@ trait ImmutableComponent
     {
         return null !== $this->getContent();
     }
+
+    /**
+     * Returns the instance content encoded in RFC3986 or RFC3987.
+     *
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
+     *
+     * @return string|null
+     */
+    abstract public function getContent($enc_type = UriComponent::RFC3986);
 
     /**
      * @inheritdoc

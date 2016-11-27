@@ -250,6 +250,7 @@ class QueryTest extends AbstractTestCase
         return [
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
             ['foo&bar&baz&to.go=toofan', ['foo', 'unknown'], 'bar&baz&to.go=toofan'],
+            ['foo&bar&baz&to.go=toofan', [], 'foo&bar&baz&to.go=toofan'],
         ];
     }
 
@@ -420,31 +421,43 @@ class QueryTest extends AbstractTestCase
     }
 
     /**
-     * @param $query
-     * @param $expected
      * @dataProvider buildProvider
      */
-    public function testBuild($query, $expected)
+    public function testBuild($pairs, $expected_rfc3986, $expected_rfc3987, $expected_iri)
     {
-        $this->assertSame($expected, Query::build($query, '&', false));
+        $this->assertSame($expected_rfc3986, Query::build($pairs, '&', Query::RFC3986));
+        $this->assertSame($expected_rfc3987, Query::build($pairs, '&', Query::RFC3987));
+        $this->assertSame($expected_iri, Query::createFromPairs($pairs)->getContent(Query::RFC3987));
     }
 
     public function buildProvider()
     {
         return [
-            'empty string' => [[], ''],
-            'identical keys' => [['a' => ['1', '2']], 'a=1&a=2'],
-            'no value' => [['a' => null, 'b' => null], 'a&b'],
-            'empty value' => [['a' => '', 'b' => ''], 'a=&b='],
-            'php array' => [['a[]' => ['1', '2']], 'a%5B%5D=1&a%5B%5D=2'],
-            'preserve dot' => [['a.b' => '3'], 'a.b=3'],
-            'no key stripping' => [['a' => '', 'b' => null], 'a=&b'],
-            'no value stripping' => [['a' => 'b='], 'a=b='],
-            'key only' => [['a' => null], 'a'],
-            'preserve falsey 1' => [['0' => null], '0'],
-            'preserve falsey 2' => [['0' => ''], '0='],
-            'preserve falsey 3' => [['a' => '0'], 'a=0'],
+            'empty string' => [[], '', '', null],
+            'identical keys' => [['a' => ['1', '2']], 'a=1&a=2', 'a=1&a=2', 'a=1&a=2'],
+            'no value' => [['a' => null, 'b' => null], 'a&b', 'a&b', 'a&b'],
+            'empty value' => [['a' => '', 'b' => ''], 'a=&b=', 'a=&b=', 'a=&b='],
+            'php array' => [['a[]' => ['1', '2']], 'a%5B%5D=1&a%5B%5D=2', 'a[]=1&a[]=2', 'a[]=1&a[]=2'],
+            'preserve dot' => [['a.b' => '3'], 'a.b=3', 'a.b=3', 'a.b=3'],
+            'no key stripping' => [['a' => '', 'b' => null], 'a=&b', 'a=&b', 'a=&b'],
+            'no value stripping' => [['a' => 'b='], 'a=b=', 'a=b=', 'a=b='],
+            'key only' => [['a' => null], 'a', 'a', 'a'],
+            'preserve falsey 1' => [['0' => null], '0', '0', '0'],
+            'preserve falsey 2' => [['0' => ''], '0=', '0=', '0='],
+            'preserve falsey 3' => [['a' => '0'], 'a=0', 'a=0', 'a=0'],
         ];
+    }
+
+    public function testThrowsExceptionOnInvalidEncodingType()
+    {
+        $this->expectException(Exception::class);
+        Query::build([], '&', PHP_QUERY_RFC1738);
+    }
+
+    public function testInvalidEncodingTypeThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Query('query'))->getContent('RFC1738');
     }
 
     public function testFailSafeQueryParsing()
@@ -452,27 +465,23 @@ class QueryTest extends AbstractTestCase
         $arr = ['a' => '1', 'b' => 'le heros'];
         $expected = 'a=1&b=le%20heros';
 
-        $this->assertSame($expected, Query::build($arr, '&', 'yolo'));
+        $this->assertSame($expected, Query::build($arr, '&'));
     }
 
     public function testParserBuilderPreserveQuery()
     {
         $querystring = 'uri=http://example.com?a=b%26c=d';
         $data = Query::parse($querystring);
-        $this->assertSame([
-            'uri' => 'http://example.com?a=b&c=d',
-        ], $data);
+        $this->assertSame(['uri' => 'http://example.com?a=b&c=d'], $data);
         $this->assertSame($querystring, Query::build($data));
     }
 
     /**
      * @dataProvider parsedQueryProvider
      */
-    public function testParsedQuery($query, $name, $expectedData, $expectedValue)
+    public function testParsedQuery($query, $expectedData)
     {
-        $component = new Query($query);
-        $this->assertSame($expectedData, $component->getParsed());
-        $this->assertSame($expectedValue, $component->getParsedValue($name));
+        $this->assertSame($expectedData, Query::extract($query));
     }
 
     public function parsedQueryProvider()
@@ -480,66 +489,58 @@ class QueryTest extends AbstractTestCase
         return [
             [
                 'query' => '&&',
-                'name' => 'toto',
                 'expected' => [],
-                'value' => null,
             ],
             [
                 'query' => 'arr[1=sid&arr[4][2=fred',
-                'name' => 'arr',
                 'expected' => [
                     'arr[1' => 'sid',
                     'arr' => ['4' => 'fred'],
                 ],
-                'value' => ['4' => 'fred'],
             ],
             [
                 'query' => 'arr1]=sid&arr[4]2]=fred',
-                'name' => 'arr',
                 'expected' => [
                     'arr1]' => 'sid',
                     'arr' => ['4' => 'fred'],
                 ],
-                'value' => ['4' => 'fred'],
             ],
             [
                 'query' => 'arr[one=sid&arr[4][two=fred',
-                'name' => 'arr',
                 'expected' => [
                     'arr[one' => 'sid',
                     'arr' => ['4' => 'fred'],
                 ],
-                'value' => ['4' => 'fred'],
             ],
             [
                 'query' => 'first=%41&second=%a&third=%b',
-                'name' => 'first',
                 'expected' => [
                     'first' => 'A',
                     'second' => '%a',
                     'third' => '%b',
                 ],
-                'value' => 'A',
             ],
             [
                 'query' => 'arr.test[1]=sid&arr test[4][two]=fred',
-                'name' => 'arr.test',
                 'expected' => [
                     'arr.test' => ['1' => 'sid'],
                     'arr test' => ['4' => ['two' => 'fred']],
                 ],
-                'value' => ['1' => 'sid'],
             ],
             [
                 'query' => 'foo&bar=&baz=bar&fo.o',
-                'name' => 'bar',
                 'expected' => [
                     'foo' => '',
                     'bar' => '',
                     'baz' => 'bar',
                     'fo.o' => '',
                 ],
-                'value' => '',
+            ],
+            [
+                'query' => 'foo[]=bar&foo[]=baz',
+                'expected' => [
+                    'foo' => ['bar', 'baz'],
+                ],
             ],
         ];
     }

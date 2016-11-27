@@ -57,7 +57,7 @@ class HostTest extends AbstractTestCase
      * @param $uri
      * @dataProvider validHostProvider
      */
-    public function testValidHost($host, $isIp, $isIpv4, $isIpv6, $uri, $ip)
+    public function testValidHost($host, $isIp, $isIpv4, $isIpv6, $uri, $ip, $iri)
     {
         $host = new Host($host);
         $this->assertSame($isIp, $host->isIp());
@@ -65,22 +65,25 @@ class HostTest extends AbstractTestCase
         $this->assertSame($isIpv6, $host->isIpv6());
         $this->assertSame($uri, $host->getUriComponent());
         $this->assertSame($ip, $host->getIp());
+        $this->assertSame($iri, $host->getContent(Host::RFC3987));
     }
 
     public function validHostProvider()
     {
         return [
-            'ipv4' => ['127.0.0.1', true, true, false, '127.0.0.1', '127.0.0.1'],
-            'ipv6' => ['[::1]', true, false, true, '[::1]', '::1'],
-            'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]', 'fe80:1234::%1'],
-            'normalized' => ['Master.EXAMPLE.cOm', false, false, false, 'master.example.com', null],
-            'empty string' => ['', false, false, false, '', null],
-            'null' => [null, false, false, false, '', null],
-            'dot ending' => ['example.com.', false, false, false, 'example.com.', null],
-            'partial numeric' => ['23.42c.two', false, false, false, '23.42c.two', null],
-            'all numeric' => ['98.3.2', false, false, false, '98.3.2', null],
-            'invalid punycode' => ['xn--fsqu00a.xn--g6w131251d', false, false, false, 'xn--fsqu00a.xn--g6w131251d', null],
-            'mix IP format with host label' => ['toto.127.0.0.1', false, false, false, 'toto.127.0.0.1', null],
+            'ipv4' => ['127.0.0.1', true, true, false, '127.0.0.1', '127.0.0.1', '127.0.0.1'],
+            'ipv6' => ['[::1]', true, false, true, '[::1]', '::1', '[::1]'],
+            'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]', 'fe80:1234::%1', '[fe80:1234::%251]'],
+            'normalized' => ['Master.EXAMPLE.cOm', false, false, false, 'master.example.com', null, 'master.example.com'],
+            'empty string' => ['', false, false, false, '', null, ''],
+            'null' => [null, false, false, false, '', null, null],
+            'dot ending' => ['example.com.', false, false, false, 'example.com.', null, 'example.com.'],
+            'partial numeric' => ['23.42c.two', false, false, false, '23.42c.two', null, '23.42c.two'],
+            'all numeric' => ['98.3.2', false, false, false, '98.3.2', null, '98.3.2'],
+            'invalid punycode' => ['xn--fsqu00a.xn--g6w131251d', false, false, false, 'xn--fsqu00a.xn--g6w131251d', null, '例子.xn--g6w131251d'],
+            'mix IP format with host label' => ['toto.127.0.0.1', false, false, false, 'toto.127.0.0.1', null, 'toto.127.0.0.1'],
+            'idn support' => ['مثال.إختبار', false, false, false, 'مثال.إختبار', null, 'مثال.إختبار'],
+            'IRI support' => ['xn--mgbh0fb.xn--kgbechtv', false, false, false, 'xn--mgbh0fb.xn--kgbechtv', null, 'مثال.إختبار'],
         ];
     }
 
@@ -92,6 +95,12 @@ class HostTest extends AbstractTestCase
     {
         $this->expectException(Exception::class);
         new Host($invalid);
+    }
+
+    public function testInvalidEncodingTypeThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Host('host'))->getContent('RFC1738');
     }
 
     public function invalidHostProvider()

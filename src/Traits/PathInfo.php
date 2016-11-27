@@ -13,6 +13,7 @@
 namespace League\Uri\Components\Traits;
 
 use League\Uri\Components\Exception;
+use League\Uri\Interfaces\Component as UriComponent;
 
 /**
  * Value object representing a URI path component.
@@ -78,11 +79,54 @@ trait PathInfo
     }
 
     /**
-     * The component raw data
+     * Returns the instance content encoded in RFC3986 or RFC3987.
      *
-     * @return mixed
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
+     *
+     * @return string|null
      */
-    abstract public function getContent();
+    public function getContent($enc_type = UriComponent::RFC3986)
+    {
+        if ($enc_type == UriComponent::RFC3987) {
+            $pattern = str_split(self::$invalidUriChars);
+            $pattern[] = '#';
+            $pattern[] = '?';
+
+            return str_replace($pattern, array_map('rawurlencode', $pattern), $this->getDecoded());
+        }
+
+        if ($enc_type == UriComponent::RFC3986) {
+            return $this->encodePath($this->getDecoded());
+        }
+
+        throw new Exception('Unsupported or Unknown Encoding');
+    }
+
+    /**
+     * Encode a path string according to RFC3986
+     *
+     * @param string $str can be a string or an array
+     *
+     * @return string The same type as the input parameter
+     */
+    abstract protected function encodePath($str);
+
+    /**
+     * Return the decoded string representation of the component
+     *
+     * @return string
+     */
+    abstract protected function getDecoded();
 
     /**
      * Returns an instance without dot segments
