@@ -36,10 +36,12 @@ class Path extends Component implements PathComponent
     }
 
     /**
-     * @inheritdoc
+     * Return the decoded string representation of the component
+     *
+     * @return string
      */
-    public function getContent()
+    public function getDecoded()
     {
-        return $this->encodePath($this->data);
+        return $this->data;
     }
 }

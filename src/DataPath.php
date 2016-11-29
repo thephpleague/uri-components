@@ -114,6 +114,16 @@ class DataPath extends Component implements PathComponent
     }
 
     /**
+     * Return the decoded string representation of the component
+     *
+     * @return string
+     */
+    public function getDecoded()
+    {
+        return $this->data;
+    }
+
+    /**
      * validate the submitted path
      *
      * @param string $path
@@ -335,16 +345,6 @@ class DataPath extends Component implements PathComponent
         $file->fwrite($data);
 
         return $file;
-    }
-
-    /**
-     * Returns the component literal value.
-     *
-     * @return string
-     */
-    public function getContent()
-    {
-        return $this->data;
     }
 
     /**

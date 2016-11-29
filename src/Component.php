@@ -13,6 +13,7 @@
 namespace League\Uri\Components;
 
 use League\Uri\Components\Traits\ImmutableComponent;
+use League\Uri\Interfaces\Component as UriComponent;
 
 /**
  * An abstract class to ease component manipulation
@@ -70,11 +71,38 @@ abstract class Component
     }
 
     /**
-     * The component raw data
+     * Returns the instance content encoded in RFC3986 or RFC3987.
      *
-     * @return mixed
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param string $enc_type
+     *
+     * @return string|null
      */
-    public function getContent()
+    public function getContent($enc_type = UriComponent::RFC3986)
+    {
+        if (!in_array($enc_type, [UriComponent::RFC3986, UriComponent::RFC3987])) {
+            throw new Exception('Unsupported or Unknown Encoding');
+        }
+
+
+        return $this->data;
+    }
+
+    /**
+     * Return the decoded string representation of the component
+     *
+     * @return null|string
+     */
+    public function getDecoded()
     {
         return $this->data;
     }

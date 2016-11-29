@@ -179,14 +179,6 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
     /**
      * @inheritdoc
      */
-    public function getContent()
-    {
-        return $this->encodePath($this->getDecoded());
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function __toString()
     {
         return (string) $this->getContent();

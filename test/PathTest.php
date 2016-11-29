@@ -35,6 +35,7 @@ class PathTest extends AbstractTestCase
     {
         $path = new Path($raw);
         $this->assertSame($parsed, $path->getUriComponent());
+        $this->assertSame($raw, $path->getContent(Path::RFC3987));
     }
 
     public function validPathEncoding()
@@ -50,6 +51,7 @@ class PathTest extends AbstractTestCase
             ['\\slashy', '%5Cslashy'],
             ['foo^bar', 'foo%5Ebar'],
             ['foo^bar/baz', 'foo%5Ebar/baz'],
+            ['foo%2Fbar', 'foo%2Fbar', 'foo%2Fbar'],
         ];
     }
 
@@ -61,6 +63,12 @@ class PathTest extends AbstractTestCase
     {
         $this->expectException(Exception::class);
         new Path($raw);
+    }
+
+    public function testInvalidEncodingTypeThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Path('query'))->getContent('RFC1738');
     }
 
     public function invalidDataProvider()

@@ -6,11 +6,18 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- League\Uri\Components\Exception as the base exception for the library
+- `League\Uri\Components\Exception` as the base exception for the library
+- `League\Uri\Components\DataPath::getDecoded` returns the non-encoded path
+- `League\Uri\Components\HierarchicalPath::getDecoded` returns the non-encoded path
+- `League\Uri\Components\Path::getDecoded` returns the non-encoded path
+- `League\Uri\Components\Fragment::getDecoded` returns the non-encoded fragment
+- `League\Uri\Components\Port::getDecoded` returns the non-encoded port
+- `League\Uri\Components\Scheme::getDecoded` returns the non-encoded scheme
+- `League\Uri\Components\Query::extract` public static method returns a hash similar to `parse_str` without the mangling from the query string
 
 ### Fixed
 
-- None
+- `getContent` is updated to support RFC3987
 
 ### Deprecated
 
@@ -18,7 +25,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Removed
 
-- None
+- `Query::parsed` use `Query::extract` instead
+- `Query::parsedValue` use `Query::extract` instead
 
 ## 0.2.1
 

@@ -27,24 +27,90 @@ class UserInfoTest extends AbstractTestCase
     /**
      * @dataProvider userInfoProvider
      */
-    public function testConstructor($user, $pass, $expected_user, $expected_pass, $expected_str, $uri_component)
-    {
+    public function testConstructor(
+        $user,
+        $pass,
+        $expected_user,
+        $expected_pass,
+        $expected_str,
+        $uri_component,
+        $iri_str
+    ) {
         $userinfo = new UserInfo($user, $pass);
         $this->assertSame($expected_user, $userinfo->getUser());
         $this->assertSame($expected_pass, $userinfo->getPass());
         $this->assertSame($expected_str, (string) $userinfo);
         $this->assertSame($uri_component, $userinfo->getUriComponent());
+        $this->assertSame($iri_str, $userinfo->getContent(UserInfo::RFC3987));
     }
 
     public function userInfoProvider()
     {
         return [
-            ['login', 'pass', 'login', 'pass', 'login:pass', 'login:pass@'],
-            ['login', null, 'login', '', 'login', 'login@'],
-            [null, null, '', '', '', ''],
-            ['', null, '', '', '', ''],
-            ['', '', '', '', '', ''],
-            [null, 'pass', '', '', '', ''],
+            [
+                'login',
+                'pass',
+                'login',
+                'pass',
+                'login:pass',
+                'login:pass@',
+                'login:pass',
+            ],
+            [
+                'login',
+                null,
+                'login',
+                '',
+                'login',
+                'login@',
+                'login',
+            ],
+            [
+                null,
+                null,
+                '',
+                '',
+                '',
+                '',
+                null,
+            ],
+            [
+                '',
+                null,
+                '',
+                '',
+                '',
+                '',
+                '',
+            ],
+            [
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+            ],
+            [
+                null,
+                'pass',
+                '',
+                '',
+                '',
+                '',
+                null,
+            ],
+            [
+                'foò',
+                'bar',
+                'fo%C3%B2',
+                'bar',
+                'fo%C3%B2:bar',
+                'fo%C3%B2:bar@',
+                'foò:bar',
+            ],
+
         ];
     }
 
@@ -70,11 +136,11 @@ class UserInfoTest extends AbstractTestCase
     {
         return [
             'simple' => ['user:pass', 'user', 'pass', 'user:pass'],
-            'empty password' => ['user:', 'user', '', 'user'],
+            'empty password' => ['user:', 'user', '', 'user:'],
             'no password' => ['user', 'user', '', 'user'],
             'no login but has password' => [':pass', '', '', ''],
             'empty all' => ['', '', '', ''],
-            'encoded chars' => ['foo%40bar:bar%40foo', 'foo@bar', 'bar@foo', 'foo%40bar:bar%40foo'],
+            'encoded chars' => ['foo%40bar:bar%40foo', 'foo%40bar', 'bar%40foo', 'foo%40bar:bar%40foo'],
         ];
     }
 
@@ -107,7 +173,7 @@ class UserInfoTest extends AbstractTestCase
     {
         return [
             'simple' => ['user', 'pass', 'user:pass'],
-            'empty password' => ['user', '', 'user'],
+            'empty password' => ['user', '', 'user:'],
             'no password' => ['user', null, 'user'],
             'no login but has password' => ['', 'pass', ''],
             'empty all' => ['', '', '', ''],
@@ -136,5 +202,11 @@ class UserInfoTest extends AbstractTestCase
     {
         $this->expectException(Exception::class);
         (new UserInfo('user', 'pass'))->withUserInfo(null);
+    }
+
+    public function testInvalidEncodingTypeThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new UserInfo('user', 'pass'))->getContent('RFC1738');
     }
 }
