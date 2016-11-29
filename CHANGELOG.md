@@ -2,6 +2,26 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next
+
+### Added
+
+- None
+
+### Fixed
+
+- `League\Uri\Components\Host::getContent` now support correctly RFC3987
+- `League\Uri\Components\Host::__toString` only returns RFC3986 representation
+
+### Deprecated 
+
+- None
+
+### Remove
+
+- `League\Uri\Components\Host::isIdn`
+
+
 ## 0.3.0 - 2016-11-29
 
 ### Added
