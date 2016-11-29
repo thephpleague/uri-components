@@ -35,13 +35,6 @@ class Host extends HierarchicalComponent implements CollectionComponent
     use HostInfo;
 
     /**
-     * Tell whether the Host is in Unicode form or not
-     *
-     * @var bool
-     */
-    protected $isIdn = false;
-
-    /**
      * Tell whether the Host is an IPv4
      *
      * @var bool
@@ -199,36 +192,14 @@ class Host extends HierarchicalComponent implements CollectionComponent
         }
 
         if ($this->isValidHostname($host)) {
-            $host = strtolower($this->setIsAbsolute($host));
-            $raw_labels = explode('.', $host);
-            $labels = array_map('idn_to_ascii', $raw_labels);
-            $this->isIdn = $raw_labels !== $labels;
 
-            return array_reverse(array_map('idn_to_utf8', $labels));
+            return array_reverse(array_map(
+                'idn_to_utf8',
+                explode('.', strtolower($this->setIsAbsolute($host)))
+            ));
         }
 
         throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-    }
-
-    /**
-     * Format an label collection for string representation of the Host
-     *
-     * @param array $labels  host labels
-     * @param bool  $convert should we transcode the labels into their ascii equivalent
-     *
-     * @return array
-     */
-    protected function convertToAscii(array $labels, $convert)
-    {
-        if (!$convert) {
-            return $labels;
-        }
-
-        if (in_array($labels, [[], ['']], true)) {
-            return $labels;
-        }
-
-        return array_map('idn_to_ascii', $labels);
     }
 
     /**
@@ -241,16 +212,6 @@ class Host extends HierarchicalComponent implements CollectionComponent
     protected function newCollectionInstance(array $data)
     {
         return $this->createFromLabels($data, $this->isAbsolute);
-    }
-
-    /**
-     * Returns whether or not the host is an IDN
-     *
-     * @return bool
-     */
-    public function isIdn()
-    {
-        return $this->isIdn;
     }
 
     /**
@@ -302,7 +263,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
      */
     public function getLabels()
     {
-        return $this->convertToAscii($this->data, !$this->isIdn);
+        return $this->data;
     }
 
     /**
@@ -319,7 +280,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
     public function getLabel($offset, $default = null)
     {
         if (isset($this->data[$offset])) {
-            return $this->isIdn ? rawurldecode($this->data[$offset]) : idn_to_ascii($this->data[$offset]);
+            return $this->data[$offset];
         }
 
         return $default;
@@ -344,6 +305,10 @@ class Host extends HierarchicalComponent implements CollectionComponent
      */
     public function getContent($enc_type = self::RFC3986)
     {
+        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
+            throw new Exception('Unsupported or Unknown Encoding');
+        }
+
         if ([] === $this->data) {
             return null;
         }
@@ -356,11 +321,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
             return $this->format($this->data, $this->isAbsolute);
         }
 
-        if ($enc_type == self::RFC3986) {
-            return $this->format($this->getLabels(), $this->isAbsolute);
-        }
-
-        throw new Exception('Unsupported or Unknown Encoding');
+        return $this->format(array_map('idn_to_ascii', $this->data), $this->isAbsolute);
     }
 
     /**
@@ -406,47 +367,6 @@ class Host extends HierarchicalComponent implements CollectionComponent
         $host->hostnameInfo = $properties['hostnameInfo'];
 
         return $host;
-    }
-
-    /**
-     * Returns a host in his punycode encoded form
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance with the host transcoded using to ascii the RFC 3492 rules
-     *
-     * @see http://tools.ietf.org/html/rfc3492
-     *
-     * @return static
-     */
-    public function toAscii()
-    {
-        if ($this->isIp() || !$this->isIdn) {
-            return $this;
-        }
-
-        return $this->withContent($this->format(
-            $this->convertToAscii($this->data, $this->isIdn),
-            $this->isAbsolute
-        ));
-    }
-
-    /**
-     * Returns a host in his IDN form
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance with the host in its IDN form using RFC 3492 rules
-     *
-     * @see http://tools.ietf.org/html/rfc3492
-     *
-     * @return static
-     */
-    public function toUnicode()
-    {
-        if ($this->isIp() || $this->isIdn) {
-            return $this;
-        }
-
-        return $this->withContent($this->format($this->data, $this->isAbsolute));
     }
 
     /**

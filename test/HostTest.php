@@ -71,19 +71,123 @@ class HostTest extends AbstractTestCase
     public function validHostProvider()
     {
         return [
-            'ipv4' => ['127.0.0.1', true, true, false, '127.0.0.1', '127.0.0.1', '127.0.0.1'],
-            'ipv6' => ['[::1]', true, false, true, '[::1]', '::1', '[::1]'],
-            'scoped ipv6' => ['[fe80:1234::%251]', true, false, true, '[fe80:1234::%251]', 'fe80:1234::%1', '[fe80:1234::%251]'],
-            'normalized' => ['Master.EXAMPLE.cOm', false, false, false, 'master.example.com', null, 'master.example.com'],
-            'empty string' => ['', false, false, false, '', null, ''],
-            'null' => [null, false, false, false, '', null, null],
-            'dot ending' => ['example.com.', false, false, false, 'example.com.', null, 'example.com.'],
-            'partial numeric' => ['23.42c.two', false, false, false, '23.42c.two', null, '23.42c.two'],
-            'all numeric' => ['98.3.2', false, false, false, '98.3.2', null, '98.3.2'],
-            'invalid punycode' => ['xn--fsqu00a.xn--g6w131251d', false, false, false, 'xn--fsqu00a.xn--g6w131251d', null, '例子.xn--g6w131251d'],
-            'mix IP format with host label' => ['toto.127.0.0.1', false, false, false, 'toto.127.0.0.1', null, 'toto.127.0.0.1'],
-            'idn support' => ['مثال.إختبار', false, false, false, 'مثال.إختبار', null, 'مثال.إختبار'],
-            'IRI support' => ['xn--mgbh0fb.xn--kgbechtv', false, false, false, 'xn--mgbh0fb.xn--kgbechtv', null, 'مثال.إختبار'],
+            'ipv4' => [
+                '127.0.0.1',
+                true,
+                true,
+                false,
+                '127.0.0.1',
+                '127.0.0.1',
+                '127.0.0.1',
+            ],
+            'ipv6' => [
+                '[::1]',
+                true,
+                false,
+                true,
+                '[::1]',
+                '::1',
+                '[::1]',
+            ],
+            'scoped ipv6' => [
+                '[fe80:1234::%251]',
+                true,
+                false,
+                true,
+                '[fe80:1234::%251]',
+                'fe80:1234::%1',
+                '[fe80:1234::%251]',
+            ],
+            'normalized' => [
+                'Master.EXAMPLE.cOm',
+                false,
+                false,
+                false,
+                'master.example.com',
+                null,
+                'master.example.com',
+            ],
+            'empty string' => [
+                '',
+                false,
+                false,
+                false,
+                '',
+                null,
+                '',
+            ],
+            'null' => [
+                null,
+                false,
+                false,
+                false,
+                '',
+                null,
+                null,
+            ],
+            'dot ending' => [
+                'example.com.',
+                false,
+                false,
+                false,
+                'example.com.',
+                null,
+                'example.com.',
+            ],
+            'partial numeric' => [
+                '23.42c.two',
+                false,
+                false,
+                false,
+                '23.42c.two',
+                null,
+                '23.42c.two',
+            ],
+            'all numeric' => [
+                '98.3.2',
+                false,
+                false,
+                false,
+                '98.3.2',
+                null,
+                '98.3.2',
+            ],
+            'invalid punycode' => [
+                'xn--fsqu00a.xn--g6w131251d',
+                false,
+                false,
+                false,
+                'xn--fsqu00a.xn--g6w131251d',
+                null,
+                '例子.xn--g6w131251d',
+            ],
+            'mix IP format with host label' => [
+                'toto.127.0.0.1',
+                false,
+                false,
+                false,
+                'toto.127.0.0.1',
+                null,
+                'toto.127.0.0.1',
+            ],
+            'idn support' => [
+                'مثال.إختبار',
+                false,
+                false,
+                false,
+                'xn--mgbh0fb.xn--kgbechtv',
+                null,
+                'مثال.إختبار',
+            ],
+            'IRI support' => [
+                'xn--mgbh0fb.xn--kgbechtv',
+                false,
+                false,
+                false,
+                'xn--mgbh0fb.xn--kgbechtv',
+                null,
+                'مثال.إختبار',
+            ],
         ];
     }
 
@@ -155,25 +259,6 @@ class HostTest extends AbstractTestCase
     }
 
     /**
-     * @param $host
-     * @param $expected
-     * @dataProvider isIdnProvider
-     */
-    public function testIsIdn($host, $expected)
-    {
-        $this->assertSame($expected, (new Host($host))->isIdn());
-    }
-
-    public function isIdnProvider()
-    {
-        return [
-            ['127.0.0.1', false],
-            ['example.com', false],
-            ['مثال.آزمایشی', true],
-        ];
-    }
-
-    /**
      * Test Punycode support
      *
      * @param string $unicode Unicode Hostname
@@ -183,10 +268,8 @@ class HostTest extends AbstractTestCase
     public function testValidUnicodeHost($unicode, $ascii)
     {
         $host = new Host($unicode);
-        $this->assertSame($ascii, (string) $host->toAscii());
-        $this->assertSame($unicode, (string) $host->toUnicode());
-        $this->assertSame($ascii, (string) $host->toUnicode()->toAscii());
-        $this->assertSame($unicode, (string) $host->toAscii()->toUnicode());
+        $this->assertSame($ascii, $host->getContent(Host::RFC3986));
+        $this->assertSame($unicode, $host->getContent(Host::RFC3987));
     }
 
     public function hostnamesProvider()
@@ -524,7 +607,7 @@ class HostTest extends AbstractTestCase
             ['localhost', '', '', '', false],
             ['127.0.0.1', '', '', '', false],
             ['[::1]', '', '', '', false],
-            ['مثال.إختبار', 'إختبار', 'مثال.إختبار', '', false],
+            ['مثال.إختبار', 'xn--kgbechtv', 'xn--mgbh0fb.xn--kgbechtv', '', false],
             ['xn--p1ai.ru.', 'ru', 'xn--p1ai.ru', '', true],
         ];
     }
