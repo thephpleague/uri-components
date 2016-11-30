@@ -77,10 +77,7 @@ class UserInfo implements UriComponent
             return $this->decodeComponent($str);
         }
 
-        throw new Exception(sprintf(
-            'The encoded user string `%s` contains invalid characters `/:@?#`',
-            $str
-        ));
+        throw new Exception(sprintf('The encoded user string `%s` contains invalid characters `/:@?#`', $str));
     }
 
     /**
@@ -125,17 +122,12 @@ class UserInfo implements UriComponent
         }
 
         if ($enc_type == self::RFC3987) {
-            return str_replace(
-                ['?', '/', ':', '@', '#'],
-                ['%3F', '%2F', '%3A', '%40', '%23'],
-                $this->user
-            );
+            $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', ':', '@']);
+
+            return str_replace($pattern, array_map('rawurlencode', $pattern), $this->user);
         }
 
-        $regexp = '/(?:[^'
-            .static::$unreservedChars
-            .static::$subdelimChars
-            .']+|%(?!'.static::$encodedChars.'))/x';
+        $regexp = '/(?:[^'.static::$unreservedChars.static::$subdelimChars.']+|%(?!'.static::$encodedChars.'))/x';
 
         return $this->encode($this->user, $regexp);
     }
@@ -156,17 +148,12 @@ class UserInfo implements UriComponent
         }
 
         if ($enc_type == self::RFC3987) {
-            return str_replace(
-                ['?', '/', '@', '#'],
-                ['%3F', '%2F', '%40', '%23'],
-                $this->pass
-            );
+            $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', '@']);
+
+            return str_replace($pattern, array_map('rawurlencode', $pattern),  $this->pass);
         }
 
-        $regexp = '/(?:[^'
-            .static::$unreservedChars
-            .static::$subdelimChars
-            .']+|%(?!'.static::$encodedChars.'))/x';
+        $regexp = '/(?:[^'.static::$unreservedChars.static::$subdelimChars.']+|%(?!'.static::$encodedChars.'))/x';
 
         return $this->encode($this->pass, $regexp);
     }

@@ -46,8 +46,8 @@ Any Component object exposes the following methods and constant:
 ```php
 <?php
 
-const Component::RFC3986;
-const Component::RFC3987;
+const Component::RFC3986 = 'RFC3986';
+const Component::RFC3987 = 'RFC3987';
 public Component::isDefined(void): bool
 public Component::getContent(string $enc_type = Component::RFC3986): mixed
 public Component::__toString(): string
@@ -120,13 +120,13 @@ public static Query::extract(string $query, string $separator = '&'): array
 public static Query::build(array $pairs, string $separator = '&', string $enc_type = Query::RFC3986): string
 public static Query::createFromPairs(array $pairs): self
 public Query::getPairs(void): array
-public Query::getValue(string $offset, $default = null): mixed
-public Query::hasKey($offset): bool
-public Query::keys($mixed $value = null): string[]
+public Query::getValue(string $offset, mixed $default = null): mixed
+public Query::hasKey(string $offset): bool
+public Query::keys(mixed $value = null): string[]
 public Query::merge(Query|string $content): self
 public Query::ksort(callable|int $sort = SORT_REGULAR): self
 public Query::filter(callable $callable, int $flag = 0): self
-public Query::without(array $offsets): self
+public Query::without(string[] $offsets): self
 ```
 
 **NEW:**
@@ -140,8 +140,8 @@ The `Host` object also implements the following SPL interfaces: `Countable`, `It
 ```php
 <?php
 
-const Host::IS_RELATIVE;
-const Host::IS_ABSOLUTE;
+const Host::IS_RELATIVE = 1;
+const Host::IS_ABSOLUTE = 2;
 public static Host::createFromIp(string $ip): Host
 public static Host::createFromLabels(array $labels, $type = self::IS_RELATIVE): self
 public Host::isAbsolute(void): bool
@@ -151,26 +151,26 @@ public Host::isIpv6(void): bool
 public Host::hasZoneIdentifier(void): bool
 public Host::getIp(void): string|null
 public Host::getLabels(void): string[]
-public Host::getLabel($offset, $default = null): mixed
+public Host::getLabel(int $offset, mixed $default = null): mixed
 public Host::hasKey(int $offset): bool
-public Host::keys($mixed $value = null): int[]
+public Host::keys(mixed $value = null): int[]
 public Host::getPublicSuffix(): string
 public Host::getRegisterableDomain(): string
 public Host::getSubdomain(): string
 public Host::isPublicSuffixValid(): bool
 public Host::withoutZoneIdentifier(): self
-public Host::prepend(string $component): self
-public Host::append(string $component): self
-public Host::replace(int $offset, string $content = null): self
+public Host::prepend(string $content): self
+public Host::append(string $content): self
+public Host::replace(int $offset, string $content): self
 public Host::filter(callable $callable, int $flag = 0): self
-public Host::without(array $offsets): self
+public Host::without(int[] $offsets): self
 ```
 
 **BC Break:**
 
-- The constructor no longer accept "naked" IPv6 string
+- The constructor no longer accept *naked* IPv6 string
 - The host labels are always normalized to their RFC3987 representation
-- `Host::isIp` is removed
+- `Host::isIdn` is removed
 
 ### Path objects
 
@@ -181,13 +181,13 @@ URI path component objects are modelled depending on the URI as such each URI sc
 
 public Path::isEmpty(void): bool
 public Path::isAbsolute(void): bool
+public Path::getDecoded(void): string
 public Path::withLeadingSlash(void): self
 public Path::withoutLeadingSlash(void): self
 public Path::withoutDotSegments(void): self
 public Path::withTrailingSlash(void): self
 public Path::withoutTrailingSlash(void): self
 public Path::withoutEmptySegments(void): self
-public Path::getDecoded(void): self
 ```
 
 **NEW:**
@@ -206,21 +206,21 @@ This specific path object ease manipulating the  HTTP scheme specific URI path c
 ```php
 <?php
 
-const HierarchicalPath::IS_RELATIVE;
-const HierarchicalPath::IS_ABSOLUTE;
+const HierarchicalPath::IS_RELATIVE = 1;
+const HierarchicalPath::IS_ABSOLUTE = 2;
 public static HierarchicalPath::createFromSegments(array $segments, $type = self::IS_RELATIVE): self
 public HierarchicalPath::getSegments(void): string[]
-public HierarchicalPath::getSegment($offset, $default = null): mixed
+public HierarchicalPath::getSegment(int $offset, mixed $default = null): mixed
 public HierarchicalPath::getBasename(): string
 public HierarchicalPath::getDirname(): string
 public HierarchicalPath::getExtension(): string
 public HierarchicalPath::hasKey(int $offset): bool
-public HierarchicalPath::keys($mixed $value = null): int[]
-public HierarchicalPath::prepend(string $component): self
-public HierarchicalPath::append(string $component): self
-public HierarchicalPath::replace(int $offset, string $content = null): self
+public HierarchicalPath::keys(mixed $value = null): int[]
+public HierarchicalPath::prepend(string $content): self
+public HierarchicalPath::append(string $content): self
+public HierarchicalPath::replace(int $offset, string $content): self
 public HierarchicalPath::filter(callable $callable, int $flag = 0): self
-public HierarchicalPath::without(array $offsets): self
+public HierarchicalPath::without(int[] $offsets): self
 public HierarchicalPath::withExtension(string $extension): self
 ```
 
