@@ -85,7 +85,7 @@ abstract class Component
      *
      * @param string $enc_type
      *
-     * @return string|null
+     * @return mixed
      */
     public function getContent($enc_type = UriComponent::RFC3986)
     {
@@ -93,17 +93,6 @@ abstract class Component
             throw new Exception('Unsupported or Unknown Encoding');
         }
 
-
-        return $this->data;
-    }
-
-    /**
-     * Return the decoded string representation of the component
-     *
-     * @return null|string
-     */
-    public function getDecoded()
-    {
         return $this->data;
     }
 

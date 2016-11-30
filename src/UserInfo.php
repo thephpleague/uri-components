@@ -114,10 +114,22 @@ class UserInfo implements UriComponent
      *
      * @return string
      */
-    public function getUser()
+    public function getUser($enc_type = self::RFC3986)
     {
+        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
+            throw new Exception('Unsupported or Unknown Encoding');
+        }
+
         if ('' == $this->user) {
             return '';
+        }
+
+        if ($enc_type == self::RFC3987) {
+            return str_replace(
+                ['?', '/', ':', '@', '#'],
+                ['%3F', '%2F', '%3A', '%40', '%23'],
+                $this->user
+            );
         }
 
         $regexp = '/(?:[^'
@@ -133,10 +145,22 @@ class UserInfo implements UriComponent
      *
      * @return string
      */
-    public function getPass()
+    public function getPass($enc_type = self::RFC3986)
     {
+        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
+            throw new Exception('Unsupported or Unknown Encoding');
+        }
+
         if ('' == $this->pass) {
             return '';
+        }
+
+        if ($enc_type == self::RFC3987) {
+            return str_replace(
+                ['?', '/', '@', '#'],
+                ['%3F', '%2F', '%40', '%23'],
+                $this->pass
+            );
         }
 
         $regexp = '/(?:[^'
@@ -190,56 +214,13 @@ class UserInfo implements UriComponent
             return null;
         }
 
-        if ($enc_type == self::RFC3987) {
-            return $this->toRFC3987();
-        }
-
-        return $this->toRFC3986();
-    }
-
-    /**
-     * Convert the URI component value into an IRI component value.
-     *
-     * @return null|string
-     */
-    protected function toRFC3986()
-    {
-        $regexp = '/(?:[^'
-            .static::$unreservedChars
-            .static::$subdelimChars
-            .']+|%(?!'.static::$encodedChars.'))/x';
-
-        $userInfo = $this->encode($this->user, $regexp);
+        $userInfo = $this->getUser($enc_type);
         if (null === $this->pass) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$this->encode($this->pass, $regexp);
+        return $userInfo.':'.$this->getPass($enc_type);
     }
-
-    /**
-     * Convert the URI component value into an IRI component value.
-     *
-     * @return null|string
-     */
-    protected function toRFC3987()
-    {
-        $userInfo = str_replace(
-            ['?', '/', ':', '@', '#'],
-            ['%3F', '%2F', '%3A', '%40', '%23'],
-            $this->user
-        );
-        if (null == $this->pass) {
-            return $userInfo;
-        }
-
-        return $userInfo.':'.str_replace(
-            ['?', '/', '@', '#'],
-            ['%3F', '%2F', '%40', '%23'],
-            $this->pass
-        );
-    }
-
 
     /**
      * Returns the instance string representation; If the

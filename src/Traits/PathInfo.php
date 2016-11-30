@@ -126,7 +126,7 @@ trait PathInfo
      *
      * @return string
      */
-    abstract protected function getDecoded();
+    abstract public function getDecoded();
 
     /**
      * Returns an instance without dot segments
@@ -241,6 +241,18 @@ trait PathInfo
         $path = $this->__toString();
 
         return '' !== $path && '/' === mb_substr($path, 0, 1, 'UTF-8');
+    }
+
+    /**
+     * Returns whether or not the path is empty or not
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        $path = $this->__toString();
+
+        return '' === $path;
     }
 
     /**

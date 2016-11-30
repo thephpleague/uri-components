@@ -36,8 +36,6 @@ class Query implements CollectionComponent
     use ImmutableCollection;
     use QueryParser;
 
-    const DELIMITER = '?';
-
     /**
      * Key/pair separator character
      *
@@ -172,7 +170,7 @@ class Query implements CollectionComponent
     {
         $query = $this->__toString();
         if ($this->preserveDelimiter) {
-            return self::DELIMITER.$query;
+            return '?'.$query;
         }
 
         return $query;
