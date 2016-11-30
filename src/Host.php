@@ -192,7 +192,6 @@ class Host extends HierarchicalComponent implements CollectionComponent
         }
 
         if ($this->isValidHostname($host)) {
-
             return array_reverse(array_map(
                 'idn_to_utf8',
                 explode('.', strtolower($this->setIsAbsolute($host)))

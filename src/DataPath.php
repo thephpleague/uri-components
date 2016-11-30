@@ -106,10 +106,14 @@ class DataPath extends Component implements PathComponent
     /**
      * new instance
      *
-     * @param string $path the component value
+     * @param string|null $path the component value
      */
-    public function __construct($path = '')
+    public function __construct($path = null)
     {
+        if (null === $path) {
+            $path = '';
+        }
+
         $this->data = $this->validate($this->validateString($path));
     }
 

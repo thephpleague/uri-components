@@ -36,6 +36,7 @@ class PathTest extends AbstractTestCase
         $path = new Path($raw);
         $this->assertSame($parsed, $path->getUriComponent());
         $this->assertSame($raw, $path->getContent(Path::RFC3987));
+        $this->assertTrue($path->isDefined());
     }
 
     public function validPathEncoding()
@@ -53,6 +54,14 @@ class PathTest extends AbstractTestCase
             ['foo^bar/baz', 'foo%5Ebar/baz'],
             ['foo%2Fbar', 'foo%2Fbar', 'foo%2Fbar'],
         ];
+    }
+
+    public function testNullConstructor()
+    {
+        $path = new Path();
+        $this->assertEquals(new Path(''), $path);
+        $this->assertTrue($path->isDefined());
+        $this->assertTrue($path->isEmpty());
     }
 
     /**

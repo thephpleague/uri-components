@@ -186,6 +186,18 @@ class UserInfoTest extends AbstractTestCase
         (new UserInfo())->withContent([]);
     }
 
+    public function testGetUserThrowsInvalidArgumentException()
+    {
+        $this->expectException(Exception::class);
+        (new UserInfo())->getUser('toto');
+    }
+
+    public function testGetPassThrowsInvalidArgumentException()
+    {
+        $this->expectException(Exception::class);
+        (new UserInfo())->getPass('toto');
+    }
+
     public function testConstructorThrowsInvalidArgumentException1()
     {
         $this->expectException(Exception::class);

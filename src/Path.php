@@ -28,6 +28,20 @@ class Path extends Component implements PathComponent
     use PathInfo;
 
     /**
+     * new instance
+     *
+     * @param string|null $path the component value
+     */
+    public function __construct($path = null)
+    {
+        if (null === $path) {
+            $path = '';
+        }
+
+        $this->data = $this->validate($this->validateString($path));
+    }
+
+    /**
      * @inheritdoc
      */
     protected function validate($data)

@@ -12,15 +12,18 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - `League\Uri\Components\Host::getContent` now support correctly RFC3987
 - `League\Uri\Components\Host::__toString` only returns RFC3986 representation
+- `League\Uri\Components\UserInfo::getUser` to use the `$enc_type` parameter
+- `League\Uri\Components\UserInfo::getPass` to use the `$enc_type` parameter
 
-### Deprecated 
+### Deprecated
 
 - None
 
 ### Remove
 
 - `League\Uri\Components\Host::isIdn`
-
+- `League\Uri\Components\Port::getDecoded`
+- `League\Uri\Components\Scheme::getDecoded`
 
 ## 0.3.0 - 2016-11-29
 

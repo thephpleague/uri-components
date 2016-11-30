@@ -74,6 +74,16 @@ class Fragment extends Component implements UriComponent
     }
 
     /**
+     * Return the decoded string representation of the component
+     *
+     * @return null|string
+     */
+    public function getDecoded()
+    {
+        return $this->data;
+    }
+
+    /**
      * Returns the instance string representation
      * with its optional URI delimiters
      *
