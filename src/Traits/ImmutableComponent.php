@@ -174,10 +174,7 @@ trait ImmutableComponent
         }
 
         if (strlen($str) !== strcspn($str, self::$invalidUriChars)) {
-            throw new Exception(sprintf(
-                'the submitted string `%s` contains invalid characters',
-                $str
-            ));
+            throw new Exception(sprintf('The submitted string `%s` contains invalid characters', $str));
         }
 
         return $str;

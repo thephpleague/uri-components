@@ -40,10 +40,7 @@ class Port extends Component implements UriComponent
         }
 
         if (!is_int($data) || $data < 1 || $data > 65535) {
-            throw new Exception(sprintf(
-                'Expected port to be a int or null; received %s',
-                gettype($data)
-            ));
+            throw new Exception(sprintf('Expected port to be a int or null; received %s', gettype($data)));
         }
 
         return $data;

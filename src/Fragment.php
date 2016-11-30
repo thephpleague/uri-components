@@ -64,11 +64,7 @@ class Fragment extends Component implements UriComponent
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->data);
         }
 
-        $regexp = '/(?:[^'
-            .self::$unreservedChars
-            .self::$subdelimChars
-            .'\:\/@\?]+|%(?!'
-            .self::$encodedChars.'))/ux';
+        $regexp = '/(?:[^'.self::$unreservedChars.self::$subdelimChars.'\:\/@\?]+|%(?!'.self::$encodedChars.'))/ux';
 
         return $this->encode($this->data, $regexp);
     }
