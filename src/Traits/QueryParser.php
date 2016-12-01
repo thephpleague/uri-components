@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components\Traits;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
 
 /**
@@ -100,8 +99,9 @@ trait QueryParser
      *
      * @return string
      */
-    public static function build(array $pairs, $separator = '&', $enc_type = Query::RFC3986)
+    public static function build(array $pairs, $separator = '&', $enc_type = Query::RFC3986_ENCODING)
     {
+        self::assertValidEncoding($enc_type);
         $encoder = self::getEncoder($separator, $enc_type);
         $normalized_pairs = array_map(function ($value) {
             return !is_array($value) ? [$value] : $value;
@@ -150,7 +150,7 @@ trait QueryParser
      */
     protected static function getEncoder($separator, $enc_type)
     {
-        if (Query::RFC3987 == $enc_type) {
+        if (Query::RFC3987_ENCODING == $enc_type) {
             return function ($str) use ($separator) {
                 $pattern = str_split(self::$invalidUriChars);
                 $pattern[] = '#';
@@ -160,7 +160,7 @@ trait QueryParser
             };
         }
 
-        if (Query::RFC3986 == $enc_type) {
+        if (Query::RFC3986_ENCODING == $enc_type) {
             $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
             $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
 
@@ -170,7 +170,7 @@ trait QueryParser
             };
         }
 
-        throw new Exception('Unknown encoding type');
+        return 'sprintf';
     }
 
     /**

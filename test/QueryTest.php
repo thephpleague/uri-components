@@ -423,28 +423,29 @@ class QueryTest extends AbstractTestCase
     /**
      * @dataProvider buildProvider
      */
-    public function testBuild($pairs, $expected_rfc3986, $expected_rfc3987, $expected_iri)
+    public function testBuild($pairs, $expected_rfc3986, $expected_rfc3987, $expected_iri, $expected_no_encoding)
     {
-        $this->assertSame($expected_rfc3986, Query::build($pairs, '&', Query::RFC3986));
-        $this->assertSame($expected_rfc3987, Query::build($pairs, '&', Query::RFC3987));
-        $this->assertSame($expected_iri, Query::createFromPairs($pairs)->getContent(Query::RFC3987));
+        $this->assertSame($expected_rfc3986, Query::build($pairs, '&', Query::RFC3986_ENCODING));
+        $this->assertSame($expected_rfc3987, Query::build($pairs, '&', Query::RFC3987_ENCODING));
+        $this->assertSame($expected_no_encoding, Query::build($pairs, '&', Query::NO_ENCODING));
+        $this->assertSame($expected_iri, Query::createFromPairs($pairs)->getContent(Query::RFC3987_ENCODING));
     }
 
     public function buildProvider()
     {
         return [
-            'empty string' => [[], '', '', null],
-            'identical keys' => [['a' => ['1', '2']], 'a=1&a=2', 'a=1&a=2', 'a=1&a=2'],
-            'no value' => [['a' => null, 'b' => null], 'a&b', 'a&b', 'a&b'],
-            'empty value' => [['a' => '', 'b' => ''], 'a=&b=', 'a=&b=', 'a=&b='],
-            'php array' => [['a[]' => ['1', '2']], 'a%5B%5D=1&a%5B%5D=2', 'a[]=1&a[]=2', 'a[]=1&a[]=2'],
-            'preserve dot' => [['a.b' => '3'], 'a.b=3', 'a.b=3', 'a.b=3'],
-            'no key stripping' => [['a' => '', 'b' => null], 'a=&b', 'a=&b', 'a=&b'],
-            'no value stripping' => [['a' => 'b='], 'a=b=', 'a=b=', 'a=b='],
-            'key only' => [['a' => null], 'a', 'a', 'a'],
-            'preserve falsey 1' => [['0' => null], '0', '0', '0'],
-            'preserve falsey 2' => [['0' => ''], '0=', '0=', '0='],
-            'preserve falsey 3' => [['a' => '0'], 'a=0', 'a=0', 'a=0'],
+            'empty string' => [[], '', '', null, ''],
+            'identical keys' => [['a' => ['1', '2']], 'a=1&a=2', 'a=1&a=2', 'a=1&a=2', 'a=1&a=2'],
+            'no value' => [['a' => null, 'b' => null], 'a&b', 'a&b', 'a&b', 'a&b'],
+            'empty value' => [['a' => '', 'b' => ''], 'a=&b=', 'a=&b=', 'a=&b=', 'a=&b='],
+            'php array' => [['a[]' => ['1', '2']], 'a%5B%5D=1&a%5B%5D=2', 'a[]=1&a[]=2', 'a[]=1&a[]=2', 'a[]=1&a[]=2'],
+            'preserve dot' => [['a.b' => '3'], 'a.b=3', 'a.b=3', 'a.b=3', 'a.b=3'],
+            'no key stripping' => [['a' => '', 'b' => null], 'a=&b', 'a=&b', 'a=&b', 'a=&b'],
+            'no value stripping' => [['a' => 'b='], 'a=b=', 'a=b=', 'a=b=', 'a=b='],
+            'key only' => [['a' => null], 'a', 'a', 'a', 'a'],
+            'preserve falsey 1' => [['0' => null], '0', '0', '0', '0'],
+            'preserve falsey 2' => [['0' => ''], '0=', '0=', '0=', '0='],
+            'preserve falsey 3' => [['a' => '0'], 'a=0', 'a=0', 'a=0', 'a=0'],
         ];
     }
 

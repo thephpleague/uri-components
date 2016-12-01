@@ -65,7 +65,7 @@ class HostTest extends AbstractTestCase
         $this->assertSame($isIpv6, $host->isIpv6());
         $this->assertSame($uri, $host->getUriComponent());
         $this->assertSame($ip, $host->getIp());
-        $this->assertSame($iri, $host->getContent(Host::RFC3987));
+        $this->assertSame($iri, $host->getContent(Host::RFC3987_ENCODING));
     }
 
     public function validHostProvider()
@@ -268,8 +268,8 @@ class HostTest extends AbstractTestCase
     public function testValidUnicodeHost($unicode, $ascii)
     {
         $host = new Host($unicode);
-        $this->assertSame($ascii, $host->getContent(Host::RFC3986));
-        $this->assertSame($unicode, $host->getContent(Host::RFC3987));
+        $this->assertSame($ascii, $host->getContent(Host::RFC3986_ENCODING));
+        $this->assertSame($unicode, $host->getContent(Host::RFC3987_ENCODING));
     }
 
     public function hostnamesProvider()

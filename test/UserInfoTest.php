@@ -41,7 +41,7 @@ class UserInfoTest extends AbstractTestCase
         $this->assertSame($expected_pass, $userinfo->getPass());
         $this->assertSame($expected_str, (string) $userinfo);
         $this->assertSame($uri_component, $userinfo->getUriComponent());
-        $this->assertSame($iri_str, $userinfo->getContent(UserInfo::RFC3987));
+        $this->assertSame($iri_str, $userinfo->getContent(UserInfo::RFC3987_ENCODING));
     }
 
     public function userInfoProvider()
@@ -60,7 +60,7 @@ class UserInfoTest extends AbstractTestCase
                 'login',
                 null,
                 'login',
-                '',
+                null,
                 'login',
                 'login@',
                 'login',
@@ -68,8 +68,8 @@ class UserInfoTest extends AbstractTestCase
             [
                 null,
                 null,
-                '',
-                '',
+                null,
+                null,
                 '',
                 '',
                 null,
@@ -78,7 +78,7 @@ class UserInfoTest extends AbstractTestCase
                 '',
                 null,
                 '',
-                '',
+                null,
                 '',
                 '',
                 '',
@@ -87,7 +87,7 @@ class UserInfoTest extends AbstractTestCase
                 '',
                 '',
                 '',
-                '',
+                null,
                 '',
                 '',
                 '',
@@ -95,8 +95,8 @@ class UserInfoTest extends AbstractTestCase
             [
                 null,
                 'pass',
-                '',
-                '',
+                null,
+                null,
                 '',
                 '',
                 null,
@@ -137,9 +137,10 @@ class UserInfoTest extends AbstractTestCase
         return [
             'simple' => ['user:pass', 'user', 'pass', 'user:pass'],
             'empty password' => ['user:', 'user', '', 'user:'],
-            'no password' => ['user', 'user', '', 'user'],
-            'no login but has password' => [':pass', '', '', ''],
-            'empty all' => ['', '', '', ''],
+            'no password' => ['user', 'user', null, 'user'],
+            'no login but has password' => [':pass', '', null, ''],
+            'empty all' => ['', '', null, ''],
+            'null content' => [null, null, null, ''],
             'encoded chars' => ['foo%40bar:bar%40foo', 'foo%40bar', 'bar%40foo', 'foo%40bar:bar%40foo'],
         ];
     }
@@ -176,7 +177,7 @@ class UserInfoTest extends AbstractTestCase
             'empty password' => ['user', '', 'user:'],
             'no password' => ['user', null, 'user'],
             'no login but has password' => ['', 'pass', ''],
-            'empty all' => ['', '', '', ''],
+            'empty all' => ['', '', ''],
         ];
     }
 

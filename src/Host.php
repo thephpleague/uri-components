@@ -298,15 +298,13 @@ class Host extends HierarchicalComponent implements CollectionComponent
      *
      * If the instance is not defined null is returned
      *
-     * @param string $enc_type
+     * @param int $enc_type
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986)
+    public function getContent($enc_type = self::RFC3986_ENCODING)
     {
-        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
-            throw new Exception('Unsupported or Unknown Encoding');
-        }
+        $this->assertValidEncoding($enc_type);
 
         if ([] === $this->data) {
             return null;
@@ -316,7 +314,7 @@ class Host extends HierarchicalComponent implements CollectionComponent
             return $this->data[0];
         }
 
-        if ($enc_type == self::RFC3987) {
+        if ($enc_type != self::RFC3986_ENCODING) {
             return $this->format($this->data, $this->isAbsolute);
         }
 

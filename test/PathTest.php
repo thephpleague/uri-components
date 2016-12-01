@@ -35,7 +35,8 @@ class PathTest extends AbstractTestCase
     {
         $path = new Path($raw);
         $this->assertSame($parsed, $path->getUriComponent());
-        $this->assertSame($raw, $path->getContent(Path::RFC3987));
+        $this->assertSame($raw, $path->getContent(Path::RFC3987_ENCODING));
+        $this->assertSame($raw, $path->getContent(Path::NO_ENCODING));
         $this->assertTrue($path->isDefined());
     }
 

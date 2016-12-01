@@ -96,11 +96,11 @@ abstract class HierarchicalComponent
      *
      * If the instance is not defined null is returned
      *
-     * @param string $enc_type
+     * @param int $enc_type
      *
      * @return string|null
      */
-    abstract public function getContent($enc_type = UriComponent::RFC3986);
+    abstract public function getContent($enc_type = UriComponent::RFC3986_ENCODING);
 
     /**
      * Returns the instance string representation; If the

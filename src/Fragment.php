@@ -44,21 +44,19 @@ class Fragment extends Component implements UriComponent
      *
      * If the instance is not defined null is returned
      *
-     * @param string $enc_type
+     * @param int $enc_type
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986)
+    public function getContent($enc_type = self::RFC3986_ENCODING)
     {
-        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
-            throw new Exception('Unsupported or Unknown Encoding');
-        }
+        $this->assertValidEncoding($enc_type);
 
-        if ('' == $this->data) {
+        if ('' == $this->data || self::NO_ENCODING == $enc_type) {
             return $this->data;
         }
 
-        if (self::RFC3987 == $enc_type) {
+        if (self::RFC3987_ENCODING == $enc_type) {
             $pattern = str_split(self::$invalidUriChars);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->data);
@@ -67,16 +65,6 @@ class Fragment extends Component implements UriComponent
         $regexp = '/(?:[^'.self::$unreservedChars.self::$subdelimChars.'\:\/@\?]+|%(?!'.self::$encodedChars.'))/ux';
 
         return $this->encode($this->data, $regexp);
-    }
-
-    /**
-     * Return the decoded string representation of the component
-     *
-     * @return null|string
-     */
-    public function getDecoded()
-    {
-        return $this->data;
     }
 
     /**

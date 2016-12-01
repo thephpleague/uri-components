@@ -109,19 +109,16 @@ class UserInfo implements UriComponent
     /**
      * Retrieve the user component of the URI User Info part
      *
-     * @return string
+     * @return string|null
      */
-    public function getUser($enc_type = self::RFC3986)
+    public function getUser($enc_type = self::RFC3986_ENCODING)
     {
-        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
-            throw new Exception('Unsupported or Unknown Encoding');
+        $this->assertValidEncoding($enc_type);
+        if ('' == $this->user || self::NO_ENCODING == $enc_type) {
+            return $this->user;
         }
 
-        if ('' == $this->user) {
-            return '';
-        }
-
-        if ($enc_type == self::RFC3987) {
+        if ($enc_type == self::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', ':', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->user);
@@ -137,17 +134,14 @@ class UserInfo implements UriComponent
      *
      * @return string
      */
-    public function getPass($enc_type = self::RFC3986)
+    public function getPass($enc_type = self::RFC3986_ENCODING)
     {
-        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
-            throw new Exception('Unsupported or Unknown Encoding');
+        $this->assertValidEncoding($enc_type);
+        if ('' == $this->pass || self::NO_ENCODING == $enc_type) {
+            return $this->pass;
         }
 
-        if ('' == $this->pass) {
-            return '';
-        }
-
-        if ($enc_type == self::RFC3987) {
+        if ($enc_type == self::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern),  $this->pass);
@@ -187,16 +181,13 @@ class UserInfo implements UriComponent
      *
      * If the instance is not defined null is returned
      *
-     * @param string $enc_type
+     * @param int $enc_type
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986)
+    public function getContent($enc_type = self::RFC3986_ENCODING)
     {
-        if (!in_array($enc_type, [self::RFC3986, self::RFC3987])) {
-            throw new Exception('Unsupported or Unknown Encoding');
-        }
-
+        $this->assertValidEncoding($enc_type);
         if (null === $this->user) {
             return null;
         }
