@@ -83,15 +83,13 @@ abstract class Component
      *
      * If the instance is not defined null is returned
      *
-     * @param string $enc_type
+     * @param int $enc_type
      *
      * @return mixed
      */
-    public function getContent($enc_type = UriComponent::RFC3986)
+    public function getContent($enc_type = UriComponent::RFC3986_ENCODING)
     {
-        if (!in_array($enc_type, [UriComponent::RFC3986, UriComponent::RFC3987])) {
-            throw new Exception('Unsupported or Unknown Encoding');
-        }
+        $this->assertValidEncoding($enc_type);
 
         return $this->data;
     }

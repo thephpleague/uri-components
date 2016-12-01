@@ -166,7 +166,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathComponent, C
      *
      * @return string
      */
-    public function getDecoded()
+    protected function getDecoded()
     {
         $front_delimiter = '';
         if ($this->isAbsolute === static::IS_ABSOLUTE) {

@@ -46,21 +46,26 @@ Any Component object exposes the following methods and constant:
 ```php
 <?php
 
-const Component::RFC3986 = 'RFC3986';
-const Component::RFC3987 = 'RFC3987';
+const Component::RFC3986_ENCODING = 2;
+const Component::RFC3987_ENCODING = 3;
+const Component::NO_ENCODING = 255;
 public Component::isDefined(void): bool
-public Component::getContent(string $enc_type = Component::RFC3986): mixed
+public Component::getContent(string $enc_type = Component::RFC3986_ENCODING): mixed
 public Component::__toString(): string
 public Component::getUriComponent(void): string
-public Component::withContent(string $content): self
+public Component::withContent(?string $content): self
 ```
 
 **NEW**
 
 - `Component::isDefined` returns `true` when the component content is not equal to `null`.
 - `Component::getContent` can return a `string` or an `int`, in case of the `Port` component, if the component is defined, otherwise the method returns `null`.
-- When the `$enc_type` parameter is used, the method returns a value encoded against RFC3986 or RFC3987 rules. `$enc_type` value can be `Component::RFC3986` or `Component::RFC3987`.
-- `Component::withContent` accept any string in no particular encoding but will normalize the string to be RFC3986 compliant.
+- When the `$enc_type` parameter is used, the method returns a value encoded against:
+	- the RFC3986 rules with `Component::RFC3986_ENCODING`;
+	- the RFC3987 rules with `Component::RFC3987_ENCODING`;
+	- or no rules at all with `Component::NO_ENCODING`;
+
+- `Component::withContent` accepts any string in no particular encoding but will normalize the string to be RFC3986 compliant.
 
 **BC Break:**
 
@@ -79,24 +84,13 @@ public Component::__construct(string $content = null): void
 
 Depending on the component and on its related scheme more methods for manipulating the component are available. Below are listed the specific methods for each components.
 
-### Fragment
-
-```php
-<?php
-
-public Fragment::getDecoded(void): string|null
-```
-**NEW:**
-
-- `Fragment::getDecoded` returns the fragment decoded without any encoding.
-
 ### UserInfo
 
 ```php
 <?php
 
-public UserInfo::getUser(string $enc_type = Component::RFC3986): string|null
-public UserInfo::getPass(string $enc_type = Component::RFC3986): string|null
+public UserInfo::getUser(string $enc_type = Component::RFC3986_ENCODING): string|null
+public UserInfo::getPass(string $enc_type = Component::RFC3986_ENCODING): string|null
 public UserInfo::withUserInfo(string $user [, string $password = null]): self
 ```
 
@@ -117,7 +111,7 @@ The `Query` object also implements the following SPL interfaces: `Countable`, `I
 
 public static Query::parse(string $query, string $separator = '&'): array
 public static Query::extract(string $query, string $separator = '&'): array
-public static Query::build(array $pairs, string $separator = '&', string $enc_type = Query::RFC3986): string
+public static Query::build(array $pairs, string $separator = '&', string $enc_type = Query::RFC3986_ENCODING): string
 public static Query::createFromPairs(array $pairs): self
 public Query::getPairs(void): array
 public Query::getValue(string $offset, mixed $default = null): mixed
@@ -166,10 +160,15 @@ public Host::filter(callable $callable, int $flag = 0): self
 public Host::without(int[] $offsets): self
 ```
 
+**NEW:**
+
+- `Host::createFromIp` a named constructor to returns a Host object from an IP
+- `Host::getIp` returns the Host IP part or null if the host is not an IP
+
 **BC Break:**
 
 - The constructor no longer accept *naked* IPv6 string
-- The host labels are always normalized to their RFC3987 representation
+- The host labels are always normalized to their IDN representation
 - `Host::isIdn` is removed
 
 ### Path objects
@@ -181,7 +180,6 @@ URI path component objects are modelled depending on the URI as such each URI sc
 
 public Path::isEmpty(void): bool
 public Path::isAbsolute(void): bool
-public Path::getDecoded(void): string
 public Path::withLeadingSlash(void): self
 public Path::withoutLeadingSlash(void): self
 public Path::withoutDotSegments(void): self
@@ -192,16 +190,15 @@ public Path::withoutEmptySegments(void): self
 
 **NEW:**
 
-- `Path::getDecoded` returns the path decoded without any encoding.
 - `Path::isEmpty` tell whether the path is an empty string or not.
 
-**even if the method is exposed using this method may trigger an `InvalidArgumentException` if the specific path does not support the given modifitication**
+**According to RFC3986, the Path content can not be equal to `null` therefore `Path::isDefined` always returns `true`**
 
-**According to RFC3986, the `Path::isDefined` method must always returns `true`**
+**Because path are scheme specific, some methods may trigger an `InvalidArgumentException` if for a given scheme the path does not support the given modification**
 
 #### HierarchicalPath
 
-This specific path object ease manipulating the  HTTP scheme specific URI path component. The `HierarchicalPath` object also implements the following SPL interfaces: `Countable`, `IteratorAggregate`.
+This specific path object ease manipulating path made of segments. The `HierarchicalPath` object also implements the following SPL interfaces: `Countable`, `IteratorAggregate`.
 
 ```php
 <?php

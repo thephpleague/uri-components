@@ -51,7 +51,7 @@ class FragmentTest extends AbstractTestCase
      */
     public function testGetValue($str, $expected)
     {
-        $this->assertSame($expected, (new Fragment($str))->getDecoded());
+        $this->assertSame($expected, (new Fragment($str))->getContent(Fragment::NO_ENCODING));
     }
 
     public function geValueProvider()
@@ -81,10 +81,10 @@ class FragmentTest extends AbstractTestCase
     public function getContentProvider()
     {
         return [
-            ['€', Fragment::RFC3987, '€'],
-            ['€', Fragment::RFC3986, '%E2%82%AC'],
-            ['%E2%82%AC', Fragment::RFC3987, '€'],
-            ['%E2%82%AC', Fragment::RFC3986, '%E2%82%AC'],
+            ['€', Fragment::RFC3987_ENCODING, '€'],
+            ['€', Fragment::RFC3986_ENCODING, '%E2%82%AC'],
+            ['%E2%82%AC', Fragment::RFC3987_ENCODING, '€'],
+            ['%E2%82%AC', Fragment::RFC3986_ENCODING, '%E2%82%AC'],
         ];
     }
 

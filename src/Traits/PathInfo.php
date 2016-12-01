@@ -91,13 +91,15 @@ trait PathInfo
      *
      * If the instance is not defined null is returned
      *
-     * @param string $enc_type
+     * @param int $enc_type
      *
      * @return string|null
      */
-    public function getContent($enc_type = UriComponent::RFC3986)
+    public function getContent($enc_type = UriComponent::RFC3986_ENCODING)
     {
-        if ($enc_type == UriComponent::RFC3987) {
+        $this->assertValidEncoding($enc_type);
+
+        if ($enc_type == UriComponent::RFC3987_ENCODING) {
             $pattern = str_split(self::$invalidUriChars);
             $pattern[] = '#';
             $pattern[] = '?';
@@ -105,11 +107,11 @@ trait PathInfo
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->getDecoded());
         }
 
-        if ($enc_type == UriComponent::RFC3986) {
+        if ($enc_type == UriComponent::RFC3986_ENCODING) {
             return $this->encodePath($this->getDecoded());
         }
 
-        throw new Exception('Unsupported or Unknown Encoding');
+        return $this->getDecoded();
     }
 
     /**
@@ -126,7 +128,7 @@ trait PathInfo
      *
      * @return string
      */
-    abstract public function getDecoded();
+    abstract protected function getDecoded();
 
     /**
      * Returns an instance without dot segments

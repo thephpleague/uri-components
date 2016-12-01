@@ -122,7 +122,7 @@ class DataPath extends Component implements PathComponent
      *
      * @return string
      */
-    public function getDecoded()
+    protected function getDecoded()
     {
         return $this->data;
     }

@@ -203,11 +203,34 @@ trait ImmutableComponent
      *
      * If the instance is not defined null is returned
      *
-     * @param string $enc_type
+     * @param int $enc_type
      *
      * @return string|null
      */
-    abstract public function getContent($enc_type = UriComponent::RFC3986);
+    abstract public function getContent($enc_type = UriComponent::RFC3986_ENCODING);
+
+    /**
+     * Validate the encoding type value
+     *
+     * @param int $enc_type
+     *
+     * @throws Exception If the encoding type is invalid
+     */
+    protected static function assertValidEncoding($enc_type)
+    {
+        static $enc_type_list;
+        if (null === $enc_type_list) {
+            $enc_type_list = [
+                UriComponent::RFC3986_ENCODING => 1,
+                UriComponent::RFC3987_ENCODING => 1,
+                UriComponent::NO_ENCODING => 1,
+            ];
+        }
+
+        if (!isset($enc_type_list[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+    }
 
     /**
      * @inheritdoc
