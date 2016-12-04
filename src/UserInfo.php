@@ -32,14 +32,14 @@ class UserInfo implements UriComponent
     /**
      * User user component
      *
-     * @var User
+     * @var string|null
      */
     protected $user;
 
     /**
      * Pass URI component
      *
-     * @var Pass
+     * @var string|null
      */
     protected $pass;
 
