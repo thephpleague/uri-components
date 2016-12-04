@@ -115,6 +115,15 @@ trait PathInfo
     }
 
     /**
+     * Validate the encoding type value
+     *
+     * @param int $enc_type
+     *
+     * @throws Exception If the encoding type is invalid
+     */
+    abstract protected static function assertValidEncoding($enc_type);
+
+    /**
      * Encode a path string according to RFC3986
      *
      * @param string $str can be a string or an array
