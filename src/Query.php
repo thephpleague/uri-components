@@ -12,9 +12,11 @@
  */
 namespace League\Uri\Components;
 
+use Countable;
+use IteratorAggregate;
 use League\Uri\Components\Traits\ImmutableCollection;
 use League\Uri\Components\Traits\QueryParser;
-use League\Uri\Interfaces\CollectionComponent;
+use League\Uri\Interfaces\Component as ComponentInterface;
 use Traversable;
 
 /**
@@ -31,7 +33,7 @@ use Traversable;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-class Query implements CollectionComponent
+class Query implements ComponentInterface, Countable, IteratorAggregate
 {
     use ImmutableCollection;
     use QueryParser;
