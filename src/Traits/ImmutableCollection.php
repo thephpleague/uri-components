@@ -14,7 +14,6 @@ namespace League\Uri\Components\Traits;
 
 use ArrayIterator;
 use InvalidArgumentException;
-use League\Uri\Components\Collection;
 use League\Uri\Components\Exception;
 use Traversable;
 
@@ -58,7 +57,7 @@ trait ImmutableCollection
     /**
      * Returns whether the given key exists in the current instance
      *
-     * @param string $offset
+     * @param string|int $offset
      *
      * @return bool
      */
@@ -113,7 +112,7 @@ trait ImmutableCollection
      *
      * @param array $data
      *
-     * @return Collection
+     * @return static
      */
     abstract protected function newCollectionInstance(array $data);
 

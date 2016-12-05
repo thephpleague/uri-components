@@ -12,8 +12,10 @@
  */
 namespace League\Uri\Components;
 
+use Countable;
+use IteratorAggregate;
 use League\Uri\Components\Traits\HostInfo;
-use League\Uri\Interfaces\CollectionComponent;
+use League\Uri\Interfaces\Component as ComponentInterface;
 use Traversable;
 
 /**
@@ -30,7 +32,7 @@ use Traversable;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-class Host extends HierarchicalComponent implements CollectionComponent
+class Host extends HierarchicalComponent implements ComponentInterface, Countable, IteratorAggregate
 {
     use HostInfo;
 

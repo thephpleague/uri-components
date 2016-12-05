@@ -2,6 +2,26 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next
+
+### Added
+
+- None
+
+### Fixed
+
+- Remove `League\Uri\Interfaces\CollectionComponent` interface dependencies from:
+    - `League\Uri\Components\Host`
+    - `League\Uri\Components\HierarchicalPath`
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 0.4.0 - 2016-12-01
 
 ### Added
