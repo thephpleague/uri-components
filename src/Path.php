@@ -13,7 +13,7 @@
 namespace League\Uri\Components;
 
 use League\Uri\Components\Traits\PathInfo;
-use League\Uri\Interfaces\PathComponent;
+use League\Uri\Interfaces\Path as PathInterface;
 
 /**
  * Value object representing a URI path component.
@@ -23,7 +23,7 @@ use League\Uri\Interfaces\PathComponent;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class Path extends Component implements PathComponent
+class Path extends Component implements PathInterface
 {
     use PathInfo;
 

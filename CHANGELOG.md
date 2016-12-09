@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next
+## 0.5.0 - 2016-12-09
 
 ### Added
 
@@ -13,6 +13,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Remove `League\Uri\Interfaces\CollectionComponent` interface dependencies from:
     - `League\Uri\Components\Host`
     - `League\Uri\Components\HierarchicalPath`
+
+- Bug fix `League\Uri\Components\Query::build`
+
+- Update dependencies on `League\Uri\Interfaces`
 
 ### Deprecated
 

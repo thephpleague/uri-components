@@ -449,6 +449,14 @@ class QueryTest extends AbstractTestCase
         ];
     }
 
+    public function testBuildWithMalformedUtf8Chars()
+    {
+        $this->assertSame(
+            'badutf8=%A0TM1TMS061114IP1',
+            Query::build(['badutf8' => rawurldecode('%A0TM1TMS061114IP1')])
+        );
+    }
+
     public function testThrowsExceptionOnInvalidEncodingType()
     {
         $this->expectException(Exception::class);

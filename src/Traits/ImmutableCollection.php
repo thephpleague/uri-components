@@ -112,7 +112,7 @@ trait ImmutableCollection
      *
      * @param array $data
      *
-     * @return static
+     * @return $this
      */
     abstract protected function newCollectionInstance(array $data);
 
@@ -141,7 +141,7 @@ trait ImmutableCollection
     /**
      * Validate an Iterator or an array
      *
-     * @param iterable $data
+     * @param Traversable|array $data
      *
      * @throws InvalidArgumentException if the value can not be converted
      *

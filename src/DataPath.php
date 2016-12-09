@@ -12,10 +12,8 @@
  */
 namespace League\Uri\Components;
 
-use InvalidArgumentException;
 use League\Uri\Components\Traits\PathInfo;
-use League\Uri\Interfaces\PathComponent;
-use RuntimeException;
+use League\Uri\Interfaces\Path as PathInterface;
 use SplFileObject;
 
 /**
@@ -32,7 +30,7 @@ use SplFileObject;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.3
  */
-class DataPath extends Component implements PathComponent
+class DataPath extends Component implements PathInterface
 {
     use PathInfo;
 
@@ -85,7 +83,7 @@ class DataPath extends Component implements PathComponent
      *
      * @param string $path
      *
-     * @throws RuntimeException If the File is not readable
+     * @throws Exception If the File is not readable
      *
      * @return static
      */
@@ -166,7 +164,7 @@ class DataPath extends Component implements PathComponent
      *
      * @param string|null $mimetype
      *
-     * @throws InvalidArgumentException If the mimetype is invalid
+     * @throws Exception If the mimetype is invalid
      *
      * @return string
      */
@@ -188,7 +186,7 @@ class DataPath extends Component implements PathComponent
      *
      * @param string $parameters
      *
-     * @throws InvalidArgumentException If the mediatype parameters contain invalid data
+     * @throws Exception If the mediatype parameters contain invalid data
      *
      * @return string[]
      */
@@ -230,7 +228,7 @@ class DataPath extends Component implements PathComponent
     /**
      * Validate the path document string representation
      *
-     * @throws InvalidArgumentException If the data is invalid
+     * @throws Exception If the data is invalid
      */
     protected function validateDocument()
     {
@@ -338,8 +336,6 @@ class DataPath extends Component implements PathComponent
      * @param string $path The path to the file where to save the data
      * @param string $mode The mode parameter specifies the type of access you require to the stream.
      *
-     * @throws RuntimeException if the path is not reachable
-     *
      * @return SplFileObject
      */
     public function save($path, $mode = 'w')
@@ -407,7 +403,7 @@ class DataPath extends Component implements PathComponent
      *
      * @param string $parameters The mediatype parameters to use with the new instance.
      *
-     * @throws InvalidArgumentException for invalid query strings.
+     * @throws Exception for invalid query strings.
      *
      * @return static A new instance with the specified mediatype parameters.
      */
