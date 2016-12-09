@@ -15,7 +15,7 @@ namespace League\Uri\Components;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Components\Traits\PathInfo;
-use League\Uri\Interfaces\PathComponent;
+use League\Uri\Interfaces\Path as PathInterface;
 use Traversable;
 
 /**
@@ -26,7 +26,7 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class HierarchicalPath extends HierarchicalComponent implements PathComponent, Countable, IteratorAggregate
+class HierarchicalPath extends HierarchicalComponent implements PathInterface, Countable, IteratorAggregate
 {
     use PathInfo;
 
