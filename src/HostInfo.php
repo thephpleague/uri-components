@@ -10,7 +10,7 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
-namespace League\Uri\Components\Traits;
+namespace League\Uri\Components;
 
 use Pdp\Parser;
 use Pdp\PublicSuffixListManager;

@@ -249,19 +249,6 @@ class DataPathTest extends AbstractTestCase
         $this->assertSame('text/plain;charset=us-ascii,', (string) new Path());
     }
 
-    /**
-     * @supportsDebugInfo
-     */
-    public function testDebugInfo()
-    {
-        $path = new Path();
-        $this->assertInternalType('array', $path->__debugInfo());
-        ob_start();
-        var_dump($path);
-        $res = ob_get_clean();
-        $this->assertContains($path->__toString(), $res);
-    }
-
     public function testInvalidBase64Encoded()
     {
         $this->expectException(Exception::class);

@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Interfaces\Component as UriComponent;
-
 /**
  * Value object representing a URI Fragment component.
  *
@@ -28,7 +26,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.5
  */
-class Fragment extends Component implements UriComponent
+class Fragment extends Component
 {
 
     /**
@@ -81,13 +79,5 @@ class Fragment extends Component implements UriComponent
         }
 
         return $component;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function __debugInfo()
-    {
-        return ['fragment' => $this->getContent()];
     }
 }

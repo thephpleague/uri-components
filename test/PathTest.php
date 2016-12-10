@@ -12,20 +12,6 @@ use League\Uri\Components\Path;
 class PathTest extends AbstractTestCase
 {
     /**
-     * @supportsDebugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Path('yolo');
-        $this->assertInternalType('array', $component->__debugInfo());
-        ob_start();
-        var_dump($component);
-        $res = ob_get_clean();
-        $this->assertContains($component->__toString(), $res);
-        $this->assertContains('path', $res);
-    }
-
-    /**
      * @dataProvider validPathEncoding
      *
      * @param string $raw

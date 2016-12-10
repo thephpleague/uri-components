@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Interfaces\Component as UriComponent;
-
 /**
  * Value object representing a URI Scheme component.
  *
@@ -28,7 +26,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.1
  */
-class Scheme extends Component implements UriComponent
+class Scheme extends Component
 {
     /**
      * @inheritdoc
@@ -45,14 +43,6 @@ class Scheme extends Component implements UriComponent
         }
 
         return strtolower($scheme);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function __debugInfo()
-    {
-        return ['scheme' => $this->getContent()];
     }
 
     /**

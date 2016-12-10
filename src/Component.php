@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Components\Traits\ImmutableComponent;
 use League\Uri\Interfaces\Component as UriComponent;
 
 /**
@@ -23,9 +22,9 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-abstract class Component
+abstract class Component implements UriComponent
 {
-    use ImmutableComponent;
+    use ComponentTrait;
 
     /**
      * The component data

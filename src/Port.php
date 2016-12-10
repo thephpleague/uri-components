@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Interfaces\Component as UriComponent;
-
 /**
  * Value object representing a URI Port component.
  *
@@ -28,7 +26,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.3
  */
-class Port extends Component implements UriComponent
+class Port extends Component
 {
     /**
      * @inheritdoc
@@ -44,14 +42,6 @@ class Port extends Component implements UriComponent
         }
 
         return $data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function __debugInfo()
-    {
-        return ['port' => $this->getContent()];
     }
 
     /**

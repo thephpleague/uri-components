@@ -10,9 +10,7 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
-namespace League\Uri\Components\Traits;
-
-use League\Uri\Components\Query;
+namespace League\Uri\Components;
 
 /**
  * a class to parse a URI query string according to RFC3986
@@ -22,9 +20,9 @@ use League\Uri\Components\Query;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-trait QueryParser
+trait QueryParserTrait
 {
-    use ImmutableComponent;
+    use ComponentTrait;
 
     /**
      * Parse a query string into an associative array
@@ -151,19 +149,18 @@ trait QueryParser
     protected static function getEncoder($separator, $enc_type)
     {
         if (Query::RFC3987_ENCODING == $enc_type) {
-            return function ($str) use ($separator) {
-                $pattern = str_split(self::$invalidUriChars);
-                $pattern[] = '#';
-                $pattern[] = $separator;
-
-                return str_replace($pattern, array_map('rawurlencode', $pattern), $str);
+            $pattern = str_split(self::$invalidUriChars);
+            $pattern[] = '#';
+            $pattern[] = $separator;
+            $replace = array_map('rawurlencode', $pattern);
+            return function ($str) use ($pattern, $replace) {
+                return str_replace($pattern, $replace, $str);
             };
         }
 
         if (Query::RFC3986_ENCODING == $enc_type) {
             $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
             $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
-
             $regexp = '/(?:[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+|%(?![A-Fa-f0-9]{2}))/u';
             return function ($str) use ($regexp) {
                 return self::encode($str, $regexp);
@@ -210,11 +207,11 @@ trait QueryParser
     protected static function extractFromPairs(array $pairs)
     {
         $data = [];
-        foreach ($pairs as $name => $value) {
-            if (!is_array($value)) {
-                $value = [$value];
-            }
+        $normalized_pairs = array_map(function ($value) {
+            return !is_array($value) ? [$value] : $value;
+        }, $pairs);
 
+        foreach ($normalized_pairs as $name => $value) {
             foreach ($value as $val) {
                 self::extractPhpVariable(trim($name), self::formatParsedValue($val), $data);
             }

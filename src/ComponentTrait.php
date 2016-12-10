@@ -10,10 +10,8 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
-namespace League\Uri\Components\Traits;
+namespace League\Uri\Components;
 
-use League\Uri\Components\Component;
-use League\Uri\Components\Exception;
 use League\Uri\Interfaces\Component as UriComponent;
 
 /**
@@ -24,7 +22,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-trait ImmutableComponent
+trait ComponentTrait
 {
     /**
      * Invalid Characters
@@ -181,6 +179,14 @@ trait ImmutableComponent
         }
 
         return $str;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __debugInfo()
+    {
+        return ['component' => $this->getContent()];
     }
 
     /**

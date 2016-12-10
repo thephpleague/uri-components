@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Components\Traits\PathInfo;
-use League\Uri\Interfaces\Path as PathInterface;
 use SplFileObject;
 
 /**
