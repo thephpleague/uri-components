@@ -14,8 +14,6 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Components\Traits\PathInfo;
-use League\Uri\Interfaces\Path as PathInterface;
 use Traversable;
 
 /**
@@ -186,7 +184,14 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface, C
     }
 
     /**
-     * @inheritdoc
+     * Returns an instance with the specified component prepended
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component with the prepended data
+     *
+     * @param string $component the component to append
+     *
+     * @return static
      */
     public function prepend($component)
     {
@@ -202,7 +207,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface, C
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
      *
-     * @param HierarchicalComponent|string $component the component to append
+     * @param string $component the component to append
      *
      * @return static
      */

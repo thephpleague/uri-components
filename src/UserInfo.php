@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Components\Traits\ImmutableComponent;
 use League\Uri\Interfaces\Component as UriComponent;
 
 /**
@@ -27,7 +26,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  */
 class UserInfo implements UriComponent
 {
-    use ImmutableComponent;
+    use ComponentTrait;
 
     /**
      * User user component
@@ -150,14 +149,6 @@ class UserInfo implements UriComponent
         $regexp = '/(?:[^'.static::$unreservedChars.static::$subdelimChars.']+|%(?!'.static::$encodedChars.'))/x';
 
         return $this->encode($this->pass, $regexp);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function __debugInfo()
-    {
-        return ['userInfo' => $this->getContent()];
     }
 
     /**

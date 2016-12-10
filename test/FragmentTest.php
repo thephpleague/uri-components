@@ -119,13 +119,7 @@ class FragmentTest extends AbstractTestCase
      */
     public function testDebugInfo()
     {
-        $component = new Fragment('yolo');
-        $this->assertInternalType('array', $component->__debugInfo());
-        ob_start();
-        var_dump($component);
-        $res = ob_get_clean();
-        $this->assertContains($component->__toString(), $res);
-        $this->assertContains('fragment', $res);
+        $this->assertInternalType('array', (new Fragment('yolo'))->__debugInfo());
     }
 
     public function testPreserverDelimiter()

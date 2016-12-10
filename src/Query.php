@@ -14,8 +14,6 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Components\Traits\ImmutableCollection;
-use League\Uri\Components\Traits\QueryParser;
 use League\Uri\Interfaces\Component as ComponentInterface;
 use Traversable;
 
@@ -35,8 +33,8 @@ use Traversable;
  */
 class Query implements ComponentInterface, Countable, IteratorAggregate
 {
-    use ImmutableCollection;
-    use QueryParser;
+    use CollectionTrait;
+    use QueryParserTrait;
 
     /**
      * Key/pair separator character
@@ -111,14 +109,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         return static::parse($str, static::$separator);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function __debugInfo()
-    {
-        return ['query' => $this->getContent()];
     }
 
     /**

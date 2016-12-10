@@ -21,19 +21,6 @@ class QueryTest extends AbstractTestCase
         $this->query = new Query('kingkong=toto');
     }
 
-    /**
-     * @supportsDebugInfo
-     */
-    public function testDebugInfo()
-    {
-        $this->assertInternalType('array', $this->query->__debugInfo());
-        ob_start();
-        var_dump($this->query);
-        $res = ob_get_clean();
-        $this->assertContains($this->query->__toString(), $res);
-        $this->assertContains('query', $res);
-    }
-
     public function testSetState()
     {
         $generateComponent = eval('return '.var_export($this->query, true).';');

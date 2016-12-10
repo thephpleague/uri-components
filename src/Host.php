@@ -14,8 +14,6 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Components\Traits\HostInfo;
-use League\Uri\Interfaces\Component as ComponentInterface;
 use Traversable;
 
 /**
@@ -32,7 +30,7 @@ use Traversable;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-class Host extends HierarchicalComponent implements ComponentInterface, Countable, IteratorAggregate
+class Host extends HierarchicalComponent implements Countable, IteratorAggregate
 {
     use HostInfo;
 
@@ -351,14 +349,6 @@ class Host extends HierarchicalComponent implements ComponentInterface, Countabl
     /**
      * @inheritdoc
      */
-    public function __debugInfo()
-    {
-        return ['host' => $this->getContent()];
-    }
-
-    /**
-     * @inheritdoc
-     */
     public static function __set_state(array $properties)
     {
         $host = static::createFromLabels($properties['data'], $properties['isAbsolute']);
@@ -406,7 +396,14 @@ class Host extends HierarchicalComponent implements ComponentInterface, Countabl
     }
 
     /**
-     * @inheritdoc
+     * Returns an instance with the specified component prepended
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component with the prepended data
+     *
+     * @param string $component the component to append
+     *
+     * @return static
      */
     public function prepend($component)
     {
@@ -417,7 +414,14 @@ class Host extends HierarchicalComponent implements ComponentInterface, Countabl
     }
 
     /**
-     * @inheritdoc
+     * Returns an instance with the specified component appended
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component with the appended data
+     *
+     * @param string $component the component to append
+     *
+     * @return static
      */
     public function append($component)
     {

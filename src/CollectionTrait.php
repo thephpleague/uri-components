@@ -10,11 +10,10 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
-namespace League\Uri\Components\Traits;
+namespace League\Uri\Components;
 
 use ArrayIterator;
 use InvalidArgumentException;
-use League\Uri\Components\Exception;
 use Traversable;
 
 /**
@@ -25,7 +24,7 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-trait ImmutableCollection
+trait CollectionTrait
 {
     /**
      * The component Data
@@ -52,59 +51,6 @@ trait ImmutableCollection
     public function getIterator()
     {
         return new ArrayIterator($this->data);
-    }
-
-    /**
-     * Returns whether the given key exists in the current instance
-     *
-     * @param string|int $offset
-     *
-     * @return bool
-     */
-    public function hasKey($offset)
-    {
-        return array_key_exists($offset, $this->data);
-    }
-
-    /**
-     * Returns the component $keys.
-     *
-     * If a value is specified only the keys associated with
-     * the given value will be returned
-     *
-     * @return array
-     */
-    public function keys()
-    {
-        if (0 === func_num_args()) {
-            return array_keys($this->data);
-        }
-
-        return array_keys($this->data, func_get_arg(0), true);
-    }
-
-    /**
-     * Returns an instance without the specified keys
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
-     *
-     * @param array $offsets the list of keys to remove from the collection
-     *
-     * @return static
-     */
-    public function without(array $offsets)
-    {
-        $data = $this->data;
-        foreach ($offsets as $offset) {
-            unset($data[$offset]);
-        }
-
-        if ($data === $this->data) {
-            return $this;
-        }
-
-        return $this->newCollectionInstance($data);
     }
 
     /**

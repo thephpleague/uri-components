@@ -17,11 +17,6 @@ class UserInfoTest extends AbstractTestCase
     {
         $component = new UserInfo('yolo', 'oloy');
         $this->assertInternalType('array', $component->__debugInfo());
-        ob_start();
-        var_dump($component);
-        $res = ob_get_clean();
-        $this->assertContains($component->__toString(), $res);
-        $this->assertContains('userInfo', $res);
     }
 
     /**

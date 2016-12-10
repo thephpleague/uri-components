@@ -10,20 +10,6 @@ use League\Uri\Components\Port;
  */
 class PortTest extends AbstractTestCase
 {
-    /**
-     * @supportsDebugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Port(42);
-        $this->assertInternalType('array', $component->__debugInfo());
-        ob_start();
-        var_dump($component);
-        $res = ob_get_clean();
-        $this->assertContains($component->__toString(), $res);
-        $this->assertContains('port', $res);
-    }
-
     public function testPortSetter()
     {
         $this->assertSame('443', (new Port(443))->__toString());
