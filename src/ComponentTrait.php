@@ -13,6 +13,7 @@
 namespace League\Uri\Components;
 
 use League\Uri\Interfaces\Component as UriComponent;
+use Traversable;
 
 /**
  * Common methods for a URI component Value Object
@@ -182,6 +183,28 @@ trait ComponentTrait
     }
 
     /**
+     * Validate an Iterator or an array
+     *
+     * @param Traversable|array $data
+     *
+     * @throws InvalidArgumentException if the value can not be converted
+     *
+     * @return array
+     */
+    protected static function validateIterator($data)
+    {
+        if ($data instanceof Traversable) {
+            return iterator_to_array($data);
+        }
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        throw Exception::fromInvalidIterable($data);
+    }
+
+    /**
      * @inheritdoc
      */
     public function __debugInfo()
@@ -197,6 +220,16 @@ trait ComponentTrait
     public function isDefined()
     {
         return null !== $this->getContent();
+    }
+
+    /**
+     * Returns whether or not the component is empty.
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return '' == $this->getContent();
     }
 
     /**

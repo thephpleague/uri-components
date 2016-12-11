@@ -12,6 +12,7 @@
  */
 namespace League\Uri\Components;
 
+use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Interfaces\Component as ComponentInterface;
@@ -33,8 +34,14 @@ use Traversable;
  */
 class Query implements ComponentInterface, Countable, IteratorAggregate
 {
-    use CollectionTrait;
     use QueryParserTrait;
+
+    /**
+     * The component Data
+     *
+     * @var array
+     */
+    protected $data = [];
 
     /**
      * Key/pair separator character
@@ -164,6 +171,26 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         return $query;
+    }
+
+    /**
+     * Count elements of an object
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->data);
+    }
+
+    /**
+     * Returns an external iterator
+     *
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->data);
     }
 
     /**
@@ -307,14 +334,24 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Return a new instance when needed
+     * Returns an instance with only the specified value
      *
-     * @param array $data
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component
+     *
+     * @param callable $callable the list of keys to keep from the collection
+     * @param int      $flag     flag to determine what argument are sent to callback
      *
      * @return static
      */
-    protected function newCollectionInstance(array $data)
+    public function filter(callable $callable, $flag = 0)
     {
-        return static::createFromPairs($data);
+        static $flags_list = [0 => 1, ARRAY_FILTER_USE_BOTH => 1, ARRAY_FILTER_USE_KEY => 1];
+
+        if (!isset($flags_list[$flag])) {
+            throw Exception::fromInvalidFlag($flag);
+        }
+
+        return static::createFromPairs(array_filter($this->data, $callable, $flag));
     }
 }

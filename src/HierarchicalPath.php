@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use Countable;
-use IteratorAggregate;
 use Traversable;
 
 /**
@@ -24,7 +22,7 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class HierarchicalPath extends HierarchicalComponent implements PathInterface, Countable, IteratorAggregate
+class HierarchicalPath extends HierarchicalComponent implements PathInterface
 {
     use PathInfo;
 
@@ -122,12 +120,13 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface, C
      * Return a new instance when needed
      *
      * @param array $data
+     * @param int   $isAbsolute
      *
      * @return static
      */
-    protected function newCollectionInstance(array $data)
+    protected function newHierarchicalInstance(array $data, $isAbsolute)
     {
-        return $this->createFromSegments($data, $this->isAbsolute);
+        return $this->createFromSegments($data, $isAbsolute);
     }
 
     /**
