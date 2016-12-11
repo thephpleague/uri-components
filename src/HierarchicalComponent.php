@@ -12,6 +12,9 @@
  */
 namespace League\Uri\Components;
 
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
 use League\Uri\Interfaces\Component as UriComponent;
 
 /**
@@ -22,9 +25,8 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-abstract class HierarchicalComponent implements UriComponent
+abstract class HierarchicalComponent implements UriComponent, Countable, IteratorAggregate
 {
-    use CollectionTrait;
     use ComponentTrait;
 
     const IS_ABSOLUTE = 1;
@@ -44,6 +46,12 @@ abstract class HierarchicalComponent implements UriComponent
      * @var int
      */
     protected $isAbsolute = self::IS_RELATIVE;
+    /**
+     * The component Data
+     *
+     * @var array
+     */
+    protected $data = [];
 
     /**
      * new instance
@@ -51,6 +59,61 @@ abstract class HierarchicalComponent implements UriComponent
      * @param string|null $data the component value
      */
     abstract public function __construct($data = null);
+
+    /**
+     * Count elements of an object
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->data);
+    }
+
+    /**
+     * Returns an external iterator
+     *
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->data);
+    }
+
+    /**
+     * Returns an instance with only the specified value
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component
+     *
+     * @param callable $callable the list of keys to keep from the collection
+     * @param int      $flag     flag to determine what argument are sent to callback
+     *
+     * @return static
+     */
+    public function filter(callable $callable, $flag = 0)
+    {
+        static $flags_list = [0 => 1, ARRAY_FILTER_USE_BOTH => 1, ARRAY_FILTER_USE_KEY => 1];
+
+        if (!isset($flags_list[$flag])) {
+            throw Exception::fromInvalidFlag($flag);
+        }
+
+        return $this->newHierarchicalInstance(
+            array_filter($this->data, $callable, $flag),
+            $this->isAbsolute
+        );
+    }
+
+    /**
+     * Return a new instance when needed
+     *
+     * @param array $data
+     * @param int   $isAbsolute
+     *
+     * @return static
+     */
+    abstract protected function newHierarchicalInstance(array $data, $isAbsolute);
 
     /**
      * Returns whether or not the component is absolute or not
@@ -172,7 +235,7 @@ abstract class HierarchicalComponent implements UriComponent
             return $this;
         }
 
-        return $this->newCollectionInstance($data);
+        return $this->newHierarchicalInstance($data, $this->isAbsolute);
     }
 
 
@@ -199,11 +262,16 @@ abstract class HierarchicalComponent implements UriComponent
             array_pop($dest);
         }
 
-        $data = array_merge(array_slice($source, 0, $offset), $dest, array_slice($source, $offset + 1));
+        $data = array_merge(
+            array_slice($source, 0, $offset),
+            $dest,
+            array_slice($source, $offset + 1)
+        );
+
         if ($data === $this->data) {
             return $this;
         }
 
-        return $this->newCollectionInstance($data);
+        return $this->newHierarchicalInstance($data, $this->isAbsolute);
     }
 }

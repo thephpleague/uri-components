@@ -254,18 +254,6 @@ trait PathInfo
     }
 
     /**
-     * Returns whether or not the path is empty or not
-     *
-     * @return bool
-     */
-    public function isEmpty()
-    {
-        $path = $this->__toString();
-
-        return '' === $path;
-    }
-
-    /**
      * Returns an instance with a leading slash
      *
      * This method MUST retain the state of the current instance, and return

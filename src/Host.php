@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use Countable;
-use IteratorAggregate;
 use Traversable;
 
 /**
@@ -30,7 +28,7 @@ use Traversable;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-class Host extends HierarchicalComponent implements Countable, IteratorAggregate
+class Host extends HierarchicalComponent
 {
     use HostInfo;
 
@@ -205,12 +203,13 @@ class Host extends HierarchicalComponent implements Countable, IteratorAggregate
      * Return a new instance when needed
      *
      * @param array $data
+     * @param int   $isAbsolute
      *
      * @return static
      */
-    protected function newCollectionInstance(array $data)
+    protected function newHierarchicalInstance(array $data, $isAbsolute)
     {
-        return $this->createFromLabels($data, $this->isAbsolute);
+        return $this->createFromLabels($data, $isAbsolute);
     }
 
     /**
