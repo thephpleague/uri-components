@@ -50,7 +50,7 @@ const Component::RFC3987_ENCODING = 3;
 const Component::NO_ENCODING = 255;
 public Component::isNull(void): bool
 public Component::isEmpty(void): bool
-public Component::getContent(string $enc_type = Component::RFC3986_ENCODING): mixed
+public Component::getContent(int $enc_type = Component::RFC3986_ENCODING): mixed
 public Component::__toString(): string
 public Component::getUriComponent(void): string
 public Component::withContent(?string $content): self
@@ -90,8 +90,8 @@ Depending on the component and on its related scheme more methods for manipulati
 ```php
 <?php
 
-public UserInfo::getUser(string $enc_type = Component::RFC3986_ENCODING): string|null
-public UserInfo::getPass(string $enc_type = Component::RFC3986_ENCODING): string|null
+public UserInfo::getUser(int $enc_type = Component::RFC3986_ENCODING): string|null
+public UserInfo::getPass(int $enc_type = Component::RFC3986_ENCODING): string|null
 public UserInfo::withUserInfo(string $user [, string $password = null]): self
 ```
 
@@ -112,7 +112,7 @@ The `Query` object also implements the following SPL interfaces: `Countable`, `I
 
 public static Query::parse(string $query, string $separator = '&'): array
 public static Query::extract(string $query, string $separator = '&'): array
-public static Query::build(array $pairs, string $separator = '&', string $enc_type = Query::RFC3986_ENCODING): string
+public static Query::build(array $pairs, string $separator = '&', int $enc_type = Query::RFC3986_ENCODING): string
 public static Query::createFromPairs(array $pairs): self
 public Query::getPairs(void): array
 public Query::getValue(string $offset, mixed $default = null): mixed
