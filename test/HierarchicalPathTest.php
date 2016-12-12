@@ -31,8 +31,8 @@ class HierarchicalPathTest extends AbstractTestCase
     public function testDefined()
     {
         $component = new Path('yolo');
-        $this->assertTrue($component->isDefined());
-        $this->assertTrue($component->withContent(null)->isDefined());
+        $this->assertTrue($component->isNull());
+        $this->assertTrue($component->withContent(null)->isNull());
     }
 
     /**
@@ -137,6 +137,8 @@ class HierarchicalPathTest extends AbstractTestCase
         return [
             ['/shop/rev iew/', 1, 'rev iew', null],
             ['/shop/rev%20iew/', 1, 'rev iew', null],
+            ['/shop/rev iew/', -2, 'rev iew', null],
+            ['/shop/rev%20iew/', -2, 'rev iew', null],
             ['/shop/rev%20iew/', 28, 'foo', 'foo'],
         ];
     }
@@ -515,5 +517,92 @@ class HierarchicalPathTest extends AbstractTestCase
             ['frag%2-ment', 'frag%2-ment'],
             ['fr%61gment', 'fr%61gment'],
         ];
+    }
+
+    /**
+     * @dataProvider getDirnameProvider
+     */
+    public function testWithDirname($path, $dirname, $expected)
+    {
+        $path = new Path($path);
+        $this->assertSame($expected, (string) $path->withDirname($dirname));
+    }
+
+    public function getDirnameProvider()
+    {
+        return [
+            'path with basename and absolute dirname' => [
+                'path' => '/foo/bar/baz',
+                'dirname' => '/bar',
+                'expected' => '/bar/baz',
+            ],
+            'path with basename and rootless dirname' => [
+                'path' => '/foo/bar/baz',
+                'dirname' => 'bar',
+                'expected' => 'bar/baz',
+            ],
+            'path with basename and empty dirname' => [
+                'path' => '/foo/bar/baz',
+                'dirname' => '',
+                'expected' => '/baz',
+            ],
+            'empty path and empty dirname' => [
+                'path' => '',
+                'dirname' => '',
+                'expected' => '',
+            ],
+            'empty path and non empty dirname' => [
+                'path' => '',
+                'dirname' => '/foo/bar',
+                'expected' => '/foo/bar/',
+            ],
+        ];
+    }
+
+
+    /**
+     * @dataProvider getBasenameProvider
+     */
+    public function testWithBasename($path, $basename, $expected)
+    {
+        $path = new Path($path);
+        $this->assertSame($expected, (string) $path->withBasename($basename));
+    }
+
+    public function getBasenameProvider()
+    {
+        return [
+            [
+                'path' => '/foo/bar/baz',
+                'basename' => 'bar',
+                'expected' => '/foo/bar/bar',
+            ],
+            [
+                'path' => 'foo/bar/baz',
+                'basename' => 'bar',
+                'expected' => 'foo/bar/bar',
+            ],
+            [
+                'path' => '/foo/bar/',
+                'basename' => '',
+                'expected' => '/foo/bar/',
+            ],
+            [
+                'path' => '',
+                'basename' => '',
+                'expected' => '',
+            ],
+            [
+                'path' => '',
+                'basename' => 'bar',
+                'expected' => 'bar',
+            ],
+        ];
+    }
+
+    public function testWithBasenameThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Path('foo/bar'))->withBasename('foo/bar');
     }
 }

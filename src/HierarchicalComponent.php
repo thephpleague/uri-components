@@ -15,7 +15,6 @@ namespace League\Uri\Components;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use League\Uri\Interfaces\Component as UriComponent;
 
 /**
  * An abstract class to ease collection like object manipulation
@@ -25,7 +24,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-abstract class HierarchicalComponent implements UriComponent, Countable, IteratorAggregate
+abstract class HierarchicalComponent implements ComponentInterface, Countable, IteratorAggregate
 {
     use ComponentTrait;
 
@@ -161,7 +160,7 @@ abstract class HierarchicalComponent implements UriComponent, Countable, Iterato
      *
      * @return string|null
      */
-    abstract public function getContent($enc_type = UriComponent::RFC3986_ENCODING);
+    abstract public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING);
 
     /**
      * Returns the instance string representation; If the

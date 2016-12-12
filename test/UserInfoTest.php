@@ -112,8 +112,8 @@ class UserInfoTest extends AbstractTestCase
 
     public function testIsNull()
     {
-        $this->assertFalse((new UserInfo(null))->isDefined());
-        $this->assertTrue((new UserInfo('toto'))->isDefined());
+        $this->assertFalse((new UserInfo(null))->isNull());
+        $this->assertTrue((new UserInfo('toto'))->isNull());
     }
 
     /**

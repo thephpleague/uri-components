@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Interfaces\Component as UriComponent;
-
 /**
  * Value object representing a URI path component.
  *
@@ -94,11 +92,11 @@ trait PathInfo
      *
      * @return string|null
      */
-    public function getContent($enc_type = UriComponent::RFC3986_ENCODING)
+    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
-        if ($enc_type == UriComponent::RFC3987_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
             $pattern = str_split(self::$invalidUriChars);
             $pattern[] = '#';
             $pattern[] = '?';
@@ -106,7 +104,7 @@ trait PathInfo
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->getDecoded());
         }
 
-        if ($enc_type == UriComponent::RFC3986_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3986_ENCODING) {
             return $this->encodePath($this->getDecoded());
         }
 
