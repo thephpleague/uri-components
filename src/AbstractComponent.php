@@ -42,7 +42,7 @@ abstract class AbstractComponent implements ComponentInterface
     /**
      * new instance
      *
-     * @param string|null $data the component value
+     * @param mixed $data the component value
      */
     public function __construct($data = null)
     {
