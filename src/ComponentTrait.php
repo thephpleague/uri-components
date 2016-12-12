@@ -12,7 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Interfaces\Component as UriComponent;
 use Traversable;
 
 /**
@@ -217,7 +216,7 @@ trait ComponentTrait
      *
      * @return bool
      */
-    public function isDefined()
+    public function isNull()
     {
         return null !== $this->getContent();
     }
@@ -249,7 +248,7 @@ trait ComponentTrait
      *
      * @return string|null
      */
-    abstract public function getContent($enc_type = UriComponent::RFC3986_ENCODING);
+    abstract public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING);
 
     /**
      * Validate the encoding type value
@@ -263,9 +262,9 @@ trait ComponentTrait
         static $enc_type_list;
         if (null === $enc_type_list) {
             $enc_type_list = [
-                UriComponent::RFC3986_ENCODING => 1,
-                UriComponent::RFC3987_ENCODING => 1,
-                UriComponent::NO_ENCODING => 1,
+                ComponentInterface::RFC3986_ENCODING => 1,
+                ComponentInterface::RFC3987_ENCODING => 1,
+                ComponentInterface::NO_ENCODING => 1,
             ];
         }
 

@@ -68,6 +68,18 @@ class Host extends HierarchicalComponent
     protected $host;
 
     /**
+     * @inheritdoc
+     */
+    public static function __set_state(array $properties)
+    {
+        $host = static::createFromLabels($properties['data'], $properties['isAbsolute']);
+        $host->hostnameInfoLoaded = $properties['hostnameInfoLoaded'];
+        $host->hostnameInfo = $properties['hostnameInfo'];
+
+        return $host;
+    }
+
+    /**
      * return a new instance from an array or a traversable object
      *
      * @param Traversable|string[] $data The segments list
@@ -270,15 +282,20 @@ class Host extends HierarchicalComponent
      * Retrieves a single host label. If the label offset has not been set,
      * returns the default value provided.
      *
-     * @param string $offset  the label offset
-     * @param mixed  $default Default value to return if the offset does not exist.
+     * @param int   $offset  the label offset
+     * @param mixed $default Default value to return if the offset does not exist.
      *
      * @return mixed
      */
     public function getLabel($offset, $default = null)
     {
-        if (isset($this->data[$offset])) {
+        if ($offset > -1 && isset($this->data[$offset])) {
             return $this->data[$offset];
+        }
+
+        $nb_labels = count($this->data);
+        if ($offset <= -1 && $nb_labels + $offset > -1) {
+            return $this->data[$nb_labels + $offset];
         }
 
         return $default;
@@ -346,18 +363,6 @@ class Host extends HierarchicalComponent
     }
 
     /**
-     * @inheritdoc
-     */
-    public static function __set_state(array $properties)
-    {
-        $host = static::createFromLabels($properties['data'], $properties['isAbsolute']);
-        $host->hostnameInfoLoaded = $properties['hostnameInfoLoaded'];
-        $host->hostnameInfo = $properties['hostnameInfo'];
-
-        return $host;
-    }
-
-    /**
      * Return an host without its zone identifier according to RFC6874
      *
      * This method MUST retain the state of the current instance, and return
@@ -406,7 +411,7 @@ class Host extends HierarchicalComponent
      */
     public function prepend($component)
     {
-        return $this->createFromLabels(
+        return static::createFromLabels(
             $this->withContent($component),
             $this->isAbsolute
         )->append($this->__toString());
@@ -424,7 +429,7 @@ class Host extends HierarchicalComponent
      */
     public function append($component)
     {
-        return $this->createFromLabels(array_merge(
+        return static::createFromLabels(array_merge(
             iterator_to_array($this->withContent($component)),
             $this->getLabels()
         ), $this->isAbsolute);

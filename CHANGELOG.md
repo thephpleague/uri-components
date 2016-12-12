@@ -2,6 +2,25 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+### Added
+
+- `HierarchicalPath::withDirname`
+- `HierarchicalPath::withBasename`
+- `League\Uri\Components\ComponentInterface` replaces `League\Uri\Interfaces\Component`
+
+### Fixed
+
+- `HierarchicalPath::getSegment` now can use negative offset like PHP 7.1+
+- `Host::getLabel` now can use negative offset like PHP 7.1+
+
+### Deprecated
+
+- None
+
+### Remove
+
+- Implementing `League\Uri\Interfaces\Component`
+
 ## 0.5.0 - 2016-12-09
 
 ### Added

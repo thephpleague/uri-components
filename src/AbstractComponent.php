@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Interfaces\Component as UriComponent;
-
 /**
  * An abstract class to ease component manipulation
  *
@@ -22,7 +20,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-abstract class Component implements UriComponent
+abstract class AbstractComponent implements ComponentInterface
 {
     use ComponentTrait;
 
@@ -86,7 +84,7 @@ abstract class Component implements UriComponent
      *
      * @return mixed
      */
-    public function getContent($enc_type = UriComponent::RFC3986_ENCODING)
+    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 

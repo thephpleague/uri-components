@@ -32,6 +32,14 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     protected static $separator = '/';
 
     /**
+     * @inheritdoc
+     */
+    public static function __set_state(array $properties)
+    {
+        return static::createFromSegments($properties['data'], $properties['isAbsolute']);
+    }
+
+    /**
      * return a new instance from an array or a traversable object
      *
      * @param Traversable|string[] $data The segments list
@@ -109,14 +117,6 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public static function __set_state(array $properties)
-    {
-        return static::createFromSegments($properties['data'], $properties['isAbsolute']);
-    }
-
-    /**
      * Return a new instance when needed
      *
      * @param array $data
@@ -126,7 +126,45 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      */
     protected function newHierarchicalInstance(array $data, $isAbsolute)
     {
-        return $this->createFromSegments($data, $isAbsolute);
+        return static::createFromSegments($data, $isAbsolute);
+    }
+
+    /**
+     * Returns parent directory's path
+     *
+     * @return string
+     */
+    public function getDirname()
+    {
+        return str_replace(
+            ['\\', "\0"],
+            [static::$separator, '\\'],
+            dirname(str_replace('\\', "\0", $this->__toString()))
+        );
+    }
+
+    /**
+     * Returns the path basename
+     *
+     * @return string
+     */
+    public function getBasename()
+    {
+        $data = $this->data;
+
+        return (string) array_pop($data);
+    }
+
+    /**
+     * Returns the basename extension
+     *
+     * @return string
+     */
+    public function getExtension()
+    {
+        list($basename, ) = explode(';', $this->getBasename(), 2);
+
+        return pathinfo($basename, PATHINFO_EXTENSION);
     }
 
     /**
@@ -145,15 +183,20 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      * Retrieves a single path segment. If the segment offset has not been set,
      * returns the default value provided.
      *
-     * @param string $offset  the segment offset
-     * @param mixed  $default Default value to return if the offset does not exist.
+     * @param int   $offset  the segment offset
+     * @param mixed $default Default value to return if the offset does not exist.
      *
      * @return mixed
      */
     public function getSegment($offset, $default = null)
     {
-        if (isset($this->data[$offset])) {
+        if ($offset > -1 && isset($this->data[$offset])) {
             return $this->data[$offset];
+        }
+
+        $nb_segments = count($this->data);
+        if ($offset <= -1 && $nb_segments + $offset > -1) {
+            return $this->data[$nb_segments + $offset];
         }
 
         return $default;
@@ -217,48 +260,62 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
             array_pop($source);
         }
 
-        return $this->createFromSegments(array_merge(
+        return static::createFromSegments(array_merge(
             $source,
             iterator_to_array($this->withContent($component))
         ), $this->isAbsolute);
     }
 
     /**
-     * Returns the path basename
+     * Returns an instance with the specified parent directory's path.
      *
-     * @return string
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the extension basename modified.
+     *
+     * @param string $path the new parent directory path
+     *
+     * @return static
      */
-    public function getBasename()
+    public function withDirname($path)
     {
+        $path = $this->validateString($path);
+        if ($path === $this->getDirname()) {
+            return $this;
+        }
+
+        if ('/' !== mb_substr($path, -1, 1)) {
+            $path = $path.'/';
+        }
+
+        return new static($path.$this->getBasename());
+    }
+
+    /**
+     * Returns an instance with the specified basename.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the extension basename modified.
+     *
+     * @param string $path the new path basename
+     *
+     * @return static
+     */
+    public function withBasename($path)
+    {
+        $path = $this->validateString($path);
+        if (false !== strpos($path, '/')) {
+            throw new Exception('The submitted basename can not contain the path separator');
+        }
+
         $data = $this->data;
+        $basename = array_pop($data);
+        if ($path == $basename) {
+            return $this;
+        }
 
-        return (string) array_pop($data);
-    }
+        $data[] = $path;
 
-    /**
-     * Returns parent directory's path
-     *
-     * @return string
-     */
-    public function getDirname()
-    {
-        return str_replace(
-            ['\\', "\0"],
-            [static::$separator, '\\'],
-            dirname(str_replace('\\', "\0", $this->__toString()))
-        );
-    }
-
-    /**
-     * Returns the basename extension
-     *
-     * @return string
-     */
-    public function getExtension()
-    {
-        list($basename, ) = explode(';', $this->getBasename(), 2);
-
-        return pathinfo($basename, PATHINFO_EXTENSION);
+        return static::createFromSegments($data, $this->isAbsolute);
     }
 
     /**

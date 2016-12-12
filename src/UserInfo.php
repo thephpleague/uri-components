@@ -12,8 +12,6 @@
  */
 namespace League\Uri\Components;
 
-use League\Uri\Interfaces\Component as UriComponent;
-
 /**
  * Value object representing the UserInfo part of an URI.
  *
@@ -24,7 +22,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.1
  *
  */
-class UserInfo implements UriComponent
+class UserInfo implements ComponentInterface
 {
     use ComponentTrait;
 
@@ -110,14 +108,14 @@ class UserInfo implements UriComponent
      *
      * @return string|null
      */
-    public function getUser($enc_type = self::RFC3986_ENCODING)
+    public function getUser($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->user || self::NO_ENCODING == $enc_type) {
+        if ('' == $this->user || ComponentInterface::NO_ENCODING == $enc_type) {
             return $this->user;
         }
 
-        if ($enc_type == self::RFC3987_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', ':', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->user);
@@ -133,14 +131,14 @@ class UserInfo implements UriComponent
      *
      * @return string
      */
-    public function getPass($enc_type = self::RFC3986_ENCODING)
+    public function getPass($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->pass || self::NO_ENCODING == $enc_type) {
+        if ('' == $this->pass || ComponentInterface::NO_ENCODING == $enc_type) {
             return $this->pass;
         }
 
-        if ($enc_type == self::RFC3987_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern),  $this->pass);
@@ -176,7 +174,7 @@ class UserInfo implements UriComponent
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986_ENCODING)
+    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
         if (null === $this->user) {

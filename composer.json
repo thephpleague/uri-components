@@ -30,8 +30,7 @@
         "ext-mbstring" : "*",
         "ext-intl" : "*",
         "ext-fileinfo": "*",
-        "jeremykendall/php-domain-parser": "^3.0",
-        "league/uri-interfaces": "~0.4"
+        "jeremykendall/php-domain-parser": "^3.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^1.0",

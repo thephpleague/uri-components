@@ -26,7 +26,7 @@ namespace League\Uri\Components;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.5
  */
-class Fragment extends Component
+class Fragment extends AbstractComponent
 {
 
     /**
@@ -46,7 +46,7 @@ class Fragment extends Component
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986_ENCODING)
+    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 

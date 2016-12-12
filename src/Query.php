@@ -15,7 +15,6 @@ namespace League\Uri\Components;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use League\Uri\Interfaces\Component as ComponentInterface;
 use Traversable;
 
 /**
@@ -135,7 +134,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986_ENCODING)
+    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 

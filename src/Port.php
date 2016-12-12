@@ -26,7 +26,7 @@ namespace League\Uri\Components;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.3
  */
-class Port extends Component
+class Port extends AbstractComponent
 {
     /**
      * @inheritdoc

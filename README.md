@@ -18,7 +18,6 @@ You need:
 Dependencies
 -------
 
-- [uri-interfaces](https://github.com/thephpleague/uri-interfaces)
 - [php-domain-parser](https://github.com/jeremykendall/php-domain-parser)
 
 Installation
@@ -49,7 +48,8 @@ Any Component object exposes the following methods and constant:
 const Component::RFC3986_ENCODING = 2;
 const Component::RFC3987_ENCODING = 3;
 const Component::NO_ENCODING = 255;
-public Component::isDefined(void): bool
+public Component::isNull(void): bool
+public Component::isEmpty(void): bool
 public Component::getContent(string $enc_type = Component::RFC3986_ENCODING): mixed
 public Component::__toString(): string
 public Component::getUriComponent(void): string
@@ -58,7 +58,8 @@ public Component::withContent(?string $content): self
 
 **NEW**
 
-- `Component::isDefined` returns `true` when the component content is not equal to `null`.
+- `Component::isNull` returns `true` when the component content is equal to `null`.
+- `Component::isEmpty` returns `true` when the component content is equal to `null` or the empty string.
 - `Component::getContent` can return a `string` or an `int`, in case of the `Port` component, if the component is defined, otherwise the method returns `null`.
 - When the `$enc_type` parameter is used, the method returns a value encoded against:
 	- the RFC3986 rules with `Component::RFC3986_ENCODING`;
@@ -164,6 +165,7 @@ public Host::without(int[] $offsets): self
 
 - `Host::createFromIp` a named constructor to returns a Host object from an IP
 - `Host::getIp` returns the Host IP part or null if the host is not an IP
+- `Host::getLabel` now accepts negative offset like PHP 7.1+
 
 **BC Break:**
 
@@ -178,7 +180,6 @@ URI path component objects are modelled depending on the URI as such each URI sc
 ```php
 <?php
 
-public Path::isEmpty(void): bool
 public Path::isAbsolute(void): bool
 public Path::withLeadingSlash(void): self
 public Path::withoutLeadingSlash(void): self
@@ -187,12 +188,6 @@ public Path::withTrailingSlash(void): self
 public Path::withoutTrailingSlash(void): self
 public Path::withoutEmptySegments(void): self
 ```
-
-**NEW:**
-
-- `Path::isEmpty` tell whether the path is an empty string or not.
-
-**According to RFC3986, the Path content can not be equal to `null` therefore `Path::isDefined` always returns `true`**
 
 **Because path are scheme specific, some methods may trigger an `InvalidArgumentException` if for a given scheme the path does not support the given modification**
 
@@ -208,8 +203,8 @@ const HierarchicalPath::IS_ABSOLUTE = 2;
 public static HierarchicalPath::createFromSegments(array $segments, $type = self::IS_RELATIVE): self
 public HierarchicalPath::getSegments(void): string[]
 public HierarchicalPath::getSegment(int $offset, mixed $default = null): mixed
-public HierarchicalPath::getBasename(): string
 public HierarchicalPath::getDirname(): string
+public HierarchicalPath::getBasename(): string
 public HierarchicalPath::getExtension(): string
 public HierarchicalPath::hasKey(int $offset): bool
 public HierarchicalPath::keys(mixed $value = null): int[]
@@ -218,8 +213,16 @@ public HierarchicalPath::append(string $content): self
 public HierarchicalPath::replace(int $offset, string $content): self
 public HierarchicalPath::filter(callable $callable, int $flag = 0): self
 public HierarchicalPath::without(int[] $offsets): self
+public HierarchicalPath::withDirname(string $dirname): self
+public HierarchicalPath::withBasename(string $basename): self
 public HierarchicalPath::withExtension(string $extension): self
 ```
+
+**NEW:**
+
+- `HierarchicalPath::withDirname` returns a new instance with a new path directory parent
+- `HierarchicalPath::withBasename` returns a new instance with a new path basename
+- `HierarchicalPath::getSegment` now accepts negative offset like PHP 7.1+
 
 **BC Break:**
 

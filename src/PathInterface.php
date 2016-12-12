@@ -13,7 +13,6 @@
 namespace League\Uri\Components;
 
 use InvalidArgumentException;
-use League\Uri\Interfaces\Component as UriComponent;
 
 /**
  * Value object representing a URI Path component.
@@ -29,7 +28,7 @@ use League\Uri\Interfaces\Component as UriComponent;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-interface PathInterface extends UriComponent
+interface PathInterface extends ComponentInterface
 {
     /**
      * Returns whether or not the path is empty
