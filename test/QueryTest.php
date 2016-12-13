@@ -174,12 +174,6 @@ class QueryTest extends AbstractTestCase
         $this->assertSame($expected, $this->query->getValue('togo', $expected));
     }
 
-    public function testhasKey()
-    {
-        $this->assertTrue($this->query->hasKey('kingkong'));
-        $this->assertFalse($this->query->hasKey('togo'));
-    }
-
     public function testCountable()
     {
         $this->assertSame(1, count($this->query));

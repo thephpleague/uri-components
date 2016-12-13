@@ -116,7 +116,6 @@ public static Query::build(array $pairs, string $separator = '&', int $enc_type 
 public static Query::createFromPairs(array $pairs): self
 public Query::getPairs(void): array
 public Query::getValue(string $offset, mixed $default = null): mixed
-public Query::hasKey(string $offset): bool
 public Query::keys(mixed $value = null): string[]
 public Query::merge(Query|string $content): self
 public Query::ksort(callable|int $sort = SORT_REGULAR): self
@@ -147,7 +146,6 @@ public Host::hasZoneIdentifier(void): bool
 public Host::getIp(void): string|null
 public Host::getLabels(void): string[]
 public Host::getLabel(int $offset, mixed $default = null): mixed
-public Host::hasKey(int $offset): bool
 public Host::keys(mixed $value = null): int[]
 public Host::getPublicSuffix(): string
 public Host::getRegisterableDomain(): string
@@ -166,6 +164,7 @@ public Host::without(int[] $offsets): self
 - `Host::createFromIp` a named constructor to returns a Host object from an IP
 - `Host::getIp` returns the Host IP part or null if the host is not an IP
 - `Host::getLabel` now accepts negative offset like PHP 7.1+
+- `Host::replace` now accepts negative offset like PHP 7.1+
 
 **BC Break:**
 
@@ -206,7 +205,6 @@ public HierarchicalPath::getSegment(int $offset, mixed $default = null): mixed
 public HierarchicalPath::getDirname(): string
 public HierarchicalPath::getBasename(): string
 public HierarchicalPath::getExtension(): string
-public HierarchicalPath::hasKey(int $offset): bool
 public HierarchicalPath::keys(mixed $value = null): int[]
 public HierarchicalPath::prepend(string $content): self
 public HierarchicalPath::append(string $content): self
@@ -223,6 +221,7 @@ public HierarchicalPath::withExtension(string $extension): self
 - `HierarchicalPath::withDirname` returns a new instance with a new path directory parent
 - `HierarchicalPath::withBasename` returns a new instance with a new path basename
 - `HierarchicalPath::getSegment` now accepts negative offset like PHP 7.1+
+- `HierarchicalPath::replace` now accepts negative offset like PHP 7.1+
 
 **BC Break:**
 
