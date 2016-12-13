@@ -379,6 +379,24 @@ class Host extends HierarchicalComponent
     }
 
     /**
+     * set the FQDN property
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    protected function setIsAbsolute($str)
+    {
+        $this->isAbsolute = self::IS_RELATIVE;
+        if ('.' === mb_substr($str, -1, 1, 'UTF-8')) {
+            $this->isAbsolute = self::IS_ABSOLUTE;
+            $str = mb_substr($str, 0, -1, 'UTF-8');
+        }
+
+        return $str;
+    }
+
+    /**
      * Return an host without its zone identifier according to RFC6874
      *
      * This method MUST retain the state of the current instance, and return
@@ -398,21 +416,41 @@ class Host extends HierarchicalComponent
     }
 
     /**
-     * set the FQDN property
+     * Returns a host instance with its Root label
      *
-     * @param string $str
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
-     * @return string
+     * @return static
      */
-    protected function setIsAbsolute($str)
+    public function withRootLabel()
     {
-        $this->isAbsolute = self::IS_RELATIVE;
-        if ('.' === mb_substr($str, -1, 1, 'UTF-8')) {
-            $this->isAbsolute = self::IS_ABSOLUTE;
-            $str = mb_substr($str, 0, -1, 'UTF-8');
+        if ($this->isAbsolute == self::IS_ABSOLUTE || $this->isIp()) {
+            return $this;
         }
 
-        return $str;
+        $clone = clone $this;
+        $clone->isAbsolute = self::IS_ABSOLUTE;
+
+        return $clone;
+    }
+
+    /**
+     * Returns a host instance without the Root label
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * @return static
+     */
+    public function withoutRootlabel()
+    {
+        if ($this->isAbsolute == self::IS_RELATIVE || $this->isIp()) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->isAbsolute = self::IS_RELATIVE;
+
+        return $clone;
     }
 
     /**
@@ -449,5 +487,90 @@ class Host extends HierarchicalComponent
             iterator_to_array($this->withContent($component)),
             $this->getLabels()
         ), $this->isAbsolute);
+    }
+
+    /**
+     * Returns an instance with the specified registerable domain added
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component with the new registerable domain
+     *
+     * @param string|null $host the registerable domain to add
+     *
+     * @return static
+     */
+    public function withRegisterableDomain($host)
+    {
+        $host = $this->filterPublicDomain($host);
+        $registerable_domain = $this->getRegisterableDomain();
+        if ($host === $registerable_domain) {
+            return $this;
+        }
+
+        $source = $this->getContent();
+        if ('' == $source) {
+            return $this->withContent($host);
+        }
+
+        return $this
+            ->withContent(substr($source, 0,  -strlen($registerable_domain) - 1))
+            ->append($host);
+    }
+
+    /**
+     * Returns an instance with the specified sub domain added
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component with the new sud domain
+     *
+     * @param string|null $host the subdomain to add
+     *
+     * @return static
+     */
+    public function withSubdomain($host)
+    {
+        $host = $this->filterPublicDomain($host);
+        $subdomain = $this->getSubdomain();
+        if ($host === $subdomain) {
+            return $this;
+        }
+
+        $source = $this->getContent();
+        if ('' == $source) {
+            return $this->withContent($host);
+        }
+
+        if ('' == $subdomain) {
+            return $this->prepend($host);
+        }
+
+        return $this
+            ->withContent(substr($source, strlen($subdomain) + 1))
+            ->prepend($host);
+    }
+
+    /**
+     * Filter the submitted domain to see if It can be use
+     * to modify the Host Info properties. The host is normalize
+     * to its RFC3986 representation
+     *
+     * @param string|null $host
+     *
+     * @throws Exception If the current host is an IP
+     * @throws Exception If the submitted host is invalid
+     *
+     * @return string|null
+     */
+    protected function filterPublicDomain($host)
+    {
+        if ($this->isIp()) {
+            throw new Exception('The submitted host can not modify an IP host');
+        }
+
+        if (mb_substr($host, -1, 1, 'UTF-8') === '.') {
+            throw new Exception('The submitted host can not be absolute');
+        }
+
+        return $this->withContent($host)->getContent();
     }
 }

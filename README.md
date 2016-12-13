@@ -125,7 +125,13 @@ public Query::without(string[] $offsets): self
 
 **NEW:**
 
+- `Query::parse` returns a associative array representing the query key/pair as defined in RFC3986
+- `Query::build` returns the query string from a query key/pair array as defined in RFC3986
 - `Query::extract` returns a hash similar to `parse_str` usage with a second parameter but the array [keys are not mangled](https://wiki.php.net/rfc/on_demand_name_mangling)
+
+**BC Break:**
+
+- `Query::hasKey` is removed
 
 ### Host
 
@@ -151,12 +157,16 @@ public Host::getPublicSuffix(): string
 public Host::getRegisterableDomain(): string
 public Host::getSubdomain(): string
 public Host::isPublicSuffixValid(): bool
+public Host::withRootLabel(void): self
+public Host::withoutRootLabel(void): self
 public Host::withoutZoneIdentifier(): self
 public Host::prepend(string $content): self
 public Host::append(string $content): self
 public Host::replace(int $offset, string $content): self
 public Host::filter(callable $callable, int $flag = 0): self
 public Host::without(int[] $offsets): self
+public Host::withRegisterableDomain(string|null $host): self
+public Host::withSubdomain(string|null $host): self
 ```
 
 **NEW:**
@@ -165,12 +175,17 @@ public Host::without(int[] $offsets): self
 - `Host::getIp` returns the Host IP part or null if the host is not an IP
 - `Host::getLabel` now accepts negative offset like PHP 7.1+
 - `Host::replace` now accepts negative offset like PHP 7.1+
+- `Host::withRegisterableDomain` modify the registerable domain part
+- `Host::withSubdomain` modify the sub domain part
+- `Host::withRootLabel` adds the root label
+- `Host::withoutRootLabel` removes the root label
 
 **BC Break:**
 
 - The constructor no longer accept *naked* IPv6 string
 - The host labels are always normalized to their IDN representation
 - `Host::isIdn` is removed
+- `Host::hasKey` is removed
 
 ### Path objects
 
@@ -226,6 +241,7 @@ public HierarchicalPath::withExtension(string $extension): self
 **BC Break:**
 
 - All FTP related methods to manipulate the typecode are removed.
+- `HierarchicalPath::hasKey` is removed
 
 #### DataPath
 

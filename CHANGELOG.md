@@ -7,6 +7,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `HierarchicalPath::withDirname`
 - `HierarchicalPath::withBasename`
 - `League\Uri\Components\ComponentInterface` replaces `League\Uri\Interfaces\Component`
+- `Host::withRegisterableDomain`
+- `Host::withSubdomain`
+- `Host::withRootLabel`
+- `Host::withoutRootLabel`
 
 ### Fixed
 
