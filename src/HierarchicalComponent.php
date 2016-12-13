@@ -98,10 +98,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
             throw Exception::fromInvalidFlag($flag);
         }
 
-        return $this->newHierarchicalInstance(
-            array_filter($this->data, $callable, $flag),
-            $this->isAbsolute
-        );
+        return $this->newHierarchicalInstance(array_filter($this->data, $callable, $flag), $this->isAbsolute);
     }
 
     /**
@@ -185,46 +182,22 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
     }
 
     /**
-     * Returns whether the given key exists in the current instance
-     *
-     * @param int $offset
-     *
-     * @return bool
-     */
-    public function hasKey($offset)
-    {
-        return array_key_exists($offset, $this->data);
-    }
-
-    /**
-     * Returns the component $keys.
-     *
-     * If a value is specified only the keys associated with
-     * the given value will be returned
-     *
-     * @return array
-     */
-    public function keys()
-    {
-        if (0 === func_num_args()) {
-            return array_keys($this->data);
-        }
-
-        return array_keys($this->data, func_get_arg(0), true);
-    }
-
-    /**
      * Returns an instance without the specified keys
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
-     * @param array $offsets the list of keys to remove from the collection
+     * @param int[] $offsets the list of keys to remove from the collection
      *
      * @return static
      */
     public function without(array $offsets)
     {
+        $offsets = filter_var($offsets, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
+        if (in_array(false, $offsets, true)) {
+            throw new Exception('The offset list must contains integers only');
+        }
+
         $data = $this->data;
         foreach ($offsets as $offset) {
             unset($data[$offset]);
@@ -236,7 +209,6 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
 
         return $this->newHierarchicalInstance($data, $this->isAbsolute);
     }
-
 
     /**
      * Returns an instance with the modified segment
@@ -251,26 +223,45 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      */
     public function replace($offset, $component)
     {
-        if (!empty($this->data) && !$this->hasKey($offset)) {
+        $offset = $this->filterOffset($offset);
+        if (false === $offset) {
             return $this;
         }
 
-        $source = iterator_to_array($this);
         $dest = iterator_to_array($this->withContent($component));
         if ('' === $dest[count($dest) - 1]) {
             array_pop($dest);
         }
 
-        $data = array_merge(
-            array_slice($source, 0, $offset),
-            $dest,
-            array_slice($source, $offset + 1)
-        );
-
+        $source = iterator_to_array($this);
+        $data = array_merge(array_slice($source, 0, $offset), $dest, array_slice($source, $offset + 1));
         if ($data === $this->data) {
             return $this;
         }
 
         return $this->newHierarchicalInstance($data, $this->isAbsolute);
+    }
+
+    /**
+     * Filter Offset
+     *
+     * @param int $offset
+     *
+     * @return int|false
+     */
+    protected function filterOffset($offset)
+    {
+        $nb_elements = count($this->data);
+        $offset = filter_var(
+            $offset,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]]
+        );
+
+        if ($offset < 0) {
+            return $nb_elements + $offset;
+        }
+
+        return $offset;
     }
 }

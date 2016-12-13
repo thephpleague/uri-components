@@ -265,6 +265,12 @@ class HierarchicalPathTest extends AbstractTestCase
         ];
     }
 
+    public function testWithoutThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Path('/toto/le/heros/masson'))->without(['toto']);
+    }
+
     /**
      * @param $raw
      * @param $input
@@ -288,6 +294,9 @@ class HierarchicalPathTest extends AbstractTestCase
             ['', '/shoki/', 0, 'shoki'],
             ['/path/to/paradise', '::1', 42, '/path/to/paradise'],
             ['/path/to/paradise', 'path', 0, '/path/to/paradise'],
+            ['/path/to/paradise', 'path', -1, '/path/to/path'],
+            ['/path/to/paradise', 'path', -4, '/path/to/paradise'],
+            ['/path/to/paradise', 'path', -3, '/path/to/paradise'],
         ];
     }
 
@@ -456,6 +465,16 @@ class HierarchicalPathTest extends AbstractTestCase
             'remove All' => [['foobar', 'stay'], $func, '/'],
             'remove None' => [['foo.bar', 'st.ay'], $func, '/foo.bar/st.ay'],
         ];
+    }
+
+    public function testFilterThrowException()
+    {
+        $func = function ($value) {
+            return stripos($value, '.') !== false;
+        };
+
+        $this->expectException(Exception::class);
+        (new Path())->filter($func, 34);
     }
 
 

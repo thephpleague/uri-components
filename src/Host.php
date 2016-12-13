@@ -302,6 +302,22 @@ class Host extends HierarchicalComponent
     }
 
     /**
+     * @inheritdoc
+     */
+    public function keys()
+    {
+        if (0 === func_num_args()) {
+            return array_keys($this->data);
+        }
+
+        return array_keys(
+            $this->data,
+            idn_to_utf8($this->validateString(func_get_arg(0))),
+            true
+        );
+    }
+
+    /**
      * Returns the instance content encoded in RFC3986 or RFC3987.
      *
      * If the instance is defined, the value returned MUST be percent-encoded,

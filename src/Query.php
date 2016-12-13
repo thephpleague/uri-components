@@ -291,17 +291,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function hasKey($offset)
-    {
-        return array_key_exists(
-            $this->decodeComponent($this->validateString($offset)),
-            $this->data
-        );
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function keys()
     {
         if (0 === func_num_args()) {

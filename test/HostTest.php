@@ -435,6 +435,12 @@ class HostTest extends AbstractTestCase
         ];
     }
 
+    public function testWithoutThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Host('example.com'))->without(['com']);
+    }
+
     /**
      * @param $host
      * @param $expected
@@ -556,6 +562,8 @@ class HostTest extends AbstractTestCase
             ['toto', '[::1]', 23, 'toto'],
             ['127.0.0.1', 'secure.example.com', 2, '127.0.0.1'],
             ['secure.example.com', '127.0.0.1', 0, 'secure.example.127.0.0.1'],
+            ['master.example.com', 'shop', -2, 'master.shop.com'],
+            ['master.example.com', 'shop', -1, 'shop.example.com'],
         ];
     }
 

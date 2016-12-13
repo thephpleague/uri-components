@@ -168,6 +168,22 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function keys()
+    {
+        if (0 === func_num_args()) {
+            return array_keys($this->data);
+        }
+
+        return array_keys(
+            $this->data,
+            $this->decodeComponent($this->validateString(func_get_arg(0))),
+            true
+        );
+    }
+
+    /**
      * Returns an array representation of the HierarchicalPath
      *
      * @return array

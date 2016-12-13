@@ -12,6 +12,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - `HierarchicalPath::getSegment` now can use negative offset like PHP 7.1+
 - `Host::getLabel` now can use negative offset like PHP 7.1+
+- `HierarchicalPath::replace` now accepts negative offset like PHP 7.1+
+- `Host::replace` now accepts negative offset like PHP 7.1+
+- `HierarchicalPath::without` argument is more strict accepts only array of integers
+- `Host::without` argument is more strict accepts only array of integers
 
 ### Deprecated
 
@@ -20,6 +24,9 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Remove
 
 - Implementing `League\Uri\Interfaces\Component`
+- `HierarchicalPath::hasKey`
+- `Host::hasKey`
+- `Query::hasKey`
 
 ## 0.5.0 - 2016-12-09
 
