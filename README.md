@@ -117,7 +117,7 @@ public static Query::createFromPairs(array $pairs): self
 public Query::getPairs(void): array
 public Query::getValue(string $offset, mixed $default = null): mixed
 public Query::keys(mixed $value = null): string[]
-public Query::merge(Query|string $content): self
+public Query::merge(string|null $content): self
 public Query::ksort(callable|int $sort = SORT_REGULAR): self
 public Query::filter(callable $callable, int $flag = 0): self
 public Query::without(string[] $offsets): self

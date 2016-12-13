@@ -248,14 +248,18 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
-     * @param self|string $query the data to be merged
+     * @param string $query the data to be merged
      *
      * @return static
      */
     public function merge($query)
     {
-        $pairs = !$query instanceof self ? $this->validate($query) : $query->getPairs();
-        if (in_array($pairs, [$this->data, []], true)) {
+        if ($query === null) {
+            return $this;
+        }
+
+        $pairs = $this->validate($this->validateString($query));
+        if ($pairs === $this->data) {
             return $this;
         }
 
