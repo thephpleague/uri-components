@@ -607,4 +607,89 @@ class HostTest extends AbstractTestCase
             ['xn--p1ai.ru.', 'ru', 'xn--p1ai.ru', '', true],
         ];
     }
+
+    /**
+     * @dataProvider validRegisterableDomain
+     */
+    public function testWithRegisterableDomain($newhost, $host, $expected)
+    {
+        $host = new Host($host);
+        $this->assertSame($expected, (string) $host->withRegisterableDomain($newhost));
+    }
+
+    public function validRegisterableDomain()
+    {
+        return [
+            ['thephpleague.com', 'shop.example.com', 'shop.thephpleague.com'],
+            ['thephpleague.com', 'shop.ulb.ac.be', 'shop.thephpleague.com'],
+            ['thephpleague.com', 'shop.ulb.ac.be.', 'shop.thephpleague.com.'],
+            ['thephpleague.com', '', 'thephpleague.com'],
+            ['thephpleague.com', 'shop.thephpleague.com', 'shop.thephpleague.com'],
+        ];
+    }
+
+    public function testWithRegisterableDomainThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Host('127.0.0.1'))->withRegisterableDomain('example.com');
+    }
+
+    public function testWithSubDomainThrowExceptionWithAbsoluteRegisterableDomain()
+    {
+        $this->expectException(Exception::class);
+        (new Host('example.com'))->withRegisterableDomain('example.com.');
+    }
+
+    /**
+     * @dataProvider validSubDomain
+     */
+    public function testWithSubDomain($newhost, $host, $expected)
+    {
+        $host = new Host($host);
+        $this->assertSame($expected, (string) $host->withSubDomain($newhost));
+    }
+
+    public function validSubDomain()
+    {
+        return [
+            ['shop', 'master.example.com', 'shop.example.com'],
+            ['shop', 'www.ulb.ac.be', 'shop.ulb.ac.be'],
+            ['shop', 'ulb.ac.be', 'shop.ulb.ac.be'],
+            ['', 'ulb.ac.be.', 'ulb.ac.be.'],
+            ['www', 'www.ulb.ac.be', 'www.ulb.ac.be'],
+            ['www', '', 'www'],
+            ['www', 'example.com.', 'www.example.com.'],
+        ];
+    }
+
+    public function testWithSubDomainThrowExceptionWithIPHost()
+    {
+        $this->expectException(Exception::class);
+        (new Host('127.0.0.1'))->withSubDomain('example.com');
+    }
+
+    public function testWithSubDomainThrowExceptionWithAbsoluteSubDomain()
+    {
+        $this->expectException(Exception::class);
+        (new Host('example.com'))->withSubDomain('example.com.');
+    }
+
+    /**
+     * @dataProvider rootProvider
+     */
+    public function testWithRooot($host, $expected_with_root, $expected_without_root)
+    {
+        $host = new Host($host);
+        $this->assertSame($expected_with_root, (string) $host->withRootLabel());
+        $this->assertSame($expected_without_root, (string) $host->withoutRootLabel());
+    }
+
+    public function rootProvider()
+    {
+        return [
+            ['example.com', 'example.com.', 'example.com'],
+            ['example.com.', 'example.com.', 'example.com'],
+            ['127.0.0.1', '127.0.0.1', '127.0.0.1'],
+        ];
+    }
 }
