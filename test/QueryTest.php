@@ -141,15 +141,15 @@ class QueryTest extends AbstractTestCase
     {
         return [
             'with new data' => [
-                Query::createFromPairs(['john' => 'doe the john']),
+                'john=doe the john',
                 'kingkong=toto&john=doe%20the%20john',
             ],
             'with the same data' => [
-                new Query('kingkong=toto'),
+                'kingkong=toto',
                 'kingkong=toto',
             ],
             'without new data' => [
-                new Query(''),
+                null,
                 'kingkong=toto',
             ],
             'with string' => [
