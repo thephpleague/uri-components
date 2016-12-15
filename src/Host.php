@@ -165,7 +165,35 @@ class Host extends HierarchicalComponent
      */
     public function __construct($host = null)
     {
+        $host = $this->setIsAbsolute($host);
         $this->data = $this->validate($host);
+    }
+
+    /**
+     * set the FQDN property
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    protected function setIsAbsolute($str)
+    {
+        if (null === $str) {
+            return $str;
+        }
+
+        $str = $this->validateString($str);
+        if ('.' === $str) {
+            return $str;
+        }
+
+        $this->isAbsolute = self::IS_RELATIVE;
+        if ('.' === mb_substr($str, -1, 1, 'UTF-8')) {
+            $this->isAbsolute = self::IS_ABSOLUTE;
+            return mb_substr($str, 0, -1, 'UTF-8');
+        }
+
+        return $str;
     }
 
     /**
@@ -183,7 +211,6 @@ class Host extends HierarchicalComponent
             return [];
         }
 
-        $host = $this->validateString($host);
         if ('' === $host) {
             return [''];
         }
@@ -204,7 +231,7 @@ class Host extends HierarchicalComponent
         if ($this->isValidHostname($host)) {
             return array_reverse(array_map(
                 'idn_to_utf8',
-                explode('.', strtolower($this->setIsAbsolute($host)))
+                explode('.', strtolower($host))
             ));
         }
 
@@ -379,24 +406,6 @@ class Host extends HierarchicalComponent
     }
 
     /**
-     * set the FQDN property
-     *
-     * @param string $str
-     *
-     * @return string
-     */
-    protected function setIsAbsolute($str)
-    {
-        $this->isAbsolute = self::IS_RELATIVE;
-        if ('.' === mb_substr($str, -1, 1, 'UTF-8')) {
-            $this->isAbsolute = self::IS_ABSOLUTE;
-            $str = mb_substr($str, 0, -1, 'UTF-8');
-        }
-
-        return $str;
-    }
-
-    /**
      * Return an host without its zone identifier according to RFC6874
      *
      * This method MUST retain the state of the current instance, and return
@@ -465,10 +474,12 @@ class Host extends HierarchicalComponent
      */
     public function prepend($component)
     {
-        return static::createFromLabels(
-            $this->withContent($component),
-            $this->isAbsolute
-        )->append($this->__toString());
+        $labels = array_merge($this->data, $this->filterComponent($component));
+        if ($this->data === $labels) {
+            return $this;
+        }
+
+        return static::createFromLabels($labels, $this->isAbsolute);
     }
 
     /**
@@ -483,10 +494,33 @@ class Host extends HierarchicalComponent
      */
     public function append($component)
     {
-        return static::createFromLabels(array_merge(
-            iterator_to_array($this->withContent($component)),
-            $this->getLabels()
-        ), $this->isAbsolute);
+        $labels = array_merge($this->filterComponent($component), $this->data);
+        if ($this->data === $labels) {
+            return $this;
+        }
+
+        return static::createFromLabels($labels, $this->isAbsolute);
+    }
+
+    /**
+     * Filter the component to append or prepend
+     *
+     * @param string $component
+     *
+     * @return array
+     */
+    protected function filterComponent($component)
+    {
+        $component = $this->validateString($component);
+        if ('' === $component) {
+            return [];
+        }
+
+        if ('.' !== $component && '.' == substr($component, -1, 1)) {
+            $component = substr($component, 0, -1);
+        }
+
+        return $this->validate($component);
     }
 
     /**

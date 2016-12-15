@@ -498,10 +498,11 @@ class HostTest extends AbstractTestCase
     public function validPrepend()
     {
         return [
-            'prepend string' => ['secure.example.com', 'master', 'master.secure.example.com'],
-            'prepend FQDN host string' => ['secure.example.com', 'master.', 'master.secure.example.com'],
-            'prepend to FQDN host a host string' => ['secure.example.com.', 'master', 'master.secure.example.com.'],
-            'prepend IPv4' => ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
+            ['secure.example.com', 'master', 'master.secure.example.com'],
+            ['secure.example.com', 'master.', 'master.secure.example.com'],
+            ['secure.example.com.', 'master', 'master.secure.example.com.'],
+            ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
+            ['example.com', '', 'example.com'],
         ];
     }
 
@@ -531,6 +532,7 @@ class HostTest extends AbstractTestCase
             ['secure.example.com', 'master.', 'secure.example.com.master'],
             ['secure.example.com.', 'master', 'secure.example.com.master.'],
             ['127.0.0.1', 'toto', '127.0.0.1.toto'],
+            ['example.com', '', 'example.com'],
         ];
     }
 
