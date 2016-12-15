@@ -218,7 +218,7 @@ trait ComponentTrait
      */
     public function isNull()
     {
-        return null !== $this->getContent();
+        return null === $this->getContent();
     }
 
     /**

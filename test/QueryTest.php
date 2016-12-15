@@ -29,8 +29,8 @@ class QueryTest extends AbstractTestCase
 
     public function testDefined()
     {
-        $this->assertTrue($this->query->isNull());
-        $this->assertFalse($this->query->withContent(null)->isNull());
+        $this->assertFalse($this->query->isNull());
+        $this->assertTrue($this->query->withContent(null)->isNull());
     }
 
     public function testWithContent()
