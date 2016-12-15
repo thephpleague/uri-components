@@ -42,8 +42,8 @@ class FragmentTest extends AbstractTestCase
 
     public function testIsNull()
     {
-        $this->assertFalse((new Fragment(null))->isNull());
-        $this->assertTrue((new Fragment(''))->isNull());
+        $this->assertTrue((new Fragment(null))->isNull());
+        $this->assertFalse((new Fragment(''))->isNull());
     }
 
     /**

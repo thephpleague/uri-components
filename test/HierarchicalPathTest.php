@@ -31,8 +31,8 @@ class HierarchicalPathTest extends AbstractTestCase
     public function testDefined()
     {
         $component = new Path('yolo');
-        $this->assertTrue($component->isNull());
-        $this->assertTrue($component->withContent(null)->isNull());
+        $this->assertFalse($component->isNull());
+        $this->assertFalse($component->withContent(null)->isNull());
     }
 
     /**

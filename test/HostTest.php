@@ -23,8 +23,8 @@ class HostTest extends AbstractTestCase
     public function testDefined()
     {
         $component = new Host('yolo');
-        $this->assertTrue($component->isNull());
-        $this->assertFalse($component->withContent(null)->isNull());
+        $this->assertFalse($component->isNull());
+        $this->assertTrue($component->withContent(null)->isNull());
     }
 
     public function testWithContent()
