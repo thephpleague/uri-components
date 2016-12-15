@@ -253,10 +253,12 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      */
     public function prepend($component)
     {
-        return $this->createFromSegments(
-            $this->withContent($component),
-            $this->isAbsolute
-        )->append($this->__toString());
+        $new_segments = $this->filterComponent($component);
+        if (!empty($new_segments) && '' === end($new_segments)) {
+            array_pop($new_segments);
+        }
+
+        return static::createFromSegments(array_merge($new_segments, $this->data), $this->isAbsolute);
     }
 
     /**
@@ -271,15 +273,30 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      */
     public function append($component)
     {
-        $source = $this->getSegments();
-        if (!empty($source) && '' === end($source)) {
-            array_pop($source);
+        $new_segments = $this->filterComponent($component);
+        $data = $this->data;
+        if (!empty($data) && '' === end($data)) {
+            array_pop($data);
         }
 
-        return static::createFromSegments(array_merge(
-            $source,
-            iterator_to_array($this->withContent($component))
-        ), $this->isAbsolute);
+        return static::createFromSegments(array_merge($data, $new_segments), $this->isAbsolute);
+    }
+
+    /**
+     * Filter the component to append or prepend
+     *
+     * @param string $component
+     *
+     * @return array
+     */
+    protected function filterComponent($component)
+    {
+        $component = $this->validateString($component);
+        if ('' != $component && '/' == $component[0]) {
+            $component = substr($component, 1);
+        }
+
+        return $this->validate($component);
     }
 
     /**
