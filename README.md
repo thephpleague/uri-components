@@ -115,7 +115,8 @@ public static Query::extract(string $query, string $separator = '&'): array
 public static Query::build(array $pairs, string $separator = '&', int $enc_type = Query::RFC3986_ENCODING): string
 public static Query::createFromPairs(array $pairs): self
 public Query::getPairs(void): array
-public Query::getValue(string $offset, mixed $default = null): mixed
+public Query::getPair(string $offset, mixed $default = null): mixed
+public Query::hasPair(mixed $value = null): bool
 public Query::keys(mixed $value = null): string[]
 public Query::merge(string|null $content): self
 public Query::ksort(callable|int $sort = SORT_REGULAR): self
@@ -131,7 +132,8 @@ public Query::without(string[] $offsets): self
 
 **BC Break:**
 
-- `Query::hasKey` is removed
+- `Query::hasKey` is renamed `Query::hasPair`
+- `Query::getValue` is removed `Query::getPair`
 
 ### Host
 
