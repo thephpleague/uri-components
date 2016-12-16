@@ -43,7 +43,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     protected $data = [];
 
     /**
-     * Key/pair separator character
+     * pair separator character
      *
      * @var string
      */
@@ -55,6 +55,13 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * @var bool
      */
     protected $preserveDelimiter = false;
+
+    /**
+     * The query keys
+     *
+     * @var array
+     */
+    protected $keys = [];
 
     /**
      * return a new Query instance from an Array or a traversable object
@@ -78,11 +85,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function __set_state(array $properties)
     {
-        $component = new static();
-        $component->data = $properties['data'];
-        $component->preserveDelimiter = $properties['preserveDelimiter'];
-
-        return $component;
+        return new static(static::build($properties['data'], static::$separator));
     }
 
     /**
@@ -94,6 +97,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     {
         $this->data = $this->validate($data);
         $this->preserveDelimiter = null !== $data;
+        $this->keys = array_fill_keys(array_keys($this->data), 1);
     }
 
     /**
@@ -213,14 +217,28 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return mixed
      */
-    public function getValue($offset, $default = null)
+    public function getPair($offset, $default = null)
     {
         $offset = $this->decodeComponent($this->validateString($offset));
-        if (isset($this->data[$offset])) {
+        if (isset($this->keys[$offset])) {
             return $this->data[$offset];
         }
 
         return $default;
+    }
+
+    /**
+     * Returns whether the given key exists in the current instance
+     *
+     * @param string $offset
+     *
+     * @return bool
+     */
+    public function haskey($offset)
+    {
+        $offset = $this->decodeComponent($this->validateString($offset));
+
+        return isset($this->keys[$offset]);
     }
 
     /**

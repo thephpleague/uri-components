@@ -178,15 +178,11 @@ class Host extends HierarchicalComponent
      */
     protected function setIsAbsolute($str)
     {
-        if (null === $str) {
+        if (in_array($str, [null, '.'], true)) {
             return $str;
         }
 
         $str = $this->validateString($str);
-        if ('.' === $str) {
-            return $str;
-        }
-
         $this->isAbsolute = self::IS_RELATIVE;
         if ('.' === mb_substr($str, -1, 1, 'UTF-8')) {
             $this->isAbsolute = self::IS_ABSOLUTE;
@@ -516,7 +512,7 @@ class Host extends HierarchicalComponent
             return [];
         }
 
-        if ('.' !== $component && '.' == substr($component, -1, 1)) {
+        if ('.' !== $component && '.' == mb_substr($component, -1, 1, 'UTF-8')) {
             $component = substr($component, 0, -1);
         }
 
@@ -535,20 +531,20 @@ class Host extends HierarchicalComponent
      */
     public function withRegisterableDomain($host)
     {
-        $host = $this->filterPublicDomain($host);
+        $new = $this->filterPublicDomain($host);
+        $source = $this->getContent();
+        if ('' == $source) {
+            return $this->withContent($new);
+        }
+
         $registerable_domain = $this->getRegisterableDomain();
-        if ($host === $registerable_domain) {
+        if ($new === $registerable_domain) {
             return $this;
         }
 
-        $source = $this->getContent();
-        if ('' == $source) {
-            return $this->withContent($host);
-        }
-
         return $this
-            ->withContent(substr($source, 0,  -strlen($registerable_domain) - 1))
-            ->append($host);
+            ->withContent(substr($source, 0, -(strlen($registerable_domain) + 1)))
+            ->append($new);
     }
 
     /**
@@ -563,24 +559,24 @@ class Host extends HierarchicalComponent
      */
     public function withSubdomain($host)
     {
-        $host = $this->filterPublicDomain($host);
+        $new = $this->filterPublicDomain($host);
+        $source = $this->getContent();
+        if ('' == $source) {
+            return $this->withContent($new);
+        }
+
         $subdomain = $this->getSubdomain();
-        if ($host === $subdomain) {
+        if ($new === $subdomain) {
             return $this;
         }
 
-        $source = $this->getContent();
-        if ('' == $source) {
-            return $this->withContent($host);
-        }
-
         if ('' == $subdomain) {
-            return $this->prepend($host);
+            return $this->prepend($new);
         }
 
         return $this
             ->withContent(substr($source, strlen($subdomain) + 1))
-            ->prepend($host);
+            ->prepend($new);
     }
 
     /**
@@ -605,6 +601,6 @@ class Host extends HierarchicalComponent
             throw new Exception('The submitted host can not be absolute');
         }
 
-        return $this->withContent($host)->getContent();
+        return implode('.', array_reverse($this->validate($host)));
     }
 }

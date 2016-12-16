@@ -165,13 +165,19 @@ class QueryTest extends AbstractTestCase
 
     public function testGetParameter()
     {
-        $this->assertSame('toto', $this->query->getValue('kingkong'));
+        $this->assertSame('toto', $this->query->getPair('kingkong'));
     }
 
     public function testGetParameterWithDefaultValue()
     {
         $expected = 'toofan';
-        $this->assertSame($expected, $this->query->getValue('togo', $expected));
+        $this->assertSame($expected, $this->query->getPair('togo', $expected));
+    }
+
+    public function testhasKey()
+    {
+        $this->assertTrue($this->query->hasKey('kingkong'));
+        $this->assertFalse($this->query->hasKey('togo'));
     }
 
     public function testCountable()
@@ -200,9 +206,9 @@ class QueryTest extends AbstractTestCase
 
         $this->assertCount(3, $query->keys());
         $this->assertSame(['foo', 'bar', 'baz'], $query->keys());
-        $this->assertSame(null, $query->getValue('foo'));
-        $this->assertSame(null, $query->getValue('bar'));
-        $this->assertSame(null, $query->getValue('baz'));
+        $this->assertSame(null, $query->getPair('foo'));
+        $this->assertSame(null, $query->getPair('bar'));
+        $this->assertSame(null, $query->getPair('baz'));
     }
 
     public function testgetPairs()
