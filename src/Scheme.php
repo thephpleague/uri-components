@@ -31,7 +31,7 @@ class Scheme extends AbstractComponent
     /**
      * Validate the component content
      *
-     * @param mixed $data
+     * @param mixed $scheme
      *
      * @throws Exception if the component is no valid
      *

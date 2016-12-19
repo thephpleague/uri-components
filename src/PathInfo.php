@@ -118,6 +118,15 @@ trait PathInfo
     }
 
     /**
+     * Convert a RFC3986 encoded string into a RFC1738 string
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    abstract protected function toRFC1738($str);
+
+    /**
      * Validate the encoding type value
      *
      * @param int $enc_type
