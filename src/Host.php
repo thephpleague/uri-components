@@ -68,7 +68,11 @@ class Host extends HierarchicalComponent
     protected $host;
 
     /**
-     * @inheritdoc
+     *  This static method is called for classes exported by var_export()
+     *
+     * @param array $properties
+     *
+     * @return static
      */
     public static function __set_state(array $properties)
     {
@@ -325,7 +329,12 @@ class Host extends HierarchicalComponent
     }
 
     /**
-     * @inheritdoc
+     * Returns the associated key for each label.
+     *
+     * If a value is specified only the keys associated with
+     * the given value will be returned
+     *
+     * @return array
      */
     public function keys()
     {

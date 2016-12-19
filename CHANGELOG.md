@@ -31,7 +31,6 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Implementing `League\Uri\Interfaces\Component`
 - `HierarchicalPath::hasKey`
 - `Host::hasKey`
-- `Query::hasKey`
 
 ## 0.5.0 - 2016-12-09
 

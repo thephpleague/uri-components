@@ -68,7 +68,9 @@ trait PathInfo
     abstract public function withContent($value);
 
     /**
-     * @inheritdoc
+     * Called by var_dump() when dumping The object
+     *
+     * @return array
      */
     public function __debugInfo()
     {

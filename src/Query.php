@@ -81,7 +81,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * @inheritdoc
+     *  This static method is called for classes exported by var_export()
+     *
+     * @param array $properties
+     *
+     * @return static
      */
     public static function __set_state(array $properties)
     {
@@ -242,6 +246,27 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
+     * Returns the associated key for each pair.
+     *
+     * If a value is specified only the keys associated with
+     * the given value will be returned
+     *
+     * @return array
+     */
+    public function keys()
+    {
+        if (0 === func_num_args()) {
+            return array_keys($this->data);
+        }
+
+        return array_keys(
+            $this->data,
+            $this->decodeComponent($this->validateString(func_get_arg(0))),
+            true
+        );
+    }
+
+    /**
      * Returns an instance with the specified string
      *
      * This method MUST retain the state of the current instance, and return
@@ -311,23 +336,14 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * @inheritdoc
-     */
-    public function keys()
-    {
-        if (0 === func_num_args()) {
-            return array_keys($this->data);
-        }
-
-        return array_keys(
-            $this->data,
-            $this->decodeComponent($this->validateString(func_get_arg(0))),
-            true
-        );
-    }
-
-    /**
-     * @inheritdoc
+     * Returns an instance without the specified keys
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component
+     *
+     * @param array $offsets the list of keys to remove from the collection
+     *
+     * @return static
      */
     public function without(array $offsets)
     {

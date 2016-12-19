@@ -150,7 +150,11 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * @inheritdoc
+     * This static method is called for classes exported by var_export()
+     *
+     * @param array $properties
+     *
+     * @return static
      */
     public static function __set_state(array $properties)
     {

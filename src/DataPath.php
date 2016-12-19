@@ -69,7 +69,11 @@ class DataPath extends AbstractComponent implements PathInterface
     protected $document;
 
     /**
-     * @inheritdoc
+     * This static method is called for classes exported by var_export()
+     *
+     * @param array $properties
+     *
+     * @return static
      */
     public static function __set_state(array $properties)
     {

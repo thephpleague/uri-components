@@ -32,7 +32,11 @@ abstract class AbstractComponent implements ComponentInterface
     protected $data;
 
     /**
-     * @inheritdoc
+     *  This static method is called for classes exported by var_export()
+     *
+     * @param array $properties
+     *
+     * @return static
      */
     public static function __set_state(array $properties)
     {
@@ -50,7 +54,7 @@ abstract class AbstractComponent implements ComponentInterface
     }
 
     /**
-     * Validate the component string
+     * Validate the component content
      *
      * @param mixed $data
      *
