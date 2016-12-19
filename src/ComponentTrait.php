@@ -276,6 +276,13 @@ trait ComponentTrait
         }
     }
 
+    /**
+     * Convert a RFC3986 encoded string into a RFC1738 string
+     *
+     * @param string $str
+     *
+     * @return string
+     */
     protected static function toRFC1738($str)
     {
         return str_replace('%20', '+', $str);
