@@ -39,11 +39,17 @@ class Path extends AbstractComponent implements PathInterface
     }
 
     /**
-     * @inheritdoc
+     * Validate the component content
+     *
+     * @param mixed $data
+     *
+     * @throws Exception if the component is no valid
+     *
+     * @return mixed
      */
     protected function validate($data)
     {
-        return $this->decodePath($this->validateString($data));
+        return $this->decodePath($this->filterEncodedPath($this->validateString($data)));
     }
 
     /**

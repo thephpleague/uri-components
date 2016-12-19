@@ -29,7 +29,13 @@ namespace League\Uri\Components;
 class Scheme extends AbstractComponent
 {
     /**
-     * @inheritdoc
+     * Validate the component content
+     *
+     * @param mixed $data
+     *
+     * @throws Exception if the component is no valid
+     *
+     * @return mixed
      */
     protected function validate($scheme)
     {

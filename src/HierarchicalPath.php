@@ -27,12 +27,18 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     use PathInfo;
 
     /**
-     * @inheritdoc
+     * Path segment separator
+     *
+     * @var string
      */
     protected static $separator = '/';
 
     /**
-     * @inheritdoc
+     * This static method is called for classes exported by var_export()
+     *
+     * @param array $properties
+     *
+     * @return static
      */
     public static function __set_state(array $properties)
     {
@@ -168,22 +174,6 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function keys()
-    {
-        if (0 === func_num_args()) {
-            return array_keys($this->data);
-        }
-
-        return array_keys(
-            $this->data,
-            $this->decodeComponent($this->validateString(func_get_arg(0))),
-            true
-        );
-    }
-
-    /**
      * Returns an array representation of the HierarchicalPath
      *
      * @return array
@@ -219,6 +209,27 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     }
 
     /**
+     * Returns the associated key for each label.
+     *
+     * If a value is specified only the keys associated with
+     * the given value will be returned
+     *
+     * @return array
+     */
+    public function keys()
+    {
+        if (0 === func_num_args()) {
+            return array_keys($this->data);
+        }
+
+        return array_keys(
+            $this->data,
+            $this->decodeComponent($this->validateString(func_get_arg(0))),
+            true
+        );
+    }
+
+    /**
      * Return the decoded string representation of the component
      *
      * @return string
@@ -234,7 +245,10 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     }
 
     /**
-     * @inheritdoc
+     * Returns the instance string representation; If the
+     * instance is not defined an empty string is returned
+     *
+     * @return string
      */
     public function __toString()
     {
