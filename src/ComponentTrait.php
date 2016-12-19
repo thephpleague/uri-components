@@ -264,6 +264,7 @@ trait ComponentTrait
         static $enc_type_list;
         if (null === $enc_type_list) {
             $enc_type_list = [
+                ComponentInterface::RFC1738_ENCODING => 1,
                 ComponentInterface::RFC3986_ENCODING => 1,
                 ComponentInterface::RFC3987_ENCODING => 1,
                 ComponentInterface::NO_ENCODING => 1,
@@ -273,6 +274,11 @@ trait ComponentTrait
         if (!isset($enc_type_list[$enc_type])) {
             throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
         }
+    }
+
+    protected static function toRFC1738($str)
+    {
+        return str_replace('%20', '+', $str);
     }
 
     /**

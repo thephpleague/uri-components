@@ -30,6 +30,8 @@ use InvalidArgumentException;
  */
 interface ComponentInterface
 {
+    const RFC1738_ENCODING = 1;
+
     const RFC3986_ENCODING = 2;
 
     const RFC3987_ENCODING = 3;

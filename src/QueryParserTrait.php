@@ -37,18 +37,32 @@ trait QueryParserTrait
      *
      * @return array
      */
-    public static function parse($str, $separator = '&')
+    public static function parse($str, $separator = '&', $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
+        self::assertValidEncoding($enc_type);
+
         $res = [];
         if ('' === $str) {
             return $res;
         }
 
+        $decoder = self::getDecoder($enc_type);
         foreach (explode($separator, $str) as $pair) {
-            $res = self::parsePair($res, $pair, $separator);
+            $res = self::parsePair($res, $pair, $separator, $decoder);
         }
 
         return $res;
+    }
+
+    protected static function getDecoder($enc_type)
+    {
+        if (ComponentInterface::RFC1738_ENCODING === $enc_type) {
+            return function ($value) {
+                return str_replace('+', ' ', self::decodeComponent($value));
+            };
+        }
+
+        return [Query::class, 'decodeComponent'];
     }
 
     /**
@@ -60,14 +74,14 @@ trait QueryParserTrait
      *
      * @return array
      */
-    protected static function parsePair(array $res, $pair, $separator)
+    protected static function parsePair(array $res, $pair, $separator, callable $decoder)
     {
         $encoded_sep = rawurlencode($separator);
         $param = explode('=', $pair, 2);
-        $key = self::decodeComponent(array_shift($param));
+        $key = $decoder(array_shift($param));
         $value = array_shift($param);
         if (null !== $value) {
-            $value = str_replace($encoded_sep, $separator, self::decodeComponent($value));
+            $value = str_replace($encoded_sep, $separator, $decoder($value));
         }
 
         if (!array_key_exists($key, $res)) {
@@ -148,6 +162,10 @@ trait QueryParserTrait
      */
     protected static function getEncoder($separator, $enc_type)
     {
+        if (Query::NO_ENCODING == $enc_type) {
+            return 'sprintf';
+        }
+
         if (Query::RFC3987_ENCODING == $enc_type) {
             $pattern = str_split(self::$invalidUriChars);
             $pattern[] = '#';
@@ -158,16 +176,19 @@ trait QueryParserTrait
             };
         }
 
+        $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
+        $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
+        $regexp = '/(?:[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+|%(?![A-Fa-f0-9]{2}))/u';
+
         if (Query::RFC3986_ENCODING == $enc_type) {
-            $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
-            $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
-            $regexp = '/(?:[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+|%(?![A-Fa-f0-9]{2}))/u';
             return function ($str) use ($regexp) {
                 return self::encode($str, $regexp);
             };
         }
 
-        return 'sprintf';
+        return function ($str) use ($regexp) {
+            return self::toRFC1738(self::encode($str, $regexp));
+        };
     }
 
     /**

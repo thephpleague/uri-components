@@ -123,6 +123,10 @@ class UserInfo implements ComponentInterface
 
         $regexp = '/(?:[^'.static::$unreservedChars.static::$subdelimChars.']+|%(?!'.static::$encodedChars.'))/x';
 
+        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
+            return $this->toRFC1738($this->encode($this->user, $regexp));
+        }
+
         return $this->encode($this->user, $regexp);
     }
 
@@ -145,6 +149,10 @@ class UserInfo implements ComponentInterface
         }
 
         $regexp = '/(?:[^'.static::$unreservedChars.static::$subdelimChars.']+|%(?!'.static::$encodedChars.'))/x';
+
+        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
+            return $this->toRFC1738($this->encode($this->pass, $regexp));
+        }
 
         return $this->encode($this->pass, $regexp);
     }

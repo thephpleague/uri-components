@@ -49,24 +49,25 @@ class FragmentTest extends AbstractTestCase
     /**
      * @dataProvider geValueProvider
      */
-    public function testGetValue($str, $expected)
+    public function testGetValue($str, $expected, $enc_type)
     {
-        $this->assertSame($expected, (new Fragment($str))->getContent(Fragment::NO_ENCODING));
+        $this->assertSame($expected, (new Fragment($str))->getContent($enc_type));
     }
 
     public function geValueProvider()
     {
         return [
-            [null, null],
-            ['', ''],
-            ['0', '0'],
-            ['azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\', 'azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\'],
-            ['€', '€'],
-            ['%E2%82%AC', '€'],
-            ['frag ment', 'frag ment'],
-            ['frag%20ment', 'frag ment'],
-            ['frag%2-ment', 'frag%2-ment'],
-            ['fr%61gment', 'fr%61gment'],
+            [null, null, Fragment::RFC3987_ENCODING],
+            ['', '', Fragment::RFC3987_ENCODING],
+            ['0', '0', Fragment::RFC3987_ENCODING],
+            ['azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\', 'azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\', Fragment::RFC3987_ENCODING],
+            ['€', '€', Fragment::RFC3987_ENCODING],
+            ['%E2%82%AC', '€', Fragment::RFC3987_ENCODING],
+            ['frag ment', 'frag ment', Fragment::RFC3987_ENCODING],
+            ['frag%20ment', 'frag ment', Fragment::RFC3987_ENCODING],
+            ['frag%2-ment', 'frag%2-ment', Fragment::RFC3987_ENCODING],
+            ['fr%61gment', 'fr%61gment', Fragment::RFC3987_ENCODING],
+            ['frag%20ment', 'frag+ment', Fragment::RFC1738_ENCODING],
         ];
     }
 

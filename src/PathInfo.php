@@ -110,6 +110,10 @@ trait PathInfo
             return $this->encodePath($this->getDecoded());
         }
 
+        if ($enc_type == ComponentInterface::RFC1738_ENCODING) {
+            return $this->toRFC1738($this->encodePath($this->getDecoded()));
+        }
+
         return $this->getDecoded();
     }
 

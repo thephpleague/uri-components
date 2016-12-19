@@ -375,43 +375,132 @@ class QueryTest extends AbstractTestCase
 
     /**
      * @dataProvider parserProvider
-     *
-     * @param string $query
-     * @param string $separator
-     * @param array  $expected
      */
-    public function testParse($query, $separator, $expected)
+    public function testParse($query, $separator, $expected, $encoding)
     {
-        $this->assertSame($expected, Query::parse($query, $separator));
+        $this->assertSame($expected, Query::parse($query, $separator, $encoding));
     }
 
     public function parserProvider()
     {
         return [
-            'empty string' => ['', '&', []],
-            'identical keys' => ['a=1&a=2', '&', ['a' => ['1', '2']]],
-            'no value' => ['a&b', '&', ['a' => null, 'b' => null]],
-            'empty value' => ['a=&b=', '&', ['a' => '', 'b' => '']],
-            'php array' => ['a[]=1&a[]=2', '&', ['a[]' => ['1', '2']]],
-            'preserve dot' => ['a.b=3', '&', ['a.b' => '3']],
-            'decode' => ['a%20b=c%20d', '&', ['a b' => 'c d']],
-            'no key stripping' => ['a=&b', '&', ['a' => '', 'b' => null]],
-            'no value stripping' => ['a=b=', '&', ['a' => 'b=']],
-            'key only' => ['a', '&', ['a' => null]],
-            'preserve falsey 1' => ['0', '&', ['0' => null]],
-            'preserve falsey 2' => ['0=', '&', ['0' => '']],
-            'preserve falsey 3' => ['a=0', '&', ['a' => '0']],
-            'different separator' => ['a=0;b=0&c=4', ';', ['a' => '0', 'b' => '0&c=4']],
-            'numeric key only' => ['42', '&', ['42' => null]],
-            'numeric key' => ['42=l33t', '&', ['42' => 'l33t']],
+            'empty string' => [
+                '',
+                '&',
+                [],
+                Query::RFC3986_ENCODING,
+            ],
+            'identical keys' => [
+                'a=1&a=2',
+                '&',
+                ['a' => ['1', '2']],
+                Query::RFC3986_ENCODING,
+            ],
+            'no value' => [
+                'a&b',
+                '&',
+                ['a' => null, 'b' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'empty value' => [
+                'a=&b=',
+                '&',
+                ['a' => '', 'b' => ''],
+                Query::RFC3986_ENCODING,
+            ],
+            'php array' => [
+                'a[]=1&a[]=2',
+                '&',
+                ['a[]' => ['1', '2']],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve dot' => [
+                'a.b=3',
+                '&',
+                ['a.b' => '3'],
+                Query::RFC3986_ENCODING,
+            ],
+            'decode' => [
+                'a%20b=c%20d',
+                '&',
+                ['a b' => 'c d'],
+                Query::RFC3986_ENCODING,
+            ],
+            'no key stripping' => [
+                'a=&b',
+                '&',
+                ['a' => '', 'b' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'no value stripping' => [
+                'a=b=',
+                '&',
+                ['a' => 'b='],
+                Query::RFC3986_ENCODING,
+            ],
+            'key only' => [
+                'a',
+                '&',
+                ['a' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve falsey 1' => [
+                '0',
+                '&',
+                ['0' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve falsey 2' => [
+                '0=',
+                '&',
+                ['0' => ''],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve falsey 3' => [
+                'a=0',
+                '&',
+                ['a' => '0'],
+                Query::RFC3986_ENCODING,
+            ],
+            'different separator' => [
+                'a=0;b=0&c=4',
+                ';',
+                ['a' => '0', 'b' => '0&c=4'],
+                Query::RFC3986_ENCODING,
+            ],
+            'numeric key only' => [
+                '42',
+                '&',
+                ['42' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'numeric key' => [
+                '42=l33t',
+                '&',
+                ['42' => 'l33t'],
+                Query::RFC3986_ENCODING,
+            ],
+            'rfc1738' => [
+                '42=l3+3t',
+                '&',
+                ['42' => 'l3 3t'],
+                Query::RFC1738_ENCODING,
+            ],
         ];
     }
 
     /**
      * @dataProvider buildProvider
      */
-    public function testBuild($pairs, $expected_rfc3986, $expected_rfc3987, $expected_iri, $expected_no_encoding)
-    {
+    public function testBuild(
+        $pairs,
+        $expected_rfc1738,
+        $expected_rfc3986,
+        $expected_rfc3987,
+        $expected_iri,
+        $expected_no_encoding
+    ) {
+        $this->assertSame($expected_rfc1738, Query::build($pairs, '&', Query::RFC1738_ENCODING));
         $this->assertSame($expected_rfc3986, Query::build($pairs, '&', Query::RFC3986_ENCODING));
         $this->assertSame($expected_rfc3987, Query::build($pairs, '&', Query::RFC3987_ENCODING));
         $this->assertSame($expected_no_encoding, Query::build($pairs, '&', Query::NO_ENCODING));
@@ -421,18 +510,110 @@ class QueryTest extends AbstractTestCase
     public function buildProvider()
     {
         return [
-            'empty string' => [[], '', '', null, ''],
-            'identical keys' => [['a' => ['1', '2']], 'a=1&a=2', 'a=1&a=2', 'a=1&a=2', 'a=1&a=2'],
-            'no value' => [['a' => null, 'b' => null], 'a&b', 'a&b', 'a&b', 'a&b'],
-            'empty value' => [['a' => '', 'b' => ''], 'a=&b=', 'a=&b=', 'a=&b=', 'a=&b='],
-            'php array' => [['a[]' => ['1', '2']], 'a%5B%5D=1&a%5B%5D=2', 'a[]=1&a[]=2', 'a[]=1&a[]=2', 'a[]=1&a[]=2'],
-            'preserve dot' => [['a.b' => '3'], 'a.b=3', 'a.b=3', 'a.b=3', 'a.b=3'],
-            'no key stripping' => [['a' => '', 'b' => null], 'a=&b', 'a=&b', 'a=&b', 'a=&b'],
-            'no value stripping' => [['a' => 'b='], 'a=b=', 'a=b=', 'a=b=', 'a=b='],
-            'key only' => [['a' => null], 'a', 'a', 'a', 'a'],
-            'preserve falsey 1' => [['0' => null], '0', '0', '0', '0'],
-            'preserve falsey 2' => [['0' => ''], '0=', '0=', '0=', '0='],
-            'preserve falsey 3' => [['a' => '0'], 'a=0', 'a=0', 'a=0', 'a=0'],
+            'empty string' => [
+                'pairs' => [],
+                'expected_rfc1738' => '',
+                'expected_rfc3986' => '',
+                'expected_rfc3987' => '',
+                'expected_iri' => null,
+                'expected_no_encoding' => '',
+            ],
+            'identical keys' => [
+                'pairs' => ['a' => ['1', '2']],
+                'expected_rfc1738' => 'a=1&a=2',
+                'expected_rfc3986' => 'a=1&a=2',
+                'expected_rfc3987' => 'a=1&a=2',
+                'expected_iri' => 'a=1&a=2',
+                'expected_no_encoding' => 'a=1&a=2',
+            ],
+            'no value' => [
+                'pairs' => ['a' => null, 'b' => null],
+                'expected_rfc1738' => 'a&b',
+                'expected_rfc3986' => 'a&b',
+                'expected_rfc3987' => 'a&b',
+                'expected_iri' => 'a&b',
+                'expected_no_encoding' => 'a&b',
+            ],
+            'empty value' => [
+                'pairs' => ['a' => '', 'b' => ''],
+                'expected_rfc1738' => 'a=&b=',
+                'expected_rfc3986' => 'a=&b=',
+                'expected_rfc3987' => 'a=&b=',
+                'expected_iri' => 'a=&b=',
+                'expected_no_encoding' => 'a=&b=',
+            ],
+            'php array' => [
+                'pairs' => ['a[]' => ['1', '2']],
+                'expected_rfc1738' => 'a%5B%5D=1&a%5B%5D=2',
+                'expected_rfc3986' => 'a%5B%5D=1&a%5B%5D=2',
+                'expected_rfc3987' => 'a[]=1&a[]=2',
+                'expected_iri' => 'a[]=1&a[]=2',
+                'expected_no_encoding' => 'a[]=1&a[]=2',
+            ],
+            'preserve dot' => [
+                'pairs' => ['a.b' => '3'],
+                'expected_rfc1738' => 'a.b=3',
+                'expected_rfc3986' => 'a.b=3',
+                'expected_rfc3987' => 'a.b=3',
+                'expected_iri' => 'a.b=3',
+                'expected_no_encoding' => 'a.b=3',
+            ],
+            'no key stripping' => [
+                'pairs' => ['a' => '', 'b' => null],
+                'expected_rfc1738' => 'a=&b',
+                'expected_rfc3986' => 'a=&b',
+                'expected_rfc3987' => 'a=&b',
+                'expected_iri' => 'a=&b',
+                'expected_no_encoding' => 'a=&b',
+            ],
+            'no value stripping' => [
+                'pairs' => ['a' => 'b='],
+                'expected_rfc1738' => 'a=b=',
+                'expected_rfc3986' => 'a=b=',
+                'expected_rfc3987' => 'a=b=',
+                'expected_iri' => 'a=b=',
+                'expected_no_encoding' => 'a=b=',
+            ],
+            'key only' => [
+                'pairs' => ['a' => null],
+                'expected_rfc1738' => 'a',
+                'expected_rfc3986' => 'a',
+                'expected_rfc3987' => 'a',
+                'expected_iri' => 'a',
+                'expected_no_encoding' => 'a',
+            ],
+            'preserve falsey 1' => [
+                'pairs' => ['0' => null],
+                'expected_rfc1738' => '0',
+                'expected_rfc3986' => '0',
+                'expected_rfc3987' => '0',
+                'expected_iri' => '0',
+                'expected_no_encoding' => '0',
+            ],
+            'preserve falsey 2' => [
+                'pairs' => ['0' => ''],
+                'expected_rfc1738' => '0=',
+                'expected_rfc3986' => '0=',
+                'expected_rfc3987' => '0=',
+                'expected_iri' => '0=',
+                'expected_no_encoding' => '0=',
+            ],
+            'preserve falsey 3' => [
+                'pairs' => ['0' => '0'],
+                'expected_rfc1738' => '0=0',
+                'expected_rfc3986' => '0=0',
+                'expected_rfc3987' => '0=0',
+                'expected_iri' => '0=0',
+                'expected_no_encoding' => '0=0',
+            ],
+            'rcf1738' => [
+                'pairs' => ['toto' => 'foo bar'],
+                'expected_rfc1738' => 'toto=foo+bar',
+                'expected_rfc3986' => 'toto=foo%20bar',
+                'expected_rfc3987' => 'toto=foo bar',
+                'expected_iri' => 'toto=foo bar',
+                'expected_no_encoding' => 'toto=foo bar',
+            ],
         ];
     }
 
@@ -447,7 +628,7 @@ class QueryTest extends AbstractTestCase
     public function testThrowsExceptionOnInvalidEncodingType()
     {
         $this->expectException(Exception::class);
-        Query::build([], '&', PHP_QUERY_RFC1738);
+        Query::build([], '&', 'RFC1738');
     }
 
     public function testInvalidEncodingTypeThrowException()

@@ -366,7 +366,7 @@ class Host extends HierarchicalComponent
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986_ENCODING)
+    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -378,11 +378,11 @@ class Host extends HierarchicalComponent
             return $this->data[0];
         }
 
-        if ($enc_type != self::RFC3986_ENCODING) {
-            return $this->format($this->data, $this->isAbsolute);
+        if ($enc_type != ComponentInterface::RFC3987_ENCODING) {
+            return $this->format(array_map('idn_to_ascii', $this->data), $this->isAbsolute);
         }
 
-        return $this->format(array_map('idn_to_ascii', $this->data), $this->isAbsolute);
+        return $this->format($this->data, $this->isAbsolute);
     }
 
     /**
