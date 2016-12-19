@@ -17,28 +17,29 @@ class PathTest extends AbstractTestCase
      * @param string $raw
      * @param string $parsed
      */
-    public function testGetUriComponent($raw, $parsed)
+    public function testGetUriComponent($raw, $parsed, $rfc1738)
     {
         $path = new Path($raw);
         $this->assertSame($parsed, $path->getUriComponent());
         $this->assertSame($raw, $path->getContent(Path::RFC3987_ENCODING));
         $this->assertSame($raw, $path->getContent(Path::NO_ENCODING));
+        $this->assertSame($rfc1738, $path->getContent(Path::RFC1738_ENCODING));
         $this->assertFalse($path->isNull());
     }
 
     public function validPathEncoding()
     {
         return [
-            ['toto', 'toto'],
-            ['bar---', 'bar---'],
-            ['', ''],
-            ['"bad"', '%22bad%22'],
-            ['<not good>', '%3Cnot%20good%3E'],
-            ['{broken}', '%7Bbroken%7D'],
-            ['`oops`', '%60oops%60'],
-            ['\\slashy', '%5Cslashy'],
-            ['foo^bar', 'foo%5Ebar'],
-            ['foo^bar/baz', 'foo%5Ebar/baz'],
+            ['toto', 'toto', 'toto'],
+            ['bar---', 'bar---', 'bar---'],
+            ['', '', ''],
+            ['"bad"', '%22bad%22', '%22bad%22'],
+            ['<not good>', '%3Cnot%20good%3E', '%3Cnot+good%3E'],
+            ['{broken}', '%7Bbroken%7D', '%7Bbroken%7D'],
+            ['`oops`', '%60oops%60', '%60oops%60'],
+            ['\\slashy', '%5Cslashy', '%5Cslashy'],
+            ['foo^bar', 'foo%5Ebar', 'foo%5Ebar'],
+            ['foo^bar/baz', 'foo%5Ebar/baz', 'foo%5Ebar/baz'],
             ['foo%2Fbar', 'foo%2Fbar', 'foo%2Fbar'],
         ];
     }

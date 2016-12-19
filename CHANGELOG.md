@@ -4,6 +4,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
+- `ComponentInterface::RFC1738_ENCODING`
 - `HierarchicalPath::withDirname`
 - `HierarchicalPath::withBasename`
 - `League\Uri\Components\ComponentInterface` replaces `League\Uri\Interfaces\Component`

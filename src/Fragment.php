@@ -54,7 +54,7 @@ class Fragment extends AbstractComponent
             return $this->data;
         }
 
-        if (self::RFC3987_ENCODING == $enc_type) {
+        if (ComponentInterface::RFC3987_ENCODING == $enc_type) {
             $pattern = str_split(self::$invalidUriChars);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->data);
@@ -62,7 +62,12 @@ class Fragment extends AbstractComponent
 
         $regexp = '/(?:[^'.self::$unreservedChars.self::$subdelimChars.'\:\/@\?]+|%(?!'.self::$encodedChars.'))/ux';
 
-        return $this->encode($this->data, $regexp);
+        $content = $this->encode($this->data, $regexp);
+        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
+            return $this->toRFC1738($content);
+        }
+
+        return $content;
     }
 
     /**
