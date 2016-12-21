@@ -29,7 +29,7 @@ class Path extends AbstractComponent implements PathInterface
      *
      * @param string|null $path the component value
      */
-    public function __construct($path = null)
+    public function __construct(string $path = null)
     {
         if (null === $path) {
             $path = '';
@@ -57,7 +57,7 @@ class Path extends AbstractComponent implements PathInterface
      *
      * @return string
      */
-    protected function getDecoded()
+    protected function getDecoded(): string
     {
         return $this->data;
     }

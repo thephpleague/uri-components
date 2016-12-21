@@ -190,7 +190,7 @@ class HostTest extends AbstractTestCase
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
-        (new Host('host'))->getContent('RFC1738');
+        (new Host('host'))->getContent(-1);
     }
 
     public function invalidHostProvider()
@@ -219,9 +219,6 @@ class HostTest extends AbstractTestCase
             'invalid scope IPv6' => ['[ab23::1234%251]'],
             'invalid scope ID' => ['[fe80::1234%25?@]'],
             'invalid scope ID with utf8 character' => ['[fe80::1234%25€]'],
-            'bool' => [true],
-            'Std Class' => [(object) 'foo'],
-            'float' => [1.2],
         ];
     }
 
@@ -354,10 +351,6 @@ class HostTest extends AbstractTestCase
     public function createFromLabelsInvalid()
     {
         return [
-            'string' => ['www.example.com', Host::IS_RELATIVE],
-            'bool' => [true, Host::IS_RELATIVE],
-            'integer' => [1, Host::IS_RELATIVE],
-            'object' => [new \stdClass(), Host::IS_RELATIVE],
             'ipv6 FQDN' => [['::1'], Host::IS_ABSOLUTE],
             'unknown flag' => [['all', 'is', 'good'], 23],
         ];
@@ -392,7 +385,7 @@ class HostTest extends AbstractTestCase
     public function createFromIpFailed()
     {
         return [
-            'false ipv4' => ['127.0.0', '127.0.0'],
+            'false ipv4' => ['127.0.0'],
             'hostname' => ['example.com'],
         ];
     }
@@ -541,7 +534,7 @@ class HostTest extends AbstractTestCase
      */
     public function testAppendIpFailed()
     {
-        (new Host('::1'))->append(new Host('foo'));
+        (new Host('[::1]'))->append('foo');
     }
 
     /**
@@ -645,10 +638,10 @@ class HostTest extends AbstractTestCase
     /**
      * @dataProvider validSubDomain
      */
-    public function testWithSubDomain($newhost, $host, $expected)
+    public function testWithSubDomain($new_subdomain, $host, $expected)
     {
         $host = new Host($host);
-        $this->assertSame($expected, (string) $host->withSubDomain($newhost));
+        $this->assertSame($expected, (string) $host->withSubDomain($new_subdomain));
     }
 
     public function validSubDomain()

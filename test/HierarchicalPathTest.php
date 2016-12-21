@@ -84,9 +84,6 @@ class HierarchicalPathTest extends AbstractTestCase
     public function failedConstructor()
     {
         return [
-            'bool' => [true],
-            'Std Class' => [(object) 'foo'],
-            'float' => [1.2],
             'reserved chars' => ['foo?bar'],
         ];
     }
@@ -184,10 +181,6 @@ class HierarchicalPathTest extends AbstractTestCase
     public function createFromSegmentsInvalid()
     {
         return [
-            'string' => ['www.example.com', Path::IS_RELATIVE],
-            'bool' => [true, Path::IS_RELATIVE],
-            'integer' => [1, Path::IS_RELATIVE],
-            'object' => [new \stdClass(), Path::IS_RELATIVE],
             'unknown flag' => [['all', 'is', 'good'], 23],
         ];
     }

@@ -74,7 +74,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         $host = static::createFromLabels($properties['data'], $properties['isAbsolute']);
         $host->hostnameInfoLoaded = $properties['hostnameInfoLoaded'];
@@ -93,7 +93,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public static function createFromLabels($data, $type = self::IS_RELATIVE)
+    public static function createFromLabels($data, int $type = self::IS_RELATIVE): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
@@ -121,7 +121,7 @@ class Host extends HierarchicalComponent
      *
      * @return string
      */
-    protected static function format(array $data, $type)
+    protected static function format(array $data, int $type): string
     {
         $hostname = implode(static::$separator, array_reverse($data));
         if (self::IS_ABSOLUTE === $type) {
@@ -140,7 +140,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public static function createFromIp($ip)
+    public static function createFromIp(string $ip): self
     {
         $ip = static::validateString($ip);
 
@@ -167,7 +167,7 @@ class Host extends HierarchicalComponent
      *
      * @param null|string $host
      */
-    public function __construct($host = null)
+    public function __construct(string $host = null)
     {
         $host = $this->setIsAbsolute($host);
         $this->data = $this->validate($host);
@@ -180,7 +180,7 @@ class Host extends HierarchicalComponent
      *
      * @return string
      */
-    protected function setIsAbsolute($str)
+    protected function setIsAbsolute(string $str = null)
     {
         if (in_array($str, [null, '.'], true)) {
             return $str;
@@ -199,13 +199,13 @@ class Host extends HierarchicalComponent
     /**
      * validate the submitted data
      *
-     * @param string $host
+     * @param string|null $host
      *
      * @throws Exception If the host is invalid
      *
      * @return array
      */
-    protected function validate($host)
+    protected function validate(string $host = null): array
     {
         if (null === $host) {
             return [];
@@ -213,6 +213,10 @@ class Host extends HierarchicalComponent
 
         if ('' === $host) {
             return [''];
+        }
+
+        if ('.' === $host[0]) {
+            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
         }
 
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
@@ -246,7 +250,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, $isAbsolute)
+    protected function newHierarchicalInstance(array $data, int $isAbsolute): HierarchicalComponent
     {
         return $this->createFromLabels($data, $isAbsolute);
     }
@@ -256,7 +260,7 @@ class Host extends HierarchicalComponent
      *
      * @return bool
      */
-    public function isIp()
+    public function isIp(): bool
     {
         return $this->host_as_ipv4 || $this->host_as_ipv6;
     }
@@ -266,7 +270,7 @@ class Host extends HierarchicalComponent
      *
      * @return bool
      */
-    public function isIpv4()
+    public function isIpv4(): bool
     {
         return $this->host_as_ipv4;
     }
@@ -276,7 +280,7 @@ class Host extends HierarchicalComponent
      *
      * @return bool
      */
-    public function isIpv6()
+    public function isIpv6(): bool
     {
         return $this->host_as_ipv6;
     }
@@ -288,7 +292,7 @@ class Host extends HierarchicalComponent
      *
      * @see http://tools.ietf.org/html/rfc6874#section-4
      */
-    public function hasZoneIdentifier()
+    public function hasZoneIdentifier(): bool
     {
         return $this->has_zone_identifier;
     }
@@ -298,7 +302,7 @@ class Host extends HierarchicalComponent
      *
      * @return array
      */
-    public function getLabels()
+    public function getLabels(): array
     {
         return $this->data;
     }
@@ -314,7 +318,7 @@ class Host extends HierarchicalComponent
      *
      * @return mixed
      */
-    public function getLabel($offset, $default = null)
+    public function getLabel(int $offset, $default = null)
     {
         if ($offset > -1 && isset($this->data[$offset])) {
             return $this->data[$offset];
@@ -336,7 +340,7 @@ class Host extends HierarchicalComponent
      *
      * @return array
      */
-    public function keys()
+    public function keys(): array
     {
         if (0 === func_num_args()) {
             return array_keys($this->data);
@@ -366,7 +370,7 @@ class Host extends HierarchicalComponent
      *
      * @return string|null
      */
-    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -390,7 +394,7 @@ class Host extends HierarchicalComponent
      *
      * If the host is a domain name this method will return null
      *
-     * @return string
+     * @return string|null
      */
     public function getIp()
     {
@@ -420,7 +424,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public function withoutZoneIdentifier()
+    public function withoutZoneIdentifier(): self
     {
         if (!$this->has_zone_identifier) {
             return $this;
@@ -436,7 +440,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public function withRootLabel()
+    public function withRootLabel(): self
     {
         if ($this->isAbsolute == self::IS_ABSOLUTE || $this->isIp()) {
             return $this;
@@ -455,7 +459,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public function withoutRootlabel()
+    public function withoutRootlabel(): self
     {
         if ($this->isAbsolute == self::IS_RELATIVE || $this->isIp()) {
             return $this;
@@ -477,7 +481,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public function prepend($component)
+    public function prepend(string $component): self
     {
         $labels = array_merge($this->data, $this->filterComponent($component));
         if ($this->data === $labels) {
@@ -497,7 +501,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public function append($component)
+    public function append(string $component): self
     {
         $labels = array_merge($this->filterComponent($component), $this->data);
         if ($this->data === $labels) {
@@ -514,7 +518,7 @@ class Host extends HierarchicalComponent
      *
      * @return array
      */
-    protected function filterComponent($component)
+    protected function filterComponent(string $component): array
     {
         $component = $this->validateString($component);
         if ('' === $component) {
@@ -534,11 +538,11 @@ class Host extends HierarchicalComponent
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the new registerable domain
      *
-     * @param string|null $host the registerable domain to add
+     * @param string $host the registerable domain to add
      *
      * @return static
      */
-    public function withRegisterableDomain($host)
+    public function withRegisterableDomain(string $host): self
     {
         $new = $this->filterPublicDomain($host);
         $source = $this->getContent();
@@ -566,7 +570,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public function withSubdomain($host)
+    public function withSubdomain(string $host):self
     {
         $new = $this->filterPublicDomain($host);
         $source = $this->getContent();
@@ -600,7 +604,7 @@ class Host extends HierarchicalComponent
      *
      * @return string|null
      */
-    protected function filterPublicDomain($host)
+    protected function filterPublicDomain(string $host): string
     {
         if ($this->isIp()) {
             throw new Exception('The submitted host can not modify an IP host');

@@ -48,7 +48,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @param mixed $data the component value
      */
-    public function __construct($data = null)
+    public function __construct(string $data = null)
     {
         $this->data = $this->validate($data);
     }
@@ -88,7 +88,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @return mixed
      */
-    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -101,7 +101,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getContent();
     }
@@ -112,7 +112,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @return string
      */
-    public function getUriComponent()
+    public function getUriComponent(): string
     {
         return $this->__toString();
     }
@@ -127,7 +127,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @return static
      */
-    public function withContent($value)
+    public function withContent($value): ComponentInterface
     {
         if ($value === $this->getContent()) {
             return $this;

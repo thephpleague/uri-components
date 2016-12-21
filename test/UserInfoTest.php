@@ -204,13 +204,13 @@ class UserInfoTest extends AbstractTestCase
     public function testGetUserThrowsInvalidArgumentException()
     {
         $this->expectException(Exception::class);
-        (new UserInfo())->getUser('toto');
+        (new UserInfo())->getUser(-1);
     }
 
     public function testGetPassThrowsInvalidArgumentException()
     {
         $this->expectException(Exception::class);
-        (new UserInfo())->getPass('toto');
+        (new UserInfo())->getPass(-1);
     }
 
     public function testConstructorThrowsInvalidArgumentException1()
@@ -225,15 +225,9 @@ class UserInfoTest extends AbstractTestCase
         new UserInfo('toto', 'p@ass');
     }
 
-    public function testWithUserInfoThrowException()
-    {
-        $this->expectException(Exception::class);
-        (new UserInfo('user', 'pass'))->withUserInfo(null);
-    }
-
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
-        (new UserInfo('user', 'pass'))->getContent('RFC1738');
+        (new UserInfo('user', 'pass'))->getContent(-1);
     }
 }

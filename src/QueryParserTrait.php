@@ -34,11 +34,15 @@ trait QueryParserTrait
      *
      * @param string $str       The query string to parse
      * @param string $separator The query string separator
+     * @param int    $enc_type  The query encoding algorithm
      *
      * @return array
      */
-    public static function parse($str, $separator = '&', $enc_type = ComponentInterface::RFC3986_ENCODING)
-    {
+    public static function parse(
+        string $str,
+        string $separator = '&',
+        int $enc_type = ComponentInterface::RFC3986_ENCODING
+    ): array {
         self::assertValidEncoding($enc_type);
 
         $res = [];
@@ -54,7 +58,7 @@ trait QueryParserTrait
         return $res;
     }
 
-    protected static function getDecoder($enc_type)
+    protected static function getDecoder(int $enc_type): callable
     {
         if (ComponentInterface::RFC1738_ENCODING === $enc_type) {
             return function ($value) {
@@ -68,14 +72,19 @@ trait QueryParserTrait
     /**
      * Parse a query string pair
      *
-     * @param array  $res       The associative array to add the pair to
-     * @param string $pair      The query string pair
-     * @param string $separator The query string separator
+     * @param array    $res       The associative array to add the pair to
+     * @param string   $pair      The query string pair
+     * @param string   $separator The query string separator
+     * @param callable $decoder   The query string decoder
      *
      * @return array
      */
-    protected static function parsePair(array $res, $pair, $separator, callable $decoder)
-    {
+    protected static function parsePair(
+        array $res,
+        string $pair,
+        string $separator,
+        callable $decoder
+    ): array {
         $encoded_sep = rawurlencode($separator);
         $param = explode('=', $pair, 2);
         $key = $decoder(array_shift($param));
@@ -111,8 +120,11 @@ trait QueryParserTrait
      *
      * @return string
      */
-    public static function build(array $pairs, $separator = '&', $enc_type = Query::RFC3986_ENCODING)
-    {
+    public static function build(
+        array $pairs,
+        string $separator = '&',
+        int $enc_type = Query::RFC3986_ENCODING
+    ): string {
         self::assertValidEncoding($enc_type);
         $encoder = self::getEncoder($separator, $enc_type);
         $normalized_pairs = array_map(function ($value) {
@@ -134,9 +146,9 @@ trait QueryParserTrait
      * @param array    $value   The query string value
      * @param string   $key     The query string key
      *
-     * @return string
+     * @return array
      */
-    protected static function buildPair(callable $encoder, array $value, $key)
+    protected static function buildPair(callable $encoder, array $value, string $key): array
     {
         $key = $encoder($key);
         $reducer = function (array $carry, $data) use ($key, $encoder) {
@@ -160,7 +172,7 @@ trait QueryParserTrait
      *
      * @return callable
      */
-    protected static function getEncoder($separator, $enc_type)
+    protected static function getEncoder(string $separator, int $enc_type): callable
     {
         if (Query::NO_ENCODING == $enc_type) {
             return 'sprintf';
@@ -203,12 +215,16 @@ trait QueryParserTrait
      *
      * @param string $str       the query string
      * @param string $separator a the query string single character separator
+     * @param string $enc_type  the query encoding
      *
      * @return array
      */
-    public static function extract($str, $separator = '&')
-    {
-        return self::extractFromPairs(self::parse($str, $separator));
+    public static function extract(
+        string $str,
+        string $separator = '&',
+        int $enc_type = ComponentInterface::RFC3986_ENCODING
+    ): array {
+        return self::extractFromPairs(self::parse($str, $separator, $enc_type));
     }
 
     /**
@@ -225,7 +241,7 @@ trait QueryParserTrait
      *
      * @return array
      */
-    protected static function extractFromPairs(array $pairs)
+    protected static function extractFromPairs(array $pairs): array
     {
         $data = [];
         $normalized_pairs = array_map(function ($value) {
@@ -248,7 +264,7 @@ trait QueryParserTrait
      *
      * @return string
      */
-    protected static function formatParsedValue($value)
+    protected static function formatParsedValue($value): string
     {
         if (null === $value) {
             return '';
@@ -282,7 +298,7 @@ trait QueryParserTrait
      * @param string $value the formatted value
      * @param array  &$data the result array passed by reference
      */
-    protected static function extractPhpVariable($name, $value, array &$data)
+    protected static function extractPhpVariable(string $name, string $value, array &$data)
     {
         if ('' === $name) {
             return;

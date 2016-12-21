@@ -38,7 +38,7 @@ trait PathInfo
      *
      * @return string
      */
-    protected function filterEncodedPath($path)
+    protected function filterEncodedPath(string $path): string
     {
         if (strlen($path) === strcspn($path, '?#')) {
             return $path;
@@ -53,7 +53,7 @@ trait PathInfo
      *
      * @return string
      */
-    abstract public function __toString();
+    abstract public function __toString(): string;
 
     /**
      * Returns an instance with the specified string
@@ -65,14 +65,14 @@ trait PathInfo
      *
      * @return static
      */
-    abstract public function withContent($value);
+    abstract public function withContent($value): ComponentInterface;
 
     /**
      * Called by var_dump() when dumping The object
      *
      * @return array
      */
-    public function __debugInfo()
+    public function __debugInfo(): array
     {
         return ['component' => $this->getContent()];
     }
@@ -94,7 +94,7 @@ trait PathInfo
      *
      * @return string|null
      */
-    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -124,7 +124,7 @@ trait PathInfo
      *
      * @return string
      */
-    abstract protected function toRFC1738($str);
+    abstract protected function toRFC1738(string $str): string;
 
     /**
      * Validate the encoding type value
@@ -133,7 +133,7 @@ trait PathInfo
      *
      * @throws Exception If the encoding type is invalid
      */
-    abstract protected function assertValidEncoding($enc_type);
+    abstract protected function assertValidEncoding(int $enc_type);
 
     /**
      * Encode a path string according to RFC3986
@@ -142,14 +142,14 @@ trait PathInfo
      *
      * @return string The same type as the input parameter
      */
-    abstract protected function encodePath($str);
+    abstract protected function encodePath(string $str): string;
 
     /**
      * Return the decoded string representation of the component
      *
      * @return string
      */
-    abstract protected function getDecoded();
+    abstract protected function getDecoded(): string;
 
     /**
      * Returns an instance without dot segments
@@ -160,7 +160,7 @@ trait PathInfo
      *
      * @return static
      */
-    public function withoutDotSegments()
+    public function withoutDotSegments(): PathInterface
     {
         $current = $this->__toString();
         if (false === strpos($current, '.')) {
@@ -186,7 +186,7 @@ trait PathInfo
      *
      * @return array
      */
-    protected function filterDotSegments(array $carry, $segment)
+    protected function filterDotSegments(array $carry, string $segment): array
     {
         if ('..' === $segment) {
             array_pop($carry);
@@ -210,7 +210,7 @@ trait PathInfo
      *
      * @return static
      */
-    public function withoutEmptySegments()
+    public function withoutEmptySegments(): PathInterface
     {
         return $this->withContent(preg_replace(',/+,', '/', $this->__toString()));
     }
@@ -220,7 +220,7 @@ trait PathInfo
      *
      * @return bool
      */
-    public function hasTrailingSlash()
+    public function hasTrailingSlash(): bool
     {
         $path = $this->__toString();
 
@@ -236,7 +236,7 @@ trait PathInfo
      *
      * @return static
      */
-    public function withTrailingSlash()
+    public function withTrailingSlash(): PathInterface
     {
         return $this->hasTrailingSlash() ? $this : $this->withContent($this->__toString().'/');
     }
@@ -249,7 +249,7 @@ trait PathInfo
      *
      * @return static
      */
-    public function withoutTrailingSlash()
+    public function withoutTrailingSlash(): PathInterface
     {
         return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this, 0, -1, 'UTF-8'));
     }
@@ -259,7 +259,7 @@ trait PathInfo
      *
      * @return bool
      */
-    public function isAbsolute()
+    public function isAbsolute(): bool
     {
         $path = $this->__toString();
 
@@ -275,7 +275,7 @@ trait PathInfo
      *
      * @return static
      */
-    public function withLeadingSlash()
+    public function withLeadingSlash(): PathInterface
     {
         return $this->isAbsolute() ? $this : $this->withContent('/'.$this->__toString());
     }
@@ -288,7 +288,7 @@ trait PathInfo
      *
      * @return static
      */
-    public function withoutLeadingSlash()
+    public function withoutLeadingSlash(): PathInterface
     {
         return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this, 1, null, 'UTF-8'));
     }

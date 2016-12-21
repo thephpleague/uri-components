@@ -31,18 +31,11 @@ use InvalidArgumentException;
 interface PathInterface extends ComponentInterface
 {
     /**
-     * Returns whether or not the path is empty
-     *
-     * @return bool
-     */
-    public function isEmpty();
-
-    /**
      * Returns whether or not the path is absolute or rootless
      *
      * @return bool
      */
-    public function isAbsolute();
+    public function isAbsolute(): bool;
 
     /**
      * Returns a absolute path instance.
@@ -54,7 +47,7 @@ interface PathInterface extends ComponentInterface
      *
      * @return static
      */
-    public function withLeadingSlash();
+    public function withLeadingSlash(): self;
 
     /**
      * Returns a rootless path instance.
@@ -66,7 +59,7 @@ interface PathInterface extends ComponentInterface
      *
      * @return static
      */
-    public function withoutLeadingSlash();
+    public function withoutLeadingSlash(): self;
 
     /**
      * Returns a path instance without dot segments.
@@ -79,5 +72,5 @@ interface PathInterface extends ComponentInterface
      *
      * @return static
      */
-    public function withoutDotSegments();
+    public function withoutDotSegments(): self;
 }

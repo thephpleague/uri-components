@@ -77,7 +77,7 @@ trait HostInfo
      *
      * @return string
      */
-    public function getPublicSuffix()
+    public function getPublicSuffix(): string
     {
         return $this->getHostnameInfo('publicSuffix');
     }
@@ -87,7 +87,7 @@ trait HostInfo
      *
      * @return string
      */
-    public function getRegisterableDomain()
+    public function getRegisterableDomain(): string
     {
         return $this->getHostnameInfo('registerableDomain');
     }
@@ -97,7 +97,7 @@ trait HostInfo
      *
      * @return string
      */
-    public function getSubdomain()
+    public function getSubdomain(): string
     {
         return $this->getHostnameInfo('subdomain');
     }
@@ -107,7 +107,7 @@ trait HostInfo
      *
      * @return bool
      */
-    public function isPublicSuffixValid()
+    public function isPublicSuffixValid(): bool
     {
         return $this->getHostnameInfo('isPublicSuffixValid');
     }
@@ -119,7 +119,7 @@ trait HostInfo
      *
      * @return mixed
      */
-    protected function getHostnameInfo($key)
+    protected function getHostnameInfo(string $key)
     {
         $this->loadHostnameInfo();
         return $this->hostnameInfo[$key];
@@ -161,7 +161,7 @@ trait HostInfo
      *
      * @return bool
      */
-    protected function isValidHostnameIpv6($ipv6)
+    protected function isValidHostnameIpv6(string $ipv6): bool
     {
         if (false === strpos($ipv6, '[') || false === strpos($ipv6, ']')) {
             return false;
@@ -203,12 +203,8 @@ trait HostInfo
      *
      * @return bool
      */
-    protected function isValidHostname($host)
+    protected function isValidHostname(string $host): bool
     {
-        if ('.' === mb_substr($host, -1, 1, 'UTF-8')) {
-            $host = mb_substr($host, 0, -1, 'UTF-8');
-        }
-
         $labels = array_map('idn_to_ascii', explode('.', $host));
 
         return 127 > count($labels) && $labels === array_filter($labels, [$this, 'isValidHostLabel']);
@@ -221,8 +217,12 @@ trait HostInfo
      *
      * @return bool
      */
-    protected function isValidHostLabel($label)
+    protected function isValidHostLabel(string $label): bool
     {
+        if ('' == $label) {
+            return false;
+        }
+
         $pos = strlen($label);
         $delimiters = $label[0].$label[$pos - 1];
 
@@ -236,28 +236,28 @@ trait HostInfo
      *
      * @return string
      */
-    abstract public function __toString();
+    abstract public function __toString(): string;
 
     /**
      * Returns whether or not the host is an IP address
      *
      * @return bool
      */
-    abstract public function isIp();
+    abstract public function isIp(): bool;
 
     /**
      * Returns whether or not the host is a full qualified domain name
      *
      * @return bool
      */
-    abstract public function isAbsolute();
+    abstract public function isAbsolute(): bool;
 
     /**
      * Initialize and access the Parser object
      *
      * @return Parser
      */
-    protected function getPdpParser()
+    protected function getPdpParser(): Parser
     {
         if (!static::$pdpParser instanceof Parser) {
             static::$pdpParser = new Parser((new PublicSuffixListManager())->getList());

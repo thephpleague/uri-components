@@ -77,7 +77,7 @@ trait ComponentTrait
      *
      * @return string
      */
-    protected static function encode($str, $regexp)
+    protected static function encode(string $str, string $regexp): string
     {
         $encoder = function (array $matches) {
             return rawurlencode($matches[0]);
@@ -98,7 +98,7 @@ trait ComponentTrait
      *
      * @return string The same type as the input parameter
      */
-    protected static function encodePath($str)
+    protected static function encodePath(string $str): string
     {
         $regexp = '/(?:[^'
             .self::$unreservedChars
@@ -117,7 +117,7 @@ trait ComponentTrait
      *
      * @return string
      */
-    protected static function decode($str, $pattern)
+    protected static function decode(string $str, string $pattern): string
     {
         $regexp = ',%'.$pattern.',i';
         $decoder = function (array $matches) use ($regexp) {
@@ -142,7 +142,7 @@ trait ComponentTrait
      *
      * @return string
      */
-    protected static function decodeComponent($str)
+    protected static function decodeComponent(string $str): string
     {
         return self::decode($str, self::$unreservedCharsEncoded);
     }
@@ -154,7 +154,7 @@ trait ComponentTrait
      *
      * @return string
      */
-    protected static function decodePath($str)
+    protected static function decodePath(string $str): string
     {
         return self::decode($str, self::$unreservedCharsEncoded.'|2F');
     }
@@ -162,18 +162,14 @@ trait ComponentTrait
     /**
      * validate a string
      *
-     * @param mixed $str the value to evaluate as a string
+     * @param string $str the value to evaluate as a string
      *
      * @throws InvalidArgumentException if the submitted data can not be converted to string
      *
      * @return string
      */
-    protected static function validateString($str)
+    protected static function validateString(string $str): string
     {
-        if (!is_string($str)) {
-            throw Exception::fromInvalidString($str);
-        }
-
         if (strlen($str) !== strcspn($str, self::$invalidUriChars)) {
             throw new Exception(sprintf('The submitted string `%s` contains invalid characters', $str));
         }
@@ -190,7 +186,7 @@ trait ComponentTrait
      *
      * @return array
      */
-    protected static function validateIterator($data)
+    protected static function validateIterator($data): array
     {
         if ($data instanceof Traversable) {
             return iterator_to_array($data);
@@ -208,7 +204,7 @@ trait ComponentTrait
      *
      * @return array
      */
-    public function __debugInfo()
+    public function __debugInfo(): array
     {
         return ['component' => $this->getContent()];
     }
@@ -218,7 +214,7 @@ trait ComponentTrait
      *
      * @return bool
      */
-    public function isNull()
+    public function isNull(): bool
     {
         return null === $this->getContent();
     }
@@ -228,7 +224,7 @@ trait ComponentTrait
      *
      * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return '' == $this->getContent();
     }
@@ -250,7 +246,7 @@ trait ComponentTrait
      *
      * @return string|null
      */
-    abstract public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING);
+    abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
 
     /**
      * Validate the encoding type value
@@ -259,7 +255,7 @@ trait ComponentTrait
      *
      * @throws Exception If the encoding type is invalid
      */
-    protected static function assertValidEncoding($enc_type)
+    protected static function assertValidEncoding(int $enc_type)
     {
         static $enc_type_list;
         if (null === $enc_type_list) {
@@ -283,7 +279,7 @@ trait ComponentTrait
      *
      * @return string
      */
-    protected static function toRFC1738($str)
+    protected static function toRFC1738(string $str): string
     {
         return str_replace('%20', '+', $str);
     }
@@ -291,7 +287,7 @@ trait ComponentTrait
     /**
      * @inheritdoc
      */
-    public function __set($property, $value)
+    public function __set(string $property, $value)
     {
         throw Exception::fromInaccessibleProperty($property);
     }
@@ -299,7 +295,7 @@ trait ComponentTrait
     /**
      * @inheritdoc
      */
-    public function __isset($property)
+    public function __isset(string $property)
     {
         throw Exception::fromInaccessibleProperty($property);
     }
@@ -307,7 +303,7 @@ trait ComponentTrait
     /**
      * @inheritdoc
      */
-    public function __unset($property)
+    public function __unset(string $property)
     {
         throw Exception::fromInaccessibleProperty($property);
     }
@@ -315,7 +311,7 @@ trait ComponentTrait
     /**
      * @inheritdoc
      */
-    public function __get($property)
+    public function __get(string $property)
     {
         throw Exception::fromInaccessibleProperty($property);
     }

@@ -40,7 +40,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return static::createFromSegments($properties['data'], $properties['isAbsolute']);
     }
@@ -56,7 +56,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    public static function createFromSegments($data, $type = self::IS_RELATIVE)
+    public static function createFromSegments($data, int $type = self::IS_RELATIVE): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
@@ -77,7 +77,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @param string|null $path
      */
-    public function __construct($path = null)
+    public function __construct(string $path = null)
     {
         if (null === $path) {
             $path = '';
@@ -109,7 +109,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return array
      */
-    protected function validate($data)
+    protected function validate(string $data): array
     {
         $data = $this->filterEncodedPath($data);
 
@@ -130,7 +130,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, $isAbsolute)
+    protected function newHierarchicalInstance(array $data, int $isAbsolute): HierarchicalComponent
     {
         return static::createFromSegments($data, $isAbsolute);
     }
@@ -140,7 +140,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return string
      */
-    public function getDirname()
+    public function getDirname(): string
     {
         return str_replace(
             ['\\', "\0"],
@@ -154,7 +154,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return string
      */
-    public function getBasename()
+    public function getBasename(): string
     {
         $data = $this->data;
 
@@ -166,7 +166,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return string
      */
-    public function getExtension()
+    public function getExtension(): string
     {
         list($basename, ) = explode(';', $this->getBasename(), 2);
 
@@ -178,7 +178,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return array
      */
-    public function getSegments()
+    public function getSegments(): array
     {
         return $this->data;
     }
@@ -194,7 +194,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return mixed
      */
-    public function getSegment($offset, $default = null)
+    public function getSegment(int $offset, $default = null)
     {
         if ($offset > -1 && isset($this->data[$offset])) {
             return $this->data[$offset];
@@ -216,7 +216,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return array
      */
-    public function keys()
+    public function keys(): array
     {
         if (0 === func_num_args()) {
             return array_keys($this->data);
@@ -234,7 +234,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return string
      */
-    protected function getDecoded()
+    protected function getDecoded(): string
     {
         $front_delimiter = '';
         if ($this->isAbsolute === static::IS_ABSOLUTE) {
@@ -250,7 +250,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getContent();
     }
@@ -265,7 +265,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    public function prepend($component)
+    public function prepend(string $component): self
     {
         $new_segments = $this->filterComponent($component);
         if (!empty($new_segments) && '' === end($new_segments)) {
@@ -285,7 +285,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    public function append($component)
+    public function append(string $component): self
     {
         $new_segments = $this->filterComponent($component);
         $data = $this->data;
@@ -303,7 +303,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return array
      */
-    protected function filterComponent($component)
+    protected function filterComponent(string $component): array
     {
         $component = $this->validateString($component);
         if ('' != $component && '/' == $component[0]) {
@@ -323,7 +323,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    public function withDirname($path)
+    public function withDirname(string $path): self
     {
         $path = $this->validateString($path);
         if ($path === $this->getDirname()) {
@@ -347,7 +347,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    public function withBasename($path)
+    public function withBasename(string $path): self
     {
         $path = $this->validateString($path);
         if (false !== strpos($path, '/')) {
@@ -376,7 +376,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    public function withExtension($extension)
+    public function withExtension(string $extension): self
     {
         $extension = $this->formatExtension($extension);
         $segments = $this->getSegments();
@@ -405,7 +405,10 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return string
      */
-    protected function buildBasename($basenamePart, $extension, $parameterPart)
+    protected function buildBasename(
+        string $basenamePart,
+        string $extension,
+        string $parameterPart = null): string
     {
         $length = mb_strrpos($basenamePart, '.'.pathinfo($basenamePart, PATHINFO_EXTENSION), 'UTF-8');
         if (false !== $length) {
@@ -434,7 +437,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return string
      */
-    protected function formatExtension($extension)
+    protected function formatExtension(string $extension): string
     {
         if (0 === strpos($extension, '.')) {
             throw new Exception('an extension sequence can not contain a leading `.` character');

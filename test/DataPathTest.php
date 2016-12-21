@@ -7,7 +7,8 @@ use League\Uri\Components\Exception;
 use SplFileObject;
 
 /**
- * @group data
+ * @group path
+ * @group datapath
  */
 class DataPathTest extends AbstractTestCase
 {
@@ -40,8 +41,6 @@ class DataPathTest extends AbstractTestCase
     public function invalidDataUriPath()
     {
         return [
-            'boolean' => [true],
-            'integer' => [23],
             'invalid format' => ['/usr/bin/yeah'],
         ];
     }

@@ -29,6 +29,16 @@ namespace League\Uri\Components;
 class Port extends AbstractComponent
 {
     /**
+     * new instance
+     *
+     * @param mixed $data the component value
+     */
+    public function __construct(int $data = null)
+    {
+        $this->data = $this->validate($data);
+    }
+
+    /**
      * Validate the component content
      *
      * @param mixed $data
@@ -43,7 +53,7 @@ class Port extends AbstractComponent
             return null;
         }
 
-        if (!is_int($data) || $data < 1 || $data > 65535) {
+        if ($data < 1 || $data > 65535) {
             throw new Exception(sprintf('Expected port to be a int or null; received %s', gettype($data)));
         }
 
@@ -56,7 +66,7 @@ class Port extends AbstractComponent
      *
      * @return string
      */
-    public function getUriComponent()
+    public function getUriComponent(): string
     {
         $component = $this->__toString();
         if ('' !== $component) {

@@ -43,14 +43,14 @@ interface ComponentInterface
      *
      * @return bool
      */
-    public function isNull();
+    public function isNull(): bool;
 
     /**
      * Returns whether or not the component is empty (null or empty string).
      *
      * @return bool
      */
-    public function isEmpty();
+    public function isEmpty(): bool;
 
     /**
      * Returns the instance content.
@@ -67,7 +67,7 @@ interface ComponentInterface
      *
      * @return string|null
      */
-    public function getContent($enc_type = self::RFC3986_ENCODING);
+    public function getContent(int $enc_type = self::RFC3986_ENCODING);
 
     /**
      * Returns the instance string representation.
@@ -80,7 +80,7 @@ interface ComponentInterface
      *
      * @return string
      */
-    public function __toString();
+    public function __toString(): string;
 
     /**
      * Returns the instance string representation with its optional URI delimiters
@@ -93,7 +93,7 @@ interface ComponentInterface
      *
      * @return string
      */
-    public function getUriComponent();
+    public function getUriComponent(): string;
 
     /**
      * Returns an instance with the specified content.
@@ -112,5 +112,5 @@ interface ComponentInterface
      *
      * @return static
      */
-    public function withContent($content);
+    public function withContent($content): self;
 }

@@ -57,7 +57,7 @@ class Scheme extends AbstractComponent
      *
      * @return string
      */
-    public function getUriComponent()
+    public function getUriComponent(): string
     {
         $component = $this->__toString();
         if ('' !== $component) {
