@@ -70,16 +70,12 @@ class SchemeTest extends AbstractTestCase
             'empty string' => [''],
             'invalid char' => ['in,valid'],
             'integer like string' => ['123'],
-            'bool' => [true],
-            'Std Class' => [(object) 'foo'],
-            'float' => [1.2],
-            'array' => [['foo']],
         ];
     }
 
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
-        (new Scheme('http'))->getContent('RFC1738');
+        (new Scheme('http'))->getContent(-1);
     }
 }

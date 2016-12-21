@@ -2,6 +2,8 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next
+
 ### Added
 
 - `ComponentInterface::RFC1738_ENCODING`
@@ -29,6 +31,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Remove
 
+- PHP5 support
 - Implementing `League\Uri\Interfaces\Component`
 - `HierarchicalPath::hasKey`
 - `Host::hasKey`

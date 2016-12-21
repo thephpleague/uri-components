@@ -38,25 +38,10 @@ class QueryTest extends AbstractTestCase
         $this->assertSame($this->query, $this->query->withContent('kingkong=toto'));
     }
 
-    /**
-     * @param $str
-     * @dataProvider failedConstructor
-     */
-    public function testFailedConstructor($str)
+    public function testFailedConstructor()
     {
         $this->expectException(Exception::class);
-        new Query($str);
-    }
-
-    public function failedConstructor()
-    {
-        return [
-            'bool' => [true],
-            'Std Class' => [(object) 'foo'],
-            'float' => [1.2],
-            'array' => [['foo']],
-            'reserved char' => ['foo#bar'],
-        ];
+        new Query('foo#bar');
     }
 
     public function testIterator()
@@ -298,43 +283,14 @@ class QueryTest extends AbstractTestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidFilter
-     * @param $callable
-     * @param $flag
-     */
-    public function testFilterOffsetsFailed($callable, $flag)
+    public function testFilterOffsetsFailed()
     {
         $this->expectException(Exception::class);
-        Query::createFromPairs([])->filter($callable, $flag);
-    }
-
-    public function invalidFilter()
-    {
-        $callback = function () {
+        $filter = function () {
             return true;
         };
 
-        return [[$callback, 'toto']];
-    }
-
-    /**
-     * @dataProvider invalidQueryStrings
-     * @param $query
-     */
-    public function testWithQueryRaisesExceptionForInvalidQueryStrings($query)
-    {
-        $this->expectException(Exception::class);
-        new Query($query);
-    }
-
-    public function invalidQueryStrings()
-    {
-        return [
-            'true' => [ true ],
-            'false' => [ false ],
-            'array' => [ [ 'baz=bat' ] ],
-        ];
+        Query::createFromPairs([])->filter($filter, -1);
     }
 
     /**
@@ -628,13 +584,13 @@ class QueryTest extends AbstractTestCase
     public function testThrowsExceptionOnInvalidEncodingType()
     {
         $this->expectException(Exception::class);
-        Query::build([], '&', 'RFC1738');
+        Query::build([], '&', -1);
     }
 
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
-        (new Query('query'))->getContent('RFC1738');
+        (new Query('query'))->getContent(-1);
     }
 
     public function testFailSafeQueryParsing()

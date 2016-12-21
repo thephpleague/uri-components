@@ -57,14 +57,14 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @param string|null $data the component value
      */
-    abstract public function __construct($data = null);
+    abstract public function __construct(string $data = null);
 
     /**
      * Count elements of an object
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->data);
     }
@@ -74,7 +74,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->data);
     }
@@ -90,7 +90,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return static
      */
-    public function filter(callable $callable, $flag = 0)
+    public function filter(callable $callable, int $flag = 0): self
     {
         static $flags_list = [0 => 1, ARRAY_FILTER_USE_BOTH => 1, ARRAY_FILTER_USE_KEY => 1];
 
@@ -109,14 +109,14 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return static
      */
-    abstract protected function newHierarchicalInstance(array $data, $isAbsolute);
+    abstract protected function newHierarchicalInstance(array $data, int $isAbsolute): self;
 
     /**
      * Returns whether or not the component is absolute or not
      *
      * @return bool
      */
-    public function isAbsolute()
+    public function isAbsolute(): bool
     {
         return $this->isAbsolute === self::IS_ABSOLUTE;
     }
@@ -131,7 +131,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return static
      */
-    public function withContent($value)
+    public function withContent($value): ComponentInterface
     {
         if ($value === $this->getContent()) {
             return $this;
@@ -157,7 +157,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return string|null
      */
-    abstract public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING);
+    abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
 
     /**
      * Returns the instance string representation; If the
@@ -165,7 +165,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getContent();
     }
@@ -176,7 +176,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return string
      */
-    public function getUriComponent()
+    public function getUriComponent(): string
     {
         return $this->__toString();
     }
@@ -191,7 +191,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return static
      */
-    public function without(array $offsets)
+    public function without(array $offsets): HierarchicalComponent
     {
         $offsets = filter_var($offsets, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
         if (in_array(false, $offsets, true)) {
@@ -221,7 +221,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return static
      */
-    public function replace($offset, $component)
+    public function replace(int $offset, string $component): HierarchicalComponent
     {
         $offset = $this->filterOffset($offset);
         if (false === $offset) {
@@ -249,7 +249,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return int|false
      */
-    protected function filterOffset($offset)
+    protected function filterOffset(int $offset)
     {
         $nb_elements = count($this->data);
         $offset = filter_var(

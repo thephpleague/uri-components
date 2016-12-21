@@ -46,7 +46,7 @@ class Fragment extends AbstractComponent
      *
      * @return string|null
      */
-    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -76,7 +76,7 @@ class Fragment extends AbstractComponent
      *
      * @return string
      */
-    public function getUriComponent()
+    public function getUriComponent(): string
     {
         $component = $this->__toString();
         if (null !== $this->data) {

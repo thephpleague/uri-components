@@ -70,7 +70,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public static function createFromPairs($data)
+    public static function createFromPairs($data): self
     {
         $data = static::validateIterator($data);
         if (empty($data)) {
@@ -87,7 +87,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return new static(static::build($properties['data'], static::$separator));
     }
@@ -97,7 +97,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @param string $data
      */
-    public function __construct($data = null)
+    public function __construct(string $data = null)
     {
         $this->data = $this->validate($data);
         $this->preserveDelimiter = null !== $data;
@@ -107,11 +107,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * sanitize the submitted data
      *
-     * @param string $str
+     * @param string|null $str
      *
      * @return array
      */
-    protected function validate($str)
+    protected function validate(string $str = null): array
     {
         if (null === $str) {
             return [];
@@ -142,7 +142,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return string|null
      */
-    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -159,7 +159,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getContent();
     }
@@ -170,7 +170,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return string
      */
-    public function getUriComponent()
+    public function getUriComponent(): string
     {
         $query = $this->__toString();
         if ($this->preserveDelimiter) {
@@ -185,7 +185,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->data);
     }
@@ -195,7 +195,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->data);
     }
@@ -205,7 +205,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return array
      */
-    public function getPairs()
+    public function getPairs(): array
     {
         return $this->data;
     }
@@ -221,7 +221,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return mixed
      */
-    public function getPair($offset, $default = null)
+    public function getPair(string $offset, $default = null)
     {
         $offset = $this->decodeComponent($this->validateString($offset));
         if (isset($this->keys[$offset])) {
@@ -238,7 +238,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return bool
      */
-    public function haskey($offset)
+    public function haskey(string $offset): bool
     {
         $offset = $this->decodeComponent($this->validateString($offset));
 
@@ -253,7 +253,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return array
      */
-    public function keys()
+    public function keys(): array
     {
         if (0 === func_num_args()) {
             return array_keys($this->data);
@@ -276,7 +276,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function withContent($value)
+    public function withContent($value): ComponentInterface
     {
         if ($value === $this->getContent()) {
             return $this;
@@ -295,7 +295,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function merge($query)
+    public function merge($query): self
     {
         if ($query === null) {
             return $this;
@@ -323,7 +323,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function ksort($sort = SORT_REGULAR)
+    public function ksort($sort = SORT_REGULAR): self
     {
         $func = is_callable($sort) ? 'uksort' : 'ksort';
         $data = $this->data;
@@ -345,7 +345,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function without(array $offsets)
+    public function without(array $offsets): self
     {
         $data = $this->data;
         foreach ($offsets as $offset) {
@@ -370,7 +370,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function filter(callable $callable, $flag = 0)
+    public function filter(callable $callable, int $flag = 0): self
     {
         static $flags_list = [0 => 1, ARRAY_FILTER_USE_BOTH => 1, ARRAY_FILTER_USE_KEY => 1];
 

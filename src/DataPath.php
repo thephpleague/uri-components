@@ -89,7 +89,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return static
      */
-    public static function createFromPath($path)
+    public static function createFromPath(string $path): self
     {
         if (!file_exists($path) || !is_readable($path)) {
             throw new Exception(sprintf('`%s` does not exist or is not readabele', $path));
@@ -108,7 +108,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @param string|null $path the component value
      */
-    public function __construct($path = null)
+    public function __construct(string $path = null)
     {
         if (null === $path) {
             $path = '';
@@ -122,7 +122,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string
      */
-    protected function getDecoded()
+    protected function getDecoded(): string
     {
         return $this->data;
     }
@@ -170,7 +170,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string
      */
-    protected function filterMimeType($mimetype)
+    protected function filterMimeType(string $mimetype): string
     {
         if (in_array($mimetype, [null, ''], true)) {
             return static::DEFAULT_MIMETYPE;
@@ -192,7 +192,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string[]
      */
-    protected function filterParameters($parameters)
+    protected function filterParameters(string $parameters): array
     {
         $this->isBinaryData = false;
         if ('' === $parameters) {
@@ -219,7 +219,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return bool
      */
-    protected function validateParameter($parameter)
+    protected function validateParameter(string $parameter): bool
     {
         $properties = explode('=', $parameter);
 
@@ -254,8 +254,12 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string
      */
-    protected static function format($mimetype, $parameters, $isBinaryData, $data)
-    {
+    protected static function format(
+        string $mimetype,
+        string $parameters,
+        bool $isBinaryData,
+        string $data
+    ): string {
         if ('' != $parameters) {
             $parameters = ';'.$parameters;
         }
@@ -275,7 +279,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string
      */
-    public function getData()
+    public function getData(): string
     {
         return $this->document;
     }
@@ -285,7 +289,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return bool
      */
-    public function isBinaryData()
+    public function isBinaryData(): bool
     {
         return $this->isBinaryData;
     }
@@ -299,7 +303,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string The URI scheme.
      */
-    public function getMimeType()
+    public function getMimeType(): string
     {
         return $this->mimetype;
     }
@@ -313,7 +317,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string The URI scheme.
      */
-    public function getParameters()
+    public function getParameters(): string
     {
         return implode(';', $this->parameters);
     }
@@ -327,7 +331,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return string The URI scheme.
      */
-    public function getMediaType()
+    public function getMediaType(): string
     {
         return $this->getMimeType().';'.$this->getParameters();
     }
@@ -340,7 +344,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return SplFileObject
      */
-    public function save($path, $mode = 'w')
+    public function save(string $path, string $mode = 'w'): SplFileObject
     {
         $file = new SplFileObject($path, $mode);
         $data = $this->isBinaryData ? base64_decode($this->document) : rawurldecode($this->document);
@@ -357,7 +361,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return static
      */
-    public function toBinary()
+    public function toBinary(): self
     {
         if ($this->isBinaryData) {
             return $this;
@@ -379,7 +383,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return static
      */
-    public function toAscii()
+    public function toAscii(): self
     {
         if (!$this->isBinaryData) {
             return $this;
@@ -409,7 +413,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @return static A new instance with the specified mediatype parameters.
      */
-    public function withParameters($parameters)
+    public function withParameters(string $parameters): self
     {
         if ($parameters === $this->getParameters()) {
             return $this;

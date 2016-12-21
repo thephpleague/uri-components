@@ -46,7 +46,7 @@ class UserInfo implements ComponentInterface
      * @param string|null $user
      * @param string|null $pass
      */
-    public function __construct($user = null, $pass = null)
+    public function __construct(string $user = null, string $pass = null)
     {
         $this->user = $this->filterUser($user);
         if ('' != $this->user) {
@@ -63,7 +63,7 @@ class UserInfo implements ComponentInterface
      *
      * @return string|null
      */
-    protected function filterUser($str)
+    protected function filterUser(string $str = null)
     {
         if (null === $str) {
             return $str;
@@ -86,7 +86,7 @@ class UserInfo implements ComponentInterface
      *
      * @return string|null
      */
-    protected function filterPass($str)
+    protected function filterPass(string $str = null)
     {
         if (null === $str) {
             return $str;
@@ -108,7 +108,7 @@ class UserInfo implements ComponentInterface
      *
      * @return string|null
      */
-    public function getUser($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getUser(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
         if ('' == $this->user || ComponentInterface::NO_ENCODING == $enc_type) {
@@ -135,7 +135,7 @@ class UserInfo implements ComponentInterface
      *
      * @return string
      */
-    public function getPass($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getPass(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
         if ('' == $this->pass || ComponentInterface::NO_ENCODING == $enc_type) {
@@ -164,7 +164,7 @@ class UserInfo implements ComponentInterface
      *
      * @return static
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return new static($properties['user'], $properties['pass']);
     }
@@ -186,7 +186,7 @@ class UserInfo implements ComponentInterface
      *
      * @return string|null
      */
-    public function getContent($enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
         if (null === $this->user) {
@@ -207,7 +207,7 @@ class UserInfo implements ComponentInterface
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getContent();
     }
@@ -218,7 +218,7 @@ class UserInfo implements ComponentInterface
      *
      * @return string
      */
-    public function getUriComponent()
+    public function getUriComponent(): string
     {
         $component = (string) $this->getContent();
         if ('' == $component) {
@@ -235,7 +235,7 @@ class UserInfo implements ComponentInterface
      *
      * @return static
      */
-    public function withContent($content)
+    public function withContent($content): ComponentInterface
     {
         if ($content === $this->getContent()) {
             return $this;
@@ -261,11 +261,12 @@ class UserInfo implements ComponentInterface
      *
      * An empty user is equivalent to removing the user information.
      *
-     * @param string $user The user to use with the new instance.
+     * @param string      $user The user to use with the new instance.
+     * @param string|null $pass The pass to use with the new instance.
      *
      * @return static
      */
-    public function withUserInfo($user, $pass = null)
+    public function withUserInfo(string $user, string $pass = null): self
     {
         $user = $this->filterUser($this->validateString($user));
         $pass = $this->filterPass($pass);

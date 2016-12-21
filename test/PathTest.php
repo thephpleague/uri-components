@@ -7,7 +7,7 @@ use League\Uri\Components\Path;
 
 /**
  * @group path
- * @group segmentmodifier
+ * @group defaultpath
  */
 class PathTest extends AbstractTestCase
 {
@@ -52,30 +52,16 @@ class PathTest extends AbstractTestCase
         $this->assertTrue($path->isEmpty());
     }
 
-    /**
-     * @param $raw
-     * @dataProvider invalidDataProvider
-     */
-    public function testFailedConstructor($raw)
+    public function testFailedConstructor()
     {
         $this->expectException(Exception::class);
-        new Path($raw);
+        new Path('?#');
     }
 
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
-        (new Path('query'))->getContent('RFC1738');
-    }
-
-    public function invalidDataProvider()
-    {
-        return [
-            'bool' => [true],
-            'Std Class' => [(object) 'foo'],
-            'float' => [1.2],
-            'array' => [['foo']],
-        ];
+        (new Path('query'))->getContent(-1);
     }
 
     /**

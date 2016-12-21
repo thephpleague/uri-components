@@ -24,14 +24,6 @@ use InvalidArgumentException;
  */
 class Exception extends InvalidArgumentException
 {
-    public static function fromInvalidString($str)
-    {
-        return new self(sprintf(
-            'Expected data to be a string; received "%s"',
-            (is_object($str) ? get_class($str) : gettype($str))
-        ));
-    }
-
     public static function fromInvalidIterable($str)
     {
         return new self(sprintf(

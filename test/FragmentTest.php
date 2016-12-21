@@ -89,30 +89,10 @@ class FragmentTest extends AbstractTestCase
         ];
     }
 
-    /**
-     * @param $str
-     * @dataProvider failedConstructor
-     */
-    public function testInvalidFragment($str)
-    {
-        $this->expectException(Exception::class);
-        new Fragment($str);
-    }
-
-    public function failedConstructor()
-    {
-        return [
-            'bool' => [true],
-            'Std Class' => [(object) 'foo'],
-            'float' => [1.2],
-            'array' => [['foo']],
-        ];
-    }
-
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
-        (new Fragment('host'))->getContent('RFC1738');
+        (new Fragment('host'))->getContent(-1);
     }
 
     /**
