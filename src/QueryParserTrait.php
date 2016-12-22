@@ -62,7 +62,7 @@ trait QueryParserTrait
     {
         if (ComponentInterface::RFC1738_ENCODING === $enc_type) {
             return function ($value) {
-                return str_replace('+', ' ', self::decodeComponent($value));
+                return self::decodeComponent(str_replace('+', ' ', $value));
             };
         }
 
@@ -190,7 +190,7 @@ trait QueryParserTrait
 
         $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
         $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
-        $regexp = '/(?:[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+|%(?![A-Fa-f0-9]{2}))/u';
+        $regexp = '/(%[A-Fa-f0-9]{2})|[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+/u';
 
         if (Query::RFC3986_ENCODING == $enc_type) {
             return function ($str) use ($regexp) {

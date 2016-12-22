@@ -4,11 +4,12 @@ namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Exception;
 use League\Uri\Components\Fragment;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group fragment
  */
-class FragmentTest extends AbstractTestCase
+class FragmentTest extends TestCase
 {
     /**
      * @dataProvider getUriComponentProvider
@@ -67,7 +68,7 @@ class FragmentTest extends AbstractTestCase
             ['frag%20ment', 'frag ment', Fragment::RFC3987_ENCODING],
             ['frag%2-ment', 'frag%2-ment', Fragment::RFC3987_ENCODING],
             ['fr%61gment', 'fr%61gment', Fragment::RFC3987_ENCODING],
-            ['frag%20ment', 'frag+ment', Fragment::RFC1738_ENCODING],
+            ['frag+ment', 'frag%2Bment', Fragment::RFC1738_ENCODING],
         ];
     }
 
@@ -95,9 +96,6 @@ class FragmentTest extends AbstractTestCase
         (new Fragment('host'))->getContent(-1);
     }
 
-    /**
-     * @supportsDebugInfo
-     */
     public function testDebugInfo()
     {
         $this->assertInternalType('array', (new Fragment('yolo'))->__debugInfo());

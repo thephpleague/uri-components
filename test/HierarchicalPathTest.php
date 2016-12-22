@@ -5,16 +5,14 @@ namespace LeagueTest\Uri\Components;
 use ArrayIterator;
 use League\Uri\Components\Exception;
 use League\Uri\Components\HierarchicalPath as Path;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group path
  * @group hierarchicalpath
  */
-class HierarchicalPathTest extends AbstractTestCase
+class HierarchicalPathTest extends TestCase
 {
-    /**
-     * @supportsDebugInfo
-     */
     public function testDebugInfo()
     {
         $component = new Path('yolo');
@@ -567,6 +565,11 @@ class HierarchicalPathTest extends AbstractTestCase
                 'path' => '',
                 'dirname' => '/foo/bar',
                 'expected' => '/foo/bar/',
+            ],
+            'dirname with trailing slash' => [
+                'path' => '',
+                'dirname' => 'bar/baz/',
+                'expected' => 'bar/baz/',
             ],
         ];
     }

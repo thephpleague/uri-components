@@ -44,7 +44,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @var int
      */
-    protected $isAbsolute = self::IS_RELATIVE;
+    protected $is_absolute = self::IS_RELATIVE;
     /**
      * The component Data
      *
@@ -98,18 +98,18 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
             throw Exception::fromInvalidFlag($flag);
         }
 
-        return $this->newHierarchicalInstance(array_filter($this->data, $callable, $flag), $this->isAbsolute);
+        return $this->newHierarchicalInstance(array_filter($this->data, $callable, $flag), $this->is_absolute);
     }
 
     /**
      * Return a new instance when needed
      *
      * @param array $data
-     * @param int   $isAbsolute
+     * @param int   $is_absolute
      *
      * @return static
      */
-    abstract protected function newHierarchicalInstance(array $data, int $isAbsolute): self;
+    abstract protected function newHierarchicalInstance(array $data, int $is_absolute): self;
 
     /**
      * Returns whether or not the component is absolute or not
@@ -118,7 +118,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      */
     public function isAbsolute(): bool
     {
-        return $this->isAbsolute === self::IS_ABSOLUTE;
+        return $this->is_absolute === self::IS_ABSOLUTE;
     }
 
     /**
@@ -207,7 +207,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
             return $this;
         }
 
-        return $this->newHierarchicalInstance($data, $this->isAbsolute);
+        return $this->newHierarchicalInstance($data, $this->is_absolute);
     }
 
     /**
@@ -239,7 +239,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
             return $this;
         }
 
-        return $this->newHierarchicalInstance($data, $this->isAbsolute);
+        return $this->newHierarchicalInstance($data, $this->is_absolute);
     }
 
     /**

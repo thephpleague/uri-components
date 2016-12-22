@@ -4,13 +4,14 @@ namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\DataPath as Path;
 use League\Uri\Components\Exception;
+use PHPUnit\Framework\TestCase;
 use SplFileObject;
 
 /**
  * @group path
  * @group datapath
  */
-class DataPathTest extends AbstractTestCase
+class DataPathTest extends TestCase
 {
     /**
      * @dataProvider invalidDataUriPath
@@ -49,6 +50,12 @@ class DataPathTest extends AbstractTestCase
     {
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $this->assertSame($uri, $uri->withContent((string) $uri));
+    }
+
+    public function testDebugInfo()
+    {
+        $component = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $this->assertInternalType('array', $component->__debugInfo());
     }
 
     /**

@@ -42,7 +42,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      */
     public static function __set_state(array $properties): self
     {
-        return static::createFromSegments($properties['data'], $properties['isAbsolute']);
+        return static::createFromSegments($properties['data'], $properties['is_absolute']);
     }
 
     /**
@@ -84,9 +84,9 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
         }
 
         $path = $this->validateString($path);
-        $this->isAbsolute = static::IS_RELATIVE;
+        $this->is_absolute = static::IS_RELATIVE;
         if (static::$separator === substr($path, 0, 1)) {
-            $this->isAbsolute = static::IS_ABSOLUTE;
+            $this->is_absolute = static::IS_ABSOLUTE;
             $path = substr($path, 1, strlen($path));
         }
 
@@ -126,13 +126,27 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      * Return a new instance when needed
      *
      * @param array $data
-     * @param int   $isAbsolute
+     * @param int   $is_absolute
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, int $isAbsolute): HierarchicalComponent
+    protected function newHierarchicalInstance(array $data, int $is_absolute): HierarchicalComponent
     {
-        return static::createFromSegments($data, $isAbsolute);
+        return static::createFromSegments($data, $is_absolute);
+    }
+
+    /**
+     * Called by var_dump() when dumping The object
+     *
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'segments' => $this->data,
+            'is_absolute' => (bool) $this->is_absolute,
+            'component' => $this->getContent(),
+        ];
     }
 
     /**
@@ -237,7 +251,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
     protected function getDecoded(): string
     {
         $front_delimiter = '';
-        if ($this->isAbsolute === static::IS_ABSOLUTE) {
+        if ($this->is_absolute === static::IS_ABSOLUTE) {
             $front_delimiter = static::$separator;
         }
 
@@ -272,7 +286,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
             array_pop($new_segments);
         }
 
-        return static::createFromSegments(array_merge($new_segments, $this->data), $this->isAbsolute);
+        return static::createFromSegments(array_merge($new_segments, $this->data), $this->is_absolute);
     }
 
     /**
@@ -293,7 +307,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
             array_pop($data);
         }
 
-        return static::createFromSegments(array_merge($data, $new_segments), $this->isAbsolute);
+        return static::createFromSegments(array_merge($data, $new_segments), $this->is_absolute);
     }
 
     /**
@@ -330,11 +344,11 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
             return $this;
         }
 
-        if ('/' !== mb_substr($path, -1, 1)) {
-            $path = $path.'/';
+        if ('' !== $path && substr($path, -1, 1) === '/') {
+            $path = substr($path, 0, -1);
         }
 
-        return new static($path.$this->getBasename());
+        return new static($path.'/'.array_pop($this->data));
     }
 
     /**
@@ -362,7 +376,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
 
         $data[] = $path;
 
-        return static::createFromSegments($data, $this->isAbsolute);
+        return static::createFromSegments($data, $this->is_absolute);
     }
 
     /**
@@ -393,7 +407,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
         }
         $segments[] = $newBasename;
 
-        return $this->createFromSegments($segments, $this->isAbsolute);
+        return $this->createFromSegments($segments, $this->is_absolute);
     }
 
     /**

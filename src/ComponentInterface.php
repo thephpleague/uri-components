@@ -30,13 +30,13 @@ use InvalidArgumentException;
  */
 interface ComponentInterface
 {
+    const NO_ENCODING = 0;
+
     const RFC1738_ENCODING = 1;
 
     const RFC3986_ENCODING = 2;
 
     const RFC3987_ENCODING = 3;
-
-    const NO_ENCODING = 255;
 
     /**
      * Returns whether or not the component is null.

@@ -76,7 +76,7 @@ class Host extends HierarchicalComponent
      */
     public static function __set_state(array $properties): self
     {
-        $host = static::createFromLabels($properties['data'], $properties['isAbsolute']);
+        $host = static::createFromLabels($properties['data'], $properties['is_absolute']);
         $host->hostnameInfoLoaded = $properties['hostnameInfoLoaded'];
         $host->hostnameInfo = $properties['hostnameInfo'];
 
@@ -142,8 +142,6 @@ class Host extends HierarchicalComponent
      */
     public static function createFromIp(string $ip): self
     {
-        $ip = static::validateString($ip);
-
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return new static($ip);
         }
@@ -187,9 +185,9 @@ class Host extends HierarchicalComponent
         }
 
         $str = $this->validateString($str);
-        $this->isAbsolute = self::IS_RELATIVE;
+        $this->is_absolute = self::IS_RELATIVE;
         if ('.' === mb_substr($str, -1, 1, 'UTF-8')) {
-            $this->isAbsolute = self::IS_ABSOLUTE;
+            $this->is_absolute = self::IS_ABSOLUTE;
             return mb_substr($str, 0, -1, 'UTF-8');
         }
 
@@ -246,13 +244,27 @@ class Host extends HierarchicalComponent
      * Return a new instance when needed
      *
      * @param array $data
-     * @param int   $isAbsolute
+     * @param int   $is_absolute
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, int $isAbsolute): HierarchicalComponent
+    protected function newHierarchicalInstance(array $data, int $is_absolute): HierarchicalComponent
     {
-        return $this->createFromLabels($data, $isAbsolute);
+        return $this->createFromLabels($data, $is_absolute);
+    }
+
+    /**
+     * Called by var_dump() when dumping The object
+     *
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'labels' => $this->data,
+            'is_absolute' => (bool) $this->is_absolute,
+            'component' => $this->getContent(),
+        ];
     }
 
     /**
@@ -383,10 +395,10 @@ class Host extends HierarchicalComponent
         }
 
         if ($enc_type != ComponentInterface::RFC3987_ENCODING) {
-            return $this->format(array_map('idn_to_ascii', $this->data), $this->isAbsolute);
+            return $this->format(array_map('idn_to_ascii', $this->data), $this->is_absolute);
         }
 
-        return $this->format($this->data, $this->isAbsolute);
+        return $this->format($this->data, $this->is_absolute);
     }
 
     /**
@@ -442,12 +454,12 @@ class Host extends HierarchicalComponent
      */
     public function withRootLabel(): self
     {
-        if ($this->isAbsolute == self::IS_ABSOLUTE || $this->isIp()) {
+        if ($this->is_absolute == self::IS_ABSOLUTE || $this->isIp()) {
             return $this;
         }
 
         $clone = clone $this;
-        $clone->isAbsolute = self::IS_ABSOLUTE;
+        $clone->is_absolute = self::IS_ABSOLUTE;
 
         return $clone;
     }
@@ -461,12 +473,12 @@ class Host extends HierarchicalComponent
      */
     public function withoutRootlabel(): self
     {
-        if ($this->isAbsolute == self::IS_RELATIVE || $this->isIp()) {
+        if ($this->is_absolute == self::IS_RELATIVE || $this->isIp()) {
             return $this;
         }
 
         $clone = clone $this;
-        $clone->isAbsolute = self::IS_RELATIVE;
+        $clone->is_absolute = self::IS_RELATIVE;
 
         return $clone;
     }
@@ -488,7 +500,7 @@ class Host extends HierarchicalComponent
             return $this;
         }
 
-        return static::createFromLabels($labels, $this->isAbsolute);
+        return static::createFromLabels($labels, $this->is_absolute);
     }
 
     /**
@@ -508,7 +520,7 @@ class Host extends HierarchicalComponent
             return $this;
         }
 
-        return static::createFromLabels($labels, $this->isAbsolute);
+        return static::createFromLabels($labels, $this->is_absolute);
     }
 
     /**
@@ -544,20 +556,23 @@ class Host extends HierarchicalComponent
      */
     public function withRegisterableDomain(string $host): self
     {
-        $new = $this->filterPublicDomain($host);
         $source = $this->getContent();
         if ('' == $source) {
-            return $this->withContent($new);
+            return $this->withContent($host);
         }
 
+        $new = $this->validate($host);
         $registerable_domain = $this->getRegisterableDomain();
-        if ($new === $registerable_domain) {
+        if (implode('.', array_reverse($new)) === $registerable_domain) {
             return $this;
         }
 
-        return $this
-            ->withContent(substr($source, 0, -(strlen($registerable_domain) + 1)))
-            ->append($new);
+        $offset = 0;
+        if ('' != $registerable_domain) {
+            $offset = count(explode('.', $registerable_domain));
+        }
+
+        return self::createFromLabels(array_merge($new, array_slice($this->data, $offset)), $this->is_absolute);
     }
 
     /**
@@ -572,48 +587,22 @@ class Host extends HierarchicalComponent
      */
     public function withSubdomain(string $host):self
     {
-        $new = $this->filterPublicDomain($host);
         $source = $this->getContent();
         if ('' == $source) {
-            return $this->withContent($new);
+            return $this->withContent($host);
         }
 
+        $new = $this->validate($host);
         $subdomain = $this->getSubdomain();
-        if ($new === $subdomain) {
+        if (implode('.', array_reverse($new)) === $subdomain) {
             return $this;
         }
 
-        if ('' == $subdomain) {
-            return $this->prepend($new);
+        $offset = count($this->data);
+        if ('' != $subdomain) {
+            $offset -= count(explode('.', $subdomain));
         }
 
-        return $this
-            ->withContent(substr($source, strlen($subdomain) + 1))
-            ->prepend($new);
-    }
-
-    /**
-     * Filter the submitted domain to see if It can be use
-     * to modify the Host Info properties. The host is normalize
-     * to its RFC3986 representation
-     *
-     * @param string|null $host
-     *
-     * @throws Exception If the current host is an IP
-     * @throws Exception If the submitted host is invalid
-     *
-     * @return string|null
-     */
-    protected function filterPublicDomain(string $host): string
-    {
-        if ($this->isIp()) {
-            throw new Exception('The submitted host can not modify an IP host');
-        }
-
-        if (mb_substr($host, -1, 1, 'UTF-8') === '.') {
-            throw new Exception('The submitted host can not be absolute');
-        }
-
-        return implode('.', array_reverse($this->validate($host)));
+        return self::createFromLabels(array_merge(array_slice($this->data, 0, $offset), $new), $this->is_absolute);
     }
 }

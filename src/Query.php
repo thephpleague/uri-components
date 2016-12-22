@@ -126,6 +126,19 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
+     * Called by var_dump() when dumping The object
+     *
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'pairs' => $this->data,
+            'component' => $this->getContent(),
+        ];
+    }
+
+    /**
      * Returns the instance content encoded in RFC3986 or RFC3987.
      *
      * If the instance is defined, the value returned MUST be percent-encoded,
