@@ -272,6 +272,22 @@ class DataPath extends AbstractComponent implements PathInterface
     }
 
     /**
+     * Called by var_dump() when dumping The object
+     *
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'mimetype' => $this->mimetype,
+            'parameters' => $this->parameters,
+            'is_binary' => $this->isBinaryData,
+            'data' => $this->document,
+            'component' => $this->getContent(),
+        ];
+    }
+
+    /**
      * Retrieves the data string.
      *
      * Retrieves the data part of the path. If no data part is provided return

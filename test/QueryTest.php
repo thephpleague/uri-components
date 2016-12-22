@@ -5,11 +5,12 @@ namespace LeagueTest\Uri\Components;
 use ArrayIterator;
 use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group query
  */
-class QueryTest extends AbstractTestCase
+class QueryTest extends TestCase
 {
     /**
      * @var Query
@@ -80,7 +81,7 @@ class QueryTest extends AbstractTestCase
             'Percent encode spaces' => ['q=va lue', '?q=va%20lue'],
             'Percent encode multibyte' => ['€', '?%E2%82%AC'],
             "Don't encode something that's already encoded" => ['q=va%20lue', '?q=va%20lue'],
-            'Percent encode invalid percent encodings' => ['q=va%2-lue', '?q=va%252-lue'],
+            'Percent encode invalid percent encodings' => ['q=va%2-lue', '?q=va%2-lue'],
             "Don't encode path segments" => ['q=va/lue', '?q=va/lue'],
             "Don't encode unreserved chars or sub-delimiters" => [$unreserved, '?'.$unreserved],
             'Encoded unreserved chars are not decoded' => ['q=v%61lue', '?q=v%61lue'],
@@ -563,12 +564,12 @@ class QueryTest extends AbstractTestCase
                 'expected_no_encoding' => '0=0',
             ],
             'rcf1738' => [
-                'pairs' => ['toto' => 'foo bar'],
-                'expected_rfc1738' => 'toto=foo+bar',
-                'expected_rfc3986' => 'toto=foo%20bar',
-                'expected_rfc3987' => 'toto=foo bar',
-                'expected_iri' => 'toto=foo bar',
-                'expected_no_encoding' => 'toto=foo bar',
+                'pairs' => ['toto' => 'foo+bar'],
+                'expected_rfc1738' => 'toto=foo%2Bbar',
+                'expected_rfc3986' => 'toto=foo+bar',
+                'expected_rfc3987' => 'toto=foo+bar',
+                'expected_iri' => 'toto=foo+bar',
+                'expected_no_encoding' => 'toto=foo+bar',
             ],
         ];
     }

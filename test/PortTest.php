@@ -4,11 +4,12 @@ namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Exception;
 use League\Uri\Components\Port;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group port
  */
-class PortTest extends AbstractTestCase
+class PortTest extends TestCase
 {
     public function testPortSetter()
     {

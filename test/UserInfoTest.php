@@ -4,15 +4,13 @@ namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Exception;
 use League\Uri\Components\UserInfo;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group userinfo
  */
-class UserInfoTest extends AbstractTestCase
+class UserInfoTest extends TestCase
 {
-    /**
-     * @supportsDebugInfo
-     */
     public function testDebugInfo()
     {
         $component = new UserInfo('yolo', 'oloy');
@@ -115,14 +113,14 @@ class UserInfoTest extends AbstractTestCase
                 'rfc1738_str' => 'fo%C3%B2:bar',
             ],
             [
-                'user' => 'fo o',
-                'pass' => 'ba r',
-                'expected_user' => 'fo%20o',
-                'expected_pass' => 'ba%20r',
-                'expected_str' => 'fo%20o:ba%20r',
-                'uri_component' => 'fo%20o:ba%20r@',
-                'iri_str' => 'fo o:ba r',
-                'rfc1738_str' => 'fo+o:ba+r',
+                'user' => 'fo+o',
+                'pass' => 'ba+r',
+                'expected_user' => 'fo+o',
+                'expected_pass' => 'ba+r',
+                'expected_str' => 'fo+o:ba+r',
+                'uri_component' => 'fo+o:ba+r@',
+                'iri_str' => 'fo+o:ba+r',
+                'rfc1738_str' => 'fo%2Bo:ba%2Br',
             ],
 
         ];

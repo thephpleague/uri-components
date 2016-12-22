@@ -6,11 +6,12 @@ use ArrayIterator;
 use League\Uri\Components\Exception;
 use League\Uri\Components\Host;
 use LogicException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group host
  */
-class HostTest extends AbstractTestCase
+class HostTest extends TestCase
 {
     public function testSetState()
     {
@@ -620,13 +621,14 @@ class HostTest extends AbstractTestCase
             ['thephpleague.com', 'shop.ulb.ac.be.', 'shop.thephpleague.com.'],
             ['thephpleague.com', '', 'thephpleague.com'],
             ['thephpleague.com', 'shop.thephpleague.com', 'shop.thephpleague.com'],
+            ['example.com', '127.0.0.1', '127.0.0.1.example.com'],
         ];
     }
 
     public function testWithRegisterableDomainThrowException()
     {
         $this->expectException(Exception::class);
-        (new Host('127.0.0.1'))->withRegisterableDomain('example.com');
+        (new Host('[::1]'))->withRegisterableDomain('example.com');
     }
 
     public function testWithSubDomainThrowExceptionWithAbsoluteRegisterableDomain()
@@ -654,13 +656,14 @@ class HostTest extends AbstractTestCase
             ['www', 'www.ulb.ac.be', 'www.ulb.ac.be'],
             ['www', '', 'www'],
             ['www', 'example.com.', 'www.example.com.'],
+            ['example.com', '127.0.0.1', 'example.com.127.0.0.1'],
         ];
     }
 
     public function testWithSubDomainThrowExceptionWithIPHost()
     {
         $this->expectException(Exception::class);
-        (new Host('127.0.0.1'))->withSubDomain('example.com');
+        (new Host('[::1]'))->withSubDomain('example.com');
     }
 
     public function testWithSubDomainThrowExceptionWithAbsoluteSubDomain()

@@ -4,11 +4,12 @@ namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Exception;
 use League\Uri\Components\Scheme;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group scheme
  */
-class SchemeTest extends AbstractTestCase
+class SchemeTest extends TestCase
 {
     public function testSetState()
     {

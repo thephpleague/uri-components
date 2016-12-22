@@ -80,6 +80,10 @@ trait ComponentTrait
     protected static function encode(string $str, string $regexp): string
     {
         $encoder = function (array $matches) {
+            if (preg_match('/^[A-Za-z0-9_\-\.~]$/', rawurldecode($matches[0]))) {
+                return $matches[0];
+            }
+
             return rawurlencode($matches[0]);
         };
 
@@ -121,10 +125,6 @@ trait ComponentTrait
     {
         $regexp = ',%'.$pattern.',i';
         $decoder = function (array $matches) use ($regexp) {
-            if (strpos("!$&'()*+,;=%", rawurldecode($matches[0]))) {
-                return $matches[0];
-            }
-
             if (preg_match($regexp, $matches[0])) {
                 return strtoupper($matches[0]);
             }
@@ -281,7 +281,7 @@ trait ComponentTrait
      */
     protected static function toRFC1738(string $str): string
     {
-        return str_replace('%20', '+', $str);
+        return str_replace(['+', '~'], ['%2B', '%7E'], $str);
     }
 
     /**

@@ -4,12 +4,13 @@ namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Exception;
 use League\Uri\Components\Path;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group path
  * @group defaultpath
  */
-class PathTest extends AbstractTestCase
+class PathTest extends TestCase
 {
     /**
      * @dataProvider validPathEncoding
@@ -34,7 +35,7 @@ class PathTest extends AbstractTestCase
             ['bar---', 'bar---', 'bar---'],
             ['', '', ''],
             ['"bad"', '%22bad%22', '%22bad%22'],
-            ['<not good>', '%3Cnot%20good%3E', '%3Cnot+good%3E'],
+            ['<not good>', '%3Cnot%20good%3E', '%3Cnot%20good%3E'],
             ['{broken}', '%7Bbroken%7D', '%7Bbroken%7D'],
             ['`oops`', '%60oops%60', '%60oops%60'],
             ['\\slashy', '%5Cslashy', '%5Cslashy'],
@@ -62,6 +63,12 @@ class PathTest extends AbstractTestCase
     {
         $this->expectException(Exception::class);
         (new Path('query'))->getContent(-1);
+    }
+
+    public function testDebugInfo()
+    {
+        $component = new Path('this is a normal path');
+        $this->assertInternalType('array', $component->__debugInfo());
     }
 
     /**
