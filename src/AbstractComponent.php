@@ -125,7 +125,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @param string|null $value
      *
-     * @return static
+     * @return ComponentInterface
      */
     public function withContent($value): ComponentInterface
     {

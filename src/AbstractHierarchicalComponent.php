@@ -109,7 +109,7 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      *
      * @return static
      */
-    abstract protected function newHierarchicalInstance(array $data, int $is_absolute): self;
+    abstract protected function newHierarchicalInstance(array $data, int $is_absolute);
 
     /**
      * Returns whether or not the component is absolute or not

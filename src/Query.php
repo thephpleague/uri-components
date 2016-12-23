@@ -287,7 +287,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @param string|null $value
      *
-     * @return static
+     * @return ComponentInterface
      */
     public function withContent($value): ComponentInterface
     {
