@@ -31,7 +31,7 @@ trait ComponentTrait
      *
      * @var string
      */
-    protected static $invalidUriChars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
+    protected static $invalid_uri_chars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
 
     /**
      * Encoded Characters regular expression pattern
@@ -40,7 +40,7 @@ trait ComponentTrait
      *
      * @var string
      */
-    protected static $encodedChars = '[A-Fa-f0-9]{2}';
+    protected static $encoded_chars = '[A-Fa-f0-9]{2}';
 
     /**
      * RFC3986 Sub delimiter characters regular expression pattern
@@ -49,7 +49,7 @@ trait ComponentTrait
      *
      * @var string
      */
-    protected static $subdelimChars = "\!\$&'\(\)\*\+,;\=%";
+    protected static $subdelim_chars = "\!\$&'\(\)\*\+,;\=%";
 
     /**
      * RFC3986 unreserved characters regular expression pattern
@@ -58,7 +58,7 @@ trait ComponentTrait
      *
      * @var string
      */
-    protected static $unreservedChars = 'A-Za-z0-9_\-\.~';
+    protected static $unreserved_chars = 'A-Za-z0-9_\-\.~';
 
     /**
      * RFC3986 unreserved characters encoded regular expression pattern
@@ -67,7 +67,7 @@ trait ComponentTrait
      *
      * @var string
      */
-    protected static $unreservedCharsEncoded = '2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]';
+    protected static $unreserved_chars_encoded = '2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]';
 
     /**
      * Encode a component string
@@ -105,10 +105,10 @@ trait ComponentTrait
     protected static function encodePath(string $str): string
     {
         $regexp = '/(?:[^'
-            .self::$unreservedChars
-            .self::$subdelimChars
+            .self::$unreserved_chars
+            .self::$subdelim_chars
             .'\:\/@]+|%(?!'
-            .self::$encodedChars.'))/x';
+            .self::$encoded_chars.'))/x';
 
         return self::encode($str, $regexp);
     }
@@ -132,7 +132,7 @@ trait ComponentTrait
             return rawurldecode($matches[0]);
         };
 
-        return preg_replace_callback(',%'.self::$encodedChars.',', $decoder, $str);
+        return preg_replace_callback(',%'.self::$encoded_chars.',', $decoder, $str);
     }
 
     /**
@@ -144,7 +144,7 @@ trait ComponentTrait
      */
     protected static function decodeComponent(string $str): string
     {
-        return self::decode($str, self::$unreservedCharsEncoded);
+        return self::decode($str, self::$unreserved_chars_encoded);
     }
 
     /**
@@ -156,7 +156,7 @@ trait ComponentTrait
      */
     protected static function decodePath(string $str): string
     {
-        return self::decode($str, self::$unreservedCharsEncoded.'|2F');
+        return self::decode($str, self::$unreserved_chars_encoded.'|2F');
     }
 
     /**
@@ -170,7 +170,7 @@ trait ComponentTrait
      */
     protected static function validateString(string $str): string
     {
-        if (strlen($str) !== strcspn($str, self::$invalidUriChars)) {
+        if (strlen($str) !== strcspn($str, self::$invalid_uri_chars)) {
             throw new Exception(sprintf('The submitted string `%s` contains invalid characters', $str));
         }
 

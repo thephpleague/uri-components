@@ -22,7 +22,7 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class HierarchicalPath extends HierarchicalComponent implements PathInterface
+class HierarchicalPath extends AbstractHierarchicalComponent implements PathInterface
 {
     use PathInfo;
 
@@ -130,7 +130,7 @@ class HierarchicalPath extends HierarchicalComponent implements PathInterface
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, int $is_absolute): HierarchicalComponent
+    protected function newHierarchicalInstance(array $data, int $is_absolute): AbstractHierarchicalComponent
     {
         return static::createFromSegments($data, $is_absolute);
     }

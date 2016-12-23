@@ -55,12 +55,12 @@ class Fragment extends AbstractComponent
         }
 
         if (ComponentInterface::RFC3987_ENCODING == $enc_type) {
-            $pattern = str_split(self::$invalidUriChars);
+            $pattern = str_split(self::$invalid_uri_chars);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->data);
         }
 
-        $regexp = '/(?:[^'.self::$unreservedChars.self::$subdelimChars.'\:\/@\?]+|%(?!'.self::$encodedChars.'))/ux';
+        $regexp = '/(?:[^'.self::$unreserved_chars.self::$subdelim_chars.'\:\/@\?]+|%(?!'.self::$encoded_chars.'))/ux';
 
         $content = $this->encode($this->data, $regexp);
         if (ComponentInterface::RFC1738_ENCODING == $enc_type) {

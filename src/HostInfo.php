@@ -30,7 +30,7 @@ trait HostInfo
      *
      * @var Parser
      */
-    protected static $pdpParser;
+    protected static $pdp_parser;
 
     /**
      * Hostname public info
@@ -259,10 +259,10 @@ trait HostInfo
      */
     protected function getPdpParser(): Parser
     {
-        if (!static::$pdpParser instanceof Parser) {
-            static::$pdpParser = new Parser((new PublicSuffixListManager())->getList());
+        if (!static::$pdp_parser instanceof Parser) {
+            static::$pdp_parser = new Parser((new PublicSuffixListManager())->getList());
         }
 
-        return static::$pdpParser;
+        return static::$pdp_parser;
     }
 }

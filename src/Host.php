@@ -28,7 +28,7 @@ use Traversable;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-class Host extends HierarchicalComponent
+class Host extends AbstractHierarchicalComponent
 {
     use HostInfo;
 
@@ -248,7 +248,7 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, int $is_absolute): HierarchicalComponent
+    protected function newHierarchicalInstance(array $data, int $is_absolute): AbstractHierarchicalComponent
     {
         return $this->createFromLabels($data, $is_absolute);
     }
@@ -556,6 +556,10 @@ class Host extends HierarchicalComponent
      */
     public function withRegisterableDomain(string $host): self
     {
+        if ('' === $host) {
+            $host = null;
+        }
+
         $source = $this->getContent();
         if ('' == $source) {
             return $this->withContent($host);
@@ -585,8 +589,12 @@ class Host extends HierarchicalComponent
      *
      * @return static
      */
-    public function withSubdomain(string $host):self
+    public function withSubdomain(string $host): self
     {
+        if ('' === $host) {
+            $host = null;
+        }
+
         $source = $this->getContent();
         if ('' == $source) {
             return $this->withContent($host);
