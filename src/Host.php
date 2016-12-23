@@ -248,7 +248,7 @@ class Host extends AbstractHierarchicalComponent
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, int $is_absolute): AbstractHierarchicalComponent
+    protected function newHierarchicalInstance(array $data, int $is_absolute): self
     {
         return $this->createFromLabels($data, $is_absolute);
     }

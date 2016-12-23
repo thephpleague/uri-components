@@ -23,7 +23,9 @@ Dependencies
 Installation
 --------
 
-Clone this repo and use composer install
+```bash
+$ composer require league/uri-components
+```
 
 Documentation
 --------

@@ -130,7 +130,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements PathInte
      *
      * @return static
      */
-    protected function newHierarchicalInstance(array $data, int $is_absolute): AbstractHierarchicalComponent
+    protected function newHierarchicalInstance(array $data, int $is_absolute): self
     {
         return static::createFromSegments($data, $is_absolute);
     }
