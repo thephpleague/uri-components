@@ -27,7 +27,7 @@ trait PathInfo
      *
      * @var array
      */
-    protected static $dotSegments = ['.' => 1, '..' => 1];
+    protected static $dot_segments = ['.' => 1, '..' => 1];
 
     /**
      * Filter the encoded path string
@@ -99,7 +99,7 @@ trait PathInfo
         $this->assertValidEncoding($enc_type);
 
         if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
-            $pattern = str_split(self::$invalidUriChars);
+            $pattern = str_split(self::$invalid_uri_chars);
             $pattern[] = '#';
             $pattern[] = '?';
 
@@ -169,7 +169,7 @@ trait PathInfo
 
         $input = explode('/', $current);
         $new = implode('/', array_reduce($input, [$this, 'filterDotSegments'], []));
-        if (isset(static::$dotSegments[end($input)])) {
+        if (isset(static::$dot_segments[end($input)])) {
             $new .= '/';
         }
 
@@ -194,7 +194,7 @@ trait PathInfo
             return $carry;
         }
 
-        if (!isset(static::$dotSegments[$segment])) {
+        if (!isset(static::$dot_segments[$segment])) {
             $carry[] = $segment;
         }
 

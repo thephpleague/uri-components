@@ -116,12 +116,12 @@ class UserInfo implements ComponentInterface
         }
 
         if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
-            $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', ':', '@']);
+            $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', ':', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->user);
         }
 
-        $regexp = '/(?:[^'.static::$unreservedChars.static::$subdelimChars.']+|%(?!'.static::$encodedChars.'))/x';
+        $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
 
         if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
             return $this->toRFC1738($this->encode($this->user, $regexp));
@@ -143,12 +143,12 @@ class UserInfo implements ComponentInterface
         }
 
         if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
-            $pattern = array_merge(str_split(self::$invalidUriChars), ['/', '#', '?', '@']);
+            $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern),  $this->pass);
         }
 
-        $regexp = '/(?:[^'.static::$unreservedChars.static::$subdelimChars.']+|%(?!'.static::$encodedChars.'))/x';
+        $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
 
         if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
             return $this->toRFC1738($this->encode($this->pass, $regexp));

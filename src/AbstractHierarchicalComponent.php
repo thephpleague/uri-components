@@ -24,7 +24,7 @@ use IteratorAggregate;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-abstract class HierarchicalComponent implements ComponentInterface, Countable, IteratorAggregate
+abstract class AbstractHierarchicalComponent implements ComponentInterface, Countable, IteratorAggregate
 {
     use ComponentTrait;
 
@@ -191,7 +191,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return static
      */
-    public function without(array $offsets): HierarchicalComponent
+    public function without(array $offsets): self
     {
         $offsets = filter_var($offsets, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
         if (in_array(false, $offsets, true)) {
@@ -221,7 +221,7 @@ abstract class HierarchicalComponent implements ComponentInterface, Countable, I
      *
      * @return static
      */
-    public function replace(int $offset, string $component): HierarchicalComponent
+    public function replace(int $offset, string $component): self
     {
         $offset = $this->filterOffset($offset);
         if (false === $offset) {

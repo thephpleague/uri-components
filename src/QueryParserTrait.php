@@ -179,7 +179,7 @@ trait QueryParserTrait
         }
 
         if (Query::RFC3987_ENCODING == $enc_type) {
-            $pattern = str_split(self::$invalidUriChars);
+            $pattern = str_split(self::$invalid_uri_chars);
             $pattern[] = '#';
             $pattern[] = $separator;
             $replace = array_map('rawurlencode', $pattern);
@@ -190,7 +190,7 @@ trait QueryParserTrait
 
         $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
         $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
-        $regexp = '/(%[A-Fa-f0-9]{2})|[^'.self::$unreservedChars.preg_quote($subdelim, '/').']+/u';
+        $regexp = '/(%[A-Fa-f0-9]{2})|[^'.self::$unreserved_chars.preg_quote($subdelim, '/').']+/u';
 
         if (Query::RFC3986_ENCODING == $enc_type) {
             return function ($str) use ($regexp) {

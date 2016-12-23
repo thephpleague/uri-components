@@ -622,6 +622,7 @@ class HostTest extends TestCase
             ['thephpleague.com', '', 'thephpleague.com'],
             ['thephpleague.com', 'shop.thephpleague.com', 'shop.thephpleague.com'],
             ['example.com', '127.0.0.1', '127.0.0.1.example.com'],
+            ['', 'www.example.com', 'www'],
         ];
     }
 
@@ -657,6 +658,7 @@ class HostTest extends TestCase
             ['www', '', 'www'],
             ['www', 'example.com.', 'www.example.com.'],
             ['example.com', '127.0.0.1', 'example.com.127.0.0.1'],
+            ['', 'www.example.com', 'example.com'],
         ];
     }
 

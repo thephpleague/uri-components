@@ -54,7 +54,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @var bool
      */
-    protected $preserveDelimiter = false;
+    protected $preserve_delimiter = false;
 
     /**
      * The query keys
@@ -100,7 +100,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function __construct(string $data = null)
     {
         $this->data = $this->validate($data);
-        $this->preserveDelimiter = null !== $data;
+        $this->preserve_delimiter = null !== $data;
         $this->keys = array_fill_keys(array_keys($this->data), 1);
     }
 
@@ -159,7 +159,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     {
         $this->assertValidEncoding($enc_type);
 
-        if (!$this->preserveDelimiter) {
+        if (!$this->preserve_delimiter) {
             return null;
         }
 
@@ -186,7 +186,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function getUriComponent(): string
     {
         $query = $this->__toString();
-        if ($this->preserveDelimiter) {
+        if ($this->preserve_delimiter) {
             return '?'.$query;
         }
 

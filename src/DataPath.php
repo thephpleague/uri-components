@@ -59,7 +59,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @var bool
      */
-    protected $isBinaryData;
+    protected $is_binary_data;
 
     /**
      * The document string representation
@@ -138,7 +138,7 @@ class DataPath extends AbstractComponent implements PathInterface
             $this->document = '';
             $this->mimetype = static::DEFAULT_MIMETYPE;
             $this->parameters = [static::DEFAULT_PARAMETER];
-            $this->isBinaryData = false;
+            $this->is_binary_data = false;
             return static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',';
         }
 
@@ -158,7 +158,7 @@ class DataPath extends AbstractComponent implements PathInterface
         $this->mimetype = $this->filterMimeType($mimetype);
         $this->parameters = $this->filterParameters($parameters);
         $this->validateDocument();
-        return $this->format($this->mimetype, $this->getParameters(), $this->isBinaryData, $this->document);
+        return $this->format($this->mimetype, $this->getParameters(), $this->is_binary_data, $this->document);
     }
 
     /**
@@ -194,14 +194,14 @@ class DataPath extends AbstractComponent implements PathInterface
      */
     protected function filterParameters(string $parameters): array
     {
-        $this->isBinaryData = false;
+        $this->is_binary_data = false;
         if ('' === $parameters) {
             return [static::DEFAULT_PARAMETER];
         }
 
         if (preg_match(',(;|^)'.static::BINARY_PARAMETER.'$,', $parameters, $matches)) {
             $parameters = mb_substr($parameters, 0, - strlen($matches[0]));
-            $this->isBinaryData = true;
+            $this->is_binary_data = true;
         }
 
         $params = array_filter(explode(';', $parameters));
@@ -234,7 +234,7 @@ class DataPath extends AbstractComponent implements PathInterface
      */
     protected function validateDocument()
     {
-        if (!$this->isBinaryData) {
+        if (!$this->is_binary_data) {
             return;
         }
 
@@ -249,7 +249,7 @@ class DataPath extends AbstractComponent implements PathInterface
      *
      * @param string $mimetype
      * @param string $parameters
-     * @param bool   $isBinaryData
+     * @param bool   $is_binary_data
      * @param string $data
      *
      * @return string
@@ -257,14 +257,14 @@ class DataPath extends AbstractComponent implements PathInterface
     protected static function format(
         string $mimetype,
         string $parameters,
-        bool $isBinaryData,
+        bool $is_binary_data,
         string $data
     ): string {
         if ('' != $parameters) {
             $parameters = ';'.$parameters;
         }
 
-        if ($isBinaryData) {
+        if ($is_binary_data) {
             $parameters .= ';'.static::BINARY_PARAMETER;
         }
 
@@ -281,7 +281,7 @@ class DataPath extends AbstractComponent implements PathInterface
         return [
             'mimetype' => $this->mimetype,
             'parameters' => $this->parameters,
-            'is_binary' => $this->isBinaryData,
+            'is_binary' => $this->is_binary_data,
             'data' => $this->document,
             'component' => $this->getContent(),
         ];
@@ -307,7 +307,7 @@ class DataPath extends AbstractComponent implements PathInterface
      */
     public function isBinaryData(): bool
     {
-        return $this->isBinaryData;
+        return $this->is_binary_data;
     }
 
     /**
@@ -363,7 +363,7 @@ class DataPath extends AbstractComponent implements PathInterface
     public function save(string $path, string $mode = 'w'): SplFileObject
     {
         $file = new SplFileObject($path, $mode);
-        $data = $this->isBinaryData ? base64_decode($this->document) : rawurldecode($this->document);
+        $data = $this->is_binary_data ? base64_decode($this->document) : rawurldecode($this->document);
         $file->fwrite($data);
 
         return $file;
@@ -379,14 +379,14 @@ class DataPath extends AbstractComponent implements PathInterface
      */
     public function toBinary(): self
     {
-        if ($this->isBinaryData) {
+        if ($this->is_binary_data) {
             return $this;
         }
 
         return new static($this->format(
             $this->mimetype,
             $this->getParameters(),
-            !$this->isBinaryData,
+            !$this->is_binary_data,
             base64_encode(rawurldecode($this->document))
         ));
     }
@@ -401,14 +401,14 @@ class DataPath extends AbstractComponent implements PathInterface
      */
     public function toAscii(): self
     {
-        if (!$this->isBinaryData) {
+        if (!$this->is_binary_data) {
             return $this;
         }
 
         return new static($this->format(
             $this->mimetype,
             $this->getParameters(),
-            !$this->isBinaryData,
+            !$this->is_binary_data,
             rawurlencode(base64_decode($this->document))
         ));
     }
@@ -438,7 +438,7 @@ class DataPath extends AbstractComponent implements PathInterface
         return new static($this->format(
             $this->mimetype,
             $parameters,
-            $this->isBinaryData,
+            $this->is_binary_data,
             $this->document
         ));
     }
