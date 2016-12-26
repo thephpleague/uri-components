@@ -339,8 +339,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function append(string $key, $value)
     {
         $data = $this->data;
-        if ($this->has($key)) {
-            $old = $this->getPair($key);
+        $key = $this->decodeComponent($this->validateString($key));
+        if (isset($this->keys[$key])) {
+            $old = $data[$key];
             if (!is_array($old)) {
                 $old = [$old];
             }
