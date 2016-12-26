@@ -431,44 +431,6 @@ class HierarchicalPathTest extends TestCase
         ];
     }
 
-
-    /**
-     * @param $params
-     * @param $callable
-     * @param $expected
-     * @dataProvider filterProvider
-     */
-    public function testFilter($params, $callable, $expected)
-    {
-        $obj = Path::createFromSegments($params, Path::IS_ABSOLUTE)->filter($callable, 0);
-        $this->assertSame($expected, $obj->__toString());
-    }
-
-    public function filterProvider()
-    {
-        $func = function ($value) {
-            return stripos($value, '.') !== false;
-        };
-
-        return [
-            'empty query' => [[], $func, '/'],
-            'remove One' => [['toto', 'foo.bar', 'st.ay'], $func, '/foo.bar/st.ay'],
-            'remove All' => [['foobar', 'stay'], $func, '/'],
-            'remove None' => [['foo.bar', 'st.ay'], $func, '/foo.bar/st.ay'],
-        ];
-    }
-
-    public function testFilterThrowException()
-    {
-        $func = function ($value) {
-            return stripos($value, '.') !== false;
-        };
-
-        $this->expectException(Exception::class);
-        (new Path())->filter($func, 34);
-    }
-
-
     /**
      * @dataProvider withExtensionProvider2
      *

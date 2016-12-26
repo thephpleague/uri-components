@@ -73,11 +73,39 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public static function createFromPairs($data): self
     {
         $data = static::validateIterator($data);
+        static:: validatePairs($data);
+
         if (empty($data)) {
             return new static();
         }
 
+
         return new static(static::build($data, static::$separator));
+    }
+
+    /**
+     * Filter the submitted pair array.
+     *
+     * @param array $pairs
+     *
+     * @throws Exception If the array contains non valid data
+     */
+    protected static function validatePairs(array $pairs)
+    {
+        foreach ($pairs as $value) {
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+
+            foreach ($value as $val) {
+                if (!is_scalar($val) && !is_null($val)) {
+                    throw new Exception(sprintf(
+                        'Expected data to be a scalar or null; received "%s"',
+                        (is_object($val) ? get_class($val) : gettype($val))
+                    ));
+                }
+            }
+        }
     }
 
     /**
@@ -251,7 +279,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return bool
      */
-    public function haskey(string $offset): bool
+    public function has(string $offset): bool
     {
         $offset = $this->decodeComponent($this->validateString($offset));
 
@@ -262,7 +290,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * Returns the associated key for each pair.
      *
      * If a value is specified only the keys associated with
-     * the given value will be returned
+     * the given value will be returned. The specified value
+     * must be decoded
      *
      * @return array
      */
@@ -272,11 +301,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return array_keys($this->data);
         }
 
-        return array_keys(
-            $this->data,
-            $this->decodeComponent($this->validateString(func_get_arg(0))),
-            true
-        );
+        return array_keys($this->data, func_get_arg(0), true);
     }
 
     /**
@@ -299,12 +324,46 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
+     * Returns an instance with the new pair appended to it.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified query
+     *
+     * If the pair already exists the value will be added to it.
+     *
+     * @param string $key   the pair key
+     * @param mixed  $value the pair value
+     *
+     * @return static
+     */
+    public function append(string $key, $value)
+    {
+        $data = $this->data;
+        if ($this->has($key)) {
+            $old = $this->getPair($key);
+            if (!is_array($old)) {
+                $old = [$old];
+            }
+
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+
+            $value = array_merge($old, $value);
+        }
+
+        $data[$key] = $value;
+
+        return static::createFromPairs($data);
+    }
+
+    /**
      * Returns an instance merge with the specified query
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
-     * @param string $query the data to be merged
+     * @param string|null $query the data to be merged
      *
      * @return static
      */
@@ -320,32 +379,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         return static::createFromPairs(array_merge($this->data, $pairs));
-    }
-
-    /**
-     * Sort the query string by offset, maintaining offset to data correlations.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * @param callable|int $sort a PHP sort flag constant or a comparaison function
-     *                           which must return an integer less than, equal to,
-     *                           or greater than zero if the first argument is
-     *                           considered to be respectively less than, equal to,
-     *                           or greater than the second.
-     *
-     * @return static
-     */
-    public function ksort($sort = SORT_REGULAR): self
-    {
-        $func = is_callable($sort) ? 'uksort' : 'ksort';
-        $data = $this->data;
-        $func($data, $sort);
-        if ($data === $this->data) {
-            return $this;
-        }
-
-        return static::createFromPairs($data);
     }
 
     /**
@@ -373,24 +406,28 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with only the specified value
+     * Sort the query string by offset, maintaining offset to data correlations.
      *
      * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
+     * an instance that contains the modified query
      *
-     * @param callable $callable the list of keys to keep from the collection
-     * @param int      $flag     flag to determine what argument are sent to callback
+     * @param callable|int $sort a PHP sort flag constant or a comparaison function
+     *                           which must return an integer less than, equal to,
+     *                           or greater than zero if the first argument is
+     *                           considered to be respectively less than, equal to,
+     *                           or greater than the second.
      *
      * @return static
      */
-    public function filter(callable $callable, int $flag = 0): self
+    public function ksort($sort = SORT_REGULAR): self
     {
-        static $flags_list = [0 => 1, ARRAY_FILTER_USE_BOTH => 1, ARRAY_FILTER_USE_KEY => 1];
-
-        if (!isset($flags_list[$flag])) {
-            throw Exception::fromInvalidFlag($flag);
+        $func = is_callable($sort) ? 'uksort' : 'ksort';
+        $data = $this->data;
+        $func($data, $sort);
+        if ($data === $this->data) {
+            return $this;
         }
 
-        return static::createFromPairs(array_filter($this->data, $callable, $flag));
+        return static::createFromPairs($data);
     }
 }

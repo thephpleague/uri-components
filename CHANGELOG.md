@@ -14,6 +14,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Host::withSubdomain`
 - `Host::withRootLabel`
 - `Host::withoutRootLabel`
+- `Query::append`
+- `Query::has`
 
 ### Fixed
 
@@ -35,6 +37,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Implementing `League\Uri\Interfaces\Component`
 - `HierarchicalPath::hasKey`
 - `Host::hasKey`
+- `Query::hasKey`
+- `HierarchicalPath::filter`
+- `Host::filter`
+- `Query::filter`
 
 ## 0.5.0 - 2016-12-09
 

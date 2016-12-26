@@ -80,28 +80,6 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     }
 
     /**
-     * Returns an instance with only the specified value
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
-     *
-     * @param callable $callable the list of keys to keep from the collection
-     * @param int      $flag     flag to determine what argument are sent to callback
-     *
-     * @return static
-     */
-    public function filter(callable $callable, int $flag = 0): self
-    {
-        static $flags_list = [0 => 1, ARRAY_FILTER_USE_BOTH => 1, ARRAY_FILTER_USE_KEY => 1];
-
-        if (!isset($flags_list[$flag])) {
-            throw Exception::fromInvalidFlag($flag);
-        }
-
-        return $this->newHierarchicalInstance(array_filter($this->data, $callable, $flag), $this->is_absolute);
-    }
-
-    /**
      * Return a new instance when needed
      *
      * @param array $data
