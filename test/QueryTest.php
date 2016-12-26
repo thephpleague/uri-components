@@ -109,6 +109,7 @@ class QueryTest extends TestCase
         return [
             'Non traversable object' => [new \stdClass()],
             'String' => ['toto=23'],
+            'Non pairs array' => [['toto' => ['foo' => [new \stdClass()]]]],
         ];
     }
 
@@ -149,6 +150,30 @@ class QueryTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider validAppendValue
+     */
+    public function testAppend($key, $value, $expected, $query)
+    {
+        $query = new Query($query);
+        $this->assertSame($expected, (string) $query->append($key, $value));
+    }
+
+    public function validAppendValue()
+    {
+        return [
+            ['foo', 'bar', 'foo=bar', ''],
+            ['foo', 'baz', 'foo=bar&foo=baz', 'foo=bar'],
+            ['foo', null, 'foo', ''],
+            ['foo', null, 'foo=bar&foo', 'foo=bar'],
+            ['foo', '', 'foo=', ''],
+            ['foo', '', 'foo=bar&foo=', 'foo=bar'],
+            ['foo', ['bar', 'baz'], 'foo=bar&foo=baz', ''],
+            ['foo', ['bar', 'baz'], 'foo=yolo&foo=bar&foo=baz', 'foo=yolo'],
+        ];
+    }
+
+
     public function testGetParameter()
     {
         $this->assertSame('toto', $this->query->getPair('kingkong'));
@@ -160,10 +185,10 @@ class QueryTest extends TestCase
         $this->assertSame($expected, $this->query->getPair('togo', $expected));
     }
 
-    public function testhasKey()
+    public function testHas()
     {
-        $this->assertTrue($this->query->hasKey('kingkong'));
-        $this->assertFalse($this->query->hasKey('togo'));
+        $this->assertTrue($this->query->has('kingkong'));
+        $this->assertFalse($this->query->has('togo'));
     }
 
     public function testCountable()
@@ -178,12 +203,14 @@ class QueryTest extends TestCase
             'baz' => 'troll',
             'lol' => 3,
             'toto' => 'troll',
+            'yolo' => null,
         ]);
         $this->assertCount(0, $query->keys('foo'));
         $this->assertSame(['foo'], $query->keys('bar'));
         $this->assertCount(1, $query->keys('3'));
         $this->assertSame(['lol'], $query->keys('3'));
         $this->assertSame(['baz', 'toto'], $query->keys('troll'));
+        $this->assertSame(['yolo'], $query->keys(null));
     }
 
     public function testStringWithoutContent()
@@ -197,7 +224,7 @@ class QueryTest extends TestCase
         $this->assertSame(null, $query->getPair('baz'));
     }
 
-    public function testgetPairs()
+    public function testGetAll()
     {
         $expected = ['foo' => null, 'bar' => null, 'baz' => null, 'to.go' => 'toofan'];
         $query = new Query('foo&bar&baz&to.go=toofan');
@@ -225,73 +252,6 @@ class QueryTest extends TestCase
             ['foo&bar&baz&to.go=toofan', ['foo', 'unknown'], 'bar&baz&to.go=toofan'],
             ['foo&bar&baz&to.go=toofan', [], 'foo&bar&baz&to.go=toofan'],
         ];
-    }
-
-    /**
-     * @dataProvider filterProvider
-     *
-     * @param array    $params
-     * @param callable $callable
-     * @param int      $flag
-     * @param string   $expected
-     */
-    public function testFilter($params, $callable, $flag, $expected)
-    {
-        $this->assertSame($expected, (string) Query::createFromPairs($params)->filter($callable, $flag));
-    }
-
-    public function filterProvider()
-    {
-        $func = function ($value) {
-            return stripos($value, '.') !== false;
-        };
-
-        $funcBoth = function ($value, $key) {
-            return strpos($value, 'o') !== false && strpos($key, 'o') !== false;
-        };
-
-        return [
-            'empty query' => [[], $func, 0, ''],
-            'remove One' => [['toto' => 'foo.bar', 'zozo' => 'stay'], $func, 0, 'toto=foo.bar'],
-            'remove All' => [['to.to' => 'foobar', 'zozo' => 'stay'], $func, 0, ''],
-            'remove None' => [['toto' => 'foo.bar', 'zozo' => 'st.ay'], $func, 0, 'toto=foo.bar&zozo=st.ay'],
-            'remove with filter both' => [['toto' => 'foo', 'foo' => 'bar'], $funcBoth, ARRAY_FILTER_USE_BOTH, 'toto=foo'],
-        ];
-    }
-
-    /**
-     * @param $params
-     * @param $callable
-     * @param $expected
-     * @dataProvider filterByOffsetsProvider
-     */
-    public function testFilterOffsets($params, $callable, $expected)
-    {
-        $this->assertSame($expected, (string) Query::createFromPairs($params)->filter($callable, ARRAY_FILTER_USE_KEY));
-    }
-
-    public function filterByOffsetsProvider()
-    {
-        $func = function ($value) {
-            return stripos($value, '.') !== false;
-        };
-
-        return [
-            'empty query' => [[], $func, ''],
-            'remove One' => [['toto' => 'foo.bar', 'zozo' => 'stay'], $func, ''],
-            'remove All' => [['to.to' => 'foobar', 'zozo' => 'stay'], $func, 'to.to=foobar'],
-            'remove None' => [['to.to' => 'foo.bar', 'zo.zo' => 'st.ay'], $func, 'to.to=foo.bar&zo.zo=st.ay'],
-        ];
-    }
-
-    public function testFilterOffsetsFailed()
-    {
-        $this->expectException(Exception::class);
-        $filter = function () {
-            return true;
-        };
-
-        Query::createFromPairs([])->filter($filter, -1);
     }
 
     /**
