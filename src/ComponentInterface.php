@@ -57,8 +57,9 @@ interface ComponentInterface
     /**
      * Returns the instance content.
      *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     * If the instance is defined, the value returned MUST be encoded according to the
+     * selected encoding algorithm. In any case, the value MUST NOT double-encode any character
+     * depending on the selected encoding algorithm.
      *
      * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
      * or RFC 3987 Section 3. By default the content is encoded according to RFC3986
@@ -67,7 +68,7 @@ interface ComponentInterface
      *
      * @param int $enc_type
      *
-     * @return string|null
+     * @return mixed
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING);
 
@@ -107,7 +108,7 @@ interface ComponentInterface
      *
      * A null value is equivalent to removing the component content.
      *
-     * @param string|null $content
+     * @param mixed $content
      *
      * @throws InvalidArgumentException for invalid component or transformations
      *                                  that would result in a object in invalid state.

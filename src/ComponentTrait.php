@@ -188,7 +188,7 @@ trait ComponentTrait
      *
      * @return array
      */
-    protected static function validateIterator($data): array
+    protected static function filterIterable($data): array
     {
         if ($data instanceof Traversable) {
             return iterator_to_array($data);

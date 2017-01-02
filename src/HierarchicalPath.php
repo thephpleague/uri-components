@@ -66,7 +66,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements PathInte
             throw Exception::fromInvalidFlag($type);
         }
 
-        $path = implode(static::$separator, static::validateIterator($data));
+        $path = implode(static::$separator, static::filterIterable($data));
         if (static::IS_ABSOLUTE === $type) {
             $path = static::$separator.$path;
         }
