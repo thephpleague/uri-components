@@ -10,6 +10,8 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
+declare(strict_types=1);
+
 namespace League\Uri\Components;
 
 use Traversable;
@@ -429,7 +431,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements PathInte
             $basenamePart = mb_substr($basenamePart, 0, $length, 'UTF-8');
         }
 
-        $parameterPart = trim($parameterPart);
+        $parameterPart = trim((string) $parameterPart);
         if ('' !== $parameterPart) {
             $parameterPart = ";$parameterPart";
         }

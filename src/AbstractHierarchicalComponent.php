@@ -10,6 +10,8 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
+declare(strict_types=1);
+
 namespace League\Uri\Components;
 
 use ArrayIterator;
@@ -169,15 +171,10 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      *
      * @return static
      */
-    public function without(array $offsets): self
+    public function remove(array $offsets): self
     {
-        $offsets = filter_var($offsets, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
-        if (in_array(false, $offsets, true)) {
-            throw new Exception('The offset list must contains integers only');
-        }
-
         $data = $this->data;
-        foreach ($offsets as $offset) {
+        foreach ($this->filterOffsets($offsets) as $offset) {
             unset($data[$offset]);
         }
 
@@ -241,5 +238,38 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
         }
 
         return $offset;
+    }
+
+    /**
+     * Filter Offset list
+     *
+     * @param array $offset
+     *
+     * @return int[]
+     */
+    protected function filterOffsets(array $offset_list)
+    {
+        $offset_list = filter_var($offset_list, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
+        if (in_array(false, $offset_list, true)) {
+            throw new Exception('The offset list must contains integers only');
+        }
+
+        $nb_elements = count($this->data);
+        $options = ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1];
+
+        $mapper = function ($offset) use ($nb_elements, $options) {
+            $offset = filter_var($offset, FILTER_VALIDATE_INT, ['options' => $options]);
+            if ($offset < 0) {
+                return $nb_elements + $offset;
+            }
+
+            return $offset;
+        };
+
+        $filter = function ($value) {
+            return is_int($value);
+        };
+
+        return array_filter(array_unique(array_map($mapper, $offset_list)), $filter);
     }
 }

@@ -10,6 +10,8 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
+declare(strict_types=1);
+
 namespace League\Uri\Components;
 
 /**
@@ -251,7 +253,7 @@ trait PathInfo
      */
     public function withoutTrailingSlash(): PathInterface
     {
-        return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this, 0, -1, 'UTF-8'));
+        return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this->__toString(), 0, -1, 'UTF-8'));
     }
 
     /**
@@ -290,6 +292,6 @@ trait PathInfo
      */
     public function withoutLeadingSlash(): PathInterface
     {
-        return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this, 1, null, 'UTF-8'));
+        return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this->__toString(), 1, null, 'UTF-8'));
     }
 }

@@ -242,7 +242,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithout($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Path($origin))->without($without));
+        $this->assertSame($result, (string) (new Path($origin))->remove($without));
     }
 
     public function withoutProvider()
@@ -259,7 +259,7 @@ class HierarchicalPathTest extends TestCase
     public function testWithoutThrowException()
     {
         $this->expectException(Exception::class);
-        (new Path('/toto/le/heros/masson'))->without(['toto']);
+        (new Path('/toto/le/heros/masson'))->remove(['toto']);
     }
 
     /**

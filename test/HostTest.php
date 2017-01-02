@@ -416,7 +416,7 @@ class HostTest extends TestCase
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (new Host($host))->without($without)->__toString());
+        $this->assertSame($res, (new Host($host))->remove($without)->__toString());
     }
 
     public function withoutProvider()
@@ -432,7 +432,7 @@ class HostTest extends TestCase
     public function testWithoutThrowException()
     {
         $this->expectException(Exception::class);
-        (new Host('example.com'))->without(['com']);
+        (new Host('example.com'))->remove(['com']);
     }
 
     /**

@@ -135,10 +135,6 @@ class QueryTest extends TestCase
                 'kingkong=toto',
                 'kingkong=toto',
             ],
-            'without new data' => [
-                null,
-                'kingkong=toto',
-            ],
             'with string' => [
                 'foo=bar',
                 'kingkong=toto&foo=bar',
@@ -153,23 +149,23 @@ class QueryTest extends TestCase
     /**
      * @dataProvider validAppendValue
      */
-    public function testAppend($key, $value, $expected, $query)
+    public function testAppend($query, $append_data, $expected)
     {
         $query = new Query($query);
-        $this->assertSame($expected, (string) $query->append($key, $value));
+        $this->assertSame($expected, (string) $query->append($append_data));
     }
 
     public function validAppendValue()
     {
         return [
-            ['foo', 'bar', 'foo=bar', ''],
-            ['foo', 'baz', 'foo=bar&foo=baz', 'foo=bar'],
-            ['foo', null, 'foo', ''],
-            ['foo', null, 'foo=bar&foo', 'foo=bar'],
-            ['foo', '', 'foo=', ''],
-            ['foo', '', 'foo=bar&foo=', 'foo=bar'],
-            ['foo', ['bar', 'baz'], 'foo=bar&foo=baz', ''],
-            ['foo', ['bar', 'baz'], 'foo=yolo&foo=bar&foo=baz', 'foo=yolo'],
+            ['', 'foo=bar&foo=baz', 'foo=bar&foo=baz'],
+            ['', 'foo=bar', 'foo=bar'],
+            ['', 'foo=', 'foo='],
+            ['', 'foo', 'foo'],
+            ['foo=bar', 'foo=baz', 'foo=bar&foo=baz'],
+            ['foo=bar', 'foo=', 'foo=bar&foo='],
+            ['foo=bar', 'foo', 'foo=bar&foo'],
+            ['foo=bar', 'foo=baz&foo=yolo', 'foo=bar&foo=baz&foo=yolo'],
         ];
     }
 
@@ -242,7 +238,7 @@ class QueryTest extends TestCase
      */
     public function testWithout($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Query($origin))->without($without));
+        $this->assertSame($result, (string) (new Query($origin))->remove($without));
     }
 
     public function withoutProvider()

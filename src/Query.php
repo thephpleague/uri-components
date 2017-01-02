@@ -10,6 +10,8 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
+declare(strict_types=1);
+
 namespace League\Uri\Components;
 
 use ArrayIterator;
@@ -336,26 +338,45 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function append(string $key, $value)
+    public function append(string $query): self
     {
-        $data = $this->data;
-        $key = $this->decodeComponent($this->validateString($key));
-        if (isset($this->keys[$key])) {
-            $old = $data[$key];
-            if (!is_array($old)) {
-                $old = [$old];
-            }
-
-            if (!is_array($value)) {
-                $value = [$value];
-            }
-
-            $value = array_merge($old, $value);
+        $pairs = $this->validate($this->validateString($query));
+        if ($pairs == $this->data) {
+            return $this;
         }
 
-        $data[$key] = $value;
+        $data = $this->data;
+        foreach ($pairs as $key => $value) {
+            $this->appendPair($data, $key, $value);
+        }
 
         return static::createFromPairs($data);
+    }
+
+    /**
+     * Append a key/pair to query pairs collection
+     *
+     * @param array  &$pairs
+     * @param string $key
+     * @param mixed  $value
+     */
+    protected function appendPair(array &$pairs, string $key, $value)
+    {
+        if (!array_key_exists($key, $pairs)) {
+            $pairs[$key] = $value;
+            return;
+        }
+
+        $pair = $pairs[$key];
+        if (!is_array($pair)) {
+            $pair = [$pair];
+        }
+
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        $pairs[$key] = array_merge($pair, $value);
     }
 
     /**
@@ -364,16 +385,12 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
-     * @param string|null $query the data to be merged
+     * @param string $query the data to be merged
      *
      * @return static
      */
-    public function merge($query): self
+    public function merge(string $query): self
     {
-        if ($query === null) {
-            return $this;
-        }
-
         $pairs = $this->validate($this->validateString($query));
         if ($pairs === $this->data) {
             return $this;
@@ -388,11 +405,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
-     * @param array $offsets the list of keys to remove from the collection
+     * @param string[] $offsets the list of keys to remove from the collection
      *
      * @return static
      */
-    public function without(array $offsets): self
+    public function remove(array $offsets): self
     {
         $data = $this->data;
         foreach ($offsets as $offset) {
