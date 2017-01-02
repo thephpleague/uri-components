@@ -10,6 +10,8 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
+declare(strict_types=1);
+
 namespace League\Uri\Components;
 
 /**
@@ -142,13 +144,13 @@ trait QueryParserTrait
     /**
      * Build a query key/pair association
      *
-     * @param callable $encoder a callable to encode the key/pair association
-     * @param array    $value   The query string value
-     * @param string   $key     The query string key
+     * @param callable   $encoder a callable to encode the key/pair association
+     * @param array      $value   The query string value
+     * @param string|int $key     The query string key
      *
      * @return array
      */
-    protected static function buildPair(callable $encoder, array $value, string $key): array
+    protected static function buildPair(callable $encoder, array $value, $key): array
     {
         $key = $encoder($key);
         $reducer = function (array $carry, $data) use ($key, $encoder) {
@@ -194,12 +196,12 @@ trait QueryParserTrait
 
         if (Query::RFC3986_ENCODING == $enc_type) {
             return function ($str) use ($regexp) {
-                return self::encode($str, $regexp);
+                return self::encode((string) $str, $regexp);
             };
         }
 
         return function ($str) use ($regexp) {
-            return self::toRFC1738(self::encode($str, $regexp));
+            return self::toRFC1738(self::encode((string) $str, $regexp));
         };
     }
 

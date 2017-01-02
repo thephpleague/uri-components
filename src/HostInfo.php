@@ -10,6 +10,8 @@
  * @version    1.0.0
  * @link       https://github.com/thephpleague/uri-components
  */
+declare(strict_types=1);
+
 namespace League\Uri\Components;
 
 use Pdp\Parser;
