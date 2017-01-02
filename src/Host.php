@@ -99,7 +99,7 @@ class Host extends AbstractHierarchicalComponent
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
-        $data = static::validateIterator($data);
+        $data = static::filterIterable($data);
         if (!isset($type_list[$type])) {
             throw Exception::fromInvalidFlag($type);
         }

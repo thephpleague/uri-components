@@ -13,7 +13,7 @@
 
     <testsuites>
         <testsuite name="Uri Components Test Suite">
-            <directory>test</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
 

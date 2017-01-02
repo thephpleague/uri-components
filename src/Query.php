@@ -74,7 +74,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function createFromPairs($data): self
     {
-        $data = static::validateIterator($data);
+        $data = static::filterIterable($data);
         static:: validatePairs($data);
 
         if (empty($data)) {

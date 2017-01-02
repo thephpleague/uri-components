@@ -125,7 +125,7 @@ abstract class AbstractComponent implements ComponentInterface
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified data
      *
-     * @param string|null $value
+     * @param mixed $value
      *
      * @return ComponentInterface
      */
