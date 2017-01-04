@@ -248,7 +248,7 @@ trait ComponentTrait
      *
      * @return string|null
      */
-    abstract public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING);
+    abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
 
     /**
      * Validate the encoding type value
@@ -262,10 +262,10 @@ trait ComponentTrait
         static $enc_type_list;
         if (null === $enc_type_list) {
             $enc_type_list = [
-                EncodingInterface::RFC1738_ENCODING => 1,
-                EncodingInterface::RFC3986_ENCODING => 1,
-                EncodingInterface::RFC3987_ENCODING => 1,
-                EncodingInterface::NO_ENCODING => 1,
+                ComponentInterface::RFC1738_ENCODING => 1,
+                ComponentInterface::RFC3986_ENCODING => 1,
+                ComponentInterface::RFC3987_ENCODING => 1,
+                ComponentInterface::NO_ENCODING => 1,
             ];
         }
 

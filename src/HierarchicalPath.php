@@ -24,7 +24,7 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class HierarchicalPath extends AbstractHierarchicalComponent
+class HierarchicalPath extends AbstractHierarchicalComponent implements PathInterface
 {
     use PathInfoTrait;
 
@@ -135,27 +135,6 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     protected function newHierarchicalInstance(array $data, int $is_absolute): self
     {
         return static::createFromSegments($data, $is_absolute);
-    }
-
-    /**
-     * Returns an instance with the specified string
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified data
-     *
-     * @param mixed $value
-     *
-     * @throws Exception for invalid component or transformations
-     *                   that would result in a object in invalid state.
-     * @return static
-     */
-    public function withContent($value): self
-    {
-        if ($value === $this->getContent()) {
-            return $this;
-        }
-
-        return new static($value);
     }
 
     /**

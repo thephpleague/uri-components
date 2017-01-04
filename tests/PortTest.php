@@ -79,14 +79,4 @@ class PortTest extends TestCase
             [23, ':23'],
         ];
     }
-
-    public function testWithContent()
-    {
-        $component = new Port(21);
-        $component_alt = $component->withContent(23);
-        $component_equal = $component->withContent(21);
-        $this->assertSame('21', (string) $component);
-        $this->assertSame('23', (string) $component_alt);
-        $this->assertEquals($component_equal, $component);
-    }
 }

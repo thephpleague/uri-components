@@ -26,7 +26,7 @@ use IteratorAggregate;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-abstract class AbstractHierarchicalComponent implements EncodingInterface, Countable, IteratorAggregate
+abstract class AbstractHierarchicalComponent implements ComponentInterface, Countable, IteratorAggregate
 {
     use ComponentTrait;
 
@@ -118,7 +118,7 @@ abstract class AbstractHierarchicalComponent implements EncodingInterface, Count
      *
      * @return string|null
      */
-    abstract public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING);
+    abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
 
     /**
      * Returns an instance with the specified string
@@ -128,11 +128,16 @@ abstract class AbstractHierarchicalComponent implements EncodingInterface, Count
      *
      * @param string $value
      *
-     * @throws Exception for invalid component or transformations
-     *                   that would result in a object in invalid state.
      * @return static
      */
-    abstract public function withContent($value);
+    public function withContent($value): self
+    {
+        if ($value === $this->getContent()) {
+            return $this;
+        }
+
+        return new static($value);
+    }
 
     /**
      * Returns the instance string representation; If the

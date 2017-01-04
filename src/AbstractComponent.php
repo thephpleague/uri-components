@@ -22,7 +22,7 @@ namespace League\Uri\Components;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-abstract class AbstractComponent implements EncodingInterface
+abstract class AbstractComponent implements ComponentInterface
 {
     use ComponentTrait;
 
@@ -90,7 +90,7 @@ abstract class AbstractComponent implements EncodingInterface
      *
      * @return mixed
      */
-    public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -127,9 +127,14 @@ abstract class AbstractComponent implements EncodingInterface
      *
      * @param mixed $value
      *
-     * @throws Exception for invalid component or transformations
-     *                   that would result in a object in invalid state.
      * @return static
      */
-    abstract public function withContent($value);
+    public function withContent($value)
+    {
+        if ($value === $this->getContent()) {
+            return $this;
+        }
+
+        return new static($value);
+    }
 }
