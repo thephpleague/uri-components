@@ -516,7 +516,7 @@ class HierarchicalPathTest extends TestCase
             'path with basename and empty dirname' => [
                 'path' => '/foo/bar/baz',
                 'dirname' => '',
-                'expected' => '/baz',
+                'expected' => 'baz',
             ],
             'empty path and empty dirname' => [
                 'path' => '',
@@ -532,6 +532,11 @@ class HierarchicalPathTest extends TestCase
                 'path' => '',
                 'dirname' => 'bar/baz/',
                 'expected' => 'bar/baz/',
+            ],
+            'dirname with a single slash' => [
+                'path' => '',
+                'dirname' => '/',
+                'expected' => '/',
             ],
         ];
     }
