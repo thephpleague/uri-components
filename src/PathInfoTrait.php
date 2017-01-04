@@ -176,7 +176,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutDotSegments(): PathInterface
+    public function withoutDotSegments(): self
     {
         $current = $this->__toString();
         if (false === strpos($current, '.')) {
@@ -226,7 +226,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutEmptySegments(): PathInterface
+    public function withoutEmptySegments(): self
     {
         return $this->withContent(preg_replace(',/+,', '/', $this->__toString()));
     }
@@ -253,7 +253,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withTrailingSlash(): PathInterface
+    public function withTrailingSlash(): self
     {
         return $this->hasTrailingSlash() ? $this : $this->withContent($this->__toString().'/');
     }
@@ -268,7 +268,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutTrailingSlash(): PathInterface
+    public function withoutTrailingSlash(): self
     {
         return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this->__toString(), 0, -1, 'UTF-8'));
     }
@@ -295,7 +295,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withLeadingSlash(): PathInterface
+    public function withLeadingSlash(): self
     {
         return $this->isAbsolute() ? $this : $this->withContent('/'.$this->__toString());
     }
@@ -310,7 +310,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutLeadingSlash(): PathInterface
+    public function withoutLeadingSlash(): self
     {
         return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this->__toString(), 1, null, 'UTF-8'));
     }

@@ -42,6 +42,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `HierarchicalComponent::hasKey`
 - `HierarchicalComponent::without`
 - `HierarchicalComponent::filter`
+- `League\Uri\Components\PathInterface` 
 
 ## 0.5.0 - 2016-12-09
 
