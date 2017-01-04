@@ -337,21 +337,15 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements PathInte
     public function withDirname(string $path): self
     {
         $path = $this->validateString($path);
-        if ($path == $this->getDirname()) {
+        if ($path === $this->getDirname()) {
             return $this;
         }
 
-        $segments = $this->data;
-        $basename = array_pop($segments);
-        if ('' == $path) {
-            return new static($basename);
-        }
-
-        if (substr($path, -1, 1) === '/') {
+        if ('' !== $path && substr($path, -1, 1) === '/') {
             $path = substr($path, 0, -1);
         }
 
-        return new static($path.'/'.$basename);
+        return new static($path.'/'.array_pop($this->data));
     }
 
     /**
