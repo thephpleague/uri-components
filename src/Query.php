@@ -38,13 +38,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     use QueryParserTrait;
 
     /**
-     * The component Data
-     *
-     * @var array
-     */
-    protected $data = [];
-
-    /**
      * pair separator character
      *
      * @var string
@@ -66,23 +59,37 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     protected $keys = [];
 
     /**
+     * The query pairs
+     *
+     * @var array
+     */
+    protected $pairs = [];
+
+    /**
+     * The deserialized query arguments
+     *
+     * @var array
+     */
+    protected $params = [];
+
+    /**
      * return a new Query instance from an Array or a traversable object
      *
-     * @param Traversable|array $data
+     * @param Traversable|array $pairs
      *
      * @return static
      */
-    public static function createFromPairs($data): self
+    public static function createFromPairs($pairs): self
     {
-        $data = static::filterIterable($data);
-        static:: validatePairs($data);
+        $pairs = static::filterIterable($pairs);
+        static:: validatePairs($pairs);
 
-        if (empty($data)) {
+        if (empty($pairs)) {
             return new static();
         }
 
 
-        return new static(static::build($data, static::$separator));
+        return new static(static::build($pairs, static::$separator));
     }
 
     /**
@@ -119,7 +126,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function __set_state(array $properties): self
     {
-        return new static(static::build($properties['data'], static::$separator));
+        return new static(static::build($properties['pairs'], static::$separator));
     }
 
     /**
@@ -129,9 +136,10 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function __construct(string $data = null)
     {
-        $this->data = $this->validate($data);
+        $this->pairs = $this->validate($data);
         $this->preserve_delimiter = null !== $data;
-        $this->keys = array_fill_keys(array_keys($this->data), 1);
+        $this->keys = array_fill_keys(array_keys($this->pairs), 1);
+        $this->params = $this->extractFromPairs($this->pairs);
     }
 
     /**
@@ -163,8 +171,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function __debugInfo(): array
     {
         return [
-            'pairs' => $this->data,
             'component' => $this->getContent(),
+            'pairs' => $this->pairs,
         ];
     }
 
@@ -193,7 +201,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return null;
         }
 
-        return static::build($this->data, static::$separator, $enc_type);
+        return static::build($this->pairs, static::$separator, $enc_type);
     }
 
     /**
@@ -230,7 +238,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function count(): int
     {
-        return count($this->data);
+        return count($this->pairs);
     }
 
     /**
@@ -240,7 +248,17 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getIterator(): ArrayIterator
     {
-        return new ArrayIterator($this->data);
+        return new ArrayIterator($this->pairs);
+    }
+
+    /**
+     * Returns the deserialized query string arguments, if any.
+     *
+     * @return array
+     */
+    public function getParams(): array
+    {
+        return $this->params;
     }
 
     /**
@@ -250,7 +268,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getPairs(): array
     {
-        return $this->data;
+        return $this->pairs;
     }
 
     /**
@@ -268,7 +286,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     {
         $offset = $this->decodeComponent($this->validateString($offset));
         if (isset($this->keys[$offset])) {
-            return $this->data[$offset];
+            return $this->pairs[$offset];
         }
 
         return $default;
@@ -300,10 +318,10 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function keys(): array
     {
         if (0 === func_num_args()) {
-            return array_keys($this->data);
+            return array_keys($this->pairs);
         }
 
-        return array_keys($this->data, func_get_arg(0), true);
+        return array_keys($this->pairs, func_get_arg(0), true);
     }
 
     /**
@@ -312,11 +330,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified data
      *
-     * @param string|null $value
+     * @param string $value
      *
-     * @return ComponentInterface
+     * @return static
      */
-    public function withContent($value): ComponentInterface
+    public function withContent($value): self
     {
         if ($value === $this->getContent()) {
             return $this;
@@ -333,24 +351,23 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * If the pair already exists the value will be added to it.
      *
-     * @param string $key   the pair key
-     * @param mixed  $value the pair value
+     * @param string $query the pair value
      *
      * @return static
      */
     public function append(string $query): self
     {
         $pairs = $this->validate($this->validateString($query));
-        if ($pairs == $this->data) {
+        $new_pairs = $this->pairs;
+        foreach ($pairs as $key => $value) {
+            $this->appendPair($new_pairs, $key, $value);
+        }
+
+        if ($new_pairs == $this->pairs) {
             return $this;
         }
 
-        $data = $this->data;
-        foreach ($pairs as $key => $value) {
-            $this->appendPair($data, $key, $value);
-        }
-
-        return static::createFromPairs($data);
+        return static::createFromPairs($new_pairs);
     }
 
     /**
@@ -392,11 +409,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function merge(string $query): self
     {
         $pairs = $this->validate($this->validateString($query));
-        if ($pairs === $this->data) {
+        if ($pairs === $this->pairs) {
             return $this;
         }
 
-        return static::createFromPairs(array_merge($this->data, $pairs));
+        return static::createFromPairs(array_merge($this->pairs, $pairs));
     }
 
     /**
@@ -409,18 +426,18 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function remove(array $offsets): self
+    public function delete(array $offsets): self
     {
-        $data = $this->data;
+        $pairs = $this->pairs;
         foreach ($offsets as $offset) {
-            unset($data[$this->decodeComponent($this->validateString($offset))]);
+            unset($pairs[$this->decodeComponent($this->validateString($offset))]);
         }
 
-        if ($data === $this->data) {
+        if ($pairs === $this->pairs) {
             return $this;
         }
 
-        return static::createFromPairs($data);
+        return static::createFromPairs($pairs);
     }
 
     /**
@@ -440,12 +457,12 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function ksort($sort = SORT_REGULAR): self
     {
         $func = is_callable($sort) ? 'uksort' : 'ksort';
-        $data = $this->data;
-        $func($data, $sort);
-        if ($data === $this->data) {
+        $pairs = $this->pairs;
+        $func($pairs, $sort);
+        if ($pairs === $this->pairs) {
             return $this;
         }
 
-        return static::createFromPairs($data);
+        return static::createFromPairs($pairs);
     }
 }

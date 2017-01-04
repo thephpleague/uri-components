@@ -193,12 +193,6 @@ class UserInfoTest extends TestCase
         ];
     }
 
-    public function testWithContentThrowsInvalidArgumentException()
-    {
-        $this->expectException(Exception::class);
-        (new UserInfo())->withContent([]);
-    }
-
     public function testGetUserThrowsInvalidArgumentException()
     {
         $this->expectException(Exception::class);

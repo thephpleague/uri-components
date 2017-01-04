@@ -32,7 +32,7 @@ use Traversable;
  */
 class Host extends AbstractHierarchicalComponent
 {
-    use HostInfo;
+    use HostInfoTrait;
 
     /**
      * Tell whether the Host is an IPv4
@@ -263,9 +263,9 @@ class Host extends AbstractHierarchicalComponent
     public function __debugInfo(): array
     {
         return [
+            'component' => $this->getContent(),
             'labels' => $this->data,
             'is_absolute' => (bool) $this->is_absolute,
-            'component' => $this->getContent(),
         ];
     }
 
@@ -334,16 +334,11 @@ class Host extends AbstractHierarchicalComponent
      */
     public function getLabel(int $offset, $default = null)
     {
-        if ($offset > -1 && isset($this->data[$offset])) {
-            return $this->data[$offset];
+        if ($offset < 0) {
+            $offset += count($this->data);
         }
 
-        $nb_labels = count($this->data);
-        if ($offset <= -1 && $nb_labels + $offset > -1) {
-            return $this->data[$nb_labels + $offset];
-        }
-
-        return $default;
+        return $this->data[$offset] ?? $default;
     }
 
     /**

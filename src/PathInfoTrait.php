@@ -22,7 +22,7 @@ namespace League\Uri\Components;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-trait PathInfo
+trait PathInfoTrait
 {
     /**
      * Dot Segment pattern
@@ -67,7 +67,21 @@ trait PathInfo
      *
      * @return static
      */
-    abstract public function withContent($value): ComponentInterface;
+    public function withContent($value)
+    {
+        if ($value === $this->getContent()) {
+            return $this;
+        }
+
+        return new static($value);
+    }
+
+    /**
+     * new instance
+     *
+     * @param string|null $data the component value
+     */
+    abstract public function __construct(string $data = null);
 
     /**
      * Called by var_dump() when dumping The object

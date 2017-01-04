@@ -252,7 +252,7 @@ trait QueryParserTrait
 
         foreach ($normalized_pairs as $name => $value) {
             foreach ($value as $val) {
-                self::extractPhpVariable(trim($name), self::formatParsedValue($val), $data);
+                self::extractPhpVariable(trim((string) $name), self::formatParsedValue($val), $data);
             }
         }
 

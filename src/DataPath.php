@@ -32,7 +32,7 @@ use SplFileObject;
  */
 class DataPath extends AbstractComponent implements PathInterface
 {
-    use PathInfo;
+    use PathInfoTrait;
 
     const DEFAULT_MIMETYPE = 'text/plain';
 
@@ -155,7 +155,7 @@ class DataPath extends AbstractComponent implements PathInterface
         $mediatype = array_shift($parts);
         $this->document = (string) array_shift($parts);
         $mediatype = explode(';', $mediatype, 2);
-        $mimetype = array_shift($mediatype);
+        $mimetype = (string) array_shift($mediatype);
         $parameters = (string) array_shift($mediatype);
         $this->mimetype = $this->filterMimeType($mimetype);
         $this->parameters = $this->filterParameters($parameters);
@@ -166,7 +166,7 @@ class DataPath extends AbstractComponent implements PathInterface
     /**
      * Filter the mimeType property
      *
-     * @param string|null $mimetype
+     * @param string $mimetype
      *
      * @throws Exception If the mimetype is invalid
      *
@@ -174,7 +174,7 @@ class DataPath extends AbstractComponent implements PathInterface
      */
     protected function filterMimeType(string $mimetype): string
     {
-        if (in_array($mimetype, [null, ''], true)) {
+        if ('' == $mimetype) {
             return static::DEFAULT_MIMETYPE;
         }
 
@@ -281,11 +281,11 @@ class DataPath extends AbstractComponent implements PathInterface
     public function __debugInfo(): array
     {
         return [
+            'component' => $this->getContent(),
             'mimetype' => $this->mimetype,
             'parameters' => $this->parameters,
             'is_binary' => $this->is_binary_data,
             'data' => $this->document,
-            'component' => $this->getContent(),
         ];
     }
 

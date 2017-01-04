@@ -24,7 +24,7 @@ namespace League\Uri\Components;
  */
 class Path extends AbstractComponent implements PathInterface
 {
-    use PathInfo;
+    use PathInfoTrait;
 
     /**
      * new instance

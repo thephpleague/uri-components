@@ -26,7 +26,7 @@ use Traversable;
  */
 class HierarchicalPath extends AbstractHierarchicalComponent implements PathInterface
 {
-    use PathInfo;
+    use PathInfoTrait;
 
     /**
      * Path segment separator
@@ -145,9 +145,9 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements PathInte
     public function __debugInfo(): array
     {
         return [
+            'component' => $this->getContent(),
             'segments' => $this->data,
             'is_absolute' => (bool) $this->is_absolute,
-            'component' => $this->getContent(),
         ];
     }
 
@@ -212,16 +212,11 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements PathInte
      */
     public function getSegment(int $offset, $default = null)
     {
-        if ($offset > -1 && isset($this->data[$offset])) {
-            return $this->data[$offset];
+        if ($offset < 0) {
+            $offset += count($this->data);
         }
 
-        $nb_segments = count($this->data);
-        if ($offset <= -1 && $nb_segments + $offset > -1) {
-            return $this->data[$nb_segments + $offset];
-        }
-
-        return $default;
+        return $this->data[$offset] ?? $default;
     }
 
     /**

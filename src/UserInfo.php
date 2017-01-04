@@ -57,6 +57,20 @@ class UserInfo implements ComponentInterface
     }
 
     /**
+     * Called by var_dump() when dumping The object
+     *
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'component' => $this->getContent(),
+            'user' => $this->getUser(),
+            'pass' => $this->getPass(),
+        ];
+    }
+
+    /**
      * Filter the URI user component
      *
      * @param string|null $str
@@ -237,17 +251,14 @@ class UserInfo implements ComponentInterface
      *
      * @return static
      */
-    public function withContent($content): ComponentInterface
+    public function withContent($content): self
     {
-        if ($content === $this->getContent()) {
-            return $this;
+        if (null !== $content) {
+            $content = $this->validateString($content);
         }
 
-        if (null !== $content && !is_string($content)) {
-            throw new Exception(sprintf(
-                'Expected data to be a string or NULL; received "%s"',
-                gettype($content)
-            ));
+        if ($content === $this->getContent()) {
+            return $this;
         }
 
         $res = explode(':', $content, 2);
@@ -272,7 +283,7 @@ class UserInfo implements ComponentInterface
     {
         $user = $this->filterUser($this->validateString($user));
         $pass = $this->filterPass($pass);
-        if (in_array($user, [null, ''], true)) {
+        if ('' == $user) {
             $pass = null;
         }
 

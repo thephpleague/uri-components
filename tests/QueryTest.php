@@ -34,6 +34,11 @@ class QueryTest extends TestCase
         $this->assertTrue($this->query->withContent(null)->isNull());
     }
 
+    public function testDebugInfo()
+    {
+        $this->assertInternalType('array', $this->query->__debugInfo());
+    }
+
     public function testWithContent()
     {
         $this->assertSame($this->query, $this->query->withContent('kingkong=toto'));
@@ -166,6 +171,7 @@ class QueryTest extends TestCase
             ['foo=bar', 'foo=', 'foo=bar&foo='],
             ['foo=bar', 'foo', 'foo=bar&foo'],
             ['foo=bar', 'foo=baz&foo=yolo', 'foo=bar&foo=baz&foo=yolo'],
+            ['foo=bar', '', 'foo=bar'],
         ];
     }
 
@@ -220,11 +226,19 @@ class QueryTest extends TestCase
         $this->assertSame(null, $query->getPair('baz'));
     }
 
-    public function testGetAll()
+    public function testGetPairs()
     {
         $expected = ['foo' => null, 'bar' => null, 'baz' => null, 'to.go' => 'toofan'];
         $query = new Query('foo&bar&baz&to.go=toofan');
         $this->assertSame($expected, $query->getPairs());
+    }
+
+    /**
+     * @dataProvider parsedQueryProvider
+     */
+    public function testGetParams($query, $expected)
+    {
+        $this->assertSame($expected, (new Query($query))->getParams());
     }
 
     /**
@@ -238,7 +252,7 @@ class QueryTest extends TestCase
      */
     public function testWithout($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Query($origin))->remove($without));
+        $this->assertSame($result, (string) (new Query($origin))->delete($without));
     }
 
     public function withoutProvider()
