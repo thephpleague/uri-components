@@ -43,7 +43,7 @@ trait QueryParserTrait
     public static function parse(
         string $str,
         string $separator = '&',
-        int $enc_type = EncodingInterface::RFC3986_ENCODING
+        int $enc_type = ComponentInterface::RFC3986_ENCODING
     ): array {
         self::assertValidEncoding($enc_type);
 
@@ -62,7 +62,7 @@ trait QueryParserTrait
 
     protected static function getDecoder(int $enc_type): callable
     {
-        if (EncodingInterface::RFC1738_ENCODING === $enc_type) {
+        if (ComponentInterface::RFC1738_ENCODING === $enc_type) {
             return function ($value) {
                 return self::decodeComponent(str_replace('+', ' ', $value));
             };
@@ -224,7 +224,7 @@ trait QueryParserTrait
     public static function extract(
         string $str,
         string $separator = '&',
-        int $enc_type = EncodingInterface::RFC3986_ENCODING
+        int $enc_type = ComponentInterface::RFC3986_ENCODING
     ): array {
         return self::extractFromPairs(self::parse($str, $separator, $enc_type));
     }

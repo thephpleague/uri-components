@@ -65,8 +65,6 @@ trait PathInfoTrait
      *
      * @param string $value
      *
-     * @throws Exception for invalid component or transformations
-     *                   that would result in a object in invalid state.
      * @return static
      */
     public function withContent($value)
@@ -112,11 +110,11 @@ trait PathInfoTrait
      *
      * @return string|null
      */
-    public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
-        if ($enc_type == EncodingInterface::RFC3987_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
             $pattern = str_split(self::$invalid_uri_chars);
             $pattern[] = '#';
             $pattern[] = '?';
@@ -124,11 +122,11 @@ trait PathInfoTrait
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->getDecoded());
         }
 
-        if ($enc_type == EncodingInterface::RFC3986_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3986_ENCODING) {
             return $this->encodePath($this->getDecoded());
         }
 
-        if ($enc_type == EncodingInterface::RFC1738_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC1738_ENCODING) {
             return $this->toRFC1738($this->encodePath($this->getDecoded()));
         }
 
@@ -178,7 +176,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutDotSegments(): self
+    public function withoutDotSegments(): PathInterface
     {
         $current = $this->__toString();
         if (false === strpos($current, '.')) {
@@ -228,7 +226,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutEmptySegments(): self
+    public function withoutEmptySegments(): PathInterface
     {
         return $this->withContent(preg_replace(',/+,', '/', $this->__toString()));
     }
@@ -251,11 +249,10 @@ trait PathInfoTrait
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a trailing slash
      *
-     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */
-    public function withTrailingSlash(): self
+    public function withTrailingSlash(): PathInterface
     {
         return $this->hasTrailingSlash() ? $this : $this->withContent($this->__toString().'/');
     }
@@ -266,11 +263,9 @@ trait PathInfoTrait
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a trailing slash
      *
-     * @throws Exception for transformations that would result in a invalid object.
-     *
      * @return static
      */
-    public function withoutTrailingSlash(): self
+    public function withoutTrailingSlash(): PathInterface
     {
         return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this->__toString(), 0, -1, 'UTF-8'));
     }
@@ -293,11 +288,10 @@ trait PathInfoTrait
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a leading slash
      *
-     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */
-    public function withLeadingSlash(): self
+    public function withLeadingSlash(): PathInterface
     {
         return $this->isAbsolute() ? $this : $this->withContent('/'.$this->__toString());
     }
@@ -308,11 +302,9 @@ trait PathInfoTrait
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a leading slash
      *
-     * @throws Exception for transformations that would result in a invalid object.
-     *
      * @return static
      */
-    public function withoutLeadingSlash(): self
+    public function withoutLeadingSlash(): PathInterface
     {
         return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this->__toString(), 1, null, 'UTF-8'));
     }

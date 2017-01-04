@@ -109,14 +109,4 @@ class FragmentTest extends TestCase
         $this->assertNull($altFragment->getContent());
         $this->assertSame('', $altFragment->__toString());
     }
-
-    public function testWithContent()
-    {
-        $fragment = new Fragment('foobar');
-        $fragment_alt = $fragment->withContent('top');
-        $fragment_equal = $fragment->withContent('foobar');
-        $this->assertSame('foobar', (string) $fragment);
-        $this->assertSame('top', (string) $fragment_alt);
-        $this->assertEquals($fragment_equal, $fragment);
-    }
 }

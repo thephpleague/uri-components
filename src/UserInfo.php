@@ -24,7 +24,7 @@ namespace League\Uri\Components;
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.1
  *
  */
-class UserInfo implements EncodingInterface
+class UserInfo implements ComponentInterface
 {
     use ComponentTrait;
 
@@ -124,14 +124,14 @@ class UserInfo implements EncodingInterface
      *
      * @return string|null
      */
-    public function getUser(int $enc_type = EncodingInterface::RFC3986_ENCODING)
+    public function getUser(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->user || EncodingInterface::NO_ENCODING == $enc_type) {
+        if ('' == $this->user || ComponentInterface::NO_ENCODING == $enc_type) {
             return $this->user;
         }
 
-        if ($enc_type == EncodingInterface::RFC3987_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', ':', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->user);
@@ -139,7 +139,7 @@ class UserInfo implements EncodingInterface
 
         $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
 
-        if (EncodingInterface::RFC1738_ENCODING == $enc_type) {
+        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
             return $this->toRFC1738($this->encode($this->user, $regexp));
         }
 
@@ -151,14 +151,14 @@ class UserInfo implements EncodingInterface
      *
      * @return string
      */
-    public function getPass(int $enc_type = EncodingInterface::RFC3986_ENCODING)
+    public function getPass(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->pass || EncodingInterface::NO_ENCODING == $enc_type) {
+        if ('' == $this->pass || ComponentInterface::NO_ENCODING == $enc_type) {
             return $this->pass;
         }
 
-        if ($enc_type == EncodingInterface::RFC3987_ENCODING) {
+        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern),  $this->pass);
@@ -166,7 +166,7 @@ class UserInfo implements EncodingInterface
 
         $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
 
-        if (EncodingInterface::RFC1738_ENCODING == $enc_type) {
+        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
             return $this->toRFC1738($this->encode($this->pass, $regexp));
         }
 
@@ -202,7 +202,7 @@ class UserInfo implements EncodingInterface
      *
      * @return string|null
      */
-    public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
         if (null === $this->user) {

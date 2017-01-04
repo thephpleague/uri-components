@@ -33,7 +33,7 @@ use Traversable;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-class Query implements EncodingInterface, Countable, IteratorAggregate
+class Query implements ComponentInterface, Countable, IteratorAggregate
 {
     use QueryParserTrait;
 
@@ -193,7 +193,7 @@ class Query implements EncodingInterface, Countable, IteratorAggregate
      *
      * @return string|null
      */
-    public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
