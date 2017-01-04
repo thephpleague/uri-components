@@ -128,9 +128,9 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      *
      * @param string $value
      *
-     * @return static
+     * @return ComponentInterface
      */
-    public function withContent($value): self
+    public function withContent($value): ComponentInterface
     {
         if ($value === $this->getContent()) {
             return $this;
