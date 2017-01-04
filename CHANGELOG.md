@@ -16,7 +16,9 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Host::withoutRootLabel`
 - `Query::append`
 - `Query::has`
-- `HierarchicalComponent::remove` replaces `HierarchicalComponent::without`
+- `Query::delete` replaces `Query::without`
+- `Query::getParams`
+- `HierarchicalComponent::delete` replaces `HierarchicalComponent::without`
 
 ### Fixed
 
@@ -24,6 +26,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Host::getLabel` now can use negative offset like PHP 7.1+
 - `HierarchicalComponent::replace` now accepts negative offset like PHP 7.1+
 - `Query::merge` only accepts string
+- `ComponentInterface::withContent` return type removed because of the enforcement of the declared return type during inheritance is invariant;
 
 ### Deprecated
 
@@ -34,9 +37,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - PHP5 support
 - Implementing `League\Uri\Interfaces\Component`
 - `Query::hasKey`
+- `Query::without`
 - `Query::filter`
-- `HierarchicalComponent::without`
 - `HierarchicalComponent::hasKey`
+- `HierarchicalComponent::without`
 - `HierarchicalComponent::filter`
 
 ## 0.5.0 - 2016-12-09

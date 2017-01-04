@@ -127,9 +127,9 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @param mixed $value
      *
-     * @return ComponentInterface
+     * @return static
      */
-    public function withContent($value): ComponentInterface
+    public function withContent($value)
     {
         if ($value === $this->getContent()) {
             return $this;

@@ -25,7 +25,7 @@ use Pdp\PublicSuffixListManager;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-trait HostInfo
+trait HostInfoTrait
 {
     /**
      * Pdp Parser

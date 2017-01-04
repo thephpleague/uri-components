@@ -102,25 +102,6 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     }
 
     /**
-     * Returns an instance with the specified string
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified data
-     *
-     * @param string $value
-     *
-     * @return static
-     */
-    public function withContent($value): ComponentInterface
-    {
-        if ($value === $this->getContent()) {
-            return $this;
-        }
-
-        return new static($value);
-    }
-
-    /**
      * Returns the instance content encoded in RFC3986 or RFC3987.
      *
      * If the instance is defined, the value returned MUST be percent-encoded,
@@ -138,6 +119,25 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      * @return string|null
      */
     abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
+
+    /**
+     * Returns an instance with the specified string
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified data
+     *
+     * @param string $value
+     *
+     * @return static
+     */
+    public function withContent($value): self
+    {
+        if ($value === $this->getContent()) {
+            return $this;
+        }
+
+        return new static($value);
+    }
 
     /**
      * Returns the instance string representation; If the
@@ -162,30 +162,6 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     }
 
     /**
-     * Returns an instance without the specified keys
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
-     *
-     * @param int[] $offsets the list of keys to remove from the collection
-     *
-     * @return static
-     */
-    public function remove(array $offsets): self
-    {
-        $data = $this->data;
-        foreach ($this->filterOffsets($offsets) as $offset) {
-            unset($data[$offset]);
-        }
-
-        if ($data === $this->data) {
-            return $this;
-        }
-
-        return $this->newHierarchicalInstance($data, $this->is_absolute);
-    }
-
-    /**
      * Returns an instance with the modified segment
      *
      * This method MUST retain the state of the current instance, and return
@@ -198,9 +174,18 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      */
     public function replace(int $offset, string $component): self
     {
-        $offset = $this->filterOffset($offset);
+        $nb_elements = count($this->data);
+        $offset = filter_var(
+            $offset,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]]
+        );
         if (false === $offset) {
             return $this;
+        }
+
+        if ($offset < 0) {
+            $offset = $nb_elements + $offset;
         }
 
         $dest = iterator_to_array($this->withContent($component));
@@ -218,47 +203,48 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     }
 
     /**
-     * Filter Offset
+     * Returns an instance without the specified keys
      *
-     * @param int $offset
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component
      *
-     * @return int|false
+     * @param int[] $offsets the list of keys to remove from the collection
+     *
+     * @return static
      */
-    protected function filterOffset(int $offset)
+    public function delete(array $offsets): self
     {
-        $nb_elements = count($this->data);
-        $offset = filter_var(
-            $offset,
-            FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]]
-        );
-
-        if ($offset < 0) {
-            return $nb_elements + $offset;
+        $data = $this->data;
+        foreach ($this->filterOffsets($offsets) as $offset) {
+            unset($data[$offset]);
         }
 
-        return $offset;
+        if ($data === $this->data) {
+            return $this;
+        }
+
+        return $this->newHierarchicalInstance($data, $this->is_absolute);
     }
 
     /**
      * Filter Offset list
      *
-     * @param array $offset
+     * @param array $offsets
      *
      * @return int[]
      */
-    protected function filterOffsets(array $offset_list)
+    protected function filterOffsets(array $offsets)
     {
-        $offset_list = filter_var($offset_list, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
-        if (in_array(false, $offset_list, true)) {
+        $offsets = filter_var($offsets, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
+        if (in_array(false, $offsets, true)) {
             throw new Exception('The offset list must contains integers only');
         }
 
         $nb_elements = count($this->data);
-        $options = ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1];
+        $options = ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]];
 
         $mapper = function ($offset) use ($nb_elements, $options) {
-            $offset = filter_var($offset, FILTER_VALIDATE_INT, ['options' => $options]);
+            $offset = filter_var($offset, FILTER_VALIDATE_INT, $options);
             if ($offset < 0) {
                 return $nb_elements + $offset;
             }
@@ -270,6 +256,6 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
             return is_int($value);
         };
 
-        return array_filter(array_unique(array_map($mapper, $offset_list)), $filter);
+        return array_filter(array_unique(array_map($mapper, $offsets)), $filter);
     }
 }
