@@ -332,9 +332,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @param string $value
      *
-     * @return static
+     * @return ComponentInterface
      */
-    public function withContent($value): self
+    public function withContent($value): ComponentInterface
     {
         if ($value === $this->getContent()) {
             return $this;

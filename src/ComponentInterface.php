@@ -115,5 +115,5 @@ interface ComponentInterface
      *
      * @return static
      */
-    public function withContent($content);
+    public function withContent($content): self;
 }

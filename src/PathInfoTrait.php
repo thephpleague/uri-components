@@ -65,9 +65,9 @@ trait PathInfoTrait
      *
      * @param string $value
      *
-     * @return static
+     * @return ComponentInterface
      */
-    public function withContent($value)
+    public function withContent($value): ComponentInterface
     {
         if ($value === $this->getContent()) {
             return $this;
@@ -249,6 +249,7 @@ trait PathInfoTrait
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a trailing slash
      *
+     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */
@@ -262,6 +263,8 @@ trait PathInfoTrait
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a trailing slash
+     *
+     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */
@@ -288,6 +291,7 @@ trait PathInfoTrait
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a leading slash
      *
+     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */
@@ -301,6 +305,8 @@ trait PathInfoTrait
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a leading slash
+     *
+     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */

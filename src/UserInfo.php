@@ -249,9 +249,9 @@ class UserInfo implements ComponentInterface
      *
      * @param string|null $content
      *
-     * @return static
+     * @return ComponentInterface
      */
-    public function withContent($content): self
+    public function withContent($content): ComponentInterface
     {
         if (null !== $content) {
             $content = $this->validateString($content);
