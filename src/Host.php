@@ -256,6 +256,27 @@ class Host extends AbstractHierarchicalComponent
     }
 
     /**
+     * Returns an instance with the specified string
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified data
+     *
+     * @param mixed $value
+     *
+     * @throws Exception for invalid component or transformations
+     *                   that would result in a object in invalid state.
+     * @return static
+     */
+    public function withContent($value): self
+    {
+        if ($value === $this->getContent()) {
+            return $this;
+        }
+
+        return new static($value);
+    }
+
+    /**
      * Called by var_dump() when dumping The object
      *
      * @return array
@@ -379,7 +400,7 @@ class Host extends AbstractHierarchicalComponent
      *
      * @return string|null
      */
-    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -391,7 +412,7 @@ class Host extends AbstractHierarchicalComponent
             return $this->data[0];
         }
 
-        if ($enc_type != ComponentInterface::RFC3987_ENCODING) {
+        if ($enc_type != EncodingInterface::RFC3987_ENCODING) {
             return $this->format(array_map('idn_to_ascii', $this->data), $this->is_absolute);
         }
 

@@ -30,7 +30,7 @@ use SplFileObject;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.3
  */
-class DataPath extends AbstractComponent implements PathInterface
+class DataPath extends AbstractComponent
 {
     use PathInfoTrait;
 
