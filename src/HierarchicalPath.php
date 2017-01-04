@@ -24,7 +24,7 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class HierarchicalPath extends AbstractHierarchicalComponent implements PathInterface
+class HierarchicalPath extends AbstractHierarchicalComponent
 {
     use PathInfoTrait;
 

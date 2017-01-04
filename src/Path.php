@@ -22,7 +22,7 @@ namespace League\Uri\Components;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class Path extends AbstractComponent implements PathInterface
+class Path extends AbstractComponent
 {
     use PathInfoTrait;
 
