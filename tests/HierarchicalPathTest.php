@@ -250,16 +250,11 @@ class HierarchicalPathTest extends TestCase
         return [
             ['/test/query.php', [4], '/test/query.php'],
             ['/master/test/query.php', [2], '/master/test'],
+            ['/master/test/query.php', [-1], '/master/test'],
             ['/toto/le/heros/masson', [0], '/le/heros/masson'],
             ['/toto/le/heros/masson', [2, 3], '/toto/le'],
             ['/toto/le/heros/masson', [1, 2], '/toto/masson'],
         ];
-    }
-
-    public function testWithoutThrowException()
-    {
-        $this->expectException(Exception::class);
-        (new Path('/toto/le/heros/masson'))->delete(['toto']);
     }
 
     /**

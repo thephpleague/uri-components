@@ -3,7 +3,7 @@
  * League.Uri (http://uri.thephpleague.com)
  *
  * @package    League\Uri
- * @subpackage League\Uri\Interfaces
+ * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @copyright  2016 Ignace Nyamagana Butera
  * @license    https://github.com/thephpleague/uri-interfaces/blob/master/LICENSE (MIT License)
@@ -26,20 +26,12 @@ use InvalidArgumentException;
  *
  * @see        https://tools.ietf.org/html/rfc3986#section-3
  * @package    League\Uri
- * @subpackage League\Uri\Interfaces
+ * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-interface ComponentInterface
+interface ComponentInterface extends EncodingInterface
 {
-    const NO_ENCODING = 0;
-
-    const RFC1738_ENCODING = 1;
-
-    const RFC3986_ENCODING = 2;
-
-    const RFC3987_ENCODING = 3;
-
     /**
      * Returns whether or not the component is null.
      *

@@ -52,11 +52,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     protected $preserve_delimiter = false;
 
     /**
-     * The query keys
+     * The deserialized query arguments
      *
      * @var array
      */
-    protected $keys = [];
+    protected $params = [];
 
     /**
      * The query pairs
@@ -66,11 +66,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     protected $pairs = [];
 
     /**
-     * The deserialized query arguments
+     * The query pairs keys
      *
      * @var array
      */
-    protected $params = [];
+    protected $keys = [];
 
     /**
      * return a new Query instance from an Array or a traversable object
@@ -107,7 +107,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             }
 
             foreach ($value as $val) {
-                if (!is_scalar($val) && !is_null($val)) {
+                if (null !== $val && !is_scalar($val)) {
                     throw new Exception(sprintf(
                         'Expected data to be a scalar or null; received "%s"',
                         (is_object($val) ? get_class($val) : gettype($val))
