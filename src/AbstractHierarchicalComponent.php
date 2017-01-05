@@ -215,7 +215,7 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     public function delete(array $offsets): self
     {
         $data = $this->data;
-        foreach ($this->filterOffsets($offsets) as $offset) {
+        foreach ($this->filterOffsets(...$offsets) as $offset) {
             unset($data[$offset]);
         }
 
@@ -229,17 +229,12 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     /**
      * Filter Offset list
      *
-     * @param array $offsets
+     * @param int ...$offsets
      *
      * @return int[]
      */
-    protected function filterOffsets(array $offsets)
+    protected function filterOffsets(int ...$offsets)
     {
-        $offsets = filter_var($offsets, FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
-        if (in_array(false, $offsets, true)) {
-            throw new Exception('The offset list must contains integers only');
-        }
-
         $nb_elements = count($this->data);
         $options = ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]];
 

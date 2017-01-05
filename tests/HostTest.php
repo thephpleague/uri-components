@@ -13,6 +13,12 @@ use PHPUnit\Framework\TestCase;
  */
 class HostTest extends TestCase
 {
+    public function testDebugInfo()
+    {
+        $host = new Host('uri.thephpleague.com');
+        $this->assertInternalType('array', $host->__debugInfo());
+    }
+
     public function testSetState()
     {
         $host = new Host('uri.thephpleague.com');
@@ -424,15 +430,10 @@ class HostTest extends TestCase
         return [
             'remove unknown label' => ['secure.example.com', [34], 'secure.example.com'],
             'remove one string label' => ['secure.example.com', [0], 'secure.example'],
+            'remove one string label negative offset' => ['secure.example.com', [-1], 'example.com'],
             'remove IP based label' => ['127.0.0.1', [0], ''],
             'remove silent excessive label index' => ['127.0.0.1', [0, 1] , ''],
         ];
-    }
-
-    public function testWithoutThrowException()
-    {
-        $this->expectException(Exception::class);
-        (new Host('example.com'))->delete(['com']);
     }
 
     /**
