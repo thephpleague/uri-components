@@ -436,6 +436,12 @@ class HostTest extends TestCase
         ];
     }
 
+    public function testWithoutTriggersException()
+    {
+        $this->expectException(Exception::class);
+        (new Host('bébé.be'))->delete(['be']);
+    }
+
     /**
      * @param $host
      * @param $expected

@@ -214,6 +214,10 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      */
     public function delete(array $offsets): self
     {
+        if (array_filter($offsets, 'is_int') !== $offsets) {
+            throw new Exception('the list of keys must contain integer only values');
+        }
+
         $data = $this->data;
         foreach ($this->filterOffsets(...$offsets) as $offset) {
             unset($data[$offset]);
@@ -229,7 +233,7 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     /**
      * Filter Offset list
      *
-     * @param int ...$offsets
+     * @param int ...$offsets list of keys to remove from the collection
      *
      * @return int[]
      */
@@ -247,10 +251,6 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
             return $offset;
         };
 
-        $filter = function ($value) {
-            return is_int($value);
-        };
-
-        return array_filter(array_unique(array_map($mapper, $offsets)), $filter);
+        return array_filter(array_unique(array_map($mapper, $offsets)), 'is_int');
     }
 }
