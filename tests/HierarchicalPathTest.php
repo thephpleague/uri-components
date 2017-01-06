@@ -257,6 +257,12 @@ class HierarchicalPathTest extends TestCase
         ];
     }
 
+    public function testWithoutTriggersException()
+    {
+        $this->expectException(Exception::class);
+        (new Path('/path/where'))->delete(['where']);
+    }
+
     /**
      * @param $raw
      * @param $input
