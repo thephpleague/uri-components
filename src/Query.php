@@ -299,7 +299,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return bool
      */
-    public function has(string $offset): bool
+    public function hasPair(string $offset): bool
     {
         $offset = $this->decodeComponent($this->validateString($offset));
 
@@ -426,7 +426,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return static
      */
-    public function delete(array $offsets): self
+    public function withoutPairs(array $offsets): self
     {
         $pairs = $this->pairs;
         foreach ($offsets as $offset) {

@@ -242,7 +242,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithout($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Path($origin))->delete($without));
+        $this->assertSame($result, (string) (new Path($origin))->withoutSegments($without));
     }
 
     public function withoutProvider()
@@ -260,7 +260,7 @@ class HierarchicalPathTest extends TestCase
     public function testWithoutTriggersException()
     {
         $this->expectException(Exception::class);
-        (new Path('/path/where'))->delete(['where']);
+        (new Path('/path/where'))->withoutSegments(['where']);
     }
 
     /**
@@ -273,7 +273,7 @@ class HierarchicalPathTest extends TestCase
     public function testReplace($raw, $input, $offset, $expected)
     {
         $path = new Path($raw);
-        $newPath = $path->replace($offset, $input);
+        $newPath = $path->replaceSegment($offset, $input);
         $this->assertSame($expected, $newPath->__toString());
     }
 

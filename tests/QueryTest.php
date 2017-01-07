@@ -189,8 +189,8 @@ class QueryTest extends TestCase
 
     public function testHas()
     {
-        $this->assertTrue($this->query->has('kingkong'));
-        $this->assertFalse($this->query->has('togo'));
+        $this->assertTrue($this->query->hasPair('kingkong'));
+        $this->assertFalse($this->query->hasPair('togo'));
     }
 
     public function testCountable()
@@ -252,7 +252,7 @@ class QueryTest extends TestCase
      */
     public function testWithout($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Query($origin))->delete($without));
+        $this->assertSame($result, (string) (new Query($origin))->withoutPairs($without));
     }
 
     public function withoutProvider()

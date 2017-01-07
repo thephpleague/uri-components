@@ -422,7 +422,7 @@ class HostTest extends TestCase
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (new Host($host))->delete($without)->__toString());
+        $this->assertSame($res, (new Host($host))->withoutLabels($without)->__toString());
     }
 
     public function withoutProvider()
@@ -439,7 +439,7 @@ class HostTest extends TestCase
     public function testWithoutTriggersException()
     {
         $this->expectException(Exception::class);
-        (new Host('bébé.be'))->delete(['be']);
+        (new Host('bébé.be'))->withoutLabels(['be']);
     }
 
     /**
@@ -554,7 +554,7 @@ class HostTest extends TestCase
      */
     public function testReplace($raw, $input, $offset, $expected)
     {
-        $this->assertSame($expected, (new Host($raw))->replace($offset, $input)->__toString());
+        $this->assertSame($expected, (new Host($raw))->replaceLabel($offset, $input)->__toString());
     }
 
     public function replaceValid()
@@ -573,7 +573,7 @@ class HostTest extends TestCase
     public function testReplaceIpMustFailed()
     {
         $this->expectException(Exception::class);
-        (new Host('secure.example.com'))->replace(2, '[::1]');
+        (new Host('secure.example.com'))->replaceLabel(2, '[::1]');
     }
 
     /**
