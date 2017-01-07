@@ -234,7 +234,9 @@ class Host extends AbstractHierarchicalComponent
 
         if ($this->isValidHostname($host)) {
             return array_reverse(array_map(
-                'idn_to_utf8',
+                function ($value) {
+                    return idn_to_utf8($value, 0, INTL_IDNA_VARIANT_UTS46);
+                },
                 explode('.', strtolower($host))
             ));
         }
@@ -344,7 +346,7 @@ class Host extends AbstractHierarchicalComponent
 
         return array_keys(
             $this->data,
-            idn_to_utf8($this->validateString(func_get_arg(0))),
+            idn_to_utf8($this->validateString(func_get_arg(0)), 0, INTL_IDNA_VARIANT_UTS46),
             true
         );
     }
@@ -379,7 +381,9 @@ class Host extends AbstractHierarchicalComponent
         }
 
         if ($enc_type != ComponentInterface::RFC3987_ENCODING) {
-            return $this->format(array_map('idn_to_ascii', $this->data), $this->is_absolute);
+            return $this->format(array_map(function ($value) {
+                return idn_to_ascii($value, 0, INTL_IDNA_VARIANT_UTS46);
+            }, $this->data), $this->is_absolute);
         }
 
         return $this->format($this->data, $this->is_absolute);
@@ -473,13 +477,13 @@ class Host extends AbstractHierarchicalComponent
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the prepended data
      *
-     * @param string $component the component to append
+     * @param string $host the component to append
      *
      * @return static
      */
-    public function prepend(string $component): self
+    public function prepend(string $host): self
     {
-        $labels = array_merge($this->data, $this->filterComponent($component));
+        $labels = array_merge($this->data, $this->filterComponent($host));
         if ($this->data === $labels) {
             return $this;
         }
@@ -493,13 +497,13 @@ class Host extends AbstractHierarchicalComponent
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
      *
-     * @param string $component the component to append
+     * @param string $host the component to append
      *
      * @return static
      */
-    public function append(string $component): self
+    public function append(string $host): self
     {
-        $labels = array_merge($this->filterComponent($component), $this->data);
+        $labels = array_merge($this->filterComponent($host), $this->data);
         if ($this->data === $labels) {
             return $this;
         }
@@ -534,14 +538,14 @@ class Host extends AbstractHierarchicalComponent
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the replaced data
      *
-     * @param int    $offset    the label offset to remove and replace by the given component
-     * @param string $component the component added
+     * @param int    $offset the label offset to remove and replace by the given component
+     * @param string $host   the component added
      *
      * @return static
      */
-    public function replaceLabel(int $offset, string $component): self
+    public function replaceLabel(int $offset, string $host): self
     {
-        $data = $this->replace($offset, $component);
+        $data = $this->replace($offset, $host);
         if ($data === $this->data) {
             return $this;
         }

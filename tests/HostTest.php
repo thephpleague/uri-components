@@ -145,15 +145,6 @@ class HostTest extends TestCase
                 null,
                 '98.3.2',
             ],
-            'invalid punycode' => [
-                'xn--fsqu00a.xn--g6w131251d',
-                false,
-                false,
-                false,
-                'xn--fsqu00a.xn--g6w131251d',
-                null,
-                '例子.xn--g6w131251d',
-            ],
             'mix IP format with host label' => [
                 'toto.127.0.0.1',
                 false,
@@ -226,6 +217,8 @@ class HostTest extends TestCase
             'invalid scope IPv6' => ['[ab23::1234%251]'],
             'invalid scope ID' => ['[fe80::1234%25?@]'],
             'invalid scope ID with utf8 character' => ['[fe80::1234%25€]'],
+            'invalid punycode (1)' => ['xn--fsqu00a.xn--g6w131251d'],
+            'invalid punycode (2)' => ['例子.xn--1'],
         ];
     }
 
@@ -287,7 +280,6 @@ class HostTest extends TestCase
             ['gwóźdź.pl', 'xn--gwd-hna98db.pl'],
             ['[::1]', '[::1]'],
             ['127.0.0.1', '127.0.0.1'],
-            ['例子.xn--1', 'xn--fsqu00a.xn--1'],
         ];
     }
 
