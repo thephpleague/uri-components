@@ -82,16 +82,6 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     }
 
     /**
-     * Return a new instance when needed
-     *
-     * @param array $data
-     * @param int   $is_absolute
-     *
-     * @return static
-     */
-    abstract protected function newHierarchicalInstance(array $data, int $is_absolute);
-
-    /**
      * Returns whether or not the component is absolute or not
      *
      * @return bool
@@ -170,9 +160,9 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      * @param int    $offset    the label offset to remove and replace by the given component
      * @param string $component the component added
      *
-     * @return static
+     * @return array
      */
-    public function replace(int $offset, string $component): self
+    protected function replace(int $offset, string $component): array
     {
         $nb_elements = count($this->data);
         $offset = filter_var(
@@ -181,7 +171,7 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
             ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]]
         );
         if (false === $offset) {
-            return $this;
+            return $this->data;
         }
 
         if ($offset < 0) {
@@ -194,12 +184,8 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
         }
 
         $source = iterator_to_array($this);
-        $data = array_merge(array_slice($source, 0, $offset), $dest, array_slice($source, $offset + 1));
-        if ($data === $this->data) {
-            return $this;
-        }
 
-        return $this->newHierarchicalInstance($data, $this->is_absolute);
+        return array_merge(array_slice($source, 0, $offset), $dest, array_slice($source, $offset + 1));
     }
 
     /**
@@ -210,9 +196,9 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
      *
      * @param int[] $offsets the list of keys to remove from the collection
      *
-     * @return static
+     * @return array
      */
-    public function delete(array $offsets): self
+    protected function delete(array $offsets): array
     {
         if (array_filter($offsets, 'is_int') !== $offsets) {
             throw new Exception('the list of keys must contain integer only values');
@@ -223,11 +209,7 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
             unset($data[$offset]);
         }
 
-        if ($data === $this->data) {
-            return $this;
-        }
-
-        return $this->newHierarchicalInstance($data, $this->is_absolute);
+        return $data;
     }
 
     /**

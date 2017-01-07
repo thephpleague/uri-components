@@ -243,19 +243,6 @@ class Host extends AbstractHierarchicalComponent
     }
 
     /**
-     * Return a new instance when needed
-     *
-     * @param array $data
-     * @param int   $is_absolute
-     *
-     * @return static
-     */
-    protected function newHierarchicalInstance(array $data, int $is_absolute): self
-    {
-        return $this->createFromLabels($data, $is_absolute);
-    }
-
-    /**
      * Called by var_dump() when dumping The object
      *
      * @return array
@@ -539,6 +526,48 @@ class Host extends AbstractHierarchicalComponent
         }
 
         return $this->validate($component);
+    }
+
+    /**
+     * Returns an instance with the modified label
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component with the replaced data
+     *
+     * @param int    $offset    the label offset to remove and replace by the given component
+     * @param string $component the component added
+     *
+     * @return static
+     */
+    public function replaceLabel(int $offset, string $component): self
+    {
+        $data = $this->replace($offset, $component);
+        if ($data === $this->data) {
+            return $this;
+        }
+
+        return self::createFromLabels($data, $this->is_absolute);
+    }
+
+
+    /**
+     * Returns an instance without the specified keys
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component
+     *
+     * @param int[] $offsets the list of keys to remove from the collection
+     *
+     * @return static
+     */
+    public function withoutLabels(array $offsets): self
+    {
+        $data = $this->delete($offsets);
+        if ($data === $this->data) {
+            return $this;
+        }
+
+        return self::createFromLabels($data, $this->is_absolute);
     }
 
     /**

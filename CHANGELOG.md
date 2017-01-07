@@ -6,20 +6,22 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
+- `ComponentInterface`
 - `EncodingInterface`
-- `ComponentInterface::RFC1738_ENCODING`
 - `HierarchicalPath::withDirname`
 - `HierarchicalPath::withBasename`
-- `League\Uri\Components\ComponentInterface` replaces `League\Uri\Interfaces\Component`
+- `HierarchicalPath::withoutSegments`
+- `HierarchicalPath::replaceSegment`
 - `Host::withRegisterableDomain`
 - `Host::withSubdomain`
 - `Host::withRootLabel`
 - `Host::withoutRootLabel`
-- `Query::append`
-- `Query::has`
-- `Query::delete` replaces `Query::without`
+- `Host::withoutLabels`
+- `Host::replaceLabel`
 - `Query::getParams`
-- `HierarchicalComponent::delete` replaces `HierarchicalComponent::without`
+- `Query::append`
+- `Query::hasPair`
+- `Query::withoutPairs`
 
 ### Fixed
 
@@ -27,7 +29,6 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Host::getLabel` now can use negative offset like PHP 7.1+
 - `HierarchicalComponent::replace` now accepts negative offset like PHP 7.1+
 - `Query::merge` only accepts string
-- `ComponentInterface::withContent` return type removed because of the enforcement of the declared return type during inheritance is invariant;
 
 ### Deprecated
 
@@ -40,9 +41,14 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Query::hasKey`
 - `Query::without`
 - `Query::filter`
-- `HierarchicalComponent::hasKey`
-- `HierarchicalComponent::without`
-- `HierarchicalComponent::filter`
+- `Host::hasKey`
+- `Host::without`
+- `Host::filter`
+- `Host::replace`
+- `HierarchicalPath::hasKey`
+- `HierarchicalPath::without`
+- `HierarchicalPath::filter`
+- `HierarchicalPath::replace`
 - `League\Uri\Components\PathInterface` 
 
 ## 0.5.0 - 2016-12-09
