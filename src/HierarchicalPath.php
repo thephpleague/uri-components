@@ -259,13 +259,13 @@ class HierarchicalPath extends AbstractHierarchicalComponent
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the prepended data
      *
-     * @param string $component the component to append
+     * @param string $path the component to append
      *
      * @return static
      */
-    public function prepend(string $component): self
+    public function prepend(string $path): self
     {
-        $new_segments = $this->filterComponent($component);
+        $new_segments = $this->filterComponent($path);
         if (!empty($new_segments) && '' === end($new_segments)) {
             array_pop($new_segments);
         }
@@ -279,13 +279,13 @@ class HierarchicalPath extends AbstractHierarchicalComponent
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
      *
-     * @param string $component the component to append
+     * @param string $path the component to append
      *
      * @return static
      */
-    public function append(string $component): self
+    public function append(string $path): self
     {
-        $new_segments = $this->filterComponent($component);
+        $new_segments = $this->filterComponent($path);
         $data = $this->data;
         if (!empty($data) && '' === end($data)) {
             array_pop($data);
@@ -297,18 +297,18 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     /**
      * Filter the component to append or prepend
      *
-     * @param string $component
+     * @param string $path
      *
      * @return array
      */
-    protected function filterComponent(string $component): array
+    protected function filterComponent(string $path): array
     {
-        $component = $this->validateString($component);
-        if ('' != $component && '/' == $component[0]) {
-            $component = substr($component, 1);
+        $path = $this->validateString($path);
+        if ('' != $path && '/' == $path[0]) {
+            $path = substr($path, 1);
         }
 
-        return $this->validate($component);
+        return $this->validate($path);
     }
 
     /**
