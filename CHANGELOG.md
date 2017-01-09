@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next
+## 1.0.0-RC1 - 2017-01-09
 
 ### Added
 
@@ -19,15 +19,21 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Host::withoutLabels`
 - `Host::replaceLabel`
 - `Query::getParams`
+- `Query::getParam`
 - `Query::append`
 - `Query::hasPair`
 - `Query::withoutPairs`
 
 ### Fixed
 
-- `HierarchicalPath::getSegment` now can use negative offset like PHP 7.1+
-- `Host::getLabel` now can use negative offset like PHP 7.1+
-- `HierarchicalComponent::replace` now accepts negative offset like PHP 7.1+
+- ComponentInterface::getContent supports RFC1738
+- The methods that accept integer offset supports negative offset
+    - `HierarchicalPath::getSegment`
+    - `HierarchicalPath::replaceSegment`
+    - `HierarchicalPath::withoutSegments`
+    - `Host::getLabel`
+    - `Host::replaceLabel`
+    - `Host::withoutLabels`
 - `Query::merge` only accepts string
 
 ### Deprecated
@@ -49,7 +55,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `HierarchicalPath::without`
 - `HierarchicalPath::filter`
 - `HierarchicalPath::replace`
-- `League\Uri\Components\PathInterface` 
+- `League\Uri\Components\PathInterface`
 
 ## 0.5.0 - 2016-12-09
 
