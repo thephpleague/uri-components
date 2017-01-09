@@ -207,9 +207,7 @@ trait HostInfoTrait
      */
     protected function isValidHostname(string $host): bool
     {
-        $labels = array_map(function ($label) {
-            return idn_to_ascii($label, 0, INTL_IDNA_VARIANT_UTS46);
-        }, explode('.', $host));
+        $labels = array_map('idn_to_ascii', explode('.', $host));
 
         return 127 > count($labels) && $labels === array_filter($labels, [$this, 'isValidHostLabel']);
     }
