@@ -217,8 +217,6 @@ class HostTest extends TestCase
             'invalid scope IPv6' => ['[ab23::1234%251]'],
             'invalid scope ID' => ['[fe80::1234%25?@]'],
             'invalid scope ID with utf8 character' => ['[fe80::1234%25€]'],
-            'invalid punycode (1)' => ['xn--fsqu00a.xn--g6w131251d'],
-            'invalid punycode (2)' => ['例子.xn--1'],
         ];
     }
 

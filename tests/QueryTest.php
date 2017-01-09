@@ -242,6 +242,32 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @dataProvider getParamProvider
+     */
+    public function testGetParam($query, $offset, $default, $expected)
+    {
+        $this->assertSame($expected, (new Query($query))->getParam($offset, $default));
+    }
+
+    public function getParamProvider()
+    {
+        return [
+            'simple query' => [
+                'query' => 'foo=bar&key=value',
+                'offset' => 'foo',
+                'default' => null,
+                'expected' => 'bar',
+            ],
+            'using default value' => [
+                'query' => 'foo=bar&key=value',
+                'offset' => 'zoo',
+                'default' => 'topia',
+                'expected' => 'topia',
+            ],
+        ];
+    }
+
+    /**
      * Test AbstractSegment::without
      *
      * @param $origin
