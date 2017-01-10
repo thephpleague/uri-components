@@ -162,6 +162,10 @@ class HierarchicalPathTest extends TestCase
             'ending delimiter' => [['foo/bar/baz', ''], Path::IS_RELATIVE, 'foo/bar/baz/'],
             'use reserved characters #' => [['all', 'i%23s', 'good'], Path::IS_ABSOLUTE, '/all/i%23s/good'],
             'use reserved characters ?' => [['all', 'i%3fs', 'good'], Path::IS_RELATIVE,  'all/i%3Fs/good'],
+            'enforce path status (1)' => [['', 'toto', 'yeah', ''], Path::IS_RELATIVE, 'toto/yeah/'],
+            'enforce path status (2)' => [['', 'toto', 'yeah', ''], Path::IS_ABSOLUTE, '/toto/yeah/'],
+            'enforce path status (3)' => [['', '', 'toto', 'yeah', ''], Path::IS_RELATIVE, 'toto/yeah/'],
+            'enforce path status (4)' => [['', '', 'toto', 'yeah', ''], Path::IS_ABSOLUTE, '//toto/yeah/'],
         ];
     }
 

@@ -82,39 +82,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public static function createFromPairs($pairs): self
     {
         $pairs = static::filterIterable($pairs);
-        static:: validatePairs($pairs);
-
         if (empty($pairs)) {
             return new static();
         }
 
-
         return new static(static::build($pairs, static::$separator));
-    }
-
-    /**
-     * Filter the submitted pair array.
-     *
-     * @param array $pairs
-     *
-     * @throws Exception If the array contains non valid data
-     */
-    protected static function validatePairs(array $pairs)
-    {
-        foreach ($pairs as $value) {
-            if (!is_array($value)) {
-                $value = [$value];
-            }
-
-            foreach ($value as $val) {
-                if (null !== $val && !is_scalar($val)) {
-                    throw new Exception(sprintf(
-                        'Expected data to be a scalar or null; received "%s"',
-                        (is_object($val) ? get_class($val) : gettype($val))
-                    ));
-                }
-            }
-        }
     }
 
     /**
@@ -196,12 +168,13 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-
         if (!$this->preserve_delimiter) {
             return null;
         }
 
-        return static::build($this->pairs, static::$separator, $enc_type);
+        $encoder = self::getEncoder(static::$separator, $enc_type);
+
+        return static::getQueryString($this->pairs, static::$separator, $encoder);
     }
 
     /**
@@ -324,15 +297,17 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * the given value will be returned. The specified value
      * must be decoded
      *
+     * @param mixed ...$args the total number of argument given to the method
+     *
      * @return array
      */
-    public function keys(): array
+    public function keys(...$args): array
     {
-        if (0 === func_num_args()) {
+        if (empty($args)) {
             return array_keys($this->pairs);
         }
 
-        return array_keys($this->pairs, func_get_arg(0), true);
+        return array_keys($this->pairs, $args[0], true);
     }
 
     /**

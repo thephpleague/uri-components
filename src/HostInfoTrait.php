@@ -75,6 +75,59 @@ trait HostInfoTrait
     protected static $invalid_uri_chars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
 
     /**
+     * Load the hostname info
+     *
+     * @param string $key hostname info key
+     *
+     * @return mixed
+     */
+    protected function getHostnameInfo(string $key)
+    {
+        $this->loadHostnameInfo();
+        return $this->hostnameInfo[$key];
+    }
+
+    /**
+     * parse and save the Hostname information from the Parser
+     */
+    protected function loadHostnameInfo()
+    {
+        if ($this->isIp() || $this->hostnameInfoLoaded) {
+            return;
+        }
+
+        $host = $this->__toString();
+        if ($this->isAbsolute()) {
+            $host = substr($host, 0, -1);
+        }
+
+        $this->hostnameInfo = array_map(
+            'sprintf',
+            $this->getPdpParser()->parseHost($host)->toArray()
+        ) + $this->hostnameInfo;
+
+        if ('' !== $this->hostnameInfo['publicSuffix']) {
+            $this->hostnameInfo['isPublicSuffixValid'] = $this->getPdpParser()->isSuffixValid($host);
+        }
+
+        $this->hostnameInfoLoaded = true;
+    }
+
+    /**
+     * Initialize and access the Parser object
+     *
+     * @return Parser
+     */
+    protected function getPdpParser(): Parser
+    {
+        if (!static::$pdp_parser instanceof Parser) {
+            static::$pdp_parser = new Parser((new PublicSuffixListManager())->getList());
+        }
+
+        return static::$pdp_parser;
+    }
+
+    /**
      * Return the host public suffix
      *
      * @return string
@@ -115,45 +168,6 @@ trait HostInfoTrait
     }
 
     /**
-     * Load the hostname info
-     *
-     * @param string $key hostname info key
-     *
-     * @return mixed
-     */
-    protected function getHostnameInfo(string $key)
-    {
-        $this->loadHostnameInfo();
-        return $this->hostnameInfo[$key];
-    }
-
-    /**
-     * parse and save the Hostname information from the Parser
-     */
-    protected function loadHostnameInfo()
-    {
-        if ($this->isIp() || $this->hostnameInfoLoaded) {
-            return;
-        }
-
-        $host = $this->__toString();
-        if ($this->isAbsolute()) {
-            $host = mb_substr($host, 0, -1, 'UTF-8');
-        }
-
-        $this->hostnameInfo = array_merge(
-            $this->hostnameInfo,
-            array_map('sprintf', $this->getPdpParser()->parseHost($host)->toArray())
-        );
-
-        if ('' !== $this->hostnameInfo['publicSuffix']) {
-            $this->hostnameInfo['isPublicSuffixValid'] = $this->getPdpParser()->isSuffixValid($host);
-        }
-
-        $this->hostnameInfoLoaded = true;
-    }
-
-    /**
      * validate an Ipv6 Hostname
      *
      * @see http://tools.ietf.org/html/rfc6874#section-2
@@ -163,7 +177,7 @@ trait HostInfoTrait
      *
      * @return bool
      */
-    protected function isValidHostnameIpv6(string $ipv6): bool
+    protected function isValidIpv6Hostname(string $ipv6): bool
     {
         if (false === strpos($ipv6, '[') || false === strpos($ipv6, ']')) {
             return false;
@@ -209,7 +223,7 @@ trait HostInfoTrait
     {
         $labels = array_map('idn_to_ascii', explode('.', $host));
 
-        return 127 > count($labels) && $labels === array_filter($labels, [$this, 'isValidHostLabel']);
+        return 127 > count($labels) && $labels === array_filter($labels, [$this, 'isValidLabel']);
     }
 
     /**
@@ -219,7 +233,7 @@ trait HostInfoTrait
      *
      * @return bool
      */
-    protected function isValidHostLabel(string $label): bool
+    protected function isValidLabel(string $label): bool
     {
         if ('' == $label) {
             return false;
@@ -253,18 +267,4 @@ trait HostInfoTrait
      * @return bool
      */
     abstract public function isAbsolute(): bool;
-
-    /**
-     * Initialize and access the Parser object
-     *
-     * @return Parser
-     */
-    protected function getPdpParser(): Parser
-    {
-        if (!static::$pdp_parser instanceof Parser) {
-            static::$pdp_parser = new Parser((new PublicSuffixListManager())->getList());
-        }
-
-        return static::$pdp_parser;
-    }
 }
