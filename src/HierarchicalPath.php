@@ -68,10 +68,14 @@ class HierarchicalPath extends AbstractHierarchicalComponent
 
         $path = implode(static::$separator, static::filterIterable($data));
         if (static::IS_ABSOLUTE === $type) {
-            $path = static::$separator.$path;
+            if (static::$separator !== substr($path, 0, 1)) {
+                return new static(static::$separator.$path);
+            }
+
+            return new static($path);
         }
 
-        return new static($path);
+        return new static(ltrim($path, '/'));
     }
 
     /**
@@ -212,19 +216,17 @@ class HierarchicalPath extends AbstractHierarchicalComponent
      * If a value is specified only the keys associated with
      * the given value will be returned
      *
+     * @param mixed ...$args the total number of argument given to the method
+     *
      * @return array
      */
-    public function keys(): array
+    public function keys(...$args): array
     {
-        if (0 === func_num_args()) {
+        if (empty($args)) {
             return array_keys($this->data);
         }
 
-        return array_keys(
-            $this->data,
-            $this->decodeComponent($this->validateString(func_get_arg(0))),
-            true
-        );
+        return array_keys($this->data, $this->decodeComponent($this->validateString($args[0])), true);
     }
 
     /**

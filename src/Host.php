@@ -225,7 +225,7 @@ class Host extends AbstractHierarchicalComponent
             return [$host];
         }
 
-        if ($this->isValidHostnameIpv6($host)) {
+        if ($this->isValidIpv6Hostname($host)) {
             $this->host_as_ipv6 = true;
             $this->has_zone_identifier = false !== strpos($host, '%');
 
@@ -331,15 +331,17 @@ class Host extends AbstractHierarchicalComponent
      * If a value is specified only the keys associated with
      * the given value will be returned
      *
+     * @param mixed ...$args the total number of argument given to the method
+     *
      * @return array
      */
-    public function keys(): array
+    public function keys(...$args): array
     {
-        if (0 === func_num_args()) {
+        if (empty($args)) {
             return array_keys($this->data);
         }
 
-        return array_keys($this->data, idn_to_utf8($this->validateString(func_get_arg(0))), true);
+        return array_keys($this->data, idn_to_utf8($this->validateString($args[0])), true);
     }
 
     /**

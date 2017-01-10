@@ -127,8 +127,55 @@ trait QueryParserTrait
         string $separator = '&',
         int $enc_type = Query::RFC3986_ENCODING
     ): string {
+        self::assertValidPairs($pairs);
         self::assertValidEncoding($enc_type);
         $encoder = self::getEncoder($separator, $enc_type);
+
+        return self::getQueryString($pairs, $separator, $encoder);
+    }
+
+    /**
+     * Filter the submitted pair array.
+     *
+     * @param array $pairs
+     *
+     * @throws Exception If the array contains non valid data
+     */
+    protected static function assertValidPairs(array $pairs)
+    {
+        $invalid = array_filter($pairs, function ($value) {
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+
+            return array_filter($value, function ($val) {
+                return $val !== null && !is_scalar($val);
+            });
+        });
+
+        if (empty($invalid)) {
+            return;
+        }
+
+        throw new Exception('Invalid value contained in the submitted pairs');
+    }
+
+    /**
+     * Build a query string from an associative array
+     *
+     * The method expects the return value from Query::parse to build
+     * a valid query string. This method differs from PHP http_build_query as:
+     *
+     *    - it does not modify parameters keys
+     *
+     * @param array    $pairs     Query pairs
+     * @param string   $separator Query string separator
+     * @param callable $encoder   Query encoder
+     *
+     * @return string
+     */
+    protected static function getQueryString(array $pairs, string $separator, callable $encoder): string
+    {
         $normalized_pairs = array_map(function ($value) {
             return !is_array($value) ? [$value] : $value;
         }, $pairs);

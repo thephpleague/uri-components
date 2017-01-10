@@ -2,6 +2,27 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.0.0 - 2017-01-17
+
+### Added
+
+- None
+
+### Fixed
+
+- Improve validation check for `Query::build`
+- Remove `func_* function usage
+- Improve `HierarchicalPath::createFromSegments`
+- Internal code simplification
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.0.0-RC1 - 2017-01-09
 
 ### Added
