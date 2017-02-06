@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.0.1 - 2017-02-06
+
+### Added
+
+- None
+
+### Fixed
+
+- Update idn to ascii algorithm from INTL_IDNA_VARIANT_2003 to  INTL_IDNA_VARIANT_UTS46
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.0.0 - 2017-01-17
 
 ### Added

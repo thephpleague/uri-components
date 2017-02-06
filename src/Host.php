@@ -233,7 +233,7 @@ class Host extends AbstractHierarchicalComponent
         }
 
         if ($this->isValidHostname($host)) {
-            return array_reverse(array_map('idn_to_utf8', explode('.', strtolower($host))));
+            return array_reverse(array_map([$this, 'toIdn'], explode('.', strtolower($host))));
         }
 
         throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
@@ -341,7 +341,7 @@ class Host extends AbstractHierarchicalComponent
             return array_keys($this->data);
         }
 
-        return array_keys($this->data, idn_to_utf8($this->validateString($args[0])), true);
+        return array_keys($this->data, $this->toIdn($this->validateString($args[0])), true);
     }
 
     /**
@@ -374,7 +374,7 @@ class Host extends AbstractHierarchicalComponent
         }
 
         if ($enc_type != ComponentInterface::RFC3987_ENCODING) {
-            return $this->format(array_map('idn_to_ascii', $this->data), $this->is_absolute);
+            return $this->format(array_map([$this, 'toAscii'], $this->data), $this->is_absolute);
         }
 
         return $this->format($this->data, $this->is_absolute);
