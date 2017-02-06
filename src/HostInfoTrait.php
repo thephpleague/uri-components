@@ -221,10 +221,41 @@ trait HostInfoTrait
      */
     protected function isValidHostname(string $host): bool
     {
-        $labels = array_map('idn_to_ascii', explode('.', $host));
+        $labels = array_map([$this, 'toAscii'], explode('.', $host));
 
         return 127 > count($labels) && $labels === array_filter($labels, [$this, 'isValidLabel']);
     }
+
+    /**
+     * Convert domain name to IDNA ASCII form.
+     *
+     * @param string $label
+     *
+     * @return string
+     */
+    protected function toAscii(string $label)
+    {
+        $res = idn_to_ascii($label, 0, INTL_IDNA_VARIANT_UTS46);
+        if (false !== $res) {
+            return $res;
+        }
+
+        return '';
+    }
+
+
+    /**
+     * Convert domain name to IDNA ASCII form.
+     *
+     * @param string $label
+     *
+     * @return string
+     */
+    protected function toIdn(string $label)
+    {
+        return idn_to_utf8($label, 0, INTL_IDNA_VARIANT_UTS46);
+    }
+
 
     /**
      * Returns whether the host label is valid
