@@ -215,6 +215,15 @@ trait HostInfoTrait
     /**
      * Returns whether the hostname is valid
      *
+     * A valid registered name MUST:
+     *
+     * - contains at most 127 subdomains deep
+     * - be limited to 255 octets in length
+     *
+     * @see https://en.wikipedia.org/wiki/Subdomain
+     * @see https://tools.ietf.org/html/rfc1035#section-2.3.4
+     * @see https://blogs.msdn.microsoft.com/oldnewthing/20120412-00/?p=7873/
+     *
      * @param string $host
      *
      * @return bool
@@ -223,58 +232,71 @@ trait HostInfoTrait
     {
         $labels = array_map([$this, 'toAscii'], explode('.', $host));
 
-        return 127 > count($labels) && $labels === array_filter($labels, [$this, 'isValidLabel']);
+        return 127 > count($labels)
+            && 253 > strlen(implode('.', $labels))
+            && $labels === array_filter($labels, [$this, 'isValidLabel']);
     }
 
     /**
      * Convert domain name to IDNA ASCII form.
      *
+     * Conversion is done only if the label contains none valid label characters
+     *
      * @param string $label
      *
-     * @return string
+     * @return string|false
      */
     protected function toAscii(string $label)
     {
-        $res = idn_to_ascii($label, 0, INTL_IDNA_VARIANT_UTS46);
-        if (false !== $res) {
-            return $res;
+        if (strlen($label) === strspn($label, static::$starting_label_chars.'-')) {
+            return $label;
         }
 
-        return '';
+        return idn_to_ascii($label, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
     }
-
 
     /**
      * Convert domain name to IDNA ASCII form.
      *
+     * Conversion is done only if the label contains the ACE prefix 'xn--'
+     *
      * @param string $label
      *
-     * @return string
+     * @return string|false
      */
     protected function toIdn(string $label)
     {
-        return idn_to_utf8($label, 0, INTL_IDNA_VARIANT_UTS46);
+        if (0 !== stripos($label, 'xn--')) {
+            return $label;
+        }
+
+        return idn_to_utf8($label, IDNA_NONTRANSITIONAL_TO_UNICODE, INTL_IDNA_VARIANT_UTS46);
     }
 
-
     /**
-     * Returns whether the host label is valid
+     * Returns whether the registered name label is valid
+     *
+     * A valid registered name label MUST:
+     *
+     * - not be empty
+     * - contain 63 characters or less
+     * - contain alphanumeric ASCII character or a hyphen
+     * - start and end whith an alpha numeric ASCII character
+     *
+     * @see https://tools.ietf.org/html/rfc1034#section-3.5
      *
      * @param string $label
      *
      * @return bool
      */
-    protected function isValidLabel(string $label): bool
+    protected function isValidLabel($label): bool
     {
-        if ('' == $label) {
+        if (!is_string($label) || '' == $label || 63 < strlen($label)) {
             return false;
         }
 
-        $pos = strlen($label);
-        $delimiters = $label[0].$label[$pos - 1];
-
-        return 2 === strspn($delimiters, static::$starting_label_chars)
-            && $pos === strspn($label, static::$starting_label_chars.'-');
+        return 2 === strspn($label[0].substr($label, -1, 1), static::$starting_label_chars)
+            && strlen($label) === strspn($label, static::$starting_label_chars.'-');
     }
 
     /**
