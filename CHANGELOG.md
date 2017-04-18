@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next
+
+### Added
+
+- None
+
+### Fixed
+
+- Improve Host validation (cf [issue #5](https://github.com/thephpleague/uri-parser/issues/5))
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.0.1 - 2017-02-06
 
 ### Added
