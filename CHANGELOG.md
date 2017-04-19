@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next
+## 1.0.2 - 2017-04-19
 
 ### Added
 
@@ -10,7 +10,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- Improve Host validation (cf [issue #5](https://github.com/thephpleague/uri-parser/issues/5))
+- Improve registered name validation [issue #5](https://github.com/thephpleague/uri-parser/issues/5)
 
 ### Deprecated
 
