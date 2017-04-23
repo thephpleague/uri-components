@@ -258,6 +258,7 @@ class HierarchicalPathTest extends TestCase
             ['/toto/le/heros/masson', [0], '/le/heros/masson'],
             ['/toto/le/heros/masson', [2, 3], '/toto/le'],
             ['/toto/le/heros/masson', [1, 2], '/toto/masson'],
+            ['/toto', [-1], '/'],
         ];
     }
 
