@@ -412,7 +412,7 @@ class HostTest extends TestCase
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (new Host($host))->withoutLabels($without)->__toString());
+        $this->assertSame($res, (string) (new Host($host))->withoutLabels($without));
     }
 
     public function withoutProvider()
@@ -423,6 +423,7 @@ class HostTest extends TestCase
             'remove one string label negative offset' => ['secure.example.com', [-1], 'example.com'],
             'remove IP based label' => ['127.0.0.1', [0], ''],
             'remove silent excessive label index' => ['127.0.0.1', [0, 1] , ''],
+            'remove simple label' => ['localhost', [-1], ''],
         ];
     }
 
@@ -557,6 +558,7 @@ class HostTest extends TestCase
             ['secure.example.com', '127.0.0.1', 0, 'secure.example.127.0.0.1'],
             ['master.example.com', 'shop', -2, 'master.shop.com'],
             ['master.example.com', 'shop', -1, 'shop.example.com'],
+            ['foo', 'bar', -1, 'bar'],
         ];
     }
 

@@ -294,6 +294,8 @@ class HierarchicalPathTest extends TestCase
             ['/path/to/paradise', 'path', -1, '/path/to/path'],
             ['/path/to/paradise', 'path', -4, '/path/to/paradise'],
             ['/path/to/paradise', 'path', -3, '/path/to/paradise'],
+            ['/foo', 'bar', -1, '/bar'],
+            ['foo', 'bar', -1, 'bar'],
         ];
     }
 
