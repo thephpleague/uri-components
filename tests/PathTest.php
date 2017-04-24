@@ -17,6 +17,7 @@ class PathTest extends TestCase
      *
      * @param string $raw
      * @param string $parsed
+     * @param mixed  $rfc1738
      */
     public function testGetUriComponent($raw, $parsed, $rfc1738)
     {

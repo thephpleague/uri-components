@@ -48,6 +48,8 @@ class HostTest extends TestCase
      * @param $isIpv4
      * @param $isIpv6
      * @param $uri
+     * @param mixed $ip
+     * @param mixed $iri
      * @dataProvider validHostProvider
      */
     public function testValidHost($host, $isIp, $isIpv4, $isIpv6, $uri, $ip, $iri)
@@ -355,6 +357,8 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider createFromIpValid
+     * @param mixed $input
+     * @param mixed $expected
      */
     public function testCreateFromIp($input, $expected)
     {
@@ -372,6 +376,7 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider createFromIpFailed
+     * @param mixed $input
      */
     public function testCreateFromIpFailed($input)
     {
@@ -605,6 +610,9 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider validRegisterableDomain
+     * @param mixed $newhost
+     * @param mixed $host
+     * @param mixed $expected
      */
     public function testWithRegisterableDomain($newhost, $host, $expected)
     {
@@ -639,6 +647,9 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider validSubDomain
+     * @param mixed $new_subdomain
+     * @param mixed $host
+     * @param mixed $expected
      */
     public function testWithSubDomain($new_subdomain, $host, $expected)
     {
@@ -675,6 +686,9 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider rootProvider
+     * @param mixed $host
+     * @param mixed $expected_with_root
+     * @param mixed $expected_without_root
      */
     public function testWithRooot($host, $expected_with_root, $expected_without_root)
     {

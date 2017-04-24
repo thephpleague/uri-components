@@ -240,6 +240,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * Returns a single deserialized query string argument, if any
      * otherwise return the provided default value
      *
+     * @param string     $offset
+     * @param null|mixed $default
+     *
      * @return mixed
      */
     public function getParam(string $offset, $default = null)

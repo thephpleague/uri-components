@@ -57,6 +57,8 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider queryProvider
+     * @param mixed $input
+     * @param mixed $expected
      */
     public function testGetUriComponent($input, $expected)
     {
@@ -153,6 +155,9 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider validAppendValue
+     * @param mixed $query
+     * @param mixed $append_data
+     * @param mixed $expected
      */
     public function testAppend($query, $append_data, $expected)
     {
@@ -235,6 +240,8 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider parsedQueryProvider
+     * @param mixed $query
+     * @param mixed $expected
      */
     public function testGetParams($query, $expected)
     {
@@ -243,6 +250,10 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider getParamProvider
+     * @param mixed $query
+     * @param mixed $offset
+     * @param mixed $default
+     * @param mixed $expected
      */
     public function testGetParam($query, $offset, $default, $expected)
     {
@@ -307,14 +318,14 @@ class QueryTest extends TestCase
             [
                 ['superman' => 'lex luthor', 'batman' => 'joker'],
                 SORT_REGULAR,
-                [ 'batman' => 'joker', 'superman' => 'lex luthor'],
+                ['batman' => 'joker', 'superman' => 'lex luthor'],
             ],
             [
                 ['superman' => 'lex luthor', 'batman' => 'joker'],
                 function ($dataA, $dataB) {
                     return strcasecmp($dataA, $dataB);
                 },
-                [ 'batman' => 'joker', 'superman' => 'lex luthor'],
+                ['batman' => 'joker', 'superman' => 'lex luthor'],
             ],
             [
                 ['superman' => 'lex luthor', 'superwoman' => 'joker'],
@@ -328,6 +339,10 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider parserProvider
+     * @param mixed $query
+     * @param mixed $separator
+     * @param mixed $expected
+     * @param mixed $encoding
      */
     public function testParse($query, $separator, $expected, $encoding)
     {
@@ -444,6 +459,12 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider buildProvider
+     * @param mixed $pairs
+     * @param mixed $expected_rfc1738
+     * @param mixed $expected_rfc3986
+     * @param mixed $expected_rfc3987
+     * @param mixed $expected_iri
+     * @param mixed $expected_no_encoding
      */
     public function testBuild(
         $pairs,
@@ -608,6 +629,8 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider parsedQueryProvider
+     * @param mixed $query
+     * @param mixed $expectedData
      */
     public function testParsedQuery($query, $expectedData)
     {

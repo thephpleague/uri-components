@@ -19,6 +19,14 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider userInfoProvider
+     * @param mixed $user
+     * @param mixed $pass
+     * @param mixed $expected_user
+     * @param mixed $expected_pass
+     * @param mixed $expected_str
+     * @param mixed $uri_component
+     * @param mixed $iri_str
+     * @param mixed $rfc1738_str
      */
     public function testConstructor(
         $user,
@@ -135,6 +143,10 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider createFromStringProvider
+     * @param mixed $str
+     * @param mixed $expected_user
+     * @param mixed $expected_pass
+     * @param mixed $expected_str
      */
     public function testWithContent($str, $expected_user, $expected_pass, $expected_str)
     {
@@ -175,6 +187,9 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider withUserInfoProvider
+     * @param mixed $user
+     * @param mixed $pass
+     * @param mixed $expected
      */
     public function testWithUserInfo($user, $pass, $expected)
     {
