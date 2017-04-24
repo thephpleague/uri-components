@@ -25,7 +25,7 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidDataUriPath
-     * @param mixed $path
+     * @param string $path
      */
     public function testConstructorFailed($path)
     {
@@ -61,8 +61,8 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider validPathContent
-     * @param $path
-     * @param $expected
+     * @param string $path
+     * @param string $expected
      */
     public function testDefaultConstructor($path, $expected)
     {
@@ -89,10 +89,9 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider validFilePath
-     * @param $path
-     * @param $expected
-     * @param mixed $mimetype
-     * @param mixed $mediatype
+     * @param string $path
+     * @param string $mimetype
+     * @param string $mediatype
      */
     public function testCreateFromPath($path, $mimetype, $mediatype)
     {
@@ -207,7 +206,7 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidParameters
-     * @param $parameters
+     * @param string $parameters
      */
     public function testUpdateParametersFailed($parameters)
     {

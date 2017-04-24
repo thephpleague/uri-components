@@ -57,8 +57,8 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider queryProvider
-     * @param mixed $input
-     * @param mixed $expected
+     * @param string|array $input
+     * @param string       $expected
      */
     public function testGetUriComponent($input, $expected)
     {
@@ -102,7 +102,7 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @param $input
+     * @param mixed $input
      * @dataProvider createFromPairsFailedProvider
      */
     public function testcreateFromPairsFailed($input)
@@ -121,8 +121,8 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @param $input
-     * @param $expected
+     * @param string $input
+     * @param string $expected
      * @dataProvider validMergeValue
      */
     public function testMerge($input, $expected)
@@ -155,14 +155,13 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider validAppendValue
-     * @param mixed $query
-     * @param mixed $append_data
-     * @param mixed $expected
+     * @param string $query
+     * @param string $append_data
+     * @param string $expected
      */
     public function testAppend($query, $append_data, $expected)
     {
-        $query = new Query($query);
-        $this->assertSame($expected, (string) $query->append($append_data));
+        $this->assertSame($expected, (string) (new Query($query))->append($append_data));
     }
 
     public function validAppendValue()
@@ -240,8 +239,8 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider parsedQueryProvider
-     * @param mixed $query
-     * @param mixed $expected
+     * @param string $query
+     * @param array  $expected
      */
     public function testGetParams($query, $expected)
     {
@@ -250,10 +249,10 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider getParamProvider
-     * @param mixed $query
-     * @param mixed $offset
-     * @param mixed $default
-     * @param mixed $expected
+     * @param string $query
+     * @param string $offset
+     * @param mixed  $default
+     * @param mixed  $expected
      */
     public function testGetParam($query, $offset, $default, $expected)
     {
@@ -281,9 +280,9 @@ class QueryTest extends TestCase
     /**
      * Test AbstractSegment::without
      *
-     * @param $origin
-     * @param $without
-     * @param $result
+     * @param string $origin
+     * @param array  $without
+     * @param string $result
      *
      * @dataProvider withoutProvider
      */
@@ -302,9 +301,9 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @param $data
-     * @param $sort
-     * @param $expected
+     * @param array $data
+     * @param mixed $sort
+     * @param array $expected
      * @dataProvider ksortProvider
      */
     public function testksort($data, $sort, $expected)
@@ -339,10 +338,10 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider parserProvider
-     * @param mixed $query
-     * @param mixed $separator
-     * @param mixed $expected
-     * @param mixed $encoding
+     * @param string $query
+     * @param string $separator
+     * @param array  $expected
+     * @param int    $encoding
      */
     public function testParse($query, $separator, $expected, $encoding)
     {
@@ -459,12 +458,12 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider buildProvider
-     * @param mixed $pairs
-     * @param mixed $expected_rfc1738
-     * @param mixed $expected_rfc3986
-     * @param mixed $expected_rfc3987
-     * @param mixed $expected_iri
-     * @param mixed $expected_no_encoding
+     * @param array  $pairs
+     * @param string $expected_rfc1738
+     * @param string $expected_rfc3986
+     * @param string $expected_rfc3987
+     * @param string $expected_iri
+     * @param string $expected_no_encoding
      */
     public function testBuild(
         $pairs,
@@ -629,8 +628,8 @@ class QueryTest extends TestCase
 
     /**
      * @dataProvider parsedQueryProvider
-     * @param mixed $query
-     * @param mixed $expectedData
+     * @param string $query
+     * @param array  $expectedData
      */
     public function testParsedQuery($query, $expectedData)
     {

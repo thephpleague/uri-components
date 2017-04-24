@@ -13,8 +13,8 @@ class FragmentTest extends TestCase
 {
     /**
      * @dataProvider getUriComponentProvider
-     * @param mixed $str
-     * @param mixed $encoded
+     * @param string $str
+     * @param string $encoded
      */
     public function testGetUriComponent($str, $encoded)
     {
@@ -51,9 +51,9 @@ class FragmentTest extends TestCase
 
     /**
      * @dataProvider geValueProvider
-     * @param mixed $str
-     * @param mixed $expected
-     * @param mixed $enc_type
+     * @param string|null $str
+     * @param string|null $expected
+     * @param int         $enc_type
      */
     public function testGetValue($str, $expected, $enc_type)
     {
@@ -79,9 +79,9 @@ class FragmentTest extends TestCase
 
     /**
      * @dataProvider getContentProvider
-     * @param mixed $input
-     * @param mixed $enc_type
-     * @param mixed $expected
+     * @param string $input
+     * @param int    $enc_type
+     * @param string $expected
      */
     public function testGetContent($input, $enc_type, $expected)
     {
