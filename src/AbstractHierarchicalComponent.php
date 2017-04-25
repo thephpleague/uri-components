@@ -170,7 +170,7 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
         $offset = filter_var(
             $offset,
             FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]]
+            ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]
         );
         if (false === $offset) {
             return $this->data;
@@ -224,7 +224,7 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     protected function filterOffsets(int ...$offsets)
     {
         $nb_elements = count($this->data);
-        $options = ['options' => ['min_range' => 1 - $nb_elements, 'max_range' => $nb_elements - 1]];
+        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
 
         $mapper = function ($offset) use ($nb_elements, $options) {
             $offset = filter_var($offset, FILTER_VALIDATE_INT, $options);

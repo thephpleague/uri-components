@@ -19,6 +19,14 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider userInfoProvider
+     * @param string      $user
+     * @param string      $pass
+     * @param string|null $expected_user
+     * @param string|null $expected_pass
+     * @param string      $expected_str
+     * @param string      $uri_component
+     * @param string      $iri_str
+     * @param string      $rfc1738_str
      */
     public function testConstructor(
         $user,
@@ -135,6 +143,10 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider createFromStringProvider
+     * @param string|null $str
+     * @param string|null $expected_user
+     * @param string|null $expected_pass
+     * @param string      $expected_str
      */
     public function testWithContent($str, $expected_user, $expected_pass, $expected_str)
     {
@@ -175,11 +187,13 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider withUserInfoProvider
+     * @param string      $user
+     * @param string|null $pass
+     * @param string      $expected
      */
     public function testWithUserInfo($user, $pass, $expected)
     {
-        $conn = (new UserInfo('user', 'pass'))->withUserInfo($user, $pass);
-        $this->assertSame($expected, $conn->__toString());
+        $this->assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
     }
 
     public function withUserInfoProvider()

@@ -43,11 +43,13 @@ class HostTest extends TestCase
 
     /**
      * Test valid Host
-     * @param $host
-     * @param $isIp
-     * @param $isIpv4
-     * @param $isIpv6
-     * @param $uri
+     * @param string|null $host
+     * @param bool        $isIp
+     * @param bool        $isIpv4
+     * @param bool        $isIpv6
+     * @param string      $uri
+     * @param string      $ip
+     * @param string      $iri
      * @dataProvider validHostProvider
      */
     public function testValidHost($host, $isIp, $isIpv4, $isIpv6, $uri, $ip, $iri)
@@ -221,8 +223,8 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $expected
+     * @param string $raw
+     * @param bool   $expected
      * @dataProvider isAbsoluteProvider
      */
     public function testIsAbsolute($raw, $expected)
@@ -284,9 +286,9 @@ class HostTest extends TestCase
     /**
      * Test Countable
      *
-     * @param $host
-     * @param $nblabels
-     * @param $array
+     * @param string|null $host
+     * @param int         $nblabels
+     * @param array       $array
      * @dataProvider countableProvider
      */
     public function testCountable($host, $nblabels, $array)
@@ -308,14 +310,14 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $input
-     * @param $is_absolute
-     * @param $expected
+     * @param string $input
+     * @param bool   $is_absolute
+     * @param string $expected
      * @dataProvider createFromLabelsValid
      */
     public function testCreateFromLabels($input, $is_absolute, $expected)
     {
-        $this->assertSame($expected, Host::createFromLabels($input, $is_absolute)->__toString());
+        $this->assertSame($expected, (string) Host::createFromLabels($input, $is_absolute));
     }
 
     public function createFromLabelsValid()
@@ -335,8 +337,8 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $input
-     * @param $is_absolute
+     * @param string $input
+     * @param bool   $is_absolute
      * @dataProvider createFromLabelsInvalid
      */
     public function testcreateFromLabelsFailed($input, $is_absolute)
@@ -355,10 +357,12 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider createFromIpValid
+     * @param string $input
+     * @param string $expected
      */
     public function testCreateFromIp($input, $expected)
     {
-        $this->assertSame($expected, Host::createFromIp($input)->__toString());
+        $this->assertSame($expected, (string) Host::createFromIp($input));
     }
 
     public function createFromIpValid()
@@ -372,6 +376,7 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider createFromIpFailed
+     * @param string $input
      */
     public function testCreateFromIpFailed($input)
     {
@@ -405,14 +410,14 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $host
-     * @param $without
-     * @param $res
+     * @param string $host
+     * @param array  $without
+     * @param string $res
      * @dataProvider withoutProvider
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (new Host($host))->withoutLabels($without)->__toString());
+        $this->assertSame($res, (string) (new Host($host))->withoutLabels($without));
     }
 
     public function withoutProvider()
@@ -423,6 +428,7 @@ class HostTest extends TestCase
             'remove one string label negative offset' => ['secure.example.com', [-1], 'example.com'],
             'remove IP based label' => ['127.0.0.1', [0], ''],
             'remove silent excessive label index' => ['127.0.0.1', [0, 1] , ''],
+            'remove simple label' => ['localhost', [-1], ''],
         ];
     }
 
@@ -433,13 +439,13 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $host
-     * @param $expected
+     * @param string $host
+     * @param string $expected
      * @dataProvider withoutZoneIdentifierProvider
      */
     public function testWithoutZoneIdentifier($host, $expected)
     {
-        $this->assertSame($expected, (new Host($host))->withoutZoneIdentifier()->__toString());
+        $this->assertSame($expected, (string) (new Host($host))->withoutZoneIdentifier());
     }
 
     public function withoutZoneIdentifierProvider()
@@ -454,8 +460,8 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $host
-     * @param $expected
+     * @param string $host
+     * @param bool   $expected
      * @dataProvider hasZoneIdentifierProvider
      */
     public function testHasZoneIdentifier($host, $expected)
@@ -474,16 +480,14 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $prepend
-     * @param $expected
+     * @param string $raw
+     * @param string $prepend
+     * @param string $expected
      * @dataProvider validPrepend
      */
     public function testPrepend($raw, $prepend, $expected)
     {
-        $host = new Host($raw);
-        $newHost = $host->prepend($prepend);
-        $this->assertSame($expected, $newHost->__toString());
+        $this->assertSame($expected, (string) (new Host($raw))->prepend($prepend));
     }
 
     public function validPrepend()
@@ -504,16 +508,14 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $append
-     * @param $expected
+     * @param string $raw
+     * @param string $append
+     * @param string $expected
      * @dataProvider validAppend
      */
     public function testAppend($raw, $append, $expected)
     {
-        $host = new Host($raw);
-        $newHost = $host->append($append);
-        $this->assertSame($expected, $newHost->__toString());
+        $this->assertSame($expected, (string) (new Host($raw))->append($append));
     }
 
     public function validAppend()
@@ -536,10 +538,10 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $input
-     * @param $offset
-     * @param $expected
+     * @param string $raw
+     * @param string $input
+     * @param int    $offset
+     * @param string $expected
      * @dataProvider replaceValid
      */
     public function testReplace($raw, $input, $offset, $expected)
@@ -557,6 +559,7 @@ class HostTest extends TestCase
             ['secure.example.com', '127.0.0.1', 0, 'secure.example.127.0.0.1'],
             ['master.example.com', 'shop', -2, 'master.shop.com'],
             ['master.example.com', 'shop', -1, 'shop.example.com'],
+            ['foo', 'bar', -1, 'bar'],
         ];
     }
 
@@ -568,11 +571,11 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider parseDataProvider
-     * @param $host
-     * @param $publicSuffix
-     * @param $registerableDomain
-     * @param $subdomain
-     * @param $isValidSuffix
+     * @param string $host
+     * @param string $publicSuffix
+     * @param string $registerableDomain
+     * @param string $subdomain
+     * @param bool   $isValidSuffix
      */
     public function testPublicSuffixListImplementation(
         $host,
@@ -603,11 +606,13 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider validRegisterableDomain
+     * @param string $newhost
+     * @param string $host
+     * @param string $expected
      */
     public function testWithRegisterableDomain($newhost, $host, $expected)
     {
-        $host = new Host($host);
-        $this->assertSame($expected, (string) $host->withRegisterableDomain($newhost));
+        $this->assertSame($expected, (string) (new Host($host))->withRegisterableDomain($newhost));
     }
 
     public function validRegisterableDomain()
@@ -637,11 +642,13 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider validSubDomain
+     * @param string $new_subdomain
+     * @param string $host
+     * @param string $expected
      */
     public function testWithSubDomain($new_subdomain, $host, $expected)
     {
-        $host = new Host($host);
-        $this->assertSame($expected, (string) $host->withSubDomain($new_subdomain));
+        $this->assertSame($expected, (string) (new Host($host))->withSubDomain($new_subdomain));
     }
 
     public function validSubDomain()
@@ -673,6 +680,9 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider rootProvider
+     * @param string $host
+     * @param string $expected_with_root
+     * @param string $expected_without_root
      */
     public function testWithRooot($host, $expected_with_root, $expected_without_root)
     {

@@ -17,6 +17,7 @@ class PathTest extends TestCase
      *
      * @param string $raw
      * @param string $parsed
+     * @param string $rfc1738
      */
     public function testGetUriComponent($raw, $parsed, $rfc1738)
     {
@@ -74,8 +75,8 @@ class PathTest extends TestCase
     /**
      * Test Removing Dot Segment
      *
-     * @param $expected
-     * @param $path
+     * @param string $expected
+     * @param string $path
      * @dataProvider normalizeProvider
      */
     public function testWithoutDotSegments($path, $expected)
@@ -100,13 +101,13 @@ class PathTest extends TestCase
     }
 
     /**
-     * @param $path
-     * @param $expected
+     * @param string $path
+     * @param string $expected
      * @dataProvider withoutEmptySegmentsProvider
      */
     public function testWithoutEmptySegments($path, $expected)
     {
-        $this->assertSame($expected, (new Path($path))->withoutEmptySegments()->__toString());
+        $this->assertSame($expected, (string) (new Path($path))->withoutEmptySegments());
     }
 
     public function withoutEmptySegmentsProvider()
@@ -120,8 +121,8 @@ class PathTest extends TestCase
     }
 
     /**
-     * @param $path
-     * @param $expected
+     * @param string $path
+     * @param bool   $expected
      * @dataProvider trailingSlashProvider
      */
     public function testHasTrailingSlash($path, $expected)
@@ -142,8 +143,8 @@ class PathTest extends TestCase
     }
 
     /**
-     * @param $path
-     * @param $expected
+     * @param string $path
+     * @param string $expected
      * @dataProvider withTrailingSlashProvider
      */
     public function testWithTrailingSlash($path, $expected)
@@ -164,8 +165,8 @@ class PathTest extends TestCase
     }
 
     /**
-     * @param $path
-     * @param $expected
+     * @param string $path
+     * @param string $expected
      * @dataProvider withoutTrailingSlashProvider
      */
     public function testWithoutTrailingSlash($path, $expected)
@@ -186,8 +187,8 @@ class PathTest extends TestCase
     }
 
     /**
-     * @param $path
-     * @param $expected
+     * @param string $path
+     * @param string $expected
      * @dataProvider withLeadingSlashProvider
      */
     public function testWithLeadingSlash($path, $expected)
@@ -208,8 +209,8 @@ class PathTest extends TestCase
     }
 
     /**
-     * @param $path
-     * @param $expected
+     * @param string $path
+     * @param string $expected
      * @dataProvider withoutLeadingSlashProvider
      */
     public function testWithoutLeadingSlash($path, $expected)

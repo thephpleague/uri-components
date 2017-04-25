@@ -124,6 +124,8 @@ class UserInfo implements ComponentInterface
     /**
      * Retrieve the user component of the URI User Info part
      *
+     * @param int $enc_type
+     *
      * @return string|null
      */
     public function getUser(int $enc_type = ComponentInterface::RFC3986_ENCODING)
@@ -151,7 +153,9 @@ class UserInfo implements ComponentInterface
     /**
      * Retrieve the pass component of the URI User Info part
      *
-     * @return string
+     * @param int $enc_type
+     *
+     * @return string|null
      */
     public function getPass(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
@@ -163,7 +167,7 @@ class UserInfo implements ComponentInterface
         if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', '@']);
 
-            return str_replace($pattern, array_map('rawurlencode', $pattern),  $this->pass);
+            return str_replace($pattern, array_map('rawurlencode', $pattern), $this->pass);
         }
 
         $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
