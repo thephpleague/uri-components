@@ -33,8 +33,8 @@
         "jeremykendall/php-domain-parser": "^3.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^1.0",
-        "phpunit/phpunit" : "^6.0"
+        "friendsofphp/php-cs-fixer": "^2.3",
+        "phpunit/phpunit": "^6.0"
     },
     "autoload": {
         "psr-4": {
@@ -47,9 +47,9 @@
         }
     },
     "scripts": {
-        "test": "phpunit --coverage-text; php-cs-fixer fix -v --diff --dry-run;",
+        "test": "phpunit --coverage-text; php-cs-fixer fix -v --diff --dry-run --allow-risky=yes;",
         "phpunit": "phpunit --coverage-text",
-        "phpcs": "php-cs-fixer fix -v --diff --dry-run;"
+        "phpcs": "php-cs-fixer fix -v --diff --dry-run --allow-risky=yes;"
     },
     "extra": {
         "branch-alias": {

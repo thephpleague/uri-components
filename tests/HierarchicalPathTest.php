@@ -94,8 +94,8 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $expected
+     * @param string $raw
+     * @param bool   $expected
      * @dataProvider isAbsoluteProvider
      */
     public function testIsAbsolute($raw, $expected)
@@ -139,14 +139,14 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $input
-     * @param $has_front_delimiter
-     * @param $expected
+     * @param array|Traversable $input
+     * @param bool              $has_front_delimiter
+     * @param string            $expected
      * @dataProvider createFromSegmentsValid
      */
     public function testCreateFromSegments($input, $has_front_delimiter, $expected)
     {
-        $this->assertSame($expected, Path::createFromSegments($input, $has_front_delimiter)->__toString());
+        $this->assertSame($expected, (string) Path::createFromSegments($input, $has_front_delimiter));
     }
 
     public function createFromSegmentsValid()
@@ -170,8 +170,8 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $input
-     * @param $flags
+     * @param array $input
+     * @param bool  $flags
      * @dataProvider createFromSegmentsInvalid
      */
     public function testCreateFromSegmentsFailed($input, $flags)
@@ -188,16 +188,14 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $source
-     * @param $prepend
-     * @param $res
+     * @param string $source
+     * @param string $prepend
+     * @param string $res
      * @dataProvider prependData
      */
     public function testPrepend($source, $prepend, $res)
     {
-        $path = new Path($source);
-        $newPath = $path->prepend($prepend);
-        $this->assertSame($res, $newPath->__toString());
+        $this->assertSame($res, (string) (new Path($source))->prepend($prepend));
     }
 
     public function prependData()
@@ -218,9 +216,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testAppend($source, $append, $res)
     {
-        $path = new Path($source);
-        $newPath = $path->append($append);
-        $this->assertSame($res, $newPath->__toString());
+        $this->assertSame($res, (string) (new Path($source))->append($append));
     }
 
     public function appendData()
@@ -238,9 +234,9 @@ class HierarchicalPathTest extends TestCase
     /**
      * Test AbstractSegment::without
      *
-     * @param $origin
-     * @param $without
-     * @param $result
+     * @param string $origin
+     * @param array  $without
+     * @param string $result
      *
      * @dataProvider withoutProvider
      */
@@ -258,6 +254,7 @@ class HierarchicalPathTest extends TestCase
             ['/toto/le/heros/masson', [0], '/le/heros/masson'],
             ['/toto/le/heros/masson', [2, 3], '/toto/le'],
             ['/toto/le/heros/masson', [1, 2], '/toto/masson'],
+            ['/toto', [-1], '/'],
         ];
     }
 
@@ -268,10 +265,10 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $input
-     * @param $offset
-     * @param $expected
+     * @param string $raw
+     * @param string $input
+     * @param int    $offset
+     * @param string $expected
      * @dataProvider replaceValid
      */
     public function testReplace($raw, $input, $offset, $expected)
@@ -293,6 +290,8 @@ class HierarchicalPathTest extends TestCase
             ['/path/to/paradise', 'path', -1, '/path/to/path'],
             ['/path/to/paradise', 'path', -4, '/path/to/paradise'],
             ['/path/to/paradise', 'path', -3, '/path/to/paradise'],
+            ['/foo', 'bar', -1, '/bar'],
+            ['foo', 'bar', -1, 'bar'],
         ];
     }
 
@@ -307,9 +306,9 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $input
-     * @param $getSegments
-     * @param $nbSegment
+     * @param string $input
+     * @param array  $getSegments
+     * @param int    $nbSegment
      * @dataProvider arrayProvider
      */
     public function testCountable($input, $getSegments, $nbSegment)
@@ -498,6 +497,9 @@ class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getDirnameProvider
+     * @param mixed $path
+     * @param mixed $dirname
+     * @param mixed $expected
      */
     public function testWithDirname($path, $dirname, $expected)
     {
@@ -544,6 +546,9 @@ class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getBasenameProvider
+     * @param mixed $path
+     * @param mixed $basename
+     * @param mixed $expected
      */
     public function testWithBasename($path, $basename, $expected)
     {
