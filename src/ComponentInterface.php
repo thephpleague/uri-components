@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-interfaces/blob/master/LICENSE (MIT License)
- * @version    1.0.2
+ * @version    1.0.3
  * @link       https://github.com/thephpleague/uri-interfaces/
  *
  * For the full copyright and license information, please view the LICENSE
