@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.0.3 - 2017-04-27
+
+### Added
+
+- None
+
+### Fixed
+
+- Bug fix negative offset [issue #5](https://github.com/thephpleague/uri-components/issues/5)
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.0.2 - 2017-04-19
 
 ### Added
