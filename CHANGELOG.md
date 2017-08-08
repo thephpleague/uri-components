@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- Bug fix label conversion depending on locale [issue #102](https://github.com/thephpleague/uri/issues/102)
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.0.3 - 2017-04-27
 
 ### Added
