@@ -235,7 +235,7 @@ class Host extends AbstractHierarchicalComponent
         }
 
         if ($this->isValidHostname($host)) {
-            return array_reverse(array_map([$this, 'toIdn'], explode('.', strtolower($host))));
+            return array_reverse(array_map([$this, 'toIdn'], explode('.', mb_strtolower($host, 'UTF-8'))));
         }
 
         throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
