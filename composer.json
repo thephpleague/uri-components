@@ -38,12 +38,13 @@
     },
     "autoload": {
         "psr-4": {
-            "League\\Uri\\Components\\": "src"
-        }
+            "League\\Uri\\": "src"
+        },
+        "files": ["src/functions_include.php"]
     },
     "autoload-dev": {
         "psr-4": {
-            "LeagueTest\\Uri\\Components\\": "tests"
+            "LeagueTest\\Uri\\": "tests"
         }
     },
     "scripts": {

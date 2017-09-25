@@ -74,7 +74,7 @@ trait HostInfoTrait
      *
      * @var string
      */
-    protected static $invalid_uri_chars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
+    protected static $invalid_zone_id_chars = "?#@[]\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
 
     /**
      * Load the hostname info
@@ -122,9 +122,7 @@ trait HostInfoTrait
      */
     protected function getPdpParser(): Parser
     {
-        if (!static::$pdp_parser instanceof Parser) {
-            static::$pdp_parser = new Parser((new PublicSuffixListManager())->getList());
-        }
+        static::$pdp_parser = static::$pdp_parser ?? new Parser((new PublicSuffixListManager())->getList());
 
         return static::$pdp_parser;
     }
@@ -196,7 +194,7 @@ trait HostInfoTrait
         }
 
         $scope = rawurldecode($scope_raw);
-        if (strlen($scope) !== strcspn($scope, '?#@[]'.self::$invalid_uri_chars)) {
+        if (strlen($scope) !== strcspn($scope, self::$invalid_zone_id_chars)) {
             return false;
         }
 
