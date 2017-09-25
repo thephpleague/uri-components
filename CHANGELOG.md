@@ -2,6 +2,26 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.1.0 - TBD
+
+### Added
+
+- `League\Uri\parse_query`
+- `League\Uri\build_query`
+- `League\Uri\extract_params`
+
+### Fixed
+
+- Internal call in PHP7.2 with incompatible definitions
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.0.4 - 2017-08-10
 
 ### Added
