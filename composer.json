@@ -30,7 +30,7 @@
         "ext-mbstring" : "*",
         "ext-intl" : "*",
         "ext-fileinfo": "*",
-        "jeremykendall/php-domain-parser": "^3.0"
+        "jeremykendall/php-domain-parser": "4.0.3-alpha"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3",

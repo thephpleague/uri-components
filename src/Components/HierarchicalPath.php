@@ -452,8 +452,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     protected function buildBasename(
         string $basenamePart,
         string $extension,
-        string $parameterPart = null): string
-    {
+        string $parameterPart = null
+    ): string {
         $length = mb_strrpos($basenamePart, '.'.pathinfo($basenamePart, PATHINFO_EXTENSION), 'UTF-8');
         if (false !== $length) {
             $basenamePart = mb_substr($basenamePart, 0, $length, 'UTF-8');
