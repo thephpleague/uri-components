@@ -26,7 +26,7 @@ use League\Uri\Components\Query;
  *
  * @return array
  */
-function extract_params(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
+function extract_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
 {
     return Query::extract($query, $separator, $enc_type);
 }

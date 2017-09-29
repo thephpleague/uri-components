@@ -8,11 +8,12 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - `League\Uri\parse_query`
 - `League\Uri\build_query`
-- `League\Uri\extract_params`
+- `League\Uri\extract_query`
 
 ### Fixed
 
 - Internal call in PHP7.2 with incompatible definitions
+- update PHP Domain Parser to be compatible with PHP7.2 deprecation notice
 
 ### Deprecated
 

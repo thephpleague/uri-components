@@ -105,7 +105,6 @@ class DataPathTest extends TestCase
         return [
             'text file' => ['hello-world.txt', 'text/plain', 'text/plain;charset=us-ascii'],
             'img file' => ['red-nose.gif', 'image/gif', 'image/gif;charset=binary'],
-            'vcard file' => ['john-doe.vcf', 'text/x-vcard', 'text/x-vcard;charset=us-ascii'],
         ];
     }
 
