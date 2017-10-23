@@ -54,12 +54,6 @@ class PathTest extends TestCase
         $this->assertTrue($path->isEmpty());
     }
 
-    public function testFailedConstructor()
-    {
-        $this->expectException(Exception::class);
-        new Path('?#');
-    }
-
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);

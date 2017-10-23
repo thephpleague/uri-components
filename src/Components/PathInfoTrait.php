@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.0.4
+ * @version    1.1.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -32,24 +32,6 @@ trait PathInfoTrait
      * @var array
      */
     protected static $dot_segments = ['.' => 1, '..' => 1];
-
-    /**
-     * Filter the encoded path string
-     *
-     * @param string $path the encoded path
-     *
-     * @throws Exception If the encoded path is invalid
-     *
-     * @return string
-     */
-    protected function filterEncodedPath(string $path): string
-    {
-        if (strlen($path) === strcspn($path, '?#')) {
-            return $path;
-        }
-
-        throw new Exception(sprintf('The encoded path `%s` contains invalid characters', $path));
-    }
 
     /**
      * Returns the instance string representation; If the
