@@ -6,14 +6,13 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- `League\Uri\parse_query`
-- `League\Uri\build_query`
-- `League\Uri\extract_query`
+- `League\Uri\parse_query` as an alias of `Query::extract`
 
 ### Fixed
 
 - Internal call in PHP7.2 with incompatible definitions
 - update PHP Domain Parser to be compatible with PHP7.2 deprecation notice
+- remove restriction to constructor characters for `Path`, `Query` and `UserInfo`.
 
 ### Deprecated
 

@@ -6,7 +6,6 @@ use ArrayIterator;
 use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
 use PHPUnit\Framework\TestCase;
-use function League\Uri\build_query;
 
 /**
  * @group query
@@ -43,12 +42,6 @@ class QueryTest extends TestCase
     public function testWithContent()
     {
         $this->assertSame($this->query, $this->query->withContent('kingkong=toto'));
-    }
-
-    public function testFailedConstructor()
-    {
-        $this->expectException(Exception::class);
-        new Query('foo#bar');
     }
 
     public function testIterator()
@@ -478,12 +471,6 @@ class QueryTest extends TestCase
         $this->assertSame($expected_rfc3986, Query::build($pairs, '&', Query::RFC3986_ENCODING));
         $this->assertSame($expected_rfc3987, Query::build($pairs, '&', Query::RFC3987_ENCODING));
         $this->assertSame($expected_no_encoding, Query::build($pairs, '&', Query::NO_ENCODING));
-
-        $this->assertSame($expected_rfc1738, build_query($pairs, '&', Query::RFC1738_ENCODING));
-        $this->assertSame($expected_rfc3986, build_query($pairs, '&', Query::RFC3986_ENCODING));
-        $this->assertSame($expected_rfc3987, build_query($pairs, '&', Query::RFC3987_ENCODING));
-        $this->assertSame($expected_no_encoding, build_query($pairs, '&', Query::NO_ENCODING));
-
         $this->assertSame($expected_iri, Query::createFromPairs($pairs)->getContent(Query::RFC3987_ENCODING));
     }
 

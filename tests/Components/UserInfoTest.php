@@ -219,18 +219,6 @@ class UserInfoTest extends TestCase
         (new UserInfo())->getPass(-1);
     }
 
-    public function testConstructorThrowsInvalidArgumentException1()
-    {
-        $this->expectException(Exception::class);
-        new UserInfo('tot:o');
-    }
-
-    public function testConstructorThrowsInvalidArgumentException2()
-    {
-        $this->expectException(Exception::class);
-        new UserInfo('toto', 'p@ass');
-    }
-
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);

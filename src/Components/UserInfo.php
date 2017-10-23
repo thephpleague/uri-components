@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.0.4
+ * @version    1.1.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -88,11 +88,8 @@ class UserInfo implements ComponentInterface
         }
 
         $str = $this->validateString($str);
-        if (strlen($str) === strcspn($str, '/:@?#')) {
-            return $this->decodeComponent($str);
-        }
 
-        throw new Exception(sprintf('The encoded user string `%s` contains invalid characters `/:@?#`', $str));
+        return $this->decodeComponent($str);
     }
 
     /**
@@ -111,14 +108,8 @@ class UserInfo implements ComponentInterface
         }
 
         $str = $this->validateString($str);
-        if (strlen($str) === strcspn($str, '/@?#')) {
-            return $this->decodeComponent($str);
-        }
 
-        throw new Exception(sprintf(
-            'The encoded pass string `%s` contains invalid characters `/@?#`',
-            $str
-        ));
+        return $this->decodeComponent($str);
     }
 
     /**

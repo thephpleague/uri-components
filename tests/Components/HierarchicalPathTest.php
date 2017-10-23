@@ -69,23 +69,6 @@ class HierarchicalPathTest extends TestCase
         ];
     }
 
-    /**
-     * @param $str
-     * @dataProvider failedConstructor
-     */
-    public function testInvalidPath($str)
-    {
-        $this->expectException(Exception::class);
-        new Path($str);
-    }
-
-    public function failedConstructor()
-    {
-        return [
-            'reserved chars' => ['foo?bar'],
-        ];
-    }
-
     public function testWithContent()
     {
         $path = new Path('/path/to/the/sky');
