@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## 1.1.0 - TBD
+## 1.1.0 - 2017-10-24
 
 ### Added
 
