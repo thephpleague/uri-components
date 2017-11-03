@@ -12,17 +12,17 @@ use PHPUnit\Framework\TestCase;
 class FunctionsTest extends TestCase
 {
     /**
-     * @dataProvider parseQueryProvider
+     * @dataProvider extractQueryProvider
      *
      * @param string $query
      * @param array  $expectedData
      */
     public function testExtractQuery($query, $expectedData)
     {
-        $this->assertSame($expectedData, Uri\parse_query($query));
+        $this->assertSame($expectedData, Uri\extract_query($query));
     }
 
-    public function parseQueryProvider()
+    public function extractQueryProvider()
     {
         return [
             [
@@ -79,6 +79,126 @@ class FunctionsTest extends TestCase
                 'expected' => [
                     'foo' => ['bar', 'baz'],
                 ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider parserProvider
+     * @param string $query
+     * @param string $separator
+     * @param array  $expected
+     * @param int    $encoding
+     */
+    public function testParse($query, $separator, $expected, $encoding)
+    {
+        $this->assertSame($expected, Uri\parse_query($query, $separator, $encoding));
+    }
+
+    public function parserProvider()
+    {
+        return [
+            'empty string' => [
+                '',
+                '&',
+                [],
+                Query::RFC3986_ENCODING,
+            ],
+            'identical keys' => [
+                'a=1&a=2',
+                '&',
+                ['a' => ['1', '2']],
+                Query::RFC3986_ENCODING,
+            ],
+            'no value' => [
+                'a&b',
+                '&',
+                ['a' => null, 'b' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'empty value' => [
+                'a=&b=',
+                '&',
+                ['a' => '', 'b' => ''],
+                Query::RFC3986_ENCODING,
+            ],
+            'php array' => [
+                'a[]=1&a[]=2',
+                '&',
+                ['a[]' => ['1', '2']],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve dot' => [
+                'a.b=3',
+                '&',
+                ['a.b' => '3'],
+                Query::RFC3986_ENCODING,
+            ],
+            'decode' => [
+                'a%20b=c%20d',
+                '&',
+                ['a b' => 'c d'],
+                Query::RFC3986_ENCODING,
+            ],
+            'no key stripping' => [
+                'a=&b',
+                '&',
+                ['a' => '', 'b' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'no value stripping' => [
+                'a=b=',
+                '&',
+                ['a' => 'b='],
+                Query::RFC3986_ENCODING,
+            ],
+            'key only' => [
+                'a',
+                '&',
+                ['a' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve falsey 1' => [
+                '0',
+                '&',
+                ['0' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve falsey 2' => [
+                '0=',
+                '&',
+                ['0' => ''],
+                Query::RFC3986_ENCODING,
+            ],
+            'preserve falsey 3' => [
+                'a=0',
+                '&',
+                ['a' => '0'],
+                Query::RFC3986_ENCODING,
+            ],
+            'different separator' => [
+                'a=0;b=0&c=4',
+                ';',
+                ['a' => '0', 'b' => '0&c=4'],
+                Query::RFC3986_ENCODING,
+            ],
+            'numeric key only' => [
+                '42',
+                '&',
+                ['42' => null],
+                Query::RFC3986_ENCODING,
+            ],
+            'numeric key' => [
+                '42=l33t',
+                '&',
+                ['42' => 'l33t'],
+                Query::RFC3986_ENCODING,
+            ],
+            'rfc1738' => [
+                '42=l3+3t',
+                '&',
+                ['42' => 'l3 3t'],
+                Query::RFC1738_ENCODING,
             ],
         ];
     }
