@@ -202,4 +202,122 @@ class FunctionsTest extends TestCase
             ],
         ];
     }
+
+    /**
+     * @dataProvider buildProvider
+     * @param array  $pairs
+     * @param string $expected_rfc1738
+     * @param string $expected_rfc3986
+     * @param string $expected_rfc3987
+     * @param string $expected_no_encoding
+     */
+    public function testBuild(
+        $pairs,
+        $expected_rfc1738,
+        $expected_rfc3986,
+        $expected_rfc3987,
+        $expected_no_encoding
+    ) {
+        $this->assertSame($expected_rfc1738, Uri\build_query($pairs, '&', PHP_QUERY_RFC1738));
+        $this->assertSame($expected_rfc3986, Uri\build_query($pairs, '&', PHP_QUERY_RFC3986));
+        $this->assertSame($expected_rfc3987, Uri\build_query($pairs, '&', Query::RFC3987_ENCODING));
+        $this->assertSame($expected_no_encoding, Uri\build_query($pairs, '&', Query::NO_ENCODING));
+    }
+
+    public function buildProvider()
+    {
+        return [
+            'empty string' => [
+                'pairs' => [],
+                'expected_rfc1738' => '',
+                'expected_rfc3986' => '',
+                'expected_rfc3987' => '',
+                'expected_no_encoding' => '',
+            ],
+            'identical keys' => [
+                'pairs' => ['a' => ['1', '2']],
+                'expected_rfc1738' => 'a=1&a=2',
+                'expected_rfc3986' => 'a=1&a=2',
+                'expected_rfc3987' => 'a=1&a=2',
+                'expected_no_encoding' => 'a=1&a=2',
+            ],
+            'no value' => [
+                'pairs' => ['a' => null, 'b' => null],
+                'expected_rfc1738' => 'a&b',
+                'expected_rfc3986' => 'a&b',
+                'expected_rfc3987' => 'a&b',
+                'expected_no_encoding' => 'a&b',
+            ],
+            'empty value' => [
+                'pairs' => ['a' => '', 'b' => ''],
+                'expected_rfc1738' => 'a=&b=',
+                'expected_rfc3986' => 'a=&b=',
+                'expected_rfc3987' => 'a=&b=',
+                'expected_no_encoding' => 'a=&b=',
+            ],
+            'php array' => [
+                'pairs' => ['a[]' => ['1', '2']],
+                'expected_rfc1738' => 'a%5B%5D=1&a%5B%5D=2',
+                'expected_rfc3986' => 'a%5B%5D=1&a%5B%5D=2',
+                'expected_rfc3987' => 'a[]=1&a[]=2',
+                'expected_no_encoding' => 'a[]=1&a[]=2',
+            ],
+            'preserve dot' => [
+                'pairs' => ['a.b' => '3'],
+                'expected_rfc1738' => 'a.b=3',
+                'expected_rfc3986' => 'a.b=3',
+                'expected_rfc3987' => 'a.b=3',
+                'expected_no_encoding' => 'a.b=3',
+            ],
+            'no key stripping' => [
+                'pairs' => ['a' => '', 'b' => null],
+                'expected_rfc1738' => 'a=&b',
+                'expected_rfc3986' => 'a=&b',
+                'expected_rfc3987' => 'a=&b',
+                'expected_no_encoding' => 'a=&b',
+            ],
+            'no value stripping' => [
+                'pairs' => ['a' => 'b='],
+                'expected_rfc1738' => 'a=b=',
+                'expected_rfc3986' => 'a=b=',
+                'expected_rfc3987' => 'a=b=',
+                'expected_no_encoding' => 'a=b=',
+            ],
+            'key only' => [
+                'pairs' => ['a' => null],
+                'expected_rfc1738' => 'a',
+                'expected_rfc3986' => 'a',
+                'expected_rfc3987' => 'a',
+                'expected_no_encoding' => 'a',
+            ],
+            'preserve falsey 1' => [
+                'pairs' => ['0' => null],
+                'expected_rfc1738' => '0',
+                'expected_rfc3986' => '0',
+                'expected_rfc3987' => '0',
+                'expected_no_encoding' => '0',
+            ],
+            'preserve falsey 2' => [
+                'pairs' => ['0' => ''],
+                'expected_rfc1738' => '0=',
+                'expected_rfc3986' => '0=',
+                'expected_rfc3987' => '0=',
+                'expected_no_encoding' => '0=',
+            ],
+            'preserve falsey 3' => [
+                'pairs' => ['0' => '0'],
+                'expected_rfc1738' => '0=0',
+                'expected_rfc3986' => '0=0',
+                'expected_rfc3987' => '0=0',
+                'expected_no_encoding' => '0=0',
+            ],
+            'rcf1738' => [
+                'pairs' => ['toto' => 'foo+bar'],
+                'expected_rfc1738' => 'toto=foo%2Bbar',
+                'expected_rfc3986' => 'toto=foo+bar',
+                'expected_rfc3987' => 'toto=foo+bar',
+                'expected_no_encoding' => 'toto=foo+bar',
+            ],
+        ];
+    }
 }
