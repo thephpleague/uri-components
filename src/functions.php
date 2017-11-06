@@ -16,13 +16,29 @@ namespace League\Uri;
 use League\Uri\Components\Query;
 
 /**
- * Parse the query string like parse_str without mangling the results
+ * Build a query string from an associative array
  *
- * @see Query::extract
+ * @see Query::build
  *
- * @param string $query
- * @param string $separator
- * @param int    $enc_type
+ * @param array  $pairs     The query pairs
+ * @param string $separator The query string separator
+ * @param int    $enc_type  The query encoding type
+ *
+ * @return string
+ */
+function build_query(array $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): string
+{
+    return Query::build($pairs, $separator, $enc_type);
+}
+
+/**
+ * Parse a query string into an associative array
+ *
+ * @see Query::parse
+ *
+ * @param string $query     The query string to parse
+ * @param string $separator The query string separator
+ * @param int    $enc_type  The query encoding algorithm
  *
  * @return array
  */
@@ -36,9 +52,9 @@ function parse_query(string $query, string $separator = '&', int $enc_type = PHP
  *
  * @see Query::extract
  *
- * @param string $query
- * @param string $separator
- * @param int    $enc_type
+ * @param string $query     The query string to parse
+ * @param string $separator The query string separator
+ * @param int    $enc_type  The query encoding algorithm
  *
  * @return array
  */

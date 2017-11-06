@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.1.1
+ * @version    1.2.0
 
  * @link       https://github.com/thephpleague/uri-components
  *
