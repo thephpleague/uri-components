@@ -93,6 +93,11 @@ trait QueryParserTrait
         $encoded_sep = rawurlencode($separator);
         $param = explode('=', $pair, 2);
         $key = $decoder(array_shift($param));
+
+        if ($key === '') {
+            return $res;
+        }
+
         $value = array_shift($param);
         if (null !== $value) {
             $value = str_replace($encoded_sep, $separator, $decoder($value));
