@@ -111,7 +111,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function __construct(string $data = null)
     {
-        $this->pairs = $this->validate($data);
+        $pairs = $this->validate($data);
+        $this->pairs = $this->normalizePairs($pairs);
         $this->preserve_delimiter = null !== $data;
         $this->keys = array_fill_keys(array_keys($this->pairs), 1);
         $this->params = $this->extractFromPairs($this->pairs);
@@ -133,6 +134,57 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         $str = $this->validateString($str);
 
         return static::parse($str, static::$separator);
+    }
+
+    /**
+     * Normalize a query string by removing empty pairs
+     *
+     * @param array $pairs
+     *
+     * @return array
+     */
+    protected function normalizePairs(array $pairs): array
+    {
+        $result = [];
+
+        foreach ($pairs as $key => $value) {
+            if ('' !== $key) {
+                $result[$key] = $value;
+                continue;
+            }
+
+            if (null === $value) {
+                continue;
+            }
+
+            if (!is_array($value)) {
+                $result[$key] = $value;
+                continue;
+            }
+
+            $value = array_filter($value, [$this, 'isValueSet']);
+            if (!empty($value)) {
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Tell whether a variable is set.
+     *
+     * Because isset is not really a function but a
+     * language construct so It can not be used
+     * directly with array_filter.
+     *
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    protected function isValueSet($value)
+    {
+        return null !== $value;
     }
 
     /**
@@ -333,6 +385,27 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
+     * Returns an instance merge with the specified query
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified query
+     *
+     * @param string $query the data to be merged
+     *
+     * @return static
+     */
+    public function merge(string $query): self
+    {
+        $pairs = $this->validate($this->validateString($query));
+        $pairs = $this->normalizePairs($pairs);
+        if ($this->pairs === $pairs) {
+            return $this;
+        }
+
+        return static::createFromPairs(array_merge($this->pairs, $pairs));
+    }
+
+    /**
      * Returns an instance with the new pair appended to it.
      *
      * This method MUST retain the state of the current instance, and return
@@ -347,9 +420,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function append(string $query): self
     {
         $pairs = $this->validate($this->validateString($query));
+        $pairs = $this->normalizePairs($pairs);
         $new_pairs = $this->pairs;
+
         foreach ($pairs as $key => $value) {
-            $this->appendPair($new_pairs, $key, $value);
+            $new_pairs = $this->appendPair($new_pairs, $key, $value);
         }
 
         if ($new_pairs == $this->pairs) {
@@ -362,15 +437,18 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * Append a key/pair to query pairs collection
      *
-     * @param array  &$pairs
+     * @param array  $pairs
      * @param string $key
      * @param mixed  $value
+     *
+     * @return array
      */
-    protected function appendPair(array &$pairs, string $key, $value)
+    protected function appendPair(array $pairs, string $key, $value): array
     {
         if (!array_key_exists($key, $pairs)) {
             $pairs[$key] = $value;
-            return;
+
+            return $pairs;
         }
 
         $pair = $pairs[$key];
@@ -383,26 +461,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         $pairs[$key] = array_merge($pair, $value);
-    }
 
-    /**
-     * Returns an instance merge with the specified query
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * @param string $query the data to be merged
-     *
-     * @return static
-     */
-    public function merge(string $query): self
-    {
-        $pairs = $this->validate($this->validateString($query));
-        if ($pairs === $this->pairs) {
-            return $this;
-        }
-
-        return static::createFromPairs(array_merge($this->pairs, $pairs));
+        return $pairs;
     }
 
     /**

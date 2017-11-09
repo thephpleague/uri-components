@@ -108,41 +108,92 @@ class QueryTest extends TestCase
     public function createFromPairsFailedProvider()
     {
         return [
-            'Non traversable object' => [new \stdClass()],
+            'Non traversable object' => [(object) []],
             'String' => ['toto=23'],
-            'Non pairs array' => [['toto' => ['foo' => [new \stdClass()]]]],
+            'Non pairs array' => [['toto' => ['foo' => [(object) []]]]],
         ];
     }
 
     /**
-     * @param string $input
+     * @dataProvider mergeDataProvider
+     *
+     * @param string $base_query
+     * @param string $query
      * @param string $expected
-     * @dataProvider validMergeValue
      */
-    public function testMerge($input, $expected)
+    public function testMerge(string $base_query, string $query, string $expected)
     {
-        $query = $this->query->merge($input);
-        $this->assertSame($expected, (string) $query);
+        $base = new Query($base_query);
+        $this->assertSame($expected, $base->merge($query)->getContent());
     }
 
-    public function validMergeValue()
+    public function mergeDataProvider()
     {
         return [
             'with new data' => [
+                'kingkong=toto',
                 'john=doe the john',
                 'kingkong=toto&john=doe%20the%20john',
             ],
             'with the same data' => [
                 'kingkong=toto',
                 'kingkong=toto',
-            ],
-            'with string' => [
-                'foo=bar',
-                'kingkong=toto&foo=bar',
+                'kingkong=toto',
             ],
             'with empty string' => [
+                'kingkong=toto',
                 '',
                 'kingkong=toto',
+            ],
+            'no separator' => [
+                'foo=bar',
+                'bar=baz',
+                'foo=bar&bar=baz',
+            ],
+            'base query ends with separator' => [
+                'foo=bar&',
+                'bar=baz',
+                'foo=bar&bar=baz',
+            ],
+            'base query starts with separator' => [
+                '&foo=bar',
+                'bar=baz',
+                'foo=bar&bar=baz',
+            ],
+            'query ends with separator' => [
+                'foo=bar',
+                'bar=baz&',
+                'foo=bar&bar=baz',
+            ],
+            'query starts with separator' => [
+                'foo=bar',
+                '&bar=baz',
+                'foo=bar&bar=baz',
+            ],
+            'separator on query starts and base query ends' => [
+                'foo=bar&',
+                '&bar=baz',
+                'foo=bar&bar=baz',
+            ],
+            'separator on query ends and base query starts' => [
+                '&foo=bar',
+                'bar=baz&',
+                'foo=bar&bar=baz',
+            ],
+            'internal empty pair' => [
+                'foo=bar&&bar=baz',
+                'hello=world',
+                'foo=bar&bar=baz&hello=world',
+            ],
+            'internal empty pair' => [
+                '&foo=bar&',
+                '&bar=baz&',
+                'foo=bar&bar=baz',
+            ],
+            'strange query' => [
+                '=toto&foo=bar',
+                '&bar=baz&',
+                '=toto&foo=bar&bar=baz',
             ],
         ];
     }
@@ -155,7 +206,8 @@ class QueryTest extends TestCase
      */
     public function testAppend($query, $append_data, $expected)
     {
-        $this->assertSame($expected, (string) (new Query($query))->append($append_data));
+        $base = new Query($query);
+        $this->assertSame($expected, $base->append($append_data)->getContent());
     }
 
     public function validAppendValue()
@@ -170,6 +222,13 @@ class QueryTest extends TestCase
             ['foo=bar', 'foo', 'foo=bar&foo'],
             ['foo=bar', 'foo=baz&foo=yolo', 'foo=bar&foo=baz&foo=yolo'],
             ['foo=bar', '', 'foo=bar'],
+            ['foo=bar', 'foo=baz', 'foo=bar&foo=baz'],
+            ['foo=bar', '&foo=baz', 'foo=bar&foo=baz'],
+            ['&foo=bar', 'foo=baz', 'foo=bar&foo=baz'],
+            ['foo=bar&', 'foo=baz&', 'foo=bar&foo=baz'],
+            ['&foo=bar', '&foo=baz', 'foo=bar&foo=baz'],
+            ['foo=bar&', '&foo=baz', 'foo=bar&foo=baz'],
+            ['&foo=bar&', '&foo=baz&', 'foo=bar&foo=baz'],
         ];
     }
 
