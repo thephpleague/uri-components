@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- `Query` normalized to remove empty pairs see [#7](https://github.com/thephpleague/uri/pull/7) and [#8](https://github.com/thephpleague/uri/pull/8)
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.2.0 - 2017-11-06
 
 ### Added
