@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @group query
+ * @coversDefaultClass \League\Uri\Components\Query
  */
 class QueryTest extends TestCase
 {
@@ -22,34 +23,53 @@ class QueryTest extends TestCase
         $this->query = new Query('kingkong=toto');
     }
 
+    /**
+     * @covers ::__set_state
+     */
     public function testSetState()
     {
         $generateComponent = eval('return '.var_export($this->query, true).';');
         $this->assertEquals($this->query, $generateComponent);
     }
 
+    /**
+     * @covers ::isNull
+     * @covers ::withContent
+     */
     public function testDefined()
     {
         $this->assertFalse($this->query->isNull());
         $this->assertTrue($this->query->withContent(null)->isNull());
     }
 
+    /**
+     * @covers ::__debugInfo
+     */
     public function testDebugInfo()
     {
         $this->assertInternalType('array', $this->query->__debugInfo());
     }
 
+    /**
+     * @covers ::withContent
+     */
     public function testWithContent()
     {
         $this->assertSame($this->query, $this->query->withContent('kingkong=toto'));
     }
 
+    /**
+     * @covers ::getIterator
+     */
     public function testIterator()
     {
         $this->assertSame(['kingkong' => 'toto'], iterator_to_array($this->query, true));
     }
 
     /**
+     * @covers ::getUriComponent
+     * @covers ::createFromPairs
+     * @covers ::validate
      * @dataProvider queryProvider
      * @param string|array $input
      * @param string       $expected
@@ -89,6 +109,9 @@ class QueryTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::createFromPairs
+     */
     public function testcreateFromPairsWithTraversable()
     {
         $query = Query::createFromPairs(new ArrayIterator(['john' => 'doe the john']));
@@ -96,6 +119,9 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::createFromPairs
+     * @covers \League\Uri\Components\Exception
+     *
      * @param mixed $input
      * @dataProvider createFromPairsFailedProvider
      */
@@ -115,6 +141,19 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::__construct
+     * @covers ::normalizePairs
+     */
+    public function testNormalization()
+    {
+        $this->assertSame('foo=bar&=', (new Query('foo=bar&&&=&&&&&&'))->getContent());
+        $this->assertSame('=bar&=', (new Query('&=bar&='))->getContent());
+        $this->assertSame('', (new Query('&&&&&&&&&&&'))->getContent());
+    }
+
+    /**
+     * @covers ::merge
+     * @covers ::normalizePairs
      * @dataProvider mergeDataProvider
      *
      * @param string $base_query
@@ -180,17 +219,12 @@ class QueryTest extends TestCase
                 'bar=baz&',
                 'foo=bar&bar=baz',
             ],
-            'internal empty pair' => [
-                'foo=bar&&bar=baz',
-                'hello=world',
-                'foo=bar&bar=baz&hello=world',
-            ],
-            'internal empty pair' => [
+            'separator on each end' => [
                 '&foo=bar&',
                 '&bar=baz&',
                 'foo=bar&bar=baz',
             ],
-            'strange query' => [
+            'pair without empty key' => [
                 '=toto&foo=bar',
                 '&bar=baz&',
                 '=toto&foo=bar&bar=baz',
@@ -199,6 +233,8 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::append
+     * @covers ::normalizePairs
      * @dataProvider validAppendValue
      * @param string $query
      * @param string $append_data
@@ -232,29 +268,37 @@ class QueryTest extends TestCase
         ];
     }
 
-
+    /**
+     * @covers ::getPair
+     */
     public function testGetParameter()
-    {
-        $this->assertSame('toto', $this->query->getPair('kingkong'));
-    }
-
-    public function testGetParameterWithDefaultValue()
     {
         $expected = 'toofan';
         $this->assertSame($expected, $this->query->getPair('togo', $expected));
+        $this->assertNull($this->query->getPair('togo'));
+        $this->assertSame('toto', $this->query->getPair('kingkong'));
     }
 
+    /**
+     * @covers ::hasPair
+     */
     public function testHas()
     {
         $this->assertTrue($this->query->hasPair('kingkong'));
         $this->assertFalse($this->query->hasPair('togo'));
     }
 
+    /**
+     * @covers ::count
+     */
     public function testCountable()
     {
         $this->assertSame(1, count($this->query));
     }
 
+    /**
+     * @covers ::keys
+     */
     public function testKeys()
     {
         $query = Query::createFromPairs([
@@ -272,6 +316,9 @@ class QueryTest extends TestCase
         $this->assertSame(['yolo'], $query->keys(null));
     }
 
+    /**
+     * @covers ::keys
+     */
     public function testStringWithoutContent()
     {
         $query = new Query('foo&bar&baz');
@@ -283,6 +330,9 @@ class QueryTest extends TestCase
         $this->assertSame(null, $query->getPair('baz'));
     }
 
+    /**
+     * @covers ::getPairs
+     */
     public function testGetPairs()
     {
         $expected = ['foo' => null, 'bar' => null, 'baz' => null, 'to.go' => 'toofan'];
@@ -291,6 +341,7 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::getParams
      * @dataProvider parsedQueryProvider
      * @param string $query
      * @param array  $expected
@@ -301,6 +352,7 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::getParam
      * @dataProvider getParamProvider
      * @param string $query
      * @param string $offset
@@ -331,7 +383,7 @@ class QueryTest extends TestCase
     }
 
     /**
-     * Test AbstractSegment::without
+     * @covers ::withoutPairs
      *
      * @param string $origin
      * @param array  $without
@@ -354,6 +406,7 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::ksort
      * @param array $data
      * @param mixed $sort
      * @param array $expected
@@ -390,6 +443,7 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::parse
      * @dataProvider parserProvider
      * @param string $query
      * @param string $separator
@@ -510,6 +564,9 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::build
+     * @covers ::assertValidPairs
+     *
      * @dataProvider buildProvider
      * @param array  $pairs
      * @param string $expected_rfc1738
@@ -643,6 +700,10 @@ class QueryTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::build
+     * @covers ::assertValidPairs
+     */
     public function testBuildWithMalformedUtf8Chars()
     {
         $this->assertSame(
@@ -651,18 +712,38 @@ class QueryTest extends TestCase
         );
     }
 
+    /**
+     * @covers ::build
+     * @covers ::assertValidPairs
+     */
     public function testThrowsExceptionOnInvalidEncodingType()
     {
         $this->expectException(Exception::class);
         Query::build([], '&', -1);
     }
 
+    /**
+     * @covers ::build
+     * @covers ::assertValidPairs
+     */
+    public function testThrowsExceptionOnInvalidPairs()
+    {
+        $this->expectException(Exception::class);
+        Query::build(['foo' => (object)[]]);
+    }
+
+    /**
+     * @covers ::getContent
+     */
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
         (new Query('query'))->getContent(-1);
     }
 
+    /**
+     * @covers ::build
+     */
     public function testFailSafeQueryParsing()
     {
         $arr = ['a' => '1', 'b' => 'le heros'];
@@ -671,6 +752,9 @@ class QueryTest extends TestCase
         $this->assertSame($expected, Query::build($arr, '&'));
     }
 
+    /**
+     * @covers ::build
+     */
     public function testParserBuilderPreserveQuery()
     {
         $querystring = 'uri=http://example.com?a=b%26c=d';
@@ -680,6 +764,7 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::extract
      * @dataProvider parsedQueryProvider
      * @param string $query
      * @param array  $expectedData
