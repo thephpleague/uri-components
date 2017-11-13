@@ -142,18 +142,19 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::__construct
-     * @covers ::normalizePairs
+     * @covers ::removeEmptyPairs
+     * @covers ::withoutEmptyPairs
      */
     public function testNormalization()
     {
-        $this->assertSame('foo=bar&=', (new Query('foo=bar&&&=&&&&&&'))->getContent());
-        $this->assertSame('=bar&=', (new Query('&=bar&='))->getContent());
-        $this->assertSame('', (new Query('&&&&&&&&&&&'))->getContent());
+        $this->assertSame('foo=bar&=', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->getContent());
+        $this->assertSame('=bar&=', (new Query('&=bar&='))->withoutEmptyPairs()->getContent());
+        $this->assertSame(null, (new Query('&&&&&&&&&&&'))->withoutEmptyPairs()->getContent());
     }
 
     /**
      * @covers ::merge
-     * @covers ::normalizePairs
+     * @covers ::removeEmptyPairs
      * @dataProvider mergeDataProvider
      *
      * @param string $base_query
@@ -234,7 +235,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::append
-     * @covers ::normalizePairs
+     * @covers ::removeEmptyPairs
      * @dataProvider validAppendValue
      * @param string $query
      * @param string $append_data

@@ -111,8 +111,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function __construct(string $data = null)
     {
-        $pairs = $this->validate($data);
-        $this->pairs = $this->normalizePairs($pairs);
+        $this->pairs = $this->validate($data);
         $this->preserve_delimiter = null !== $data;
         $this->keys = array_fill_keys(array_keys($this->pairs), 1);
         $this->params = $this->extractFromPairs($this->pairs);
@@ -143,7 +142,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return array
      */
-    protected function normalizePairs(array $pairs): array
+    protected function removeEmptyPairs(array $pairs): array
     {
         $result = [];
 
@@ -385,6 +384,20 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
+     * Returns an instance without empty pairs
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the query component normalized by removing
+     * empty pairs
+     *
+     * @return static
+     */
+    public function withoutEmptyPairs(): self
+    {
+        return self::createFromPairs($this->removeEmptyPairs($this->pairs));
+    }
+
+    /**
      * Returns an instance merge with the specified query
      *
      * This method MUST retain the state of the current instance, and return
@@ -397,12 +410,13 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function merge(string $query): self
     {
         $pairs = $this->validate($this->validateString($query));
-        $pairs = $this->normalizePairs($pairs);
-        if ($this->pairs === $pairs) {
+        $pairs = $this->removeEmptyPairs($pairs);
+        $base_pairs = $this->removeEmptyPairs($this->pairs);
+        if ($base_pairs === $pairs) {
             return $this;
         }
 
-        return static::createFromPairs(array_merge($this->pairs, $pairs));
+        return static::createFromPairs(array_merge($base_pairs, $pairs));
     }
 
     /**
@@ -420,14 +434,14 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     public function append(string $query): self
     {
         $pairs = $this->validate($this->validateString($query));
-        $pairs = $this->normalizePairs($pairs);
-        $new_pairs = $this->pairs;
-
+        $pairs = $this->removeEmptyPairs($pairs);
+        $base_pairs = $this->removeEmptyPairs($this->pairs);
+        $new_pairs = $base_pairs;
         foreach ($pairs as $key => $value) {
             $new_pairs = $this->appendPair($new_pairs, $key, $value);
         }
 
-        if ($new_pairs == $this->pairs) {
+        if ($base_pairs == $new_pairs) {
             return $this;
         }
 

@@ -6,7 +6,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- None
+- `Query::withoutEmptyPairs` to normalized the query string [#7](https://github.com/thephpleague/uri/pull/7) and [#8](https://github.com/thephpleague/uri/pull/8)
 
 ### Fixed
 
