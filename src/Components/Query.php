@@ -59,7 +59,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @var array
      */
-    protected $params = [];
+    protected $params;
 
     /**
      * The query pairs
@@ -76,7 +76,25 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     protected $keys = [];
 
     /**
-     * return a new Query instance from an Array or a traversable object
+     * Returns a new instance from a collection of iterable properties.
+     *
+     * @param Traversable|array $params
+     * @param string            $separator
+     *
+     * @return static
+     */
+    public static function createFromParams($params, string $separator = '&'): self
+    {
+        $params = static::filterIterable($params);
+        if (empty($params)) {
+            return new static(null, $separator);
+        }
+
+        return new static(http_build_query($params, '', $separator, PHP_QUERY_RFC3986), $separator);
+    }
+
+    /**
+     * Return a new instance from a collection of key pairs
      *
      * @param Traversable|array $pairs
      * @param string            $separator
@@ -102,7 +120,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function __set_state(array $properties): self
     {
-        return new static(static::build($properties['pairs'], $properties['separator']));
+        return new static(static::build($properties['pairs'], $properties['separator'] ?? '&'));
     }
 
     /**
@@ -117,7 +135,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         $this->pairs = $this->validate($data);
         $this->preserve_delimiter = null !== $data;
         $this->keys = array_fill_keys(array_keys($this->pairs), 1);
-        $this->params = $this->extractFromPairs($this->pairs);
     }
 
     /**
@@ -313,6 +330,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getParams(): array
     {
+        $this->params = $this->params ?? $this->extractFromPairs($this->pairs);
+
         return $this->params;
     }
 
@@ -327,7 +346,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getParam(string $offset, $default = null)
     {
-        return $this->params[$offset] ?? $default;
+        return $this->getParams()[$offset] ?? $default;
     }
 
     /**
@@ -415,20 +434,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without empty pairs
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the query component normalized by removing
-     * empty pairs
-     *
-     * @return static
-     */
-    public function withoutEmptyPairs(): self
-    {
-        return self::createFromPairs($this->removeEmptyPairs($this->pairs), $this->separator);
-    }
-
-    /**
      * Returns an instance with a different separator
      *
      * This method MUST retain the state of the current instance, and return
@@ -451,6 +456,31 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         return $clone;
     }
 
+    /**
+     * Sort the query string by offset, maintaining offset to data correlations.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified query
+     *
+     * @param callable|int $sort a PHP sort flag constant or a comparaison function
+     *                           which must return an integer less than, equal to,
+     *                           or greater than zero if the first argument is
+     *                           considered to be respectively less than, equal to,
+     *                           or greater than the second.
+     *
+     * @return static
+     */
+    public function ksort($sort = SORT_REGULAR): self
+    {
+        $func = is_callable($sort) ? 'uksort' : 'ksort';
+        $pairs = $this->pairs;
+        $func($pairs, $sort);
+        if ($pairs === $this->pairs) {
+            return $this;
+        }
+
+        return static::createFromPairs($pairs, $this->separator);
+    }
 
     /**
      * Returns an instance merge with the specified query
@@ -493,7 +523,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         $base_pairs = $this->removeEmptyPairs($this->pairs);
         $new_pairs = $base_pairs;
         foreach ($pairs as $key => $value) {
-            $new_pairs = $this->appendPair($new_pairs, $key, $value);
+            $new_pairs = $this->appendToPair($new_pairs, $key, $value);
         }
 
         if ($base_pairs == $new_pairs) {
@@ -512,7 +542,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @return array
      */
-    protected function appendPair(array $pairs, string $key, $value): array
+    protected function appendToPair(array $pairs, string $key, $value): array
     {
         if (!array_key_exists($key, $pairs)) {
             $pairs[$key] = $value;
@@ -559,28 +589,97 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Sort the query string by offset, maintaining offset to data correlations.
+     * Returns an instance without the specified params
      *
      * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
+     * an instance that contains the modified component
      *
-     * @param callable|int $sort a PHP sort flag constant or a comparaison function
-     *                           which must return an integer less than, equal to,
-     *                           or greater than zero if the first argument is
-     *                           considered to be respectively less than, equal to,
-     *                           or greater than the second.
+     * @param string[] $offsets the list of params key to remove from the query
      *
      * @return static
      */
-    public function ksort($sort = SORT_REGULAR): self
+    public function withoutParams(array $offsets): self
     {
-        $func = is_callable($sort) ? 'uksort' : 'ksort';
-        $pairs = $this->pairs;
-        $func($pairs, $sort);
-        if ($pairs === $this->pairs) {
+        $new_pairs = $this->pairs;
+        foreach ($offsets as $offset) {
+            $new_pairs = array_filter($new_pairs, function ($key) use ($offset) {
+                if ($offset === $key) {
+                    return false;
+                }
+
+                return 0 !== strpos($key, $offset.'[');
+            }, ARRAY_FILTER_USE_KEY);
+        }
+
+        if ($new_pairs === $this->pairs) {
             return $this;
         }
 
-        return static::createFromPairs($pairs, $this->separator);
+        return static::createFromPairs($new_pairs, $this->separator);
+    }
+
+    /**
+     * Returns an instance without empty pairs
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the query component normalized by removing
+     * empty pairs
+     *
+     * @return static
+     */
+    public function withoutEmptyPairs(): self
+    {
+        return self::createFromPairs($this->removeEmptyPairs($this->pairs), $this->separator);
+    }
+
+    /**
+     * Returns an instance where numeric indices associated to PHP's array like key are removed.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the query component normalized so that numeric indexes
+     * from PHP's parameters from the query string are removed from the query string representation
+     *
+     * @return static
+     */
+    public function withoutNumericIndices(): self
+    {
+        $str = (string) $this->getContent();
+        if ('' === $str) {
+            return $this;
+        }
+
+        $res = array_map([$this, 'removeNumericIndex'], explode($this->separator, $str));
+        $query = implode($this->separator, $res);
+        if ($query === $str) {
+            return $this;
+        }
+
+        return new static($query, $this->separator);
+    }
+
+    /**
+     * Remove the numeric index from the key pair
+     *
+     * @param string $pair
+     *
+     * @return string
+     */
+    protected function removeNumericIndex(string $pair): string
+    {
+        static $regexp = ',\%5B\d+\%5D,';
+        static $replace = '%5B%5D';
+
+        list($key, $value) = explode('=', $pair) + ['', null];
+        $new_key = preg_replace($regexp, $replace, $key);
+        if ($new_key === $key) {
+            return $pair;
+        }
+
+        $pair = $new_key;
+        if (null !== $value) {
+            $pair .= '='.$value;
+        }
+
+        return $pair;
     }
 }
