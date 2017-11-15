@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.2.0
+ * @version    1.3.0
 
  * @link       https://github.com/thephpleague/uri-components
  *
@@ -45,7 +45,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @var string
      */
-    protected static $separator = '&';
+    protected $separator = '&';
 
     /**
      * Preserve the delimiter
@@ -79,17 +79,18 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * return a new Query instance from an Array or a traversable object
      *
      * @param Traversable|array $pairs
+     * @param string            $separator
      *
      * @return static
      */
-    public static function createFromPairs($pairs): self
+    public static function createFromPairs($pairs, string $separator = '&'): self
     {
         $pairs = static::filterIterable($pairs);
         if (empty($pairs)) {
-            return new static();
+            return new static(null, $separator);
         }
 
-        return new static(static::build($pairs, static::$separator));
+        return new static(static::build($pairs, $separator), $separator);
     }
 
     /**
@@ -101,20 +102,40 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function __set_state(array $properties): self
     {
-        return new static(static::build($properties['pairs'], static::$separator));
+        return new static(static::build($properties['pairs'], $properties['separator']));
     }
 
     /**
      * a new instance
      *
      * @param string $data
+     * @param string $separator
      */
-    public function __construct(string $data = null)
+    public function __construct(string $data = null, string $separator = '&')
     {
+        $this->separator = $this->filterSeparator($separator);
         $this->pairs = $this->validate($data);
         $this->preserve_delimiter = null !== $data;
         $this->keys = array_fill_keys(array_keys($this->pairs), 1);
         $this->params = $this->extractFromPairs($this->pairs);
+    }
+
+    /**
+     * Filter the submitted query separator
+     *
+     * @param string $separator
+     *
+     * @throws Exception If the separator is invalid
+     *
+     * @return string
+     */
+    protected static function filterSeparator(string $separator): string
+    {
+        if (1 != strlen($separator) || '=' === $separator) {
+            throw new Exception(sprintf('Invalid separator character `%s`', $separator));
+        }
+
+        return $separator;
     }
 
     /**
@@ -132,7 +153,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
 
         $str = $this->validateString($str);
 
-        return static::parse($str, static::$separator);
+        return static::parse($str, $this->separator);
     }
 
     /**
@@ -173,9 +194,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * Tell whether a variable is set.
      *
-     * Because isset is not really a function but a
-     * language construct so It can not be used
-     * directly with array_filter.
+     * Because isset is a language construct
+     * it can not be used directly with array_filter.
      *
      * @param mixed $value
      *
@@ -196,6 +216,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         return [
             'component' => $this->getContent(),
             'pairs' => $this->pairs,
+            'separator' => $this->separator,
         ];
     }
 
@@ -223,9 +244,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return null;
         }
 
-        $encoder = self::getEncoder(static::$separator, $enc_type);
+        $encoder = self::getEncoder($this->separator, $enc_type);
 
-        return static::getQueryString($this->pairs, static::$separator, $encoder);
+        return static::getQueryString($this->pairs, $this->separator, $encoder);
     }
 
     /**
@@ -253,6 +274,16 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         return $query;
+    }
+
+    /**
+     * Returns the query string separator character
+     *
+     * @return string
+     */
+    public function getSeparator(): string
+    {
+        return $this->separator;
     }
 
     /**
@@ -380,7 +411,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return new static($value);
+        return new static($value, $this->separator);
     }
 
     /**
@@ -394,8 +425,32 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutEmptyPairs(): self
     {
-        return self::createFromPairs($this->removeEmptyPairs($this->pairs));
+        return self::createFromPairs($this->removeEmptyPairs($this->pairs), $this->separator);
     }
+
+    /**
+     * Returns an instance with a different separator
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the query component with a different separator
+     *
+     * @param string $separator
+     *
+     * @return static
+     */
+    public function withSeparator(string $separator): self
+    {
+        if ($separator === $this->separator) {
+            return $this;
+        }
+
+        $separator = $this->filterSeparator($separator);
+        $clone = clone $this;
+        $clone->separator = $separator;
+
+        return $clone;
+    }
+
 
     /**
      * Returns an instance merge with the specified query
@@ -416,7 +471,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return static::createFromPairs(array_merge($base_pairs, $pairs));
+        return static::createFromPairs(array_merge($base_pairs, $pairs), $this->separator);
     }
 
     /**
@@ -445,7 +500,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return static::createFromPairs($new_pairs);
+        return static::createFromPairs($new_pairs, $this->separator);
     }
 
     /**
@@ -500,7 +555,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return static::createFromPairs($pairs);
+        return static::createFromPairs($pairs, $this->separator);
     }
 
     /**
@@ -526,6 +581,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return static::createFromPairs($pairs);
+        return static::createFromPairs($pairs, $this->separator);
     }
 }

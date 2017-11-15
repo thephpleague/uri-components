@@ -33,6 +33,38 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::filterSeparator
+     * @dataProvider invalidSeparatorProvider
+     * @param mixed $separator
+     */
+    public function testInvalidSeparator($separator)
+    {
+        $this->expectException(Exception::class);
+        new Query('foo=bar', $separator);
+    }
+
+    public function invalidSeparatorProvider()
+    {
+        return [
+            'separator must be one character long' => ['foo'],
+            'separator can not be `=`' => ['='],
+        ];
+    }
+
+    /**
+     * @covers ::getSeparator
+     * @covers ::withSeparator
+     */
+    public function testSeparator()
+    {
+        $query = new Query('foo=bar&kingkong=toto');
+        $new_query = $query->withSeparator('|');
+        $this->assertSame('&', $query->getSeparator());
+        $this->assertSame('|', $new_query->getSeparator());
+        $this->assertSame('foo=bar|kingkong=toto', $new_query->getContent());
+    }
+
+    /**
      * @covers ::isNull
      * @covers ::withContent
      */
