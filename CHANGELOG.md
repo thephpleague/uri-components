@@ -7,10 +7,13 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Added
 
 - `Query::withoutEmptyPairs` to normalized the query string [#7](https://github.com/thephpleague/uri/pull/7) and [#8](https://github.com/thephpleague/uri/pull/8)
+- `Query::getSeparator`, `Query::withSeparator` to allow modifying query string separator.
 
 ### Fixed
 
 - `Query` normalized to remove empty pairs see [#7](https://github.com/thephpleague/uri/pull/7) and [#8](https://github.com/thephpleague/uri/pull/8)
+- `Query::__debugInfo` nows adds query separator informations.
+
 
 ### Deprecated
 
