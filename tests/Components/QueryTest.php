@@ -267,6 +267,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::append
+     * @covers ::appendToPair
      * @covers ::removeEmptyPairs
      * @dataProvider validAppendValue
      * @param string $query
@@ -422,20 +423,162 @@ class QueryTest extends TestCase
      * @param array  $without
      * @param string $result
      *
-     * @dataProvider withoutProvider
+     * @dataProvider withoutPairsProvider
      */
-    public function testWithout($origin, $without, $result)
+    public function testWithoutPairs($origin, $without, $result)
     {
         $this->assertSame($result, (string) (new Query($origin))->withoutPairs($without));
     }
 
-    public function withoutProvider()
+    public function withoutPairsProvider()
     {
         return [
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
             ['foo&bar&baz&to.go=toofan', ['foo', 'unknown'], 'bar&baz&to.go=toofan'],
             ['foo&bar&baz&to.go=toofan', [], 'foo&bar&baz&to.go=toofan'],
         ];
+    }
+
+    /**
+     * @covers ::withoutParams
+     * @covers ::createFromParams
+     *
+     * @param array  $origin
+     * @param array  $without
+     * @param string $expected
+     *
+     * @dataProvider withoutParamsProvider
+     */
+    public function testWithoutParams(array $origin, array $without, string $expected)
+    {
+        $this->assertSame($expected, (string) (Query::createFromParams($origin))->withoutParams($without));
+    }
+
+    public function withoutParamsProvider()
+    {
+        $data = [
+            'filter' => [
+                'foo' => [
+                    'bar',
+                    'baz',
+                ],
+                'bar' => [
+                    'bar' => 'foo',
+                    'foo' => 'bar',
+                ],
+            ],
+        ];
+
+        return [
+            'simple removal' => [
+                'origin' => ['foo' => 'bar', 'bar' => 'baz'],
+                'without' => ['bar'],
+                'expected' => 'foo=bar',
+            ],
+            'nothing to remove' => [
+                'origin' => $data,
+                'without' => ['filter[dummy]'],
+                'expected' => 'filter%5Bfoo%5D%5B0%5D=bar&filter%5Bfoo%5D%5B1%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar',
+            ],
+            'remove 2nd level' => [
+                'origin' => $data,
+                'without' => ['filter[bar]'],
+                'expected' => 'filter%5Bfoo%5D%5B0%5D=bar&filter%5Bfoo%5D%5B1%5D=baz',
+            ],
+            'remove nth level' => [
+                'origin' => $data,
+                'without' => ['filter[foo][0]', 'filter[bar][bar]'],
+                'expected' => 'filter%5Bfoo%5D%5B1%5D=baz&filter%5Bbar%5D%5Bfoo%5D=bar',
+            ],
+        ];
+    }
+
+    /**
+     * @covers ::withoutParams
+     * @covers ::createFromParams
+     */
+    public function testWithoutParamsDoesNotChangeParamsKey()
+    {
+        $data = [
+            'foo' => [
+                'bar',
+                'baz',
+            ],
+        ];
+
+        $query = Query::createFromParams($data);
+        $this->assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->getContent());
+        $new_query = $query->withoutParams(['foo[0]']);
+        $this->assertSame('foo%5B1%5D=baz', $new_query->getContent());
+        $this->assertSame(['foo' => [1 => 'baz']], $new_query->getParams());
+    }
+
+    /**
+     * @covers ::withoutNumericIndices
+     * @covers ::removeNumericIndex
+     */
+    public function testWithoutNumericIndices()
+    {
+        $data = [
+            'filter' => [
+                'foo' => [
+                    'bar',
+                    'baz',
+                ],
+                'bar' => [
+                    'bar' => 'foo',
+                    'foo' => 'bar',
+                ],
+            ],
+        ];
+
+        $with_indices = [
+            'string' => 'filter%5Bfoo%5D%5B0%5D=bar&filter%5Bfoo%5D%5B1%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar',
+            'pairs' => [
+                'filter[foo][0]' => 'bar',
+                'filter[foo][1]' => 'baz',
+                'filter[bar][bar]' => 'foo',
+                'filter[bar][foo]' => 'bar',
+            ],
+        ];
+
+        $without_indices = [
+            'string' => 'filter%5Bfoo%5D%5B%5D=bar&filter%5Bfoo%5D%5B%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar',
+            'pairs' => [
+                'filter[foo][]' => ['bar', 'baz'],
+                'filter[bar][bar]' => 'foo',
+                'filter[bar][foo]' => 'bar',
+            ],
+        ];
+
+        $query = Query::createFromParams($data);
+        $this->assertSame($with_indices['string'], $query->getContent());
+        $this->assertSame($with_indices['pairs'], $query->getPairs());
+        $this->assertSame($data, $query->getParams());
+
+        $new_query = $query->withoutNumericIndices();
+        $this->assertSame($without_indices['string'], $new_query->getContent());
+        $this->assertSame($without_indices['pairs'], $new_query->getPairs());
+        $this->assertSame($data, $new_query->getParams());
+    }
+
+    /**
+     * @covers ::withoutNumericIndices
+     * @covers ::removeNumericIndex
+     */
+    public function testWithoutNumericIndicesRetursSameInstance()
+    {
+        $this->assertSame($this->query->withoutNumericIndices(), $this->query);
+    }
+
+    /**
+     * @covers ::withoutNumericIndices
+     * @covers ::removeNumericIndex
+     */
+    public function testWithoutNumericIndicesDoesNotAffectPairValue()
+    {
+        $query = Query::createFromParams(['foo' => 'bar[3]']);
+        $this->assertSame($query, $query->withoutNumericIndices());
     }
 
     /**
