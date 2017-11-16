@@ -46,7 +46,6 @@ class QueryTest extends TestCase
     public function invalidSeparatorProvider()
     {
         return [
-            'separator must be one character long' => ['foo'],
             'separator can not be `=`' => ['='],
         ];
     }
@@ -474,6 +473,14 @@ class QueryTest extends TestCase
                 'origin' => ['foo' => 'bar', 'bar' => 'baz'],
                 'without' => ['bar'],
                 'expected' => 'foo=bar',
+            ],
+            'complext removal' => [
+                'origin' => [
+                    'arr[one' => 'sid',
+                    'arr' => ['4' => 'fred'],
+                ],
+                'without' => ['arr'],
+                'expected' => 'arr%5Bone=sid',
             ],
             'nothing to remove' => [
                 'origin' => $data,
