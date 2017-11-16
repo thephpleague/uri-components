@@ -148,7 +148,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     protected static function filterSeparator(string $separator): string
     {
-        if (1 != strlen($separator) || '=' === $separator) {
+        if ('=' === $separator) {
             throw new Exception(sprintf('Invalid separator character `%s`', $separator));
         }
 
@@ -171,41 +171,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
         $str = $this->validateString($str);
 
         return static::parse($str, $this->separator);
-    }
-
-    /**
-     * Normalize a query string by removing empty pairs
-     *
-     * @param array $pairs
-     *
-     * @return array
-     */
-    protected function removeEmptyPairs(array $pairs): array
-    {
-        $result = [];
-
-        foreach ($pairs as $key => $value) {
-            if ('' !== $key) {
-                $result[$key] = $value;
-                continue;
-            }
-
-            if (null === $value) {
-                continue;
-            }
-
-            if (!is_array($value)) {
-                $result[$key] = $value;
-                continue;
-            }
-
-            $value = array_filter($value, [$this, 'isValueSet']);
-            if (!empty($value)) {
-                $result[$key] = $value;
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -505,6 +470,41 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
+     * Normalize a query string by removing empty pairs
+     *
+     * @param array $pairs
+     *
+     * @return array
+     */
+    protected function removeEmptyPairs(array $pairs): array
+    {
+        $result = [];
+
+        foreach ($pairs as $key => $value) {
+            if ('' !== $key) {
+                $result[$key] = $value;
+                continue;
+            }
+
+            if (null === $value) {
+                continue;
+            }
+
+            if (!is_array($value)) {
+                $result[$key] = $value;
+                continue;
+            }
+
+            $value = array_filter($value, [$this, 'isValueSet']);
+            if (!empty($value)) {
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Returns an instance with the new pair appended to it.
      *
      * This method MUST retain the state of the current instance, and return
@@ -576,11 +576,14 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutPairs(array $offsets): self
     {
-        $pairs = $this->pairs;
-        foreach ($offsets as $offset) {
-            unset($pairs[$this->decodeComponent($this->validateString($offset))]);
-        }
+        $reducer = function (array $pairs, string $key): array {
+            $offset = $this->decodeComponent($this->validateString($key));
+            unset($pairs[$offset]);
 
+            return $pairs;
+        };
+
+        $pairs = array_reduce($offsets, $reducer, $this->pairs);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -600,22 +603,22 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutParams(array $offsets): self
     {
-        $new_pairs = $this->pairs;
-        foreach ($offsets as $offset) {
-            $new_pairs = array_filter($new_pairs, function ($key) use ($offset) {
-                if ($offset === $key) {
-                    return false;
-                }
+        $reducer = function (array $pairs, string $name): array {
+            $filter = function (string $key) use ($name): bool {
+                $regexp = ',^'.preg_quote($name, ',').'(\[.*\].*)?$,';
 
-                return 0 !== strpos($key, $offset.'[');
-            }, ARRAY_FILTER_USE_KEY);
-        }
+                return !preg_match($regexp, $key, $matches);
+            };
 
-        if ($new_pairs === $this->pairs) {
+            return array_filter($pairs, $filter, ARRAY_FILTER_USE_KEY);
+        };
+
+        $pairs = array_reduce($offsets, $reducer, $this->pairs);
+        if ($pairs === $this->pairs) {
             return $this;
         }
 
-        return static::createFromPairs($new_pairs, $this->separator);
+        return static::createFromPairs($pairs, $this->separator);
     }
 
     /**
