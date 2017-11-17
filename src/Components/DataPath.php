@@ -74,11 +74,7 @@ class DataPath extends AbstractComponent
     protected $document;
 
     /**
-     * This static method is called for classes exported by var_export()
-     *
-     * @param array $properties
-     *
-     * @return static
+     * {@inheritdoc}
      */
     public static function __set_state(array $properties)
     {
@@ -277,11 +273,9 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Called by var_dump() when dumping The object
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function __debugInfo(): array
+    public function __debugInfo()
     {
         return [
             'component' => $this->getContent(),

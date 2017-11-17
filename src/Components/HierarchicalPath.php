@@ -39,11 +39,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     protected static $separator = '/';
 
     /**
-     * This static method is called for classes exported by var_export()
-     *
-     * @param array $properties
-     *
-     * @return static
+     * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -130,11 +126,9 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     }
 
     /**
-     * Called by var_dump() when dumping The object
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function __debugInfo(): array
+    public function __debugInfo()
     {
         return [
             'component' => $this->getContent(),
@@ -246,12 +240,9 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     }
 
     /**
-     * Returns the instance string representation; If the
-     * instance is not defined an empty string is returned
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function __toString(): string
+    public function __toString()
     {
         return (string) $this->getContent();
     }

@@ -45,14 +45,14 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @var string
      */
-    protected $separator = '&';
+    protected $separator;
 
     /**
      * Preserve the delimiter
      *
      * @var bool
      */
-    protected $preserve_delimiter = false;
+    protected $preserve_delimiter;
 
     /**
      * The deserialized query arguments
@@ -66,14 +66,14 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @var array
      */
-    protected $pairs = [];
+    protected $pairs;
 
     /**
      * The query pairs keys
      *
      * @var array
      */
-    protected $keys = [];
+    protected $keys;
 
     /**
      * Returns a new instance from a collection of iterable properties.
@@ -189,11 +189,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Called by var_dump() when dumping The object
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function __debugInfo(): array
+    public function __debugInfo()
     {
         return [
             'component' => $this->getContent(),
@@ -203,21 +201,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns the instance content encoded in RFC3986 or RFC3987.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3.
-     *
-     * By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
@@ -232,21 +216,15 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns the instance string representation; If the
-     * instance is not defined an empty string is returned
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function __toString(): string
+    public function __toString()
     {
         return (string) $this->getContent();
     }
 
     /**
-     * Returns the instance string representation
-     * with its optional URI delimiters
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getUriComponent(): string
     {
@@ -269,21 +247,17 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Count elements of an object
-     *
-     * @return int
+     * {@inheritdoc}
      */
-    public function count(): int
+    public function count()
     {
         return count($this->pairs);
     }
 
     /**
-     * Returns an external iterator
-     *
-     * @return ArrayIterator
+     * {@inheritdoc}
      */
-    public function getIterator(): ArrayIterator
+    public function getIterator()
     {
         return new ArrayIterator($this->pairs);
     }
@@ -380,14 +354,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with the specified string
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified data
-     *
-     * @param string $value
-     *
-     * @return ComponentInterface
+     * {@inheritdoc}
      */
     public function withContent($value): ComponentInterface
     {

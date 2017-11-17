@@ -34,13 +34,7 @@ namespace League\Uri\Components;
 class Scheme extends AbstractComponent
 {
     /**
-     * Validate the component content
-     *
-     * @param mixed $scheme
-     *
-     * @throws Exception if the component is no valid
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     protected function validate($scheme)
     {
@@ -57,10 +51,7 @@ class Scheme extends AbstractComponent
     }
 
     /**
-     * Returns the instance string representation
-     * with its optional URI delimiters
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getUriComponent(): string
     {

@@ -205,11 +205,9 @@ trait ComponentTrait
     }
 
     /**
-     * Called by var_dump() when dumping The object
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function __debugInfo(): array
+    public function __debugInfo()
     {
         return ['component' => $this->getContent()];
     }
@@ -290,7 +288,7 @@ trait ComponentTrait
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __set(string $property, $value)
     {
@@ -298,7 +296,7 @@ trait ComponentTrait
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __isset(string $property)
     {
@@ -306,7 +304,7 @@ trait ComponentTrait
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __unset(string $property)
     {
@@ -314,7 +312,7 @@ trait ComponentTrait
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __get(string $property)
     {

@@ -60,11 +60,9 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Called by var_dump() when dumping The object
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function __debugInfo(): array
+    public function __debugInfo()
     {
         return [
             'component' => $this->getContent(),
@@ -172,11 +170,7 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * This static method is called for classes exported by var_export()
-     *
-     * @param array $properties
-     *
-     * @return static
+     * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -184,21 +178,7 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Returns the instance content encoded in RFC3986 or RFC3987.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3.
-     *
-     * By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
@@ -216,21 +196,15 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Returns the instance string representation; If the
-     * instance is not defined an empty string is returned
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function __toString(): string
+    public function __toString()
     {
         return (string) $this->getContent();
     }
 
     /**
-     * Returns the instance string representation
-     * with its optional URI delimiters
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getUriComponent(): string
     {
@@ -243,11 +217,7 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Create a new instance from a string
-     *
-     * @param string|null $content
-     *
-     * @return ComponentInterface
+     * {@inheritdoc}
      */
     public function withContent($content): ComponentInterface
     {

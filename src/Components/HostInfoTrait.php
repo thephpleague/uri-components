@@ -42,7 +42,7 @@ trait HostInfoTrait
      *
      * @var array
      */
-    protected $hostnameInfo = [
+    protected $hostname_infos = [
         'isPublicSuffixValid' => false,
         'publicSuffix' => '',
         'registerableDomain' => '',
@@ -54,7 +54,7 @@ trait HostInfoTrait
      *
      * @var bool
      */
-    protected $hostnameInfoLoaded = false;
+    protected $hostname_infos_loaded = false;
 
     /**
      * Valid Start Label characters
@@ -87,7 +87,7 @@ trait HostInfoTrait
     protected function getHostnameInfo(string $key)
     {
         $this->loadHostnameInfo();
-        return $this->hostnameInfo[$key];
+        return $this->hostname_infos[$key];
     }
 
     /**
@@ -95,7 +95,7 @@ trait HostInfoTrait
      */
     protected function loadHostnameInfo()
     {
-        if ($this->isIp() || $this->hostnameInfoLoaded) {
+        if ($this->isIp() || $this->hostname_infos_loaded) {
             return;
         }
 
@@ -104,16 +104,16 @@ trait HostInfoTrait
             $host = substr($host, 0, -1);
         }
 
-        $this->hostnameInfo = array_map(
+        $this->hostname_infos = array_map(
             'sprintf',
             $this->getPdpParser()->parseHost($host)->toArray()
-        ) + $this->hostnameInfo;
+        ) + $this->hostname_infos;
 
-        if ('' !== $this->hostnameInfo['publicSuffix']) {
-            $this->hostnameInfo['isPublicSuffixValid'] = $this->getPdpParser()->isSuffixValid($host);
+        if ('' !== $this->hostname_infos['publicSuffix']) {
+            $this->hostname_infos['isPublicSuffixValid'] = $this->getPdpParser()->isSuffixValid($host);
         }
 
-        $this->hostnameInfoLoaded = true;
+        $this->hostname_infos_loaded = true;
     }
 
     /**
@@ -306,7 +306,7 @@ trait HostInfoTrait
      *
      * @return string
      */
-    abstract public function __toString(): string;
+    abstract public function __toString();
 
     /**
      * Returns whether or not the host is an IP address

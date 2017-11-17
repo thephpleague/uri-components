@@ -35,21 +35,7 @@ class Fragment extends AbstractComponent
 {
 
     /**
-     * Returns the instance content encoded in RFC3986 or RFC3987.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3.
-     *
-     * By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
@@ -76,10 +62,7 @@ class Fragment extends AbstractComponent
     }
 
     /**
-     * Returns the instance string representation
-     * with its optional URI delimiters
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getUriComponent(): string
     {

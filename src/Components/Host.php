@@ -73,17 +73,18 @@ class Host extends AbstractHierarchicalComponent
     protected $host;
 
     /**
-     *  This static method is called for classes exported by var_export()
-     *
-     * @param array $properties
-     *
-     * @return static
+     * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
         $host = static::createFromLabels($properties['data'], $properties['is_absolute']);
-        $host->hostnameInfoLoaded = $properties['hostnameInfoLoaded'];
-        $host->hostnameInfo = $properties['hostnameInfo'];
+        $host->hostname_infos_loaded = $properties['hostname_infos_loaded'] ?? [
+            'isPublicSuffixValid' => false,
+            'publicSuffix' => '',
+            'registerableDomain' => '',
+            'subdomain' => '',
+        ];
+        $host->hostname_infos = $properties['hostname_infos'] ?? false;
 
         return $host;
     }
@@ -243,11 +244,9 @@ class Host extends AbstractHierarchicalComponent
     }
 
     /**
-     * Called by var_dump() when dumping The object
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function __debugInfo(): array
+    public function __debugInfo()
     {
         return [
             'component' => $this->getContent(),
@@ -348,21 +347,7 @@ class Host extends AbstractHierarchicalComponent
     }
 
     /**
-     * Returns the instance content encoded in RFC3986 or RFC3987.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3.
-     *
-     * By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {

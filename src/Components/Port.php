@@ -44,13 +44,7 @@ class Port extends AbstractComponent
     }
 
     /**
-     * Validate the component content
-     *
-     * @param mixed $data
-     *
-     * @throws Exception if the component is no valid
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     protected function validate($data)
     {
@@ -66,10 +60,7 @@ class Port extends AbstractComponent
     }
 
     /**
-     * Returns the instance string representation
-     * with its optional URI delimiters
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getUriComponent(): string
     {
