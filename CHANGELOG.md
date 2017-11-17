@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next - TBD
+## 1.3.0 - 2017-11-17
 
 ### Added
 
@@ -17,6 +17,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - `Query::merge` and `Query::append` normalized the query string to remove empty pairs see [#7](https://github.com/thephpleague/uri/pull/7) and [#8](https://github.com/thephpleague/uri/pull/8)
+- `Query::build` and `Uri\build` now accept any iterable structure.
 
 ### Deprecated
 

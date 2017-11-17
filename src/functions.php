@@ -14,19 +14,20 @@ declare(strict_types=1);
 namespace League\Uri;
 
 use League\Uri\Components\Query;
+use Traversable;
 
 /**
  * Build a query string from an associative array
  *
  * @see Query::build
  *
- * @param array  $pairs     The query pairs
- * @param string $separator The query string separator
- * @param int    $enc_type  The query encoding type
+ * @param array|Traversable $pairs     The query pairs
+ * @param string            $separator The query string separator
+ * @param int               $enc_type  The query encoding type
  *
  * @return string
  */
-function build_query(array $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): string
+function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): string
 {
     return Query::build($pairs, $separator, $enc_type);
 }

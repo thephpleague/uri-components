@@ -792,6 +792,14 @@ class QueryTest extends TestCase
                 'expected_iri' => 'a=1&a=2',
                 'expected_no_encoding' => 'a=1&a=2',
             ],
+            'using an traversable' => [
+                'pairs' => new ArrayIterator(['a' => ['1', '2']]),
+                'expected_rfc1738' => 'a=1&a=2',
+                'expected_rfc3986' => 'a=1&a=2',
+                'expected_rfc3987' => 'a=1&a=2',
+                'expected_iri' => 'a=1&a=2',
+                'expected_no_encoding' => 'a=1&a=2',
+            ],
             'no value' => [
                 'pairs' => ['a' => null, 'b' => null],
                 'expected_rfc1738' => 'a&b',
