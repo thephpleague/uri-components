@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Traversable;
+
 /**
  * a class to parse a URI query string according to RFC3986
  *
@@ -119,17 +121,20 @@ trait QueryParserTrait
      *
      *    - it does not modify parameters keys
      *
-     * @param array  $pairs     Query pairs
-     * @param string $separator Query string separator
-     * @param int    $enc_type  Query encoding type
+     * @param array|Traversable $pairs     Query pairs
+     * @param string            $separator Query string separator
+     * @param int               $enc_type  Query encoding type
      *
      * @return string
      */
     public static function build(
-        array $pairs,
+        $pairs,
         string $separator = '&',
         int $enc_type = Query::RFC3986_ENCODING
     ): string {
+        if ($pairs instanceof Traversable) {
+            $pairs = iterator_to_array($pairs, true);
+        }
         self::assertValidPairs($pairs);
         self::assertValidEncoding($enc_type);
         $encoder = self::getEncoder($separator, $enc_type);
