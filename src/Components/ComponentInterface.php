@@ -78,7 +78,7 @@ interface ComponentInterface extends EncodingInterface
      *
      * @return string
      */
-    public function __toString(): string;
+    public function __toString();
 
     /**
      * Returns the instance string representation with its optional URI delimiters

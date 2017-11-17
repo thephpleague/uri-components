@@ -65,21 +65,17 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     abstract public function __construct(string $data = null);
 
     /**
-     * Count elements of an object
-     *
-     * @return int
+     * {@inheritdoc}
      */
-    public function count(): int
+    public function count()
     {
         return count($this->data);
     }
 
     /**
-     * Returns an external iterator
-     *
-     * @return ArrayIterator
+     * {@inheritdoc}
      */
-    public function getIterator(): ArrayIterator
+    public function getIterator()
     {
         return new ArrayIterator($this->data);
     }
@@ -95,33 +91,12 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     }
 
     /**
-     * Returns the instance content encoded in RFC3986 or RFC3987.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3.
-     *
-     * By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
 
     /**
-     * Returns an instance with the specified string
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified data
-     *
-     * @param string $value
-     *
-     * @return ComponentInterface
+     * {@inheritdoc}
      */
     public function withContent($value): ComponentInterface
     {
@@ -133,21 +108,15 @@ abstract class AbstractHierarchicalComponent implements ComponentInterface, Coun
     }
 
     /**
-     * Returns the instance string representation; If the
-     * instance is not defined an empty string is returned
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function __toString(): string
+    public function __toString()
     {
         return (string) $this->getContent();
     }
 
     /**
-     * Returns the instance string representation
-     * with its optional URI delimiters
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getUriComponent(): string
     {

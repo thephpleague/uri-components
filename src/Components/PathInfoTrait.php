@@ -40,7 +40,7 @@ trait PathInfoTrait
      *
      * @return string
      */
-    abstract public function __toString(): string;
+    abstract public function __toString();
 
     /**
      * Returns an instance with the specified string
@@ -69,11 +69,9 @@ trait PathInfoTrait
     abstract public function __construct(string $data = null);
 
     /**
-     * Called by var_dump() when dumping The object
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function __debugInfo(): array
+    public function __debugInfo()
     {
         return ['component' => $this->getContent()];
     }
