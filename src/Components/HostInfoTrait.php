@@ -17,9 +17,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\PublicSuffix\Cache;
-use League\Uri\PublicSuffix\CurlHttpClient;
-use League\Uri\PublicSuffix\ICANNSectionManager;
+use League\Uri;
 
 /**
  * Value object representing a URI host component.
@@ -98,11 +96,7 @@ trait HostInfoTrait
             $host = substr($host, 0, -1);
         }
 
-        static $icann_rules;
-
-        $icann_rules = $icann_rules ?? (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
-
-        $domain = $icann_rules->resolve($host);
+        $domain = Uri\resolve_domain($host);
         $this->hostname_infos['isPublicSuffixValid'] = $domain->isValid();
         $this->hostname_infos['publicSuffix'] = (string) $domain->getPublicSuffix();
         $this->hostname_infos['registerableDomain'] = (string) $domain->getRegistrableDomain();
