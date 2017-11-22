@@ -18,7 +18,7 @@ You need:
 Dependencies
 -------
 
-- [PHP Domain Parser](https://github.com/jeremykendall/php-domain-parser)
+- [League Uri Hostname Parser](https://github.com/thephpleague/uri-hostname-parser)
 
 Installation
 --------
