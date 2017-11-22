@@ -14,7 +14,6 @@ matrix:
       env: COLLECT_COVERAGE=false VALIDATE_CODING_STYLE=false IGNORE_PLATFORMS=true
   allow_failures:
     - php: nightly
-    - php: 7.2
   fast_finish: true
 
 cache:

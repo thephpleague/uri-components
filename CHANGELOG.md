@@ -2,6 +2,25 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.4.0 - TBD
+
+
+### Added
+
+- Dependencies to [League URI Hostname parser](https://github.com/thephpleague/uri-hostname-parser)
+
+### Fixed
+
+- Issue [#109](https://github.com/thephpleague/uri/issues/109) Dependencie on a unstable package
+
+### Deprecated
+
+- None
+
+### Remove
+
+- Dependencies to [PHP Domaine parser](https://github.com/jeremykendall/php-domain-parser/)
+
 ## 1.3.0 - 2017-11-17
 
 ### Added

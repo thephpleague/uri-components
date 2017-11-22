@@ -17,8 +17,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use Pdp\Parser;
-use Pdp\PublicSuffixListManager;
+use League\Uri;
 
 /**
  * Value object representing a URI host component.
@@ -30,13 +29,6 @@ use Pdp\PublicSuffixListManager;
  */
 trait HostInfoTrait
 {
-    /**
-     * Pdp Parser
-     *
-     * @var Parser
-     */
-    protected static $pdp_parser;
-
     /**
      * Hostname public info
      *
@@ -104,28 +96,12 @@ trait HostInfoTrait
             $host = substr($host, 0, -1);
         }
 
-        $this->hostname_infos = array_map(
-            'sprintf',
-            $this->getPdpParser()->parseHost($host)->toArray()
-        ) + $this->hostname_infos;
-
-        if ('' !== $this->hostname_infos['publicSuffix']) {
-            $this->hostname_infos['isPublicSuffixValid'] = $this->getPdpParser()->isSuffixValid($host);
-        }
-
+        $domain = Uri\resolve_domain($host);
+        $this->hostname_infos['isPublicSuffixValid'] = $domain->isValid();
+        $this->hostname_infos['publicSuffix'] = (string) $domain->getPublicSuffix();
+        $this->hostname_infos['registerableDomain'] = (string) $domain->getRegistrableDomain();
+        $this->hostname_infos['subdomain'] = (string) $domain->getSubDomain();
         $this->hostname_infos_loaded = true;
-    }
-
-    /**
-     * Initialize and access the Parser object
-     *
-     * @return Parser
-     */
-    protected function getPdpParser(): Parser
-    {
-        static::$pdp_parser = static::$pdp_parser ?? new Parser((new PublicSuffixListManager())->getList());
-
-        return static::$pdp_parser;
     }
 
     /**
