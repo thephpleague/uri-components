@@ -31,7 +31,7 @@
         "ext-fileinfo": "*",
         "ext-intl": "*",
         "ext-mbstring": "*",
-        "league/uri-hostname-parser": "^1.0.0"
+        "league/uri-hostname-parser": "^1.0.1"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3",
@@ -49,6 +49,8 @@
         }
     },
     "scripts": {
+        "post-install-cmd": "\\League\\Uri\\Installer\\ICANNSection::update",
+        "post-update-cmd": "\\League\\Uri\\Installer\\ICANNSection::update",
         "test": "phpunit --coverage-text; php-cs-fixer fix -v --diff --dry-run --allow-risky=yes;",
         "phpunit": "phpunit --coverage-text",
         "phpcs": "php-cs-fixer fix -v --diff --dry-run --allow-risky=yes;"
