@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.4.1 - 2017-11-24
+
+### Added
+
+- None
+
+### Fixed
+
+- URI Hostname parser local cache update
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.4.0 - 2017-11-22
 
 ### Added
