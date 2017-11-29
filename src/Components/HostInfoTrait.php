@@ -54,6 +54,8 @@ trait HostInfoTrait
      */
     protected static $starting_label_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+    protected static $sub_delimiters = '!$&\'()*+,;=';
+
     /**
      * IPv6 Local Link Prefix
      *
@@ -214,9 +216,11 @@ trait HostInfoTrait
     }
 
     /**
-     * Convert domain name to IDNA ASCII form.
+     * Convert a registered name label to its IDNA ASCII form.
      *
      * Conversion is done only if the label contains none valid label characters
+     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
+     * making the conversion
      *
      * @param string $label
      *
@@ -224,6 +228,10 @@ trait HostInfoTrait
      */
     protected function toAscii(string $label)
     {
+        if (false !== strpos($label, '%')) {
+            $label = rawurldecode($label);
+        }
+
         if (strlen($label) === strspn($label, static::$starting_label_chars.'-')) {
             return $label;
         }
@@ -235,6 +243,8 @@ trait HostInfoTrait
      * Convert domain name to IDNA ASCII form.
      *
      * Conversion is done only if the label contains the ACE prefix 'xn--'
+     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
+     * making the conversion
      *
      * @param string $label
      *
@@ -242,6 +252,10 @@ trait HostInfoTrait
      */
     protected function toIdn(string $label)
     {
+        if (false !== strpos($label, '%')) {
+            $label = rawurldecode($label);
+        }
+
         if (0 !== stripos($label, 'xn--')) {
             return $label;
         }
@@ -256,10 +270,11 @@ trait HostInfoTrait
      *
      * - not be empty
      * - contain 63 characters or less
-     * - contain alphanumeric ASCII character or a hyphen
-     * - start and end whith an alpha numeric ASCII character
+     * - conform to the following ABNF
      *
-     * @see https://tools.ietf.org/html/rfc1034#section-3.5
+     * reg-name = *( unreserved / pct-encoded / sub-delims )
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
      * @param string $label
      *
@@ -267,12 +282,10 @@ trait HostInfoTrait
      */
     protected function isValidLabel($label): bool
     {
-        if (!is_string($label) || '' == $label || 63 < strlen($label)) {
-            return false;
-        }
-
-        return 2 === strspn($label[0].substr($label, -1, 1), static::$starting_label_chars)
-            && strlen($label) === strspn($label, static::$starting_label_chars.'-');
+        return is_string($label)
+            && '' != $label
+            && 63 >= strlen($label)
+            && strlen($label) == strspn($label, self::$starting_label_chars.'-_~'.self::$sub_delimiters);
     }
 
     /**

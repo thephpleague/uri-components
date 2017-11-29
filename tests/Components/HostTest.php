@@ -179,7 +179,7 @@ class HostTest extends TestCase
 
     /**
      * @param string $invalid
-     * @dataProvider       invalidHostProvider
+     * @dataProvider invalidHostProvider
      */
     public function testInvalidHost($invalid)
     {
@@ -199,12 +199,12 @@ class HostTest extends TestCase
 
         return [
             'dot in front' => ['.example.com'],
-            'hyphen suffix' => ['host.com-'],
+            //'hyphen suffix' => ['host.com-'],
             'multiple dot' => ['.......'],
             'one dot' => ['.'],
             'empty label' => ['tot.    .coucou.com'],
             'space in the label' => ['re view'],
-            'underscore in label' => ['_bad.host.com'],
+            //'underscore in label' => ['_bad.host.com'],
             'label too long' => [$longlabel.'.secure.example.com'],
             'too many labels' => [implode('.', array_fill(0, 128, 'a'))],
             'Invalid IPv4 format' => ['[127.0.0.1]'],
@@ -281,6 +281,13 @@ class HostTest extends TestCase
             ['[::1]', '[::1]'],
             ['127.0.0.1', '127.0.0.1'],
         ];
+    }
+
+    public function testValidUrlEncodedHost()
+    {
+        $host = new Host('_b%C3%A9bé.be-');
+        $this->assertSame('xn--_bb-cmab.be-', $host->getContent(Host::RFC3986_ENCODING));
+        $this->assertSame('_bébé.be-', $host->getContent(Host::RFC3987_ENCODING));
     }
 
     /**
