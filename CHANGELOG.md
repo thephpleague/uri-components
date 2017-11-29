@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- URI Host parsing to respect RFC3986
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.4.1 - 2017-11-24
 
 ### Added
