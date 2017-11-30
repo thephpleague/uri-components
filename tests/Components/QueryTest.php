@@ -748,7 +748,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      *
      * @dataProvider buildProvider
      * @param array  $pairs
@@ -893,7 +892,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      */
     public function testBuildWithMalformedUtf8Chars()
     {
@@ -905,7 +903,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      */
     public function testThrowsExceptionOnInvalidEncodingType()
     {
@@ -915,7 +912,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      */
     public function testThrowsExceptionOnInvalidPairs()
     {

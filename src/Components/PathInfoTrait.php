@@ -6,13 +6,12 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-declare(strict_types=1);
 
 namespace League\Uri\Components;
 
@@ -73,6 +72,26 @@ trait PathInfoTrait
     public function __debugInfo()
     {
         return ['component' => $this->getContent()];
+    }
+
+    /**
+     * Returns whether or not the component is defined.
+     *
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return null === $this->getContent();
+    }
+
+    /**
+     * Returns whether or not the component is empty.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return '' == $this->getContent();
     }
 
     /**
@@ -158,7 +177,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutDotSegments(): self
+    public function withoutDotSegments()
     {
         $current = $this->__toString();
         if (false === strpos($current, '.')) {
@@ -208,7 +227,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutEmptySegments(): self
+    public function withoutEmptySegments()
     {
         return $this->withContent(preg_replace(',/+,', '/', $this->__toString()));
     }
@@ -235,7 +254,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withTrailingSlash(): self
+    public function withTrailingSlash()
     {
         return $this->hasTrailingSlash() ? $this : $this->withContent($this->__toString().'/');
     }
@@ -250,7 +269,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutTrailingSlash(): self
+    public function withoutTrailingSlash()
     {
         return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this->__toString(), 0, -1, 'UTF-8'));
     }
@@ -277,7 +296,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withLeadingSlash(): self
+    public function withLeadingSlash()
     {
         return $this->isAbsolute() ? $this : $this->withContent('/'.$this->__toString());
     }
@@ -292,7 +311,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutLeadingSlash(): self
+    public function withoutLeadingSlash()
     {
         return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this->__toString(), 1, null, 'UTF-8'));
     }

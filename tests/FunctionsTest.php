@@ -1,8 +1,10 @@
 <?php
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri;
 
+use ArrayIterator;
 use League\Uri;
+use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
 use PHPUnit\Framework\TestCase;
 
@@ -235,7 +237,7 @@ class FunctionsTest extends TestCase
                 'expected_no_encoding' => '',
             ],
             'identical keys' => [
-                'pairs' => ['a' => ['1', '2']],
+                'pairs' => new ArrayIterator(['a' => ['1', '2']]),
                 'expected_rfc1738' => 'a=1&a=2',
                 'expected_rfc3986' => 'a=1&a=2',
                 'expected_rfc3987' => 'a=1&a=2',
@@ -319,5 +321,11 @@ class FunctionsTest extends TestCase
                 'expected_no_encoding' => 'toto=foo+bar',
             ],
         ];
+    }
+
+    public function testBuildQueryThrowsException()
+    {
+        $this->expectException(Exception::class);
+        Uri\build_query(['foo' => ['bar' => new ArrayIterator(['foo', 'bar', 'baz'])]]);
     }
 }

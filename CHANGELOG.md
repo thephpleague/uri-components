@@ -2,11 +2,12 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next - TBD
+## 1.5.0 - TBD
 
 ### Added
 
-- None
+- `QueryParser` class to parse any string into key/pair value or extract PHP values
+- `QueryBuilder` class to build a valid query string from a collection of Key/pair values
 
 ### Fixed
 
@@ -14,11 +15,13 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Deprecated
 
-- None
+- `Query::parse` replaced by `QueryParser::parse`
+- `Query::extract` replaced by `QueryParser::extract`
+- `Query::build` replaced by `QueryBuilder::build`
 
 ### Remove
 
-- None
+- internal traits `QueryParserTrait`, `HostInfoTrait`
 
 ## 1.4.1 - 2017-11-24
 
