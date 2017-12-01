@@ -201,6 +201,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     {
         $this->separator = $this->filterSeparator($separator);
         $this->pairs = $this->validate($data);
+        $this->params = Uri\pairs_to_params($this->pairs);
         $this->preserve_delimiter = null !== $data;
         $this->keys = array_fill_keys(array_keys($this->pairs), 1);
     }
@@ -351,8 +352,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getParams(): array
     {
-        $this->params = $this->params ?? Uri\extract_query((string) $this, $this->separator);
-
         return $this->params;
     }
 
@@ -367,7 +366,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getParam(string $offset, $default = null)
     {
-        return $this->getParams()[$offset] ?? $default;
+        return $this->params[$offset] ?? $default;
     }
 
     /**

@@ -590,7 +590,7 @@ class HostTest extends TestCase
         $isValidSuffix
     ) {
         $host = new Host($host);
-        $this->assertSame($subdomain, $host->getSubdomain());
+        $this->assertSame($subdomain, $host->getSubDomain());
         $this->assertSame($registerableDomain, $host->getRegisterableDomain());
         $this->assertSame($publicSuffix, $host->getPublicSuffix());
         $this->assertSame($isValidSuffix, $host->isPublicSuffixValid());

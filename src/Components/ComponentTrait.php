@@ -25,6 +25,8 @@ use Traversable;
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
+ *
+ * @internal used internally to ease component conversion
  */
 trait ComponentTrait
 {

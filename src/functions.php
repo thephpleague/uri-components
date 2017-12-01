@@ -36,7 +36,7 @@ function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_
 }
 
 /**
- * Parse a query string into an associative array
+ * Parse a query string into an associative array of key/value pairs
  *
  * @see QueryParser::parse
  *
@@ -73,4 +73,22 @@ function extract_query(string $query, string $separator = '&', int $enc_type = P
     $parser = $parser ?? new QueryParser();
 
     return $parser->extract($query, $separator, $enc_type);
+}
+
+/**
+ * Convert a Collection of key/value pairs into PHP variables
+ *
+ * @see QueryParser::convert
+ *
+ * @param Traversable|array $pairs The collection of key/value pairs
+ *
+ * @return array
+ */
+function pairs_to_params($pairs): array
+{
+    static $parser;
+
+    $parser = $parser ?? new QueryParser();
+
+    return $parser->convert($pairs);
 }

@@ -12,6 +12,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types=1);
 
 namespace League\Uri\Components;
 
@@ -141,7 +142,7 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
             $offset = $nb_elements + $offset;
         }
 
-        $dest = iterator_to_array($this->withContent($component));
+        $dest = iterator_to_array(new static($component));
         if ('' === $dest[count($dest) - 1]) {
             array_pop($dest);
         }

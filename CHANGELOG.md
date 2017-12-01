@@ -2,22 +2,26 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## 1.5.0 - TBD
+## 1.5.0 - 2017-12-01
 
 ### Added
 
-- `QueryParser` class to parse any string into key/pair value or extract PHP values
-- `QueryBuilder` class to build a valid query string from a collection of Key/pair values
+- `Uri\QueryParser` class to parse any string into key/pair value or extract PHP values
+- `Uri\QueryBuilder` class to build a valid query string from a collection of Key/pair values
+- `Uri\pairs_to_params` alias for `QueryParser::convert`
 
 ### Fixed
 
 - URI Host parsing to respect RFC3986
+- improve internal code
 
 ### Deprecated
 
 - `Query::parse` replaced by `QueryParser::parse`
 - `Query::extract` replaced by `QueryParser::extract`
 - `Query::build` replaced by `QueryBuilder::build`
+- `Host::getRegisterableDomain` replaced by `Host::getRegistrableDomain`
+- `Host::withRegisterableDomain` replaced by `Host::withRegistrableDomain`
 
 ### Remove
 

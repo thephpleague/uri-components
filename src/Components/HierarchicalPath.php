@@ -48,8 +48,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     /**
      * return a new instance from an array or a traversable object
      *
-     * @param Traversable|string[] $data The segments list
-     * @param int                  $type one of the constant IS_ABSOLUTE or IS_RELATIVE
+     * @param Traversable|array $data The segments list
+     * @param int               $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
      * @throws Exception If $data is invalid
      * @throws Exception If $type is not a recognized constant

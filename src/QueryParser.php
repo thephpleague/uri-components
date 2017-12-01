@@ -18,6 +18,8 @@ namespace League\Uri;
 
 use League\Uri\Components\ComponentTrait;
 use League\Uri\Components\EncodingInterface;
+use Traversable;
+use TypeError;
 
 /**
  * Value object representing a URI Query component.
@@ -142,7 +144,7 @@ class QueryParser
     ): array {
         $pairs = $this->parse($str, $separator, $enc_type);
 
-        return $this->extractFromPairs($pairs);
+        return $this->convert($pairs);
     }
 
     /**
@@ -155,12 +157,20 @@ class QueryParser
      * @see http://php.net/parse_str
      * @see https://wiki.php.net/rfc/on_demand_name_mangling
      *
-     * @param array $pairs the query string pairs
+     * @param Traversable|array $pairs the query string pairs
      *
      * @return array
      */
-    protected function extractFromPairs(array $pairs): array
+    public function convert($pairs): array
     {
+        if ($pairs instanceof Traversable) {
+            $pairs = iterator_to_array($pairs);
+        }
+
+        if (!is_array($pairs)) {
+            throw new TypeError(sprintf('%s() expects argument passed to be iterable, %s given', __METHOD__, gettype($pairs)));
+        }
+
         $data = [];
         $normalized_pairs = array_map(function ($value) {
             return !is_array($value) ? [$value] : $value;
@@ -189,7 +199,15 @@ class QueryParser
             return '';
         }
 
-        return rawurldecode($value);
+        if (!is_scalar($value) || (is_object($value) && !method_exists($value, '__toString'))) {
+            throw new TypeError(sprintf('QueryParser::convert() expects pairs value to contains null or scalar values, %s given', gettype($value)));
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        return rawurldecode((string) $value);
     }
 
     /**

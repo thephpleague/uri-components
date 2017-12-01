@@ -101,6 +101,7 @@ class QueryTest extends TestCase
      * @covers ::getUriComponent
      * @covers ::createFromPairs
      * @covers ::validate
+     * @covers \League\Uri\pairs_to_params
      * @dataProvider queryProvider
      * @param string|array $input
      * @param string       $expected
