@@ -101,6 +101,7 @@ class QueryTest extends TestCase
      * @covers ::getUriComponent
      * @covers ::createFromPairs
      * @covers ::validate
+     * @covers \League\Uri\pairs_to_params
      * @dataProvider queryProvider
      * @param string|array $input
      * @param string       $expected
@@ -748,7 +749,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      *
      * @dataProvider buildProvider
      * @param array  $pairs
@@ -893,7 +893,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      */
     public function testBuildWithMalformedUtf8Chars()
     {
@@ -905,7 +904,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      */
     public function testThrowsExceptionOnInvalidEncodingType()
     {
@@ -915,7 +913,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::build
-     * @covers ::assertValidPairs
      */
     public function testThrowsExceptionOnInvalidPairs()
     {

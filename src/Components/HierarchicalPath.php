@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -26,7 +26,7 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class HierarchicalPath extends AbstractHierarchicalComponent
+class HierarchicalPath extends AbstractHierarchicalComponent implements ComponentInterface
 {
     use PathInfoTrait;
 
@@ -48,8 +48,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     /**
      * return a new instance from an array or a traversable object
      *
-     * @param Traversable|string[] $data The segments list
-     * @param int                  $type one of the constant IS_ABSOLUTE or IS_RELATIVE
+     * @param Traversable|array $data The segments list
+     * @param int               $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
      * @throws Exception If $data is invalid
      * @throws Exception If $type is not a recognized constant
@@ -244,6 +244,18 @@ class HierarchicalPath extends AbstractHierarchicalComponent
     public function __toString()
     {
         return (string) $this->getContent();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContent($value): ComponentInterface
+    {
+        if ($value === $this->getContent()) {
+            return $this;
+        }
+
+        return new static($value);
     }
 
     /**

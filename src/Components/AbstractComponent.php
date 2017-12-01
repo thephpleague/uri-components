@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -46,7 +46,7 @@ abstract class AbstractComponent implements ComponentInterface
     /**
      * new instance
      *
-     * @param mixed $data the component value
+     * @param string|null $data the component value
      */
     public function __construct(string $data = null)
     {
@@ -107,5 +107,29 @@ abstract class AbstractComponent implements ComponentInterface
         }
 
         return new static($value);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return ['component' => $this->getContent()];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isNull(): bool
+    {
+        return null === $this->getContent();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isEmpty(): bool
+    {
+        return '' == $this->getContent();
     }
 }

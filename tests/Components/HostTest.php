@@ -336,8 +336,6 @@ class HostTest extends TestCase
             'ip 2' => [['127.0', '0.1'], Host::IS_RELATIVE, '0.1.127.0'],
             'ip 3' => [['127.0.0.1'], Host::IS_RELATIVE, '127.0.0.1'],
             'FQDN' => [['com', 'example', 'www'], Host::IS_ABSOLUTE, 'www.example.com.'],
-            'empty' => [[''], Host::IS_RELATIVE, ''],
-            'null' => [[], Host::IS_RELATIVE, ''],
             'empty' => [[''], Host::IS_ABSOLUTE, ''],
             'null' => [[], Host::IS_ABSOLUTE, ''],
         ];
@@ -592,7 +590,7 @@ class HostTest extends TestCase
         $isValidSuffix
     ) {
         $host = new Host($host);
-        $this->assertSame($subdomain, $host->getSubdomain());
+        $this->assertSame($subdomain, $host->getSubDomain());
         $this->assertSame($registerableDomain, $host->getRegisterableDomain());
         $this->assertSame($publicSuffix, $host->getPublicSuffix());
         $this->assertSame($isValidSuffix, $host->isPublicSuffixValid());

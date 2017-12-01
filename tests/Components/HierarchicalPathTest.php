@@ -6,6 +6,7 @@ use ArrayIterator;
 use League\Uri\Components\Exception;
 use League\Uri\Components\HierarchicalPath as Path;
 use PHPUnit\Framework\TestCase;
+use Traversable;
 
 /**
  * @group path

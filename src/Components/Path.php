@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -39,7 +39,7 @@ class Path extends AbstractComponent
             $path = '';
         }
 
-        $this->data = $this->validate($this->validateString($path));
+        parent::__construct($path);
     }
 
     /**

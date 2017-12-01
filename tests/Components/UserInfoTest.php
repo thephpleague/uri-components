@@ -134,11 +134,16 @@ class UserInfoTest extends TestCase
         ];
     }
 
-
     public function testIsNull()
     {
         $this->assertTrue((new UserInfo(null))->isNull());
-        $this->assertFalse((new UserInfo('toto'))->isNull());
+        $this->assertFalse((new UserInfo(''))->isNull());
+    }
+
+    public function testIsEmpty()
+    {
+        $this->assertTrue((new UserInfo(null))->isEmpty());
+        $this->assertTrue((new UserInfo(''))->isEmpty());
     }
 
     /**

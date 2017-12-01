@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -25,6 +25,8 @@ use Traversable;
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
+ *
+ * @internal used internally to ease component conversion
  */
 trait ComponentTrait
 {
@@ -204,53 +206,6 @@ trait ComponentTrait
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return ['component' => $this->getContent()];
-    }
-
-    /**
-     * Returns whether or not the component is defined.
-     *
-     * @return bool
-     */
-    public function isNull(): bool
-    {
-        return null === $this->getContent();
-    }
-
-    /**
-     * Returns whether or not the component is empty.
-     *
-     * @return bool
-     */
-    public function isEmpty(): bool
-    {
-        return '' == $this->getContent();
-    }
-
-    /**
-     * Returns the instance content encoded in RFC3986 or RFC3987.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3.
-     *
-     * By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
-     */
-    abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
-
-    /**
      * Validate the encoding type value
      *
      * @param int $enc_type
@@ -262,10 +217,10 @@ trait ComponentTrait
         static $enc_type_list;
         if (null === $enc_type_list) {
             $enc_type_list = [
-                ComponentInterface::RFC1738_ENCODING => 1,
-                ComponentInterface::RFC3986_ENCODING => 1,
-                ComponentInterface::RFC3987_ENCODING => 1,
-                ComponentInterface::NO_ENCODING => 1,
+                EncodingInterface::RFC1738_ENCODING => 1,
+                EncodingInterface::RFC3986_ENCODING => 1,
+                EncodingInterface::RFC3987_ENCODING => 1,
+                EncodingInterface::NO_ENCODING => 1,
             ];
         }
 
