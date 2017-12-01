@@ -13,13 +13,12 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\Query;
 use Traversable;
 
 /**
  * Build a query string from an associative array
  *
- * @see Query::build
+ * @see QueryBuilder::build
  *
  * @param array|Traversable $pairs     The query pairs
  * @param string            $separator The query string separator
@@ -29,13 +28,17 @@ use Traversable;
  */
 function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): string
 {
-    return Query::build($pairs, $separator, $enc_type);
+    static $builder;
+
+    $builder = $builder ?? new QueryBuilder();
+
+    return $builder->build($pairs, $separator, $enc_type);
 }
 
 /**
- * Parse a query string into an associative array
+ * Parse a query string into an associative array of key/value pairs
  *
- * @see Query::parse
+ * @see QueryParser::parse
  *
  * @param string $query     The query string to parse
  * @param string $separator The query string separator
@@ -45,13 +48,17 @@ function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_
  */
 function parse_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
 {
-    return Query::parse($query, $separator, $enc_type);
+    static $parser;
+
+    $parser = $parser ?? new QueryParser();
+
+    return $parser->parse($query, $separator, $enc_type);
 }
 
 /**
  * Parse the query string like parse_str without mangling the results
  *
- * @see Query::extract
+ * @see QueryParser::extract
  *
  * @param string $query     The query string to parse
  * @param string $separator The query string separator
@@ -61,5 +68,27 @@ function parse_query(string $query, string $separator = '&', int $enc_type = PHP
  */
 function extract_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
 {
-    return Query::extract($query, $separator, $enc_type);
+    static $parser;
+
+    $parser = $parser ?? new QueryParser();
+
+    return $parser->extract($query, $separator, $enc_type);
+}
+
+/**
+ * Convert a Collection of key/value pairs into PHP variables
+ *
+ * @see QueryParser::convert
+ *
+ * @param Traversable|array $pairs The collection of key/value pairs
+ *
+ * @return array
+ */
+function pairs_to_params($pairs): array
+{
+    static $parser;
+
+    $parser = $parser ?? new QueryParser();
+
+    return $parser->convert($pairs);
 }

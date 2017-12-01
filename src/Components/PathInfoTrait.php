@@ -6,13 +6,12 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-declare(strict_types=1);
 
 namespace League\Uri\Components;
 
@@ -23,6 +22,8 @@ namespace League\Uri\Components;
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
+ *
+ * @internal used internally to add default Path component behaviour
  */
 trait PathInfoTrait
 {
@@ -34,46 +35,49 @@ trait PathInfoTrait
     protected static $dot_segments = ['.' => 1, '..' => 1];
 
     /**
-     * Returns the instance string representation; If the
-     * instance is not defined an empty string is returned
-     *
-     * @return string
-     */
-    abstract public function __toString();
-
-    /**
-     * Returns an instance with the specified string
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified data
-     *
-     * @param string $value
-     *
-     * @return ComponentInterface
-     */
-    public function withContent($value): ComponentInterface
-    {
-        if ($value === $this->getContent()) {
-            return $this;
-        }
-
-        return new static($value);
-    }
-
-    /**
-     * new instance
-     *
-     * @param string|null $data the component value
-     */
-    abstract public function __construct(string $data = null);
-
-    /**
      * {@inheritdoc}
      */
     public function __debugInfo()
     {
         return ['component' => $this->getContent()];
     }
+
+    /**
+     * Returns whether or not the component is defined.
+     *
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return null === $this->getContent();
+    }
+
+    /**
+     * Returns whether or not the component is empty.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return '' == $this->getContent();
+    }
+
+    /**
+     * Returns whether or not the path is absolute or relative
+     *
+     * @return bool
+     */
+    public function isAbsolute(): bool
+    {
+        $path = $this->__toString();
+
+        return '' !== $path && '/' === mb_substr($path, 0, 1, 'UTF-8');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    abstract public function __toString();
 
     /**
      * Returns the instance content encoded in RFC3986 or RFC3987.
@@ -116,15 +120,6 @@ trait PathInfoTrait
     }
 
     /**
-     * Convert a RFC3986 encoded string into a RFC1738 string
-     *
-     * @param string $str
-     *
-     * @return string
-     */
-    abstract protected function toRFC1738(string $str): string;
-
-    /**
      * Validate the encoding type value
      *
      * @param int $enc_type
@@ -132,6 +127,13 @@ trait PathInfoTrait
      * @throws Exception If the encoding type is invalid
      */
     abstract protected function assertValidEncoding(int $enc_type);
+
+    /**
+     * Return the decoded string representation of the component
+     *
+     * @return string
+     */
+    abstract protected function getDecoded(): string;
 
     /**
      * Encode a path string according to RFC3986
@@ -143,11 +145,13 @@ trait PathInfoTrait
     abstract protected function encodePath(string $str): string;
 
     /**
-     * Return the decoded string representation of the component
+     * Convert a RFC3986 encoded string into a RFC1738 string
+     *
+     * @param string $str
      *
      * @return string
      */
-    abstract protected function getDecoded(): string;
+    abstract protected function toRFC1738(string $str): string;
 
     /**
      * Returns an instance without dot segments
@@ -158,7 +162,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutDotSegments(): self
+    public function withoutDotSegments()
     {
         $current = $this->__toString();
         if (false === strpos($current, '.')) {
@@ -200,6 +204,18 @@ trait PathInfoTrait
     }
 
     /**
+     * Returns an instance with the specified string
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified data
+     *
+     * @param string $value
+     *
+     * @return ComponentInterface
+     */
+    abstract public function withContent($value): ComponentInterface;
+
+    /**
      * Returns an instance without duplicate delimiters
      *
      * This method MUST retain the state of the current instance, and return
@@ -208,7 +224,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutEmptySegments(): self
+    public function withoutEmptySegments()
     {
         return $this->withContent(preg_replace(',/+,', '/', $this->__toString()));
     }
@@ -235,7 +251,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withTrailingSlash(): self
+    public function withTrailingSlash()
     {
         return $this->hasTrailingSlash() ? $this : $this->withContent($this->__toString().'/');
     }
@@ -250,21 +266,9 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutTrailingSlash(): self
+    public function withoutTrailingSlash()
     {
         return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this->__toString(), 0, -1, 'UTF-8'));
-    }
-
-    /**
-     * Returns whether or not the path is absolute or relative
-     *
-     * @return bool
-     */
-    public function isAbsolute(): bool
-    {
-        $path = $this->__toString();
-
-        return '' !== $path && '/' === mb_substr($path, 0, 1, 'UTF-8');
     }
 
     /**
@@ -277,7 +281,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withLeadingSlash(): self
+    public function withLeadingSlash()
     {
         return $this->isAbsolute() ? $this : $this->withContent('/'.$this->__toString());
     }
@@ -292,7 +296,7 @@ trait PathInfoTrait
      *
      * @return static
      */
-    public function withoutLeadingSlash(): self
+    public function withoutLeadingSlash()
     {
         return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this->__toString(), 1, null, 'UTF-8'));
     }

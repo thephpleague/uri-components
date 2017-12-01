@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -19,6 +19,7 @@ namespace League\Uri\Components;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
+use League\Uri;
 use Traversable;
 
 /**
@@ -37,7 +38,7 @@ use Traversable;
  */
 class Query implements ComponentInterface, Countable, IteratorAggregate
 {
-    use QueryParserTrait;
+    use ComponentTrait;
 
     /**
      * pair separator character
@@ -75,6 +76,72 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     protected $keys;
 
     /**
+     * Returns the store PHP variables as elements of an array.
+     *
+     * DEPRECATION WARNING! This method will be removed in the next major point release
+     *
+     * @deprecated deprecated since version 1.5.0
+     * @see        \League\Uri\QueryParser::extract
+     *
+     * @param string $str       the query string
+     * @param string $separator a the query string single character separator
+     * @param int    $enc_type  the query encoding
+     *
+     * @return array
+     */
+    public static function extract(
+        string $str,
+        string $separator = '&',
+        int $enc_type = ComponentInterface::RFC3986_ENCODING
+    ): array {
+        return Uri\extract_query($str, $separator, $enc_type);
+    }
+
+    /**
+     * Parse a query string into an associative array
+     *
+     * DEPRECATION WARNING! This method will be removed in the next major point release
+     *
+     * @deprecated deprecated since version 1.5.0
+     * @see        \League\Uri\QueryParser::parse
+     *
+     * @param string $str       The query string to parse
+     * @param string $separator The query string separator
+     * @param int    $enc_type  The query encoding algorithm
+     *
+     * @return array
+     */
+    public static function parse(
+        string $str,
+        string $separator = '&',
+        int $enc_type = ComponentInterface::RFC3986_ENCODING
+    ): array {
+        return Uri\parse_query($str, $separator, $enc_type);
+    }
+
+    /**
+     * Build a query string from an associative array
+     *
+     * DEPRECATION WARNING! This method will be removed in the next major point release
+     *
+     * @deprecated deprecated since version 1.5.0
+     * @see        \League\Uri\QueryBuilder::build
+     *
+     * @param array|Traversable $pairs     Query pairs
+     * @param string            $separator Query string separator
+     * @param int               $enc_type  Query encoding type
+     *
+     * @return string
+     */
+    public static function build(
+        $pairs,
+        string $separator = '&',
+        int $enc_type = Query::RFC3986_ENCODING
+    ): string {
+        return Uri\build_query($pairs, $separator, $enc_type);
+    }
+
+    /**
      * Returns a new instance from a collection of iterable properties.
      *
      * @param Traversable|array $params
@@ -107,7 +174,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return new static(null, $separator);
         }
 
-        return new static(static::build($pairs, $separator), $separator);
+        return new static(Uri\build_query($pairs, $separator), $separator);
     }
 
     /**
@@ -119,7 +186,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function __set_state(array $properties): self
     {
-        return new static(static::build($properties['pairs'], $properties['separator'] ?? '&'));
+        $separator = $properties['separator'] ?? '&';
+
+        return new static(Uri\build_query($properties['pairs'], $separator), $separator);
     }
 
     /**
@@ -132,6 +201,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     {
         $this->separator = $this->filterSeparator($separator);
         $this->pairs = $this->validate($data);
+        $this->params = Uri\pairs_to_params($this->pairs);
         $this->preserve_delimiter = null !== $data;
         $this->keys = array_fill_keys(array_keys($this->pairs), 1);
     }
@@ -169,7 +239,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
 
         $str = $this->validateString($str);
 
-        return static::parse($str, $this->separator);
+        return Uri\parse_query($str, $this->separator);
     }
 
     /**
@@ -202,6 +272,22 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
+    public function isNull(): bool
+    {
+        return null === $this->getContent();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isEmpty(): bool
+    {
+        return '' == $this->getContent();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
@@ -209,9 +295,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return null;
         }
 
-        $encoder = self::getEncoder($this->separator, $enc_type);
-
-        return static::getQueryString($this->pairs, $this->separator, $encoder);
+        return Uri\build_query($this->pairs, $this->separator, $enc_type);
     }
 
     /**
@@ -268,8 +352,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getParams(): array
     {
-        $this->params = $this->params ?? $this->extractFromPairs($this->pairs);
-
         return $this->params;
     }
 
@@ -284,7 +366,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getParam(string $offset, $default = null)
     {
-        return $this->getParams()[$offset] ?? $default;
+        return $this->params[$offset] ?? $default;
     }
 
     /**
@@ -425,14 +507,16 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function merge(string $query): self
     {
-        $pairs = $this->validate($this->validateString($query));
-        $pairs = $this->removeEmptyPairs($pairs);
+        $new_pairs = $this->validate($this->validateString($query));
+        $new_pairs = $this->removeEmptyPairs($new_pairs);
         $base_pairs = $this->removeEmptyPairs($this->pairs);
-        if ($base_pairs === $pairs) {
+        if ($base_pairs === $new_pairs) {
             return $this;
         }
 
-        return static::createFromPairs(array_merge($base_pairs, $pairs), $this->separator);
+        $pairs = array_merge($base_pairs, $new_pairs);
+
+        return static::createFromPairs($pairs, $this->separator);
     }
 
     /**
@@ -484,19 +568,19 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function append(string $query): self
     {
-        $pairs = $this->validate($this->validateString($query));
-        $pairs = $this->removeEmptyPairs($pairs);
+        $new_pairs = $this->validate($this->validateString($query));
+        $new_pairs = $this->removeEmptyPairs($new_pairs);
         $base_pairs = $this->removeEmptyPairs($this->pairs);
-        $new_pairs = $base_pairs;
-        foreach ($pairs as $key => $value) {
-            $new_pairs = $this->appendToPair($new_pairs, $key, $value);
+        $pairs = $base_pairs;
+        foreach ($new_pairs as $key => $value) {
+            $pairs = $this->appendToPair($pairs, $key, $value);
         }
 
-        if ($base_pairs == $new_pairs) {
+        if ($base_pairs == $pairs) {
             return $this;
         }
 
-        return static::createFromPairs($new_pairs, $this->separator);
+        return static::createFromPairs($pairs, $this->separator);
     }
 
     /**

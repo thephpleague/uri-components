@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,19 +14,28 @@
  */
 declare(strict_types=1);
 
-namespace League\Uri\Components;
+namespace League\Uri;
 
+use League\Uri\Components\ComponentTrait;
+use League\Uri\Components\EncodingInterface;
 use Traversable;
+use TypeError;
 
 /**
- * a class to parse a URI query string according to RFC3986
+ * Value object representing a URI Query component.
+ *
+ * Instances of this interface are considered immutable; all methods that
+ * might change state MUST be implemented such that they retain the internal
+ * state of the current instance and return an instance that contains the
+ * changed state.
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since      1.0.0
+ * @since      1.5.0
+ * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-trait QueryParserTrait
+class QueryParser
 {
     use ComponentTrait;
 
@@ -44,35 +53,35 @@ trait QueryParserTrait
      *
      * @return array
      */
-    public static function parse(
+    public function parse(
         string $str,
         string $separator = '&',
-        int $enc_type = ComponentInterface::RFC3986_ENCODING
+        int $enc_type = EncodingInterface::RFC3986_ENCODING
     ): array {
-        self::assertValidEncoding($enc_type);
+        $this->assertValidEncoding($enc_type);
 
         $res = [];
         if ('' === $str) {
             return $res;
         }
 
-        $decoder = self::getDecoder($enc_type);
+        $decoder = $this->getDecoder($enc_type);
         foreach (explode($separator, $str) as $pair) {
-            $res = self::parsePair($res, $pair, $separator, $decoder);
+            $res = $this->parsePair($res, $pair, $separator, $decoder);
         }
 
         return $res;
     }
 
-    protected static function getDecoder(int $enc_type): callable
+    protected function getDecoder(int $enc_type): callable
     {
-        if (ComponentInterface::RFC1738_ENCODING === $enc_type) {
+        if (EncodingInterface::RFC1738_ENCODING === $enc_type) {
             return function ($value) {
-                return self::decodeComponent(str_replace('+', ' ', $value));
+                return $this->decodeComponent(str_replace('+', ' ', $value));
             };
         }
 
-        return [Query::class, 'decodeComponent'];
+        return [$this, 'decodeComponent'];
     }
 
     /**
@@ -85,7 +94,7 @@ trait QueryParserTrait
      *
      * @return array
      */
-    protected static function parsePair(
+    protected function parsePair(
         array $res,
         string $pair,
         string $separator,
@@ -113,153 +122,6 @@ trait QueryParserTrait
     }
 
     /**
-     * Build a query string from an associative array
-     *
-     * The method expects the return value from Query::parse to build
-     * a valid query string. This method differs from PHP http_build_query as:
-     *
-     *    - it does not modify parameters keys
-     *
-     * @param array|Traversable $pairs     Query pairs
-     * @param string            $separator Query string separator
-     * @param int               $enc_type  Query encoding type
-     *
-     * @return string
-     */
-    public static function build(
-        $pairs,
-        string $separator = '&',
-        int $enc_type = Query::RFC3986_ENCODING
-    ): string {
-        if ($pairs instanceof Traversable) {
-            $pairs = iterator_to_array($pairs, true);
-        }
-        self::assertValidPairs($pairs);
-        self::assertValidEncoding($enc_type);
-        $encoder = self::getEncoder($separator, $enc_type);
-
-        return self::getQueryString($pairs, $separator, $encoder);
-    }
-
-    /**
-     * Filter the submitted pair array.
-     *
-     * @param array $pairs
-     *
-     * @throws Exception If the array contains non valid data
-     */
-    protected static function assertValidPairs(array $pairs)
-    {
-        $invalid = array_filter($pairs, function ($value) {
-            if (!is_array($value)) {
-                $value = [$value];
-            }
-
-            return array_filter($value, function ($val) {
-                return $val !== null && !is_scalar($val);
-            });
-        });
-
-        if (empty($invalid)) {
-            return;
-        }
-
-        throw new Exception('Invalid value contained in the submitted pairs');
-    }
-
-    /**
-     * Build a query string from an associative array
-     *
-     * The method expects the return value from Query::parse to build
-     * a valid query string. This method differs from PHP http_build_query as:
-     *
-     *    - it does not modify parameters keys
-     *
-     * @param array    $pairs     Query pairs
-     * @param string   $separator Query string separator
-     * @param callable $encoder   Query encoder
-     *
-     * @return string
-     */
-    protected static function getQueryString(array $pairs, string $separator, callable $encoder): string
-    {
-        $normalized_pairs = array_map(function ($value) {
-            return !is_array($value) ? [$value] : $value;
-        }, $pairs);
-
-        $arr = [];
-        foreach ($normalized_pairs as $key => $value) {
-            $arr = array_merge($arr, self::buildPair($encoder, $value, $key));
-        }
-
-        return implode($separator, $arr);
-    }
-
-    /**
-     * Build a query key/pair association
-     *
-     * @param callable   $encoder a callable to encode the key/pair association
-     * @param array      $value   The query string value
-     * @param string|int $key     The query string key
-     *
-     * @return array
-     */
-    protected static function buildPair(callable $encoder, array $value, $key): array
-    {
-        $key = $encoder($key);
-        $reducer = function (array $carry, $data) use ($key, $encoder) {
-            $pair = $key;
-            if (null !== $data) {
-                $pair .= '='.$encoder($data);
-            }
-            $carry[] = $pair;
-
-            return $carry;
-        };
-
-        return array_reduce($value, $reducer, []);
-    }
-
-    /**
-     *subject Return the query string encoding mechanism
-     *
-     * @param string $separator
-     * @param int    $enc_type
-     *
-     * @return callable
-     */
-    protected static function getEncoder(string $separator, int $enc_type): callable
-    {
-        if (Query::NO_ENCODING == $enc_type) {
-            return 'sprintf';
-        }
-
-        if (Query::RFC3987_ENCODING == $enc_type) {
-            $pattern = str_split(self::$invalid_uri_chars);
-            $pattern[] = '#';
-            $pattern[] = $separator;
-            $replace = array_map('rawurlencode', $pattern);
-            return function ($str) use ($pattern, $replace) {
-                return str_replace($pattern, $replace, $str);
-            };
-        }
-
-        $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
-        $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
-        $regexp = '/(%[A-Fa-f0-9]{2})|[^'.self::$unreserved_chars.preg_quote($subdelim, '/').']+/u';
-
-        if (Query::RFC3986_ENCODING == $enc_type) {
-            return function ($str) use ($regexp) {
-                return self::encode((string) $str, $regexp);
-            };
-        }
-
-        return function ($str) use ($regexp) {
-            return self::toRFC1738(self::encode((string) $str, $regexp));
-        };
-    }
-
-    /**
      * Returns the store PHP variables as elements of an array.
      *
      * The result is similar as PHP parse_str when used with its
@@ -271,16 +133,18 @@ trait QueryParserTrait
      *
      * @param string $str       the query string
      * @param string $separator a the query string single character separator
-     * @param string $enc_type  the query encoding
+     * @param int    $enc_type  the query encoding
      *
      * @return array
      */
-    public static function extract(
+    public function extract(
         string $str,
         string $separator = '&',
-        int $enc_type = ComponentInterface::RFC3986_ENCODING
+        int $enc_type = EncodingInterface::RFC3986_ENCODING
     ): array {
-        return self::extractFromPairs(self::parse($str, $separator, $enc_type));
+        $pairs = $this->parse($str, $separator, $enc_type);
+
+        return $this->convert($pairs);
     }
 
     /**
@@ -293,12 +157,20 @@ trait QueryParserTrait
      * @see http://php.net/parse_str
      * @see https://wiki.php.net/rfc/on_demand_name_mangling
      *
-     * @param array $pairs the query string pairs
+     * @param Traversable|array $pairs the query string pairs
      *
      * @return array
      */
-    protected static function extractFromPairs(array $pairs): array
+    public function convert($pairs): array
     {
+        if ($pairs instanceof Traversable) {
+            $pairs = iterator_to_array($pairs);
+        }
+
+        if (!is_array($pairs)) {
+            throw new TypeError(sprintf('%s() expects argument passed to be iterable, %s given', __METHOD__, gettype($pairs)));
+        }
+
         $data = [];
         $normalized_pairs = array_map(function ($value) {
             return !is_array($value) ? [$value] : $value;
@@ -306,7 +178,8 @@ trait QueryParserTrait
 
         foreach ($normalized_pairs as $name => $value) {
             foreach ($value as $val) {
-                self::extractPhpVariable(trim((string) $name), self::formatParsedValue($val), $data);
+                $val = $this->formatParsedValue($val);
+                $this->extractPhpVariable(trim((string) $name), $val, $data);
             }
         }
 
@@ -320,13 +193,21 @@ trait QueryParserTrait
      *
      * @return string
      */
-    protected static function formatParsedValue($value): string
+    protected function formatParsedValue($value): string
     {
         if (null === $value) {
             return '';
         }
 
-        return rawurldecode($value);
+        if (!is_scalar($value) || (is_object($value) && !method_exists($value, '__toString'))) {
+            throw new TypeError(sprintf('QueryParser::convert() expects pairs value to contains null or scalar values, %s given', gettype($value)));
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        return rawurldecode((string) $value);
     }
 
     /**
@@ -352,9 +233,9 @@ trait QueryParserTrait
      *
      * @param string $name  the query pair key
      * @param string $value the formatted value
-     * @param array  &$data the result array passed by reference
+     * @param array  $data  the result array passed by reference
      */
-    protected static function extractPhpVariable(string $name, string $value, array &$data)
+    protected function extractPhpVariable(string $name, string $value, array &$data)
     {
         if ('' === $name) {
             return;
@@ -386,6 +267,6 @@ trait QueryParserTrait
             $remaining = '';
         }
 
-        self::extractPhpVariable($index.$remaining, $value, $data[$key]);
+        $this->extractPhpVariable($index.$remaining, $value, $data[$key]);
     }
 }

@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.4.0
+ * @version    1.5.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -35,11 +35,15 @@ class Port extends AbstractComponent
     /**
      * new instance
      *
-     * @param mixed $data the component value
+     * @param int|null $data the component value
      */
     public function __construct(int $data = null)
     {
-        $this->data = $this->validate($data);
+        if (null !== $data) {
+            $data = (string) $data;
+        }
+
+        parent::__construct($data);
     }
 
     /**
@@ -51,7 +55,8 @@ class Port extends AbstractComponent
             return null;
         }
 
-        if ($data < 1 || $data > 65535) {
+        $data = filter_var($data, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 65535]]);
+        if (!$data) {
             throw new Exception(sprintf('Expected port to be a int or null; received %s', gettype($data)));
         }
 

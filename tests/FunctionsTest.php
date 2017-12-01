@@ -1,16 +1,46 @@
 <?php
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri;
 
+use ArrayIterator;
 use League\Uri;
+use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group function
+ * @group parser
  */
 class FunctionsTest extends TestCase
 {
+    public function testQuerParserConvert()
+    {
+        $expected = ['a' => ['1', '2', 'false']];
+        $pairs = new ArrayIterator(['a[]' => [1, '2', false]]);
+        $this->assertSame($expected, (new Uri\QueryParser())->convert($pairs));
+    }
+
+    /**
+     * @dataProvider invalidPairsProvider
+     *
+     * @param mixed $pairs
+     */
+    public function testQueryParserConvertThrowsTypeError($pairs)
+    {
+        $this->expectException(TypeError::class);
+        (new Uri\QueryParser())->convert($pairs);
+    }
+
+    public function invalidPairsProvider()
+    {
+        return [
+            'pairs must be iterable' => [date_create()],
+            'pairs value must be null or scalar' => ['a[]' => [date_create(), '2']],
+        ];
+    }
+
     /**
      * @dataProvider extractQueryProvider
      *
@@ -235,7 +265,7 @@ class FunctionsTest extends TestCase
                 'expected_no_encoding' => '',
             ],
             'identical keys' => [
-                'pairs' => ['a' => ['1', '2']],
+                'pairs' => new ArrayIterator(['a' => ['1', '2']]),
                 'expected_rfc1738' => 'a=1&a=2',
                 'expected_rfc3986' => 'a=1&a=2',
                 'expected_rfc3987' => 'a=1&a=2',
@@ -319,5 +349,11 @@ class FunctionsTest extends TestCase
                 'expected_no_encoding' => 'toto=foo+bar',
             ],
         ];
+    }
+
+    public function testBuildQueryThrowsException()
+    {
+        $this->expectException(Exception::class);
+        Uri\build_query(['foo' => ['bar' => new ArrayIterator(['foo', 'bar', 'baz'])]]);
     }
 }
