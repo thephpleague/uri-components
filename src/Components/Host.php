@@ -72,46 +72,18 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     protected static $separator = '.';
 
     /**
-     * Host literal representation
-     *
-     * @var string
-     */
-    protected $host;
-
-    /**
      * Hostname public info
      *
      * @var array
      */
-    protected $hostname_infos = [
-        'isPublicSuffixValid' => false,
-        'publicSuffix' => '',
-        'registrableDomain' => '',
-        'subDomain' => '',
-    ];
-
-    /**
-     * is the Hostname Info loaded
-     *
-     * @var bool
-     */
-    protected $hostname_infos_loaded = false;
+    protected $hostname;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        $host = static::createFromLabels($properties['data'], $properties['is_absolute']);
-        $host->hostname_infos_loaded = $properties['hostname_infos_loaded'] ?? [
-            'isPublicSuffixValid' => false,
-            'publicSuffix' => '',
-            'registrableDomain' => '',
-            'subDomain' => '',
-        ];
-        $host->hostname_infos = $properties['hostname_infos'] ?? false;
-
-        return $host;
+        return static::createFromLabels($properties['data'], $properties['is_absolute']);
     }
 
     /**
@@ -178,8 +150,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         if (false !== strpos($ip, '%')) {
-            $parts = explode('%', rawurldecode($ip));
-            $ip = array_shift($parts).'%25'.rawurlencode((string) array_shift($parts));
+            list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + ['', null];
+            $ip = $ipv6.'%25'.rawurlencode((string) $zoneId);
 
             return new static('['.$ip.']');
         }
@@ -200,6 +172,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     {
         $host = $this->setIsAbsolute($host);
         $this->data = $this->validate($host);
+        $this->getDomainInfo();
     }
 
     /**
@@ -207,7 +180,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @param string $str
      *
-     * @return string
+     * @return string|null
      */
     protected function setIsAbsolute(string $str = null)
     {
@@ -269,38 +242,20 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Load the hostname info
-     *
-     * @param string $key hostname info key
-     *
-     * @return mixed
+     * Resolve domain name information
      */
-    protected function getHostnameInfo(string $key)
+    protected function getDomainInfo()
     {
-        $this->loadHostnameInfo();
-        return $this->hostname_infos[$key];
-    }
-
-    /**
-     * parse and save the Hostname information from the Parser
-     */
-    protected function loadHostnameInfo()
-    {
-        if ($this->isIp() || $this->hostname_infos_loaded) {
-            return;
-        }
-
-        $host = $this->__toString();
+        $host = (string) $this;
         if ($this->isAbsolute()) {
             $host = substr($host, 0, -1);
         }
 
         $domain = Uri\resolve_domain($host);
-        $this->hostname_infos['isPublicSuffixValid'] = $domain->isValid();
-        $this->hostname_infos['publicSuffix'] = (string) $domain->getPublicSuffix();
-        $this->hostname_infos['registrableDomain'] = (string) $domain->getRegistrableDomain();
-        $this->hostname_infos['subDomain'] = (string) $domain->getSubDomain();
-        $this->hostname_infos_loaded = true;
+        $this->hostname['publicSuffix'] = (string) $domain->getPublicSuffix();
+        $this->hostname['registrableDomain'] = (string) $domain->getRegistrableDomain();
+        $this->hostname['isPublicSuffixValid'] = $domain->isValid();
+        $this->hostname['subDomain'] = (string) $domain->getSubDomain();
     }
 
     /**
@@ -451,13 +406,11 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function __debugInfo()
     {
-        $this->loadHostnameInfo();
-
         return array_merge([
             'component' => $this->getContent(),
             'labels' => $this->data,
             'is_absolute' => (bool) $this->is_absolute,
-        ], $this->hostname_infos);
+        ], $this->hostname);
     }
 
     /**
@@ -467,7 +420,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getPublicSuffix(): string
     {
-        return $this->getHostnameInfo('publicSuffix');
+        return $this->hostname['publicSuffix'];
     }
 
     /**
@@ -492,7 +445,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getRegistrableDomain(): string
     {
-        return $this->getHostnameInfo('registrableDomain');
+        return $this->hostname['registrableDomain'];
     }
 
     /**
@@ -502,7 +455,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getSubDomain(): string
     {
-        return $this->getHostnameInfo('subDomain');
+        return $this->hostname['subDomain'];
     }
 
     /**
@@ -512,7 +465,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isPublicSuffixValid(): bool
     {
-        return $this->getHostnameInfo('isPublicSuffixValid');
+        return $this->hostname['isPublicSuffixValid'];
     }
 
     /**
@@ -820,7 +773,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         return self::createFromLabels($data, $this->is_absolute);
     }
 
-
     /**
      * Returns an instance without the specified keys
      *
@@ -839,6 +791,41 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         return self::createFromLabels($data, $this->is_absolute);
+    }
+
+    /**
+     * Returns an instance with the specified registerable domain added
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified component with the new registerable domain
+     *
+     * @param string $host the registerable domain to add
+     *
+     * @return static
+     */
+    public function withPublicSuffix(string $host): self
+    {
+        if ('' === $host) {
+            $host = null;
+        }
+
+        $source = $this->getContent();
+        if ('' == $source) {
+            return new static($host);
+        }
+
+        $new = $this->validate($host);
+        $public_suffix = $this->getPublicSuffix();
+        if (implode('.', array_reverse($new)) === $public_suffix) {
+            return $this;
+        }
+
+        $offset = 0;
+        if ('' != $public_suffix) {
+            $offset = count(explode('.', $public_suffix));
+        }
+
+        return self::createFromLabels(array_merge($new, array_slice($this->data, $offset)), $this->is_absolute);
     }
 
     /**

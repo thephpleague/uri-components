@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.6.0 - TBD
+
+### Added
+
+- `Host::withPublicSuffix` to complete registered name manipulation methods
+
+### Fixed
+
+- registered name infos loading
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.5.0 - 2017-12-01
 
 ### Added
