@@ -610,6 +610,38 @@ class HostTest extends TestCase
     }
 
     /**
+     * @dataProvider validPublicSuffix
+     *
+     * @param string|null $publicsuffix
+     * @param string      $host
+     * @param string      $expected
+     */
+    public function testWithPublicSuffix($publicsuffix, $host, $expected)
+    {
+        $this->assertSame(
+            $expected,
+            (string) (new Host($host))->withPublicSuffix($publicsuffix)
+        );
+    }
+
+    public function validPublicSuffix()
+    {
+        return [
+            ['fr', 'example.co.uk', 'example.fr'],
+            ['fr', 'example.be', 'example.fr'],
+            ['127.0.0.1', 'example.co.uk', 'example.127.0.0.1'],
+            ['fr', 'example.fr', 'example.fr'],
+            ['', 'example.fr', 'example'],
+        ];
+    }
+
+    public function testWithPublicSuffixThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Host('[::1]'))->withPublicSuffix('example.com');
+    }
+
+    /**
      * @dataProvider validRegisterableDomain
      * @param string $newhost
      * @param string $host
