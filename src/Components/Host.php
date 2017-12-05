@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.5.0
+ * @version    1.6.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -170,9 +170,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function __construct(string $host = null)
     {
-        $host = $this->setIsAbsolute($host);
-        $this->data = $this->validate($host);
-        $this->getDomainInfo();
+        $this->data = $this->validate($this->setIsAbsolute($host));
+        $this->hostname = $this->getDomainInfo();
     }
 
     /**
@@ -252,10 +251,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $domain = Uri\resolve_domain($host);
-        $this->hostname['publicSuffix'] = (string) $domain->getPublicSuffix();
-        $this->hostname['registrableDomain'] = (string) $domain->getRegistrableDomain();
-        $this->hostname['isPublicSuffixValid'] = $domain->isValid();
-        $this->hostname['subDomain'] = (string) $domain->getSubDomain();
+        return [
+            'isPublicSuffixValid' => $domain->isValid(),
+            'publicSuffix' => (string) $domain->getPublicSuffix(),
+            'registrableDomain' => (string) $domain->getRegistrableDomain(),
+            'subDomain' => (string) $domain->getSubDomain(),
+        ];
     }
 
     /**
