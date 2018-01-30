@@ -5,6 +5,9 @@ namespace LeagueTest\Uri\Components;
 use ArrayIterator;
 use League\Uri\Components\Exception;
 use League\Uri\Components\Host;
+use League\Uri\PublicSuffix\Cache;
+use League\Uri\PublicSuffix\CurlHttpClient;
+use League\Uri\PublicSuffix\ICANNSectionManager;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 
@@ -39,6 +42,14 @@ class HostTest extends TestCase
         $host = new Host('uri.thephpleague.com');
         $alt_host = $host->withContent('uri.thephpleague.com');
         $this->assertSame($alt_host, $host);
+    }
+
+    public function testWithDomainResolver()
+    {
+        $resolver = (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
+        $host = new Host('uri.thephpleague.com');
+        $newHost = $host->withDomainResolver($resolver);
+        $this->assertEquals($newHost, $host);
     }
 
     /**

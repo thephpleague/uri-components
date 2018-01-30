@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.6.0
+ * @version    1.7.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -36,7 +36,7 @@ class Fragment extends AbstractComponent
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -44,7 +44,7 @@ class Fragment extends AbstractComponent
             return $this->data;
         }
 
-        if (ComponentInterface::RFC3987_ENCODING == $enc_type) {
+        if (self::RFC3987_ENCODING == $enc_type) {
             $pattern = str_split(self::$invalid_uri_chars);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->data);
@@ -53,7 +53,7 @@ class Fragment extends AbstractComponent
         $regexp = '/(?:[^'.self::$unreserved_chars.self::$subdelim_chars.'\:\/@\?]+|%(?!'.self::$encoded_chars.'))/ux';
 
         $content = $this->encode($this->data, $regexp);
-        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
+        if (self::RFC1738_ENCODING == $enc_type) {
             return $this->toRFC1738($content);
         }
 
