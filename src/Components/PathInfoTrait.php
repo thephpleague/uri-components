@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.6.0
+ * @version    1.7.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -96,11 +96,11 @@ trait PathInfoTrait
      *
      * @return string|null
      */
-    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
-        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
+        if ($enc_type == EncodingInterface::RFC3987_ENCODING) {
             $pattern = str_split(self::$invalid_uri_chars);
             $pattern[] = '#';
             $pattern[] = '?';
@@ -108,11 +108,11 @@ trait PathInfoTrait
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->getDecoded());
         }
 
-        if ($enc_type == ComponentInterface::RFC3986_ENCODING) {
+        if ($enc_type == EncodingInterface::RFC3986_ENCODING) {
             return $this->encodePath($this->getDecoded());
         }
 
-        if ($enc_type == ComponentInterface::RFC1738_ENCODING) {
+        if ($enc_type == EncodingInterface::RFC1738_ENCODING) {
             return $this->toRFC1738($this->encodePath($this->getDecoded()));
         }
 

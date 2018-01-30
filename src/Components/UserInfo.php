@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.6.0
+ * @version    1.7.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -133,14 +133,14 @@ class UserInfo implements ComponentInterface
      *
      * @return string|null
      */
-    public function getUser(int $enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getUser(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->user || ComponentInterface::NO_ENCODING == $enc_type) {
+        if ('' == $this->user || self::NO_ENCODING == $enc_type) {
             return $this->user;
         }
 
-        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
+        if ($enc_type == self::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', ':', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->user);
@@ -148,7 +148,7 @@ class UserInfo implements ComponentInterface
 
         $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
 
-        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
+        if (self::RFC1738_ENCODING == $enc_type) {
             return $this->toRFC1738($this->encode($this->user, $regexp));
         }
 
@@ -162,14 +162,14 @@ class UserInfo implements ComponentInterface
      *
      * @return string|null
      */
-    public function getPass(int $enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getPass(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->pass || ComponentInterface::NO_ENCODING == $enc_type) {
+        if ('' == $this->pass || self::NO_ENCODING == $enc_type) {
             return $this->pass;
         }
 
-        if ($enc_type == ComponentInterface::RFC3987_ENCODING) {
+        if ($enc_type == self::RFC3987_ENCODING) {
             $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', '@']);
 
             return str_replace($pattern, array_map('rawurlencode', $pattern), $this->pass);
@@ -177,7 +177,7 @@ class UserInfo implements ComponentInterface
 
         $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
 
-        if (ComponentInterface::RFC1738_ENCODING == $enc_type) {
+        if (self::RFC1738_ENCODING == $enc_type) {
             return $this->toRFC1738($this->encode($this->pass, $regexp));
         }
 
@@ -195,7 +195,7 @@ class UserInfo implements ComponentInterface
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
         if (null === $this->user) {

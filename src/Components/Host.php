@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.6.0
+ * @version    1.7.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,7 +16,10 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri;
+use League\Uri\PublicSuffix\Cache;
+use League\Uri\PublicSuffix\CurlHttpClient;
+use League\Uri\PublicSuffix\ICANNSectionManager;
+use League\Uri\PublicSuffix\Rules;
 use Traversable;
 
 /**
@@ -79,26 +82,38 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     protected $hostname;
 
     /**
+     * @var Rules
+     */
+    protected $resolver;
+
+    /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return static::createFromLabels($properties['data'], $properties['is_absolute']);
+        return static::createFromLabels(
+            $properties['data'],
+            $properties['is_absolute'],
+            $properties['resolver'] ?? self::getResolver()
+        );
     }
 
     /**
      * return a new instance from an array or a traversable object
      *
-     * @param Traversable|array $data The segments list
-     * @param int               $type one of the constant IS_ABSOLUTE or IS_RELATIVE
+     * @param Traversable|array $data     The segments list
+     * @param int               $type     One of the constant IS_ABSOLUTE or IS_RELATIVE
+     * @param null|Rules        $resolver
      *
      * @throws Exception If $type is not a recognized constant
      *
      * @return static
      */
-    public static function createFromLabels($data, int $type = self::IS_RELATIVE): self
+    public static function createFromLabels($data, int $type = self::IS_RELATIVE, Rules $resolver = null): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
+
+        $resolver = $resolver ?? self::getResolver();
 
         $data = static::filterIterable($data);
         if (!isset($type_list[$type])) {
@@ -106,14 +121,24 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         if ([] === $data) {
-            return new static();
+            return new static(null, $resolver);
         }
 
         if ([''] === $data) {
-            return new static('');
+            return new static('', $resolver);
         }
 
-        return new static(static::format($data, $type));
+        return new static(static::format($data, $type), $resolver);
+    }
+
+    /**
+     * Get the default Domain Resolver
+     *
+     * @return Rules
+     */
+    protected static function getResolver(): Rules
+    {
+        return (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
     }
 
     /**
@@ -137,27 +162,29 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Return a host from an IP address
      *
-     * @param string $ip
+     * @param string     $ip
+     * @param null|Rules $resolver
      *
      * @throws Exception If the IP is invalid or unrecognized
      *
      * @return static
      */
-    public static function createFromIp(string $ip): self
+    public static function createFromIp(string $ip, Rules $resolver = null): self
     {
+        $resolver = $resolver ?? self::getResolver();
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return new static($ip);
+            return new static($ip, $resolver);
         }
 
         if (false !== strpos($ip, '%')) {
             list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + ['', null];
             $ip = $ipv6.'%25'.rawurlencode((string) $zoneId);
 
-            return new static('['.$ip.']');
+            return new static('['.$ip.']', $resolver);
         }
 
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            return new static('['.$ip.']');
+            return new static('['.$ip.']', $resolver);
         }
 
         throw new Exception(sprintf('Please verify the submitted IP: %s', $ip));
@@ -167,10 +194,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * New instance
      *
      * @param null|string $host
+     * @param null|Rules  $resolver
      */
-    public function __construct(string $host = null)
+    public function __construct(string $host = null, Rules $resolver = null)
     {
         $this->data = $this->validate($this->setIsAbsolute($host));
+        $this->resolver = $resolver ?? self::getResolver();
         $this->hostname = $this->getDomainInfo();
     }
 
@@ -250,7 +279,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $host = substr($host, 0, -1);
         }
 
-        $domain = Uri\resolve_domain($host);
+        $domain = $this->resolver->resolve($host);
+
         return [
             'isPublicSuffixValid' => $domain->isValid(),
             'publicSuffix' => (string) $domain->getPublicSuffix(),
@@ -579,7 +609,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING)
+    public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
 
@@ -591,7 +621,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this->data[0];
         }
 
-        if ($enc_type != ComponentInterface::RFC3987_ENCODING) {
+        if ($enc_type != self::RFC3987_ENCODING) {
             return $this->format(array_map([$this, 'toAscii'], $this->data), $this->is_absolute);
         }
 
@@ -632,7 +662,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return new static($value);
+        return new static($value, $this->resolver);
     }
 
     /**
@@ -651,7 +681,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return new static(substr($this->data[0], 0, strpos($this->data[0], '%')).']');
+        return new static(substr($this->data[0], 0, strpos($this->data[0], '%')).']', $this->resolver);
     }
 
     /**
@@ -709,7 +739,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return static::createFromLabels($labels, $this->is_absolute);
+        return static::createFromLabels($labels, $this->is_absolute, $this->resolver);
     }
 
     /**
@@ -729,7 +759,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return static::createFromLabels($labels, $this->is_absolute);
+        return static::createFromLabels($labels, $this->is_absolute, $this->resolver);
     }
 
     /**
@@ -771,7 +801,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return self::createFromLabels($data, $this->is_absolute);
+        return self::createFromLabels($data, $this->is_absolute, $this->resolver);
     }
 
     /**
@@ -791,7 +821,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return self::createFromLabels($data, $this->is_absolute);
+        return self::createFromLabels($data, $this->is_absolute, $this->resolver);
     }
 
     /**
@@ -812,7 +842,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
 
         $source = $this->getContent();
         if ('' == $source) {
-            return new static($host);
+            return new static($host, $this->resolver);
         }
 
         $new = $this->validate($host);
@@ -826,7 +856,11 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $offset = count(explode('.', $public_suffix));
         }
 
-        return self::createFromLabels(array_merge($new, array_slice($this->data, $offset)), $this->is_absolute);
+        return self::createFromLabels(
+            array_merge($new, array_slice($this->data, $offset)),
+            $this->is_absolute,
+            $this->resolver
+        );
     }
 
     /**
@@ -864,7 +898,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
 
         $source = $this->getContent();
         if ('' == $source) {
-            return new static($host);
+            return new static($host, $this->resolver);
         }
 
         $new = $this->validate($host);
@@ -878,7 +912,11 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $offset = count(explode('.', $registerable_domain));
         }
 
-        return self::createFromLabels(array_merge($new, array_slice($this->data, $offset)), $this->is_absolute);
+        return self::createFromLabels(
+            array_merge($new, array_slice($this->data, $offset)),
+            $this->is_absolute,
+            $this->resolver
+        );
     }
 
     /**
@@ -899,7 +937,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
 
         $source = $this->getContent();
         if ('' == $source) {
-            return new static($host);
+            return new static($host, $this->resolver);
         }
 
         $new = $this->validate($host);
@@ -913,6 +951,30 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $offset -= count(explode('.', $subdomain));
         }
 
-        return self::createFromLabels(array_merge(array_slice($this->data, 0, $offset), $new), $this->is_absolute);
+        return self::createFromLabels(
+            array_merge(array_slice($this->data, 0, $offset), $new),
+            $this->is_absolute,
+            $this->resolver
+        );
+    }
+
+    /**
+     * Returns an instance with a different domain resolver
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains a different domain resolver, and update the
+     * host domain information.
+     *
+     * @param Rules $resolver
+     *
+     * @return static
+     */
+    public function withDomainResolver(Rules $resolver): self
+    {
+        $clone = clone $this;
+        $clone->resolver = $resolver;
+        $clone->getDomainInfo();
+
+        return $clone;
     }
 }
