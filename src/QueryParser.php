@@ -16,8 +16,8 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\ComponentTrait;
 use League\Uri\Components\EncodingInterface;
+use League\Uri\Components\Exception;
 use Traversable;
 use TypeError;
 
@@ -35,9 +35,14 @@ use TypeError;
  * @since      1.5.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-class QueryParser
+class QueryParser implements EncodingInterface
 {
-    use ComponentTrait;
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
 
     /**
      * Parse a query string into an associative array
@@ -56,16 +61,13 @@ class QueryParser
     public function parse(
         string $str,
         string $separator = '&',
-        int $enc_type = EncodingInterface::RFC3986_ENCODING
+        int $enc_type = self::RFC3986_ENCODING
     ): array {
-        $this->assertValidEncoding($enc_type);
-
+        $decoder = $this->getDecoder($enc_type);
         $res = [];
         if ('' === $str) {
             return $res;
         }
-
-        $decoder = $this->getDecoder($enc_type);
         foreach (explode($separator, $str) as $pair) {
             $res = $this->parsePair($res, $pair, $separator, $decoder);
         }
@@ -73,15 +75,48 @@ class QueryParser
         return $res;
     }
 
+    /**
+     * Returns the query string decoding mechanism.
+     *
+     * @param int $enc_type
+     *
+     * @throws Exception
+     *
+     * @return callable
+     */
     protected function getDecoder(int $enc_type): callable
     {
-        if (EncodingInterface::RFC1738_ENCODING === $enc_type) {
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
+        if (self::RFC1738_ENCODING === $enc_type) {
             return function ($value) {
-                return $this->decodeComponent(str_replace('+', ' ', $value));
+                return $this->decode(str_replace('+', ' ', $value));
             };
         }
 
-        return [$this, 'decodeComponent'];
+        return [$this, 'decode'];
+    }
+
+    /**
+     * Decode a component according to RFC3986
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    protected function decode(string $str): string
+    {
+        $decoder = function (array $matches) {
+            if (preg_match(',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i', $matches[0])) {
+                return strtoupper($matches[0]);
+            }
+
+            return rawurldecode($matches[0]);
+        };
+
+        return preg_replace_callback(',%[A-Fa-f0-9]{2},', $decoder, $str);
     }
 
     /**
@@ -140,7 +175,7 @@ class QueryParser
     public function extract(
         string $str,
         string $separator = '&',
-        int $enc_type = EncodingInterface::RFC3986_ENCODING
+        int $enc_type = self::RFC3986_ENCODING
     ): array {
         $pairs = $this->parse($str, $separator, $enc_type);
 
@@ -163,23 +198,22 @@ class QueryParser
      */
     public function convert($pairs): array
     {
-        if ($pairs instanceof Traversable) {
-            $pairs = iterator_to_array($pairs);
-        }
-
-        if (!is_array($pairs)) {
+        if (!$pairs instanceof Traversable && !is_array($pairs)) {
             throw new TypeError(sprintf('%s() expects argument passed to be iterable, %s given', __METHOD__, gettype($pairs)));
         }
 
         $data = [];
-        $normalized_pairs = array_map(function ($value) {
-            return !is_array($value) ? [$value] : $value;
-        }, $pairs);
+        foreach ($pairs as $name => $value) {
+            if (!is_array($value)) {
+                $value = [$value];
+            }
 
-        foreach ($normalized_pairs as $name => $value) {
             foreach ($value as $val) {
-                $val = $this->formatParsedValue($val);
-                $this->extractPhpVariable(trim((string) $name), $val, $data);
+                $this->extractPhpVariable(
+                    trim((string) $name),
+                    $this->formatParsedValue($val),
+                    $data
+                );
             }
         }
 
@@ -211,7 +245,7 @@ class QueryParser
     }
 
     /**
-     * Parse a query pairs like parse_str but wihout mangling the results array keys.
+     * Parse a query pairs like parse_str but without mangling the results array keys.
      *
      * <ul>
      * <li>empty name are not saved</li>
