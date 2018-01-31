@@ -16,7 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\ComponentTrait;
 use League\Uri\Components\EncodingInterface;
 use League\Uri\Components\Exception;
 
@@ -36,9 +35,16 @@ use Traversable;
  * @since      1.5.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-class QueryBuilder
+class QueryBuilder implements EncodingInterface
 {
-    use ComponentTrait;
+    /**
+     * Invalid Characters
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-2
+     *
+     * @var string
+     */
+    const INVALID_URI_CHARS = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
 
     /**
      * Build a query string from an associative array
@@ -57,60 +63,39 @@ class QueryBuilder
     public function build(
         $pairs,
         string $separator = '&',
-        int $enc_type = EncodingInterface::RFC3986_ENCODING
+        int $enc_type = self::RFC3986_ENCODING
     ): string {
-        if ($pairs instanceof Traversable) {
-            $pairs = iterator_to_array($pairs, true);
-        }
-        $this->assertValidPairs($pairs);
-        $this->assertValidEncoding($enc_type);
         $encoder = $this->getEncoder($separator, $enc_type);
-
-        return $this->getQueryString($pairs, $separator, $encoder);
-    }
-
-    /**
-     * Filter the submitted pair array.
-     *
-     * @param array $pairs
-     *
-     * @throws Exception If the array contains non valid data
-     */
-    protected function assertValidPairs(array $pairs)
-    {
-        $invalid = array_filter($pairs, function ($value) {
+        $res = [];
+        foreach ($pairs as $key => $value) {
             if (!is_array($value)) {
                 $value = [$value];
             }
 
-            return array_filter($value, function ($val) {
-                return $val !== null && !is_scalar($val);
-            });
-        });
-
-        if (empty($invalid)) {
-            return;
+            $res = array_merge($res, $this->buildPair($encoder, $value, $key));
         }
 
-        throw new Exception('Invalid value contained in the submitted pairs');
+        return implode($separator, $res);
     }
 
     /**
-     *subject Return the query string encoding mechanism
+     * Returns the query string encoding mechanism.
      *
      * @param string $separator
      * @param int    $enc_type
+     *
+     * @throws Exception If the encoding type is invalid
      *
      * @return callable
      */
     protected function getEncoder(string $separator, int $enc_type): callable
     {
-        if (EncodingInterface::NO_ENCODING == $enc_type) {
+        if (self::NO_ENCODING == $enc_type) {
             return 'sprintf';
         }
 
-        if (EncodingInterface::RFC3987_ENCODING == $enc_type) {
-            $pattern = str_split(self::$invalid_uri_chars);
+        if (self::RFC3987_ENCODING == $enc_type) {
+            $pattern = str_split(self::INVALID_URI_CHARS);
             $pattern[] = '#';
             $pattern[] = $separator;
             $replace = array_map('rawurlencode', $pattern);
@@ -121,49 +106,50 @@ class QueryBuilder
 
         $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
         $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
-        $regexp = '/(%[A-Fa-f0-9]{2})|[^'.self::$unreserved_chars.preg_quote($subdelim, '/').']+/u';
+        $regexp = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote($subdelim, '/').']+/u';
 
-        if (EncodingInterface::RFC3986_ENCODING == $enc_type) {
+        if (self::RFC3986_ENCODING == $enc_type) {
             return function ($str) use ($regexp) {
                 return $this->encode((string) $str, $regexp);
             };
         }
 
-        return function ($str) use ($regexp) {
-            return $this->toRFC1738($this->encode((string) $str, $regexp));
-        };
+        if (self::RFC1738_ENCODING == $enc_type) {
+            return function ($str) use ($regexp) {
+                return str_replace(
+                    ['+', '~'],
+                    ['%2B', '%7E'],
+                    $this->encode((string) $str, $regexp)
+                );
+            };
+        }
+
+        throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
     }
 
     /**
-     * Build a query string from an associative array
+     * Encodes a component string.
      *
-     * The method expects the return value from Query::parse to build
-     * a valid query string. This method differs from PHP http_build_query as:
-     *
-     *    - it does not modify parameters keys
-     *
-     * @param array    $pairs     Query pairs
-     * @param string   $separator Query string separator
-     * @param callable $encoder   Query encoder
+     * @param string $str    The string to encode
+     * @param string $regexp a regular expression
      *
      * @return string
      */
-    protected function getQueryString(array $pairs, string $separator, callable $encoder): string
+    protected function encode(string $str, string $regexp): string
     {
-        $normalized_pairs = array_map(function ($value) {
-            return !is_array($value) ? [$value] : $value;
-        }, $pairs);
+        $encoder = function (array $matches) {
+            if (preg_match('/^[A-Za-z0-9_\-\.~]$/', rawurldecode($matches[0]))) {
+                return $matches[0];
+            }
 
-        $arr = [];
-        foreach ($normalized_pairs as $key => $value) {
-            $arr = array_merge($arr, $this->buildPair($encoder, $value, $key));
-        }
+            return rawurlencode($matches[0]);
+        };
 
-        return implode($separator, $arr);
+        return preg_replace_callback($regexp, $encoder, $str) ?? rawurlencode($str);
     }
 
     /**
-     * Build a query key/pair association
+     * Build a query key/pair association.
      *
      * @param callable   $encoder a callable to encode the key/pair association
      * @param array      $value   The query string value
@@ -183,6 +169,12 @@ class QueryBuilder
 
             return $carry;
         };
+
+        foreach ($value as $val) {
+            if ($val !== null && !is_scalar($val)) {
+                throw new Exception('Invalid value contained in the submitted pairs');
+            }
+        }
 
         return array_reduce($value, $reducer, []);
     }
