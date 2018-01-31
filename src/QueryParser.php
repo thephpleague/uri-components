@@ -45,6 +45,21 @@ class QueryParser implements EncodingInterface
     ];
 
     /**
+     * @var callable
+     */
+    private $decoder;
+
+    /**
+     * @var string
+     */
+    protected $separator;
+
+    /**
+     * @var string
+     */
+    protected $encoded_sep;
+
+    /**
      * Parse a query string into an associative array
      *
      * Multiple identical key will generate an array. This function
@@ -63,16 +78,16 @@ class QueryParser implements EncodingInterface
         string $separator = '&',
         int $enc_type = self::RFC3986_ENCODING
     ): array {
-        $decoder = $this->getDecoder($enc_type);
-        $res = [];
+        $this->decoder = $this->getDecoder($enc_type);
+
         if ('' === $str) {
-            return $res;
-        }
-        foreach (explode($separator, $str) as $pair) {
-            $res = $this->parsePair($res, $pair, $separator, $decoder);
+            return [];
         }
 
-        return $res;
+        $this->separator = $separator;
+        $this->encoded_sep = rawurlencode($separator);
+
+        return array_reduce(explode($separator, $str), [$this, 'parsePair'], []);
     }
 
     /**
@@ -122,25 +137,18 @@ class QueryParser implements EncodingInterface
     /**
      * Parse a query string pair
      *
-     * @param array    $res       The associative array to add the pair to
-     * @param string   $pair      The query string pair
-     * @param string   $separator The query string separator
-     * @param callable $decoder   The query string decoder
+     * @param array  $res  The associative array to add the pair to
+     * @param string $pair The query string pair
      *
      * @return array
      */
-    protected function parsePair(
-        array $res,
-        string $pair,
-        string $separator,
-        callable $decoder
-    ): array {
-        $encoded_sep = rawurlencode($separator);
+    protected function parsePair(array $res, string $pair): array
+    {
         $param = explode('=', $pair, 2);
-        $key = $decoder(array_shift($param));
+        $key = ($this->decoder)(array_shift($param));
         $value = array_shift($param);
         if (null !== $value) {
-            $value = str_replace($encoded_sep, $separator, $decoder($value));
+            $value = str_replace($this->encoded_sep, $this->separator, ($this->decoder)($value));
         }
 
         if (!array_key_exists($key, $res)) {
@@ -172,11 +180,8 @@ class QueryParser implements EncodingInterface
      *
      * @return array
      */
-    public function extract(
-        string $str,
-        string $separator = '&',
-        int $enc_type = self::RFC3986_ENCODING
-    ): array {
+    public function extract(string $str, string $separator = '&', int $enc_type = self::RFC3986_ENCODING): array
+    {
         $pairs = $this->parse($str, $separator, $enc_type);
 
         return $this->convert($pairs);
@@ -209,11 +214,7 @@ class QueryParser implements EncodingInterface
             }
 
             foreach ($value as $val) {
-                $this->extractPhpVariable(
-                    trim((string) $name),
-                    $this->formatParsedValue($val),
-                    $data
-                );
+                $this->extractPhpVariable(trim((string) $name), $this->normalize($val), $data);
             }
         }
 
@@ -227,7 +228,7 @@ class QueryParser implements EncodingInterface
      *
      * @return string
      */
-    protected function formatParsedValue($value): string
+    protected function normalize($value): string
     {
         if (null === $value) {
             return '';
