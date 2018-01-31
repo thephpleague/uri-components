@@ -93,9 +93,7 @@ trait ComponentTrait
             return rawurlencode($matches[0]);
         };
 
-        $res = preg_replace_callback($regexp, $encoder, $str);
-
-        return $res ?? rawurlencode($str);
+        return preg_replace_callback($regexp, $encoder, $str) ?? rawurlencode($str);
     }
 
     /**

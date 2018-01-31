@@ -37,14 +37,22 @@ use Traversable;
  */
 class QueryBuilder implements EncodingInterface
 {
-    /**
-     * Invalid Characters
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-2
-     *
-     * @var string
-     */
-    const INVALID_URI_CHARS = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
+    const CHARS_LIST = [
+        'pattern' => [
+            "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07", "\x08", "\x09",
+            "\x0A", "\x0B", "\x0C", "\x0D", "\x0E", "\x0F", "\x10", "\x11", "\x12", "\x13",
+            "\x14", "\x15", "\x16", "\x17", "\x18", "\x19", "\x1A", "\x1B", "\x1C", "\x1D",
+            "\x1E", "\x1F", "\x7F", '#',
+        ],
+        'replace' => [
+            '%00', '%01', '%02', '%03', '%04', '%05', '%06', '%07', '%08', '%09',
+            '%0A', '%0B', '%0C', '%0D', '%0E', '%0F', '%10', '%11', '%12', '%13',
+            '%14', '%15', '%16', '%17', '%18', '%19', '%1A', '%1B', '%1C', '%1D',
+            '%1E', '%1F', '%7F', '%23',
+        ],
+    ];
+
+    protected $encoder;
 
     /**
      * Build a query string from an associative array
@@ -65,14 +73,10 @@ class QueryBuilder implements EncodingInterface
         string $separator = '&',
         int $enc_type = self::RFC3986_ENCODING
     ): string {
-        $encoder = $this->getEncoder($separator, $enc_type);
+        $this->encoder = $this->getEncoder($separator, $enc_type);
         $res = [];
         foreach ($pairs as $key => $value) {
-            if (!is_array($value)) {
-                $value = [$value];
-            }
-
-            $res = array_merge($res, $this->buildPair($encoder, $value, $key));
+            $res = array_merge($res, $this->buildPair($key, $value));
         }
 
         return implode($separator, $res);
@@ -95,17 +99,16 @@ class QueryBuilder implements EncodingInterface
         }
 
         if (self::RFC3987_ENCODING == $enc_type) {
-            $pattern = str_split(self::INVALID_URI_CHARS);
-            $pattern[] = '#';
+            $pattern = self::CHARS_LIST['pattern'];
             $pattern[] = $separator;
-            $replace = array_map('rawurlencode', $pattern);
+            $replace = self::CHARS_LIST['replace'];
+            $replace[] = rawurlencode($separator);
             return function ($str) use ($pattern, $replace) {
                 return str_replace($pattern, $replace, $str);
             };
         }
 
-        $separator = html_entity_decode($separator, ENT_HTML5, 'UTF-8');
-        $subdelim = str_replace($separator, '', "!$'()*+,;=:@?/&%");
+        $subdelim = str_replace(html_entity_decode($separator, ENT_HTML5, 'UTF-8'), '', "!$'()*+,;=:@?/&%");
         $regexp = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote($subdelim, '/').']+/u';
 
         if (self::RFC3986_ENCODING == $enc_type) {
@@ -151,31 +154,60 @@ class QueryBuilder implements EncodingInterface
     /**
      * Build a query key/pair association.
      *
-     * @param callable   $encoder a callable to encode the key/pair association
-     * @param array      $value   The query string value
-     * @param string|int $key     The query string key
+     * @param string|int $key   The pair key
+     * @param mixed      $value The pair value
      *
      * @return array
      */
-    protected function buildPair(callable $encoder, array $value, $key): array
+    protected function buildPair($key, $value): array
     {
-        $key = $encoder($key);
-        $reducer = function (array $carry, $data) use ($key, $encoder) {
-            $pair = $key;
-            if (null !== $data) {
-                $pair .= '='.$encoder($data);
-            }
-            $carry[] = $pair;
+        $normalized_value = $this->normalize($value);
+        $key = ($this->encoder)($key);
+        $reducer = function (array $carry, $data) use ($key) {
+            $carry[] = null === $data ? $key : $key.'='.($this->encoder)($data);
 
             return $carry;
         };
 
-        foreach ($value as $val) {
-            if ($val !== null && !is_scalar($val)) {
-                throw new Exception('Invalid value contained in the submitted pairs');
-            }
+        return array_reduce($normalized_value, $reducer, []);
+    }
+
+    /**
+     * Normalize the pair value
+     *
+     * @param mixed $content
+     *
+     * @return array
+     */
+    protected function normalize($content): array
+    {
+        if (!is_array($content)) {
+            return [$this->normalizeValue($content)];
         }
 
-        return array_reduce($value, $reducer, []);
+        foreach ($content as &$value) {
+            $value = $this->normalizeValue($value);
+        }
+        unset($value);
+
+        return $content;
+    }
+
+    /**
+     * Normalize a value
+     *
+     * @param mixed $value
+     *
+     * @throws Exception If the value content can not be normalized
+     *
+     * @return mixed
+     */
+    protected function normalizeValue($value)
+    {
+        if (null === $value || is_scalar($value)) {
+            return $value;
+        }
+
+        throw new Exception('Invalid value contained in the submitted pairs');
     }
 }

@@ -16,6 +16,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - The domain resolver as a Rules object is now injecting into the Host domain so that its data can be cached independently of the filecache. If not domain resolver is provided the Host will fallback to using the filecache with the data being kept for 7 days in a `vendor` subdirectory.
 
+- Decoupled the `QueryBuilder` and the `QueryParser` from `ComponentTrait`
+
 ### Deprecated
 
 - None
