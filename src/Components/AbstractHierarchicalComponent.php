@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.6.0
+ * @version    1.7.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -92,7 +92,7 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
     /**
      * {@inheritdoc}
      */
-    abstract public function getContent(int $enc_type = ComponentInterface::RFC3986_ENCODING);
+    abstract public function getContent(int $enc_type = EncodingInterface::RFC3986_ENCODING);
 
     /**
      * {@inheritdoc}

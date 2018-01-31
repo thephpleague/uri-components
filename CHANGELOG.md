@@ -2,6 +2,30 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.7.0 - 2018-01-30
+
+### Added
+
+- Adding the possibility to use your own domain resolver object.
+    - `Host::__construct` can take an optional `Rules` object as the domain resolver
+    - `Host::createFromIp` can take an optional `Rules` object as the domain resolver
+    - `Host::createFromLabels` can take an optional `Rules` object as the domain resolver
+    - `Host::withDomainResolver` to enable switching to current domain resolver object
+
+### Fixed
+
+- The domain resolver as a Rules object is now injecting into the Host domain so that its data can be cached independently of the filecache. If not domain resolver is provided the Host will fallback to using the filecache with the data being kept for 7 days in a `vendor` subdirectory.
+
+- Decoupled the `QueryBuilder` and the `QueryParser` from `ComponentTrait`
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.6.0 - 2017-12-05
 
 ### Added

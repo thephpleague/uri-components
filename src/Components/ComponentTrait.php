@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.6.0
+ * @version    1.7.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -93,12 +93,7 @@ trait ComponentTrait
             return rawurlencode($matches[0]);
         };
 
-        $res = preg_replace_callback($regexp, $encoder, $str);
-        if (null !== $res) {
-            return $res;
-        }
-
-        return rawurlencode($str);
+        return preg_replace_callback($regexp, $encoder, $str) ?? rawurlencode($str);
     }
 
     /**

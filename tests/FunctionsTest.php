@@ -15,6 +15,18 @@ use TypeError;
  */
 class FunctionsTest extends TestCase
 {
+    public function testEncodingThrowsExceptionWithQueryParser()
+    {
+        $this->expectException(Exception::class);
+        Uri\parse_query('foo=bar', '&', 42);
+    }
+
+    public function testEncodingThrowsExceptionWithQueryBuilder()
+    {
+        $this->expectException(Exception::class);
+        Uri\build_query(['foo' => 'bar'], '&', 42);
+    }
+
     public function testQuerParserConvert()
     {
         $expected = ['a' => ['1', '2', 'false']];

@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.6.0
+ * @version    1.7.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,8 +16,8 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\ComponentTrait;
 use League\Uri\Components\EncodingInterface;
+use League\Uri\Components\Exception;
 use Traversable;
 use TypeError;
 
@@ -35,9 +35,29 @@ use TypeError;
  * @since      1.5.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-class QueryParser
+class QueryParser implements EncodingInterface
 {
-    use ComponentTrait;
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
+
+    /**
+     * @var callable
+     */
+    private $decoder;
+
+    /**
+     * @var string
+     */
+    protected $separator;
+
+    /**
+     * @var string
+     */
+    protected $encoded_sep;
 
     /**
      * Parse a query string into an associative array
@@ -56,56 +76,79 @@ class QueryParser
     public function parse(
         string $str,
         string $separator = '&',
-        int $enc_type = EncodingInterface::RFC3986_ENCODING
+        int $enc_type = self::RFC3986_ENCODING
     ): array {
-        $this->assertValidEncoding($enc_type);
+        $this->decoder = $this->getDecoder($enc_type);
 
-        $res = [];
         if ('' === $str) {
-            return $res;
+            return [];
         }
 
-        $decoder = $this->getDecoder($enc_type);
-        foreach (explode($separator, $str) as $pair) {
-            $res = $this->parsePair($res, $pair, $separator, $decoder);
-        }
+        $this->separator = $separator;
+        $this->encoded_sep = rawurlencode($separator);
 
-        return $res;
+        return array_reduce(explode($separator, $str), [$this, 'parsePair'], []);
     }
 
+    /**
+     * Returns the query string decoding mechanism.
+     *
+     * @param int $enc_type
+     *
+     * @throws Exception
+     *
+     * @return callable
+     */
     protected function getDecoder(int $enc_type): callable
     {
-        if (EncodingInterface::RFC1738_ENCODING === $enc_type) {
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
+        if (self::RFC1738_ENCODING === $enc_type) {
             return function ($value) {
-                return $this->decodeComponent(str_replace('+', ' ', $value));
+                return $this->decode(str_replace('+', ' ', $value));
             };
         }
 
-        return [$this, 'decodeComponent'];
+        return [$this, 'decode'];
+    }
+
+    /**
+     * Decode a component according to RFC3986
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    protected function decode(string $str): string
+    {
+        $decoder = function (array $matches) {
+            if (preg_match(',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i', $matches[0])) {
+                return strtoupper($matches[0]);
+            }
+
+            return rawurldecode($matches[0]);
+        };
+
+        return preg_replace_callback(',%[A-Fa-f0-9]{2},', $decoder, $str);
     }
 
     /**
      * Parse a query string pair
      *
-     * @param array    $res       The associative array to add the pair to
-     * @param string   $pair      The query string pair
-     * @param string   $separator The query string separator
-     * @param callable $decoder   The query string decoder
+     * @param array  $res  The associative array to add the pair to
+     * @param string $pair The query string pair
      *
      * @return array
      */
-    protected function parsePair(
-        array $res,
-        string $pair,
-        string $separator,
-        callable $decoder
-    ): array {
-        $encoded_sep = rawurlencode($separator);
+    protected function parsePair(array $res, string $pair): array
+    {
         $param = explode('=', $pair, 2);
-        $key = $decoder(array_shift($param));
+        $key = ($this->decoder)(array_shift($param));
         $value = array_shift($param);
         if (null !== $value) {
-            $value = str_replace($encoded_sep, $separator, $decoder($value));
+            $value = str_replace($this->encoded_sep, $this->separator, ($this->decoder)($value));
         }
 
         if (!array_key_exists($key, $res)) {
@@ -137,11 +180,8 @@ class QueryParser
      *
      * @return array
      */
-    public function extract(
-        string $str,
-        string $separator = '&',
-        int $enc_type = EncodingInterface::RFC3986_ENCODING
-    ): array {
+    public function extract(string $str, string $separator = '&', int $enc_type = self::RFC3986_ENCODING): array
+    {
         $pairs = $this->parse($str, $separator, $enc_type);
 
         return $this->convert($pairs);
@@ -163,23 +203,18 @@ class QueryParser
      */
     public function convert($pairs): array
     {
-        if ($pairs instanceof Traversable) {
-            $pairs = iterator_to_array($pairs);
-        }
-
-        if (!is_array($pairs)) {
+        if (!$pairs instanceof Traversable && !is_array($pairs)) {
             throw new TypeError(sprintf('%s() expects argument passed to be iterable, %s given', __METHOD__, gettype($pairs)));
         }
 
         $data = [];
-        $normalized_pairs = array_map(function ($value) {
-            return !is_array($value) ? [$value] : $value;
-        }, $pairs);
+        foreach ($pairs as $name => $value) {
+            if (!is_array($value)) {
+                $value = [$value];
+            }
 
-        foreach ($normalized_pairs as $name => $value) {
             foreach ($value as $val) {
-                $val = $this->formatParsedValue($val);
-                $this->extractPhpVariable(trim((string) $name), $val, $data);
+                $this->extractPhpVariable(trim((string) $name), $this->normalize($val), $data);
             }
         }
 
@@ -193,7 +228,7 @@ class QueryParser
      *
      * @return string
      */
-    protected function formatParsedValue($value): string
+    protected function normalize($value): string
     {
         if (null === $value) {
             return '';
@@ -211,7 +246,7 @@ class QueryParser
     }
 
     /**
-     * Parse a query pairs like parse_str but wihout mangling the results array keys.
+     * Parse a query pairs like parse_str but without mangling the results array keys.
      *
      * <ul>
      * <li>empty name are not saved</li>
