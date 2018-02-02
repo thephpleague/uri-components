@@ -97,9 +97,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $properties['resolver'] ?? null
         );
 
-        if (isset($properties['hostname'])) {
-            $host->lazyloadInfo();
-        }
+        $host->hostname = $properties['hostname'];
 
         return $host;
     }
@@ -436,7 +434,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     {
         $this->lazyloadInfo();
 
-
         return array_merge([
             'component' => $this->getContent(),
             'labels' => $this->data,
@@ -695,9 +692,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $new = new static(substr($this->data[0], 0, strpos($this->data[0], '%')).']', $this->resolver);
-        if ($this->hostname) {
-            $new->lazyloadInfo();
-        }
+        $new->hostname = $this->hostname;
 
         return $new;
     }
