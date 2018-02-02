@@ -91,11 +91,17 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public static function __set_state(array $properties): self
     {
-        return static::createFromLabels(
+        $host = static::createFromLabels(
             $properties['data'],
             $properties['is_absolute'],
-            $properties['resolver'] ?? self::getResolver()
+            $properties['resolver'] ?? null
         );
+
+        if (isset($properties['hostname'])) {
+            $host->lazyloadInfo();
+        }
+
+        return $host;
     }
 
     /**
@@ -113,8 +119,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
-        $resolver = $resolver ?? self::getResolver();
-
         $data = static::filterIterable($data);
         if (!isset($type_list[$type])) {
             throw Exception::fromInvalidFlag($type);
@@ -129,16 +133,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         return new static(static::format($data, $type), $resolver);
-    }
-
-    /**
-     * Get the default Domain Resolver
-     *
-     * @return Rules
-     */
-    protected static function getResolver(): Rules
-    {
-        return (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
     }
 
     /**
@@ -171,7 +165,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public static function createFromIp(string $ip, Rules $resolver = null): self
     {
-        $resolver = $resolver ?? self::getResolver();
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return new static($ip, $resolver);
         }
@@ -199,8 +192,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     public function __construct(string $host = null, Rules $resolver = null)
     {
         $this->data = $this->validate($this->setIsAbsolute($host));
-        $this->resolver = $resolver ?? self::getResolver();
-        $this->hostname = $this->getDomainInfo();
+        $this->resolver = $resolver;
     }
 
     /**
@@ -272,16 +264,21 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Resolve domain name information
      */
-    protected function getDomainInfo()
+    protected function lazyloadInfo()
     {
+        if (isset($this->hostname)) {
+            return $this->hostname;
+        }
+
         $host = (string) $this;
         if ($this->isAbsolute()) {
             $host = substr($host, 0, -1);
         }
 
-        $domain = $this->resolver->resolve($host);
+        $resolver = $this->resolver ?? (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
+        $domain = $resolver->resolve($host);
 
-        return [
+        $this->hostname = [
             'isPublicSuffixValid' => $domain->isValid(),
             'publicSuffix' => (string) $domain->getPublicSuffix(),
             'registrableDomain' => (string) $domain->getRegistrableDomain(),
@@ -437,6 +434,9 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function __debugInfo()
     {
+        $this->lazyloadInfo();
+
+
         return array_merge([
             'component' => $this->getContent(),
             'labels' => $this->data,
@@ -451,6 +451,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getPublicSuffix(): string
     {
+        $this->lazyloadInfo();
+
         return $this->hostname['publicSuffix'];
     }
 
@@ -476,6 +478,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getRegistrableDomain(): string
     {
+        $this->lazyloadInfo();
+
         return $this->hostname['registrableDomain'];
     }
 
@@ -486,6 +490,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getSubDomain(): string
     {
+        $this->lazyloadInfo();
+
         return $this->hostname['subDomain'];
     }
 
@@ -496,6 +502,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isPublicSuffixValid(): bool
     {
+        $this->lazyloadInfo();
+
         return $this->hostname['isPublicSuffixValid'];
     }
 
@@ -662,7 +670,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return new static($value, $this->resolver);
+        $new = new static($value, $this->resolver);
+        if ($this->hostname) {
+            $new->lazyloadInfo();
+        }
+
+        return $new;
     }
 
     /**
@@ -681,7 +694,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return new static(substr($this->data[0], 0, strpos($this->data[0], '%')).']', $this->resolver);
+        $new = new static(substr($this->data[0], 0, strpos($this->data[0], '%')).']', $this->resolver);
+        if ($this->hostname) {
+            $new->lazyloadInfo();
+        }
+
+        return $new;
     }
 
     /**
@@ -739,7 +757,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return static::createFromLabels($labels, $this->is_absolute, $this->resolver);
+        $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
+        if ($this->hostname) {
+            $new->lazyloadInfo();
+        }
+
+        return $new;
     }
 
     /**
@@ -759,7 +782,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return static::createFromLabels($labels, $this->is_absolute, $this->resolver);
+        $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
+        if ($this->hostname) {
+            $new->lazyloadInfo();
+        }
+
+        return $new;
     }
 
     /**
@@ -796,12 +824,17 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function replaceLabel(int $offset, string $host): self
     {
-        $data = $this->replace($offset, $host);
-        if ($data === $this->data) {
+        $labels = $this->replace($offset, $host);
+        if ($labels === $this->data) {
             return $this;
         }
 
-        return self::createFromLabels($data, $this->is_absolute, $this->resolver);
+        $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
+        if ($this->hostname) {
+            $new->lazyloadInfo();
+        }
+
+        return $new;
     }
 
     /**
@@ -821,7 +854,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        return self::createFromLabels($data, $this->is_absolute, $this->resolver);
+        $new = self::createFromLabels($data, $this->is_absolute, $this->resolver);
+        if ($this->hostname) {
+            $new->lazyloadInfo();
+        }
+
+        return $new;
     }
 
     /**
@@ -845,8 +883,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return new static($host, $this->resolver);
         }
 
-        $new = $this->validate($host);
         $public_suffix = $this->getPublicSuffix();
+        $new = $this->normalizeLabels($host);
         if (implode('.', array_reverse($new)) === $public_suffix) {
             return $this;
         }
@@ -856,11 +894,53 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $offset = count(explode('.', $public_suffix));
         }
 
-        return self::createFromLabels(
+        $new = self::createFromLabels(
             array_merge($new, array_slice($this->data, $offset)),
             $this->is_absolute,
             $this->resolver
         );
+
+        $new->lazyloadInfo();
+
+        return $new;
+    }
+
+    /**
+     * validate the submitted data
+     *
+     * @param string|null $host
+     *
+     * @throws Exception If the host is invalid
+     *
+     * @return array
+     */
+    protected function normalizeLabels(string $host = null): array
+    {
+        if (null === $host) {
+            return [];
+        }
+
+        if ('' === $host) {
+            return [''];
+        }
+
+        if ('.' === $host[0]) {
+            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
+        }
+
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return [$host];
+        }
+
+        if ($this->isValidIpv6Hostname($host)) {
+            return [$host];
+        }
+
+        if ($this->isValidHostname($host)) {
+            return array_reverse(array_map([$this, 'toIdn'], explode('.', mb_strtolower($host, 'UTF-8'))));
+        }
+
+        throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
     }
 
     /**
@@ -901,8 +981,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return new static($host, $this->resolver);
         }
 
-        $new = $this->validate($host);
         $registerable_domain = $this->getRegistrableDomain();
+        $new = $this->normalizeLabels($host);
         if (implode('.', array_reverse($new)) === $registerable_domain) {
             return $this;
         }
@@ -912,11 +992,14 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $offset = count(explode('.', $registerable_domain));
         }
 
-        return self::createFromLabels(
+        $new = self::createFromLabels(
             array_merge($new, array_slice($this->data, $offset)),
             $this->is_absolute,
             $this->resolver
         );
+        $new->lazyloadInfo();
+
+        return $new;
     }
 
     /**
@@ -940,8 +1023,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return new static($host, $this->resolver);
         }
 
-        $new = $this->validate($host);
         $subdomain = $this->getSubDomain();
+        $new = $this->normalizeLabels($host);
         if (implode('.', array_reverse($new)) === $subdomain) {
             return $this;
         }
@@ -951,11 +1034,14 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $offset -= count(explode('.', $subdomain));
         }
 
-        return self::createFromLabels(
+        $new = self::createFromLabels(
             array_merge(array_slice($this->data, 0, $offset), $new),
             $this->is_absolute,
             $this->resolver
         );
+        $new->lazyloadInfo();
+
+        return $new;
     }
 
     /**
@@ -965,15 +1051,21 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * an instance that contains a different domain resolver, and update the
      * host domain information.
      *
-     * @param Rules $resolver
+     * @param Rules|null $resolver
      *
      * @return static
      */
-    public function withDomainResolver(Rules $resolver): self
+    public function withDomainResolver(Rules $resolver = null): self
     {
+        if ($resolver == $this->resolver) {
+            return $this;
+        }
+
         $clone = clone $this;
         $clone->resolver = $resolver;
-        $clone->getDomainInfo();
+        if (!empty($this->hostname)) {
+            $clone->lazyloadInfo();
+        }
 
         return $clone;
     }
