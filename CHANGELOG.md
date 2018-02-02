@@ -2,6 +2,29 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.7.1 - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- The `Host` resolver and its usage is lazyloaded so that `Host` only requires and used them if needed
+- Bug fix issue with:
+    - `Host::withPublicSuffix`
+    - `Host::withRegistrableDomain`
+    - `Host::withSubDomain`
+methods that were leaving the current `Host` object corrupted in some cases.
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.7.0 - 2018-01-31
 
 ### Added
