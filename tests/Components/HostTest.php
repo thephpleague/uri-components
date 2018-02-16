@@ -49,7 +49,7 @@ class HostTest extends TestCase
         $resolver = (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
         $host = new Host('uri.thephpleague.com');
         $newHost = $host->withDomainResolver($resolver);
-        $this->assertEquals($newHost, $host);
+        $this->assertNotEquals($newHost, $host);
     }
 
     /**
