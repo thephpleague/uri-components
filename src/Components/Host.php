@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.7.0
+ * @version    1.7.1
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -260,31 +260,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Resolve domain name information
-     */
-    protected function lazyloadInfo()
-    {
-        if (isset($this->hostname)) {
-            return $this->hostname;
-        }
-
-        $host = (string) $this;
-        if ($this->isAbsolute()) {
-            $host = substr($host, 0, -1);
-        }
-
-        $resolver = $this->resolver ?? (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
-        $domain = $resolver->resolve($host);
-
-        $this->hostname = [
-            'isPublicSuffixValid' => $domain->isValid(),
-            'publicSuffix' => (string) $domain->getPublicSuffix(),
-            'registrableDomain' => (string) $domain->getRegistrableDomain(),
-            'subDomain' => (string) $domain->getSubDomain(),
-        ];
-    }
-
-    /**
      * validate an Ipv6 Hostname
      *
      * @see http://tools.ietf.org/html/rfc6874#section-2
@@ -375,7 +350,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $label;
         }
 
-        return idn_to_ascii($label, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
+        return idn_to_ascii($label, 0, INTL_IDNA_VARIANT_UTS46);
     }
 
     /**
@@ -399,7 +374,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $label;
         }
 
-        return idn_to_utf8($label, IDNA_NONTRANSITIONAL_TO_UNICODE, INTL_IDNA_VARIANT_UTS46);
+        return idn_to_utf8($label, 0, INTL_IDNA_VARIANT_UTS46);
     }
 
     /**
@@ -439,6 +414,31 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             'labels' => $this->data,
             'is_absolute' => (bool) $this->is_absolute,
         ], $this->hostname);
+    }
+
+    /**
+     * Resolve domain name information
+     */
+    protected function lazyloadInfo()
+    {
+        if (isset($this->hostname)) {
+            return $this->hostname;
+        }
+
+        $host = (string) $this;
+        if ($this->isAbsolute()) {
+            $host = substr($host, 0, -1);
+        }
+
+        $this->resolver = $this->resolver ?? (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
+        $domain = $this->resolver->resolve($host);
+
+        $this->hostname = [
+            'isPublicSuffixValid' => $domain->isValid(),
+            'publicSuffix' => (string) $domain->getPublicSuffix(),
+            'registrableDomain' => (string) $domain->getRegistrableDomain(),
+            'subDomain' => (string) $domain->getSubDomain(),
+        ];
     }
 
     /**
