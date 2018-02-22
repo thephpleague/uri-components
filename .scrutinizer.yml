@@ -1,22 +1,38 @@
 build:
-  nodes:
-    analysis:
-      tests:
-        override: [php-scrutinizer-run]
+    nodes:
+        analysis:
+            environment:
+                php:
+                    version: 7.2
+                cache:
+                    disabled: false
+                    directories:
+                        - ~/.composer/cache
+                project_setup:
+                    override: true
+                tests:
+                    override:
+                        - php-scrutinizer-run
 filter:
-    paths: [src/*]
-    excluded_paths: [tests/*]
+    paths:
+        - src
+    excluded_paths:
+        - tests
 checks:
     php:
         code_rating: true
 tools:
     external_code_coverage:
-        timeout: 600
+        timeout: 3600
         runs: 2
     php_code_coverage: false
     php_loc:
         enabled: true
-        excluded_dirs: [tests, vendor]
+        excluded_dirs:
+            - tests
+            - vendor
     php_cpd:
         enabled: true
-        excluded_dirs: [tests, vendor]
+        excluded_dirs:
+            - tests
+            - vendor
