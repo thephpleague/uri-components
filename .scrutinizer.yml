@@ -1,18 +1,11 @@
 build:
     nodes:
         analysis:
-            environment:
-                php:
-                    version: 7.2
-                cache:
-                    disabled: false
-                    directories:
-                        - ~/.composer/cache
-                project_setup:
-                    override: true
-                tests:
-                    override:
-                        - php-scrutinizer-run
+            project_setup:
+                override: true
+            tests:
+                override:
+                    - php-scrutinizer-run --enable-security-analysis
 filter:
     paths:
         - src
