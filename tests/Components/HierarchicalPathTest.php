@@ -124,7 +124,7 @@ class HierarchicalPathTest extends TestCase
 
     /**
      * @param array|Traversable $input
-     * @param bool              $has_front_delimiter
+     * @param int               $has_front_delimiter
      * @param string            $expected
      * @dataProvider createFromSegmentsValid
      */
@@ -155,7 +155,7 @@ class HierarchicalPathTest extends TestCase
 
     /**
      * @param array $input
-     * @param bool  $flags
+     * @param int   $flags
      * @dataProvider createFromSegmentsInvalid
      */
     public function testCreateFromSegmentsFailed($input, $flags)
@@ -193,9 +193,9 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $source
-     * @param $append
-     * @param $res
+     * @param string $source
+     * @param string $append
+     * @param string $res
      * @dataProvider appendData
      */
     public function testAppend($source, $append, $res)
@@ -318,8 +318,8 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $path
-     * @param $dirname
+     * @param string $path
+     * @param string $dirname
      * @dataProvider dirnameProvider
      */
     public function testGetDirmane($path, $dirname)
@@ -348,8 +348,8 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $parsed
+     * @param string $raw
+     * @param string $parsed
      * @dataProvider extensionProvider
      */
     public function testGetExtension($raw, $parsed)
@@ -368,10 +368,10 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @param $raw
-     * @param $raw_ext
-     * @param $new_path
-     * @param $parsed_ext
+     * @param string $raw
+     * @param string $raw_ext
+     * @param string $new_path
+     * @param string $parsed_ext
      * @dataProvider withExtensionProvider
      */
     public function testWithExtension($raw, $raw_ext, $new_path, $parsed_ext)
@@ -447,8 +447,8 @@ class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider getExtensionProvider
      *
-     * @param $uri
-     * @param $extension
+     * @param string $uri
+     * @param string $extension
      */
     public function testGetExtensionPreserveTypeCode($uri, $extension)
     {

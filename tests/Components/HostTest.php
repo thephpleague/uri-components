@@ -10,6 +10,7 @@ use League\Uri\PublicSuffix\CurlHttpClient;
 use League\Uri\PublicSuffix\ICANNSectionManager;
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use Traversable;
 
 /**
  * @group host
@@ -328,9 +329,9 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param string $input
-     * @param bool   $is_absolute
-     * @param string $expected
+     * @param array|Traversable $input
+     * @param int               $is_absolute
+     * @param string            $expected
      * @dataProvider createFromLabelsValid
      */
     public function testCreateFromLabels($input, $is_absolute, $expected)
@@ -353,8 +354,8 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param string $input
-     * @param bool   $is_absolute
+     * @param array $input
+     * @param int   $is_absolute
      * @dataProvider createFromLabelsInvalid
      */
     public function testcreateFromLabelsFailed($input, $is_absolute)
@@ -623,9 +624,9 @@ class HostTest extends TestCase
     /**
      * @dataProvider validPublicSuffix
      *
-     * @param string|null $publicsuffix
-     * @param string      $host
-     * @param string      $expected
+     * @param string $publicsuffix
+     * @param string $host
+     * @param string $expected
      */
     public function testWithPublicSuffix($publicsuffix, $host, $expected)
     {

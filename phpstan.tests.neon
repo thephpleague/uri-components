@@ -1,0 +1,11 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/phpstan/phpstan-phpunit/strictRules.neon
+parameters:
+    ignoreErrors:
+        - '#Parameter \#1 \$offsets of method League\\Uri\\Components\\Host::withoutLabels\(\) expects array<int>, array<int, string> given.#'
+        - '#Access to an undefined property League\\Uri\\Components\\Query::\$unknownProperty.#'
+        - '#Parameter \#1 \$offsets of method League\\Uri\\Components\\HierarchicalPath::withoutSegments\(\) expects array<int>, array<int, string> given.#'
+    reportUnmatchedIgnoredErrors: false
