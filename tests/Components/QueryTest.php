@@ -50,6 +50,34 @@ class QueryTest extends TestCase
         ];
     }
 
+    public function testInvalidSetterThrowException()
+    {
+        $this->expectException(Exception::class);
+        $path = new Query();
+        $path->unknownProperty = true;
+    }
+
+    public function testInvalidGetterThrowException()
+    {
+        $this->expectException(Exception::class);
+        $path = new Query();
+        $path->unknownProperty;
+    }
+
+    public function testInvalidIssetThrowException()
+    {
+        $this->expectException(Exception::class);
+        $path = new Query();
+        isset($path->unknownProperty);
+    }
+
+    public function testInvalidUnssetThrowException()
+    {
+        $this->expectException(Exception::class);
+        $path = new Query();
+        unset($path->unknownProperty);
+    }
+
     /**
      * @covers ::getSeparator
      * @covers ::withSeparator
@@ -181,7 +209,7 @@ class QueryTest extends TestCase
     {
         $this->assertSame('foo=bar&=', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->getContent());
         $this->assertSame('=bar&=', (new Query('&=bar&='))->withoutEmptyPairs()->getContent());
-        $this->assertSame(null, (new Query('&&&&&&&&&&&'))->withoutEmptyPairs()->getContent());
+        $this->assertNull((new Query('&&&&&&&&&&&'))->withoutEmptyPairs()->getContent());
     }
 
     /**
@@ -327,7 +355,7 @@ class QueryTest extends TestCase
      */
     public function testCountable()
     {
-        $this->assertSame(1, count($this->query));
+        $this->assertCount(1, $this->query);
     }
 
     /**
@@ -359,9 +387,9 @@ class QueryTest extends TestCase
 
         $this->assertCount(3, $query->keys());
         $this->assertSame(['foo', 'bar', 'baz'], $query->keys());
-        $this->assertSame(null, $query->getPair('foo'));
-        $this->assertSame(null, $query->getPair('bar'));
-        $this->assertSame(null, $query->getPair('baz'));
+        $this->assertNull($query->getPair('foo'));
+        $this->assertNull($query->getPair('bar'));
+        $this->assertNull($query->getPair('baz'));
     }
 
     /**

@@ -24,8 +24,8 @@ class PortTest extends TestCase
     }
 
     /**
-     * @param  $input
-     * @param  $expected
+     * @param null|int $input
+     * @param null|int $expected
      * @dataProvider getToIntProvider
      */
     public function testToInt($input, $expected)
@@ -51,7 +51,7 @@ class PortTest extends TestCase
     }
 
     /**
-     * @param $port
+     * @param int $port
      *
      * @dataProvider invalidPortProvider
      */
@@ -62,8 +62,9 @@ class PortTest extends TestCase
     }
 
     /**
-     * @param  $input
-     * @param  $expected
+     * @param int|null $input
+     * @param string   $expected
+     *
      * @dataProvider getUriComponentProvider
      */
     public function testGetUriComponent($input, $expected)
