@@ -2,6 +2,25 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- code improved using PHPStan
+- using the new scrutinizr engine for PHP
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.7.1 - 2018-02-16
 
 ### Added

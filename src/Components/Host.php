@@ -79,10 +79,10 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @var array
      */
-    protected $hostname;
+    protected $hostname = [];
 
     /**
-     * @var Rules
+     * @var Rules|null
      */
     protected $resolver;
 
@@ -202,7 +202,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     protected function setIsAbsolute(string $str = null)
     {
-        if (in_array($str, [null, '.'], true)) {
+        if (null === $str || '.' === $str) {
             return $str;
         }
 
@@ -421,7 +421,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     protected function lazyloadInfo()
     {
-        if (isset($this->hostname)) {
+        if (!empty($this->hostname)) {
             return $this->hostname;
         }
 
@@ -668,7 +668,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $new = new static($value, $this->resolver);
-        if ($this->hostname) {
+        if (!empty($this->hostname)) {
             $new->lazyloadInfo();
         }
 
@@ -723,7 +723,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @return static
      */
-    public function withoutRootlabel(): self
+    public function withoutRootLabel(): self
     {
         if ($this->is_absolute == self::IS_RELATIVE || $this->isIp()) {
             return $this;
@@ -753,7 +753,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
-        if ($this->hostname) {
+        if (!empty($this->hostname)) {
             $new->lazyloadInfo();
         }
 
@@ -778,7 +778,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
-        if ($this->hostname) {
+        if (!empty($this->hostname)) {
             $new->lazyloadInfo();
         }
 
@@ -825,7 +825,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
-        if ($this->hostname) {
+        if (!empty($this->hostname)) {
             $new->lazyloadInfo();
         }
 
@@ -850,7 +850,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $new = self::createFromLabels($data, $this->is_absolute, $this->resolver);
-        if ($this->hostname) {
+        if (!empty($this->hostname)) {
             $new->lazyloadInfo();
         }
 

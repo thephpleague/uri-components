@@ -136,7 +136,7 @@ class UserInfo implements ComponentInterface
     public function getUser(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->user || self::NO_ENCODING == $enc_type) {
+        if (null === $this->user || '' === $this->user || self::NO_ENCODING == $enc_type) {
             return $this->user;
         }
 
@@ -165,7 +165,7 @@ class UserInfo implements ComponentInterface
     public function getPass(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->assertValidEncoding($enc_type);
-        if ('' == $this->pass || self::NO_ENCODING == $enc_type) {
+        if (null === $this->pass || '' === $this->pass || self::NO_ENCODING == $enc_type) {
             return $this->pass;
         }
 

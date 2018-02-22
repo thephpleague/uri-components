@@ -35,8 +35,8 @@ class SchemeTest extends TestCase
 
     /**
      * @dataProvider validSchemeProvider
-     * @param $scheme
-     * @param $toString
+     * @param null|string $scheme
+     * @param string      $toString
      */
     public function testValidScheme($scheme, $toString)
     {
@@ -56,7 +56,7 @@ class SchemeTest extends TestCase
     }
 
     /**
-     * @param  $scheme
+     * @param string $scheme
      * @dataProvider invalidSchemeProvider
      */
     public function testInvalidScheme($scheme)

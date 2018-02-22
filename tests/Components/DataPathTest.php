@@ -15,7 +15,7 @@ class DataPathTest extends TestCase
 {
     /**
      * @dataProvider invalidDataUriPath
-     * @param $path
+     * @param string $path
      */
     public function testCreateFromPathFailed($path)
     {
@@ -149,37 +149,9 @@ class DataPathTest extends TestCase
         ];
     }
 
-    public function testInvalidSetterThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Path();
-        $path->unknownProperty = true;
-    }
-
-    public function testInvalidGetterThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Path();
-        $path->unknownProperty;
-    }
-
-    public function testInvalidIssetThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Path();
-        isset($path->unknownProperty);
-    }
-
-    public function testInvalidUnssetThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Path();
-        unset($path->unknownProperty);
-    }
-
     /**
      * @dataProvider fileProvider
-     * @param $uri
+     * @param Path $uri
      */
     public function testToBinary($uri)
     {
@@ -188,7 +160,7 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider fileProvider
-     * @param $uri
+     * @param Path $uri
      */
     public function testToAscii($uri)
     {
