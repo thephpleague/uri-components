@@ -24,8 +24,8 @@ tools:
         excluded_dirs:
             - tests
             - vendor
-    php_cpd:
+    php_cpd: false
+    php_sim:
         enabled: true
-        excluded_dirs:
-            - tests
-            - vendor
+        filter:
+            paths: ['src']

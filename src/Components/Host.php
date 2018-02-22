@@ -668,7 +668,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         $new = new static($value, $this->resolver);
-        if (empty($this->hostname)) {
+        if (!empty($this->hostname)) {
             $new->lazyloadInfo();
         }
 
