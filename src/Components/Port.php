@@ -55,7 +55,7 @@ class Port extends AbstractComponent
             return null;
         }
 
-        $data = filter_var($data, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 65535]]);
+        $data = filter_var($data, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
         if (!$data) {
             throw new Exception(sprintf('Expected port to be a int or null; received %s', gettype($data)));
         }

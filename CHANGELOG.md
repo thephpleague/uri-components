@@ -12,6 +12,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - code improved using PHPStan
 - using the new scrutinizr engine for PHP
+- bug fix Port class to conform to RFC3986 now allow any port number greater or 
+  equals to `0`.
 
 ### Deprecated
 
