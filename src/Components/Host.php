@@ -47,6 +47,13 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     const SUB_DELIMITERS = '!$&\'()*+,;=';
 
     /**
+     * Tell whether the Host is an IPFuture
+     *
+     * @var bool
+     */
+    protected $host_as_ipfuture = false;
+
+    /**
      * Tell whether the Host is an IPv4
      *
      * @var bool
@@ -157,7 +164,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * @param string     $ip
      * @param null|Rules $resolver
      *
-     * @throws Exception If the IP is invalid or unrecognized
+     * @throws Exception If the resulting host is invalid
      *
      * @return static
      */
@@ -167,18 +174,16 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return new static($ip, $resolver);
         }
 
-        if (false !== strpos($ip, '%')) {
-            list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + ['', null];
-            $ip = $ipv6.'%25'.rawurlencode((string) $zoneId);
-
-            return new static('['.$ip.']', $resolver);
-        }
-
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             return new static('['.$ip.']', $resolver);
         }
 
-        throw new Exception(sprintf('Please verify the submitted IP: %s', $ip));
+        if (false !== strpos($ip, '%')) {
+            list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + [1 => null];
+            $ip = $ipv6.'%25'.rawurlencode((string) $zoneId);
+        }
+
+        return new static('['.$ip.']', $resolver);
     }
 
     /**
@@ -227,6 +232,9 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     protected function validate(string $host = null): array
     {
+        $this->host_as_ipv4 = false;
+        $this->host_as_ipv6 = false;
+        $this->host_as_ipfuture = false;
         if (null === $host) {
             return [];
         }
@@ -248,6 +256,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         if ($this->isValidIpv6Hostname($host)) {
             $this->host_as_ipv6 = true;
             $this->has_zone_identifier = false !== strpos($host, '%');
+
+            return [$host];
+        }
+
+        if ($this->isValidIpFuture($host)) {
+            $this->host_as_ipfuture = true;
 
             return [$host];
         }
@@ -295,13 +309,38 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return false;
         }
 
-        $reducer = function ($carry, $char) {
-            return $carry.str_pad(decbin(ord($char)), 8, '0', STR_PAD_LEFT);
-        };
+        static $address_block = "\xfe\x80";
 
-        $res = array_reduce(str_split(unpack('A16', inet_pton($ipv6))[1]), $reducer, '');
+        return substr(inet_pton($ipv6) & $address_block, 0, 2) === $address_block;
+    }
 
-        return substr($res, 0, 10) === self::LOCAL_LINK_PREFIX;
+    /**
+     * validate an Ip future
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * @param string $ip
+     *
+     * @return bool
+     */
+    protected function isValidIpFuture(string $ip): bool
+    {
+        if (false === strpos($ip, '[') || false === strpos($ip, ']')) {
+            return false;
+        }
+
+        $ip = substr($ip, 1, -1);
+
+        static $ip_future = '/^
+            v(?<version>[A-F0-9])+\.
+            (?:
+                (?<unreserved>[a-z0-9_~\-\.])|
+                (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
+            )+
+        $/ix';
+
+        return preg_match($ip_future, $ip, $matches)
+            && !in_array($matches['version'], ['4', '6'], true);
     }
 
     /**
@@ -527,7 +566,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIp(): bool
     {
-        return $this->host_as_ipv4 || $this->host_as_ipv6;
+        return $this->host_as_ipv4 || $this->host_as_ipv6 || $this->host_as_ipfuture;
     }
 
     /**
@@ -548,6 +587,16 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     public function isIpv6(): bool
     {
         return $this->host_as_ipv6;
+    }
+
+    /**
+     * Returns whether or not the host is an IPv6 address
+     *
+     * @return bool
+     */
+    public function isIpFuture(): bool
+    {
+        return $this->host_as_ipfuture;
     }
 
     /**
@@ -644,6 +693,10 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     {
         if ($this->host_as_ipv4) {
             return $this->data[0];
+        }
+
+        if ($this->host_as_ipfuture) {
+            return substr($this->data[0], 1, -1);
         }
 
         if (!$this->host_as_ipv6) {
