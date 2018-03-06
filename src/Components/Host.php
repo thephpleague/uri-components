@@ -760,7 +760,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return null;
         }
 
-        if ($this->isIp() || !$this->isDomain()) {
+        if (!$this->host_as_domain_name) {
             return $this->data[0];
         }
 
