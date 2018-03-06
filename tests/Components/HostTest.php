@@ -61,12 +61,13 @@ class HostTest extends TestCase
      * @param bool        $isIpv4
      * @param bool        $isIpv6
      * @param bool        $isIpFuture
+     * @param string|null $ipVersion
      * @param string      $uri
      * @param string      $ip
      * @param string      $iri
      * @dataProvider validHostProvider
      */
-    public function testValidHost($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $uri, $ip, $iri)
+    public function testValidHost($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
     {
         $host = new Host($host);
         $this->assertSame($isDomain, $host->isDomain());
@@ -77,6 +78,7 @@ class HostTest extends TestCase
         $this->assertSame($uri, $host->getUriComponent());
         $this->assertSame($ip, $host->getIp());
         $this->assertSame($iri, $host->getContent(Host::RFC3987_ENCODING));
+        $this->assertSame($ipVersion, $host->getIpVersion());
     }
 
     public function validHostProvider()
@@ -89,6 +91,7 @@ class HostTest extends TestCase
                 true,
                 false,
                 false,
+                '4',
                 '127.0.0.1',
                 '127.0.0.1',
                 '127.0.0.1',
@@ -100,6 +103,7 @@ class HostTest extends TestCase
                 false,
                 true,
                 false,
+                '6',
                 '[::1]',
                 '::1',
                 '[::1]',
@@ -111,6 +115,7 @@ class HostTest extends TestCase
                 false,
                 true,
                 false,
+                '6',
                 '[fe80:1234::%251]',
                 'fe80:1234::%1',
                 '[fe80:1234::%251]',
@@ -122,8 +127,9 @@ class HostTest extends TestCase
                 false,
                 false,
                 true,
+                '1',
                 '[v1.ZZ.ZZ]',
-                'v1.ZZ.ZZ',
+                'ZZ.ZZ',
                 '[v1.ZZ.ZZ]',
             ],
             'normalized' => [
@@ -133,6 +139,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 'master.example.com',
                 null,
                 'master.example.com',
@@ -144,6 +151,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 '',
                 null,
                 '',
@@ -155,6 +163,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 '',
                 null,
                 null,
@@ -166,6 +175,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 'example.com.',
                 null,
                 'example.com.',
@@ -177,6 +187,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 '23.42c.two',
                 null,
                 '23.42c.two',
@@ -188,6 +199,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 '98.3.2',
                 null,
                 '98.3.2',
@@ -199,6 +211,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 'toto.127.0.0.1',
                 null,
                 'toto.127.0.0.1',
@@ -210,6 +223,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 'xn--mgbh0fb.xn--kgbechtv',
                 null,
                 'مثال.إختبار',
@@ -221,6 +235,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 'xn--mgbh0fb.xn--kgbechtv',
                 null,
                 'مثال.إختبار',
@@ -232,6 +247,7 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                null,
                 'test..example.com',
                 null,
                 'test..example.com',

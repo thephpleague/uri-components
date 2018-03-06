@@ -75,6 +75,13 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     protected $host_as_ipv6 = false;
 
     /**
+     * Tell the host IP version used
+     *
+     * @var string|null
+     */
+    protected $ip_version;
+
+    /**
      * Tell whether the Host contains a ZoneID
      *
      * @var bool
@@ -219,10 +226,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     protected function validate(string $host = null): array
     {
-        $this->host_as_ipv4 = false;
-        $this->host_as_ipv6 = false;
-        $this->host_as_ipfuture = false;
-        $this->host_as_domain_name = false;
         if (null === $host) {
             return [];
         }
@@ -231,14 +234,16 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return [''];
         }
 
+        $host = $this->validateString($host);
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $this->host_as_ipv4 = true;
+            $this->ip_version = '4';
 
             return [$host];
         }
 
         $reg_name = strtolower(rawurldecode($host));
-        if ($this->isValidDomainName($reg_name)) {
+        if ($this->isValidDomain($reg_name)) {
             $this->host_as_domain_name = true;
             if (false !== strpos($reg_name, 'xn--')) {
                 $reg_name = idn_to_utf8($reg_name, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
@@ -255,12 +260,15 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         if ($this->isValidIpv6Hostname($host)) {
             $this->host_as_ipv6 = true;
             $this->has_zone_identifier = false !== strpos($host, '%');
+            $this->ip_version = '6';
 
             return [$host];
         }
 
         if ($this->isValidIpFuture($host)) {
             $this->host_as_ipfuture = true;
+            preg_match('/^v(?<version>[A-F0-9]+)\./', substr($host, 1, -1), $matches);
+            $this->ip_version = $matches['version'];
 
             return [$host];
         }
@@ -273,15 +281,10 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @param string $str
      *
-     * @return string|null
+     * @return string
      */
-    protected function setIsAbsolute(string $str = null)
+    protected function setIsAbsolute(string $str)
     {
-        if (null === $str) {
-            return $str;
-        }
-
-        $str = $this->validateString($str);
         $this->is_absolute = self::IS_RELATIVE;
         if ('.' === substr($str, -1, 1)) {
             $this->is_absolute = self::IS_ABSOLUTE;
@@ -348,7 +351,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         static $pattern = '/^
-            v(?<version>[A-F0-9])+\.
+            v(?<version>[A-F0-9]+)\.
             (?:
                 (?<unreserved>[a-z0-9_~\-\.])|
                 (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
@@ -368,7 +371,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @return bool
      */
-    private function isValidDomainName(string $host): bool
+    private function isValidDomain(string $host): bool
     {
         $host = strtolower(rawurldecode($host));
         if ('.' === $host[0]) {
@@ -382,7 +385,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
                 (?<encoded> %[A-F0-9]{2})
                 (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
             )
-            ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/imx';
+            ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
         static $gen_delims = '/[:\/?#\[\]@ ]/'; // Also includes space.
         if (preg_match($reg_name, $host)) {
             return true;
@@ -621,7 +624,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIp(): bool
     {
-        return $this->host_as_ipv4 || $this->host_as_ipv6 || $this->host_as_ipfuture;
+        return null !== $this->ip_version;
     }
 
     /**
@@ -631,7 +634,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIpv4(): bool
     {
-        return $this->host_as_ipv4;
+        return '4' === $this->ip_version;
     }
 
     /**
@@ -641,7 +644,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIpv6(): bool
     {
-        return $this->host_as_ipv6;
+        return '6' === $this->ip_version;
     }
 
     /**
@@ -797,7 +800,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Retrieve the IP component If the Host is an IP adress.
      *
-     * If the host is a domain name this method will return null
+     * If the host is a not an IP this method will return null
      *
      * @return string|null
      */
@@ -808,7 +811,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         if ($this->host_as_ipfuture) {
-            return substr($this->data[0], 1, -1);
+            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', substr($this->data[0], 1, -1));
         }
 
         if (!$this->host_as_ipv6) {
@@ -821,6 +824,18 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
+    }
+
+    /**
+     * Returns the IP version
+     *
+     * If the host is a not an IP this method will return null
+     *
+     * @return string|null
+     */
+    public function getIpVersion()
+    {
+        return $this->ip_version;
     }
 
     /**
@@ -1102,7 +1117,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
 
         $reg_name = strtolower(rawurldecode($host));
 
-        if ($this->isValidDomainName($reg_name)) {
+        if ($this->isValidDomain($reg_name)) {
             if (false !== strpos($reg_name, 'xn--')) {
                 $reg_name = idn_to_utf8($reg_name, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
             }
