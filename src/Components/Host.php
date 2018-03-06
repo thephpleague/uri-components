@@ -54,14 +54,9 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     protected $host_as_domain_name = false;
 
     /**
-     * Tell whether the Host is an IPFuture
-     *
-     * @var bool
-     */
-    protected $host_as_ipfuture = false;
-
-    /**
      * Tell whether the Host is an IPv4
+     *
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * @var bool
      */
@@ -69,6 +64,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
 
     /**
      * Tell whether the Host is an IPv6
+     *
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * @var bool
      */
@@ -164,7 +161,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.8.0
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * @param array $data The segments list
      * @param int   $type
@@ -266,7 +263,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         if ($this->isValidIpFuture($host)) {
-            $this->host_as_ipfuture = true;
             preg_match('/^v(?<version>[A-F0-9]+)\./', substr($host, 1, -1), $matches);
             $this->ip_version = $matches['version'];
 
@@ -279,12 +275,16 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Set the FQDN property.
      *
-     * @param string $str
+     * @param string|null $str
      *
-     * @return string
+     * @return string|null
      */
-    protected function setIsAbsolute(string $str)
+    protected function setIsAbsolute(string $str = null)
     {
+        if (null === $str) {
+            return $str;
+        }
+
         $this->is_absolute = self::IS_RELATIVE;
         if ('.' === substr($str, -1, 1)) {
             $this->is_absolute = self::IS_ABSOLUTE;
@@ -435,7 +435,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.8.0
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * A valid registered name MUST:
      *
@@ -464,7 +464,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.8.0
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * A valid registered name label MUST:
      *
@@ -555,7 +555,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.5.0
+     * @deprecated 1.5.0 Typo fix in name
      * @see        Host::getRegistrableDomain
      *
      * @return string
@@ -666,7 +666,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIpFuture(): bool
     {
-        return $this->host_as_ipfuture;
+        return !in_array($this->ip_version, [null, '4', '6'], true);
     }
 
     /**
@@ -806,19 +806,19 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getIp()
     {
-        if ($this->host_as_ipv4) {
-            return $this->data[0];
-        }
-
-        if ($this->host_as_ipfuture) {
-            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', substr($this->data[0], 1, -1));
-        }
-
-        if (!$this->host_as_ipv6) {
+        if (null === $this->ip_version) {
             return null;
         }
 
+        if ('4' === $this->ip_version) {
+            return $this->data[0];
+        }
+
         $ip = substr($this->data[0], 1, -1);
+        if ('6' !== $this->ip_version) {
+            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $ip);
+        }
+
         if (false === ($pos = strpos($ip, '%'))) {
             return $ip;
         }
@@ -1137,7 +1137,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.5.0
+     * @deprecated 1.5.0 Typo fix in name
      * @see        Host::withRegistrableDomain
      *
      * @param string $host the registerable domain to add
