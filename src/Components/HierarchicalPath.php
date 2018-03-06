@@ -455,9 +455,9 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
         string $extension,
         string $parameterPart = null
     ): string {
-        $length = mb_strrpos($basenamePart, '.'.pathinfo($basenamePart, PATHINFO_EXTENSION), 'UTF-8');
+        $length = strrpos($basenamePart, '.'.pathinfo($basenamePart, PATHINFO_EXTENSION));
         if (false !== $length) {
-            $basenamePart = mb_substr($basenamePart, 0, $length, 'UTF-8');
+            $basenamePart = substr($basenamePart, 0, $length);
         }
 
         $parameterPart = trim((string) $parameterPart);

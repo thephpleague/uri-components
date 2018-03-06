@@ -56,23 +56,29 @@ class HostTest extends TestCase
     /**
      * Test valid Host
      * @param string|null $host
+     * @param bool        $isDomain
      * @param bool        $isIp
      * @param bool        $isIpv4
      * @param bool        $isIpv6
+     * @param bool        $isIpFuture
+     * @param string|null $ipVersion
      * @param string      $uri
      * @param string      $ip
      * @param string      $iri
      * @dataProvider validHostProvider
      */
-    public function testValidHost($host, $isIp, $isIpv4, $isIpv6, $uri, $ip, $iri)
+    public function testValidHost($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
     {
         $host = new Host($host);
+        $this->assertSame($isDomain, $host->isDomain());
         $this->assertSame($isIp, $host->isIp());
         $this->assertSame($isIpv4, $host->isIpv4());
         $this->assertSame($isIpv6, $host->isIpv6());
+        $this->assertSame($isIpFuture, $host->isIpFuture());
         $this->assertSame($uri, $host->getUriComponent());
         $this->assertSame($ip, $host->getIp());
         $this->assertSame($iri, $host->getContent(Host::RFC3987_ENCODING));
+        $this->assertSame($ipVersion, $host->getIpVersion());
     }
 
     public function validHostProvider()
@@ -80,36 +86,60 @@ class HostTest extends TestCase
         return [
             'ipv4' => [
                 '127.0.0.1',
+                false,
                 true,
                 true,
                 false,
+                false,
+                '4',
                 '127.0.0.1',
                 '127.0.0.1',
                 '127.0.0.1',
             ],
             'ipv6' => [
                 '[::1]',
+                false,
                 true,
                 false,
                 true,
+                false,
+                '6',
                 '[::1]',
                 '::1',
                 '[::1]',
             ],
             'scoped ipv6' => [
                 '[fe80:1234::%251]',
+                false,
                 true,
                 false,
                 true,
+                false,
+                '6',
                 '[fe80:1234::%251]',
                 'fe80:1234::%1',
                 '[fe80:1234::%251]',
             ],
+            'ipfuture' => [
+                '[v1.ZZ.ZZ]',
+                false,
+                true,
+                false,
+                false,
+                true,
+                '1',
+                '[v1.ZZ.ZZ]',
+                'ZZ.ZZ',
+                '[v1.ZZ.ZZ]',
+            ],
             'normalized' => [
                 'Master.EXAMPLE.cOm',
+                true,
                 false,
                 false,
                 false,
+                false,
+                null,
                 'master.example.com',
                 null,
                 'master.example.com',
@@ -119,6 +149,9 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                false,
+                false,
+                null,
                 '',
                 null,
                 '',
@@ -128,63 +161,96 @@ class HostTest extends TestCase
                 false,
                 false,
                 false,
+                false,
+                false,
+                null,
                 '',
                 null,
                 null,
             ],
             'dot ending' => [
                 'example.com.',
+                true,
                 false,
                 false,
                 false,
+                false,
+                null,
                 'example.com.',
                 null,
                 'example.com.',
             ],
             'partial numeric' => [
                 '23.42c.two',
+                true,
                 false,
                 false,
                 false,
+                false,
+                null,
                 '23.42c.two',
                 null,
                 '23.42c.two',
             ],
             'all numeric' => [
                 '98.3.2',
+                true,
                 false,
                 false,
                 false,
+                false,
+                null,
                 '98.3.2',
                 null,
                 '98.3.2',
             ],
             'mix IP format with host label' => [
                 'toto.127.0.0.1',
+                true,
                 false,
                 false,
                 false,
+                false,
+                null,
                 'toto.127.0.0.1',
                 null,
                 'toto.127.0.0.1',
             ],
             'idn support' => [
                 'مثال.إختبار',
+                true,
                 false,
                 false,
                 false,
+                false,
+                null,
                 'xn--mgbh0fb.xn--kgbechtv',
                 null,
                 'مثال.إختبار',
             ],
             'IRI support' => [
                 'xn--mgbh0fb.xn--kgbechtv',
+                true,
                 false,
                 false,
                 false,
+                false,
+                null,
                 'xn--mgbh0fb.xn--kgbechtv',
                 null,
                 'مثال.إختبار',
+            ],
+            'Registered Name' => [
+                'test..example.com',
+                false,
+                false,
+                false,
+                false,
+                false,
+                null,
+                'test..example.com',
+                null,
+                'test..example.com',
             ],
         ];
     }
@@ -207,18 +273,18 @@ class HostTest extends TestCase
 
     public function invalidHostProvider()
     {
-        $longlabel = implode('', array_fill(0, 12, 'banana'));
+        //$longlabel = implode('', array_fill(0, 12, 'banana'));
 
         return [
-            'dot in front' => ['.example.com'],
-            //'hyphen suffix' => ['host.com-'],
-            'multiple dot' => ['.......'],
-            'one dot' => ['.'],
+            //'dot in front' => ['.example.com'], valid registered name
+            //'hyphen suffix' => ['host.com-'],   valid registered name
+            //'multiple dot' => ['.......'],      valid registered name
+            //'one dot' => ['.'],                 valid registered name
             'empty label' => ['tot.    .coucou.com'],
             'space in the label' => ['re view'],
-            //'underscore in label' => ['_bad.host.com'],
-            'label too long' => [$longlabel.'.secure.example.com'],
-            'too many labels' => [implode('.', array_fill(0, 128, 'a'))],
+            //'underscore in label' => ['_bad.host.com'],                   valid registered name
+            //'label too long' => [$longlabel.'.secure.example.com'],       valid registered name
+            //'too many labels' => [implode('.', array_fill(0, 128, 'a'))], valid registered name
             'Invalid IPv4 format' => ['[127.0.0.1]'],
             'Invalid IPv6 format' => ['[[::1]]'],
             'Invalid IPv6 format 2' => ['[::1'],
@@ -231,6 +297,8 @@ class HostTest extends TestCase
             'invalid scope IPv6' => ['[ab23::1234%251]'],
             'invalid scope ID' => ['[fe80::1234%25?@]'],
             'invalid scope ID with utf8 character' => ['[fe80::1234%25€]'],
+            'invalid IPFuture' => ['[v4.1.2.3]'],
+            'invalid host with mix content' => ['_b%C3%A9bé.be-'],
         ];
     }
 
@@ -293,13 +361,6 @@ class HostTest extends TestCase
             ['[::1]', '[::1]'],
             ['127.0.0.1', '127.0.0.1'],
         ];
-    }
-
-    public function testValidUrlEncodedHost()
-    {
-        $host = new Host('_b%C3%A9bé.be-');
-        $this->assertSame('xn--_bb-cmab.be-', $host->getContent(Host::RFC3986_ENCODING));
-        $this->assertSame('_bébé.be-', $host->getContent(Host::RFC3987_ENCODING));
     }
 
     /**
@@ -388,6 +449,7 @@ class HostTest extends TestCase
             'ipv4' => ['127.0.0.1', '127.0.0.1'],
             'ipv6' => ['::1', '[::1]'],
             'ipv6 with scope' => ['fe80:1234::%1', '[fe80:1234::%251]'],
+            'valid IpFuture' => ['vAF.csucj.$&+;::', '[vAF.csucj.$&+;::]'],
         ];
     }
 
@@ -406,6 +468,7 @@ class HostTest extends TestCase
         return [
             'false ipv4' => ['127.0.0'],
             'hostname' => ['example.com'],
+            'false ipfuture' => ['vAF.csucj.$&+;:/:'],
         ];
     }
 

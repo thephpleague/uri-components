@@ -47,7 +47,16 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     const SUB_DELIMITERS = '!$&\'()*+,;=';
 
     /**
+     * Tell whether the Host is a domain name
+     *
+     * @var bool
+     */
+    protected $host_as_domain_name = false;
+
+    /**
      * Tell whether the Host is an IPv4
+     *
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * @var bool
      */
@@ -56,9 +65,18 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Tell whether the Host is an IPv6
      *
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
+     *
      * @var bool
      */
     protected $host_as_ipv6 = false;
+
+    /**
+     * Tell the host IP version used
+     *
+     * @var string|null
+     */
+    protected $ip_version;
 
     /**
      * Tell whether the Host contains a ZoneID
@@ -103,7 +121,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * return a new instance from an array or a traversable object
+     * Returns a new instance from an array or a traversable object.
      *
      * @param Traversable|array $data     The segments list
      * @param int               $type     One of the constant IS_ABSOLUTE or IS_RELATIVE
@@ -130,11 +148,20 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return new static('', $resolver);
         }
 
-        return new static(static::format($data, $type), $resolver);
+        $host = implode(static::$separator, array_reverse($data));
+        if (self::IS_ABSOLUTE === $type) {
+            return new static($host.static::$separator, $resolver);
+        }
+
+        return new static($host, $resolver);
     }
 
     /**
-     * Return a formatted host string
+     * Returns a formatted host string.
+     *
+     * DEPRECATION WARNING! This method will be removed in the next major point release
+     *
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * @param array $data The segments list
      * @param int   $type
@@ -152,12 +179,10 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Return a host from an IP address
+     * Returns a host from an IP address.
      *
      * @param string     $ip
      * @param null|Rules $resolver
-     *
-     * @throws Exception If the IP is invalid or unrecognized
      *
      * @return static
      */
@@ -168,17 +193,11 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         if (false !== strpos($ip, '%')) {
-            list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + ['', null];
-            $ip = $ipv6.'%25'.rawurlencode((string) $zoneId);
-
-            return new static('['.$ip.']', $resolver);
+            list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + [1 => ''];
+            $ip = $ipv6.'%25'.rawurlencode($zoneId);
         }
 
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            return new static('['.$ip.']', $resolver);
-        }
-
-        throw new Exception(sprintf('Please verify the submitted IP: %s', $ip));
+        return new static('['.$ip.']', $resolver);
     }
 
     /**
@@ -189,35 +208,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function __construct(string $host = null, Rules $resolver = null)
     {
-        $this->data = $this->validate($this->setIsAbsolute($host));
+        $this->data = $this->validate($host);
         $this->resolver = $resolver;
     }
 
     /**
-     * set the FQDN property
-     *
-     * @param string $str
-     *
-     * @return string|null
-     */
-    protected function setIsAbsolute(string $str = null)
-    {
-        if (null === $str || '.' === $str) {
-            return $str;
-        }
-
-        $str = $this->validateString($str);
-        $this->is_absolute = self::IS_RELATIVE;
-        if ('.' === mb_substr($str, -1, 1, 'UTF-8')) {
-            $this->is_absolute = self::IS_ABSOLUTE;
-            return mb_substr($str, 0, -1, 'UTF-8');
-        }
-
-        return $str;
-    }
-
-    /**
-     * validate the submitted data
+     * Validates the submitted data.
      *
      * @param string|null $host
      *
@@ -235,32 +231,71 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return [''];
         }
 
-        if ('.' === $host[0]) {
-            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-        }
-
+        $host = $this->validateString($host);
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $this->host_as_ipv4 = true;
+            $this->ip_version = '4';
 
             return [$host];
+        }
+
+        $reg_name = strtolower(rawurldecode($host));
+        if ($this->isValidDomain($reg_name)) {
+            $this->host_as_domain_name = true;
+            if (false !== strpos($reg_name, 'xn--')) {
+                $reg_name = idn_to_utf8($reg_name, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
+            }
+            $reg_name = $this->setIsAbsolute($reg_name);
+
+            return array_reverse(explode('.', $reg_name));
+        }
+
+        if ($this->isValidRegisteredName($reg_name)) {
+            return [$reg_name];
         }
 
         if ($this->isValidIpv6Hostname($host)) {
             $this->host_as_ipv6 = true;
             $this->has_zone_identifier = false !== strpos($host, '%');
+            $this->ip_version = '6';
 
             return [$host];
         }
 
-        if ($this->isValidHostname($host)) {
-            return array_reverse(array_map([$this, 'toIdn'], explode('.', mb_strtolower($host, 'UTF-8'))));
+        if ($this->isValidIpFuture($host)) {
+            preg_match('/^v(?<version>[A-F0-9]+)\./', substr($host, 1, -1), $matches);
+            $this->ip_version = $matches['version'];
+
+            return [$host];
         }
 
         throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
     }
 
     /**
-     * validate an Ipv6 Hostname
+     * Set the FQDN property.
+     *
+     * @param string|null $str
+     *
+     * @return string|null
+     */
+    protected function setIsAbsolute(string $str = null)
+    {
+        if (null === $str) {
+            return $str;
+        }
+
+        $this->is_absolute = self::IS_RELATIVE;
+        if ('.' === substr($str, -1, 1)) {
+            $this->is_absolute = self::IS_ABSOLUTE;
+            return substr($str, 0, -1);
+        }
+
+        return $str;
+    }
+
+    /**
+     * Validates an Ipv6 as Host
      *
      * @see http://tools.ietf.org/html/rfc6874#section-2
      * @see http://tools.ietf.org/html/rfc6874#section-4
@@ -271,7 +306,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     protected function isValidIpv6Hostname(string $ipv6): bool
     {
-        if (false === strpos($ipv6, '[') || false === strpos($ipv6, ']')) {
+        if ('[' !== ($ipv6[0] ?? '') || ']' !== substr($ipv6, -1)) {
             return false;
         }
 
@@ -295,17 +330,112 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return false;
         }
 
-        $reducer = function ($carry, $char) {
-            return $carry.str_pad(decbin(ord($char)), 8, '0', STR_PAD_LEFT);
-        };
+        static $address_block = "\xfe\x80";
 
-        $res = array_reduce(str_split(unpack('A16', inet_pton($ipv6))[1]), $reducer, '');
-
-        return substr($res, 0, 10) === self::LOCAL_LINK_PREFIX;
+        return substr(inet_pton($ipv6) & $address_block, 0, 2) === $address_block;
     }
 
     /**
-     * Returns whether the hostname is valid
+     * Validates an Ip future as host.
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * @param string $ipfuture
+     *
+     * @return bool
+     */
+    private function isValidIpFuture(string $ipfuture): bool
+    {
+        if ('[' !== ($ipfuture[0] ?? '') || ']' !== substr($ipfuture, -1)) {
+            return false;
+        }
+
+        static $pattern = '/^
+            v(?<version>[A-F0-9]+)\.
+            (?:
+                (?<unreserved>[a-z0-9_~\-\.])|
+                (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
+            )+
+        $/ix';
+
+        return preg_match($pattern, substr($ipfuture, 1, -1), $matches)
+            && !in_array($matches['version'], ['4', '6'], true);
+    }
+
+    /**
+     * Validates a domain name as host.
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * @param string $host
+     *
+     * @return bool
+     */
+    private function isValidDomain(string $host): bool
+    {
+        $host = strtolower(rawurldecode($host));
+        if ('.' === $host[0]) {
+            $host = substr($host, 1);
+        }
+
+        // Note that unreserved is purposely missing . as it is used to separate labels.
+        static $reg_name = '/(?(DEFINE)
+                (?<unreserved> [a-z0-9_~\-])
+                (?<sub_delims> [!$&\'()*+,;=])
+                (?<encoded> %[A-F0-9]{2})
+                (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
+            )
+            ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
+        static $gen_delims = '/[:\/?#\[\]@ ]/'; // Also includes space.
+        if (preg_match($reg_name, $host)) {
+            return true;
+        }
+
+        if (preg_match($gen_delims, $host)) {
+            return false;
+        }
+
+        $res = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+
+        return 0 === $arr['errors'];
+    }
+
+    /**
+     * Validates a registered name as host.
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * @param string $host
+     *
+     * @return bool
+     */
+    private function isValidRegisteredName(string $host): bool
+    {
+        static $reg_name = '/^(
+            (?<unreserved>[a-z0-9_~\-\.])|
+            (?<sub_delims>[!$&\'()*+,;=])|
+            (?<encoded>%[A-F0-9]{2})
+        )+$/x';
+        if (preg_match($reg_name, $host)) {
+            return true;
+        }
+
+        static $gen_delims = '/[:\/?#\[\]@ ]/'; // Also includes space.
+        if (preg_match($gen_delims, $host)) {
+            return false;
+        }
+
+        $host = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+
+        return !$arr['errors'];
+    }
+
+    /**
+     * Returns whether the hostname is valid.
+     *
+     * DEPRECATION WARNING! This method will be removed in the next major point release
+     *
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * A valid registered name MUST:
      *
@@ -330,55 +460,11 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Convert a registered name label to its IDNA ASCII form.
-     *
-     * Conversion is done only if the label contains none valid label characters
-     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
-     * making the conversion
-     *
-     * @param string $label
-     *
-     * @return string|false
-     */
-    protected function toAscii(string $label)
-    {
-        if (false !== strpos($label, '%')) {
-            $label = rawurldecode($label);
-        }
-
-        if (strlen($label) === strspn($label, static::STARTING_LABEL_CHARS.'-')) {
-            return $label;
-        }
-
-        return idn_to_ascii($label, 0, INTL_IDNA_VARIANT_UTS46);
-    }
-
-    /**
-     * Convert domain name to IDNA ASCII form.
-     *
-     * Conversion is done only if the label contains the ACE prefix 'xn--'
-     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
-     * making the conversion
-     *
-     * @param string $label
-     *
-     * @return string|false
-     */
-    protected function toIdn(string $label)
-    {
-        if (false !== strpos($label, '%')) {
-            $label = rawurldecode($label);
-        }
-
-        if (0 !== stripos($label, 'xn--')) {
-            return $label;
-        }
-
-        return idn_to_utf8($label, 0, INTL_IDNA_VARIANT_UTS46);
-    }
-
-    /**
      * Returns whether the registered name label is valid
+     *
+     * DEPRECATION WARNING! This method will be removed in the next major point release
+     *
+     * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
      * A valid registered name label MUST:
      *
@@ -422,10 +508,21 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     protected function lazyloadInfo()
     {
         if (!empty($this->hostname)) {
-            return $this->hostname;
+            return;
         }
 
-        $host = (string) $this;
+        if (!$this->host_as_domain_name) {
+            $this->hostname = $this->hostname = [
+                'isPublicSuffixValid' => false,
+                'publicSuffix' => '',
+                'registrableDomain' => '',
+                'subDomain' => '',
+            ];
+
+            return;
+        }
+
+        $host = $this->getContent();
         if ($this->isAbsolute()) {
             $host = substr($host, 0, -1);
         }
@@ -458,7 +555,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.5.0
+     * @deprecated 1.5.0 Typo fix in name
      * @see        Host::getRegistrableDomain
      *
      * @return string
@@ -527,7 +624,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIp(): bool
     {
-        return $this->host_as_ipv4 || $this->host_as_ipv6;
+        return null !== $this->ip_version;
     }
 
     /**
@@ -537,7 +634,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIpv4(): bool
     {
-        return $this->host_as_ipv4;
+        return '4' === $this->ip_version;
     }
 
     /**
@@ -547,7 +644,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function isIpv6(): bool
     {
-        return $this->host_as_ipv6;
+        return '6' === $this->ip_version;
     }
 
     /**
@@ -560,6 +657,26 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     public function hasZoneIdentifier(): bool
     {
         return $this->has_zone_identifier;
+    }
+
+    /**
+     * Returns whether or not the host is an IPv6 address
+     *
+     * @return bool
+     */
+    public function isIpFuture(): bool
+    {
+        return !in_array($this->ip_version, [null, '4', '6'], true);
+    }
+
+    /**
+     * Returns whether or not the host is an IPv6 address
+     *
+     * @return bool
+     */
+    public function isDomain(): bool
+    {
+        return $this->host_as_domain_name;
     }
 
     /**
@@ -612,6 +729,27 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
+     * Convert domain name to IDNA ASCII form.
+     *
+     * Conversion is done only if the label contains the ACE prefix 'xn--'
+     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
+     * making the conversion
+     *
+     * @param string $label
+     *
+     * @return string|false
+     */
+    protected function toIdn(string $label)
+    {
+        $label = rawurldecode($label);
+        if (0 !== strpos($label, 'xn--')) {
+            return $label;
+        }
+
+        return idn_to_utf8($label, 0, INTL_IDNA_VARIANT_UTS46);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
@@ -622,40 +760,82 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return null;
         }
 
-        if ($this->isIp()) {
+        if (!$this->host_as_domain_name) {
             return $this->data[0];
         }
 
-        if ($enc_type != self::RFC3987_ENCODING) {
-            return $this->format(array_map([$this, 'toAscii'], $this->data), $this->is_absolute);
+        $host = implode(static::$separator, array_reverse($this->data));
+        if ($enc_type !== self::RFC3987_ENCODING) {
+            $host = $this->toAscii($host);
         }
 
-        return $this->format($this->data, $this->is_absolute);
+        if (self::IS_ABSOLUTE !== $this->is_absolute) {
+            return $host;
+        }
+
+        return $host.static::$separator;
+    }
+
+    /**
+     * Convert a registered name label to its IDNA ASCII form.
+     *
+     * Conversion is done only if the label contains none valid label characters
+     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
+     * making the conversion
+     *
+     * @param string $label
+     *
+     * @return string|false
+     */
+    protected function toAscii(string $label)
+    {
+        $label = strtolower(rawurldecode($label));
+        if (!preg_match('/\pL/u', $label)) {
+            return $label;
+        }
+
+        return idn_to_ascii($label, 0, INTL_IDNA_VARIANT_UTS46);
     }
 
     /**
      * Retrieve the IP component If the Host is an IP adress.
      *
-     * If the host is a domain name this method will return null
+     * If the host is a not an IP this method will return null
      *
      * @return string|null
      */
     public function getIp()
     {
-        if ($this->host_as_ipv4) {
-            return $this->data[0];
-        }
-
-        if (!$this->host_as_ipv6) {
+        if (null === $this->ip_version) {
             return null;
         }
 
+        if ('4' === $this->ip_version) {
+            return $this->data[0];
+        }
+
         $ip = substr($this->data[0], 1, -1);
+        if ('6' !== $this->ip_version) {
+            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $ip);
+        }
+
         if (false === ($pos = strpos($ip, '%'))) {
             return $ip;
         }
 
         return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
+    }
+
+    /**
+     * Returns the IP version
+     *
+     * If the host is a not an IP this method will return null
+     *
+     * @return string|null
+     */
+    public function getIpVersion()
+    {
+        return $this->ip_version;
     }
 
     /**
@@ -799,11 +979,11 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return [];
         }
 
-        if ('.' !== $component && '.' == mb_substr($component, -1, 1, 'UTF-8')) {
+        if ('.' !== $component && '.' == substr($component, -1)) {
             $component = substr($component, 0, -1);
         }
 
-        return $this->validate($component);
+        return $this->normalizeLabels($component);
     }
 
     /**
@@ -919,7 +1099,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return [''];
         }
 
-        if ('.' === $host[0]) {
+        if ('.' === $host[0] || '.' === substr($host, -1)) {
             throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
         }
 
@@ -931,8 +1111,22 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return [$host];
         }
 
-        if ($this->isValidHostname($host)) {
-            return array_reverse(array_map([$this, 'toIdn'], explode('.', mb_strtolower($host, 'UTF-8'))));
+        if ($this->isValidIpFuture($host)) {
+            return [$host];
+        }
+
+        $reg_name = strtolower(rawurldecode($host));
+
+        if ($this->isValidDomain($reg_name)) {
+            if (false !== strpos($reg_name, 'xn--')) {
+                $reg_name = idn_to_utf8($reg_name, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
+            }
+
+            return array_reverse(explode('.', $reg_name));
+        }
+
+        if ($this->isValidRegisteredName($reg_name)) {
+            return [$reg_name];
         }
 
         throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
@@ -943,7 +1137,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.5.0
+     * @deprecated 1.5.0 Typo fix in name
      * @see        Host::withRegistrableDomain
      *
      * @param string $host the registerable domain to add

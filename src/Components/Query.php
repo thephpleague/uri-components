@@ -80,7 +80,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.5.0
+     * @deprecated 1.5.0 No longer used by internal code and not recommend
      * @see        \League\Uri\QueryParser::extract
      *
      * @param string $str       the query string
@@ -102,7 +102,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.5.0
+     * @deprecated 1.5.0 No longer used by internal code and not recommend
      * @see        \League\Uri\QueryParser::parse
      *
      * @param string $str       The query string to parse
@@ -124,7 +124,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
-     * @deprecated deprecated since version 1.5.0
+     * @deprecated 1.5.0 No longer used by internal code and not recommend
      * @see        \League\Uri\QueryBuilder::build
      *
      * @param array|Traversable $pairs     Query pairs
