@@ -71,7 +71,7 @@ trait PathInfoTrait
     {
         $path = $this->__toString();
 
-        return '' !== $path && '/' === mb_substr($path, 0, 1, 'UTF-8');
+        return '' !== $path && '/' === substr($path, 0, 1);
     }
 
     /**
@@ -238,7 +238,7 @@ trait PathInfoTrait
     {
         $path = $this->__toString();
 
-        return '' !== $path && '/' === mb_substr($path, -1, 1, 'UTF-8');
+        return '' !== $path && '/' === substr($path, -1);
     }
 
     /**
@@ -268,7 +268,7 @@ trait PathInfoTrait
      */
     public function withoutTrailingSlash()
     {
-        return !$this->hasTrailingSlash() ? $this : $this->withContent(mb_substr($this->__toString(), 0, -1, 'UTF-8'));
+        return !$this->hasTrailingSlash() ? $this : $this->withContent(substr($this->__toString(), 0, -1));
     }
 
     /**
@@ -298,6 +298,6 @@ trait PathInfoTrait
      */
     public function withoutLeadingSlash()
     {
-        return !$this->isAbsolute() ? $this : $this->withContent(mb_substr($this->__toString(), 1, null, 'UTF-8'));
+        return !$this->isAbsolute() ? $this : $this->withContent(substr($this->__toString(), 1));
     }
 }
