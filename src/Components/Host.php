@@ -273,21 +273,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             ];
         }
 
-        $reg_name = strtolower(rawurldecode($host));
-        if ($this->isValidDomain($reg_name)) {
-            $this->host_as_domain_name = true;
-            if (false !== strpos($reg_name, 'xn--')) {
-                $reg_name = idn_to_utf8($reg_name, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
-            }
-            $reg_name = $this->setIsAbsolute($reg_name);
-
-            return array_reverse(explode('.', $reg_name));
-        }
-
-        if ($this->isValidRegisteredName($reg_name)) {
-            return [$reg_name];
-        }
-
         if ($this->isValidIpv6Hostname($host)) {
             return [
                 'data' => [$host],
