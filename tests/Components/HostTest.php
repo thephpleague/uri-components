@@ -36,6 +36,8 @@ class HostTest extends TestCase
         $component = new Host('yolo');
         $this->assertFalse($component->isNull());
         $this->assertTrue($component->withContent(null)->isNull());
+        $this->assertTrue($component->withContent(null)->isEmpty());
+        $this->assertTrue($component->withContent('')->isEmpty());
     }
 
     public function testWithContent()
@@ -704,6 +706,7 @@ class HostTest extends TestCase
         return [
             ['fr', 'example.co.uk', 'example.fr'],
             ['fr', 'example.be', 'example.fr'],
+            ['bébé', 'example.com', 'example.xn--bb-bjab'],
             ['127.0.0.1', 'example.co.uk', 'example.127.0.0.1'],
             ['fr', 'example.fr', 'example.fr'],
             ['', 'example.fr', 'example'],
