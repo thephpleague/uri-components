@@ -318,13 +318,14 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return (bool) filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
         }
 
-        $scope_raw = substr($ipv6, $pos);
-        if (strlen($scope_raw) !== mb_strlen($scope_raw)) {
+        $scope = rawurldecode(substr($ipv6, $pos));
+        static $idn_pattern = '/[^\x20-\x7f]/';
+        if (preg_match($idn_pattern, $scope)) {
             return false;
         }
 
-        $scope = rawurldecode($scope_raw);
-        if (strlen($scope) !== strcspn($scope, self::INVALID_ZONE_ID_CHARS)) {
+        static $gen_delims = '/[:\/?#\[\]@]/';
+        if (preg_match($gen_delims, $scope)) {
             return false;
         }
 

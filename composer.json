@@ -30,7 +30,6 @@
         "ext-curl": "*",
         "ext-fileinfo": "*",
         "ext-intl": "*",
-        "ext-mbstring": "*",
         "league/uri-hostname-parser": "^1.1.0"
     },
     "require-dev": {
@@ -71,7 +70,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0.x-dev"
+            "dev-master": "1.x-dev"
         }
     },
     "config": {
