@@ -8,9 +8,9 @@ build:
                     - php-scrutinizer-run --enable-security-analysis
 filter:
     paths:
-        - src
+        - src/
     excluded_paths:
-        - tests
+        - tests/
 checks:
     php:
         code_rating: true
@@ -23,10 +23,10 @@ tools:
     php_loc:
         enabled: true
         excluded_dirs:
-            - tests
-            - vendor
+            - tests/
+            - vendor/
     php_cpd: false
     php_sim:
         enabled: true
         filter:
-            paths: ['src']
+            paths: ['src/']
