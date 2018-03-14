@@ -2,18 +2,18 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next - TBD
+## 1.8.0 - TBD
 
 ### Added
 
-- None
+- IPvFuture support
 
 ### Fixed
 
-- code improved using PHPStan
-- using the new scrutinizr engine for PHP
-- bug fix Port class to conform to RFC3986 now allow any port number greater or 
-  equals to `0`.
+- Using PHPStan
+- Using the new scrutinizr engine for PHP
+- Bug fix Port class to conform to RFC3986 now allow any port number greater or equals to `0`.
+- Improve Host parsing
 
 ### Deprecated
 
@@ -21,7 +21,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Remove
 
-- None
+- `mbstring` extension requirement
 
 ## 1.7.1 - 2018-02-16
 

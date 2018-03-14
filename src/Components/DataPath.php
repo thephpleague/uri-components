@@ -142,7 +142,8 @@ class DataPath extends AbstractComponent
             return static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',';
         }
 
-        if (!mb_detect_encoding($path, 'US-ASCII', true) || false === strpos($path, ',')) {
+        static $idn_pattern = '/[^\x20-\x7f]/';
+        if (preg_match($idn_pattern, $path) || false === strpos($path, ',')) {
             throw new Exception(sprintf(
                 'The submitted path `%s` is invalid according to RFC2937',
                 $path
@@ -200,7 +201,7 @@ class DataPath extends AbstractComponent
         }
 
         if (preg_match(',(;|^)'.static::BINARY_PARAMETER.'$,', $parameters, $matches)) {
-            $parameters = mb_substr($parameters, 0, - strlen($matches[0]));
+            $parameters = substr($parameters, 0, - strlen($matches[0]));
             $this->is_binary_data = true;
         }
 
@@ -223,8 +224,7 @@ class DataPath extends AbstractComponent
     {
         $properties = explode('=', $parameter);
 
-        return 2 != count($properties)
-            || mb_strtolower($properties[0], 'UTF-8') === static::BINARY_PARAMETER;
+        return 2 != count($properties) || strtolower($properties[0]) === static::BINARY_PARAMETER;
     }
 
     /**
