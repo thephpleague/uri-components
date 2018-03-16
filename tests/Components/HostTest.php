@@ -55,6 +55,13 @@ class HostTest extends TestCase
         $this->assertNotEquals($newHost, $host);
     }
 
+    public function testWithDomainResolverOnSameResolver()
+    {
+        $host = new Host('uri.thephpleague.com');
+        $newHost = $host->withDomainResolver();
+        $this->assertInstanceOf(Host::class, $host);
+    }
+
     /**
      * Test valid Host
      * @param string|null $host
@@ -698,6 +705,24 @@ class HostTest extends TestCase
         $this->assertSame(
             $expected,
             (string) (new Host($host))->withPublicSuffix($publicsuffix)
+        );
+    }
+
+    public function testWithPublicSuffixOnEmptySource()
+    {
+        $this->assertSame(
+            '',
+            (string) (new Host(''))->withPublicSuffix('')
+        );
+    }
+
+    public function testWithPublicSuffixOnInvalidHostName()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The submitted host `.` is invalid');
+        $this->assertSame(
+            '',
+            (string) (new Host('.'))->withPublicSuffix('.')
         );
     }
 
