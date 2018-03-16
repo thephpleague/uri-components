@@ -618,6 +618,69 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::createFromParams
+     */
+    public function testCreateFromParamsOnEmptyParams()
+    {
+        $query = Query::createFromParams([]);
+        $this->assertSame($query, $query->withoutNumericIndices());
+    }
+
+    /**
+     * @covers ::isEmpty
+     */
+    public function testIsEmpty()
+    {
+        $query = Query::createFromParams([]);
+        $this->assertTrue($query->isEmpty());
+    }
+
+    /**
+     * @covers ::getContent
+     */
+    public function testGetContentOnEmptyContent()
+    {
+        $query = Query::createFromParams([]);
+        $this->assertNull($query->getContent());
+    }
+
+    /**
+     * @covers ::getContent
+     */
+    public function testGetContentOnHavingContent()
+    {
+        $query = Query::createFromParams(['foo' => 'bar']);
+        $this->assertSame('foo=bar', $query->getContent());
+    }
+
+    /**
+     * @covers ::__toString
+     */
+    public function testGetContentOnToString()
+    {
+        $query = Query::createFromParams(['foo' => 'bar']);
+        $this->assertSame('foo=bar', (string) $query);
+    }
+
+    /**
+     * @covers ::withSeparator
+     */
+    public function testWithSeperatorOnHavingSeparator()
+    {
+        $query = Query::createFromParams(['foo' => '/bar']);
+        $this->assertInstanceOf(Query::class, $query->withSeparator('&'));
+    }
+
+    /**
+     * @covers ::withoutNumericIndices
+     */
+    public function testWithoutNumericIndicesOnEmptyContent()
+    {
+        $query = Query::createFromParams([]);
+        $this->assertInstanceOf(Query::class, $query->withoutNumericIndices());
+    }
+
+    /**
      * @covers ::ksort
      * @param array $data
      * @param mixed $sort
