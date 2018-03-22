@@ -14,7 +14,7 @@
  */
 declare(strict_types=1);
 
-namespace League\Uri\Components;
+namespace League\Uri;
 
 use InvalidArgumentException;
 
@@ -28,21 +28,4 @@ use InvalidArgumentException;
  */
 class Exception extends InvalidArgumentException
 {
-    public static function fromInvalidIterable($str)
-    {
-        return new self(sprintf(
-            'Expected data to be an iterable; received "%s"',
-            (is_object($str) ? get_class($str) : gettype($str))
-        ));
-    }
-
-    public static function fromInaccessibleProperty($property)
-    {
-        return new self(sprintf('"%s" is an undefined or inaccessible property', $property));
-    }
-
-    public static function fromInvalidFlag($flag)
-    {
-        return new self(sprintf('"%s" is an invalid flag', $flag));
-    }
 }

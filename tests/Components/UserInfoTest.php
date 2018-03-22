@@ -2,15 +2,20 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\UserInfo;
+use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @group userinfo
+ * @coversDefaultClass \League\Uri\Components\UserInfo
  */
 class UserInfoTest extends TestCase
 {
+    /**
+     * @covers ::__debugInfo
+     * @covers ::__construct
+     */
     public function testDebugInfo()
     {
         $component = new UserInfo('yolo', 'oloy');
@@ -19,14 +24,24 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider userInfoProvider
-     * @param string      $user
-     * @param string      $pass
+     * @param mixed       $user
+     * @param mixed       $pass
      * @param string|null $expected_user
      * @param string|null $expected_pass
      * @param string      $expected_str
      * @param string      $uri_component
      * @param string      $iri_str
      * @param string      $rfc1738_str
+     * @covers ::__debugInfo
+     * @covers ::__construct
+     * @covers ::filterPart
+     * @covers ::getContent
+     * @covers ::__toString
+     * @covers ::getUriComponent
+     * @covers ::decode
+     * @covers ::encode
+     * @covers ::getPass
+     * @covers ::getUser
      */
     public function testConstructor(
         $user,
@@ -51,6 +66,16 @@ class UserInfoTest extends TestCase
     {
         return [
             [
+                'user' => new UserInfo('login'),
+                'pass' => new UserInfo('pass'),
+                'expected_user' => 'login',
+                'expected_pass' => 'pass',
+                'expected_str' => 'login:pass',
+                'uri_component' => 'login:pass@',
+                'iri_str' => 'login:pass',
+                'rfc1738_str' => 'login:pass',
+            ],
+            [
                 'user' => 'login',
                 'pass' => 'pass',
                 'expected_user' => 'login',
@@ -59,6 +84,16 @@ class UserInfoTest extends TestCase
                 'uri_component' => 'login:pass@',
                 'iri_str' => 'login:pass',
                 'rfc1738_str' => 'login:pass',
+            ],
+            [
+                'user' => 'login%61',
+                'pass' => 'pass',
+                'expected_user' => 'login%61',
+                'expected_pass' => 'pass',
+                'expected_str' => 'login%61:pass',
+                'uri_component' => 'login%61:pass@',
+                'iri_str' => 'login%61:pass',
+                'rfc1738_str' => 'login%61:pass',
             ],
             [
                 'user' => 'login',
@@ -134,28 +169,21 @@ class UserInfoTest extends TestCase
         ];
     }
 
-    public function testIsNull()
-    {
-        $this->assertTrue((new UserInfo(null))->isNull());
-        $this->assertFalse((new UserInfo(''))->isNull());
-    }
-
-    public function testIsEmpty()
-    {
-        $this->assertTrue((new UserInfo(null))->isEmpty());
-        $this->assertTrue((new UserInfo(''))->isEmpty());
-    }
-
     /**
      * @dataProvider createFromStringProvider
-     * @param string|null $str
-     * @param string|null $expected_user
-     * @param string|null $expected_pass
-     * @param string      $expected_str
+     * @param mixed  $user
+     * @param mixed  $str
+     * @param mixed  $expected_user
+     * @param mixed  $expected_pass
+     * @param string $expected_str
+     * @covers ::withContent
+     * @covers ::getUser
+     * @covers ::getPass
+     * @covers ::decode
      */
-    public function testWithContent($str, $expected_user, $expected_pass, $expected_str)
+    public function testWithContent($user, $str, $expected_user, $expected_pass, $expected_str)
     {
-        $conn = (new UserInfo())->withContent($str);
+        $conn = (new UserInfo($user))->withContent($str);
         $this->assertSame($expected_user, $conn->getUser());
         $this->assertSame($expected_pass, $conn->getPass());
         $this->assertSame($expected_str, (string) $conn);
@@ -164,16 +192,22 @@ class UserInfoTest extends TestCase
     public function createFromStringProvider()
     {
         return [
-            'simple' => ['user:pass', 'user', 'pass', 'user:pass'],
-            'empty password' => ['user:', 'user', '', 'user:'],
-            'no password' => ['user', 'user', null, 'user'],
-            'no login but has password' => [':pass', '', null, ''],
-            'empty all' => ['', '', null, ''],
-            'null content' => [null, null, null, ''],
-            'encoded chars' => ['foo%40bar:bar%40foo', 'foo%40bar', 'bar%40foo', 'foo%40bar:bar%40foo'],
+            'simple' => [null, 'user:pass', 'user', 'pass', 'user:pass'],
+            'empty password' => [null, 'user:', 'user', '', 'user:'],
+            'no password' => [null, 'user', 'user', null, 'user'],
+            'no login but has password' => [null, ':pass', '', null, ''],
+            'empty all' => [null, '', '', null, ''],
+            'null content' => [null, null, null, null, ''],
+            'encoded chars' => [null, 'foo%40bar:bar%40foo', 'foo%40bar', 'bar%40foo', 'foo%40bar:bar%40foo'],
+            'component interface' => [null, new UserInfo('user', 'pass'), 'user', 'pass', 'user:pass'],
+            'reset object' => ['login', new UserInfo(null), null, null, ''],
         ];
     }
 
+    /**
+     * @covers ::withContent
+     * @covers ::decode
+     */
     public function testWithContentReturnSameInstance()
     {
         $conn = new UserInfo();
@@ -183,6 +217,9 @@ class UserInfoTest extends TestCase
         $this->assertSame($conn, $conn->withContent('user:pass'));
     }
 
+    /**
+     * @covers ::__set_state
+     */
     public function testSetState()
     {
         $conn = new UserInfo('user', 'pass');
@@ -192,9 +229,11 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider withUserInfoProvider
-     * @param string      $user
-     * @param string|null $pass
-     * @param string      $expected
+     * @param mixed  $user
+     * @param mixed  $pass
+     * @param string $expected
+     * @covers ::withUserInfo
+     * @covers ::decode
      */
     public function testWithUserInfo($user, $pass, $expected)
     {
@@ -212,21 +251,59 @@ class UserInfoTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::getUser
+     */
     public function testGetUserThrowsInvalidArgumentException()
     {
         $this->expectException(Exception::class);
         (new UserInfo())->getUser(-1);
     }
 
+    /**
+     * @covers ::getPass
+     */
     public function testGetPassThrowsInvalidArgumentException()
     {
         $this->expectException(Exception::class);
         (new UserInfo())->getPass(-1);
     }
 
+    /**
+     * @covers ::getContent
+     */
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
         (new UserInfo('user', 'pass'))->getContent(-1);
+    }
+
+    /**
+     * @covers ::withContent
+     */
+    public function testWithContentThrowsInvalidArgumentException()
+    {
+        $this->expectException(Exception::class);
+        (new UserInfo())->withContent(date_create());
+    }
+
+    /**
+     * @dataProvider invalidUserInfoData
+     * @covers ::filterPart
+     *
+     * @param mixed $user
+     */
+    public function testConstructorThrowsInvalidArgumentException($user)
+    {
+        $this->expectException(Exception::class);
+        new UserInfo($user);
+    }
+
+    public function invalidUserInfoData()
+    {
+        return [
+            [date_create()],
+            ["\0"],
+        ];
     }
 }

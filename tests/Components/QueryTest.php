@@ -3,8 +3,8 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
-use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
+use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -50,34 +50,6 @@ class QueryTest extends TestCase
         ];
     }
 
-    public function testInvalidSetterThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Query();
-        $path->unknownProperty = true;
-    }
-
-    public function testInvalidGetterThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Query();
-        $path->unknownProperty;
-    }
-
-    public function testInvalidIssetThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Query();
-        isset($path->unknownProperty);
-    }
-
-    public function testInvalidUnssetThrowException()
-    {
-        $this->expectException(Exception::class);
-        $path = new Query();
-        unset($path->unknownProperty);
-    }
-
     /**
      * @covers ::getSeparator
      * @covers ::withSeparator
@@ -89,16 +61,6 @@ class QueryTest extends TestCase
         $this->assertSame('&', $query->getSeparator());
         $this->assertSame('|', $new_query->getSeparator());
         $this->assertSame('foo=bar|kingkong=toto', $new_query->getContent());
-    }
-
-    /**
-     * @covers ::isNull
-     * @covers ::withContent
-     */
-    public function testDefined()
-    {
-        $this->assertFalse($this->query->isNull());
-        $this->assertTrue($this->query->withContent(null)->isNull());
     }
 
     /**
@@ -115,6 +77,7 @@ class QueryTest extends TestCase
     public function testWithContent()
     {
         $this->assertSame($this->query, $this->query->withContent('kingkong=toto'));
+        $this->assertNotSame($this->query, $this->query->withContent('kingkong=tata'));
     }
 
     /**
@@ -122,14 +85,19 @@ class QueryTest extends TestCase
      */
     public function testIterator()
     {
-        $this->assertSame(['kingkong' => 'toto'], iterator_to_array($this->query, true));
+        $keys = [];
+        $values = [];
+        foreach (new Query('a=1&b=2&c=3&a=1') as $offset => $value) {
+            $keys[] = $offset;
+            $values[] = $value;
+        }
+        $this->assertSame(['a', 'a', 'b', 'c'], $keys);
+        $this->assertSame(['1', '1', '2', '3'], $values);
     }
 
     /**
      * @covers ::getUriComponent
      * @covers ::createFromPairs
-     * @covers ::validate
-     * @covers \League\Uri\pairs_to_params
      * @dataProvider queryProvider
      * @param string|array $input
      * @param string       $expected
@@ -148,7 +116,7 @@ class QueryTest extends TestCase
         return [
             'bug fix issue 84' => ['fào=?%25bar&q=v%61lue', '?f%C3%A0o=?%25bar&q=v%61lue'],
             'string' => ['kingkong=toto', '?kingkong=toto'],
-            'null' => [null, ''],
+            'query object' => [new Query('kingkong=toto'), '?kingkong=toto'],
             'empty string' => ['', '?'],
             'empty array' => [[], ''],
             'non empty array' => [['' => null], '?'],
@@ -171,6 +139,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::createFromPairs
+     * @covers ::filterPair
      */
     public function testcreateFromPairsWithTraversable()
     {
@@ -180,7 +149,17 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::createFromPairs
-     * @covers \League\Uri\Components\Exception
+     */
+    public function testcreateFromPairsWithQueryObject()
+    {
+        $query = new Query('a=1&b=2');
+        $this->assertEquals($query, Query::createFromPairs($query));
+    }
+
+    /**
+     * @covers ::createFromPairs
+     * @covers ::filterPair
+     * @covers \League\Uri\Exception
      *
      * @param mixed $input
      * @dataProvider createFromPairsFailedProvider
@@ -202,19 +181,21 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::__construct
-     * @covers ::removeEmptyPairs
      * @covers ::withoutEmptyPairs
+     * @covers ::isValueSet
      */
     public function testNormalization()
     {
-        $this->assertSame('foo=bar&=', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->getContent());
-        $this->assertSame('=bar&=', (new Query('&=bar&='))->withoutEmptyPairs()->getContent());
+        $this->assertSame('foo=bar', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->getContent());
+        $this->assertNull((new Query('&=bar&='))->withoutEmptyPairs()->getContent());
         $this->assertNull((new Query('&&&&&&&&&&&'))->withoutEmptyPairs()->getContent());
+        $this->assertSame($this->query, $this->query->withoutEmptyPairs());
     }
 
     /**
      * @covers ::merge
-     * @covers ::removeEmptyPairs
+     * @covers ::filterEmptyKeyPair
+     *
      * @dataProvider mergeDataProvider
      *
      * @param string $base_query
@@ -285,22 +266,27 @@ class QueryTest extends TestCase
                 '&bar=baz&',
                 'foo=bar&bar=baz',
             ],
-            'pair without empty key' => [
+            'pair without empty key (1)' => [
+                '=toto&foo=bar',
+                'bar=baz',
+                '=toto&foo=bar&bar=baz',
+            ],
+            'pair without empty key (2)' => [
                 '=toto&foo=bar',
                 '&bar=baz&',
-                '=toto&foo=bar&bar=baz',
+                'foo=bar&bar=baz',
             ],
         ];
     }
 
     /**
      * @covers ::append
-     * @covers ::appendToPair
-     * @covers ::removeEmptyPairs
+     * @covers ::filterEmptyKeyPair
+     *
      * @dataProvider validAppendValue
-     * @param string $query
-     * @param string $append_data
-     * @param string $expected
+     * @param null|string $query
+     * @param null|string $append_data
+     * @param null|string $expected
      */
     public function testAppend($query, $append_data, $expected)
     {
@@ -312,6 +298,9 @@ class QueryTest extends TestCase
     {
         return [
             ['', 'foo=bar&foo=baz', 'foo=bar&foo=baz'],
+            [null, null, null],
+            [null, 'foo=bar&foo=baz', 'foo=bar&foo=baz'],
+            ['foo=bar&foo=baz', null, 'foo=bar&foo=baz'],
             ['', 'foo=bar', 'foo=bar'],
             ['', 'foo=', 'foo='],
             ['', 'foo', 'foo'],
@@ -327,27 +316,32 @@ class QueryTest extends TestCase
             ['&foo=bar', '&foo=baz', 'foo=bar&foo=baz'],
             ['foo=bar&', '&foo=baz', 'foo=bar&foo=baz'],
             ['&foo=bar&', '&foo=baz&', 'foo=bar&foo=baz'],
+            ['=toto&foo=bar', 'foo=bar', '=toto&foo=bar&foo=bar'],
         ];
     }
 
     /**
-     * @covers ::getPair
+     * @covers ::get
+     * @covers ::getAll
      */
     public function testGetParameter()
     {
-        $expected = 'toofan';
-        $this->assertSame($expected, $this->query->getPair('togo', $expected));
-        $this->assertNull($this->query->getPair('togo'));
-        $this->assertSame('toto', $this->query->getPair('kingkong'));
+        $query = new Query('kingkong=toto&kingkong=barbaz&&=&=b');
+        $this->assertNull($query->get('togo'));
+        $this->assertSame([], $query->getAll('togo'));
+        $this->assertSame('toto', $query->get('kingkong'));
+        $this->assertNull($query->get(''));
+        $this->assertSame(['toto', 'barbaz'], $query->getAll('kingkong'));
+        $this->assertSame([null, '', 'b'], $query->getAll(''));
     }
 
     /**
-     * @covers ::hasPair
+     * @covers ::has
      */
     public function testHas()
     {
-        $this->assertTrue($this->query->hasPair('kingkong'));
-        $this->assertFalse($this->query->hasPair('togo'));
+        $this->assertTrue($this->query->has('kingkong'));
+        $this->assertFalse($this->query->has('togo'));
     }
 
     /**
@@ -355,7 +349,8 @@ class QueryTest extends TestCase
      */
     public function testCountable()
     {
-        $this->assertCount(1, $this->query);
+        $query = new Query('kingkong=toto&kingkong=barbaz');
+        $this->assertCount(2, $query);
     }
 
     /**
@@ -387,61 +382,9 @@ class QueryTest extends TestCase
 
         $this->assertCount(3, $query->keys());
         $this->assertSame(['foo', 'bar', 'baz'], $query->keys());
-        $this->assertNull($query->getPair('foo'));
-        $this->assertNull($query->getPair('bar'));
-        $this->assertNull($query->getPair('baz'));
-    }
-
-    /**
-     * @covers ::getPairs
-     */
-    public function testGetPairs()
-    {
-        $expected = ['foo' => null, 'bar' => null, 'baz' => null, 'to.go' => 'toofan'];
-        $query = new Query('foo&bar&baz&to.go=toofan');
-        $this->assertSame($expected, $query->getPairs());
-    }
-
-    /**
-     * @covers ::getParams
-     * @dataProvider parsedQueryProvider
-     * @param string $query
-     * @param array  $expected
-     */
-    public function testGetParams($query, $expected)
-    {
-        $this->assertSame($expected, (new Query($query))->getParams());
-    }
-
-    /**
-     * @covers ::getParam
-     * @dataProvider getParamProvider
-     * @param string $query
-     * @param string $offset
-     * @param mixed  $default
-     * @param mixed  $expected
-     */
-    public function testGetParam($query, $offset, $default, $expected)
-    {
-        $this->assertSame($expected, (new Query($query))->getParam($offset, $default));
-    }
-
-    public function getParamProvider()
-    {
-        return [
-            'simple query' => [
-                'query' => 'foo=bar&key=value',
-                'offset' => 'foo',
-                'default' => null,
-                'expected' => 'bar',
-            ],
-            'using default value' => [
-                'query' => 'foo=bar&key=value',
-                'offset' => 'zoo',
-                'default' => 'topia',
-                'expected' => 'topia',
-            ],
-        ];
+        $this->assertNull($query->get('foo'));
+        $this->assertNull($query->get('bar'));
+        $this->assertNull($query->get('baz'));
     }
 
     /**
@@ -455,7 +398,7 @@ class QueryTest extends TestCase
      */
     public function testWithoutPairs($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Query($origin))->withoutPairs($without));
+        $this->assertSame($result, (string) (new Query($origin))->withoutPairs(...$without));
     }
 
     public function withoutPairsProvider()
@@ -464,12 +407,33 @@ class QueryTest extends TestCase
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
             ['foo&bar&baz&to.go=toofan', ['foo', 'unknown'], 'bar&baz&to.go=toofan'],
             ['foo&bar&baz&to.go=toofan', [], 'foo&bar&baz&to.go=toofan'],
+            ['a=b&c=d', ['a'], 'c=d'],
+            ['a=a&b=b&a=a&c=c', ['a'], 'b=b&c=c'],
+            ['a=a&=&b=b&c=c', [''], 'a=a&b=b&c=c'],
+            ['a=a&&b=b&c=c', [''], 'a=a&b=b&c=c'],
         ];
     }
 
     /**
+     * @covers ::withoutPairs
+     */
+    public function testWithoutPairsGetterMethod()
+    {
+        $query = (new Query())->appendTo('first', 1);
+        $this->assertTrue($query->has('first'));
+        $this->assertSame(1, $query->get('first'));
+        $query = $query->withoutPairs('first');
+        $this->assertFalse($query->has('first'));
+        $query = $query
+            ->appendTo('first', 1)
+            ->appendTo('first', 10)
+            ->withoutPairs('first')
+        ;
+        $this->assertFalse($query->has('first'));
+    }
+
+    /**
      * @covers ::withoutParams
-     * @covers ::createFromParams
      *
      * @param array  $origin
      * @param array  $without
@@ -479,7 +443,7 @@ class QueryTest extends TestCase
      */
     public function testWithoutParams(array $origin, array $without, string $expected)
     {
-        $this->assertSame($expected, (string) (Query::createFromParams($origin))->withoutParams($without));
+        $this->assertSame($expected, (string) Query::createFromParams($origin)->withoutParams(...$without));
     }
 
     public function withoutParamsProvider()
@@ -532,6 +496,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutParams
      * @covers ::createFromParams
+     * @covers ::toParams
      */
     public function testWithoutParamsDoesNotChangeParamsKey()
     {
@@ -544,9 +509,40 @@ class QueryTest extends TestCase
 
         $query = Query::createFromParams($data);
         $this->assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->getContent());
-        $new_query = $query->withoutParams(['foo[0]']);
+        $new_query = $query->withoutParams('foo[0]');
         $this->assertSame('foo%5B1%5D=baz', $new_query->getContent());
-        $this->assertSame(['foo' => [1 => 'baz']], $new_query->getParams());
+        $this->assertSame(['foo' => [1 => 'baz']], $new_query->toParams());
+    }
+
+    /**
+     * @covers ::createFromParams
+     * @covers ::toParams
+     */
+    public function testCreateFromParamsWithTraversable()
+    {
+        $data = [
+            'foo' => [
+                'bar',
+                'baz',
+            ],
+        ];
+        $query = Query::createFromParams(new ArrayIterator($data));
+        $this->assertSame($data, $query->toParams());
+    }
+
+    public function testCreateFromParamsWithQueryObject()
+    {
+        $query = new Query('a=1&b=2');
+        $this->assertEquals($query, Query::createFromParams($query));
+    }
+
+    /**
+     * @covers ::createFromParams
+     */
+    public function testCreateFromParamsThrowsException()
+    {
+        $this->expectException(Exception::class);
+        Query::createFromParams('foo=bar');
     }
 
     /**
@@ -568,34 +564,17 @@ class QueryTest extends TestCase
             ],
         ];
 
-        $with_indices = [
-            'string' => 'filter%5Bfoo%5D%5B0%5D=bar&filter%5Bfoo%5D%5B1%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar',
-            'pairs' => [
-                'filter[foo][0]' => 'bar',
-                'filter[foo][1]' => 'baz',
-                'filter[bar][bar]' => 'foo',
-                'filter[bar][foo]' => 'bar',
-            ],
-        ];
+        $with_indices = 'filter%5Bfoo%5D%5B0%5D=bar&filter%5Bfoo%5D%5B1%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar';
 
-        $without_indices = [
-            'string' => 'filter%5Bfoo%5D%5B%5D=bar&filter%5Bfoo%5D%5B%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar',
-            'pairs' => [
-                'filter[foo][]' => ['bar', 'baz'],
-                'filter[bar][bar]' => 'foo',
-                'filter[bar][foo]' => 'bar',
-            ],
-        ];
+        $without_indices = 'filter%5Bfoo%5D%5B%5D=bar&filter%5Bfoo%5D%5B%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar';
 
         $query = Query::createFromParams($data);
-        $this->assertSame($with_indices['string'], $query->getContent());
-        $this->assertSame($with_indices['pairs'], $query->getPairs());
-        $this->assertSame($data, $query->getParams());
+        $this->assertSame($with_indices, $query->getContent());
+        $this->assertSame($data, $query->toParams());
 
         $new_query = $query->withoutNumericIndices();
-        $this->assertSame($without_indices['string'], $new_query->getContent());
-        $this->assertSame($without_indices['pairs'], $new_query->getPairs());
-        $this->assertSame($data, $new_query->getParams());
+        $this->assertSame($without_indices, $new_query->getContent());
+        $this->assertSame($data, $new_query->toParams());
     }
 
     /**
@@ -611,6 +590,16 @@ class QueryTest extends TestCase
      * @covers ::withoutNumericIndices
      * @covers ::removeNumericIndex
      */
+    public function testWithoutNumericIndicesReturnsAnother()
+    {
+        $query = new Query('foo[3]');
+        $this->assertSame('foo[]', $query->withoutNumericIndices()->getContent(Query::NO_ENCODING));
+    }
+
+    /**
+     * @covers ::withoutNumericIndices
+     * @covers ::removeNumericIndex
+     */
     public function testWithoutNumericIndicesDoesNotAffectPairValue()
     {
         $query = Query::createFromParams(['foo' => 'bar[3]']);
@@ -618,15 +607,68 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::createFromParams
+     */
+    public function testCreateFromParamsOnEmptyParams()
+    {
+        $query = Query::createFromParams([]);
+        $this->assertSame($query, $query->withoutNumericIndices());
+    }
+
+    /**
+     * @covers ::getContent
+     */
+    public function testGetContentOnEmptyContent()
+    {
+        $this->assertNull(Query::createFromParams([])->getContent());
+    }
+
+    /**
+     * @covers ::getContent
+     */
+    public function testGetContentOnHavingContent()
+    {
+        $this->assertSame('foo=bar', Query::createFromParams(['foo' => 'bar'])->getContent());
+    }
+
+    /**
+     * @covers ::__toString
+     */
+    public function testGetContentOnToString()
+    {
+        $this->assertSame('foo=bar', (string) Query::createFromParams(['foo' => 'bar']));
+    }
+
+    /**
+     * @covers ::withSeparator
+     */
+    public function testWithSeperatorOnHavingSeparator()
+    {
+        $query = Query::createFromParams(['foo' => '/bar']);
+        $this->assertSame($query, $query->withSeparator('&'));
+    }
+
+    /**
+     * @covers ::withoutNumericIndices
+     */
+    public function testWithoutNumericIndicesOnEmptyContent()
+    {
+        $query = Query::createFromParams([]);
+        $this->assertSame($query, $query->withoutNumericIndices());
+    }
+
+    /**
      * @covers ::ksort
-     * @param array $data
-     * @param mixed $sort
-     * @param array $expected
+     *
+     * @param array        $data
+     * @param int|callable $sort
+     * @param string       $expected
+     *
      * @dataProvider ksortProvider
      */
     public function testksort($data, $sort, $expected)
     {
-        $this->assertSame($expected, Query::createFromPairs($data)->ksort($sort)->getPairs());
+        $this->assertSame($expected, (string) Query::createFromPairs($data)->ksort($sort));
     }
 
     public function ksortProvider()
@@ -635,28 +677,31 @@ class QueryTest extends TestCase
             [
                 ['superman' => 'lex luthor', 'batman' => 'joker'],
                 SORT_REGULAR,
-                ['batman' => 'joker', 'superman' => 'lex luthor'],
+                'batman=joker&superman=lex%20luthor',
             ],
             [
                 ['superman' => 'lex luthor', 'batman' => 'joker'],
                 function ($dataA, $dataB) {
                     return strcasecmp($dataA, $dataB);
                 },
-                ['batman' => 'joker', 'superman' => 'lex luthor'],
+                'batman=joker&superman=lex%20luthor',
             ],
             [
                 ['superman' => 'lex luthor', 'superwoman' => 'joker'],
                 function ($dataA, $dataB) {
                     return strcasecmp($dataA, $dataB);
                 },
-                ['superman' => 'lex luthor', 'superwoman' => 'joker'],
+                'superman=lex%20luthor&superwoman=joker',
             ],
         ];
     }
 
     /**
-     * @covers ::parse
+     * @covers ::__construct
+     * @covers ::getAll
+     *
      * @dataProvider parserProvider
+     *
      * @param string $query
      * @param string $separator
      * @param array  $expected
@@ -664,7 +709,7 @@ class QueryTest extends TestCase
      */
     public function testParse($query, $separator, $expected, $encoding)
     {
-        $this->assertSame($expected, Query::parse($query, $separator, $encoding));
+        $this->assertSame($expected, (new Query($query, $separator, $encoding))->getAll());
     }
 
     public function parserProvider()
@@ -673,7 +718,7 @@ class QueryTest extends TestCase
             'empty string' => [
                 '',
                 '&',
-                [],
+                ['' => [null]],
                 Query::RFC3986_ENCODING,
             ],
             'identical keys' => [
@@ -685,13 +730,13 @@ class QueryTest extends TestCase
             'no value' => [
                 'a&b',
                 '&',
-                ['a' => null, 'b' => null],
+                ['a' => [null], 'b' => [null]],
                 Query::RFC3986_ENCODING,
             ],
             'empty value' => [
                 'a=&b=',
                 '&',
-                ['a' => '', 'b' => ''],
+                ['a' => [''], 'b' => ['']],
                 Query::RFC3986_ENCODING,
             ],
             'php array' => [
@@ -703,249 +748,76 @@ class QueryTest extends TestCase
             'preserve dot' => [
                 'a.b=3',
                 '&',
-                ['a.b' => '3'],
+                ['a.b' => ['3']],
                 Query::RFC3986_ENCODING,
             ],
             'decode' => [
                 'a%20b=c%20d',
                 '&',
-                ['a b' => 'c d'],
+                ['a b' => ['c d']],
                 Query::RFC3986_ENCODING,
             ],
             'no key stripping' => [
                 'a=&b',
                 '&',
-                ['a' => '', 'b' => null],
+                ['a' => [''], 'b' => [null]],
                 Query::RFC3986_ENCODING,
             ],
             'no value stripping' => [
                 'a=b=',
                 '&',
-                ['a' => 'b='],
+                ['a' => ['b=']],
                 Query::RFC3986_ENCODING,
             ],
             'key only' => [
                 'a',
                 '&',
-                ['a' => null],
+                ['a' => [null]],
                 Query::RFC3986_ENCODING,
             ],
             'preserve falsey 1' => [
                 '0',
                 '&',
-                ['0' => null],
+                ['0' => [null]],
                 Query::RFC3986_ENCODING,
             ],
             'preserve falsey 2' => [
                 '0=',
                 '&',
-                ['0' => ''],
+                ['0' => ['']],
                 Query::RFC3986_ENCODING,
             ],
             'preserve falsey 3' => [
                 'a=0',
                 '&',
-                ['a' => '0'],
+                ['a' => ['0']],
                 Query::RFC3986_ENCODING,
             ],
             'different separator' => [
                 'a=0;b=0&c=4',
                 ';',
-                ['a' => '0', 'b' => '0&c=4'],
+                ['a' => ['0'], 'b' => ['0&c=4']],
                 Query::RFC3986_ENCODING,
             ],
             'numeric key only' => [
                 '42',
                 '&',
-                ['42' => null],
+                ['42' => [null]],
                 Query::RFC3986_ENCODING,
             ],
             'numeric key' => [
                 '42=l33t',
                 '&',
-                ['42' => 'l33t'],
+                ['42' => ['l33t']],
                 Query::RFC3986_ENCODING,
             ],
             'rfc1738' => [
                 '42=l3+3t',
                 '&',
-                ['42' => 'l3 3t'],
+                ['42' => ['l3 3t']],
                 Query::RFC1738_ENCODING,
             ],
         ];
-    }
-
-    /**
-     * @covers ::build
-     *
-     * @dataProvider buildProvider
-     * @param array  $pairs
-     * @param string $expected_rfc1738
-     * @param string $expected_rfc3986
-     * @param string $expected_rfc3987
-     * @param string $expected_iri
-     * @param string $expected_no_encoding
-     */
-    public function testBuild(
-        $pairs,
-        $expected_rfc1738,
-        $expected_rfc3986,
-        $expected_rfc3987,
-        $expected_iri,
-        $expected_no_encoding
-    ) {
-        $this->assertSame($expected_rfc1738, Query::build($pairs, '&', Query::RFC1738_ENCODING));
-        $this->assertSame($expected_rfc3986, Query::build($pairs, '&', Query::RFC3986_ENCODING));
-        $this->assertSame($expected_rfc3987, Query::build($pairs, '&', Query::RFC3987_ENCODING));
-        $this->assertSame($expected_no_encoding, Query::build($pairs, '&', Query::NO_ENCODING));
-        $this->assertSame($expected_iri, Query::createFromPairs($pairs)->getContent(Query::RFC3987_ENCODING));
-    }
-
-    public function buildProvider()
-    {
-        return [
-            'empty string' => [
-                'pairs' => [],
-                'expected_rfc1738' => '',
-                'expected_rfc3986' => '',
-                'expected_rfc3987' => '',
-                'expected_iri' => null,
-                'expected_no_encoding' => '',
-            ],
-            'identical keys' => [
-                'pairs' => ['a' => ['1', '2']],
-                'expected_rfc1738' => 'a=1&a=2',
-                'expected_rfc3986' => 'a=1&a=2',
-                'expected_rfc3987' => 'a=1&a=2',
-                'expected_iri' => 'a=1&a=2',
-                'expected_no_encoding' => 'a=1&a=2',
-            ],
-            'using an traversable' => [
-                'pairs' => new ArrayIterator(['a' => ['1', '2']]),
-                'expected_rfc1738' => 'a=1&a=2',
-                'expected_rfc3986' => 'a=1&a=2',
-                'expected_rfc3987' => 'a=1&a=2',
-                'expected_iri' => 'a=1&a=2',
-                'expected_no_encoding' => 'a=1&a=2',
-            ],
-            'no value' => [
-                'pairs' => ['a' => null, 'b' => null],
-                'expected_rfc1738' => 'a&b',
-                'expected_rfc3986' => 'a&b',
-                'expected_rfc3987' => 'a&b',
-                'expected_iri' => 'a&b',
-                'expected_no_encoding' => 'a&b',
-            ],
-            'empty value' => [
-                'pairs' => ['a' => '', 'b' => ''],
-                'expected_rfc1738' => 'a=&b=',
-                'expected_rfc3986' => 'a=&b=',
-                'expected_rfc3987' => 'a=&b=',
-                'expected_iri' => 'a=&b=',
-                'expected_no_encoding' => 'a=&b=',
-            ],
-            'php array' => [
-                'pairs' => ['a[]' => ['1', '2']],
-                'expected_rfc1738' => 'a%5B%5D=1&a%5B%5D=2',
-                'expected_rfc3986' => 'a%5B%5D=1&a%5B%5D=2',
-                'expected_rfc3987' => 'a[]=1&a[]=2',
-                'expected_iri' => 'a[]=1&a[]=2',
-                'expected_no_encoding' => 'a[]=1&a[]=2',
-            ],
-            'preserve dot' => [
-                'pairs' => ['a.b' => '3'],
-                'expected_rfc1738' => 'a.b=3',
-                'expected_rfc3986' => 'a.b=3',
-                'expected_rfc3987' => 'a.b=3',
-                'expected_iri' => 'a.b=3',
-                'expected_no_encoding' => 'a.b=3',
-            ],
-            'no key stripping' => [
-                'pairs' => ['a' => '', 'b' => null],
-                'expected_rfc1738' => 'a=&b',
-                'expected_rfc3986' => 'a=&b',
-                'expected_rfc3987' => 'a=&b',
-                'expected_iri' => 'a=&b',
-                'expected_no_encoding' => 'a=&b',
-            ],
-            'no value stripping' => [
-                'pairs' => ['a' => 'b='],
-                'expected_rfc1738' => 'a=b=',
-                'expected_rfc3986' => 'a=b=',
-                'expected_rfc3987' => 'a=b=',
-                'expected_iri' => 'a=b=',
-                'expected_no_encoding' => 'a=b=',
-            ],
-            'key only' => [
-                'pairs' => ['a' => null],
-                'expected_rfc1738' => 'a',
-                'expected_rfc3986' => 'a',
-                'expected_rfc3987' => 'a',
-                'expected_iri' => 'a',
-                'expected_no_encoding' => 'a',
-            ],
-            'preserve falsey 1' => [
-                'pairs' => ['0' => null],
-                'expected_rfc1738' => '0',
-                'expected_rfc3986' => '0',
-                'expected_rfc3987' => '0',
-                'expected_iri' => '0',
-                'expected_no_encoding' => '0',
-            ],
-            'preserve falsey 2' => [
-                'pairs' => ['0' => ''],
-                'expected_rfc1738' => '0=',
-                'expected_rfc3986' => '0=',
-                'expected_rfc3987' => '0=',
-                'expected_iri' => '0=',
-                'expected_no_encoding' => '0=',
-            ],
-            'preserve falsey 3' => [
-                'pairs' => ['0' => '0'],
-                'expected_rfc1738' => '0=0',
-                'expected_rfc3986' => '0=0',
-                'expected_rfc3987' => '0=0',
-                'expected_iri' => '0=0',
-                'expected_no_encoding' => '0=0',
-            ],
-            'rcf1738' => [
-                'pairs' => ['toto' => 'foo+bar'],
-                'expected_rfc1738' => 'toto=foo%2Bbar',
-                'expected_rfc3986' => 'toto=foo+bar',
-                'expected_rfc3987' => 'toto=foo+bar',
-                'expected_iri' => 'toto=foo+bar',
-                'expected_no_encoding' => 'toto=foo+bar',
-            ],
-        ];
-    }
-
-    /**
-     * @covers ::build
-     */
-    public function testBuildWithMalformedUtf8Chars()
-    {
-        $this->assertSame(
-            'badutf8=%A0TM1TMS061114IP1',
-            Query::build(['badutf8' => rawurldecode('%A0TM1TMS061114IP1')])
-        );
-    }
-
-    /**
-     * @covers ::build
-     */
-    public function testThrowsExceptionOnInvalidEncodingType()
-    {
-        $this->expectException(Exception::class);
-        Query::build([], '&', -1);
-    }
-
-    /**
-     * @covers ::build
-     */
-    public function testThrowsExceptionOnInvalidPairs()
-    {
-        $this->expectException(Exception::class);
-        Query::build(['foo' => (object)[]]);
     }
 
     /**
@@ -958,96 +830,173 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::build
+     * @covers ::withPair
+     * @covers ::filterPair
+     *
+     * @dataProvider provideWithPairData
+     *
+     * @param null|string $query
+     * @param string      $key
+     * @param mixed       $value
+     * @param array       $expected
      */
-    public function testFailSafeQueryParsing()
+    public function testWithPair($query, $key, $value, $expected)
     {
-        $arr = ['a' => '1', 'b' => 'le heros'];
-        $expected = 'a=1&b=le%20heros';
-
-        $this->assertSame($expected, Query::build($arr, '&'));
+        $query = new Query($query);
+        $this->assertSame($expected, $query->withPair($key, $value)->getAll($key));
     }
 
-    /**
-     * @covers ::build
-     */
-    public function testParserBuilderPreserveQuery()
-    {
-        $querystring = 'uri=http://example.com?a=b%26c=d';
-        $data = Query::parse($querystring);
-        $this->assertSame(['uri' => 'http://example.com?a=b&c=d'], $data);
-        $this->assertSame($querystring, Query::build($data));
-    }
-
-    /**
-     * @covers ::extract
-     * @dataProvider parsedQueryProvider
-     * @param string $query
-     * @param array  $expectedData
-     */
-    public function testParsedQuery($query, $expectedData)
-    {
-        $this->assertSame($expectedData, Query::extract($query));
-    }
-
-    public function parsedQueryProvider()
+    public function provideWithPairData()
     {
         return [
             [
-                'query' => '&&',
-                'expected' => [],
+                null,
+                'foo',
+                'bar',
+                ['bar'],
             ],
             [
-                'query' => 'arr[1=sid&arr[4][2=fred',
-                'expected' => [
-                    'arr[1' => 'sid',
-                    'arr' => ['4' => 'fred'],
-                ],
+                null,
+                'foo',
+                ['bar'],
+                ['bar'],
             ],
             [
-                'query' => 'arr1]=sid&arr[4]2]=fred',
-                'expected' => [
-                    'arr1]' => 'sid',
-                    'arr' => ['4' => 'fred'],
-                ],
+                null,
+                'foo',
+                new ArrayIterator(['bar']),
+                ['bar'],
             ],
             [
-                'query' => 'arr[one=sid&arr[4][two=fred',
-                'expected' => [
-                    'arr[one' => 'sid',
-                    'arr' => ['4' => 'fred'],
-                ],
-            ],
-            [
-                'query' => 'first=%41&second=%a&third=%b',
-                'expected' => [
-                    'first' => 'A',
-                    'second' => '%a',
-                    'third' => '%b',
-                ],
-            ],
-            [
-                'query' => 'arr.test[1]=sid&arr test[4][two]=fred',
-                'expected' => [
-                    'arr.test' => ['1' => 'sid'],
-                    'arr test' => ['4' => ['two' => 'fred']],
-                ],
-            ],
-            [
-                'query' => 'foo&bar=&baz=bar&fo.o',
-                'expected' => [
-                    'foo' => '',
-                    'bar' => '',
-                    'baz' => 'bar',
-                    'fo.o' => '',
-                ],
-            ],
-            [
-                'query' => 'foo[]=bar&foo[]=baz',
-                'expected' => [
-                    'foo' => ['bar', 'baz'],
-                ],
+                'foo=bar',
+                'foo',
+                'bar',
+                ['bar'],
             ],
         ];
+    }
+
+    /**
+     * @covers ::withPair
+     * @covers ::filterPair
+     */
+    public function testWithPairBasic()
+    {
+        $this->assertSame('a=B&c=d', (string) (new Query('a=b&c=d'))->withPair('a', 'B'));
+        $this->assertSame('a=B&c=d', (string) (new Query('a=b&c=d&a=e'))->withPair('a', 'B'));
+        $this->assertSame('a=b&c=d&e=f', (string) (new Query('a=b&c=d'))->withPair('e', 'f'));
+    }
+
+    /**
+     * @covers ::withPair
+     * @covers ::get
+     */
+    public function testWithPairGetterMethods()
+    {
+        $query = new Query('a=1&a=2&a=3');
+        $this->assertSame('1', $query->get('a'));
+
+        $query = $query->withPair('first', 4);
+        $this->assertSame('1', $query->get('a'));
+
+        $query = $query->withPair('a', 4);
+        $this->assertSame(4, $query->get('a'));
+    }
+
+    /**
+     * @covers ::withPair
+     * @covers ::filterPair
+     */
+    public function testWithPairThrowsException()
+    {
+        $this->expectException(Exception::class);
+        (new Query(null))->withPair('foo', (object) ['data']);
+    }
+
+    /**
+     * @covers ::withoutDuplicates
+     *
+     * @dataProvider provideWithoutDuplicatesData
+     *
+     * @param null|string $query
+     * @param null|string $expected
+     */
+    public function testWithoutDuplicates($query, $expected)
+    {
+        $query = new Query($query);
+        $this->assertSame($expected, $query->withoutDuplicates()->getContent());
+    }
+
+    public function provideWithoutDuplicatesData()
+    {
+        return [
+            [null, null],
+            ['foo=bar&foo=bar', 'foo=bar'],
+        ];
+    }
+
+    /**
+     * @covers ::appendTo
+     */
+    public function testAppendToSameName()
+    {
+        $query = new Query(null);
+        $this->assertSame('a=b', (string) $query->appendTo('a', 'b'));
+        $this->assertSame('a=b&a=b', (string) $query->appendTo('a', 'b')->appendTo('a', 'b'));
+        $this->assertSame('a=b&a=b&a=c', (string) $query->appendTo('a', 'b')->appendTo('a', 'b')->appendTo('a', 'c'));
+    }
+
+    /**
+     * @covers ::appendTo
+     */
+    public function testAppendToWithEmptyString()
+    {
+        $query = new Query(null);
+        $this->assertSame('', (string) $query->appendTo('', null));
+        $this->assertSame('=', (string) $query->appendTo('', ''));
+        $this->assertSame('a', (string) $query->appendTo('a', null));
+        $this->assertSame('a=', (string) $query->appendTo('a', ''));
+        $this->assertSame(
+            'a&a=&&=',
+            (string) $query
+            ->appendTo('a', null)
+            ->appendTo('a', '')
+            ->appendTo('', null)
+            ->appendTo('', '')
+        );
+    }
+
+
+    /**
+     * @covers ::appendTo
+     * @covers ::get
+     * @covers ::getAll
+     */
+    public function testAppendToWithGetter()
+    {
+        $query = (new Query(null))
+            ->appendTo('first', 1)
+            ->appendTo('second', 2)
+            ->appendTo('third', '')
+            ->appendTo('first', 10)
+        ;
+        $this->assertSame('first=1&first=10&second=2&third=', (string) $query);
+        $this->assertTrue($query->has('first'));
+        $this->assertSame(1, $query->get('first'));
+        $this->assertSame(2, $query->get('second'));
+        $this->assertSame('', $query->get('third'));
+
+        $newQuery = $query->appendTo('first', 10);
+        $this->assertSame('first=1&first=10&first=10&second=2&third=', (string) $newQuery);
+        $this->assertSame(1, $newQuery->get('first'));
+    }
+
+    /**
+     * @covers ::appendTo
+     */
+    public function testAppendToThrowsException()
+    {
+        $this->expectException(Exception::class);
+        (new Query())->appendTo('foo', ['bar']);
     }
 }

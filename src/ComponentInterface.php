@@ -13,7 +13,7 @@
  * file that was distributed with this source code.
  */
 
-namespace League\Uri\Components;
+namespace League\Uri;
 
 use InvalidArgumentException;
 
@@ -33,20 +33,6 @@ use InvalidArgumentException;
  */
 interface ComponentInterface extends EncodingInterface
 {
-    /**
-     * Returns whether or not the component is null.
-     *
-     * @return bool
-     */
-    public function isNull(): bool;
-
-    /**
-     * Returns whether or not the component is empty (null or empty string).
-     *
-     * @return bool
-     */
-    public function isEmpty(): bool;
-
     /**
      * Returns the instance content.
      *
@@ -108,5 +94,5 @@ interface ComponentInterface extends EncodingInterface
      *
      * @return static
      */
-    public function withContent($content): self;
+    public function withContent($content);
 }

@@ -4,14 +4,14 @@ namespace LeagueTest\Uri;
 
 use ArrayIterator;
 use League\Uri;
-use League\Uri\Components\Exception;
-use League\Uri\Components\Query;
+use League\Uri\Exception;
+use League\Uri\QueryParser;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
 /**
+ * @group query
  * @group function
- * @group parser
  */
 class FunctionsTest extends TestCase
 {
@@ -21,17 +21,29 @@ class FunctionsTest extends TestCase
         Uri\parse_query('foo=bar', '&', 42);
     }
 
+    public function testInvalidQueryStringThrowsExceptionWithQueryParser()
+    {
+        $this->expectException(Exception::class);
+        Uri\parse_query("foo=bar\0");
+    }
+
     public function testEncodingThrowsExceptionWithQueryBuilder()
     {
         $this->expectException(Exception::class);
         Uri\build_query(['foo' => 'bar'], '&', 42);
     }
 
+    public function testWrongTypeThrowExceptionParseQuery()
+    {
+        $this->expectException(TypeError::class);
+        Uri\parse_query(['foo=bar'], '&', PHP_QUERY_RFC1738);
+    }
+
     public function testQuerParserConvert()
     {
         $expected = ['a' => ['1', '2', 'false']];
         $pairs = new ArrayIterator(['a[]' => [1, '2', false]]);
-        $this->assertSame($expected, (new Uri\QueryParser())->convert($pairs));
+        $this->assertSame($expected, Uri\pairs_to_params($pairs));
     }
 
     /**
@@ -42,14 +54,15 @@ class FunctionsTest extends TestCase
     public function testQueryParserConvertThrowsTypeError($pairs)
     {
         $this->expectException(TypeError::class);
-        (new Uri\QueryParser())->convert($pairs);
+        Uri\pairs_to_params($pairs);
     }
 
     public function invalidPairsProvider()
     {
         return [
             'pairs must be iterable' => [date_create()],
-            'pairs value must be null or scalar' => ['a[]' => [date_create(), '2']],
+            'pairs value must be iterable' => [['a' => date_create()]],
+            'pairs value must be null or scalar' => [['a' => [date_create(), '2']]],
         ];
     }
 
@@ -67,6 +80,10 @@ class FunctionsTest extends TestCase
     public function extractQueryProvider()
     {
         return [
+            [
+                'query' => new Uri\Components\Query(),
+                'expected' => [],
+            ],
             [
                 'query' => '&&',
                 'expected' => [],
@@ -125,6 +142,12 @@ class FunctionsTest extends TestCase
         ];
     }
 
+    public function testConvertWithQueryObject()
+    {
+        $query = new Uri\Components\Query('arr1]=sid&arr[4]2]=fred&toto');
+        $this->assertSame(['arr1]' => 'sid', 'arr' => ['4' => 'fred'], 'toto' => ''], Uri\pairs_to_params($query));
+    }
+
     /**
      * @dataProvider parserProvider
      * @param string $query
@@ -140,107 +163,136 @@ class FunctionsTest extends TestCase
     public function parserProvider()
     {
         return [
+            'query object' => [
+                new Uri\Components\Query('a=1&b=2'),
+                '&',
+                ['a' => ['1'], 'b' => ['2']],
+                PHP_QUERY_RFC3986,
+            ],
+            'stringable object' => [
+                new class() {
+                    public function __toString()
+                    {
+                        return 'a=1&a=2';
+                    }
+                },
+                '&',
+                ['a' => ['1', '2']],
+                PHP_QUERY_RFC3986,
+            ],
+            'rfc1738 without hexaencoding' => [
+                'toto=foo%2bbar',
+                '&',
+                ['toto' => ['foo bar']],
+                PHP_QUERY_RFC1738,
+            ],
+            'null value' => [
+                null,
+                '&',
+                [],
+                PHP_QUERY_RFC3986,
+            ],
             'empty string' => [
                 '',
                 '&',
-                [],
-                Query::RFC3986_ENCODING,
+                ['' => [null]],
+                PHP_QUERY_RFC3986,
             ],
             'identical keys' => [
                 'a=1&a=2',
                 '&',
                 ['a' => ['1', '2']],
-                Query::RFC3986_ENCODING,
+                PHP_QUERY_RFC3986,
             ],
             'no value' => [
                 'a&b',
                 '&',
-                ['a' => null, 'b' => null],
-                Query::RFC3986_ENCODING,
+                ['a' => [null], 'b' => [null]],
+                PHP_QUERY_RFC3986,
             ],
             'empty value' => [
                 'a=&b=',
                 '&',
-                ['a' => '', 'b' => ''],
-                Query::RFC3986_ENCODING,
+                ['a' => [''], 'b' => ['']],
+                PHP_QUERY_RFC3986,
             ],
             'php array' => [
                 'a[]=1&a[]=2',
                 '&',
                 ['a[]' => ['1', '2']],
-                Query::RFC3986_ENCODING,
+                PHP_QUERY_RFC3986,
             ],
             'preserve dot' => [
                 'a.b=3',
                 '&',
-                ['a.b' => '3'],
-                Query::RFC3986_ENCODING,
+                ['a.b' => ['3']],
+                PHP_QUERY_RFC3986,
             ],
             'decode' => [
                 'a%20b=c%20d',
                 '&',
-                ['a b' => 'c d'],
-                Query::RFC3986_ENCODING,
+                ['a b' => ['c d']],
+                PHP_QUERY_RFC3986,
             ],
             'no key stripping' => [
                 'a=&b',
                 '&',
-                ['a' => '', 'b' => null],
-                Query::RFC3986_ENCODING,
+                ['a' => [''], 'b' => [null]],
+                PHP_QUERY_RFC3986,
             ],
             'no value stripping' => [
                 'a=b=',
                 '&',
-                ['a' => 'b='],
-                Query::RFC3986_ENCODING,
+                ['a' => ['b=']],
+                PHP_QUERY_RFC3986,
             ],
             'key only' => [
                 'a',
                 '&',
-                ['a' => null],
-                Query::RFC3986_ENCODING,
+                ['a' => [null]],
+                PHP_QUERY_RFC3986,
             ],
             'preserve falsey 1' => [
                 '0',
                 '&',
-                ['0' => null],
-                Query::RFC3986_ENCODING,
+                ['0' => [null]],
+                PHP_QUERY_RFC3986,
             ],
             'preserve falsey 2' => [
                 '0=',
                 '&',
-                ['0' => ''],
-                Query::RFC3986_ENCODING,
+                ['0' => ['']],
+                PHP_QUERY_RFC3986,
             ],
             'preserve falsey 3' => [
                 'a=0',
                 '&',
-                ['a' => '0'],
-                Query::RFC3986_ENCODING,
+                ['a' => ['0']],
+                PHP_QUERY_RFC3986,
             ],
             'different separator' => [
                 'a=0;b=0&c=4',
                 ';',
-                ['a' => '0', 'b' => '0&c=4'],
-                Query::RFC3986_ENCODING,
+                ['a' => ['0'], 'b' => ['0&c=4']],
+                PHP_QUERY_RFC3986,
             ],
             'numeric key only' => [
                 '42',
                 '&',
-                ['42' => null],
-                Query::RFC3986_ENCODING,
+                ['42' => [null]],
+                PHP_QUERY_RFC3986,
             ],
             'numeric key' => [
                 '42=l33t',
                 '&',
-                ['42' => 'l33t'],
-                Query::RFC3986_ENCODING,
+                ['42' => ['l33t']],
+                PHP_QUERY_RFC3986,
             ],
             'rfc1738' => [
                 '42=l3+3t',
                 '&',
-                ['42' => 'l3 3t'],
-                Query::RFC1738_ENCODING,
+                ['42' => ['l3 3t']],
+                PHP_QUERY_RFC1738,
             ],
         ];
     }
@@ -262,19 +314,26 @@ class FunctionsTest extends TestCase
     ) {
         $this->assertSame($expected_rfc1738, Uri\build_query($pairs, '&', PHP_QUERY_RFC1738));
         $this->assertSame($expected_rfc3986, Uri\build_query($pairs, '&', PHP_QUERY_RFC3986));
-        $this->assertSame($expected_rfc3987, Uri\build_query($pairs, '&', Query::RFC3987_ENCODING));
-        $this->assertSame($expected_no_encoding, Uri\build_query($pairs, '&', Query::NO_ENCODING));
+        $this->assertSame($expected_rfc3987, Uri\build_query($pairs, '&', QueryParser::RFC3987_ENCODING));
+        $this->assertSame($expected_no_encoding, Uri\build_query($pairs, '&', QueryParser::NO_ENCODING));
     }
 
     public function buildProvider()
     {
         return [
+            'query object' => [
+                'pairs' => new Uri\Components\Query('a=1&b=2'),
+                'expected_rfc1738' => 'a=1&b=2',
+                'expected_rfc3986' => 'a=1&b=2',
+                'expected_rfc3987' => 'a=1&b=2',
+                'expected_no_encoding' => 'a=1&b=2',
+            ],
             'empty string' => [
                 'pairs' => [],
-                'expected_rfc1738' => '',
-                'expected_rfc3986' => '',
-                'expected_rfc3987' => '',
-                'expected_no_encoding' => '',
+                'expected_rfc1738' => null,
+                'expected_rfc3986' => null,
+                'expected_rfc3987' => null,
+                'expected_no_encoding' => null,
             ],
             'identical keys' => [
                 'pairs' => new ArrayIterator(['a' => ['1', '2']]),
@@ -284,7 +343,7 @@ class FunctionsTest extends TestCase
                 'expected_no_encoding' => 'a=1&a=2',
             ],
             'no value' => [
-                'pairs' => ['a' => null, 'b' => null],
+                'pairs' => ['a' => [null], 'b' => [null]],
                 'expected_rfc1738' => 'a&b',
                 'expected_rfc3986' => 'a&b',
                 'expected_rfc3987' => 'a&b',
@@ -304,57 +363,78 @@ class FunctionsTest extends TestCase
                 'expected_rfc3987' => 'a[]=1&a[]=2',
                 'expected_no_encoding' => 'a[]=1&a[]=2',
             ],
+            'php array (1)' => [
+                'pairs' => ['a[]' => ['1%a6', '2']],
+                'expected_rfc1738' => 'a%5B%5D=1%25a6&a%5B%5D=2',
+                'expected_rfc3986' => 'a%5B%5D=1%25a6&a%5B%5D=2',
+                'expected_rfc3987' => 'a[]=1%a6&a[]=2',
+                'expected_no_encoding' => 'a[]=1%a6&a[]=2',
+            ],
+            'php array (2)' => [
+                'pairs' => ['module' => ['home'], 'action' => ['show'], 'page' => ['😓']],
+                'expected_rfc1738' => 'module=home&action=show&page=%F0%9F%98%93',
+                'expected_rfc3986' => 'module=home&action=show&page=%F0%9F%98%93',
+                'expected_rfc3987' => 'module=home&action=show&page=😓',
+                'expected_no_encoding' => 'module=home&action=show&page=😓',
+            ],
+            'php array (3)' => [
+                'pairs' => ['module' => ['home'], 'action' => ['v%61lue']],
+                'expected_rfc1738' => 'module=home&action=v%61lue',
+                'expected_rfc3986' => 'module=home&action=v%61lue',
+                'expected_rfc3987' => 'module=home&action=v%61lue',
+                'expected_no_encoding' => 'module=home&action=v%61lue',
+            ],
             'preserve dot' => [
-                'pairs' => ['a.b' => '3'],
+                'pairs' => ['a.b' => ['3']],
                 'expected_rfc1738' => 'a.b=3',
                 'expected_rfc3986' => 'a.b=3',
                 'expected_rfc3987' => 'a.b=3',
                 'expected_no_encoding' => 'a.b=3',
             ],
             'no key stripping' => [
-                'pairs' => ['a' => '', 'b' => null],
+                'pairs' => ['a' => [''], 'b' => [null]],
                 'expected_rfc1738' => 'a=&b',
                 'expected_rfc3986' => 'a=&b',
                 'expected_rfc3987' => 'a=&b',
                 'expected_no_encoding' => 'a=&b',
             ],
             'no value stripping' => [
-                'pairs' => ['a' => 'b='],
+                'pairs' => ['a' => ['b=']],
                 'expected_rfc1738' => 'a=b=',
                 'expected_rfc3986' => 'a=b=',
                 'expected_rfc3987' => 'a=b=',
                 'expected_no_encoding' => 'a=b=',
             ],
             'key only' => [
-                'pairs' => ['a' => null],
+                'pairs' => ['a' => [null]],
                 'expected_rfc1738' => 'a',
                 'expected_rfc3986' => 'a',
                 'expected_rfc3987' => 'a',
                 'expected_no_encoding' => 'a',
             ],
             'preserve falsey 1' => [
-                'pairs' => ['0' => null],
+                'pairs' => ['0' => [null]],
                 'expected_rfc1738' => '0',
                 'expected_rfc3986' => '0',
                 'expected_rfc3987' => '0',
                 'expected_no_encoding' => '0',
             ],
             'preserve falsey 2' => [
-                'pairs' => ['0' => ''],
+                'pairs' => ['0' => ['']],
                 'expected_rfc1738' => '0=',
                 'expected_rfc3986' => '0=',
                 'expected_rfc3987' => '0=',
                 'expected_no_encoding' => '0=',
             ],
             'preserve falsey 3' => [
-                'pairs' => ['0' => '0'],
+                'pairs' => ['0' => ['0']],
                 'expected_rfc1738' => '0=0',
                 'expected_rfc3986' => '0=0',
                 'expected_rfc3987' => '0=0',
                 'expected_no_encoding' => '0=0',
             ],
             'rcf1738' => [
-                'pairs' => ['toto' => 'foo+bar'],
+                'pairs' => ['toto' => ['foo+bar']],
                 'expected_rfc1738' => 'toto=foo%2Bbar',
                 'expected_rfc3986' => 'toto=foo+bar',
                 'expected_rfc3987' => 'toto=foo+bar',

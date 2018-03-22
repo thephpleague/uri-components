@@ -2,13 +2,14 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\Path;
+use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @group path
  * @group defaultpath
+ * @coversDefaultClass \League\Uri\Components\Path
  */
 class PathTest extends TestCase
 {
@@ -18,6 +19,11 @@ class PathTest extends TestCase
      * @param string $raw
      * @param string $parsed
      * @param string $rfc1738
+     * @covers ::__construct
+     * @covers ::validate
+     * @covers ::decode
+     * @covers ::getContent
+     * @covers ::getUriComponent
      */
     public function testGetUriComponent($raw, $parsed, $rfc1738)
     {
@@ -26,7 +32,6 @@ class PathTest extends TestCase
         $this->assertSame($raw, $path->getContent(Path::RFC3987_ENCODING));
         $this->assertSame($raw, $path->getContent(Path::NO_ENCODING));
         $this->assertSame($rfc1738, $path->getContent(Path::RFC1738_ENCODING));
-        $this->assertFalse($path->isNull());
     }
 
     public function validPathEncoding()
@@ -46,14 +51,6 @@ class PathTest extends TestCase
         ];
     }
 
-    public function testNullConstructor()
-    {
-        $path = new Path();
-        $this->assertEquals(new Path(''), $path);
-        $this->assertFalse($path->isNull());
-        $this->assertTrue($path->isEmpty());
-    }
-
     public function testInvalidEncodingTypeThrowException()
     {
         $this->expectException(Exception::class);
@@ -64,6 +61,40 @@ class PathTest extends TestCase
     {
         $component = new Path('this is a normal path');
         $this->assertInternalType('array', $component->__debugInfo());
+    }
+
+    public function testWithContent()
+    {
+        $component = new Path('this is a normal path');
+        $this->assertSame($component, $component->withContent($component));
+        $this->assertNotSame($component, $component->withContent('new/path'));
+    }
+
+    /**
+     * @dataProvider invalidPath
+     *
+     * @param mixed $path
+     */
+    public function testConstructorThrowsWithInvalidData($path)
+    {
+        $this->expectException(Exception::class);
+        new Path($path);
+    }
+
+    public function invalidPath()
+    {
+        return [
+            ["\0"],
+            [date_create()],
+            [[]],
+        ];
+    }
+
+    public function testSetState()
+    {
+        $component = new Path(42);
+        $generateComponent = eval('return '.var_export($component, true).';');
+        $this->assertEquals($component, $generateComponent);
     }
 
     /**

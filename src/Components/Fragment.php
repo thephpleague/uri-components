@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\ComponentInterface;
+use League\Uri\Exception;
+
 /**
  * Value object representing a URI Fragment component.
  *
@@ -30,34 +33,125 @@ namespace League\Uri\Components;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.5
  */
-class Fragment extends AbstractComponent
+final class Fragment implements ComponentInterface
 {
+    /**
+     * @internal
+     */
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
+
+    /**
+     * @var string|null
+     */
+    private $fragment;
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['fragment']);
+    }
+
+    /**
+     * New instance.
+     *
+     * @param null|mixed $fragment
+     */
+    public function __construct($fragment = null)
+    {
+        $this->fragment = $this->validate($fragment);
+    }
+
+    /**
+     * Validate a port
+     *
+     * @param mixed $fragment
+     *
+     * @throws Exception if the fragment is invalid
+     *
+     * @return null|string
+     */
+    private function validate($fragment)
+    {
+        if ($fragment instanceof ComponentInterface) {
+            $fragment = $fragment->getContent();
+        }
+
+        if (null === $fragment) {
+            return null;
+        }
+
+        if ((is_object($fragment) && method_exists($fragment, '__toString')) || is_scalar($fragment)) {
+            $fragment = (string) $fragment;
+        }
+
+        if (!is_string($fragment)) {
+            throw new Exception(sprintf('Expected fragment to be stringable; received %s', gettype($fragment)));
+        }
+
+        static $pattern = '/[\x00-\x1f\x7f]/';
+        if (preg_match($pattern, $fragment)) {
+            throw new Exception(sprintf('Invalid fragment string: %s', $fragment));
+        }
+
+        static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
+
+        return preg_replace_callback($encoded_pattern, [$this, 'decode'], $fragment);
+    }
+
+    private function decode(array $matches): string
+    {
+        static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
+        if (preg_match($regexp, $matches[0])) {
+            return strtoupper($matches[0]);
+        }
+
+        return rawurldecode($matches[0]);
+    }
 
     /**
      * {@inheritdoc}
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        $this->assertValidEncoding($enc_type);
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
 
-        if ('' == $this->data || self::NO_ENCODING == $enc_type) {
-            return $this->data;
+        if (null === $this->fragment || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->fragment)) {
+            return $this->fragment;
         }
 
         if (self::RFC3987_ENCODING == $enc_type) {
-            $pattern = str_split(self::$invalid_uri_chars);
-
-            return str_replace($pattern, array_map('rawurlencode', $pattern), $this->data);
+            return preg_replace_callback('/[\x00-\x1f\x7f]/', [$this, 'encode'], $this->fragment) ?? $this->fragment;
         }
 
-        $regexp = '/(?:[^'.self::$unreserved_chars.self::$subdelim_chars.'\:\/@\?]+|%(?!'.self::$encoded_chars.'))/ux';
-
-        $content = $this->encode($this->data, $regexp);
-        if (self::RFC1738_ENCODING == $enc_type) {
-            return $this->toRFC1738($content);
+        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@\?]+|%(?![A-Fa-f0-9]{2}))/ux';
+        $content = preg_replace_callback($regexp, [$this, 'encode'], $this->fragment) ?? rawurlencode($this->fragment);
+        if (self::RFC3986_ENCODING === $enc_type) {
+            return $content;
         }
 
-        return $content;
+        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
+    }
+
+    private function encode(array $matches): string
+    {
+        return rawurlencode($matches[0]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+        return (string) $this->getContent();
     }
 
     /**
@@ -65,11 +159,36 @@ class Fragment extends AbstractComponent
      */
     public function getUriComponent(): string
     {
-        $component = $this->__toString();
-        if (null !== $this->data) {
-            return '#'.$component;
+        if (null === $this->fragment) {
+            return '';
         }
 
-        return $component;
+        return '#'.$this->getContent();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return [
+            'fragment' => $this->fragment,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContent($content)
+    {
+        $content = $this->validate($content);
+        if ($content === $this->fragment) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->fragment = $content;
+
+        return $clone;
     }
 }

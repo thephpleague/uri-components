@@ -16,10 +16,10 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\PublicSuffix\Cache;
-use League\Uri\PublicSuffix\CurlHttpClient;
-use League\Uri\PublicSuffix\ICANNSectionManager;
-use League\Uri\PublicSuffix\Rules;
+use Countable;
+use IteratorAggregate;
+use League\Uri\ComponentInterface;
+use League\Uri\Exception;
 use Traversable;
 
 /**
@@ -36,181 +36,167 @@ use Traversable;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-class Host extends AbstractHierarchicalComponent implements ComponentInterface
+final class Host implements ComponentInterface, Countable, IteratorAggregate
 {
-    /** @deprecated 1.8.0 will be removed in the next major point release */
-    const LOCAL_LINK_PREFIX = '1111111010';
+    const IS_ABSOLUTE = 1;
 
-    const INVALID_ZONE_ID_CHARS = "?#@[]\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
-
-    /** @deprecated 1.8.0 will be removed in the next major point release */
-    const STARTING_LABEL_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-    /** @deprecated 1.8.0 will be removed in the next major point release */
-    const SUB_DELIMITERS = '!$&\'()*+,;=';
+    const IS_RELATIVE = 0;
 
     /**
-     * Tell whether the Host is a domain name
-     *
-     * @var bool
+     * @internal
      */
-    protected $host_as_domain_name = false;
+    const SEPARATOR = '.';
 
     /**
-     * Tell whether the Host is an IPv4
-     *
-     * @deprecated 1.8.0 No longer used by internal code and not recommend
-     *
-     * @var bool
+     * @internal
      */
-    protected $host_as_ipv4 = false;
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
 
     /**
-     * Tell whether the Host is an IPv6
+     * The component Data
      *
-     * @deprecated 1.8.0 No longer used by internal code and not recommend
-     *
-     * @var bool
+     * @var array
      */
-    protected $host_as_ipv6 = false;
+    private $labels = [];
 
     /**
      * Tell the host IP version used
      *
      * @var string|null
      */
-    protected $ip_version;
+    private $ip_version;
+
+    /**
+     * Tell whether the Host is a domain name
+     *
+     * @var bool
+     */
+    private $host_as_domain_name = false;
 
     /**
      * Tell whether the Host contains a ZoneID
      *
      * @var bool
      */
-    protected $has_zone_identifier = false;
+    private $has_zone_identifier = false;
 
     /**
-     * Host separator
+     * Is the object considered absolute
      *
-     * @var string
+     * @var int
      */
-    protected static $separator = '.';
-
-    /**
-     * Hostname public info
-     *
-     * @var array
-     */
-    protected $hostname = [];
-
-    /**
-     * @var Rules|null
-     */
-    protected $resolver;
+    private $is_absolute = self::IS_RELATIVE;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        $host = static::createFromLabels(
-            $properties['data'],
-            $properties['is_absolute'],
-            $properties['resolver'] ?? null
-        );
-
-        $host->hostname = $properties['hostname'];
-
-        return $host;
+        return static::createFromLabels($properties['labels'], $properties['is_absolute']);
     }
 
     /**
      * Returns a new instance from an array or a traversable object.
      *
-     * @param Traversable|array $data     The segments list
-     * @param int               $type     One of the constant IS_ABSOLUTE or IS_RELATIVE
-     * @param null|Rules        $resolver
+     * @param mixed $labels
+     * @param int   $type   One of the constant IS_ABSOLUTE or IS_RELATIVE
      *
      * @throws Exception If $type is not a recognized constant
      *
-     * @return static
+     * @return self
      */
-    public static function createFromLabels($data, int $type = self::IS_RELATIVE, Rules $resolver = null): self
+    public static function createFromLabels($labels, int $type = self::IS_RELATIVE): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
-
-        $data = static::filterIterable($data);
         if (!isset($type_list[$type])) {
-            throw Exception::fromInvalidFlag($type);
+            throw new Exception(sprintf('"%s" is an invalid flag', $type));
         }
 
-        if ([] === $data) {
-            return new static(null, $resolver);
+        if ($labels instanceof Traversable) {
+            $labels = iterator_to_array($labels, false);
         }
 
-        if ([''] === $data) {
-            return new static('', $resolver);
+        if (!is_array($labels)) {
+            throw new Exception('the parameters must be iterable');
         }
 
-        $host = implode(static::$separator, array_reverse($data));
+        if ([] === $labels) {
+            return new self();
+        }
+
+        if ([''] === $labels) {
+            return new self('');
+        }
+
+        $host = implode(self::SEPARATOR, array_reverse($labels));
         if (self::IS_ABSOLUTE === $type) {
-            return new static($host.static::$separator, $resolver);
+            return new self($host.self::SEPARATOR);
         }
 
-        return new static($host, $resolver);
+        return new self($host);
     }
 
     /**
      * Returns a host from an IP address.
      *
-     * @param string     $ip
-     * @param null|Rules $resolver
+     * @param string $ip
+     * @param string $version
      *
-     * @return static
+     * @return self
      */
-    public static function createFromIp(string $ip, Rules $resolver = null): self
+    public static function createFromIp(string $ip, string $version = ''): self
     {
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return new static($ip, $resolver);
+            return new self($ip);
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return new self('['.$ip.']');
         }
 
         if (false !== strpos($ip, '%')) {
             list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + [1 => ''];
-            $ip = $ipv6.'%25'.rawurlencode($zoneId);
+            return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        return new static('['.$ip.']', $resolver);
+        return new self('[v'.$version.'.'.$ip.']');
     }
 
     /**
      * New instance
      *
-     * @param null|string $host
-     * @param null|Rules  $resolver
+     * @param mixed $host
      */
-    public function __construct(string $host = null, Rules $resolver = null)
+    public function __construct($host = null)
     {
-        $parsed = $this->parseHost($host);
-        $this->data = $parsed['data'];
+        $parsed = $this->parse($host);
+        $this->labels = $parsed['data'];
         $this->ip_version = $parsed['ip_version'];
         $this->has_zone_identifier = $parsed['has_zone_identifier'];
         $this->host_as_domain_name = $parsed['host_as_domain_name'];
         $this->is_absolute = $parsed['is_absolute'];
-        $this->host_as_ipv4 = '4' === $this->ip_version;
-        $this->host_as_ipv6 = '6' === $this->ip_version;
-        $this->resolver = $resolver;
     }
 
     /**
      * Validates the submitted data.
      *
-     * @param string|null $host
+     * @param mixed $host
      *
      * @throws Exception If the host is invalid
      *
      * @return array
      */
-    protected function parseHost(string $host = null): array
+    private function parse($host = null): array
     {
+        if ($host instanceof ComponentInterface) {
+            $host = $host->getContent();
+        }
+
         if (null === $host) {
             return [
                 'data' => [],
@@ -231,7 +217,14 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             ];
         }
 
-        $host = $this->validateString($host);
+        if (!is_scalar($host) && !method_exists($host, '__toString')) {
+            throw new Exception(sprintf('Expected host to be stringable or null; received %s', gettype($host)));
+        }
+
+        static $pattern = '/[\x00-\x1f\x7f]/';
+        if (preg_match($pattern, $host)) {
+            throw new Exception(sprintf('Invalid fragment string: %s', $host));
+        }
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return [
                 'data' => [$host],
@@ -307,7 +300,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @return bool
      */
-    protected function isValidIpv6Hostname(string $ipv6): bool
+    private function isValidIpv6Hostname(string $ipv6): bool
     {
         if ('[' !== ($ipv6[0] ?? '') || ']' !== substr($ipv6, -1)) {
             return false;
@@ -435,128 +428,10 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function __debugInfo()
     {
-        $this->lazyloadInfo();
-
-        return array_merge([
-            'component' => $this->getContent(),
-            'labels' => $this->data,
+        return [
+            'labels' => $this->labels,
             'is_absolute' => (bool) $this->is_absolute,
-        ], $this->hostname);
-    }
-
-    /**
-     * Resolve domain name information
-     */
-    protected function lazyloadInfo()
-    {
-        if (!empty($this->hostname)) {
-            return;
-        }
-
-        if (!$this->host_as_domain_name) {
-            $this->hostname = $this->hostname = [
-                'isPublicSuffixValid' => false,
-                'publicSuffix' => '',
-                'registrableDomain' => '',
-                'subDomain' => '',
-            ];
-
-            return;
-        }
-
-        $host = $this->getContent();
-        if ($this->isAbsolute()) {
-            $host = substr($host, 0, -1);
-        }
-
-        $this->resolver = $this->resolver ?? (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
-        $domain = $this->resolver->resolve($host);
-
-        $this->hostname = [
-            'isPublicSuffixValid' => $domain->isValid(),
-            'publicSuffix' => (string) $domain->getPublicSuffix(),
-            'registrableDomain' => (string) $domain->getRegistrableDomain(),
-            'subDomain' => (string) $domain->getSubDomain(),
         ];
-    }
-
-    /**
-     * Return the host public suffix
-     *
-     * @return string
-     */
-    public function getPublicSuffix(): string
-    {
-        $this->lazyloadInfo();
-
-        return $this->hostname['publicSuffix'];
-    }
-
-    /**
-     * Return the host registrable domain.
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.5.0 Typo fix in name
-     * @see        Host::getRegistrableDomain
-     *
-     * @return string
-     */
-    public function getRegisterableDomain(): string
-    {
-        return $this->getRegistrableDomain();
-    }
-
-    /**
-     * Return the host registrable domain
-     *
-     * @return string
-     */
-    public function getRegistrableDomain(): string
-    {
-        $this->lazyloadInfo();
-
-        return $this->hostname['registrableDomain'];
-    }
-
-    /**
-     * Return the hostname subdomain
-     *
-     * @return string
-     */
-    public function getSubDomain(): string
-    {
-        $this->lazyloadInfo();
-
-        return $this->hostname['subDomain'];
-    }
-
-    /**
-     * Tell whether the current public suffix is valid
-     *
-     * @return bool
-     */
-    public function isPublicSuffixValid(): bool
-    {
-        $this->lazyloadInfo();
-
-        return $this->hostname['isPublicSuffixValid'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isNull(): bool
-    {
-        return null === $this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isEmpty(): bool
-    {
-        return '' == $this->getContent();
     }
 
     /**
@@ -622,13 +497,41 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
+     * Returns whether or not the component is absolute or not
+     *
+     * @return bool
+     */
+    public function isAbsolute(): bool
+    {
+        return $this->is_absolute === self::IS_ABSOLUTE;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return count($this->labels);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIterator()
+    {
+        foreach ($this->labels as $label) {
+            yield $label;
+        }
+    }
+
+    /**
      * Returns an array representation of the Host
      *
      * @return array
      */
     public function getLabels(): array
     {
-        return $this->data;
+        return $this->labels;
     }
 
     /**
@@ -645,10 +548,10 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     public function getLabel(int $offset, $default = null)
     {
         if ($offset < 0) {
-            $offset += count($this->data);
+            $offset += count($this->labels);
         }
 
-        return $this->data[$offset] ?? $default;
+        return $this->labels[$offset] ?? $default;
     }
 
     /**
@@ -657,38 +560,17 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * If a value is specified only the keys associated with
      * the given value will be returned
      *
-     * @param mixed ...$args the total number of argument given to the method
+     * @param string ...$args the total number of argument given to the method
      *
      * @return array
      */
-    public function keys(...$args): array
+    public function keys(string ...$args): array
     {
         if (empty($args)) {
-            return array_keys($this->data);
+            return array_keys($this->labels);
         }
 
-        return array_keys($this->data, $this->toIdn($this->validateString($args[0])), true);
-    }
-
-    /**
-     * Convert domain name to IDNA ASCII form.
-     *
-     * Conversion is done only if the label contains the ACE prefix 'xn--'
-     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
-     * making the conversion
-     *
-     * @param string $label
-     *
-     * @return string|false
-     */
-    protected function toIdn(string $label)
-    {
-        $label = rawurldecode($label);
-        if (0 !== strpos($label, 'xn--')) {
-            return $label;
-        }
-
-        return idn_to_utf8($label, 0, INTL_IDNA_VARIANT_UTS46);
+        return array_keys($this->labels, $args[0], true);
     }
 
     /**
@@ -696,47 +578,50 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        $this->assertValidEncoding($enc_type);
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
 
-        if ([] === $this->data) {
+        if ([] === $this->labels) {
             return null;
         }
 
         if (!$this->host_as_domain_name) {
-            return $this->data[0];
+            return $this->labels[0];
         }
 
-        $host = implode(static::$separator, array_reverse($this->data));
-        if ($enc_type !== self::RFC3987_ENCODING) {
-            $host = $this->toAscii($host);
+        $host = implode(self::SEPARATOR, array_reverse($this->labels));
+        static $pattern = '/[^\x20-\x7f]/';
+        if ($enc_type !== self::RFC3987_ENCODING && preg_match($pattern, $host)) {
+            $host = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46);
         }
 
         if (self::IS_ABSOLUTE !== $this->is_absolute) {
             return $host;
         }
 
-        return $host.static::$separator;
+        return $host.self::SEPARATOR;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+        return (string) $this->getContent();
     }
 
     /**
-     * Convert a registered name label to its IDNA ASCII form.
-     *
-     * Conversion is done only if the label contains none valid label characters
-     * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
-     * making the conversion
-     *
-     * @param string $label
-     *
-     * @return string|false
+     * {@inheritdoc}
      */
-    protected function toAscii(string $label)
+    public function getUriComponent(): string
     {
-        static $pattern = '/[^\x20-\x7f]/';
-        if (!preg_match($pattern, $label)) {
-            return $label;
+        if (empty($this->labels)) {
+            return '';
         }
 
-        return idn_to_ascii($label, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+        return $this->getContent();
     }
 
     /**
@@ -753,10 +638,10 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
         }
 
         if ('4' === $this->ip_version) {
-            return $this->data[0];
+            return $this->labels[0];
         }
 
-        $ip = substr($this->data[0], 1, -1);
+        $ip = substr($this->labels[0], 1, -1);
         if ('6' !== $this->ip_version) {
             return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $ip);
         }
@@ -783,18 +668,17 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * {@inheritdoc}
      */
-    public function withContent($value): ComponentInterface
+    public function withContent($value)
     {
+        if ($value instanceof ComponentInterface) {
+            $value = $value->getContent();
+        }
+
         if ($value === $this->getContent()) {
             return $this;
         }
 
-        $new = new static($value, $this->resolver);
-        if (!empty($this->hostname)) {
-            $new->lazyloadInfo();
-        }
-
-        return $new;
+        return new self($value);
     }
 
     /**
@@ -805,7 +689,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @see http://tools.ietf.org/html/rfc6874#section-4
      *
-     * @return static
+     * @return self
      */
     public function withoutZoneIdentifier(): self
     {
@@ -813,10 +697,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             return $this;
         }
 
-        $new = new static(substr($this->data[0], 0, strpos($this->data[0], '%')).']', $this->resolver);
-        $new->hostname = $this->hostname;
-
-        return $new;
+        return new self(substr($this->labels[0], 0, strpos($this->labels[0], '%')).']');
     }
 
     /**
@@ -824,7 +705,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
-     * @return static
+     * @return self
      */
     public function withRootLabel(): self
     {
@@ -843,7 +724,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
-     * @return static
+     * @return self
      */
     public function withoutRootLabel(): self
     {
@@ -865,21 +746,16 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @param string $host the component to append
      *
-     * @return static
+     * @return self
      */
     public function prepend(string $host): self
     {
-        $labels = array_merge($this->data, $this->filterComponent($host));
-        if ($this->data === $labels) {
+        $labels = array_merge($this->labels, $this->filterComponent($host));
+        if ($this->labels === $labels) {
             return $this;
         }
 
-        $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
-        if (!empty($this->hostname)) {
-            $new->lazyloadInfo();
-        }
-
-        return $new;
+        return self::createFromLabels($labels, $this->is_absolute);
     }
 
     /**
@@ -890,21 +766,16 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @param string $host the component to append
      *
-     * @return static
+     * @return self
      */
     public function append(string $host): self
     {
-        $labels = array_merge($this->filterComponent($host), $this->data);
-        if ($this->data === $labels) {
+        $labels = array_merge($this->filterComponent($host), $this->labels);
+        if ($this->labels === $labels) {
             return $this;
         }
 
-        $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
-        if (!empty($this->hostname)) {
-            $new->lazyloadInfo();
-        }
-
-        return $new;
+        return self::createFromLabels($labels, $this->is_absolute);
     }
 
     /**
@@ -914,9 +785,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @return array
      */
-    protected function filterComponent(string $component): array
+    private function filterComponent(string $component): array
     {
-        $component = $this->validateString($component);
         if ('' === $component) {
             return [];
         }
@@ -925,7 +795,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
             $component = substr($component, 0, -1);
         }
 
-        return $this->parseHost($component)['data'];
+        return $this->parse($component)['data'];
     }
 
     /**
@@ -937,21 +807,31 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * @param int    $offset the label offset to remove and replace by the given component
      * @param string $host   the component added
      *
-     * @return static
+     * @return self
      */
     public function replaceLabel(int $offset, string $host): self
     {
-        $labels = $this->replace($offset, $host);
-        if ($labels === $this->data) {
+        $nb_elements = count($this->labels);
+        $offset = filter_var($offset, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]);
+        if (false === $offset) {
             return $this;
         }
 
-        $new = self::createFromLabels($labels, $this->is_absolute, $this->resolver);
-        if (!empty($this->hostname)) {
-            $new->lazyloadInfo();
+        if ($offset < 0) {
+            $offset = $nb_elements + $offset;
         }
 
-        return $new;
+        $labels = array_merge(
+            array_slice($this->labels, 0, $offset),
+            $this->parse($host)['data'],
+            array_slice($this->labels, $offset + 1)
+        );
+
+        if ($labels === $this->labels) {
+            return $this;
+        }
+
+        return self::createFromLabels($labels, $this->is_absolute);
     }
 
     /**
@@ -962,441 +842,49 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @param int[] $offsets the list of keys to remove from the collection
      *
-     * @return static
+     * @return self
      */
     public function withoutLabels(array $offsets): self
     {
-        $data = $this->delete($offsets);
-        if ($data === $this->data) {
+        if (array_filter($offsets, 'is_int') !== $offsets) {
+            throw new Exception('the list of keys must contain integer only values');
+        }
+
+        $data = $this->labels;
+        foreach ($this->filterOffsets(...$offsets) as $offset) {
+            unset($data[$offset]);
+        }
+
+        if ($data === $this->labels) {
             return $this;
         }
 
-        $new = self::createFromLabels($data, $this->is_absolute, $this->resolver);
-        if (!empty($this->hostname)) {
-            $new->lazyloadInfo();
-        }
-
-        return $new;
+        return self::createFromLabels($data, $this->is_absolute);
     }
 
     /**
-     * Returns an instance with the specified registerable domain added
+     * Filter Offset list
      *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the new registerable domain
+     * @param int ...$offsets list of keys to remove from the collection
      *
-     * @param string $host the registerable domain to add
-     *
-     * @return static
+     * @return int[]
      */
-    public function withPublicSuffix(string $host): self
+    private function filterOffsets(int ...$offsets)
     {
-        if ('' === $host) {
-            $host = null;
-        }
-
-        $source = $this->getContent();
-        if ('' == $source) {
-            return new static($host, $this->resolver);
-        }
-
-        $public_suffix = $this->getPublicSuffix();
-        if ('.' === ($host[0] ?? '') || '.' === substr((string) $host, -1)) {
-            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-        }
-
-        $new = $this->parseHost($host)['data'];
-        if (implode('.', array_reverse($new)) === $public_suffix) {
-            return $this;
-        }
-
-        $offset = 0;
-        if ('' != $public_suffix) {
-            $offset = count(explode('.', $public_suffix));
-        }
-
-        $new = self::createFromLabels(
-            array_merge($new, array_slice($this->data, $offset)),
-            $this->is_absolute,
-            $this->resolver
-        );
-
-        $new->lazyloadInfo();
-
-        return $new;
-    }
-
-    /**
-     * validate the submitted data
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.8.0 internal method not used anymore
-     *
-     * @codeCoverageIgnore
-     *
-     * @param string|null $host
-     *
-     * @throws Exception If the host is invalid
-     *
-     * @return array
-     */
-    protected function validate(string $host = null): array
-    {
-        if (null === $host) {
-            return [];
-        }
-
-        if ('' === $host) {
-            return [''];
-        }
-
-        if ('.' === $host[0] || '.' === substr($host, -1)) {
-            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-        }
-
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            $this->host_as_ipv4 = true;
-
-            return [$host];
-        }
-
-        if ($this->isValidIpv6Hostname($host)) {
-            $this->host_as_ipv6 = true;
-            $this->has_zone_identifier = false !== strpos($host, '%');
-
-            return [$host];
-        }
-
-        if ($this->isValidIpFuture($host)) {
-            return [$host];
-        }
-
-        $reg_name = strtolower(rawurldecode($host));
-
-        if ($this->isValidDomain($reg_name)) {
-            if (false !== strpos($reg_name, 'xn--')) {
-                $reg_name = idn_to_utf8($reg_name, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
+        $nb_elements = count($this->labels);
+        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
+        $keys_to_remove = [];
+        foreach ($offsets as $offset) {
+            $offset = filter_var($offset, FILTER_VALIDATE_INT, $options);
+            if (false === $offset) {
+                continue;
             }
-
-            return array_reverse(explode('.', $reg_name));
-        }
-
-        if ($this->isValidRegisteredName($reg_name)) {
-            return [$reg_name];
-        }
-
-        throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-    }
-
-    /**
-     * validate the submitted data
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.8.0 internal method not used anymore
-     *
-     * @codeCoverageIgnore
-     *
-     * @param string|null $host
-     *
-     * @throws Exception If the host is invalid
-     *
-     * @return array
-     */
-    protected function normalizeLabels(string $host = null): array
-    {
-        trigger_error(
-            self::class.'::'.__METHOD__.' is deprecated and will be removed in the next major point release',
-            E_USER_DEPRECATED
-        );
-
-        if (null === $host) {
-            return [];
-        }
-
-        if ('' === $host) {
-            return [''];
-        }
-
-        if ('.' === $host[0] || '.' === substr($host, -1)) {
-            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-        }
-
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return [$host];
-        }
-
-        if ($this->isValidIpv6Hostname($host)) {
-            return [$host];
-        }
-
-        if ($this->isValidIpFuture($host)) {
-            return [$host];
-        }
-
-        $reg_name = strtolower(rawurldecode($host));
-
-        if ($this->isValidDomain($reg_name)) {
-            if (false !== strpos($reg_name, 'xn--')) {
-                $reg_name = idn_to_utf8($reg_name, 0, INTL_IDNA_VARIANT_UTS46);
+            if ($offset < 0) {
+                $offset += $nb_elements;
             }
-
-            return array_reverse(explode('.', $reg_name));
+            $keys_to_remove[] = $offset;
         }
 
-        if ($this->isValidRegisteredName($reg_name)) {
-            return [$reg_name];
-        }
-
-        throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-    }
-
-    /**
-     * Returns an instance with the specified registerable domain added
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.5.0 Typo fix in name
-     * @see        Host::withRegistrableDomain
-     *
-     * @param string $host the registerable domain to add
-     *
-     * @return static
-     */
-    public function withRegisterableDomain(string $host): self
-    {
-        return $this->withRegistrableDomain($host);
-    }
-
-    /**
-     * Returns an instance with the specified registerable domain added
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the new registerable domain
-     *
-     * @param string $host the registerable domain to add
-     *
-     * @return static
-     */
-    public function withRegistrableDomain(string $host): self
-    {
-        if ('' === $host) {
-            $host = null;
-        }
-
-        $source = $this->getContent();
-        if ('' == $source) {
-            return new static($host, $this->resolver);
-        }
-
-        $registerable_domain = $this->getRegistrableDomain();
-
-        if ('.' === ($host[0] ?? '') || '.' === substr((string) $host, -1)) {
-            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-        }
-        $new = $this->parseHost($host)['data'];
-        if (implode('.', array_reverse($new)) === $registerable_domain) {
-            return $this;
-        }
-
-        $offset = 0;
-        if ('' != $registerable_domain) {
-            $offset = count(explode('.', $registerable_domain));
-        }
-
-        $new = self::createFromLabels(
-            array_merge($new, array_slice($this->data, $offset)),
-            $this->is_absolute,
-            $this->resolver
-        );
-        $new->lazyloadInfo();
-
-        return $new;
-    }
-
-    /**
-     * Returns an instance with the specified sub domain added
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the new sud domain
-     *
-     * @param string $host the subdomain to add
-     *
-     * @return static
-     */
-    public function withSubDomain(string $host): self
-    {
-        if ('' === $host) {
-            $host = null;
-        }
-
-        $source = $this->getContent();
-        if ('' == $source) {
-            return new static($host, $this->resolver);
-        }
-
-        $subdomain = $this->getSubDomain();
-        if ('.' === ($host[0] ?? '') || '.' === substr((string) $host, -1)) {
-            throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
-        }
-
-        $new = $this->parseHost($host)['data'];
-        if (implode('.', array_reverse($new)) === $subdomain) {
-            return $this;
-        }
-
-        $offset = count($this->data);
-        if ('' != $subdomain) {
-            $offset -= count(explode('.', $subdomain));
-        }
-
-        $new = self::createFromLabels(
-            array_merge(array_slice($this->data, 0, $offset), $new),
-            $this->is_absolute,
-            $this->resolver
-        );
-        $new->lazyloadInfo();
-
-        return $new;
-    }
-
-    /**
-     * Returns an instance with a different domain resolver
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains a different domain resolver, and update the
-     * host domain information.
-     *
-     * @param Rules|null $resolver
-     *
-     * @return static
-     */
-    public function withDomainResolver(Rules $resolver = null): self
-    {
-        if ($resolver == $this->resolver) {
-            return $this;
-        }
-
-        $clone = clone $this;
-        $clone->resolver = $resolver;
-        if (!empty($this->hostname)) {
-            $clone->lazyloadInfo();
-        }
-
-        return $clone;
-    }
-
-    /**
-     * Returns whether the hostname is valid.
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.8.0 No longer used by internal code and not recommend
-     *
-     * @codeCoverageIgnore
-     *
-     *
-     * A valid registered name MUST:
-     *
-     * - contains at most 127 subdomains deep
-     * - be limited to 255 octets in length
-     *
-     * @see https://en.wikipedia.org/wiki/Subdomain
-     * @see https://tools.ietf.org/html/rfc1035#section-2.3.4
-     * @see https://blogs.msdn.microsoft.com/oldnewthing/20120412-00/?p=7873/
-     *
-     * @param string $host
-     *
-     * @return bool
-     */
-    protected function isValidHostname(string $host): bool
-    {
-        $labels = array_map([$this, 'toAscii'], explode('.', $host));
-
-        return 127 > count($labels)
-            && 253 > strlen(implode('.', $labels))
-            && $labels === array_filter($labels, [$this, 'isValidLabel']);
-    }
-
-    /**
-     * Returns whether the registered name label is valid
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.8.0 No longer used by internal code and not recommend
-     *
-     * @codeCoverageIgnore
-     *
-     * A valid registered name label MUST:
-     *
-     * - not be empty
-     * - contain 63 characters or less
-     * - conform to the following ABNF
-     *
-     * reg-name = *( unreserved / pct-encoded / sub-delims )
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * @param string $label
-     *
-     * @return bool
-     */
-    protected function isValidLabel($label): bool
-    {
-        return is_string($label)
-            && '' != $label
-            && 63 >= strlen($label)
-            && strlen($label) == strspn($label, self::STARTING_LABEL_CHARS.'-_~'.self::SUB_DELIMITERS);
-    }
-
-    /**
-     * Set the FQDN property.
-     *
-     * @deprecated 1.8.0 internal method no longer in use
-     *
-     * @codeCoverageIgnore
-     *
-     * @param string|null $str
-     *
-     * @return string|null
-     */
-    protected function setIsAbsolute(string $str = null)
-    {
-        if (null === $str) {
-            return $str;
-        }
-
-        $this->is_absolute = self::IS_RELATIVE;
-        if ('.' === substr($str, -1, 1)) {
-            $this->is_absolute = self::IS_ABSOLUTE;
-            return substr($str, 0, -1);
-        }
-
-        return $str;
-    }
-
-    /**
-     * Returns a formatted host string.
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.8.0 No longer used by internal code and not recommend
-     *
-     * @codeCoverageIgnore
-     *
-     * @param array $data The segments list
-     * @param int   $type
-     *
-     * @return string
-     */
-    protected static function format(array $data, int $type): string
-    {
-        $hostname = implode(static::$separator, array_reverse($data));
-        if (self::IS_ABSOLUTE === $type) {
-            return $hostname.static::$separator;
-        }
-
-        return $hostname;
+        return array_flip(array_flip(array_reverse($keys_to_remove)));
     }
 }

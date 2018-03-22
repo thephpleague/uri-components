@@ -3,18 +3,20 @@
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\DataPath as Path;
-use League\Uri\Components\Exception;
+use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 use SplFileObject;
 
 /**
  * @group path
  * @group datapath
+ * @coversDefaultClass \League\Uri\Components\DataPath
  */
 class DataPathTest extends TestCase
 {
     /**
      * @dataProvider invalidDataUriPath
+     * @covers ::createFromPath
      * @param string $path
      */
     public function testCreateFromPathFailed($path)
@@ -26,6 +28,7 @@ class DataPathTest extends TestCase
     /**
      * @dataProvider invalidDataUriPath
      * @param string $path
+     * @covers ::parse
      */
     public function testConstructorFailed($path)
     {
@@ -33,9 +36,16 @@ class DataPathTest extends TestCase
         new Path($path);
     }
 
+    /**
+     * @covers ::__set_state
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateDocument
+     */
     public function testSetState()
     {
-        $component = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $component = new Path(';,Bonjour%20le%20monde%21');
         $generateComponent = eval('return '.var_export($component, true).';');
         $this->assertEquals($component, $generateComponent);
     }
@@ -47,12 +57,25 @@ class DataPathTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::withContent
+     * @covers ::__construct
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateDocument
+     */
     public function testWithPath()
     {
-        $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-        $this->assertSame($uri, $uri->withContent((string) $uri));
+        $path = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $this->assertSame($path, $path->withContent($path));
+        $this->assertNotSame($path, $path->withContent(''));
     }
 
+    /**
+     * @covers ::__debugInfo
+     * @covers ::__construct
+     */
     public function testDebugInfo()
     {
         $component = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
@@ -63,6 +86,7 @@ class DataPathTest extends TestCase
      * @dataProvider validPathContent
      * @param string $path
      * @param string $expected
+     * @covers ::__toString
      */
     public function testDefaultConstructor($path, $expected)
     {
@@ -92,6 +116,15 @@ class DataPathTest extends TestCase
      * @param string $path
      * @param string $mimetype
      * @param string $mediatype
+     * @covers ::createFromPath
+     * @covers ::__construct
+     * @covers ::format
+     * @covers ::getMimeType
+     * @covers ::getMediaType
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
      */
     public function testCreateFromPath($path, $mimetype, $mediatype)
     {
@@ -108,6 +141,14 @@ class DataPathTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::withParameters
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
+     */
     public function testWithParameters()
     {
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
@@ -115,6 +156,15 @@ class DataPathTest extends TestCase
         $this->assertSame($newUri, $uri);
     }
 
+    /**
+     * @covers ::withParameters
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
+     * @covers ::getParameters
+     */
     public function testWithParametersOnBinaryData()
     {
         $expected = 'charset=binary;foo=bar';
@@ -128,6 +178,12 @@ class DataPathTest extends TestCase
      *
      * @param string $path
      * @param string $parameters
+     * @covers ::withParameters
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
      */
     public function testWithParametersFailedWithInvalidParameters($path, $parameters)
     {
@@ -152,6 +208,8 @@ class DataPathTest extends TestCase
     /**
      * @dataProvider fileProvider
      * @param Path $uri
+     * @covers ::isBinaryData
+     * @covers ::toBinary
      */
     public function testToBinary($uri)
     {
@@ -161,6 +219,8 @@ class DataPathTest extends TestCase
     /**
      * @dataProvider fileProvider
      * @param Path $uri
+     * @covers ::isBinaryData
+     * @covers ::toAscii
      */
     public function testToAscii($uri)
     {
@@ -178,6 +238,7 @@ class DataPathTest extends TestCase
     /**
      * @dataProvider invalidParameters
      * @param string $parameters
+     * @covers ::withParameters
      */
     public function testUpdateParametersFailed($parameters)
     {
@@ -194,6 +255,9 @@ class DataPathTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::save
+     */
     public function testBinarySave()
     {
         $newFilePath = __DIR__.'/data/temp.gif';
@@ -208,6 +272,10 @@ class DataPathTest extends TestCase
         unlink($newFilePath);
     }
 
+    /**
+     * @covers ::save
+     * @covers ::getData
+     */
     public function testRawSave()
     {
         $newFilePath = __DIR__.'/data/temp.txt';
@@ -223,23 +291,64 @@ class DataPathTest extends TestCase
         unlink($newFilePath);
     }
 
+    /**
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
+     */
     public function testDataPathConstructor()
     {
         $this->assertSame('text/plain;charset=us-ascii,', (string) new Path());
     }
 
+    /**
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
+     */
     public function testInvalidBase64Encoded()
     {
         $this->expectException(Exception::class);
         new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
+    /**
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
+     */
     public function testInvalidComponent()
     {
         $this->expectException(Exception::class);
         new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
+    /**
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
+     */
+    public function testInvalidString()
+    {
+        $this->expectException(Exception::class);
+        new Path('text/plain;boulook€');
+    }
+
+    /**
+     * @covers ::parse
+     * @covers ::filterMimeType
+     * @covers ::filterParameters
+     * @covers ::validateParameter
+     * @covers ::validateDocument
+     */
     public function testInvalidMimetype()
     {
         $this->expectException(Exception::class);

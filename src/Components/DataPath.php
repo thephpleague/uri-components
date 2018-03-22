@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\Exception;
 use SplFileObject;
 
 /**
@@ -32,16 +33,17 @@ use SplFileObject;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.3
  */
-class DataPath extends AbstractComponent
+final class DataPath extends Path
 {
-    use PathInfoTrait;
-
     const DEFAULT_MIMETYPE = 'text/plain';
 
     const DEFAULT_PARAMETER = 'charset=us-ascii';
 
     const BINARY_PARAMETER = 'base64';
 
+    /**
+     * @internal
+     */
     const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
 
     /**
@@ -49,36 +51,28 @@ class DataPath extends AbstractComponent
      *
      * @var string
      */
-    protected $mimetype;
+    private $mimetype;
 
     /**
      * The mediatype parameters
      *
      * @var string[]
      */
-    protected $parameters;
+    private $parameters;
 
     /**
      * Is the Document bas64 encoded
      *
      * @var bool
      */
-    protected $is_binary_data;
+    private $is_binary_data;
 
     /**
      * The document string representation
      *
      * @var string
      */
-    protected $document;
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function __set_state(array $properties)
-    {
-        return new static($properties['data']);
-    }
+    private $document;
 
     /**
      * Create a new instance from a file path
@@ -95,71 +89,67 @@ class DataPath extends AbstractComponent
             throw new Exception(sprintf('`%s` does not exist or is not readabele', $path));
         }
 
-        return new static(static::format(
-            str_replace(' ', '', (new \finfo(FILEINFO_MIME))->file($path)),
-            '',
-            true,
-            base64_encode(file_get_contents($path))
-        ));
+        return new static(
+            str_replace(' ', '', (new \finfo(FILEINFO_MIME))->file($path))
+            .';'.static::BINARY_PARAMETER
+            .','.base64_encode(file_get_contents($path))
+        );
     }
 
     /**
      * new instance
      *
-     * @param string|null $path the component value
+     * @param mixed $path the component value
      */
-    public function __construct(string $path = null)
+    public function __construct($path = '')
     {
-        if (null === $path) {
-            $path = '';
-        }
-
         parent::__construct($path);
+        $components = $this->parse($this->path);
+        $this->document = $components['document'];
+        $this->mimetype = $components['mimetype'];
+        $this->parameters = $components['parameters'];
+        $this->is_binary_data = $components['is_binary_data'];
+        $this->path = $components['path'];
     }
 
     /**
-     * Return the decoded string representation of the component
-     *
-     * @return string
-     */
-    protected function getDecoded(): string
-    {
-        return $this->data;
-    }
-
-    /**
-     * validate the submitted path
+     * Validate the submitted path.
      *
      * @param string $path
+     *
+     * @return array
      */
-    protected function validate($path)
+    private function parse($path): array
     {
         if ('' === $path) {
-            $this->document = '';
-            $this->mimetype = static::DEFAULT_MIMETYPE;
-            $this->parameters = [static::DEFAULT_PARAMETER];
-            $this->is_binary_data = false;
-            return static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',';
+            return [
+                'document' => '',
+                'mimetype' => static::DEFAULT_MIMETYPE,
+                'parameters' => [static::DEFAULT_PARAMETER],
+                'is_binary_data' => false,
+                'path' => static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',',
+            ];
         }
 
-        static $idn_pattern = '/[^\x20-\x7f]/';
-        if (preg_match($idn_pattern, $path) || false === strpos($path, ',')) {
-            throw new Exception(sprintf(
-                'The submitted path `%s` is invalid according to RFC2937',
-                $path
-            ));
+        static $pattern = '/[^\x20-\x7f]/';
+        if (preg_match($pattern, $path) && false === strpos($path, ',')) {
+            throw new Exception(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
-        $parts = explode(',', $path, 2);
-        $mediatype = array_shift($parts);
-        $this->document = (string) array_shift($parts);
-        $mediatype = explode(';', $mediatype, 2);
-        $mimetype = (string) array_shift($mediatype);
-        $parameters = (string) array_shift($mediatype);
-        $this->mimetype = $this->filterMimeType($mimetype);
-        $this->parameters = $this->filterParameters($parameters);
-        $this->validateDocument();
-        return $this->format($this->mimetype, $this->getParameters(), $this->is_binary_data, $this->document);
+        $is_binary_data = false;
+        list($mediatype, $document) = explode(',', $path, 2) + [1 => ''];
+        list($mimetype, $parameters) = explode(';', $mediatype, 2) + [1 => ''];
+        $mimetype = $this->filterMimeType($mimetype);
+        $parameters = $this->filterParameters($parameters, $is_binary_data);
+        $this->validateDocument($document, $is_binary_data);
+
+        return [
+            'document' => $document,
+            'mimetype' => $mimetype,
+            'parameters' => $parameters,
+            'is_binary_data' => $is_binary_data,
+            'path' => $this->format($mimetype, implode(';', $parameters), $is_binary_data, $document),
+        ];
     }
 
     /**
@@ -171,7 +161,7 @@ class DataPath extends AbstractComponent
      *
      * @return string
      */
-    protected function filterMimeType(string $mimetype): string
+    private function filterMimeType(string $mimetype): string
     {
         if ('' == $mimetype) {
             return static::DEFAULT_MIMETYPE;
@@ -188,21 +178,21 @@ class DataPath extends AbstractComponent
      * Extract and set the binary flag from the parameters if it exists
      *
      * @param string $parameters
+     * @param bool   $is_binary_data
      *
      * @throws Exception If the mediatype parameters contain invalid data
      *
      * @return string[]
      */
-    protected function filterParameters(string $parameters): array
+    private function filterParameters(string $parameters, bool &$is_binary_data): array
     {
-        $this->is_binary_data = false;
         if ('' === $parameters) {
             return [static::DEFAULT_PARAMETER];
         }
 
         if (preg_match(',(;|^)'.static::BINARY_PARAMETER.'$,', $parameters, $matches)) {
             $parameters = substr($parameters, 0, - strlen($matches[0]));
-            $this->is_binary_data = true;
+            $is_binary_data = true;
         }
 
         $params = array_filter(explode(';', $parameters));
@@ -220,7 +210,7 @@ class DataPath extends AbstractComponent
      *
      * @return bool
      */
-    protected function validateParameter(string $parameter): bool
+    private function validateParameter(string $parameter): bool
     {
         $properties = explode('=', $parameter);
 
@@ -230,17 +220,20 @@ class DataPath extends AbstractComponent
     /**
      * Validate the path document string representation
      *
+     * @param string $document
+     * @param bool   $is_binary_data
+     *
      * @throws Exception If the data is invalid
      */
-    protected function validateDocument()
+    private function validateDocument(string $document, bool $is_binary_data)
     {
-        if (!$this->is_binary_data) {
+        if (!$is_binary_data) {
             return;
         }
 
-        $res = base64_decode($this->document, true);
-        if (false === $res || $this->document !== base64_encode($res)) {
-            throw new Exception(sprintf('invalid document, `%s`', $this->document));
+        $res = base64_decode($document, true);
+        if (false === $res || $document !== base64_encode($res)) {
+            throw new Exception(sprintf('invalid document, `%s`', $document));
         }
     }
 
@@ -254,7 +247,7 @@ class DataPath extends AbstractComponent
      *
      * @return string
      */
-    protected static function format(
+    private function format(
         string $mimetype,
         string $parameters,
         bool $is_binary_data,
@@ -268,7 +261,11 @@ class DataPath extends AbstractComponent
             $parameters .= ';'.static::BINARY_PARAMETER;
         }
 
-        return static::encodePath($mimetype.$parameters.','.$data);
+        $path = $mimetype.$parameters.','.$data;
+
+        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
+
+        return preg_replace_callback($regexp, [$this, 'encode'], $path) ?? $path;
     }
 
     /**
@@ -277,7 +274,7 @@ class DataPath extends AbstractComponent
     public function __debugInfo()
     {
         return [
-            'component' => $this->getContent(),
+            'path' => $this->path,
             'mimetype' => $this->mimetype,
             'parameters' => $this->parameters,
             'is_binary' => $this->is_binary_data,
@@ -433,11 +430,26 @@ class DataPath extends AbstractComponent
             return $this;
         }
 
-        return new static($this->format(
-            $this->mimetype,
-            $parameters,
-            $this->is_binary_data,
-            $this->document
-        ));
+        return new static($this->format($this->mimetype, $parameters, $this->is_binary_data, $this->document));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withContent($value)
+    {
+        $components = $this->parse($this->validate($value));
+        if ($components['path'] === $this->path) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->document = $components['document'];
+        $clone->mimetype = $components['mimetype'];
+        $clone->parameters = $components['parameters'];
+        $clone->is_binary_data = $components['is_binary_data'];
+        $clone->path = $components['path'];
+
+        return $clone;
     }
 }
