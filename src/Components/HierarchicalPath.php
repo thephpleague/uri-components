@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Countable;
+use IteratorAggregate;
+use League\Uri\Exception;
 use Traversable;
 
 /**
@@ -26,102 +29,108 @@ use Traversable;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class HierarchicalPath extends AbstractHierarchicalComponent implements ComponentInterface
+final class HierarchicalPath extends Path implements Countable, IteratorAggregate
 {
-    use PathInfoTrait;
+    const IS_ABSOLUTE = 1;
+    const IS_RELATIVE = 0;
 
     /**
-     * Path segment separator
-     *
-     * @var string
+     * @internal
      */
-    protected static $separator = '/';
+    const SEPARATOR = '/';
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return static::createFromSegments($properties['data'], $properties['is_absolute']);
-    }
+    private $segments;
+
+    private $is_absolute;
 
     /**
      * return a new instance from an array or a traversable object
      *
-     * @param Traversable|array $data The segments list
-     * @param int               $type one of the constant IS_ABSOLUTE or IS_RELATIVE
+     * @param mixed $segments The segments list
+     * @param int   $type     one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
      * @throws Exception If $data is invalid
      * @throws Exception If $type is not a recognized constant
      *
-     * @return static
+     * @return self
      */
-    public static function createFromSegments($data, int $type = self::IS_RELATIVE): self
+    public static function createFromSegments($segments, int $type = self::IS_RELATIVE): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
         if (!isset($type_list[$type])) {
-            throw Exception::fromInvalidFlag($type);
+            throw new Exception(sprintf('"%s" is an invalid flag', $type));
         }
 
-        $path = implode(static::$separator, static::filterIterable($data));
-        if (static::IS_ABSOLUTE === $type) {
-            if (static::$separator !== substr($path, 0, 1)) {
-                return new static(static::$separator.$path);
-            }
-
-            return new static($path);
+        if ($segments instanceof self) {
+            $segments = $segments->segments;
         }
 
-        return new static(ltrim($path, '/'));
+        if ($segments instanceof Traversable) {
+            $segments = iterator_to_array($segments, false);
+        }
+
+        if (!is_array($segments)) {
+            throw new Exception('the segments must be iterable');
+        }
+
+        $path = implode(self::SEPARATOR, $segments);
+        if (static::IS_ABSOLUTE !== $type) {
+            return new static(ltrim($path, '/'));
+        }
+
+        if (self::SEPARATOR !== substr($path, 0, 1)) {
+            return new static(self::SEPARATOR.$path);
+        }
+
+        return new static($path);
     }
 
     /**
      * New Instance
      *
-     * @param string|null $path
+     * @param mixed $path
      */
-    public function __construct(string $path = null)
+    public function __construct($path = '')
     {
-        if (null === $path) {
-            $path = '';
-        }
-
-        $path = $this->validateString($path);
-        $this->is_absolute = static::IS_RELATIVE;
-        if (static::$separator === substr($path, 0, 1)) {
-            $this->is_absolute = static::IS_ABSOLUTE;
-            $path = substr($path, 1, strlen($path));
-        }
-
-        $append_delimiter = false;
-        if (static::$separator === substr($path, -1, 1)) {
-            $path = substr($path, 0, -1);
-            $append_delimiter = true;
-        }
-
-        $this->data = $this->validate($path);
-        if ($append_delimiter) {
-            $this->data[] = '';
-        }
+        parent::__construct($path);
+        $this->segments = $this->filterSegments($this->path);
+        $this->is_absolute = $this->isAbsolute() ? self::IS_ABSOLUTE : self::IS_RELATIVE;
     }
 
-    /**
-     * validate the submitted data
-     *
-     * @param string $data
-     *
-     * @return array
-     */
-    protected function validate(string $data): array
+    private function filterSegments(string $path)
     {
+        if ('' === $path) {
+            return [''];
+        }
+
+        if ('/' === $path[0]) {
+            $path = substr($path, 1);
+        }
+
         $filterSegment = function ($segment) {
             return isset($segment);
         };
 
-        $data = $this->decodePath($data);
+        return array_filter(explode(self::SEPARATOR, $path), $filterSegment);
+    }
 
-        return array_filter(explode(static::$separator, $data), $filterSegment);
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return count($this->segments);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIterator()
+    {
+        foreach ($this->segments as $segment) {
+            yield $segment;
+        }
     }
 
     /**
@@ -130,9 +139,9 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     public function __debugInfo()
     {
         return [
-            'component' => $this->getContent(),
-            'segments' => $this->data,
-            'is_absolute' => (bool) $this->is_absolute,
+            'path' => $this->path,
+            'segments' => $this->segments,
+            'is_absolute' => $this->isAbsolute(),
         ];
     }
 
@@ -145,7 +154,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     {
         return str_replace(
             ['\\', "\0"],
-            [static::$separator, '\\'],
+            [self::SEPARATOR, '\\'],
             dirname(str_replace('\\', "\0", $this->__toString()))
         );
     }
@@ -157,7 +166,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      */
     public function getBasename(): string
     {
-        $data = $this->data;
+        $data = $this->segments;
 
         return (string) array_pop($data);
     }
@@ -181,7 +190,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      */
     public function getSegments(): array
     {
-        return $this->data;
+        return $this->segments;
     }
 
     /**
@@ -198,10 +207,10 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     public function getSegment(int $offset, $default = null)
     {
         if ($offset < 0) {
-            $offset += count($this->data);
+            $offset += count($this->segments);
         }
 
-        return $this->data[$offset] ?? $default;
+        return $this->segments[$offset] ?? $default;
     }
 
     /**
@@ -217,25 +226,10 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     public function keys(...$args): array
     {
         if (empty($args)) {
-            return array_keys($this->data);
+            return array_keys($this->segments);
         }
 
-        return array_keys($this->data, $this->decodeComponent($this->validateString($args[0])), true);
-    }
-
-    /**
-     * Return the decoded string representation of the component
-     *
-     * @return string
-     */
-    protected function getDecoded(): string
-    {
-        $front_delimiter = '';
-        if ($this->is_absolute === static::IS_ABSOLUTE) {
-            $front_delimiter = static::$separator;
-        }
-
-        return $front_delimiter.implode(static::$separator, $this->data);
+        return array_keys($this->segments, $args[0], true);
     }
 
     /**
@@ -247,18 +241,6 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function withContent($value): ComponentInterface
-    {
-        if ($value === $this->getContent()) {
-            return $this;
-        }
-
-        return new static($value);
-    }
-
-    /**
      * Returns an instance with the specified component prepended
      *
      * This method MUST retain the state of the current instance, and return
@@ -266,16 +248,21 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      *
      * @param string $path the component to append
      *
-     * @return static
+     * @return self
      */
     public function prepend(string $path): self
     {
         $new_segments = $this->filterComponent($path);
-        if (!empty($new_segments) && '' === end($new_segments)) {
+        if ('' === end($new_segments)) {
             array_pop($new_segments);
         }
 
-        return static::createFromSegments(array_merge($new_segments, $this->data), $this->is_absolute);
+        $old_segments = $this->segments;
+        if ('' === reset($old_segments)) {
+            array_shift($old_segments);
+        }
+
+        return static::createFromSegments(array_merge($new_segments, $old_segments), $this->is_absolute);
     }
 
     /**
@@ -286,34 +273,38 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      *
      * @param string $path the component to append
      *
-     * @return static
+     * @return self
      */
     public function append(string $path): self
     {
         $new_segments = $this->filterComponent($path);
-        $data = $this->data;
-        if (!empty($data) && '' === end($data)) {
-            array_pop($data);
+        if ('' === reset($new_segments)) {
+            array_shift($new_segments);
         }
 
-        return static::createFromSegments(array_merge($data, $new_segments), $this->is_absolute);
+        $old_segments = $this->segments;
+        if ('' === end($old_segments)) {
+            array_pop($old_segments);
+        }
+
+        return static::createFromSegments(array_merge($old_segments, $new_segments), $this->is_absolute);
     }
 
     /**
      * Filter the component to append or prepend
      *
-     * @param string $path
+     * @param mixed $path
      *
      * @return array
      */
-    protected function filterComponent(string $path): array
+    protected function filterComponent($path): array
     {
-        $path = $this->validateString($path);
-        if ('' != $path && '/' == $path[0]) {
+        $path = $this->validate($path);
+        if ('' !== $path && '/' == $path[0]) {
             $path = substr($path, 1);
         }
 
-        return $this->validate($path);
+        return $this->filterSegments($path);
     }
 
     /**
@@ -325,18 +316,33 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      * @param int    $offset    the label offset to remove and replace by the given component
      * @param string $component the component added
      *
-     * @return static
+     * @return self
      */
     public function replaceSegment(int $offset, string $component): self
     {
-        $data = $this->replace($offset, $component);
-        if ($data === $this->data) {
+        $nb_elements = count($this->segments);
+        $offset = filter_var($offset, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]);
+        if (false === $offset) {
             return $this;
         }
 
-        return self::createFromSegments($data, $this->is_absolute);
-    }
+        if ($offset < 0) {
+            $offset = $nb_elements + $offset;
+        }
 
+        $dest = $this->filterSegments($this->validate($component));
+        if ('' === $dest[count($dest) - 1]) {
+            array_pop($dest);
+        }
+
+        $segments = array_merge(array_slice($this->segments, 0, $offset), $dest, array_slice($this->segments, $offset + 1));
+
+        if ($segments === $this->segments) {
+            return $this;
+        }
+
+        return self::createFromSegments($segments, $this->is_absolute);
+    }
 
     /**
      * Returns an instance without the specified keys
@@ -346,16 +352,50 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      *
      * @param int[] $offsets the list of keys to remove from the collection
      *
-     * @return static
+     * @return self
      */
     public function withoutSegments(array $offsets): self
     {
-        $data = $this->delete($offsets);
-        if ($data === $this->data) {
+        if (array_filter($offsets, 'is_int') !== $offsets) {
+            throw new Exception('the list of keys must contain integer only values');
+        }
+
+        $segments = $this->segments;
+        foreach ($this->filterOffsets(...$offsets) as $offset) {
+            unset($segments[$offset]);
+        }
+
+        if ($segments === $this->segments) {
             return $this;
         }
 
-        return self::createFromSegments($data, $this->is_absolute);
+        return self::createFromSegments($segments, $this->is_absolute);
+    }
+
+    /**
+     * Filter Offset list
+     *
+     * @param int ...$offsets list of keys to remove from the collection
+     *
+     * @return int[]
+     */
+    protected function filterOffsets(int ...$offsets)
+    {
+        $nb_elements = count($this->segments);
+        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
+        $keys_to_remove = [];
+        foreach ($offsets as $offset) {
+            $offset = filter_var($offset, FILTER_VALIDATE_INT, $options);
+            if (false === $offset) {
+                continue;
+            }
+            if ($offset < 0) {
+                $offset += $nb_elements;
+            }
+            $keys_to_remove[] = $offset;
+        }
+
+        return array_flip(array_flip(array_reverse($keys_to_remove)));
     }
 
     /**
@@ -364,13 +404,13 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
      *
-     * @param string $path the new parent directory path
+     * @param mixed $path the new parent directory path
      *
-     * @return static
+     * @return self
      */
-    public function withDirname(string $path): self
+    public function withDirname($path): self
     {
-        $path = $this->validateString($path);
+        $path = $this->validate($path);
         if ($path === $this->getDirname()) {
             return $this;
         }
@@ -379,7 +419,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
             $path = substr($path, 0, -1);
         }
 
-        return new static($path.'/'.array_pop($this->data));
+        return new static($path.'/'.array_pop($this->segments));
     }
 
     /**
@@ -390,24 +430,24 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      *
      * @param string $path the new path basename
      *
-     * @return static
+     * @return self
      */
     public function withBasename(string $path): self
     {
-        $path = $this->validateString($path);
+        $path = $this->validate($path);
         if (false !== strpos($path, '/')) {
             throw new Exception('The submitted basename can not contain the path separator');
         }
 
-        $data = $this->data;
-        $basename = array_pop($data);
+        $segments = $this->segments;
+        $basename = array_pop($segments);
         if ($path == $basename) {
             return $this;
         }
 
-        $data[] = $path;
+        $segments[] = $path;
 
-        return static::createFromSegments($data, $this->is_absolute);
+        return static::createFromSegments($segments, $this->is_absolute);
     }
 
     /**
@@ -419,26 +459,53 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      * @param string $extension the new extension
      *                          can preceeded with or without the dot (.) character
      *
-     * @return static
+     * @return self
      */
     public function withExtension(string $extension): self
     {
         $extension = $this->formatExtension($extension);
-        $segments = $this->getSegments();
+        $segments = $this->segments;
         $basename = array_pop($segments);
-        $parts = explode(';', $basename, 2);
-        $basenamePart = array_shift($parts);
-        if ('' === $basenamePart || is_null($basenamePart)) {
+        $parts = explode(';', $basename, 2) + [1 => null];
+        $basenamePart = $parts[0];
+        if ('' === $basenamePart || null === $basenamePart) {
             return $this;
         }
 
-        $newBasename = $this->buildBasename($basenamePart, $extension, array_shift($parts));
+        $newBasename = $this->buildBasename($basenamePart, $extension, $parts[1]);
         if ($basename === $newBasename) {
             return $this;
         }
         $segments[] = $newBasename;
 
-        return $this->createFromSegments($segments, $this->is_absolute);
+        return static::createFromSegments($segments, $this->is_absolute);
+    }
+
+    /**
+     * validate and format the given extension
+     *
+     * @param string $extension the new extension to use
+     *
+     * @throws Exception If the extension is not valid
+     *
+     * @return string
+     */
+    private function formatExtension(string $extension): string
+    {
+        static $pattern = '/[\x00-\x1f\x7f]/';
+        if (preg_match($pattern, $extension)) {
+            throw new Exception(sprintf('Invalid path string: %s', $extension));
+        }
+
+        if (0 === strpos($extension, '.')) {
+            throw new Exception('an extension sequence can not contain a leading `.` character');
+        }
+
+        if (strpos($extension, self::SEPARATOR)) {
+            throw new Exception('an extension sequence can not contain a path delimiter');
+        }
+
+        return implode(self::SEPARATOR, $this->filterSegments($this->validate($extension)));
     }
 
     /**
@@ -450,7 +517,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      *
      * @return string
      */
-    protected function buildBasename(
+    private function buildBasename(
         string $basenamePart,
         string $extension,
         string $parameterPart = null
@@ -471,27 +538,5 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
         }
 
         return $basenamePart.$extension.$parameterPart;
-    }
-
-    /**
-     * validate and format the given extension
-     *
-     * @param string $extension the new extension to use
-     *
-     * @throws Exception If the extension is not valid
-     *
-     * @return string
-     */
-    protected function formatExtension(string $extension): string
-    {
-        if (0 === strpos($extension, '.')) {
-            throw new Exception('an extension sequence can not contain a leading `.` character');
-        }
-
-        if (strpos($extension, static::$separator)) {
-            throw new Exception('an extension sequence can not contain a path delimiter');
-        }
-
-        return implode(static::$separator, $this->validate($extension));
     }
 }

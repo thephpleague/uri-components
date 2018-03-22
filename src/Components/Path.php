@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\ComponentInterface;
+use League\Uri\Exception;
+
 /**
  * Value object representing a URI path component.
  *
@@ -24,45 +27,321 @@ namespace League\Uri\Components;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class Path extends AbstractComponent
+class Path implements ComponentInterface
 {
-    use PathInfoTrait;
+    /**
+     * @internal
+     */
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
+
+    /**
+     * @internal
+     */
+    const DOT_SEGMENTS = ['.' => 1, '..' => 1];
+
+    /**
+     * @var string
+     */
+    protected $path;
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new static($properties['path']);
+    }
 
     /**
      * new instance
      *
-     * @param string|null $path the component value
+     * @param mixed $path the component value
      */
-    public function __construct(string $path = null)
+    public function __construct($path = '')
     {
-        if (null === $path) {
-            $path = '';
-        }
-
-        parent::__construct($path);
+        $this->path = $this->validate($path);
     }
 
     /**
      * Validate the component content
      *
-     * @param mixed $data
+     * @param mixed $path
      *
      * @throws Exception if the component is no valid
      *
      * @return mixed
      */
-    protected function validate($data)
+    protected function validate($path)
     {
-        return $this->decodePath($this->validateString($data));
+        if ($path instanceof ComponentInterface) {
+            $path = $path->getContent();
+        }
+
+        if (is_scalar($path) || method_exists($path, '__toString')) {
+            $path = (string) $path;
+        }
+
+        if (!is_string($path)) {
+            throw new Exception(sprintf('Expected path to be stringable; received %s', gettype($path)));
+        }
+
+        static $pattern = '/[\x00-\x1f\x7f]/';
+        if (preg_match($pattern, $path)) {
+            throw new Exception(sprintf('Invalid path string: %s', $path));
+        }
+
+        return preg_replace_callback(',%[A-Fa-f0-9]{2},', [$this, 'decode'], $path);
+    }
+
+    private function decode(array $matches)
+    {
+        static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]|2F,i';
+        if (preg_match($regexp, $matches[0])) {
+            return strtoupper($matches[0]);
+        }
+
+        return rawurldecode($matches[0]);
     }
 
     /**
-     * Return the decoded string representation of the component
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    protected function getDecoded(): string
+    public function __debugInfo()
     {
-        return $this->data;
+        return ['path' => $this->path];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUriComponent(): string
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
+     * Returns the instance content encoded in RFC3986 or RFC3987.
+     *
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters depending on the encoding type selected.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3.
+     *
+     * By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @param int $enc_type
+     *
+     * @return string|null
+     */
+    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    {
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
+        if (self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->path)) {
+            return $this->path;
+        }
+
+        if ($enc_type === self::RFC3987_ENCODING) {
+            static $pattern = '/[\x00-\x1f\x7f\#\?]/';
+
+            return preg_replace_callback($pattern, [$this, 'encode'], $this->path) ?? $this->path;
+        }
+
+        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
+        $content = preg_replace_callback($regexp, [$this, 'encode'], $this->path) ?? rawurlencode($this->path);
+        if (self::RFC3986_ENCODING === $enc_type) {
+            return $content;
+        }
+
+        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
+    }
+
+    protected function encode(array $matches): string
+    {
+        return rawurlencode($matches[0]);
+    }
+
+    /**
+     * Returns whether or not the path is absolute or relative
+     *
+     * @return bool
+     */
+    public function isAbsolute(): bool
+    {
+        return '/' === ($this->getContent()[0] ?? '');
+    }
+
+    /**
+     * Returns an instance without dot segments
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component normalized by removing
+     * the dot segment.
+     *
+     * @return static
+     */
+    public function withoutDotSegments()
+    {
+        $current = $this->__toString();
+        if (false === strpos($current, '.')) {
+            return $this;
+        }
+
+        $input = explode('/', $current);
+        $new = implode('/', array_reduce($input, [$this, 'filterDotSegments'], []));
+        if (isset(self::DOT_SEGMENTS[end($input)])) {
+            $new .= '/';
+        }
+
+        return new static($new);
+    }
+
+    /**
+     * Filter Dot segment according to RFC3986
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-5.2.4
+     *
+     * @param array  $carry   Path segments
+     * @param string $segment a path segment
+     *
+     * @return array
+     */
+    private function filterDotSegments(array $carry, string $segment): array
+    {
+        if ('..' === $segment) {
+            array_pop($carry);
+
+            return $carry;
+        }
+
+        if (!isset(self::DOT_SEGMENTS[$segment])) {
+            $carry[] = $segment;
+        }
+
+        return $carry;
+    }
+
+    /**
+     * Returns an instance with the specified string
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified data
+     *
+     * @param string $value
+     *
+     * @return ComponentInterface
+     */
+    public function withContent($value)
+    {
+        $value = $this->validate($value);
+        if ($value === $this->path) {
+            return $this;
+        }
+
+        return new static($value);
+    }
+
+    /**
+     * Returns an instance without duplicate delimiters
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component normalized by removing
+     * multiple consecutive empty segment
+     *
+     * @return static
+     */
+    public function withoutEmptySegments()
+    {
+        return new static(preg_replace(',/+,', '/', $this->__toString()));
+    }
+
+    /**
+     * Returns whether or not the path has a trailing delimiter
+     *
+     * @return bool
+     */
+    public function hasTrailingSlash(): bool
+    {
+        $path = $this->__toString();
+
+        return '' !== $path && '/' === substr($path, -1);
+    }
+
+    /**
+     * Returns an instance with a trailing slash
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component with a trailing slash
+     *
+     * @throws Exception for transformations that would result in a invalid object.
+     *
+     * @return static
+     */
+    public function withTrailingSlash()
+    {
+        return $this->hasTrailingSlash() ? $this : new static($this->__toString().'/');
+    }
+
+    /**
+     * Returns an instance without a trailing slash
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component without a trailing slash
+     *
+     * @throws Exception for transformations that would result in a invalid object.
+     *
+     * @return static
+     */
+    public function withoutTrailingSlash()
+    {
+        return !$this->hasTrailingSlash() ? $this : new static(substr($this->__toString(), 0, -1));
+    }
+
+    /**
+     * Returns an instance with a leading slash
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component with a leading slash
+     *
+     * @throws Exception for transformations that would result in a invalid object.
+     *
+     * @return static
+     */
+    public function withLeadingSlash()
+    {
+        return $this->isAbsolute() ? $this : new static('/'.$this->__toString());
+    }
+
+    /**
+     * Returns an instance without a leading slash
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component without a leading slash
+     *
+     * @throws Exception for transformations that would result in a invalid object.
+     *
+     * @return static
+     */
+    public function withoutLeadingSlash()
+    {
+        return !$this->isAbsolute() ? $this : new static(substr($this->__toString(), 1));
     }
 }

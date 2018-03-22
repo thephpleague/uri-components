@@ -6,7 +6,7 @@
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,10 +16,12 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use ArrayIterator;
 use Countable;
+use Iterator;
 use IteratorAggregate;
 use League\Uri;
+use League\Uri\ComponentInterface;
+use League\Uri\Exception;
 use Traversable;
 
 /**
@@ -33,294 +35,128 @@ use Traversable;
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since      1.0.0
+ * @since      1.5.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-class Query implements ComponentInterface, Countable, IteratorAggregate
+final class Query implements ComponentInterface, Countable, IteratorAggregate
 {
-    use ComponentTrait;
+    /**
+     * @var array
+     */
+    private $pairs;
 
     /**
-     * pair separator character
-     *
      * @var string
      */
-    protected $separator;
+    private $separator;
 
     /**
-     * Preserve the delimiter
-     *
-     * @var bool
-     */
-    protected $preserve_delimiter;
-
-    /**
-     * The deserialized query arguments
-     *
-     * @var array
-     */
-    protected $params;
-
-    /**
-     * The query pairs
-     *
-     * @var array
-     */
-    protected $pairs;
-
-    /**
-     * The query pairs keys
-     *
-     * @var array
-     */
-    protected $keys;
-
-    /**
-     * Returns the store PHP variables as elements of an array.
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.5.0 No longer used by internal code and not recommend
-     * @see        \League\Uri\QueryParser::extract
-     *
-     * @param string $str       the query string
-     * @param string $separator a the query string single character separator
-     * @param int    $enc_type  the query encoding
-     *
-     * @return array
-     */
-    public static function extract(
-        string $str,
-        string $separator = '&',
-        int $enc_type = self::RFC3986_ENCODING
-    ): array {
-        return Uri\extract_query($str, $separator, $enc_type);
-    }
-
-    /**
-     * Parse a query string into an associative array
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.5.0 No longer used by internal code and not recommend
-     * @see        \League\Uri\QueryParser::parse
-     *
-     * @param string $str       The query string to parse
-     * @param string $separator The query string separator
-     * @param int    $enc_type  The query encoding algorithm
-     *
-     * @return array
-     */
-    public static function parse(
-        string $str,
-        string $separator = '&',
-        int $enc_type = self::RFC3986_ENCODING
-    ): array {
-        return Uri\parse_query($str, $separator, $enc_type);
-    }
-
-    /**
-     * Build a query string from an associative array
-     *
-     * DEPRECATION WARNING! This method will be removed in the next major point release
-     *
-     * @deprecated 1.5.0 No longer used by internal code and not recommend
-     * @see        \League\Uri\QueryBuilder::build
-     *
-     * @param array|Traversable $pairs     Query pairs
-     * @param string            $separator Query string separator
-     * @param int               $enc_type  Query encoding type
-     *
-     * @return string
-     */
-    public static function build(
-        $pairs,
-        string $separator = '&',
-        int $enc_type = self::RFC3986_ENCODING
-    ): string {
-        return Uri\build_query($pairs, $separator, $enc_type);
-    }
-
-    /**
-     * Returns a new instance from a collection of iterable properties.
+     * Returns a new instance from the result of PHP's parse_str.
      *
      * @param Traversable|array $params
      * @param string            $separator
      *
-     * @return static
+     * @return self
      */
     public static function createFromParams($params, string $separator = '&'): self
     {
-        $params = static::filterIterable($params);
-        if (empty($params)) {
-            return new static(null, $separator);
+        if ($params instanceof self) {
+            return new self($params, $separator);
         }
 
-        return new static(http_build_query($params, '', $separator, PHP_QUERY_RFC3986), $separator);
+        if ($params instanceof Traversable) {
+            $params = iterator_to_array($params, true);
+        }
+
+        if (!is_array($params)) {
+            throw new Exception('the parameters must be iterable');
+        }
+
+        if (empty($params)) {
+            return new self(null, $separator);
+        }
+
+        return new self(http_build_query($params, '', $separator, self::RFC3986_ENCODING), $separator);
     }
 
     /**
-     * Return a new instance from a collection of key pairs
+     * Returns a new instance from the result of parse_query
      *
      * @param Traversable|array $pairs
      * @param string            $separator
      *
-     * @return static
+     * @throws Exception if the pairs are not iterable
+     *
+     * @return self
      */
     public static function createFromPairs($pairs, string $separator = '&'): self
     {
-        $pairs = static::filterIterable($pairs);
-        if (empty($pairs)) {
-            return new static(null, $separator);
+        if ($pairs instanceof self) {
+            return new self($pairs, $separator);
         }
 
-        return new static(Uri\build_query($pairs, $separator), $separator);
+        if ($pairs instanceof Traversable) {
+            $pairs = iterator_to_array($pairs, true);
+        }
+
+        if (!is_array($pairs)) {
+            throw new Exception('the parameters must be iterable');
+        }
+
+        if (empty($pairs)) {
+            return new self(null, $separator);
+        }
+
+        return new self(Uri\build_query($pairs, $separator), $separator);
     }
 
     /**
-     *  This static method is called for classes exported by var_export()
-     *
-     * @param array $properties
-     *
-     * @return static
+     * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        $separator = $properties['separator'] ?? '&';
+        $newInstance = new self();
+        $newInstance->pairs = $properties['pairs'];
+        $newInstance->separator = $properties['separator'];
 
-        return new static(Uri\build_query($properties['pairs'], $separator), $separator);
+        return $newInstance;
     }
 
     /**
-     * a new instance
+     * Returns a new instance.
      *
-     * @param string $data
+     * @param mixed  $query
      * @param string $separator
+     * @param int    $enc_type
+     *
+     * @return self
      */
-    public function __construct(string $data = null, string $separator = '&')
+    public function __construct($query = null, string $separator = '&', int $enc_type = self::RFC3986_ENCODING)
     {
         $this->separator = $this->filterSeparator($separator);
-        $this->pairs = $this->validate($data);
-        $this->params = Uri\pairs_to_params($this->pairs);
-        $this->preserve_delimiter = null !== $data;
-        $this->keys = array_fill_keys(array_keys($this->pairs), 1);
+        $this->pairs = Uri\parse_query($query, $separator, $enc_type);
     }
 
     /**
-     * Filter the submitted query separator
+     * Filter the incoming separator
      *
      * @param string $separator
      *
-     * @throws Exception If the separator is invalid
+     * @throws Exception if the separator is invalid
      *
      * @return string
      */
-    protected static function filterSeparator(string $separator): string
+    private function filterSeparator(string $separator): string
     {
-        if ('=' === $separator) {
-            throw new Exception(sprintf('Invalid separator character `%s`', $separator));
+        if ('=' !== $separator) {
+            return $separator;
         }
 
-        return $separator;
+        throw new Exception(sprintf('Invalid separator character `%s`', $separator));
     }
 
     /**
-     * sanitize the submitted data
-     *
-     * @param string|null $str
-     *
-     * @return array
-     */
-    protected function validate(string $str = null): array
-    {
-        if (null === $str) {
-            return [];
-        }
-
-        $str = $this->validateString($str);
-
-        return Uri\parse_query($str, $this->separator);
-    }
-
-    /**
-     * Tell whether a variable is set.
-     *
-     * Because isset is a language construct
-     * it can not be used directly with array_filter.
-     *
-     * @param mixed $value
-     *
-     * @return bool
-     */
-    protected function isValueSet($value)
-    {
-        return null !== $value;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'pairs' => $this->pairs,
-            'separator' => $this->separator,
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isNull(): bool
-    {
-        return null === $this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isEmpty(): bool
-    {
-        return '' == $this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
-    {
-        $this->assertValidEncoding($enc_type);
-        if (!$this->preserve_delimiter) {
-            return null;
-        }
-
-        return Uri\build_query($this->pairs, $this->separator, $enc_type);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getUriComponent(): string
-    {
-        $query = $this->__toString();
-        if ($this->preserve_delimiter) {
-            return '?'.$query;
-        }
-
-        return $query;
-    }
-
-    /**
-     * Returns the query string separator character
+     * Returns the query separator.
      *
      * @return string
      */
@@ -332,118 +168,184 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function count()
+    public function __debugInfo()
     {
-        return count($this->pairs);
+        return [
+            'pairs' => $this->pairs,
+            'separator' => $this->separator,
+        ];
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the encoded query.
+     *
+     * @param  int         $enc_type
+     * @return null|string
+     */
+    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    {
+        return Uri\build_query($this->pairs, $this->separator, $enc_type);
+    }
+
+    /**
+     * Returns the number of key/value pairs present in the object.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        $reducer = function (int $carry, array $value): int {
+            return $carry + count($value);
+        };
+
+        return array_reduce($this->pairs, $reducer, 0);
+    }
+
+    /**
+     * Returns an iterator allowing to go through all key/value pairs contained in this object.
+     *
+     * The key of each pair are string
+     * The value of each pair are scalar or the null value
+     *
+     * @return Iterator
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->pairs);
-    }
-
-    /**
-     * Returns the deserialized query string arguments, if any.
-     *
-     * @return array
-     */
-    public function getParams(): array
-    {
-        return $this->params;
-    }
-
-    /**
-     * Returns a single deserialized query string argument, if any
-     * otherwise return the provided default value
-     *
-     * @param string     $offset
-     * @param null|mixed $default
-     *
-     * @return mixed
-     */
-    public function getParam(string $offset, $default = null)
-    {
-        return $this->params[$offset] ?? $default;
-    }
-
-    /**
-     * Returns an array representation of the query
-     *
-     * @return array
-     */
-    public function getPairs(): array
-    {
-        return $this->pairs;
-    }
-
-    /**
-     * Retrieves a single query parameter.
-     *
-     * Retrieves a single query parameter. If the parameter has not been set,
-     * returns the default value provided.
-     *
-     * @param string $offset  the parameter name
-     * @param mixed  $default Default value to return if the parameter does not exist.
-     *
-     * @return mixed
-     */
-    public function getPair(string $offset, $default = null)
-    {
-        $offset = $this->decodeComponent($this->validateString($offset));
-        if (isset($this->keys[$offset])) {
-            return $this->pairs[$offset];
+        foreach ($this->pairs as $offset => $value) {
+            foreach ($value as $val) {
+                yield $offset => $val;
+            }
         }
-
-        return $default;
     }
 
     /**
-     * Returns whether the given key exists in the current instance
+     * Tell whether a parameter with a specific name exists.
      *
-     * @param string $offset
+     * @param string $key
      *
      * @return bool
      */
-    public function hasPair(string $offset): bool
+    public function has(string $key): bool
     {
-        $offset = $this->decodeComponent($this->validateString($offset));
-
-        return isset($this->keys[$offset]);
+        return isset($this->pairs[$key]);
     }
 
     /**
-     * Returns the associated key for each pair.
+     * Returns the first value associated to the given parameter.
      *
-     * If a value is specified only the keys associated with
-     * the given value will be returned. The specified value
-     * must be decoded
+     * The value returned MUST be percent-encoded, but MUST NOT double-encode any
+     * characters. To determine what characters to encode, please refer to RFC 3986,
+     * Sections 2 and 3.
      *
-     * @param mixed ...$args the total number of argument given to the method
+     * If no value is found null is returned
+     *
+     * @param string $key
+     *
+     * @return mixed
+     */
+    public function get(string $key)
+    {
+        return $this->pairs[$key][0] ?? null;
+    }
+
+    /**
+     * Returns all the values associated to the given parameter as an array or all
+     * the instance pairs.
+     *
+     * The value returned MUST be percent-encoded, but MUST NOT double-encode any
+     * characters. To determine what characters to encode, please refer to RFC 3986,
+     * Sections 2 and 3.
+     *
+     * If no value is found an empty array is returned
+     *
+     * @param string... $arg
      *
      * @return array
      */
-    public function keys(...$args): array
+    public function getAll(string ...$arg): array
     {
-        if (empty($args)) {
-            return array_keys($this->pairs);
+        if (empty($arg)) {
+            return $this->pairs;
         }
 
-        return array_keys($this->pairs, $args[0], true);
+        return $this->pairs[$arg[0]] ?? [];
     }
 
     /**
-     * {@inheritdoc}
+     * Returns an iterator allowing to go through all keys contained in this object.
+     *
+     * Each key is a string. if an argument is given. Only the key who contains this
+     * value will be returned by the iterator
+     *
+     * @param mixed ...$arg
+     *
+     * @return array
      */
-    public function withContent($value): ComponentInterface
+    public function keys(...$arg): array
     {
-        if ($value === $this->getContent()) {
-            return $this;
+        if (empty($arg)) {
+            return array_keys($this->pairs);
         }
 
-        return new static($value, $this->separator);
+        $key = $arg[0];
+        $filter = function ($value) use ($key): bool {
+            return in_array($key, $value, true);
+        };
+
+        return array_keys(array_filter($this->pairs, $filter));
+    }
+
+    /**
+     * Returns the instance RFC3986 string representation.
+     *
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters. To determine what characters
+     * to encode, please refer to RFC 3986, Sections 2 and 3.
+     *
+     * If the instance is not defined an empty string is returned
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
+     * Returns the instance string representation with its optional URI delimiters
+     *
+     * The value returned MUST be percent-encoded, but MUST NOT double-encode any
+     * characters. To determine what characters to encode, please refer to RFC 3986,
+     * Sections 2 and 3.
+     *
+     * If the instance is not defined an empty string is returned
+     *
+     * @return string
+     */
+    public function getUriComponent(): string
+    {
+        if ([] === $this->pairs) {
+            return '';
+        }
+
+        return '?'.$this->getContent();
+    }
+
+    /**
+     * Returns the store PHP variables as elements of an array.
+     *
+     * The result is similar as PHP parse_str when used with its
+     * second argument with the difference that variable names are
+     * not mangled.
+     *
+     * @see http://php.net/parse_str
+     * @see https://wiki.php.net/rfc/on_demand_name_mangling
+     *
+     * @return array
+     */
+    public function toParams(): array
+    {
+        return Uri\pairs_to_params($this->pairs);
     }
 
     /**
@@ -454,7 +356,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @param string $separator
      *
-     * @return static
+     * @return self
      */
     public function withSeparator(string $separator): self
     {
@@ -462,9 +364,38 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        $separator = $this->filterSeparator($separator);
         $clone = clone $this;
-        $clone->separator = $separator;
+        $clone->separator = $this->filterSeparator($separator);
+
+        return $clone;
+    }
+
+    /**
+     * Returns an instance with the specified content.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified content.
+     *
+     * Users can provide both encoded and decoded content characters.
+     *
+     * A null value is equivalent to removing the component content.
+     *
+     * @param null|string $query
+     *
+     * @throws InvalidArgumentException for invalid component or transformations
+     *                                  that would result in a object in invalid state.
+     *
+     * @return static
+     */
+    public function withContent($query): self
+    {
+        $pairs = Uri\parse_query($query, $this->separator);
+        if ($pairs === $this->pairs) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->pairs = $pairs;
 
         return $clone;
     }
@@ -481,7 +412,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *                           considered to be respectively less than, equal to,
      *                           or greater than the second.
      *
-     * @return static
+     * @return self
      */
     public function ksort($sort = SORT_REGULAR): self
     {
@@ -492,126 +423,221 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return static::createFromPairs($pairs, $this->separator);
+        $clone = clone $this;
+        $clone->pairs = $pairs;
+
+        return $clone;
     }
 
     /**
-     * Returns an instance merge with the specified query
+     * Returns an instance without duplicate key/value pair
      *
      * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * @param string $query the data to be merged
+     * an instance that contains the query component normalized by removing
+     * duplicate pairs whose key/value are the same.
      *
      * @return static
      */
-    public function merge(string $query): self
+    public function withoutDuplicates(): self
     {
-        $new_pairs = $this->validate($this->validateString($query));
-        $new_pairs = $this->removeEmptyPairs($new_pairs);
-        $base_pairs = $this->removeEmptyPairs($this->pairs);
-        if ($base_pairs === $new_pairs) {
+        $pairs = array_map('array_unique', $this->pairs);
+        if ($pairs === $this->pairs) {
             return $this;
         }
 
-        $pairs = array_merge($base_pairs, $new_pairs);
+        $clone = clone $this;
+        $clone->pairs = $pairs;
 
-        return static::createFromPairs($pairs, $this->separator);
+        return $clone;
     }
 
     /**
-     * Normalize a query string by removing empty pairs
+     * Returns an instance without empty key/value where the value is the null value.
      *
-     * @param array $pairs
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the query component normalized by removing
+     * empty pairs.
      *
-     * @return array
+     * A pair is considered empty if its value is equal to the empty string or the null value
+     * or if its key is the empty string.
+     *
+     * @return self
      */
-    protected function removeEmptyPairs(array $pairs): array
+    public function withoutEmptyPairs(): self
     {
-        $result = [];
-
-        foreach ($pairs as $key => $value) {
-            if ('' !== $key) {
-                $result[$key] = $value;
+        $base = $this->pairs;
+        $pairs = [];
+        foreach ($base as $key => $value) {
+            if ('' === $key) {
                 continue;
             }
-
-            if (null === $value) {
-                continue;
-            }
-
-            if (!is_array($value)) {
-                $result[$key] = $value;
-                continue;
-            }
-
             $value = array_filter($value, [$this, 'isValueSet']);
             if (!empty($value)) {
-                $result[$key] = $value;
+                $pairs[$key] = $value;
             }
         }
 
-        return $result;
+        if ($pairs === $this->pairs) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->pairs = $pairs;
+
+        return $clone;
     }
 
     /**
-     * Returns an instance with the new pair appended to it.
+     * Tell whether a value is set.
+     *
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    private function isValueSet($value): bool
+    {
+        return null !== $value && '' !== $value;
+    }
+
+    /**
+     * Returns an instance where numeric indices associated to PHP's array like key are removed.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the query component normalized so that numeric indexes
+     * are removed from the pair key value.
+     *
+     *
+     * ie.: toto[3]=bar[3]&foo=bar becomes toto[]=bar[3]&foo=bar
+     *
+     * @return self
+     */
+    public function withoutNumericIndices(): self
+    {
+        $query = $this->getContent();
+        static $pattern = ',\%5B\d+\%5D,';
+        if (null === $query || !preg_match($pattern, $query)) {
+            return $this;
+        }
+
+        $new_query = implode(
+            $this->separator,
+            array_map([$this, 'removeNumericIndex'], explode($this->separator, $query))
+        );
+
+        if ($new_query === $query) {
+            return $this;
+        }
+
+        return new self($new_query, $this->separator);
+    }
+
+    /**
+     * Remove the numeric index from the key pair
+     *
+     * @param string $pair
+     *
+     * @return string
+     */
+    private function removeNumericIndex(string $pair): string
+    {
+        static $pattern = ',\%5B\d+\%5D,';
+        static $replace = '%5B%5D';
+        list($key, $value) = explode('=', $pair, 2) + [1 => null];
+        $new_key = preg_replace($pattern, $replace, $key);
+        if ($new_key === $key) {
+            return $pair;
+        }
+
+        if (null === $value) {
+            return $new_key;
+        }
+
+        return $new_key.'='.$value;
+    }
+
+    /**
+     * Returns an instance with the a new pairs added to it.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
-     * If the pair already exists the value will be added to it.
+     * If the pair already exists the value will replace the existing value.
      *
-     * @param string $query the pair value
-     *
-     * @return static
-     */
-    public function append(string $query): self
-    {
-        $new_pairs = $this->validate($this->validateString($query));
-        $new_pairs = $this->removeEmptyPairs($new_pairs);
-        $base_pairs = $this->removeEmptyPairs($this->pairs);
-        $pairs = $base_pairs;
-        foreach ($new_pairs as $key => $value) {
-            $pairs = $this->appendToPair($pairs, $key, $value);
-        }
-
-        if ($base_pairs == $pairs) {
-            return $this;
-        }
-
-        return static::createFromPairs($pairs, $this->separator);
-    }
-
-    /**
-     * Append a key/pair to query pairs collection
-     *
-     * @param array  $pairs
      * @param string $key
      * @param mixed  $value
      *
-     * @return array
+     * @return self
      */
-    protected function appendToPair(array $pairs, string $key, $value): array
+    public function withPair(string $key, $value): self
     {
-        if (!array_key_exists($key, $pairs)) {
-            $pairs[$key] = $value;
-
-            return $pairs;
+        $pairs = array_merge($this->pairs, [$key => $this->filterPair($value)]);
+        if ($pairs === $this->pairs) {
+            return $this;
         }
 
-        $pair = $pairs[$key];
-        if (!is_array($pair)) {
-            $pair = [$pair];
+        $clone = clone $this;
+        $clone->pairs = $pairs;
+
+        return $clone;
+    }
+
+    /**
+     * Validate the given pair.
+     *
+     * To be valid the pair must be the null value, a scalar or a collection of scalar and null values.
+     *
+     * @param mixed $value
+     *
+     * @throws Exception if the value is invalid
+     *
+     * @return array
+     */
+    private static function filterPair($value): array
+    {
+        if (null === $value || is_scalar($value)) {
+            return [$value];
+        }
+
+        if ($value instanceof Traversable) {
+            $value = iterator_to_array($value, false);
         }
 
         if (!is_array($value)) {
-            $value = [$value];
+            throw new Exception('The submitted value is invalid.');
         }
 
-        $pairs[$key] = array_merge($pair, $value);
+        foreach ($value as $val) {
+            if (null !== $val && !is_scalar($val)) {
+                throw new Exception('The submitted value is invalid.');
+            }
+        }
 
-        return $pairs;
+        return array_values($value);
+    }
+
+    /**
+     * Returns a new instance with a specified key/value pair appended as a new pair.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified query
+     *
+     * @param string $key
+     * @param mixed  $value must be a scalar or the null value
+     *
+     * @throws Exception if the value is invalid
+     *
+     * @return self
+     */
+    public function appendTo(string $key, $value): self
+    {
+        if (null !== $value && !is_scalar($value)) {
+            throw new Exception('The value must be a scalar or null %s given');
+        }
+
+        $clone = clone $this;
+        $clone->pairs = array_merge($this->pairs, [$key => array_merge($this->getAll($key), [$value])]);
+
+        return $clone;
     }
 
     /**
@@ -620,44 +646,124 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
-     * @param string[] $offsets the list of keys to remove from the collection
+     * @param string ...$args the list of keys to remove from the collection
      *
-     * @return static
+     * @return self
      */
-    public function withoutPairs(array $offsets): self
+    public function withoutPairs(string ...$args): self
     {
-        $reducer = function (array $pairs, string $key): array {
-            $offset = $this->decodeComponent($this->validateString($key));
-            unset($pairs[$offset]);
+        $pairs = $this->pairs;
+        foreach ($args as $key) {
+            unset($pairs[$key]);
+        }
 
-            return $pairs;
-        };
-
-        $pairs = array_reduce($offsets, $reducer, $this->pairs);
         if ($pairs === $this->pairs) {
             return $this;
         }
 
-        return static::createFromPairs($pairs, $this->separator);
+        $clone = clone $this;
+        $clone->pairs = $pairs;
+
+        return $clone;
+    }
+
+    /**
+     * Returns an instance merge with the specified query
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified query.
+     *
+     * The return query is normalized by removing empty pairs. A key/value pair is
+     * considered to be empty if its value is equal to the empty string, the null value
+     * or its key is equal to the empty string.
+     *
+     * @param null|string $query the data to be merged
+     *
+     * @return self
+     */
+    public function merge($query): self
+    {
+        $pairs = Uri\parse_query($query, $this->separator);
+        if ($pairs === $this->pairs) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->pairs = $this->filterEmptyKeyPair(array_merge($this->pairs, $pairs));
+
+        return $clone;
+    }
+
+    /**
+     * Remove key/pair where the key is the empty string
+     * and the value is null or the empty string
+     *
+     * @param array $pairs
+     *
+     * @return array
+     */
+    private function filterEmptyKeyPair(array $pairs): array
+    {
+        if (!isset($pairs[''])) {
+            return $pairs;
+        }
+
+        $pairs[''] = array_filter($pairs[''], function ($value) {
+            return null !== $value && '' !== $value;
+        });
+        if (empty($pairs[''])) {
+            unset($pairs['']);
+        }
+
+        return $pairs;
+    }
+
+    /**
+     * Returns an instance with the new pairs appended to it.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified query
+     *
+     * If the pair already exists the value will be added to it.
+     *
+     * @param string|null $query
+     *
+     * @return self
+     */
+    public function append($query): self
+    {
+        $pairs = $this->pairs;
+        $new_pairs = Uri\parse_query($query, $this->separator);
+        foreach ($new_pairs as $key => $value) {
+            $pairs = array_merge($pairs, [$key => array_merge($pairs[$key] ?? [], $value)]);
+        }
+
+        if ($pairs === $this->pairs) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->pairs = $this->filterEmptyKeyPair($pairs);
+
+        return $clone;
     }
 
     /**
      * Returns an instance without the specified params
      *
      * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
+     * an instance that contains the modified component without PHP's value.
+     * PHP's mangled is not taken into account.
      *
-     * @param string[] $offsets the list of params key to remove from the query
+     * @param string ...$offsets the list of params key to remove from the query
      *
      * @return static
      */
-    public function withoutParams(array $offsets): self
+    public function withoutParams(string ...$offsets): self
     {
-        $reducer = function (array $pairs, string $name): array {
-            $filter = function (string $key) use ($name): bool {
-                $regexp = ',^'.preg_quote($name, ',').'(\[.*\].*)?$,';
-
-                return !preg_match($regexp, $key, $matches);
+        $reducer = function (array $pairs, string $offset): array {
+            $filter = function (string $key) use ($offset): bool {
+                return !preg_match(',^'.preg_quote($offset, ',').'(\[.*\].*)?$,', $key);
             };
 
             return array_filter($pairs, $filter, ARRAY_FILTER_USE_KEY);
@@ -668,71 +774,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return static::createFromPairs($pairs, $this->separator);
-    }
+        $clone = clone $this;
+        $clone->pairs = $pairs;
 
-    /**
-     * Returns an instance without empty pairs
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the query component normalized by removing
-     * empty pairs
-     *
-     * @return static
-     */
-    public function withoutEmptyPairs(): self
-    {
-        return self::createFromPairs($this->removeEmptyPairs($this->pairs), $this->separator);
-    }
-
-    /**
-     * Returns an instance where numeric indices associated to PHP's array like key are removed.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the query component normalized so that numeric indexes
-     * from PHP's parameters from the query string are removed from the query string representation
-     *
-     * @return static
-     */
-    public function withoutNumericIndices(): self
-    {
-        $str = (string) $this->getContent();
-        if ('' === $str) {
-            return $this;
-        }
-
-        $res = array_map([$this, 'removeNumericIndex'], explode($this->separator, $str));
-        $query = implode($this->separator, $res);
-        if ($query === $str) {
-            return $this;
-        }
-
-        return new static($query, $this->separator);
-    }
-
-    /**
-     * Remove the numeric index from the key pair
-     *
-     * @param string $pair
-     *
-     * @return string
-     */
-    protected function removeNumericIndex(string $pair): string
-    {
-        static $regexp = ',\%5B\d+\%5D,';
-        static $replace = '%5B%5D';
-
-        list($key, $value) = explode('=', $pair) + ['', null];
-        $new_key = preg_replace($regexp, $replace, $key);
-        if ($new_key === $key) {
-            return $pair;
-        }
-
-        $pair = $new_key;
-        if (null !== $value) {
-            $pair .= '='.$value;
-        }
-
-        return $pair;
+        return $clone;
     }
 }

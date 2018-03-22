@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\ComponentInterface;
+use League\Uri\Exception;
+
 /**
  * Value object representing a URI Scheme component.
  *
@@ -30,23 +33,89 @@ namespace League\Uri\Components;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.1
  */
-class Scheme extends AbstractComponent
+final class Scheme implements ComponentInterface
 {
+    /**
+     * @internal
+     */
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
+
+    /**
+     * @var string|null
+     */
+    private $scheme;
+
     /**
      * {@inheritdoc}
      */
-    protected function validate($scheme)
+    public static function __set_state(array $properties): self
     {
+        return new self($properties['scheme']);
+    }
+
+    /**
+     * New instance.
+     *
+     * @param mixed $scheme
+     */
+    public function __construct($scheme = null)
+    {
+        $this->scheme = $this->validate($scheme);
+    }
+
+    /**
+     * Validate a scheme
+     *
+     * @param mixed $scheme
+     *
+     * @throws Exception if the scheme is invalid
+     *
+     * @return null|string
+     */
+    private function validate($scheme)
+    {
+        if ($scheme instanceof ComponentInterface) {
+            $scheme = $scheme->getContent();
+        }
+
         if (null === $scheme) {
             return $scheme;
         }
 
-        $scheme = $this->validateString($scheme);
-        if (!preg_match(',^[a-z]([-a-z0-9+.]+)?$,i', $scheme)) {
-            throw new Exception(sprintf("Invalid Submitted scheme: '%s'", $scheme));
+        if (is_object($scheme) && method_exists($scheme, '__toString')) {
+            $scheme = (string) $scheme;
         }
 
-        return strtolower($scheme);
+        if (is_string($scheme) && preg_match(',^[a-z]([-a-z0-9+.]+)?$,i', $scheme)) {
+            return strtolower($scheme);
+        }
+
+        throw new Exception(sprintf("Invalid Submitted scheme: '%s'", $scheme));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    {
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
+        return $this->scheme;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+        return (string) $this->scheme;
     }
 
     /**
@@ -54,11 +123,36 @@ class Scheme extends AbstractComponent
      */
     public function getUriComponent(): string
     {
-        $component = $this->__toString();
-        if ('' !== $component) {
-            return $component.':';
+        if (null === $this->scheme) {
+            return '';
         }
 
-        return $component;
+        return $this->scheme.':';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return [
+            'scheme' => $this->scheme,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContent($content)
+    {
+        $content = $this->validate($content);
+        if ($content === $this->scheme) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->scheme = $content;
+
+        return $clone;
     }
 }

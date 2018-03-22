@@ -13,7 +13,7 @@
  * file that was distributed with this source code.
  */
 
-namespace League\Uri\Components;
+namespace League\Uri;
 
 /**
  * Defines constants for common URI encoding type
@@ -42,9 +42,9 @@ interface EncodingInterface
 {
     const NO_ENCODING = 0;
 
-    const RFC1738_ENCODING = 1;
+    const RFC1738_ENCODING = PHP_QUERY_RFC1738;
 
-    const RFC3986_ENCODING = 2;
+    const RFC3986_ENCODING = PHP_QUERY_RFC3986;
 
     const RFC3987_ENCODING = 3;
 }

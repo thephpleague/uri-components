@@ -29,8 +29,7 @@
         "php": ">=7.0",
         "ext-curl": "*",
         "ext-fileinfo": "*",
-        "ext-intl": "*",
-        "league/uri-hostname-parser": "^1.1.0"
+        "ext-intl": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3",

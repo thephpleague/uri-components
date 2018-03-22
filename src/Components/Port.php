@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\ComponentInterface;
+use League\Uri\Exception;
+
 /**
  * Value object representing a URI Port component.
  *
@@ -30,37 +33,93 @@ namespace League\Uri\Components;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.3
  */
-class Port extends AbstractComponent
+final class Port implements ComponentInterface
 {
     /**
-     * new instance
-     *
-     * @param int|null $data the component value
+     * @internal
      */
-    public function __construct(int $data = null)
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
+
+    /**
+     * @var int|null
+     */
+    private $port;
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function __set_state(array $properties): self
     {
-        if (null !== $data) {
-            $data = (string) $data;
+        return new self($properties['port']);
+    }
+
+    /**
+     * New instance.
+     *
+     * @param mixed $port
+     */
+    public function __construct($port = null)
+    {
+        $this->port = $this->validate($port);
+    }
+
+    /**
+     * Validate a port
+     *
+     * @param mixed $port
+     *
+     * @throws Exception if the port is invalid
+     *
+     * @return null|int
+     */
+    protected function validate($port)
+    {
+        if ($port instanceof ComponentInterface) {
+            $port = $port->getContent();
         }
 
-        parent::__construct($data);
+        if (null === $port) {
+            return null;
+        }
+
+        if ((is_object($port) && method_exists($port, '__toString')) || is_scalar($port)) {
+            $port = (string) $port;
+        }
+
+        if (!is_string($port)) {
+            throw new Exception(sprintf('Expected port to be a int or null; received %s', gettype($port)));
+        }
+
+        if (false !== ($fport = filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]))) {
+            return $fport;
+        }
+
+        throw new Exception(sprintf('Expected port to be a positive integer or 0; received %s', $port));
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function validate($data)
+    public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (null === $data) {
-            return null;
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
         }
 
-        $data = filter_var($data, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-        if (!$data) {
-            throw new Exception(sprintf('Expected port to be a int or null; received %s', gettype($data)));
-        }
+        return $this->port;
+    }
 
-        return $data;
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+        return (string) $this->port;
     }
 
     /**
@@ -68,11 +127,36 @@ class Port extends AbstractComponent
      */
     public function getUriComponent(): string
     {
-        $component = $this->__toString();
-        if ('' !== $component) {
-            return ':'.$component;
+        if (null === $this->port) {
+            return '';
         }
 
-        return $component;
+        return ':'.$this->port;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return [
+            'port' => $this->port,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContent($content)
+    {
+        $content = $this->validate($content);
+        if ($content === $this->port) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->port = $content;
+
+        return $clone;
     }
 }

@@ -16,9 +16,7 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\EncodingInterface;
-use League\Uri\Components\Exception;
-
+use League\Uri\Components\Query;
 use Traversable;
 
 /**
@@ -35,8 +33,21 @@ use Traversable;
  * @since      1.5.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.4
  */
-class QueryBuilder implements EncodingInterface
+final class QueryBuilder implements EncodingInterface
 {
+    /**
+     * @internal
+     */
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
+
+    /**
+     * @internal
+     */
     const CHARS_LIST = [
         'pattern' => [
             "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07", "\x08", "\x09",
@@ -52,7 +63,15 @@ class QueryBuilder implements EncodingInterface
         ],
     ];
 
-    protected $encoder;
+    /**
+     * @internal
+     */
+    const UNRESERVED_CHAR_REGEXP = '/[^A-Za-z0-9_\-\.~]/';
+
+    /**
+     * @var callable
+     */
+    private $encoder;
 
     /**
      * Build a query string from an associative array
@@ -66,14 +85,23 @@ class QueryBuilder implements EncodingInterface
      * @param string            $separator Query string separator
      * @param int               $enc_type  Query encoding type
      *
-     * @return string
+     * @return null|string
      */
-    public function build(
-        $pairs,
-        string $separator = '&',
-        int $enc_type = self::RFC3986_ENCODING
-    ): string {
+    public function build($pairs, string $separator = '&', int $enc_type = self::RFC3986_ENCODING)
+    {
         $this->encoder = $this->getEncoder($separator, $enc_type);
+        if ($pairs instanceof Query) {
+            $pairs = $pairs->getAll();
+        }
+
+        if ($pairs instanceof Traversable) {
+            $pairs = iterator_to_array($pairs, true);
+        }
+
+        if (empty($pairs)) {
+            return null;
+        }
+
         $res = [];
         foreach ($pairs as $key => $value) {
             $res = array_merge($res, $this->buildPair($key, $value));
@@ -92,10 +120,29 @@ class QueryBuilder implements EncodingInterface
      *
      * @return callable
      */
-    protected function getEncoder(string $separator, int $enc_type): callable
+    private function getEncoder(string $separator, int $enc_type): callable
     {
-        if (self::NO_ENCODING == $enc_type) {
-            return 'sprintf';
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
+        $subdelim = str_replace(html_entity_decode($separator, ENT_HTML5, 'UTF-8'), '', "!$'()*+,;=:@?/&%");
+        $regexp = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote($subdelim, '/').']+/u';
+
+        if (self::RFC3986_ENCODING == $enc_type) {
+            return function (string $str) use ($regexp): string {
+                return preg_replace_callback($regexp, [$this, 'encodeMatches'], $str) ?? rawurlencode($str);
+            };
+        }
+
+        if (self::RFC1738_ENCODING == $enc_type) {
+            return function (string $str) use ($regexp): string {
+                return str_replace(
+                    ['+', '~'],
+                    ['%2B', '%7E'],
+                    preg_replace_callback($regexp, [$this, 'encodeMatches'], $str) ?? rawurlencode($str)
+                );
+            };
         }
 
         if (self::RFC3987_ENCODING == $enc_type) {
@@ -103,52 +150,31 @@ class QueryBuilder implements EncodingInterface
             $pattern[] = $separator;
             $replace = self::CHARS_LIST['replace'];
             $replace[] = rawurlencode($separator);
-            return function ($str) use ($pattern, $replace) {
+            return function (string $str) use ($pattern, $replace): string {
                 return str_replace($pattern, $replace, $str);
             };
         }
 
-        $subdelim = str_replace(html_entity_decode($separator, ENT_HTML5, 'UTF-8'), '', "!$'()*+,;=:@?/&%");
-        $regexp = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote($subdelim, '/').']+/u';
-
-        if (self::RFC3986_ENCODING == $enc_type) {
-            return function ($str) use ($regexp) {
-                return $this->encode((string) $str, $regexp);
-            };
-        }
-
-        if (self::RFC1738_ENCODING == $enc_type) {
-            return function ($str) use ($regexp) {
-                return str_replace(
-                    ['+', '~'],
-                    ['%2B', '%7E'],
-                    $this->encode((string) $str, $regexp)
-                );
-            };
-        }
-
-        throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        //NO ENCODING
+        return function (string $str): string {
+            return $str;
+        };
     }
 
     /**
-     * Encodes a component string.
+     * Encode Matches sequence
      *
-     * @param string $str    The string to encode
-     * @param string $regexp a regular expression
+     * @param array $matches
      *
      * @return string
      */
-    protected function encode(string $str, string $regexp): string
+    private function encodeMatches(array $matches): string
     {
-        $encoder = function (array $matches) {
-            if (preg_match('/^[A-Za-z0-9_\-\.~]$/', rawurldecode($matches[0]))) {
-                return $matches[0];
-            }
-
+        if (preg_match(self::UNRESERVED_CHAR_REGEXP, rawurldecode($matches[0]))) {
             return rawurlencode($matches[0]);
-        };
+        }
 
-        return preg_replace_callback($regexp, $encoder, $str) ?? rawurlencode($str);
+        return $matches[0];
     }
 
     /**
@@ -157,57 +183,36 @@ class QueryBuilder implements EncodingInterface
      * @param string|int $key   The pair key
      * @param mixed      $value The pair value
      *
-     * @return array
-     */
-    protected function buildPair($key, $value): array
-    {
-        $normalized_value = $this->normalize($value);
-        $key = ($this->encoder)($key);
-        $reducer = function (array $carry, $data) use ($key) {
-            $carry[] = null === $data ? $key : $key.'='.($this->encoder)($data);
-
-            return $carry;
-        };
-
-        return array_reduce($normalized_value, $reducer, []);
-    }
-
-    /**
-     * Normalize the pair value
-     *
-     * @param mixed $content
+     * @throws Exception If the pair contains invalid value
      *
      * @return array
      */
-    protected function normalize($content): array
+    private function buildPair($key, $value): array
     {
-        if (!is_array($content)) {
-            return [$this->normalizeValue($content)];
+        $key = (string) $key;
+        if (preg_match(self::UNRESERVED_CHAR_REGEXP, $key)) {
+            $key = ($this->encoder)($key);
         }
 
-        foreach ($content as &$value) {
-            $value = $this->normalizeValue($value);
-        }
-        unset($value);
-
-        return $content;
-    }
-
-    /**
-     * Normalize a value
-     *
-     * @param mixed $value
-     *
-     * @throws Exception If the value content can not be normalized
-     *
-     * @return mixed
-     */
-    protected function normalizeValue($value)
-    {
-        if (null === $value || is_scalar($value)) {
-            return $value;
+        $res = [];
+        if (!is_array($value)) {
+            $value = [$value];
         }
 
-        throw new Exception('Invalid value contained in the submitted pairs');
+        foreach ($value as $data) {
+            if (null === $data) {
+                $res[] = $key;
+                continue;
+            }
+
+            if (!is_scalar($data)) {
+                throw new Exception('Invalid value contained in the submitted pairs');
+            }
+
+            $data = (string) $data;
+            $res[] = $key.'='.(preg_match(self::UNRESERVED_CHAR_REGEXP, $data) ? ($this->encoder)($data) : $data);
+        }
+
+        return $res;
     }
 }

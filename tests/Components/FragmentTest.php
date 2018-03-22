@@ -2,16 +2,20 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\Fragment;
+use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @group fragment
+ * @coversDefaultClass \League\Uri\Components\Fragment
  */
 class FragmentTest extends TestCase
 {
     /**
+     * @covers ::__construct
+     * @covers ::validate
+     * @covers ::getUriComponent
      * @dataProvider getUriComponentProvider
      * @param string $str
      * @param string $encoded
@@ -43,15 +47,14 @@ class FragmentTest extends TestCase
         ];
     }
 
-    public function testIsNull()
-    {
-        $this->assertTrue((new Fragment(null))->isNull());
-        $this->assertFalse((new Fragment(''))->isNull());
-    }
-
     /**
      * @dataProvider geValueProvider
-     * @param string|null $str
+     * @covers ::__construct
+     * @covers ::validate
+     * @covers ::getContent
+     * @covers ::encode
+     * @covers ::decode
+     * @param mixed       $str
      * @param string|null $expected
      * @param int         $enc_type
      */
@@ -63,6 +66,7 @@ class FragmentTest extends TestCase
     public function geValueProvider()
     {
         return [
+            [new Fragment(), null, Fragment::RFC3987_ENCODING],
             [null, null, Fragment::RFC3987_ENCODING],
             ['', '', Fragment::RFC3987_ENCODING],
             ['0', '0', Fragment::RFC3987_ENCODING],
@@ -82,6 +86,11 @@ class FragmentTest extends TestCase
      * @param string $input
      * @param int    $enc_type
      * @param string $expected
+     * @covers ::__construct
+     * @covers ::validate
+     * @covers ::getContent
+     * @covers ::encode
+     * @covers ::decode
      */
     public function testGetContent($input, $enc_type, $expected)
     {
@@ -95,6 +104,7 @@ class FragmentTest extends TestCase
             ['€', Fragment::RFC3986_ENCODING, '%E2%82%AC'],
             ['%E2%82%AC', Fragment::RFC3987_ENCODING, '€'],
             ['%E2%82%AC', Fragment::RFC3986_ENCODING, '%E2%82%AC'],
+            ['action=v%61lue',  Fragment::RFC3986_ENCODING, 'action=v%61lue'],
         ];
     }
 
@@ -104,11 +114,48 @@ class FragmentTest extends TestCase
         (new Fragment('host'))->getContent(-1);
     }
 
+    public function testSetState()
+    {
+        $component = new Fragment('yolo');
+        $generateComponent = eval('return '.var_export($component, true).';');
+        $this->assertEquals($component, $generateComponent);
+    }
+
+    /**
+     * @param mixed $fragment
+     *
+     * @dataProvider invalidFragmentProvider
+     * @covers ::__construct
+     * @covers ::validate
+     */
+    public function testFailedPort($fragment)
+    {
+        $this->expectException(Exception::class);
+        new Fragment($fragment);
+    }
+
+    public function invalidFragmentProvider()
+    {
+        return [
+            'invalid character' => ["\0"],
+            'ivalid argument' => [date_create()],
+        ];
+    }
+
+    /**
+     * @covers ::__debugInfo
+     */
     public function testDebugInfo()
     {
         $this->assertInternalType('array', (new Fragment('yolo'))->__debugInfo());
     }
 
+    /**
+     * @covers ::__toString
+     * @covers ::validate
+     * @covers ::withContent
+     * @covers ::decode
+     */
     public function testPreserverDelimiter()
     {
         $fragment = new Fragment();
@@ -116,5 +163,17 @@ class FragmentTest extends TestCase
         $this->assertSame($fragment, $altFragment);
         $this->assertNull($altFragment->getContent());
         $this->assertSame('', $altFragment->__toString());
+    }
+
+    /**
+     * @covers ::withContent
+     * @covers ::encode
+     * @covers ::decode
+     */
+    public function testWithContent()
+    {
+        $fragment = new Fragment('coucou');
+        $this->assertSame($fragment, $fragment->withContent('coucou'));
+        $this->assertNotSame($fragment, $fragment->withContent('Coucou'));
     }
 }

@@ -3,56 +3,59 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
-use League\Uri\Components\Exception;
 use League\Uri\Components\Host;
-use League\Uri\PublicSuffix\Cache;
-use League\Uri\PublicSuffix\CurlHttpClient;
-use League\Uri\PublicSuffix\ICANNSectionManager;
-use LogicException;
+use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
-use Traversable;
 
 /**
  * @group host
+ * @coversDefaultClass \League\Uri\Components\Host
  */
 class HostTest extends TestCase
 {
+    /**
+     * @covers ::__debugInfo
+     */
     public function testDebugInfo()
     {
         $host = new Host('uri.thephpleague.com');
         $this->assertInternalType('array', $host->__debugInfo());
     }
 
+    /**
+     * @covers ::__set_state
+     */
     public function testSetState()
     {
         $host = new Host('uri.thephpleague.com');
-        $this->assertSame('thephpleague.com', $host->getRegisterableDomain());
         $generateHost = eval('return '.var_export($host, true).';');
         $this->assertEquals($host, $generateHost);
     }
 
-    public function testDefined()
+    /**
+     * @covers ::getIterator
+     */
+    public function testIterator()
     {
-        $component = new Host('yolo');
-        $this->assertFalse($component->isNull());
-        $this->assertTrue($component->withContent(null)->isNull());
-        $this->assertTrue($component->withContent(null)->isEmpty());
-        $this->assertTrue($component->withContent('')->isEmpty());
+        $host = new Host('uri.thephpleague.com');
+        $this->assertEquals($host->getLabels(), iterator_to_array($host));
     }
 
+    /**
+     * @covers ::__construct
+     * @covers ::withContent
+     * @covers ::parse
+     * @covers ::isValidDomain
+     * @covers ::isValidRegisteredName
+     * @covers ::isValidIpv6Hostname
+     * @covers ::isValidIpFuture
+     */
     public function testWithContent()
     {
         $host = new Host('uri.thephpleague.com');
-        $alt_host = $host->withContent('uri.thephpleague.com');
-        $this->assertSame($alt_host, $host);
-    }
-
-    public function testWithDomainResolver()
-    {
-        $resolver = (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
-        $host = new Host('uri.thephpleague.com');
-        $newHost = $host->withDomainResolver($resolver);
-        $this->assertNotEquals($newHost, $host);
+        $this->assertSame($host, $host->withContent('uri.thephpleague.com'));
+        $this->assertSame($host, $host->withContent($host));
+        $this->assertNotSame($host, $host->withContent('csv.thephpleague.com'));
     }
 
     /**
@@ -68,6 +71,21 @@ class HostTest extends TestCase
      * @param string      $ip
      * @param string      $iri
      * @dataProvider validHostProvider
+     * @covers ::__construct
+     * @covers ::parse
+     * @covers ::isValidDomain
+     * @covers ::isValidRegisteredName
+     * @covers ::isValidIpv6Hostname
+     * @covers ::isValidIpFuture
+     * @covers ::isIp
+     * @covers ::isIpv4
+     * @covers ::isIpv6
+     * @covers ::isIpFuture
+     * @covers ::isDomain
+     * @covers ::getIp
+     * @covers ::getContent
+     * @covers ::getUriComponent
+     * @covers ::getIpVersion
      */
     public function testValidHost($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
     {
@@ -87,6 +105,16 @@ class HostTest extends TestCase
     {
         return [
             'ipv4' => [
+                Host::createFromIp('127.0.0.1'),
+                false,
+                true,
+                true,
+                false,
+                false,
+                '4',
+                '127.0.0.1',
+                '127.0.0.1',
+                '127.0.0.1',
                 '127.0.0.1',
                 false,
                 true,
@@ -260,6 +288,12 @@ class HostTest extends TestCase
     /**
      * @param string $invalid
      * @dataProvider invalidHostProvider
+     * @covers ::__construct
+     * @covers ::parse
+     * @covers ::isValidDomain
+     * @covers ::isValidRegisteredName
+     * @covers ::isValidIpv6Hostname
+     * @covers ::isValidIpFuture
      */
     public function testInvalidHost($invalid)
     {
@@ -267,26 +301,12 @@ class HostTest extends TestCase
         new Host($invalid);
     }
 
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(Exception::class);
-        (new Host('host'))->getContent(-1);
-    }
-
     public function invalidHostProvider()
     {
-        //$longlabel = implode('', array_fill(0, 12, 'banana'));
-
         return [
-            //'dot in front' => ['.example.com'], valid registered name
-            //'hyphen suffix' => ['host.com-'],   valid registered name
-            //'multiple dot' => ['.......'],      valid registered name
-            //'one dot' => ['.'],                 valid registered name
+            'invalid type' => [date_create()],
             'empty label' => ['tot.    .coucou.com'],
             'space in the label' => ['re view'],
-            //'underscore in label' => ['_bad.host.com'],                   valid registered name
-            //'label too long' => [$longlabel.'.secure.example.com'],       valid registered name
-            //'too many labels' => [implode('.', array_fill(0, 128, 'a'))], valid registered name
             'Invalid IPv4 format' => ['[127.0.0.1]'],
             'Invalid IPv6 format' => ['[[::1]]'],
             'Invalid IPv6 format 2' => ['[::1'],
@@ -305,9 +325,19 @@ class HostTest extends TestCase
     }
 
     /**
+     * @covers ::getContent
+     */
+    public function testInvalidEncodingTypeThrowException()
+    {
+        $this->expectException(Exception::class);
+        (new Host('host'))->getContent(-1);
+    }
+
+    /**
      * @param string $raw
      * @param bool   $expected
      * @dataProvider isAbsoluteProvider
+     * @covers ::isAbsolute
      */
     public function testIsAbsolute($raw, $expected)
     {
@@ -329,6 +359,7 @@ class HostTest extends TestCase
      * @param string $unicode Unicode Hostname
      * @param string $ascii   Ascii Hostname
      * @dataProvider hostnamesProvider
+     * @covers ::getContent
      */
     public function testValidUnicodeHost($unicode, $ascii)
     {
@@ -372,6 +403,8 @@ class HostTest extends TestCase
      * @param int         $nblabels
      * @param array       $array
      * @dataProvider countableProvider
+     * @covers ::count
+     * @covers ::getLabels
      */
     public function testCountable($host, $nblabels, $array)
     {
@@ -392,9 +425,12 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param array|Traversable $input
-     * @param int               $is_absolute
-     * @param string            $expected
+     * @param mixed  $input
+     * @param int    $is_absolute
+     * @param string $expected
+     * @covers ::createFromLabels
+     * @covers ::__toString
+     *
      * @dataProvider createFromLabelsValid
      */
     public function testCreateFromLabels($input, $is_absolute, $expected)
@@ -413,13 +449,15 @@ class HostTest extends TestCase
             'FQDN' => [['com', 'example', 'www'], Host::IS_ABSOLUTE, 'www.example.com.'],
             'empty' => [[''], Host::IS_ABSOLUTE, ''],
             'null' => [[], Host::IS_ABSOLUTE, ''],
+            'another host object' => [new Host('example.com'), Host::IS_ABSOLUTE, 'example.com.'],
         ];
     }
 
     /**
-     * @param array $input
+     * @param mixed $input
      * @param int   $is_absolute
      * @dataProvider createFromLabelsInvalid
+     * @covers ::createFromLabels
      */
     public function testcreateFromLabelsFailed($input, $is_absolute)
     {
@@ -432,32 +470,38 @@ class HostTest extends TestCase
         return [
             'ipv6 FQDN' => [['::1'], Host::IS_ABSOLUTE],
             'unknown flag' => [['all', 'is', 'good'], 23],
+            'invalid labels' => [date_create(), Host::IS_RELATIVE],
         ];
     }
 
     /**
      * @dataProvider createFromIpValid
      * @param string $input
+     * @param string $version
      * @param string $expected
+     * @covers ::createFromIp
      */
-    public function testCreateFromIp($input, $expected)
+    public function testCreateFromIp($input, $version, $expected)
     {
-        $this->assertSame($expected, (string) Host::createFromIp($input));
+        $this->assertSame($expected, (string) Host::createFromIp($input, $version));
     }
 
     public function createFromIpValid()
     {
         return [
-            'ipv4' => ['127.0.0.1', '127.0.0.1'],
-            'ipv6' => ['::1', '[::1]'],
-            'ipv6 with scope' => ['fe80:1234::%1', '[fe80:1234::%251]'],
-            'valid IpFuture' => ['vAF.csucj.$&+;::', '[vAF.csucj.$&+;::]'],
+            'ipv4' => ['127.0.0.1', '', '127.0.0.1'],
+            'ipv4 does not care about the version string' => ['127.0.0.1', 'foo', '127.0.0.1'],
+            'ipv6' => ['::1', '', '[::1]'],
+            'ipv6 does not care about the version string' => ['::1', 'bar', '[::1]'],
+            'ipv6 with scope' => ['fe80:1234::%1', 'foo', '[fe80:1234::%251]'],
+            'valid IpFuture' => ['csucj.$&+;::', 'AF', '[vAF.csucj.$&+;::]'],
         ];
     }
 
     /**
      * @dataProvider createFromIpFailed
      * @param string $input
+     * @covers ::createFromIp
      */
     public function testCreateFromIpFailed($input)
     {
@@ -474,6 +518,9 @@ class HostTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::getLabel
+     */
     public function testGetLabel()
     {
         $host = new Host('master.example.com');
@@ -484,6 +531,9 @@ class HostTest extends TestCase
         $this->assertSame('toto', $host->getLabel(23, 'toto'));
     }
 
+    /**
+     * @covers ::keys
+     */
     public function testOffsets()
     {
         $host = new Host('master.example.com');
@@ -496,6 +546,8 @@ class HostTest extends TestCase
      * @param array  $without
      * @param string $res
      * @dataProvider withoutProvider
+     * @covers ::withoutLabels
+     * @covers ::filterOffsets
      */
     public function testWithout($host, $without, $res)
     {
@@ -514,6 +566,10 @@ class HostTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::withoutLabels
+     * @covers ::filterOffsets
+     */
     public function testWithoutTriggersException()
     {
         $this->expectException(Exception::class);
@@ -524,6 +580,7 @@ class HostTest extends TestCase
      * @param string $host
      * @param string $expected
      * @dataProvider withoutZoneIdentifierProvider
+     * @covers ::withoutZoneIdentifier
      */
     public function testWithoutZoneIdentifier($host, $expected)
     {
@@ -545,6 +602,7 @@ class HostTest extends TestCase
      * @param string $host
      * @param bool   $expected
      * @dataProvider hasZoneIdentifierProvider
+     * @covers ::hasZoneIdentifier
      */
     public function testHasZoneIdentifier($host, $expected)
     {
@@ -566,6 +624,8 @@ class HostTest extends TestCase
      * @param string $prepend
      * @param string $expected
      * @dataProvider validPrepend
+     * @covers ::prepend
+     * @covers ::filterComponent
      */
     public function testPrepend($raw, $prepend, $expected)
     {
@@ -583,6 +643,11 @@ class HostTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::prepend
+     * @covers ::filterComponent
+     * @covers ::parse
+     */
     public function testPrependIpFailed()
     {
         $this->expectException(Exception::class);
@@ -594,6 +659,8 @@ class HostTest extends TestCase
      * @param string $append
      * @param string $expected
      * @dataProvider validAppend
+     * @covers ::append
+     * @covers ::filterComponent
      */
     public function testAppend($raw, $append, $expected)
     {
@@ -612,10 +679,13 @@ class HostTest extends TestCase
     }
 
     /**
-     * @expectedException LogicException
+     * @covers ::append
+     * @covers ::filterComponent
+     * @covers ::parse
      */
     public function testAppendIpFailed()
     {
+        $this->expectException(Exception::class);
         (new Host('[::1]'))->append('foo');
     }
 
@@ -625,6 +695,7 @@ class HostTest extends TestCase
      * @param int    $offset
      * @param string $expected
      * @dataProvider replaceValid
+     * @covers ::replaceLabel
      */
     public function testReplace($raw, $input, $offset, $expected)
     {
@@ -645,6 +716,10 @@ class HostTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::replaceLabel
+     * @covers ::parse
+     */
     public function testReplaceIpMustFailed()
     {
         $this->expectException(Exception::class);
@@ -652,152 +727,12 @@ class HostTest extends TestCase
     }
 
     /**
-     * @dataProvider parseDataProvider
-     * @param string $host
-     * @param string $publicSuffix
-     * @param string $registerableDomain
-     * @param string $subdomain
-     * @param bool   $isValidSuffix
-     */
-    public function testPublicSuffixListImplementation(
-        $host,
-        $publicSuffix,
-        $registerableDomain,
-        $subdomain,
-        $isValidSuffix
-    ) {
-        $host = new Host($host);
-        $this->assertSame($subdomain, $host->getSubDomain());
-        $this->assertSame($registerableDomain, $host->getRegisterableDomain());
-        $this->assertSame($publicSuffix, $host->getPublicSuffix());
-        $this->assertSame($isValidSuffix, $host->isPublicSuffixValid());
-    }
-
-    public function parseDataProvider()
-    {
-        return [
-            ['www.waxaudio.com.au', 'com.au', 'waxaudio.com.au', 'www', true],
-            ['giant.yyyy.', 'yyyy', 'giant.yyyy', '', false],
-            ['localhost', '', '', '', false],
-            ['127.0.0.1', '', '', '', false],
-            ['[::1]', '', '', '', false],
-            ['مثال.إختبار', 'xn--kgbechtv', 'xn--mgbh0fb.xn--kgbechtv', '', false],
-            ['xn--p1ai.ru.', 'ru', 'xn--p1ai.ru', '', true],
-        ];
-    }
-
-    /**
-     * @dataProvider validPublicSuffix
-     *
-     * @param string $publicsuffix
-     * @param string $host
-     * @param string $expected
-     */
-    public function testWithPublicSuffix($publicsuffix, $host, $expected)
-    {
-        $this->assertSame(
-            $expected,
-            (string) (new Host($host))->withPublicSuffix($publicsuffix)
-        );
-    }
-
-    public function validPublicSuffix()
-    {
-        return [
-            ['fr', 'example.co.uk', 'example.fr'],
-            ['fr', 'example.be', 'example.fr'],
-            ['bébé', 'example.com', 'example.xn--bb-bjab'],
-            ['127.0.0.1', 'example.co.uk', 'example.127.0.0.1'],
-            ['fr', 'example.fr', 'example.fr'],
-            ['', 'example.fr', 'example'],
-        ];
-    }
-
-    public function testWithPublicSuffixThrowException()
-    {
-        $this->expectException(Exception::class);
-        (new Host('[::1]'))->withPublicSuffix('example.com');
-    }
-
-    /**
-     * @dataProvider validRegisterableDomain
-     * @param string $newhost
-     * @param string $host
-     * @param string $expected
-     */
-    public function testWithRegisterableDomain($newhost, $host, $expected)
-    {
-        $this->assertSame($expected, (string) (new Host($host))->withRegisterableDomain($newhost));
-    }
-
-    public function validRegisterableDomain()
-    {
-        return [
-            ['thephpleague.com', 'shop.example.com', 'shop.thephpleague.com'],
-            ['thephpleague.com', 'shop.ulb.ac.be', 'shop.thephpleague.com'],
-            ['thephpleague.com', 'shop.ulb.ac.be.', 'shop.thephpleague.com.'],
-            ['thephpleague.com', '', 'thephpleague.com'],
-            ['thephpleague.com', 'shop.thephpleague.com', 'shop.thephpleague.com'],
-            ['example.com', '127.0.0.1', '127.0.0.1.example.com'],
-            ['', 'www.example.com', 'www'],
-        ];
-    }
-
-    public function testWithRegisterableDomainThrowException()
-    {
-        $this->expectException(Exception::class);
-        (new Host('[::1]'))->withRegisterableDomain('example.com');
-    }
-
-    public function testWithSubDomainThrowExceptionWithAbsoluteRegisterableDomain()
-    {
-        $this->expectException(Exception::class);
-        (new Host('example.com'))->withRegisterableDomain('example.com.');
-    }
-
-    /**
-     * @dataProvider validSubDomain
-     * @param string $new_subdomain
-     * @param string $host
-     * @param string $expected
-     */
-    public function testWithSubDomain($new_subdomain, $host, $expected)
-    {
-        $this->assertSame($expected, (string) (new Host($host))->withSubDomain($new_subdomain));
-    }
-
-    public function validSubDomain()
-    {
-        return [
-            ['shop', 'master.example.com', 'shop.example.com'],
-            ['shop', 'www.ulb.ac.be', 'shop.ulb.ac.be'],
-            ['shop', 'ulb.ac.be', 'shop.ulb.ac.be'],
-            ['', 'ulb.ac.be.', 'ulb.ac.be.'],
-            ['www', 'www.ulb.ac.be', 'www.ulb.ac.be'],
-            ['www', '', 'www'],
-            ['www', 'example.com.', 'www.example.com.'],
-            ['example.com', '127.0.0.1', 'example.com.127.0.0.1'],
-            ['', 'www.example.com', 'example.com'],
-        ];
-    }
-
-    public function testWithSubDomainThrowExceptionWithIPHost()
-    {
-        $this->expectException(Exception::class);
-        (new Host('[::1]'))->withSubDomain('example.com');
-    }
-
-    public function testWithSubDomainThrowExceptionWithAbsoluteSubDomain()
-    {
-        $this->expectException(Exception::class);
-        (new Host('example.com'))->withSubDomain('example.com.');
-    }
-
-    /**
      * @dataProvider rootProvider
      * @param string $host
      * @param string $expected_with_root
      * @param string $expected_without_root
+     * @covers ::withRootLabel
+     * @covers ::withoutRootLabel
      */
     public function testWithRooot($host, $expected_with_root, $expected_without_root)
     {

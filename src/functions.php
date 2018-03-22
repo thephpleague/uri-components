@@ -24,9 +24,9 @@ use Traversable;
  * @param string            $separator The query string separator
  * @param int               $enc_type  The query encoding type
  *
- * @return string
+ * @return null|string
  */
-function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): string
+function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986)
 {
     static $builder;
 
@@ -40,13 +40,13 @@ function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_
  *
  * @see QueryParser::parse
  *
- * @param string $query     The query string to parse
+ * @param mixed  $query     The query string to parse
  * @param string $separator The query string separator
  * @param int    $enc_type  The query encoding algorithm
  *
  * @return array
  */
-function parse_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
+function parse_query($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
 {
     static $parser;
 
@@ -60,13 +60,13 @@ function parse_query(string $query, string $separator = '&', int $enc_type = PHP
  *
  * @see QueryParser::extract
  *
- * @param string $query     The query string to parse
+ * @param mixed  $query     The query string to parse
  * @param string $separator The query string separator
  * @param int    $enc_type  The query encoding algorithm
  *
  * @return array
  */
-function extract_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
+function extract_query($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
 {
     static $parser;
 

@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\ComponentInterface;
+use League\Uri\Exception;
+
 /**
  * Value object representing the UserInfo part of an URI.
  *
@@ -26,163 +29,31 @@ namespace League\Uri\Components;
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.1
  *
  */
-class UserInfo implements ComponentInterface
+final class UserInfo implements ComponentInterface
 {
-    use ComponentTrait;
+    /**
+     * @internal
+     */
+    const ENCODING_LIST = [
+        self::RFC1738_ENCODING => 1,
+        self::RFC3986_ENCODING => 1,
+        self::RFC3987_ENCODING => 1,
+        self::NO_ENCODING => 1,
+    ];
 
     /**
      * User user component
      *
      * @var string|null
      */
-    protected $user;
+    private $user;
 
     /**
      * Pass URI component
      *
      * @var string|null
      */
-    protected $pass;
-
-    /**
-     * Create a new instance of UserInfo
-     *
-     * @param string|null $user
-     * @param string|null $pass
-     */
-    public function __construct(string $user = null, string $pass = null)
-    {
-        $this->user = $this->filterUser($user);
-        if ('' != $this->user) {
-            $this->pass = $this->filterPass($pass);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'user' => $this->getUser(),
-            'pass' => $this->getPass(),
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isNull(): bool
-    {
-        return null === $this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isEmpty(): bool
-    {
-        return '' == $this->getContent();
-    }
-
-    /**
-     * Filter the URI user component
-     *
-     * @param string|null $str
-     *
-     * @throws Exception If the content is invalid
-     *
-     * @return string|null
-     */
-    protected function filterUser(string $str = null)
-    {
-        if (null === $str) {
-            return $str;
-        }
-
-        $str = $this->validateString($str);
-
-        return $this->decodeComponent($str);
-    }
-
-    /**
-     * Filter the URI password component
-     *
-     * @param string|null $str
-     *
-     * @throws Exception If the content is invalid
-     *
-     * @return string|null
-     */
-    protected function filterPass(string $str = null)
-    {
-        if (null === $str) {
-            return $str;
-        }
-
-        $str = $this->validateString($str);
-
-        return $this->decodeComponent($str);
-    }
-
-    /**
-     * Retrieve the user component of the URI User Info part
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
-     */
-    public function getUser(int $enc_type = self::RFC3986_ENCODING)
-    {
-        $this->assertValidEncoding($enc_type);
-        if (null === $this->user || '' === $this->user || self::NO_ENCODING == $enc_type) {
-            return $this->user;
-        }
-
-        if ($enc_type == self::RFC3987_ENCODING) {
-            $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', ':', '@']);
-
-            return str_replace($pattern, array_map('rawurlencode', $pattern), $this->user);
-        }
-
-        $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
-
-        if (self::RFC1738_ENCODING == $enc_type) {
-            return $this->toRFC1738($this->encode($this->user, $regexp));
-        }
-
-        return $this->encode($this->user, $regexp);
-    }
-
-    /**
-     * Retrieve the pass component of the URI User Info part
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
-     */
-    public function getPass(int $enc_type = self::RFC3986_ENCODING)
-    {
-        $this->assertValidEncoding($enc_type);
-        if (null === $this->pass || '' === $this->pass || self::NO_ENCODING == $enc_type) {
-            return $this->pass;
-        }
-
-        if ($enc_type == self::RFC3987_ENCODING) {
-            $pattern = array_merge(str_split(self::$invalid_uri_chars), ['/', '#', '?', '@']);
-
-            return str_replace($pattern, array_map('rawurlencode', $pattern), $this->pass);
-        }
-
-        $regexp = '/(?:[^'.static::$unreserved_chars.static::$subdelim_chars.']+|%(?!'.static::$encoded_chars.'))/x';
-
-        if (self::RFC1738_ENCODING == $enc_type) {
-            return $this->toRFC1738($this->encode($this->pass, $regexp));
-        }
-
-        return $this->encode($this->pass, $regexp);
-    }
+    private $pass;
 
     /**
      * {@inheritdoc}
@@ -193,11 +64,80 @@ class UserInfo implements ComponentInterface
     }
 
     /**
+     * Create a new instance of UserInfo
+     *
+     * @param mixed $user
+     * @param mixed $pass
+     */
+    public function __construct($user = null, $pass = null)
+    {
+        $this->user = $this->filterPart($user);
+        $this->pass = $this->filterPart($pass);
+        if (null === $this->user || '' === $this->user) {
+            $this->pass = null;
+        }
+    }
+
+    /**
+     * Filter the URI password component
+     *
+     * @param mixed $str
+     *
+     * @throws Exception If the content is invalid
+     *
+     * @return string|null
+     */
+    private function filterPart($str = null)
+    {
+        if ($str instanceof ComponentInterface) {
+            $str = $str->getContent();
+        }
+
+        if (null === $str) {
+            return $str;
+        }
+
+        if (!is_scalar($str) && !method_exists($str, '__toString')) {
+            throw new Exception(sprintf('Expected userinfo to be stringable or null; received %s', gettype($str)));
+        }
+
+        static $pattern = '/[\x00-\x1f\x7f]/';
+        if (preg_match($pattern, $str)) {
+            throw new Exception(sprintf('Invalid string: %s', $str));
+        }
+
+        static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
+
+        return preg_replace_callback($encoded_pattern, [$this, 'decode'], $str);
+    }
+
+    private function decode(array $matches): string
+    {
+        static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
+        if (preg_match($regexp, $matches[0])) {
+            return strtoupper($matches[0]);
+        }
+
+        return rawurldecode($matches[0]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        $this->assertValidEncoding($enc_type);
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
         if (null === $this->user) {
             return null;
         }
@@ -213,9 +153,79 @@ class UserInfo implements ComponentInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function __debugInfo()
     {
-        return (string) $this->getContent();
+        return [
+            'user' => $this->getUser(),
+            'pass' => $this->getPass(),
+        ];
+    }
+
+    /**
+     * Retrieve the user component of the URI User Info part
+     *
+     * @param int $enc_type
+     *
+     * @return string|null
+     */
+    public function getUser(int $enc_type = self::RFC3986_ENCODING)
+    {
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
+        if (null === $this->user || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->user)) {
+            return $this->user;
+        }
+
+        if ($enc_type == self::RFC3987_ENCODING) {
+            static $pattern = '/[\x00-\x1f\x7f\/#\?\:@]/';
+            return preg_replace_callback($pattern, [$this, 'encode'], $this->user) ?? $this->user;
+        }
+
+        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
+        $content = preg_replace_callback($regexp, [$this, 'encode'], $this->user) ?? rawurlencode($this->user);
+        if (self::RFC3986_ENCODING === $enc_type) {
+            return $content;
+        }
+
+        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
+    }
+
+    private function encode(array $matches): string
+    {
+        return rawurlencode($matches[0]);
+    }
+
+    /**
+     * Retrieve the pass component of the URI User Info part
+     *
+     * @param int $enc_type
+     *
+     * @return string|null
+     */
+    public function getPass(int $enc_type = self::RFC3986_ENCODING)
+    {
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
+        if (null === $this->pass || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->pass)) {
+            return $this->pass;
+        }
+
+        if ($enc_type == self::RFC3987_ENCODING) {
+            static $pattern = '/[\x00-\x1f\x7f\/#\?@]/';
+            return preg_replace_callback($pattern, [$this, 'encode'], $this->pass) ?? $this->pass;
+        }
+
+        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
+        $content = preg_replace_callback($regexp, [$this, 'encode'], $this->pass) ?? rawurlencode($this->pass);
+        if (self::RFC3986_ENCODING === $enc_type) {
+            return $content;
+        }
+
+        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
     }
 
     /**
@@ -223,12 +233,11 @@ class UserInfo implements ComponentInterface
      */
     public function getUriComponent(): string
     {
-        $component = (string) $this->getContent();
-        if ('' == $component) {
-            return $component;
+        if (null === $this->user || '' === $this->user) {
+            return '';
         }
 
-        return $component.'@';
+        return $this->getContent().'@';
     }
 
     /**
@@ -236,17 +245,23 @@ class UserInfo implements ComponentInterface
      */
     public function withContent($content): ComponentInterface
     {
-        if (null !== $content) {
-            $content = $this->validateString($content);
+        if ($content instanceof ComponentInterface) {
+            $content = $content->getContent();
         }
 
         if ($content === $this->getContent()) {
             return $this;
         }
 
-        $res = explode(':', $content, 2);
+        if (null === $content) {
+            return new self();
+        }
 
-        return $this->withUserInfo(array_shift($res), array_shift($res));
+        if (is_scalar($content) || method_exists($content, '__toString')) {
+            return new self(...explode(':', (string) $content, 2) + [1 => null]);
+        }
+
+        throw new Exception(sprintf('Expected userinfo to be stringable or null; received %s', gettype($content)));
     }
 
     /**
@@ -257,16 +272,16 @@ class UserInfo implements ComponentInterface
      *
      * An empty user is equivalent to removing the user information.
      *
-     * @param string      $user The user to use with the new instance.
-     * @param string|null $pass The pass to use with the new instance.
+     * @param mixed $user The user to use with the new instance.
+     * @param mixed $pass The pass to use with the new instance.
      *
      * @return static
      */
-    public function withUserInfo(string $user, string $pass = null): self
+    public function withUserInfo($user, $pass = null): self
     {
-        $user = $this->filterUser($this->validateString($user));
-        $pass = $this->filterPass($pass);
-        if ('' == $user) {
+        $user = $this->filterPart($user);
+        $pass = $this->filterPart($pass);
+        if (null === $user || '' === $user) {
             $pass = null;
         }
 
