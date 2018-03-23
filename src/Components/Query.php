@@ -61,7 +61,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     public static function createFromParams($params, string $separator = '&'): self
     {
         if ($params instanceof self) {
-            return new self($params, $separator);
+            $params = $params->toParams();
         }
 
         if ($params instanceof Traversable) {
@@ -92,11 +92,11 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     public static function createFromPairs($pairs, string $separator = '&'): self
     {
         if ($pairs instanceof self) {
-            return new self($pairs, $separator);
+            return $pairs->withSeparator($separator);
         }
 
         if ($pairs instanceof Traversable) {
-            $pairs = iterator_to_array($pairs, true);
+            $pairs = iterator_to_array($pairs);
         }
 
         if (!is_array($pairs)) {
@@ -239,13 +239,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function get(string $key)
     {
-        foreach ($this->pairs as $pair) {
-            if ($key === $pair[0]) {
-                return $pair[1];
-            }
-        }
+        $filter = function (array $pair) use ($key): bool {
+            return $key === $pair[0];
+        };
 
-        return null;
+        $res = array_filter($this->pairs, $filter);
+
+        return array_shift($res)[1] ?? null;
     }
 
     /**
@@ -264,15 +264,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getAll(string $key): array
     {
-        $reducer = function (array $res, array $pair) use ($key): array {
-            if ($key === $pair[0]) {
-                $res[] = $pair[1];
-            }
-
-            return $res;
+        $filter = function (array $pair) use ($key): bool {
+            return $key === $pair[0];
         };
 
-        return array_reduce($this->pairs, $reducer, []);
+        $res = array_filter($this->pairs, $filter);
+
+        return array_column($res, 1);
     }
 
     /**
@@ -482,14 +480,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutEmptyPairs(): self
     {
-        $pairs = [];
-        foreach ($this->pairs as $pair) {
-            if ('' === $pair[0] || null === $pair[1] || '' === $pair[1]) {
-                continue;
-            }
-            $pairs[] = $pair;
-        }
+        $filter = function (array $pairs): bool {
+            return '' !== $pairs[0]
+                && null !== $pairs[1]
+                && '' !== $pairs[1];
+        };
 
+        $pairs = array_filter($this->pairs, $filter);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -514,12 +511,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutNumericIndices(): self
     {
-        $pairs = array_map(function (array $pair) {
+        $mapper = function (array $pair): array {
             $pair[0] = preg_replace(',\[\d+\],', '[]', $pair[0]);
 
             return $pair;
-        }, $this->pairs);
+        };
 
+        $pairs = array_map($mapper, $this->pairs);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -671,12 +669,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
         $keys_to_remove = array_intersect(array_column($pairs, 0), array_column($this->pairs, 0));
         $base_pairs = $this->pairs;
         if (!empty($keys_to_remove)) {
-            $base_pairs = [];
-            foreach ($this->pairs as $pair) {
-                if (!in_array($pair[0], $keys_to_remove, true)) {
-                    $base_pairs[] = $pair;
+            foreach ($base_pairs as &$pair) {
+                if (in_array($pair[0], $keys_to_remove, true)) {
+                    $pair = null;
                 }
             }
+            unset($pair);
+            $base_pairs = array_filter($base_pairs);
         }
 
         $pairs = array_merge($base_pairs, $pairs);
@@ -708,7 +707,6 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     public function append($query): self
     {
         $pairs = array_merge($this->pairs, Uri\parse_query($query, $this->separator));
-
         if ($pairs === $this->pairs) {
             return $this;
         }
