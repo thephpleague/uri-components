@@ -18,6 +18,7 @@ namespace League\Uri;
 
 use League\Uri\Components\Query;
 use Traversable;
+use TypeError;
 
 /**
  * Value object representing a URI Query component.
@@ -81,33 +82,28 @@ final class QueryBuilder implements EncodingInterface
      *
      *    - it does not modify parameters keys
      *
-     * @param array|Traversable $pairs     Query pairs
-     * @param string            $separator Query string separator
-     * @param int               $enc_type  Query encoding type
+     * @param mixed  $pairs     Query pairs
+     * @param string $separator Query string separator
+     * @param int    $enc_type  Query encoding type
      *
      * @return null|string
      */
     public function build($pairs, string $separator = '&', int $enc_type = self::RFC3986_ENCODING)
     {
         $this->encoder = $this->getEncoder($separator, $enc_type);
-        if ($pairs instanceof Query) {
-            $pairs = $pairs->getAll();
-        }
-
-        if ($pairs instanceof Traversable) {
-            $pairs = iterator_to_array($pairs, true);
-        }
-
-        if (empty($pairs)) {
-            return null;
+        if (!is_array($pairs) && !$pairs instanceof Traversable) {
+            throw new TypeError('the pairs must be an array or a Traversable object');
         }
 
         $res = [];
-        foreach ($pairs as $key => $value) {
-            $res = array_merge($res, $this->buildPair($key, $value));
+        foreach ($pairs as $pair) {
+            if (!is_array($pair) || !isset($pair[0])) {
+                throw new Exception('Invalid pair');
+            }
+            $res[] = $this->buildPair((string) $pair[0], $pair[1]);
         }
 
-        return implode($separator, $res);
+        return empty($res) ? null : implode($separator, $res);
     }
 
     /**
@@ -180,39 +176,36 @@ final class QueryBuilder implements EncodingInterface
     /**
      * Build a query key/pair association.
      *
-     * @param string|int $key   The pair key
-     * @param mixed      $value The pair value
+     * @param string $key   The pair key
+     * @param mixed  $value The pair value
      *
      * @throws Exception If the pair contains invalid value
      *
-     * @return array
+     * @return string
      */
-    private function buildPair($key, $value): array
+    private function buildPair(string $key, $value): string
     {
-        $key = (string) $key;
         if (preg_match(self::UNRESERVED_CHAR_REGEXP, $key)) {
             $key = ($this->encoder)($key);
         }
 
-        $res = [];
-        if (!is_array($value)) {
-            $value = [$value];
+        if (null === $value) {
+            return $key;
         }
 
-        foreach ($value as $data) {
-            if (null === $data) {
-                $res[] = $key;
-                continue;
-            }
-
-            if (!is_scalar($data)) {
-                throw new Exception('Invalid value contained in the submitted pairs');
-            }
-
-            $data = (string) $data;
-            $res[] = $key.'='.(preg_match(self::UNRESERVED_CHAR_REGEXP, $data) ? ($this->encoder)($data) : $data);
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
         }
 
-        return $res;
+        if (method_exists($value, '__toString')) {
+            $value = (string) $value;
+        }
+
+        if (!is_scalar($value)) {
+            throw new Exception('Invalid key/pair value');
+        }
+
+        $value = (string) $value;
+        return $key.'='.(preg_match(self::UNRESERVED_CHAR_REGEXP, $value) ? ($this->encoder)($value) : $value);
     }
 }
