@@ -115,11 +115,11 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function __set_state(array $properties): self
     {
-        $newInstance = new self();
-        $newInstance->pairs = $properties['pairs'];
-        $newInstance->separator = $properties['separator'];
+        $instance = new self();
+        $instance->pairs = $properties['pairs'];
+        $instance->separator = $properties['separator'];
 
-        return $newInstance;
+        return $instance;
     }
 
     /**
@@ -194,11 +194,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function count()
     {
-        $reducer = function (int $carry, array $value): int {
-            return $carry + count($value);
-        };
-
-        return array_reduce($this->pairs, $reducer, 0);
+        return count($this->pairs);
     }
 
     /**
@@ -211,10 +207,8 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getIterator()
     {
-        foreach ($this->pairs as $offset => $value) {
-            foreach ($value as $val) {
-                yield $offset => $val;
-            }
+        foreach ($this->pairs as $pair) {
+            yield $pair;
         }
     }
 
@@ -227,7 +221,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function has(string $key): bool
     {
-        return isset($this->pairs[$key]);
+        return isset(array_flip(array_column($this->pairs, 0))[$key]);
     }
 
     /**
@@ -245,7 +239,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function get(string $key)
     {
-        return $this->pairs[$key][0] ?? null;
+        foreach ($this->pairs as $pair) {
+            if ($key === $pair[0]) {
+                return $pair[1];
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -258,41 +258,45 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * If no value is found an empty array is returned
      *
-     * @param string... $arg
+     * @param string $key
      *
      * @return array
      */
-    public function getAll(string ...$arg): array
+    public function getAll(string $key): array
     {
-        if (empty($arg)) {
-            return $this->pairs;
-        }
+        $reducer = function (array $res, array $pair) use ($key): array {
+            if ($key === $pair[0]) {
+                $res[] = $pair[1];
+            }
 
-        return $this->pairs[$arg[0]] ?? [];
+            return $res;
+        };
+
+        return array_reduce($this->pairs, $reducer, []);
     }
 
     /**
      * Returns an iterator allowing to go through all keys contained in this object.
      *
-     * Each key is a string. if an argument is given. Only the key who contains this
-     * value will be returned by the iterator
-     *
-     * @param mixed ...$arg
-     *
-     * @return array
+     * @return \Iterator
      */
-    public function keys(...$arg): array
+    public function keys()
     {
-        if (empty($arg)) {
-            return array_keys($this->pairs);
+        foreach ($this->pairs as $pair) {
+            yield $pair[0];
         }
+    }
 
-        $key = $arg[0];
-        $filter = function ($value) use ($key): bool {
-            return in_array($key, $value, true);
-        };
-
-        return array_keys(array_filter($this->pairs, $filter));
+    /**
+     * Returns an iterator allowing to go through all values contained in this object.
+     *
+     * @return \Iterator
+     */
+    public function values()
+    {
+        foreach ($this->pairs as $pair) {
+            yield $pair[1];
+        }
     }
 
     /**
@@ -345,7 +349,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function toParams(): array
     {
-        return Uri\pairs_to_params($this->pairs);
+        return Uri\extract_query($this->getContent(), $this->separator);
     }
 
     /**
@@ -416,9 +420,16 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function ksort($sort = SORT_REGULAR): self
     {
-        $func = is_callable($sort) ? 'uksort' : 'ksort';
-        $pairs = $this->pairs;
-        $func($pairs, $sort);
+        $func = is_callable($sort) ? 'uasort' : 'asort';
+
+        $keys = array_column($this->pairs, 0);
+        $func($keys, $sort);
+
+        $pairs = [];
+        foreach ($keys as $offset => $keys) {
+            $pairs[] = $this->pairs[$offset];
+        }
+
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -440,7 +451,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutDuplicates(): self
     {
-        $pairs = array_map('array_unique', $this->pairs);
+        $pairs = [];
+        foreach ($this->pairs as $pair) {
+            if (!in_array($pair, $pairs, true)) {
+                $pairs[] = $pair;
+            }
+        }
+
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -465,16 +482,12 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutEmptyPairs(): self
     {
-        $base = $this->pairs;
         $pairs = [];
-        foreach ($base as $key => $value) {
-            if ('' === $key) {
+        foreach ($this->pairs as $pair) {
+            if ('' === $pair[0] || null === $pair[1] || '' === $pair[1]) {
                 continue;
             }
-            $value = array_filter($value, [$this, 'isValueSet']);
-            if (!empty($value)) {
-                $pairs[$key] = $value;
-            }
+            $pairs[] = $pair;
         }
 
         if ($pairs === $this->pairs) {
@@ -485,18 +498,6 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
         $clone->pairs = $pairs;
 
         return $clone;
-    }
-
-    /**
-     * Tell whether a value is set.
-     *
-     * @param mixed $value
-     *
-     * @return bool
-     */
-    private function isValueSet($value): bool
-    {
-        return null !== $value && '' !== $value;
     }
 
     /**
@@ -513,46 +514,20 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutNumericIndices(): self
     {
-        $query = $this->getContent();
-        static $pattern = ',\%5B\d+\%5D,';
-        if (null === $query || !preg_match($pattern, $query)) {
-            return $this;
-        }
+        $pairs = array_map(function (array $pair) {
+            $pair[0] = preg_replace(',\[\d+\],', '[]', $pair[0]);
 
-        $new_query = implode(
-            $this->separator,
-            array_map([$this, 'removeNumericIndex'], explode($this->separator, $query))
-        );
-
-        if ($new_query === $query) {
-            return $this;
-        }
-
-        return new self($new_query, $this->separator);
-    }
-
-    /**
-     * Remove the numeric index from the key pair
-     *
-     * @param string $pair
-     *
-     * @return string
-     */
-    private function removeNumericIndex(string $pair): string
-    {
-        static $pattern = ',\%5B\d+\%5D,';
-        static $replace = '%5B%5D';
-        list($key, $value) = explode('=', $pair, 2) + [1 => null];
-        $new_key = preg_replace($pattern, $replace, $key);
-        if ($new_key === $key) {
             return $pair;
+        }, $this->pairs);
+
+        if ($pairs === $this->pairs) {
+            return $this;
         }
 
-        if (null === $value) {
-            return $new_key;
-        }
+        $clone = clone $this;
+        $clone->pairs = $pairs;
 
-        return $new_key.'='.$value;
+        return $clone;
     }
 
     /**
@@ -570,11 +545,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withPair(string $key, $value): self
     {
-        $pairs = array_merge($this->pairs, [$key => $this->filterPair($value)]);
-        if ($pairs === $this->pairs) {
-            return $this;
-        }
+        $pair = [$key, $this->filterPair($value)];
+        $filter = function (array $pair) use ($key): bool {
+            return $key !== $pair[0];
+        };
 
+        $pairs = array_filter($this->pairs, $filter);
+        $pairs[] = $pair;
         $clone = clone $this;
         $clone->pairs = $pairs;
 
@@ -590,29 +567,23 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @throws Exception if the value is invalid
      *
-     * @return array
+     * @return string|null
      */
-    private static function filterPair($value): array
+    private static function filterPair($value)
     {
-        if (null === $value || is_scalar($value)) {
-            return [$value];
+        if (null === $value) {
+            return $value;
         }
 
-        if ($value instanceof Traversable) {
-            $value = iterator_to_array($value, false);
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
         }
 
-        if (!is_array($value)) {
-            throw new Exception('The submitted value is invalid.');
+        if (is_scalar($value) || method_exists($value, '__toString')) {
+            return (string) $value;
         }
 
-        foreach ($value as $val) {
-            if (null !== $val && !is_scalar($val)) {
-                throw new Exception('The submitted value is invalid.');
-            }
-        }
-
-        return array_values($value);
+        throw new Exception('The submitted value is invalid.');
     }
 
     /**
@@ -630,12 +601,16 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function appendTo(string $key, $value): self
     {
+        if (is_object($value) && method_exists($value, '__toString')) {
+            $value = (string) $value;
+        }
+
         if (null !== $value && !is_scalar($value)) {
             throw new Exception('The value must be a scalar or null %s given');
         }
 
         $clone = clone $this;
-        $clone->pairs = array_merge($this->pairs, [$key => array_merge($this->getAll($key), [$value])]);
+        $clone->pairs[] = [$key, $value];
 
         return $clone;
     }
@@ -652,9 +627,14 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutPairs(string ...$args): self
     {
-        $pairs = $this->pairs;
-        foreach ($args as $key) {
-            unset($pairs[$key]);
+        $pairs = [];
+        foreach ($this->pairs as $pair) {
+            foreach ($args as $key) {
+                if ($key === $pair[0]) {
+                    continue 2;
+                }
+            }
+            $pairs[] = $pair;
         }
 
         if ($pairs === $this->pairs) {
@@ -688,34 +668,29 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
+        $keys_to_remove = array_intersect(array_column($pairs, 0), array_column($this->pairs, 0));
+        $base_pairs = $this->pairs;
+        if (!empty($keys_to_remove)) {
+            $base_pairs = [];
+            foreach ($this->pairs as $pair) {
+                if (!in_array($pair[0], $keys_to_remove, true)) {
+                    $base_pairs[] = $pair;
+                }
+            }
+        }
+
+        $pairs = array_merge($base_pairs, $pairs);
+        foreach ($pairs as &$pair) {
+            if ($pair[0] === '' && $pair[1] === null) {
+                $pair = null;
+            }
+        }
+        unset($pair);
+
         $clone = clone $this;
-        $clone->pairs = $this->filterEmptyKeyPair(array_merge($this->pairs, $pairs));
+        $clone->pairs = array_filter($pairs);
 
         return $clone;
-    }
-
-    /**
-     * Remove key/pair where the key is the empty string
-     * and the value is null or the empty string
-     *
-     * @param array $pairs
-     *
-     * @return array
-     */
-    private function filterEmptyKeyPair(array $pairs): array
-    {
-        if (!isset($pairs[''])) {
-            return $pairs;
-        }
-
-        $pairs[''] = array_filter($pairs[''], function ($value) {
-            return null !== $value && '' !== $value;
-        });
-        if (empty($pairs[''])) {
-            unset($pairs['']);
-        }
-
-        return $pairs;
     }
 
     /**
@@ -732,18 +707,21 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function append($query): self
     {
-        $pairs = $this->pairs;
-        $new_pairs = Uri\parse_query($query, $this->separator);
-        foreach ($new_pairs as $key => $value) {
-            $pairs = array_merge($pairs, [$key => array_merge($pairs[$key] ?? [], $value)]);
-        }
+        $pairs = array_merge($this->pairs, Uri\parse_query($query, $this->separator));
 
         if ($pairs === $this->pairs) {
             return $this;
         }
 
+        foreach ($pairs as &$pair) {
+            if ($pair[0] === '' && $pair[1] === null) {
+                $pair = null;
+            }
+        }
+        unset($pair);
+
         $clone = clone $this;
-        $clone->pairs = $this->filterEmptyKeyPair($pairs);
+        $clone->pairs = array_filter($pairs);
 
         return $clone;
     }
@@ -761,15 +739,16 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutParams(string ...$offsets): self
     {
-        $reducer = function (array $pairs, string $offset): array {
-            $filter = function (string $key) use ($offset): bool {
-                return !preg_match(',^'.preg_quote($offset, ',').'(\[.*\].*)?$,', $key);
-            };
+        $pairs = [];
+        foreach ($this->pairs as $pair) {
+            foreach ($offsets as $offset) {
+                if (preg_match(',^'.preg_quote($offset, ',').'(\[.*\].*)?$,', $pair[0])) {
+                    continue 2;
+                }
+            }
+            $pairs[] = $pair;
+        }
 
-            return array_filter($pairs, $filter, ARRAY_FILTER_USE_KEY);
-        };
-
-        $pairs = array_reduce($offsets, $reducer, $this->pairs);
         if ($pairs === $this->pairs) {
             return $this;
         }

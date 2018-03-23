@@ -13,16 +13,14 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use Traversable;
-
 /**
  * Build a query string from an associative array
  *
  * @see QueryBuilder::build
  *
- * @param array|Traversable $pairs     The query pairs
- * @param string            $separator The query string separator
- * @param int               $enc_type  The query encoding type
+ * @param mixed  $pairs     The query pairs
+ * @param string $separator The query string separator
+ * @param int    $enc_type  The query encoding type
  *
  * @return null|string
  */
@@ -73,22 +71,4 @@ function extract_query($query, string $separator = '&', int $enc_type = PHP_QUER
     $parser = $parser ?? new QueryParser();
 
     return $parser->extract($query, $separator, $enc_type);
-}
-
-/**
- * Convert a Collection of key/value pairs into PHP variables
- *
- * @see QueryParser::convert
- *
- * @param Traversable|array $pairs The collection of key/value pairs
- *
- * @return array
- */
-function pairs_to_params($pairs): array
-{
-    static $parser;
-
-    $parser = $parser ?? new QueryParser();
-
-    return $parser->convert($pairs);
 }

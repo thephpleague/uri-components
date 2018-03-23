@@ -82,17 +82,24 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::getIterator
+     * @covers ::keys
+     * @covers ::values
      */
     public function testIterator()
     {
+        $query = new Query('a=1&b=2&c=3&a=4');
         $keys = [];
         $values = [];
-        foreach (new Query('a=1&b=2&c=3&a=1') as $offset => $value) {
-            $keys[] = $offset;
-            $values[] = $value;
+        foreach ($query as $pair) {
+            $keys[] = $pair[0];
+            $values[] = $pair[1];
         }
-        $this->assertSame(['a', 'a', 'b', 'c'], $keys);
-        $this->assertSame(['1', '1', '2', '3'], $values);
+        $this->assertSame(['a', 'b', 'c', 'a'], $keys);
+        $this->assertSame(['1', '2', '3', '4'], $values);
+        $this->assertCount(4, $query->keys());
+        $this->assertCount(4, $query->values());
+        $this->assertSame(['a', 'b', 'c', 'a'], iterator_to_array($query->keys(), false));
+        $this->assertSame(['1', '2', '3', '4'], iterator_to_array($query->values(), false));
     }
 
     /**
@@ -119,7 +126,7 @@ class QueryTest extends TestCase
             'query object' => [new Query('kingkong=toto'), '?kingkong=toto'],
             'empty string' => ['', '?'],
             'empty array' => [[], ''],
-            'non empty array' => [['' => null], '?'],
+            'non empty array' => [[['', null]], '?'],
             'contains a reserved word #' => ['foo%23bar', '?foo%23bar'],
             'contains a delimiter ?' => ['?foo%23bar', '??foo%23bar'],
             'key-only' => ['k^ey', '?k%5Eey'],
@@ -141,9 +148,9 @@ class QueryTest extends TestCase
      * @covers ::createFromPairs
      * @covers ::filterPair
      */
-    public function testcreateFromPairsWithTraversable()
+    public function testCreateFromPairsWithTraversable()
     {
-        $query = Query::createFromPairs(new ArrayIterator(['john' => 'doe the john']));
+        $query = Query::createFromPairs(new ArrayIterator([['john', 'doe the john']]));
         $this->assertCount(1, $query);
     }
 
@@ -164,7 +171,7 @@ class QueryTest extends TestCase
      * @param mixed $input
      * @dataProvider createFromPairsFailedProvider
      */
-    public function testcreateFromPairsFailed($input)
+    public function testCreateFromPairsFailed($input)
     {
         $this->expectException(Exception::class);
         Query::createFromPairs($input);
@@ -182,7 +189,6 @@ class QueryTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::withoutEmptyPairs
-     * @covers ::isValueSet
      */
     public function testNormalization()
     {
@@ -194,7 +200,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::merge
-     * @covers ::filterEmptyKeyPair
      *
      * @dataProvider mergeDataProvider
      *
@@ -281,7 +286,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::append
-     * @covers ::filterEmptyKeyPair
      *
      * @dataProvider validAppendValue
      * @param null|string $query
@@ -355,22 +359,19 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::keys
+     * @covers ::values
      */
     public function testKeys()
     {
         $query = Query::createFromPairs([
-            'foo' => 'bar',
-            'baz' => 'troll',
-            'lol' => 3,
-            'toto' => 'troll',
-            'yolo' => null,
+            ['foo', 'bar'],
+            ['baz', 'troll'],
+            ['lol', 3],
+            ['toto', 'troll'],
+            ['yolo', null],
         ]);
-        $this->assertCount(0, $query->keys('foo'));
-        $this->assertSame(['foo'], $query->keys('bar'));
-        $this->assertCount(1, $query->keys('3'));
-        $this->assertSame(['lol'], $query->keys('3'));
-        $this->assertSame(['baz', 'toto'], $query->keys('troll'));
-        $this->assertSame(['yolo'], $query->keys(null));
+        $this->assertCount(5, $query->keys());
+        $this->assertCount(5, $query->values());
     }
 
     /**
@@ -381,7 +382,6 @@ class QueryTest extends TestCase
         $query = new Query('foo&bar&baz');
 
         $this->assertCount(3, $query->keys());
-        $this->assertSame(['foo', 'bar', 'baz'], $query->keys());
         $this->assertNull($query->get('foo'));
         $this->assertNull($query->get('bar'));
         $this->assertNull($query->get('baz'));
@@ -547,7 +547,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutNumericIndices
-     * @covers ::removeNumericIndex
      */
     public function testWithoutNumericIndices()
     {
@@ -579,7 +578,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutNumericIndices
-     * @covers ::removeNumericIndex
      */
     public function testWithoutNumericIndicesRetursSameInstance()
     {
@@ -588,7 +586,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutNumericIndices
-     * @covers ::removeNumericIndex
      */
     public function testWithoutNumericIndicesReturnsAnother()
     {
@@ -598,7 +595,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutNumericIndices
-     * @covers ::removeNumericIndex
      */
     public function testWithoutNumericIndicesDoesNotAffectPairValue()
     {
@@ -675,147 +671,23 @@ class QueryTest extends TestCase
     {
         return [
             [
-                ['superman' => 'lex luthor', 'batman' => 'joker'],
+                [['superman', 'lex luthor'], ['batman', 'joker']],
                 SORT_REGULAR,
                 'batman=joker&superman=lex%20luthor',
             ],
             [
-                ['superman' => 'lex luthor', 'batman' => 'joker'],
+                [['superman', 'lex luthor'], ['batman', 'joker']],
                 function ($dataA, $dataB) {
                     return strcasecmp($dataA, $dataB);
                 },
                 'batman=joker&superman=lex%20luthor',
             ],
             [
-                ['superman' => 'lex luthor', 'superwoman' => 'joker'],
+                [['superman', 'lex luthor'], ['superwoman', 'joker']],
                 function ($dataA, $dataB) {
                     return strcasecmp($dataA, $dataB);
                 },
                 'superman=lex%20luthor&superwoman=joker',
-            ],
-        ];
-    }
-
-    /**
-     * @covers ::__construct
-     * @covers ::getAll
-     *
-     * @dataProvider parserProvider
-     *
-     * @param string $query
-     * @param string $separator
-     * @param array  $expected
-     * @param int    $encoding
-     */
-    public function testParse($query, $separator, $expected, $encoding)
-    {
-        $this->assertSame($expected, (new Query($query, $separator, $encoding))->getAll());
-    }
-
-    public function parserProvider()
-    {
-        return [
-            'empty string' => [
-                '',
-                '&',
-                ['' => [null]],
-                Query::RFC3986_ENCODING,
-            ],
-            'identical keys' => [
-                'a=1&a=2',
-                '&',
-                ['a' => ['1', '2']],
-                Query::RFC3986_ENCODING,
-            ],
-            'no value' => [
-                'a&b',
-                '&',
-                ['a' => [null], 'b' => [null]],
-                Query::RFC3986_ENCODING,
-            ],
-            'empty value' => [
-                'a=&b=',
-                '&',
-                ['a' => [''], 'b' => ['']],
-                Query::RFC3986_ENCODING,
-            ],
-            'php array' => [
-                'a[]=1&a[]=2',
-                '&',
-                ['a[]' => ['1', '2']],
-                Query::RFC3986_ENCODING,
-            ],
-            'preserve dot' => [
-                'a.b=3',
-                '&',
-                ['a.b' => ['3']],
-                Query::RFC3986_ENCODING,
-            ],
-            'decode' => [
-                'a%20b=c%20d',
-                '&',
-                ['a b' => ['c d']],
-                Query::RFC3986_ENCODING,
-            ],
-            'no key stripping' => [
-                'a=&b',
-                '&',
-                ['a' => [''], 'b' => [null]],
-                Query::RFC3986_ENCODING,
-            ],
-            'no value stripping' => [
-                'a=b=',
-                '&',
-                ['a' => ['b=']],
-                Query::RFC3986_ENCODING,
-            ],
-            'key only' => [
-                'a',
-                '&',
-                ['a' => [null]],
-                Query::RFC3986_ENCODING,
-            ],
-            'preserve falsey 1' => [
-                '0',
-                '&',
-                ['0' => [null]],
-                Query::RFC3986_ENCODING,
-            ],
-            'preserve falsey 2' => [
-                '0=',
-                '&',
-                ['0' => ['']],
-                Query::RFC3986_ENCODING,
-            ],
-            'preserve falsey 3' => [
-                'a=0',
-                '&',
-                ['a' => ['0']],
-                Query::RFC3986_ENCODING,
-            ],
-            'different separator' => [
-                'a=0;b=0&c=4',
-                ';',
-                ['a' => ['0'], 'b' => ['0&c=4']],
-                Query::RFC3986_ENCODING,
-            ],
-            'numeric key only' => [
-                '42',
-                '&',
-                ['42' => [null]],
-                Query::RFC3986_ENCODING,
-            ],
-            'numeric key' => [
-                '42=l33t',
-                '&',
-                ['42' => ['l33t']],
-                Query::RFC3986_ENCODING,
-            ],
-            'rfc1738' => [
-                '42=l3+3t',
-                '&',
-                ['42' => ['l3 3t']],
-                Query::RFC1738_ENCODING,
             ],
         ];
     }
@@ -856,22 +728,22 @@ class QueryTest extends TestCase
                 ['bar'],
             ],
             [
-                null,
+                'foo=bar',
                 'foo',
-                ['bar'],
-                ['bar'],
-            ],
-            [
-                null,
-                'foo',
-                new ArrayIterator(['bar']),
+                'bar',
                 ['bar'],
             ],
             [
                 'foo=bar',
                 'foo',
-                'bar',
-                ['bar'],
+                null,
+                [null],
+            ],
+            [
+                'foo=bar',
+                'foo',
+                false,
+                ['false'],
             ],
         ];
     }
@@ -882,8 +754,8 @@ class QueryTest extends TestCase
      */
     public function testWithPairBasic()
     {
-        $this->assertSame('a=B&c=d', (string) (new Query('a=b&c=d'))->withPair('a', 'B'));
-        $this->assertSame('a=B&c=d', (string) (new Query('a=b&c=d&a=e'))->withPair('a', 'B'));
+        $this->assertSame('c=d&a=B', (string) (new Query('a=b&c=d'))->withPair('a', 'B'));
+        $this->assertSame('c=d&a=B', (string) (new Query('a=b&c=d&a=e'))->withPair('a', 'B'));
         $this->assertSame('a=b&c=d&e=f', (string) (new Query('a=b&c=d'))->withPair('e', 'f'));
     }
 
@@ -900,7 +772,7 @@ class QueryTest extends TestCase
         $this->assertSame('1', $query->get('a'));
 
         $query = $query->withPair('a', 4);
-        $this->assertSame(4, $query->get('a'));
+        $this->assertSame('4', $query->get('a'));
     }
 
     /**
@@ -943,7 +815,12 @@ class QueryTest extends TestCase
         $query = new Query(null);
         $this->assertSame('a=b', (string) $query->appendTo('a', 'b'));
         $this->assertSame('a=b&a=b', (string) $query->appendTo('a', 'b')->appendTo('a', 'b'));
-        $this->assertSame('a=b&a=b&a=c', (string) $query->appendTo('a', 'b')->appendTo('a', 'b')->appendTo('a', 'c'));
+        $this->assertSame('a=b&a=b&a=c', (string) $query->appendTo('a', 'b')->appendTo('a', 'b')->appendTo('a', new class() {
+            public function __toString()
+            {
+                return 'c';
+            }
+        }));
     }
 
     /**
@@ -980,14 +857,14 @@ class QueryTest extends TestCase
             ->appendTo('third', '')
             ->appendTo('first', 10)
         ;
-        $this->assertSame('first=1&first=10&second=2&third=', (string) $query);
+        $this->assertSame('first=1&second=2&third=&first=10', (string) $query);
         $this->assertTrue($query->has('first'));
         $this->assertSame(1, $query->get('first'));
         $this->assertSame(2, $query->get('second'));
         $this->assertSame('', $query->get('third'));
 
         $newQuery = $query->appendTo('first', 10);
-        $this->assertSame('first=1&first=10&first=10&second=2&third=', (string) $newQuery);
+        $this->assertSame('first=1&second=2&third=&first=10&first=10', (string) $newQuery);
         $this->assertSame(1, $newQuery->get('first'));
     }
 

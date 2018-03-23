@@ -39,33 +39,6 @@ class FunctionsTest extends TestCase
         Uri\parse_query(['foo=bar'], '&', PHP_QUERY_RFC1738);
     }
 
-    public function testQuerParserConvert()
-    {
-        $expected = ['a' => ['1', '2', 'false']];
-        $pairs = new ArrayIterator(['a[]' => [1, '2', false]]);
-        $this->assertSame($expected, Uri\pairs_to_params($pairs));
-    }
-
-    /**
-     * @dataProvider invalidPairsProvider
-     *
-     * @param mixed $pairs
-     */
-    public function testQueryParserConvertThrowsTypeError($pairs)
-    {
-        $this->expectException(TypeError::class);
-        Uri\pairs_to_params($pairs);
-    }
-
-    public function invalidPairsProvider()
-    {
-        return [
-            'pairs must be iterable' => [date_create()],
-            'pairs value must be iterable' => [['a' => date_create()]],
-            'pairs value must be null or scalar' => [['a' => [date_create(), '2']]],
-        ];
-    }
-
     /**
      * @dataProvider extractQueryProvider
      *
@@ -142,12 +115,6 @@ class FunctionsTest extends TestCase
         ];
     }
 
-    public function testConvertWithQueryObject()
-    {
-        $query = new Uri\Components\Query('arr1]=sid&arr[4]2]=fred&toto');
-        $this->assertSame(['arr1]' => 'sid', 'arr' => ['4' => 'fred'], 'toto' => ''], Uri\pairs_to_params($query));
-    }
-
     /**
      * @dataProvider parserProvider
      * @param string $query
@@ -166,7 +133,7 @@ class FunctionsTest extends TestCase
             'query object' => [
                 new Uri\Components\Query('a=1&b=2'),
                 '&',
-                ['a' => ['1'], 'b' => ['2']],
+                [['a', '1'], ['b', '2']],
                 PHP_QUERY_RFC3986,
             ],
             'stringable object' => [
@@ -177,13 +144,13 @@ class FunctionsTest extends TestCase
                     }
                 },
                 '&',
-                ['a' => ['1', '2']],
+                [['a', '1'], ['a', '2']],
                 PHP_QUERY_RFC3986,
             ],
             'rfc1738 without hexaencoding' => [
                 'toto=foo%2bbar',
                 '&',
-                ['toto' => ['foo bar']],
+                [['toto', 'foo bar']],
                 PHP_QUERY_RFC1738,
             ],
             'null value' => [
@@ -195,103 +162,103 @@ class FunctionsTest extends TestCase
             'empty string' => [
                 '',
                 '&',
-                ['' => [null]],
+                [['', null]],
                 PHP_QUERY_RFC3986,
             ],
             'identical keys' => [
                 'a=1&a=2',
                 '&',
-                ['a' => ['1', '2']],
+                [['a', '1'], ['a', '2']],
                 PHP_QUERY_RFC3986,
             ],
             'no value' => [
                 'a&b',
                 '&',
-                ['a' => [null], 'b' => [null]],
+                [['a', null], ['b', null]],
                 PHP_QUERY_RFC3986,
             ],
             'empty value' => [
                 'a=&b=',
                 '&',
-                ['a' => [''], 'b' => ['']],
+                [['a', ''], ['b', '']],
                 PHP_QUERY_RFC3986,
             ],
             'php array' => [
                 'a[]=1&a[]=2',
                 '&',
-                ['a[]' => ['1', '2']],
+                [['a[]', '1'], ['a[]', '2']],
                 PHP_QUERY_RFC3986,
             ],
             'preserve dot' => [
                 'a.b=3',
                 '&',
-                ['a.b' => ['3']],
+                [['a.b', '3']],
                 PHP_QUERY_RFC3986,
             ],
             'decode' => [
                 'a%20b=c%20d',
                 '&',
-                ['a b' => ['c d']],
+                [['a b', 'c d']],
                 PHP_QUERY_RFC3986,
             ],
             'no key stripping' => [
                 'a=&b',
                 '&',
-                ['a' => [''], 'b' => [null]],
+                [['a', ''], ['b', null]],
                 PHP_QUERY_RFC3986,
             ],
             'no value stripping' => [
                 'a=b=',
                 '&',
-                ['a' => ['b=']],
+                [['a', 'b=']],
                 PHP_QUERY_RFC3986,
             ],
             'key only' => [
                 'a',
                 '&',
-                ['a' => [null]],
+                [['a', null]],
                 PHP_QUERY_RFC3986,
             ],
             'preserve falsey 1' => [
                 '0',
                 '&',
-                ['0' => [null]],
+                [['0', null]],
                 PHP_QUERY_RFC3986,
             ],
             'preserve falsey 2' => [
                 '0=',
                 '&',
-                ['0' => ['']],
+                [['0', '']],
                 PHP_QUERY_RFC3986,
             ],
             'preserve falsey 3' => [
                 'a=0',
                 '&',
-                ['a' => ['0']],
+                [['a', '0']],
                 PHP_QUERY_RFC3986,
             ],
             'different separator' => [
                 'a=0;b=0&c=4',
                 ';',
-                ['a' => ['0'], 'b' => ['0&c=4']],
+                [['a', '0'], ['b', '0&c=4']],
                 PHP_QUERY_RFC3986,
             ],
             'numeric key only' => [
                 '42',
                 '&',
-                ['42' => [null]],
+                [['42', null]],
                 PHP_QUERY_RFC3986,
             ],
             'numeric key' => [
                 '42=l33t',
                 '&',
-                ['42' => ['l33t']],
+                [['42', 'l33t']],
                 PHP_QUERY_RFC3986,
             ],
             'rfc1738' => [
                 '42=l3+3t',
                 '&',
-                ['42' => ['l3 3t']],
+                [['42', 'l3 3t']],
                 PHP_QUERY_RFC1738,
             ],
         ];
@@ -336,105 +303,110 @@ class FunctionsTest extends TestCase
                 'expected_no_encoding' => null,
             ],
             'identical keys' => [
-                'pairs' => new ArrayIterator(['a' => ['1', '2']]),
-                'expected_rfc1738' => 'a=1&a=2',
-                'expected_rfc3986' => 'a=1&a=2',
-                'expected_rfc3987' => 'a=1&a=2',
-                'expected_no_encoding' => 'a=1&a=2',
+                'pairs' => new ArrayIterator([['a', true] , ['a', '2']]),
+                'expected_rfc1738' => 'a=true&a=2',
+                'expected_rfc3986' => 'a=true&a=2',
+                'expected_rfc3987' => 'a=true&a=2',
+                'expected_no_encoding' => 'a=true&a=2',
             ],
             'no value' => [
-                'pairs' => ['a' => [null], 'b' => [null]],
+                'pairs' => [['a', null], ['b', null]],
                 'expected_rfc1738' => 'a&b',
                 'expected_rfc3986' => 'a&b',
                 'expected_rfc3987' => 'a&b',
                 'expected_no_encoding' => 'a&b',
             ],
             'empty value' => [
-                'pairs' => ['a' => '', 'b' => ''],
+                'pairs' => [['a', ''], ['b', '']],
                 'expected_rfc1738' => 'a=&b=',
                 'expected_rfc3986' => 'a=&b=',
                 'expected_rfc3987' => 'a=&b=',
                 'expected_no_encoding' => 'a=&b=',
             ],
             'php array' => [
-                'pairs' => ['a[]' => ['1', '2']],
+                'pairs' => [['a[]', new class() {
+                    public function __toString()
+                    {
+                        return '1';
+                    }
+                }], ['a[]', '2']],
                 'expected_rfc1738' => 'a%5B%5D=1&a%5B%5D=2',
                 'expected_rfc3986' => 'a%5B%5D=1&a%5B%5D=2',
                 'expected_rfc3987' => 'a[]=1&a[]=2',
                 'expected_no_encoding' => 'a[]=1&a[]=2',
             ],
             'php array (1)' => [
-                'pairs' => ['a[]' => ['1%a6', '2']],
+                'pairs' => [['a[]', '1%a6'], ['a[]', '2']],
                 'expected_rfc1738' => 'a%5B%5D=1%25a6&a%5B%5D=2',
                 'expected_rfc3986' => 'a%5B%5D=1%25a6&a%5B%5D=2',
                 'expected_rfc3987' => 'a[]=1%a6&a[]=2',
                 'expected_no_encoding' => 'a[]=1%a6&a[]=2',
             ],
             'php array (2)' => [
-                'pairs' => ['module' => ['home'], 'action' => ['show'], 'page' => ['😓']],
+                'pairs' => [['module', 'home'], ['action', 'show'], ['page', '😓']],
                 'expected_rfc1738' => 'module=home&action=show&page=%F0%9F%98%93',
                 'expected_rfc3986' => 'module=home&action=show&page=%F0%9F%98%93',
                 'expected_rfc3987' => 'module=home&action=show&page=😓',
                 'expected_no_encoding' => 'module=home&action=show&page=😓',
             ],
             'php array (3)' => [
-                'pairs' => ['module' => ['home'], 'action' => ['v%61lue']],
+                'pairs' => [['module', 'home'], ['action', 'v%61lue']],
                 'expected_rfc1738' => 'module=home&action=v%61lue',
                 'expected_rfc3986' => 'module=home&action=v%61lue',
                 'expected_rfc3987' => 'module=home&action=v%61lue',
                 'expected_no_encoding' => 'module=home&action=v%61lue',
             ],
             'preserve dot' => [
-                'pairs' => ['a.b' => ['3']],
+                'pairs' => [['a.b', '3']],
                 'expected_rfc1738' => 'a.b=3',
                 'expected_rfc3986' => 'a.b=3',
                 'expected_rfc3987' => 'a.b=3',
                 'expected_no_encoding' => 'a.b=3',
             ],
             'no key stripping' => [
-                'pairs' => ['a' => [''], 'b' => [null]],
+                'pairs' => [['a', ''], ['b', null]],
                 'expected_rfc1738' => 'a=&b',
                 'expected_rfc3986' => 'a=&b',
                 'expected_rfc3987' => 'a=&b',
                 'expected_no_encoding' => 'a=&b',
             ],
             'no value stripping' => [
-                'pairs' => ['a' => ['b=']],
+                'pairs' => [['a', 'b=']],
                 'expected_rfc1738' => 'a=b=',
                 'expected_rfc3986' => 'a=b=',
                 'expected_rfc3987' => 'a=b=',
                 'expected_no_encoding' => 'a=b=',
             ],
             'key only' => [
-                'pairs' => ['a' => [null]],
+                'pairs' => [['a', null]],
                 'expected_rfc1738' => 'a',
                 'expected_rfc3986' => 'a',
                 'expected_rfc3987' => 'a',
                 'expected_no_encoding' => 'a',
             ],
             'preserve falsey 1' => [
-                'pairs' => ['0' => [null]],
+                'pairs' => [['0', null]],
                 'expected_rfc1738' => '0',
                 'expected_rfc3986' => '0',
                 'expected_rfc3987' => '0',
                 'expected_no_encoding' => '0',
             ],
             'preserve falsey 2' => [
-                'pairs' => ['0' => ['']],
+                'pairs' => [['0', '']],
                 'expected_rfc1738' => '0=',
                 'expected_rfc3986' => '0=',
                 'expected_rfc3987' => '0=',
                 'expected_no_encoding' => '0=',
             ],
             'preserve falsey 3' => [
-                'pairs' => ['0' => ['0']],
+                'pairs' => [['0', '0']],
                 'expected_rfc1738' => '0=0',
                 'expected_rfc3986' => '0=0',
                 'expected_rfc3987' => '0=0',
                 'expected_no_encoding' => '0=0',
             ],
             'rcf1738' => [
-                'pairs' => ['toto' => ['foo+bar']],
+                'pairs' => [['toto', 'foo+bar']],
                 'expected_rfc1738' => 'toto=foo%2Bbar',
                 'expected_rfc3986' => 'toto=foo+bar',
                 'expected_rfc3987' => 'toto=foo+bar',
@@ -443,9 +415,21 @@ class FunctionsTest extends TestCase
         ];
     }
 
-    public function testBuildQueryThrowsException()
+    public function testBuildQueryThrowsExceptionOnWrongType()
+    {
+        $this->expectException(TypeError::class);
+        Uri\build_query(date_create());
+    }
+
+    public function testBuildQueryThrowsExceptionOnInvalidPair()
     {
         $this->expectException(Exception::class);
-        Uri\build_query(['foo' => ['bar' => new ArrayIterator(['foo', 'bar', 'baz'])]]);
+        Uri\build_query(['foo', 'bar']);
+    }
+
+    public function testBuildQueryThrowsExceptionOnInvalidPairValue()
+    {
+        $this->expectException(Exception::class);
+        Uri\build_query([['foo', new ArrayIterator(['foo', 'bar', 'baz'])]]);
     }
 }

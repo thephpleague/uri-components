@@ -17,7 +17,6 @@ declare(strict_types=1);
 namespace League\Uri;
 
 use League\Uri\Components\Query;
-use Traversable;
 use TypeError;
 
 /**
@@ -98,7 +97,7 @@ final class QueryParser implements EncodingInterface
         }
 
         if ('' === $query) {
-            return ['' => [null]];
+            return [['', null]];
         }
 
         static $pattern = '/[\x00-\x1f\x7f]/';
@@ -110,7 +109,7 @@ final class QueryParser implements EncodingInterface
         $this->encoded_separator = rawurlencode($separator);
         $this->enc_type = $enc_type;
 
-        return array_reduce(explode($separator, $query), [$this, 'parsePair'], []);
+        return array_map([$this, 'parsePair'], explode($separator, $query));
     }
 
     /**
@@ -143,12 +142,11 @@ final class QueryParser implements EncodingInterface
     /**
      * Parse a query string pair
      *
-     * @param array  $res  The associative array to add the pair to
      * @param string $pair The query string pair
      *
      * @return array
      */
-    private function parsePair(array $res, string $pair): array
+    private function parsePair(string $pair): array
     {
         static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
         list($key, $value) = explode('=', $pair, 2) + [1 => null];
@@ -164,10 +162,7 @@ final class QueryParser implements EncodingInterface
             $key = $this->decode($key);
         }
 
-        $res[$key] = $res[$key] ?? [];
-        $res[$key][] = $value;
-
-        return $res;
+        return [$key, $value];
     }
 
     private function replace(string $value, string $pattern, string $replace)
@@ -198,85 +193,15 @@ final class QueryParser implements EncodingInterface
     public function extract($str, string $separator = '&', int $enc_type = self::RFC3986_ENCODING): array
     {
         $data = [];
-        foreach ($this->parse($str, $separator, $enc_type) as $key => $value) {
-            foreach ($value as $val) {
-                $this->extractPhpVariable(trim((string) $key), rawurldecode((string) $val), $data);
+        foreach ($this->parse($str, $separator, $enc_type) as $value) {
+            if (null === ($value[1] ?? null)) {
+                $value[1] = '';
             }
+
+            $this->extractPhpVariable(trim((string) $value[0]), rawurldecode((string) $value[1]), $data);
         }
 
         return $data;
-    }
-
-    /**
-     * Returns the store PHP variables as elements of an array.
-     *
-     * The result is similar as PHP parse_str when used with its
-     * second argument with the difference that variable names are
-     * not mangled.
-     *
-     * @see http://php.net/parse_str
-     * @see https://wiki.php.net/rfc/on_demand_name_mangling
-     *
-     * @param Traversable|array $pairs the query string pairs
-     *
-     * @return array
-     */
-    public function convert($pairs): array
-    {
-        if ($pairs instanceof Query) {
-            $pairs = $pairs->getAll();
-        }
-
-        $data = [];
-        foreach ($this->filterIterable($pairs) as $name => $value) {
-            foreach ($this->filterIterable($value) as $val) {
-                $this->extractPhpVariable(trim((string) $name), $this->normalize($val), $data);
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * filter Iterable value
-     *
-     * @param mixed $value
-     *
-     * @throws TypeError If the argument is not iterable
-     *
-     * @return array|Traversable
-     */
-    private function filterIterable($value)
-    {
-        if ($value instanceof Traversable || is_array($value)) {
-            return $value;
-        }
-
-        throw new TypeError(sprintf('%s() expects argument passed to be iterable, %s given', __METHOD__, gettype($value)));
-    }
-
-    /**
-     * Format the value of the parse query array
-     *
-     * @param mixed $value
-     *
-     * @return string
-     */
-    private function normalize($value): string
-    {
-        if (null === $value) {
-            return '';
-        }
-
-        if (is_string($value) || is_numeric($value) || method_exists($value, '__toString')) {
-            return rawurldecode((string) $value);
-        }
-
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
-        }
-
-        throw new TypeError(sprintf('%s expects pairs value to contains null or stringable values, %s given', __METHOD__, gettype($value)));
     }
 
     /**
