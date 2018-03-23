@@ -58,8 +58,6 @@
             "@phpstan-tests"
         ],
         "phpunit": "phpunit --coverage-text",
-        "post-install-cmd": "\\League\\Uri\\Installer\\ICANNSection::update",
-        "post-update-cmd": "\\League\\Uri\\Installer\\ICANNSection::update",
         "test": [
             "@phpunit",
             "@phpcs",
@@ -67,9 +65,12 @@
             "@phpstan-tests"
         ]
     },
+    "suggests": {
+        "jeremykendall/php-domain-parser": "Domain parsing implemented in PHP"
+    },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.x-dev"
+            "dev-master": "2.x-dev"
         }
     },
     "config": {
