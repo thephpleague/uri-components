@@ -36,8 +36,16 @@ class DataPathTest extends TestCase
         new Path($path);
     }
 
+    public function invalidDataUriPath()
+    {
+        return [
+            'invalid format' => ['/usr/bin/yeah'],
+        ];
+    }
+
     /**
      * @covers ::__set_state
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -50,16 +58,10 @@ class DataPathTest extends TestCase
         $this->assertEquals($component, $generateComponent);
     }
 
-    public function invalidDataUriPath()
-    {
-        return [
-            'invalid format' => ['/usr/bin/yeah'],
-        ];
-    }
-
     /**
      * @covers ::withContent
      * @covers ::__construct
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -75,6 +77,7 @@ class DataPathTest extends TestCase
     /**
      * @covers ::__debugInfo
      * @covers ::__construct
+     * @covers ::validate
      */
     public function testDebugInfo()
     {
@@ -86,6 +89,7 @@ class DataPathTest extends TestCase
      * @dataProvider validPathContent
      * @param string $path
      * @param string $expected
+     * @covers ::validate
      * @covers ::__toString
      */
     public function testDefaultConstructor($path, $expected)
@@ -118,6 +122,7 @@ class DataPathTest extends TestCase
      * @param string $mediatype
      * @covers ::createFromPath
      * @covers ::__construct
+     * @covers ::validate
      * @covers ::format
      * @covers ::getMimeType
      * @covers ::getMediaType
@@ -143,6 +148,7 @@ class DataPathTest extends TestCase
 
     /**
      * @covers ::withParameters
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -158,6 +164,7 @@ class DataPathTest extends TestCase
 
     /**
      * @covers ::withParameters
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -179,6 +186,7 @@ class DataPathTest extends TestCase
      * @param string $path
      * @param string $parameters
      * @covers ::withParameters
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -209,6 +217,7 @@ class DataPathTest extends TestCase
      * @dataProvider fileProvider
      * @param Path $uri
      * @covers ::isBinaryData
+     * @covers ::format
      * @covers ::toBinary
      */
     public function testToBinary($uri)
@@ -220,6 +229,7 @@ class DataPathTest extends TestCase
      * @dataProvider fileProvider
      * @param Path $uri
      * @covers ::isBinaryData
+     * @covers ::format
      * @covers ::toAscii
      */
     public function testToAscii($uri)
@@ -238,6 +248,7 @@ class DataPathTest extends TestCase
     /**
      * @dataProvider invalidParameters
      * @param string $parameters
+     * @covers ::format
      * @covers ::withParameters
      */
     public function testUpdateParametersFailed($parameters)
@@ -292,6 +303,7 @@ class DataPathTest extends TestCase
     }
 
     /**
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -304,6 +316,7 @@ class DataPathTest extends TestCase
     }
 
     /**
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -317,6 +330,7 @@ class DataPathTest extends TestCase
     }
 
     /**
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -330,6 +344,7 @@ class DataPathTest extends TestCase
     }
 
     /**
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -343,6 +358,7 @@ class DataPathTest extends TestCase
     }
 
     /**
+     * @covers ::validate
      * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters

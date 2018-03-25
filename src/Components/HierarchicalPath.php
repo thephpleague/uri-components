@@ -246,23 +246,23 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the prepended data
      *
-     * @param string $path the component to append
+     * @param mixed $path the component to append
      *
      * @return self
      */
-    public function prepend(string $path): self
+    public function prepend($path): self
     {
-        $new_segments = $this->filterComponent($path);
-        if ('' === end($new_segments)) {
-            array_pop($new_segments);
+        $path = $this->validate($path);
+        if ('/' === substr($path, -1, 1)) {
+            $path = substr($path, 0, -1);
         }
 
-        $old_segments = $this->segments;
-        if ('' === reset($old_segments)) {
-            array_shift($old_segments);
+        $old_path = $this->path;
+        if (self::IS_ABSOLUTE === $this->is_absolute) {
+            $old_path = substr($old_path, 1);
         }
 
-        return static::createFromSegments(array_merge($new_segments, $old_segments), $this->is_absolute);
+        return new self($path.'/'.$old_path);
     }
 
     /**
@@ -271,40 +271,23 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
      *
-     * @param string $path the component to append
+     * @param mixed $path the component to append
      *
      * @return self
      */
-    public function append(string $path): self
-    {
-        $new_segments = $this->filterComponent($path);
-        if ('' === reset($new_segments)) {
-            array_shift($new_segments);
-        }
-
-        $old_segments = $this->segments;
-        if ('' === end($old_segments)) {
-            array_pop($old_segments);
-        }
-
-        return static::createFromSegments(array_merge($old_segments, $new_segments), $this->is_absolute);
-    }
-
-    /**
-     * Filter the component to append or prepend
-     *
-     * @param mixed $path
-     *
-     * @return array
-     */
-    protected function filterComponent($path): array
+    public function append($path): self
     {
         $path = $this->validate($path);
-        if ('' !== $path && '/' == $path[0]) {
+        if ('/' === ($path[0] ?? '')) {
             $path = substr($path, 1);
         }
 
-        return $this->filterSegments($path);
+        $old_path = $this->path;
+        if ('/' === substr($old_path, -1, 1)) {
+            $old_path = substr($old_path, 0, -1);
+        }
+
+        return new self($old_path.'/'.$path);
     }
 
     /**

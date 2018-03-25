@@ -185,7 +185,6 @@ class HierarchicalPathTest extends TestCase
      * @param string $res
      * @dataProvider prependData
      * @covers ::prepend
-     * @covers ::filterComponent
      */
     public function testPrepend($source, $prepend, $res)
     {
@@ -195,10 +194,12 @@ class HierarchicalPathTest extends TestCase
     public function prependData()
     {
         return [
-            ['/test/query.php', '/master', '/master/test/query.php'],
+            ['/test/query.php', '/master',  '/master/test/query.php'],
             ['/test/query.php', '/master/', '/master/test/query.php'],
-            ['/test/query.php', '', '/test/query.php'],
-            ['/test/query.php', '/', '/test/query.php'],
+            ['/test/query.php', '',         '/test/query.php'],
+            ['/test/query.php', '/',        '/test/query.php'],
+            ['test',            '/',        '/test'],
+            ['/',               'test',     'test/'],
         ];
     }
 
@@ -208,7 +209,6 @@ class HierarchicalPathTest extends TestCase
      * @param string $res
      * @dataProvider appendData
      * @covers ::append
-     * @covers ::filterComponent
      */
     public function testAppend($source, $append, $res)
     {
@@ -224,6 +224,8 @@ class HierarchicalPathTest extends TestCase
             ['test',   'master',   'test/master'],
             ['test',   '/master',  'test/master'],
             ['test',   'master/',  'test/master/'],
+            ['test',   '/',        'test/'],
+            ['/',      'test',     '/test'],
         ];
     }
 

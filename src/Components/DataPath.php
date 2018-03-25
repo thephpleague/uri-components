@@ -109,7 +109,24 @@ final class DataPath extends Path
         $this->mimetype = $components['mimetype'];
         $this->parameters = $components['parameters'];
         $this->is_binary_data = $components['is_binary_data'];
-        $this->path = $components['path'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function validate($path)
+    {
+        $path = parent::validate($path);
+        if ('' === $path || ',' === $path) {
+            return static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',';
+        }
+
+        static $pattern  = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
+        if (preg_match($pattern, $path)) {
+            return substr($path, 0, -1).static::DEFAULT_PARAMETER.',';
+        }
+
+        return $path;
     }
 
     /**
@@ -121,16 +138,6 @@ final class DataPath extends Path
      */
     private function parse($path): array
     {
-        if ('' === $path) {
-            return [
-                'document' => '',
-                'mimetype' => static::DEFAULT_MIMETYPE,
-                'parameters' => [static::DEFAULT_PARAMETER],
-                'is_binary_data' => false,
-                'path' => static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',',
-            ];
-        }
-
         static $pattern = '/[^\x20-\x7f]/';
         if (preg_match($pattern, $path) && false === strpos($path, ',')) {
             throw new Exception(sprintf('The path `%s` is invalid according to RFC2937', $path));
@@ -148,7 +155,6 @@ final class DataPath extends Path
             'mimetype' => $mimetype,
             'parameters' => $parameters,
             'is_binary_data' => $is_binary_data,
-            'path' => $this->format($mimetype, implode(';', $parameters), $is_binary_data, $document),
         ];
     }
 
@@ -235,37 +241,6 @@ final class DataPath extends Path
         if (false === $res || $document !== base64_encode($res)) {
             throw new Exception(sprintf('invalid document, `%s`', $document));
         }
-    }
-
-    /**
-     * Format the DataURI string
-     *
-     * @param string $mimetype
-     * @param string $parameters
-     * @param bool   $is_binary_data
-     * @param string $data
-     *
-     * @return string
-     */
-    private function format(
-        string $mimetype,
-        string $parameters,
-        bool $is_binary_data,
-        string $data
-    ): string {
-        if ('' != $parameters) {
-            $parameters = ';'.$parameters;
-        }
-
-        if ($is_binary_data) {
-            $parameters .= ';'.static::BINARY_PARAMETER;
-        }
-
-        $path = $mimetype.$parameters.','.$data;
-
-        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
-
-        return preg_replace_callback($regexp, [$this, 'encode'], $path) ?? $path;
     }
 
     /**
@@ -387,6 +362,37 @@ final class DataPath extends Path
     }
 
     /**
+     * Format the DataURI string
+     *
+     * @param string $mimetype
+     * @param string $parameters
+     * @param bool   $is_binary_data
+     * @param string $data
+     *
+     * @return string
+     */
+    private function format(
+        string $mimetype,
+        string $parameters,
+        bool $is_binary_data,
+        string $data
+    ): string {
+        if ('' != $parameters) {
+            $parameters = ';'.$parameters;
+        }
+
+        if ($is_binary_data) {
+            $parameters .= ';'.static::BINARY_PARAMETER;
+        }
+
+        $path = $mimetype.$parameters.','.$data;
+
+        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
+
+        return preg_replace_callback($regexp, [$this, 'encode'], $path) ?? $path;
+    }
+
+    /**
      * Returns an instance where the data part is url encoded following RFC3986 rules
      *
      * This method MUST retain the state of the current instance, and return
@@ -430,26 +436,11 @@ final class DataPath extends Path
             return $this;
         }
 
-        return new static($this->format($this->mimetype, $parameters, $this->is_binary_data, $this->document));
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function withContent($value)
-    {
-        $components = $this->parse($this->validate($value));
-        if ($components['path'] === $this->path) {
-            return $this;
-        }
-
-        $clone = clone $this;
-        $clone->document = $components['document'];
-        $clone->mimetype = $components['mimetype'];
-        $clone->parameters = $components['parameters'];
-        $clone->is_binary_data = $components['is_binary_data'];
-        $clone->path = $components['path'];
-
-        return $clone;
+        return new static($this->format(
+            $this->mimetype,
+            $parameters,
+            $this->is_binary_data,
+            $this->document
+        ));
     }
 }
