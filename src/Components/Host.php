@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -21,6 +21,7 @@ use IteratorAggregate;
 use League\Uri\ComponentInterface;
 use League\Uri\Exception;
 use Traversable;
+use TypeError;
 
 /**
  * Value object representing a URI Host component.
@@ -58,35 +59,35 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     ];
 
     /**
-     * The component Data
+     * The component Data.
      *
      * @var array
      */
     private $labels = [];
 
     /**
-     * Tell the host IP version used
+     * Tell the host IP version used.
      *
      * @var string|null
      */
     private $ip_version;
 
     /**
-     * Tell whether the Host is a domain name
+     * Tell whether the Host is a domain name.
      *
      * @var bool
      */
     private $host_as_domain_name = false;
 
     /**
-     * Tell whether the Host contains a ZoneID
+     * Tell whether the Host contains a ZoneID.
      *
      * @var bool
      */
     private $has_zone_identifier = false;
 
     /**
-     * Is the object considered absolute
+     * Is the object considered absolute.
      *
      * @var int
      */
@@ -122,7 +123,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
         }
 
         if (!is_array($labels)) {
-            throw new Exception('the parameters must be iterable');
+            throw new TypeError('the parameters must be iterable');
         }
 
         if ([] === $labels) {
@@ -168,7 +169,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * New instance
+     * New instance.
      *
      * @param mixed $host
      */
@@ -218,13 +219,16 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
         }
 
         if (!is_scalar($host) && !method_exists($host, '__toString')) {
-            throw new Exception(sprintf('Expected host to be stringable or null; received %s', gettype($host)));
+            throw new TypeError(sprintf('Expected host to be stringable or null; received %s', gettype($host)));
         }
+
+        $host = (string) $host;
 
         static $pattern = '/[\x00-\x1f\x7f]/';
         if (preg_match($pattern, $host)) {
             throw new Exception(sprintf('Invalid fragment string: %s', $host));
         }
+
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return [
                 'data' => [$host],
@@ -291,7 +295,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Validates an Ipv6 as Host
+     * Validates an Ipv6 as Host.
      *
      * @see http://tools.ietf.org/html/rfc6874#section-2
      * @see http://tools.ietf.org/html/rfc6874#section-4
@@ -435,7 +439,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether or not the host is an IP address
+     * Returns whether or not the host is an IP address.
      *
      * @return bool
      */
@@ -445,7 +449,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether or not the host is an IPv4 address
+     * Returns whether or not the host is an IPv4 address.
      *
      * @return bool
      */
@@ -455,7 +459,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address
+     * Returns whether or not the host is an IPv6 address.
      *
      * @return bool
      */
@@ -465,7 +469,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether or not the host has a ZoneIdentifier
+     * Returns whether or not the host has a ZoneIdentifier.
      *
      * @return bool
      *
@@ -477,7 +481,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address
+     * Returns whether or not the host is an IPv6 address.
      *
      * @return bool
      */
@@ -487,7 +491,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address
+     * Returns whether or not the host is an IPv6 address.
      *
      * @return bool
      */
@@ -497,7 +501,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether or not the component is absolute or not
+     * Returns whether or not the component is absolute or not.
      *
      * @return bool
      */
@@ -525,7 +529,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an array representation of the Host
+     * Returns an array representation of the Host.
      *
      * @return array
      */
@@ -654,7 +658,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns the IP version
+     * Returns the IP version.
      *
      * If the host is a not an IP this method will return null
      *
@@ -682,7 +686,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Return an host without its zone identifier according to RFC6874
+     * Return an host without its zone identifier according to RFC6874.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance without the host zone identifier according to RFC6874
@@ -701,7 +705,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns a host instance with its Root label
+     * Returns a host instance with its Root label.
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
@@ -720,7 +724,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns a host instance without the Root label
+     * Returns a host instance without the Root label.
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
@@ -739,7 +743,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with the specified component prepended
+     * Returns an instance with the specified component prepended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the prepended data
@@ -759,7 +763,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with the specified component appended
+     * Returns an instance with the specified component appended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
@@ -779,7 +783,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Filter the component to append or prepend
+     * Filter the component to append or prepend.
      *
      * @param string $component
      *
@@ -799,7 +803,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with the modified label
+     * Returns an instance with the modified label.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the replaced data
@@ -835,7 +839,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without the specified keys
+     * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -863,7 +867,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Filter Offset list
+     * Filter Offset list.
      *
      * @param int ...$offsets list of keys to remove from the collection
      *

@@ -5,6 +5,7 @@ namespace LeagueTest\Uri\Components;
 use League\Uri\Components\Fragment;
 use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group fragment
@@ -52,8 +53,8 @@ class FragmentTest extends TestCase
      * @covers ::__construct
      * @covers ::validate
      * @covers ::getContent
-     * @covers ::encode
-     * @covers ::decode
+     * @covers ::encodeMatches
+     * @covers ::decodeMatches
      * @param mixed       $str
      * @param string|null $expected
      * @param int         $enc_type
@@ -89,8 +90,8 @@ class FragmentTest extends TestCase
      * @covers ::__construct
      * @covers ::validate
      * @covers ::getContent
-     * @covers ::encode
-     * @covers ::decode
+     * @covers ::encodeMatches
+     * @covers ::decodeMatches
      */
     public function testGetContent($input, $enc_type, $expected)
     {
@@ -121,25 +122,16 @@ class FragmentTest extends TestCase
         $this->assertEquals($component, $generateComponent);
     }
 
-    /**
-     * @param mixed $fragment
-     *
-     * @dataProvider invalidFragmentProvider
-     * @covers ::__construct
-     * @covers ::validate
-     */
-    public function testFailedPort($fragment)
+    public function testFailedFragmentException()
     {
         $this->expectException(Exception::class);
-        new Fragment($fragment);
+        new Fragment("\0");
     }
 
-    public function invalidFragmentProvider()
+    public function testFailedFragmentTypeError()
     {
-        return [
-            'invalid character' => ["\0"],
-            'ivalid argument' => [date_create()],
-        ];
+        $this->expectException(TypeError::class);
+        new Fragment(date_create());
     }
 
     /**
@@ -154,7 +146,7 @@ class FragmentTest extends TestCase
      * @covers ::__toString
      * @covers ::validate
      * @covers ::withContent
-     * @covers ::decode
+     * @covers ::decodeMatches
      */
     public function testPreserverDelimiter()
     {
@@ -167,8 +159,8 @@ class FragmentTest extends TestCase
 
     /**
      * @covers ::withContent
-     * @covers ::encode
-     * @covers ::decode
+     * @covers ::encodeMatches
+     * @covers ::decodeMatches
      */
     public function testWithContent()
     {

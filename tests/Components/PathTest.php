@@ -5,6 +5,7 @@ namespace LeagueTest\Uri\Components;
 use League\Uri\Components\Path;
 use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group path
@@ -21,7 +22,7 @@ class PathTest extends TestCase
      * @param string $rfc1738
      * @covers ::__construct
      * @covers ::validate
-     * @covers ::decode
+     * @covers ::decodeMatches
      * @covers ::getContent
      * @covers ::getUriComponent
      */
@@ -77,17 +78,22 @@ class PathTest extends TestCase
      */
     public function testConstructorThrowsWithInvalidData($path)
     {
-        $this->expectException(Exception::class);
+        $this->expectException(TypeError::class);
         new Path($path);
     }
 
     public function invalidPath()
     {
         return [
-            ["\0"],
             [date_create()],
             [[]],
         ];
+    }
+
+    public function testConstructorThrowsExceptionWithInvalidData()
+    {
+        $this->expectException(Exception::class);
+        new Path("\0");
     }
 
     public function testSetState()
@@ -98,7 +104,7 @@ class PathTest extends TestCase
     }
 
     /**
-     * Test Removing Dot Segment
+     * Test Removing Dot Segment.
      *
      * @param string $expected
      * @param string $path
@@ -110,7 +116,7 @@ class PathTest extends TestCase
     }
 
     /**
-     * Provides different segment to be normalized
+     * Provides different segment to be normalized.
      *
      * @return array
      */

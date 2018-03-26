@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -18,6 +18,7 @@ namespace League\Uri\Components;
 
 use League\Uri\ComponentInterface;
 use League\Uri\Exception;
+use TypeError;
 
 /**
  * Value object representing a URI Port component.
@@ -69,7 +70,7 @@ final class Port implements ComponentInterface
     }
 
     /**
-     * Validate a port
+     * Validate a port.
      *
      * @param mixed $port
      *
@@ -92,7 +93,7 @@ final class Port implements ComponentInterface
         }
 
         if (!is_string($port)) {
-            throw new Exception(sprintf('Expected port to be a int or null; received %s', gettype($port)));
+            throw new TypeError(sprintf('Expected port to be a int or null; received %s', gettype($port)));
         }
 
         if (false !== ($fport = filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]))) {

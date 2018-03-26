@@ -5,6 +5,7 @@ namespace LeagueTest\Uri\Components;
 use League\Uri\Components\UserInfo;
 use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group userinfo
@@ -38,8 +39,8 @@ class UserInfoTest extends TestCase
      * @covers ::getContent
      * @covers ::__toString
      * @covers ::getUriComponent
-     * @covers ::decode
-     * @covers ::encode
+     * @covers ::decodeMatches
+     * @covers ::encodeMatches
      * @covers ::getPass
      * @covers ::getUser
      */
@@ -179,7 +180,7 @@ class UserInfoTest extends TestCase
      * @covers ::withContent
      * @covers ::getUser
      * @covers ::getPass
-     * @covers ::decode
+     * @covers ::decodeMatches
      */
     public function testWithContent($user, $str, $expected_user, $expected_pass, $expected_str)
     {
@@ -206,7 +207,7 @@ class UserInfoTest extends TestCase
 
     /**
      * @covers ::withContent
-     * @covers ::decode
+     * @covers ::decodeMatches
      */
     public function testWithContentReturnSameInstance()
     {
@@ -233,7 +234,7 @@ class UserInfoTest extends TestCase
      * @param mixed  $pass
      * @param string $expected
      * @covers ::withUserInfo
-     * @covers ::decode
+     * @covers ::decodeMatches
      */
     public function testWithUserInfo($user, $pass, $expected)
     {
@@ -287,23 +288,15 @@ class UserInfoTest extends TestCase
         (new UserInfo())->withContent(date_create());
     }
 
-    /**
-     * @dataProvider invalidUserInfoData
-     * @covers ::filterPart
-     *
-     * @param mixed $user
-     */
-    public function testConstructorThrowsInvalidArgumentException($user)
+    public function testConstructorThrowsTypeError()
     {
-        $this->expectException(Exception::class);
-        new UserInfo($user);
+        $this->expectException(TypeError::class);
+        new UserInfo(date_create());
     }
 
-    public function invalidUserInfoData()
+    public function testConstructorThrowsException()
     {
-        return [
-            [date_create()],
-            ["\0"],
-        ];
+        $this->expectException(Exception::class);
+        new UserInfo("\0");
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package   League.uri
  * @author    Ignace Nyamagana Butera <nyamsprod@gmail.com>
@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace League\Uri;
 
 /**
- * Build a query string from an associative array
+ * Build a query string from an associative array.
  *
  * @see QueryBuilder::build
  *
@@ -34,7 +34,7 @@ function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_
 }
 
 /**
- * Parse a query string into an associative array of key/value pairs
+ * Parse a query string into an associative array of key/value pairs.
  *
  * @see QueryParser::parse
  *
@@ -54,7 +54,7 @@ function parse_query($query, string $separator = '&', int $enc_type = PHP_QUERY_
 }
 
 /**
- * Parse the query string like parse_str without mangling the results
+ * Parse the query string like parse_str without mangling the results.
  *
  * @see QueryParser::extract
  *

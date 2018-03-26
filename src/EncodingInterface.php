@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-interfaces/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-interfaces/
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,7 +16,7 @@
 namespace League\Uri;
 
 /**
- * Defines constants for common URI encoding type
+ * Defines constants for common URI encoding type.
  *
  * @see https://tools.ietf.org/html/rfc1738
  * @see https://tools.ietf.org/html/rfc3986
