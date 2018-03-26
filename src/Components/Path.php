@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -18,6 +18,7 @@ namespace League\Uri\Components;
 
 use League\Uri\ComponentInterface;
 use League\Uri\Exception;
+use TypeError;
 
 /**
  * Value object representing a URI path component.
@@ -58,7 +59,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * new instance
+     * new instance.
      *
      * @param mixed $path the component value
      */
@@ -68,7 +69,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Validate the component content
+     * Validate the component content.
      *
      * @param mixed $path
      *
@@ -87,7 +88,7 @@ class Path implements ComponentInterface
         }
 
         if (!is_string($path)) {
-            throw new Exception(sprintf('Expected path to be stringable; received %s', gettype($path)));
+            throw new TypeError(sprintf('Expected path to be stringable; received %s', gettype($path)));
         }
 
         static $pattern = '/[\x00-\x1f\x7f]/';
@@ -95,10 +96,17 @@ class Path implements ComponentInterface
             throw new Exception(sprintf('Invalid path string: %s', $path));
         }
 
-        return preg_replace_callback(',%[A-Fa-f0-9]{2},', [$this, 'decode'], $path);
+        return preg_replace_callback(',%[A-Fa-f0-9]{2},', [$this, 'decodeMatches'], $path);
     }
 
-    private function decode(array $matches)
+    /**
+     * Decodes Matches sequence.
+     *
+     * @param array $matches
+     *
+     * @return string
+     */
+    private function decodeMatches(array $matches): string
     {
         static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]|2F,i';
         if (preg_match($regexp, $matches[0])) {
@@ -162,11 +170,11 @@ class Path implements ComponentInterface
         if ($enc_type === self::RFC3987_ENCODING) {
             static $pattern = '/[\x00-\x1f\x7f\#\?]/';
 
-            return preg_replace_callback($pattern, [$this, 'encode'], $this->path) ?? $this->path;
+            return preg_replace_callback($pattern, [$this, 'encodeMatches'], $this->path) ?? $this->path;
         }
 
         static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
-        $content = preg_replace_callback($regexp, [$this, 'encode'], $this->path) ?? rawurlencode($this->path);
+        $content = preg_replace_callback($regexp, [$this, 'encodeMatches'], $this->path) ?? rawurlencode($this->path);
         if (self::RFC3986_ENCODING === $enc_type) {
             return $content;
         }
@@ -174,13 +182,20 @@ class Path implements ComponentInterface
         return str_replace(['+', '~'], ['%2B', '%7E'], $content);
     }
 
-    protected function encode(array $matches): string
+    /**
+     * Encode Matches sequence.
+     *
+     * @param array $matches
+     *
+     * @return string
+     */
+    protected function encodeMatches(array $matches): string
     {
         return rawurlencode($matches[0]);
     }
 
     /**
-     * Returns whether or not the path is absolute or relative
+     * Returns whether or not the path is absolute or relative.
      *
      * @return bool
      */
@@ -190,7 +205,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns an instance without dot segments
+     * Returns an instance without dot segments.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component normalized by removing
@@ -215,7 +230,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Filter Dot segment according to RFC3986
+     * Filter Dot segment according to RFC3986.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-5.2.4
      *
@@ -240,7 +255,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the specified string
+     * Returns an instance with the specified string.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified data
@@ -260,7 +275,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns an instance without duplicate delimiters
+     * Returns an instance without duplicate delimiters.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component normalized by removing
@@ -274,7 +289,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns whether or not the path has a trailing delimiter
+     * Returns whether or not the path has a trailing delimiter.
      *
      * @return bool
      */
@@ -286,7 +301,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns an instance with a trailing slash
+     * Returns an instance with a trailing slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a trailing slash
@@ -301,7 +316,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns an instance without a trailing slash
+     * Returns an instance without a trailing slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a trailing slash
@@ -316,7 +331,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns an instance with a leading slash
+     * Returns an instance with a leading slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a leading slash
@@ -331,7 +346,7 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns an instance without a leading slash
+     * Returns an instance without a leading slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a leading slash

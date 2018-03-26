@@ -5,6 +5,7 @@ namespace LeagueTest\Uri\Components;
 use League\Uri\Components\Port;
 use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group port
@@ -58,26 +59,16 @@ class PortTest extends TestCase
         ];
     }
 
-    /**
-     * @param int $port
-     *
-     * @covers ::__construct
-     * @covers ::validate
-     *
-     * @dataProvider invalidPortProvider
-     */
-    public function testFailedPort($port)
+    public function testFailedPortTypeError()
     {
-        $this->expectException(Exception::class);
-        new Port($port);
+        $this->expectException(TypeError::class);
+        new Port(date_create());
     }
 
-    public function invalidPortProvider()
+    public function testFailedPortException()
     {
-        return [
-            'invalid port number too low' => [-1],
-            'ivalid port type' => [date_create()],
-        ];
+        $this->expectException(Exception::class);
+        new Port(-1);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -23,6 +23,7 @@ use League\Uri;
 use League\Uri\ComponentInterface;
 use League\Uri\Exception;
 use Traversable;
+use TypeError;
 
 /**
  * Value object representing a URI Query component.
@@ -69,7 +70,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         if (!is_array($params)) {
-            throw new Exception('the parameters must be iterable');
+            throw new TypeError('the parameters must be iterable');
         }
 
         if (empty($params)) {
@@ -80,12 +81,10 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns a new instance from the result of parse_query
+     * Returns a new instance from the result of parse_query.
      *
      * @param Traversable|array $pairs
      * @param string            $separator
-     *
-     * @throws Exception if the pairs are not iterable
      *
      * @return self
      */
@@ -100,11 +99,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         if (!is_array($pairs)) {
-            throw new Exception('the parameters must be iterable');
-        }
-
-        if (empty($pairs)) {
-            return new self(null, $separator);
+            throw new TypeError('the parameters must be iterable');
         }
 
         return new self(Uri\build_query($pairs, $separator), $separator);
@@ -138,7 +133,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Filter the incoming separator
+     * Filter the incoming separator.
      *
      * @param string $separator
      *
@@ -245,7 +240,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
 
         $res = array_filter($this->pairs, $filter);
 
-        return array_shift($res)[1] ?? null;
+        return reset($res)[1];
     }
 
     /**
@@ -314,7 +309,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns the instance string representation with its optional URI delimiters
+     * Returns the instance string representation with its optional URI delimiters.
      *
      * The value returned MUST be percent-encoded, but MUST NOT double-encode any
      * characters. To determine what characters to encode, please refer to RFC 3986,
@@ -351,7 +346,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with a different separator
+     * Returns an instance with a different separator.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the query component with a different separator
@@ -439,7 +434,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without duplicate key/value pair
+     * Returns an instance without duplicate key/value pair.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the query component normalized by removing
@@ -593,8 +588,6 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      * @param string $key
      * @param mixed  $value must be a scalar or the null value
      *
-     * @throws Exception if the value is invalid
-     *
      * @return self
      */
     public function appendTo(string $key, $value): self
@@ -604,7 +597,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
         }
 
         if (null !== $value && !is_scalar($value)) {
-            throw new Exception('The value must be a scalar or null %s given');
+            throw new TypeError('The value must be a scalar or null %s given');
         }
 
         $clone = clone $this;
@@ -614,7 +607,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without the specified keys
+     * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -646,7 +639,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance merge with the specified query
+     * Returns an instance merge with the specified query.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query.
@@ -725,7 +718,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without the specified params
+     * Returns an instance without the specified params.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component without PHP's value.

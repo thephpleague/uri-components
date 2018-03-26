@@ -6,6 +6,7 @@ use ArrayIterator;
 use League\Uri\Components\Host;
 use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group host
@@ -59,7 +60,7 @@ class HostTest extends TestCase
     }
 
     /**
-     * Test valid Host
+     * Test valid Host.
      * @param string|null $host
      * @param bool        $isDomain
      * @param bool        $isIp
@@ -304,7 +305,6 @@ class HostTest extends TestCase
     public function invalidHostProvider()
     {
         return [
-            'invalid type' => [date_create()],
             'empty label' => ['tot.    .coucou.com'],
             'space in the label' => ['re view'],
             'Invalid IPv4 format' => ['[127.0.0.1]'],
@@ -322,6 +322,12 @@ class HostTest extends TestCase
             'invalid IPFuture' => ['[v4.1.2.3]'],
             'invalid host with mix content' => ['_b%C3%A9bé.be-'],
         ];
+    }
+
+    public function testTypeErrorOnHostConstruction()
+    {
+        $this->expectException(TypeError::class);
+        new Host(date_create());
     }
 
     /**
@@ -354,7 +360,7 @@ class HostTest extends TestCase
     }
 
     /**
-     * Test Punycode support
+     * Test Punycode support.
      *
      * @param string $unicode Unicode Hostname
      * @param string $ascii   Ascii Hostname
@@ -397,7 +403,7 @@ class HostTest extends TestCase
     }
 
     /**
-     * Test Countable
+     * Test Countable.
      *
      * @param string|null $host
      * @param int         $nblabels
@@ -470,8 +476,16 @@ class HostTest extends TestCase
         return [
             'ipv6 FQDN' => [['::1'], Host::IS_ABSOLUTE],
             'unknown flag' => [['all', 'is', 'good'], 23],
-            'invalid labels' => [date_create(), Host::IS_RELATIVE],
         ];
+    }
+
+    /**
+     * @covers ::createFromLabels
+     */
+    public function testcreateFromLabelsFailedOnTypeError()
+    {
+        $this->expectException(TypeError::class);
+        Host::createFromLabels(date_create(), Host::IS_RELATIVE);
     }
 
     /**

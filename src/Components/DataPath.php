@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -47,35 +47,35 @@ final class DataPath extends Path
     const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
 
     /**
-     * The mediatype mimetype
+     * The mediatype mimetype.
      *
      * @var string
      */
     private $mimetype;
 
     /**
-     * The mediatype parameters
+     * The mediatype parameters.
      *
      * @var string[]
      */
     private $parameters;
 
     /**
-     * Is the Document bas64 encoded
+     * Is the Document bas64 encoded.
      *
      * @var bool
      */
     private $is_binary_data;
 
     /**
-     * The document string representation
+     * The document string representation.
      *
      * @var string
      */
     private $document;
 
     /**
-     * Create a new instance from a file path
+     * Create a new instance from a file path.
      *
      * @param string $path
      *
@@ -91,13 +91,12 @@ final class DataPath extends Path
 
         return new static(
             str_replace(' ', '', (new \finfo(FILEINFO_MIME))->file($path))
-            .';'.static::BINARY_PARAMETER
-            .','.base64_encode(file_get_contents($path))
+            .';base64,'.base64_encode(file_get_contents($path))
         );
     }
 
     /**
-     * new instance
+     * new instance.
      *
      * @param mixed $path the component value
      */
@@ -118,12 +117,12 @@ final class DataPath extends Path
     {
         $path = parent::validate($path);
         if ('' === $path || ',' === $path) {
-            return static::DEFAULT_MIMETYPE.';'.static::DEFAULT_PARAMETER.',';
+            return 'text/plain;charset=us-ascii,';
         }
 
         static $pattern  = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
         if (preg_match($pattern, $path)) {
-            return substr($path, 0, -1).static::DEFAULT_PARAMETER.',';
+            return substr($path, 0, -1).'charset=us-ascii,';
         }
 
         return $path;
@@ -159,7 +158,7 @@ final class DataPath extends Path
     }
 
     /**
-     * Filter the mimeType property
+     * Filter the mimeType property.
      *
      * @param string $mimetype
      *
@@ -173,15 +172,15 @@ final class DataPath extends Path
             return static::DEFAULT_MIMETYPE;
         }
 
-        if (!preg_match(static::REGEXP_MIMETYPE, $mimetype)) {
-            throw new Exception(sprintf('invalid mimeType, `%s`', $mimetype));
+        if (preg_match(static::REGEXP_MIMETYPE, $mimetype)) {
+            return $mimetype;
         }
 
-        return $mimetype;
+        throw new Exception(sprintf('invalid mimeType, `%s`', $mimetype));
     }
 
     /**
-     * Extract and set the binary flag from the parameters if it exists
+     * Extract and set the binary flag from the parameters if it exists.
      *
      * @param string $parameters
      * @param bool   $is_binary_data
@@ -210,7 +209,7 @@ final class DataPath extends Path
     }
 
     /**
-     * Validate mediatype parameter
+     * Validate mediatype parameter.
      *
      * @param string $parameter a mediatype parameter
      *
@@ -224,7 +223,7 @@ final class DataPath extends Path
     }
 
     /**
-     * Validate the path document string representation
+     * Validate the path document string representation.
      *
      * @param string $document
      * @param bool   $is_binary_data
@@ -271,7 +270,7 @@ final class DataPath extends Path
     }
 
     /**
-     * Tells whether the data is binary safe encoded
+     * Tells whether the data is binary safe encoded.
      *
      * @return bool
      */
@@ -323,7 +322,7 @@ final class DataPath extends Path
     }
 
     /**
-     * Save the data to a specific file
+     * Save the data to a specific file.
      *
      * @param string $path The path to the file where to save the data
      * @param string $mode The mode parameter specifies the type of access you require to the stream.
@@ -340,7 +339,7 @@ final class DataPath extends Path
     }
 
     /**
-     * Returns an instance where the data part is base64 encoded
+     * Returns an instance where the data part is base64 encoded.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance where the data part is base64 encoded
@@ -362,7 +361,7 @@ final class DataPath extends Path
     }
 
     /**
-     * Format the DataURI string
+     * Format the DataURI string.
      *
      * @param string $mimetype
      * @param string $parameters
@@ -382,18 +381,18 @@ final class DataPath extends Path
         }
 
         if ($is_binary_data) {
-            $parameters .= ';'.static::BINARY_PARAMETER;
+            $parameters .= ';base64';
         }
 
         $path = $mimetype.$parameters.','.$data;
 
         static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
 
-        return preg_replace_callback($regexp, [$this, 'encode'], $path) ?? $path;
+        return preg_replace_callback($regexp, [$this, 'encodeMatches'], $path) ?? $path;
     }
 
     /**
-     * Returns an instance where the data part is url encoded following RFC3986 rules
+     * Returns an instance where the data part is url encoded following RFC3986 rules.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance where the data part is url encoded

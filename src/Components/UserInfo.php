@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -18,6 +18,7 @@ namespace League\Uri\Components;
 
 use League\Uri\ComponentInterface;
 use League\Uri\Exception;
+use TypeError;
 
 /**
  * Value object representing the UserInfo part of an URI.
@@ -42,14 +43,14 @@ final class UserInfo implements ComponentInterface
     ];
 
     /**
-     * User user component
+     * User user component.
      *
      * @var string|null
      */
     private $user;
 
     /**
-     * Pass URI component
+     * Pass URI component.
      *
      * @var string|null
      */
@@ -64,7 +65,7 @@ final class UserInfo implements ComponentInterface
     }
 
     /**
-     * Create a new instance of UserInfo
+     * Create a new instance of UserInfo.
      *
      * @param mixed $user
      * @param mixed $pass
@@ -79,7 +80,7 @@ final class UserInfo implements ComponentInterface
     }
 
     /**
-     * Filter the URI password component
+     * Filter the URI password component.
      *
      * @param mixed $str
      *
@@ -98,7 +99,7 @@ final class UserInfo implements ComponentInterface
         }
 
         if (!is_scalar($str) && !method_exists($str, '__toString')) {
-            throw new Exception(sprintf('Expected userinfo to be stringable or null; received %s', gettype($str)));
+            throw new TypeError(sprintf('Expected userinfo to be stringable or null; received %s', gettype($str)));
         }
 
         static $pattern = '/[\x00-\x1f\x7f]/';
@@ -108,10 +109,17 @@ final class UserInfo implements ComponentInterface
 
         static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
 
-        return preg_replace_callback($encoded_pattern, [$this, 'decode'], $str);
+        return preg_replace_callback($encoded_pattern, [$this, 'decodeMatches'], $str);
     }
 
-    private function decode(array $matches): string
+    /**
+     * Decodes Matches sequence.
+     *
+     * @param array $matches
+     *
+     * @return string
+     */
+    private function decodeMatches(array $matches): string
     {
         static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
         if (preg_match($regexp, $matches[0])) {
@@ -162,7 +170,7 @@ final class UserInfo implements ComponentInterface
     }
 
     /**
-     * Retrieve the user component of the URI User Info part
+     * Retrieve the user component of the URI User Info part.
      *
      * @param int $enc_type
      *
@@ -180,11 +188,11 @@ final class UserInfo implements ComponentInterface
 
         if ($enc_type == self::RFC3987_ENCODING) {
             static $pattern = '/[\x00-\x1f\x7f\/#\?\:@]/';
-            return preg_replace_callback($pattern, [$this, 'encode'], $this->user) ?? $this->user;
+            return preg_replace_callback($pattern, [$this, 'encodeMatches'], $this->user) ?? $this->user;
         }
 
         static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
-        $content = preg_replace_callback($regexp, [$this, 'encode'], $this->user) ?? rawurlencode($this->user);
+        $content = preg_replace_callback($regexp, [$this, 'encodeMatches'], $this->user) ?? rawurlencode($this->user);
         if (self::RFC3986_ENCODING === $enc_type) {
             return $content;
         }
@@ -192,13 +200,20 @@ final class UserInfo implements ComponentInterface
         return str_replace(['+', '~'], ['%2B', '%7E'], $content);
     }
 
-    private function encode(array $matches): string
+    /**
+     * Encode Matches sequence.
+     *
+     * @param array $matches
+     *
+     * @return string
+     */
+    private function encodeMatches(array $matches): string
     {
         return rawurlencode($matches[0]);
     }
 
     /**
-     * Retrieve the pass component of the URI User Info part
+     * Retrieve the pass component of the URI User Info part.
      *
      * @param int $enc_type
      *
@@ -216,11 +231,11 @@ final class UserInfo implements ComponentInterface
 
         if ($enc_type == self::RFC3987_ENCODING) {
             static $pattern = '/[\x00-\x1f\x7f\/#\?@]/';
-            return preg_replace_callback($pattern, [$this, 'encode'], $this->pass) ?? $this->pass;
+            return preg_replace_callback($pattern, [$this, 'encodeMatches'], $this->pass) ?? $this->pass;
         }
 
         static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
-        $content = preg_replace_callback($regexp, [$this, 'encode'], $this->pass) ?? rawurlencode($this->pass);
+        $content = preg_replace_callback($regexp, [$this, 'encodeMatches'], $this->pass) ?? rawurlencode($this->pass);
         if (self::RFC3986_ENCODING === $enc_type) {
             return $content;
         }

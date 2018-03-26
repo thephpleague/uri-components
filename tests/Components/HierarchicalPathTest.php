@@ -230,7 +230,7 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * Test AbstractSegment::without
+     * Test AbstractSegment::without.
      *
      * @param string $origin
      * @param array  $without

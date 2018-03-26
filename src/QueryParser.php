@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -61,7 +61,7 @@ final class QueryParser implements EncodingInterface
     private $encoded_separator;
 
     /**
-     * Parse a query string into an associative array
+     * Parse a query string into an associative array.
      *
      * Multiple identical key will generate an array. This function
      * differ from PHP parse_str as:
@@ -113,7 +113,7 @@ final class QueryParser implements EncodingInterface
     }
 
     /**
-     * Decode a component according to RFC3986
+     * Decode a component according to RFC3986.
      *
      * @param string $str
      *
@@ -140,7 +140,7 @@ final class QueryParser implements EncodingInterface
     }
 
     /**
-     * Parse a query string pair
+     * Parse a query string pair.
      *
      * @param string $pair The query string pair
      *

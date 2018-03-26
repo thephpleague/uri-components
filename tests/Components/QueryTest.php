@@ -6,6 +6,7 @@ use ArrayIterator;
 use League\Uri\Components\Query;
 use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group query
@@ -173,7 +174,7 @@ class QueryTest extends TestCase
      */
     public function testCreateFromPairsFailed($input)
     {
-        $this->expectException(Exception::class);
+        $this->expectException(TypeError::class);
         Query::createFromPairs($input);
     }
 
@@ -182,8 +183,13 @@ class QueryTest extends TestCase
         return [
             'Non traversable object' => [(object) []],
             'String' => ['toto=23'],
-            'Non pairs array' => [['toto' => ['foo' => [(object) []]]]],
         ];
+    }
+
+    public function testCreateFromPairsFailedWithBadIterable()
+    {
+        $this->expectException(Exception::class);
+        Query::createFromPairs([['toto' => ['foo' => [(object) []]]]]);
     }
 
     /**
@@ -541,7 +547,7 @@ class QueryTest extends TestCase
      */
     public function testCreateFromParamsThrowsException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(TypeError::class);
         Query::createFromParams('foo=bar');
     }
 
@@ -873,7 +879,7 @@ class QueryTest extends TestCase
      */
     public function testAppendToThrowsException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(TypeError::class);
         (new Query())->appendTo('foo', ['bar']);
     }
 }

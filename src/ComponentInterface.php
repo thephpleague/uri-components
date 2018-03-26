@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-interfaces/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-interfaces/
  *
  * For the full copyright and license information, please view the LICENSE
@@ -65,7 +65,7 @@ interface ComponentInterface extends EncodingInterface
     public function __toString();
 
     /**
-     * Returns the instance string representation with its optional URI delimiters
+     * Returns the instance string representation with its optional URI delimiters.
      *
      * The value returned MUST be percent-encoded, but MUST NOT double-encode any
      * characters. To determine what characters to encode, please refer to RFC 3986,

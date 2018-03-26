@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -75,7 +75,7 @@ final class QueryBuilder implements EncodingInterface
     private $encoder;
 
     /**
-     * Build a query string from an associative array
+     * Build a query string from an associative array.
      *
      * The method expects the return value from Query::parse to build
      * a valid query string. This method differs from PHP http_build_query as:
@@ -158,7 +158,7 @@ final class QueryBuilder implements EncodingInterface
     }
 
     /**
-     * Encode Matches sequence
+     * Encode Matches sequence.
      *
      * @param array $matches
      *
@@ -194,7 +194,7 @@ final class QueryBuilder implements EncodingInterface
         }
 
         if (is_bool($value)) {
-            $value = $value ? 'true' : 'false';
+            return $key.'='.($value = $value ? 'true' : 'false');
         }
 
         if (method_exists($value, '__toString')) {

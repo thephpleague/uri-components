@@ -1,12 +1,12 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (http://uri.thephpleague.com).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -44,7 +44,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     private $is_absolute;
 
     /**
-     * return a new instance from an array or a traversable object
+     * return a new instance from an array or a traversable object.
      *
      * @param mixed $segments The segments list
      * @param int   $type     one of the constant IS_ABSOLUTE or IS_RELATIVE
@@ -62,10 +62,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             throw new Exception(sprintf('"%s" is an invalid flag', $type));
         }
 
-        if ($segments instanceof self) {
-            $segments = $segments->segments;
-        }
-
         if ($segments instanceof Traversable) {
             $segments = iterator_to_array($segments, false);
         }
@@ -79,7 +75,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             return new static(ltrim($path, '/'));
         }
 
-        if (self::SEPARATOR !== substr($path, 0, 1)) {
+        if (self::SEPARATOR !== ($path[0] ?? '')) {
             return new static(self::SEPARATOR.$path);
         }
 
@@ -87,7 +83,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * New Instance
+     * New Instance.
      *
      * @param mixed $path
      */
@@ -146,7 +142,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns parent directory's path
+     * Returns parent directory's path.
      *
      * @return string
      */
@@ -160,7 +156,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns the path basename
+     * Returns the path basename.
      *
      * @return string
      */
@@ -172,7 +168,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns the basename extension
+     * Returns the basename extension.
      *
      * @return string
      */
@@ -184,7 +180,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an array representation of the HierarchicalPath
+     * Returns an array representation of the HierarchicalPath.
      *
      * @return array
      */
@@ -241,7 +237,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an instance with the specified component prepended
+     * Returns an instance with the specified component prepended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the prepended data
@@ -266,7 +262,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an instance with the specified component appended
+     * Returns an instance with the specified component appended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
@@ -291,7 +287,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an instance with the modified label
+     * Returns an instance with the modified label.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the replaced data
@@ -328,7 +324,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an instance without the specified keys
+     * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -356,7 +352,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Filter Offset list
+     * Filter Offset list.
      *
      * @param int ...$offsets list of keys to remove from the collection
      *
@@ -434,7 +430,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an instance with the specified basename extension
+     * Returns an instance with the specified basename extension.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
@@ -465,7 +461,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * validate and format the given extension
+     * validate and format the given extension.
      *
      * @param string $extension the new extension to use
      *
@@ -492,7 +488,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * create a new basename with a new extension
+     * create a new basename with a new extension.
      *
      * @param string $basenamePart  the basename file part
      * @param string $extension     the new extension to add
