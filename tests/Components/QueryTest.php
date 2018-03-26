@@ -85,12 +85,15 @@ class QueryTest extends TestCase
      * @covers ::getIterator
      * @covers ::keys
      * @covers ::values
+     * @covers ::pairs
      */
     public function testIterator()
     {
         $query = new Query('a=1&b=2&c=3&a=4');
         $keys = [];
         $values = [];
+        $keysp = [];
+        $valuesp = [];
         foreach ($query as $pair) {
             $keys[] = $pair[0];
             $values[] = $pair[1];
@@ -99,8 +102,17 @@ class QueryTest extends TestCase
         $this->assertSame(['1', '2', '3', '4'], $values);
         $this->assertCount(4, $query->keys());
         $this->assertCount(4, $query->values());
+        $this->assertCount(4, $query->pairs());
         $this->assertSame(['a', 'b', 'c', 'a'], iterator_to_array($query->keys(), false));
         $this->assertSame(['1', '2', '3', '4'], iterator_to_array($query->values(), false));
+
+        foreach ($query->pairs() as $key => $value) {
+            $keysp[] = $key;
+            $valuesp[] = $value;
+        }
+
+        $this->assertSame($keys, $keysp);
+        $this->assertSame($values, $valuesp);
     }
 
     /**
