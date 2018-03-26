@@ -195,8 +195,11 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * Returns an iterator allowing to go through all key/value pairs contained in this object.
      *
-     * The key of each pair are string
-     * The value of each pair are scalar or the null value
+     * The pair is represented as an array where the first value is the pair key
+     * and the second value the pair value.
+     *
+     * The key of each pair is a string
+     * The value of each pair is a scalar or the null value
      *
      * @return Iterator
      */
@@ -222,10 +225,6 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * Returns the first value associated to the given parameter.
      *
-     * The value returned MUST be percent-encoded, but MUST NOT double-encode any
-     * characters. To determine what characters to encode, please refer to RFC 3986,
-     * Sections 2 and 3.
-     *
      * If no value is found null is returned
      *
      * @param string $key
@@ -246,10 +245,6 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * Returns all the values associated to the given parameter as an array or all
      * the instance pairs.
-     *
-     * The value returned MUST be percent-encoded, but MUST NOT double-encode any
-     * characters. To determine what characters to encode, please refer to RFC 3986,
-     * Sections 2 and 3.
      *
      * If no value is found an empty array is returned
      *
@@ -289,6 +284,24 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     {
         foreach ($this->pairs as $pair) {
             yield $pair[1];
+        }
+    }
+
+    /**
+     * Returns the next key-value pairs from the query.
+     *
+     * The return type is as a Iterator where its offset
+     * is the pair key and its value the pair value.
+     *
+     * The key of each pair is a string
+     * The value of each pair is a scalar or the null value
+     *
+     * @return \Iterator
+     */
+    public function pairs()
+    {
+        foreach ($this->pairs as $pair) {
+            yield $pair[0] => $pair[1];
         }
     }
 
