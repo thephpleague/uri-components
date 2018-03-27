@@ -211,6 +211,23 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
+     * Returns an iterator allowing to go through all key/value pairs contained in this object.
+     *
+     * The return type is as a Iterator where its offset is the pair key and its value the pair value.
+     *
+     * The key of each pair is a string
+     * The value of each pair is a scalar or the null value
+     *
+     * @return \Iterator
+     */
+    public function pairs()
+    {
+        foreach ($this->pairs as $pair) {
+            yield $pair[0] => $pair[1];
+        }
+    }
+
+    /**
      * Tell whether a parameter with a specific name exists.
      *
      * @param string $key
@@ -233,13 +250,13 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function get(string $key)
     {
-        $filter = function (array $pair) use ($key): bool {
-            return $key === $pair[0];
-        };
+        foreach ($this->pairs as $pair) {
+            if ($key === $pair[0]) {
+                return $pair[1];
+            }
+        }
 
-        $res = array_filter($this->pairs, $filter);
-
-        return reset($res)[1];
+        return null;
     }
 
     /**
@@ -258,51 +275,30 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
             return $key === $pair[0];
         };
 
-        $res = array_filter($this->pairs, $filter);
-
-        return array_column($res, 1);
+        return array_column(array_filter($this->pairs, $filter), 1);
     }
 
     /**
-     * Returns an iterator allowing to go through all keys contained in this object.
+     * Returns the associated key for each pair.
      *
-     * @return \Iterator
+     * If a key is present multiple time in the query string, the key
+     * will be returned only once by the method.
+     *
+     * @param mixed ...$args the total number of argument given to the method
+     *
+     * @return array
      */
-    public function keys()
+    public function keys(...$args): array
     {
-        foreach ($this->pairs as $pair) {
-            yield $pair[0];
+        if (empty($args)) {
+            return array_values(array_flip(array_flip(array_column($this->pairs, 0))));
         }
-    }
 
-    /**
-     * Returns an iterator allowing to go through all values contained in this object.
-     *
-     * @return \Iterator
-     */
-    public function values()
-    {
-        foreach ($this->pairs as $pair) {
-            yield $pair[1];
-        }
-    }
+        $filter = function (array $pair) use ($args): bool {
+            return $args[0] === $pair[1];
+        };
 
-    /**
-     * Returns the next key-value pairs from the query.
-     *
-     * The return type is as a Iterator where its offset
-     * is the pair key and its value the pair value.
-     *
-     * The key of each pair is a string
-     * The value of each pair is a scalar or the null value
-     *
-     * @return \Iterator
-     */
-    public function pairs()
-    {
-        foreach ($this->pairs as $pair) {
-            yield $pair[0] => $pair[1];
-        }
+        return array_values(array_flip(array_flip(array_column(array_filter($this->pairs, $filter), 0))));
     }
 
     /**
@@ -625,15 +621,15 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
-     * @param string ...$args the list of keys to remove from the collection
+     * @param string ...$keys the list of keys to remove from the collection
      *
      * @return self
      */
-    public function withoutPairs(string ...$args): self
+    public function withoutPairs(string ...$keys): self
     {
         $pairs = [];
         foreach ($this->pairs as $pair) {
-            foreach ($args as $key) {
+            foreach ($keys as $key) {
                 if ($key === $pair[0]) {
                     continue 2;
                 }

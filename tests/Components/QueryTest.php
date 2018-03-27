@@ -84,7 +84,6 @@ class QueryTest extends TestCase
     /**
      * @covers ::getIterator
      * @covers ::keys
-     * @covers ::values
      * @covers ::pairs
      */
     public function testIterator()
@@ -100,11 +99,7 @@ class QueryTest extends TestCase
         }
         $this->assertSame(['a', 'b', 'c', 'a'], $keys);
         $this->assertSame(['1', '2', '3', '4'], $values);
-        $this->assertCount(4, $query->keys());
-        $this->assertCount(4, $query->values());
         $this->assertCount(4, $query->pairs());
-        $this->assertSame(['a', 'b', 'c', 'a'], iterator_to_array($query->keys(), false));
-        $this->assertSame(['1', '2', '3', '4'], iterator_to_array($query->values(), false));
 
         foreach ($query->pairs() as $key => $value) {
             $keysp[] = $key;
@@ -377,7 +372,6 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::keys
-     * @covers ::values
      */
     public function testKeys()
     {
@@ -389,7 +383,10 @@ class QueryTest extends TestCase
             ['yolo', null],
         ]);
         $this->assertCount(5, $query->keys());
-        $this->assertCount(5, $query->values());
+        $this->assertCount(2, $query->keys('troll'));
+        $this->assertSame(['baz', 'toto'], $query->keys('troll'));
+        $this->assertCount(1, $query->keys(null));
+        $this->assertSame(['yolo'], $query->keys(null));
     }
 
     /**

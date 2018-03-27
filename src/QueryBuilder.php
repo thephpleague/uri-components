@@ -98,7 +98,7 @@ final class QueryBuilder implements EncodingInterface
         $res = [];
         foreach ($pairs as $pair) {
             if (!is_array($pair) || !isset($pair[0])) {
-                throw new Exception('Invalid pair');
+                throw new Exception('A pair must be an array where the first element is the pair key and the second element the pair value');
             }
             $res[] = $this->buildPair((string) $pair[0], $pair[1]);
         }

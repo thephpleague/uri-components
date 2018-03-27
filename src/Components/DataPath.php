@@ -435,11 +435,6 @@ final class DataPath extends Path
             return $this;
         }
 
-        return new static($this->format(
-            $this->mimetype,
-            $parameters,
-            $this->is_binary_data,
-            $this->document
-        ));
+        return new static($this->format($this->mimetype, $parameters, $this->is_binary_data, $this->document));
     }
 }
