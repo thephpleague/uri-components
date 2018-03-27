@@ -279,29 +279,6 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns the associated key for each pair.
-     *
-     * If a key is present multiple time in the query string, the key
-     * will be returned only once by the method.
-     *
-     * @param mixed ...$args the total number of argument given to the method
-     *
-     * @return array
-     */
-    public function keys(...$args): array
-    {
-        if (empty($args)) {
-            return array_values(array_flip(array_flip(array_column($this->pairs, 0))));
-        }
-
-        $filter = function (array $pair) use ($args): bool {
-            return $args[0] === $pair[1];
-        };
-
-        return array_values(array_flip(array_flip(array_column(array_filter($this->pairs, $filter), 0))));
-    }
-
-    /**
      * Returns the instance RFC3986 string representation.
      *
      * If the instance is defined, the value returned MUST be percent-encoded,
