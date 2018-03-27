@@ -83,31 +83,30 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::getIterator
-     * @covers ::keys
      * @covers ::pairs
      */
     public function testIterator()
     {
         $query = new Query('a=1&b=2&c=3&a=4');
+
         $keys = [];
         $values = [];
-        $keysp = [];
-        $valuesp = [];
         foreach ($query as $pair) {
             $keys[] = $pair[0];
             $values[] = $pair[1];
         }
         $this->assertSame(['a', 'b', 'c', 'a'], $keys);
         $this->assertSame(['1', '2', '3', '4'], $values);
-        $this->assertCount(4, $query->pairs());
 
+        $keysp = [];
+        $valuesp = [];
         foreach ($query->pairs() as $key => $value) {
             $keysp[] = $key;
             $valuesp[] = $value;
         }
 
-        $this->assertSame($keys, $keysp);
-        $this->assertSame($values, $valuesp);
+        $this->assertSame(['a', 'b', 'c', 'a'], $keysp);
+        $this->assertSame(['1', '2', '3', '4'], $valuesp);
     }
 
     /**
@@ -371,32 +370,11 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::keys
-     */
-    public function testKeys()
-    {
-        $query = Query::createFromPairs([
-            ['foo', 'bar'],
-            ['baz', 'troll'],
-            ['lol', 3],
-            ['toto', 'troll'],
-            ['yolo', null],
-        ]);
-        $this->assertCount(5, $query->keys());
-        $this->assertCount(2, $query->keys('troll'));
-        $this->assertSame(['baz', 'toto'], $query->keys('troll'));
-        $this->assertCount(1, $query->keys(null));
-        $this->assertSame(['yolo'], $query->keys(null));
-    }
-
-    /**
-     * @covers ::keys
+     * @covers ::get
      */
     public function testStringWithoutContent()
     {
         $query = new Query('foo&bar&baz');
-
-        $this->assertCount(3, $query->keys());
         $this->assertNull($query->get('foo'));
         $this->assertNull($query->get('bar'));
         $this->assertNull($query->get('baz'));
