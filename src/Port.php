@@ -16,8 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\ComponentInterface;
-use League\Uri\Exception;
 use TypeError;
 
 /**
@@ -88,7 +86,7 @@ final class Port implements ComponentInterface
             return null;
         }
 
-        if ((is_object($port) && method_exists($port, '__toString')) || is_scalar($port)) {
+        if (method_exists($port, '__toString') || is_scalar($port)) {
             $port = (string) $port;
         }
 

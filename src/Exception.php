@@ -14,17 +14,16 @@
  */
 declare(strict_types=1);
 
-namespace League\Uri;
+namespace League\Uri\Components;
 
 use InvalidArgumentException;
 
 /**
- * Base Exception class for League Uri Schemes.
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since      1.0.0
+ * @since      2.0.0
  */
 class Exception extends InvalidArgumentException
 {

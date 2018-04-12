@@ -1,21 +1,20 @@
 <?php
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League Uri Query Parser (http://uri.thephpleague.com).
  *
- * @package    League\Uri
- * @subpackage League\Uri\Components
- * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @license    https://github.com/thephpleague/uri-interfaces/blob/master/LICENSE (MIT License)
- * @version    2.0.0
- * @link       https://github.com/thephpleague/uri-interfaces/
+ * @author  Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license https://github.com/thephpleague/uri-query-parser/blob/master/LICENSE (MIT License)
+ * @version 2.0.0
+ * @link    https://github.com/thephpleague/uri-query-parser
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace League\Uri;
+namespace League\Uri\Components;
 
 use InvalidArgumentException;
+use League\Uri\EncodingInterface;
 
 /**
  * Value object representing a URI component.

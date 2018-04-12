@@ -16,8 +16,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\ComponentInterface;
-use League\Uri\Exception;
+use TypeError;
 
 /**
  * Value object representing a URI Scheme component.
@@ -87,11 +86,15 @@ final class Scheme implements ComponentInterface
             return $scheme;
         }
 
-        if (is_object($scheme) && method_exists($scheme, '__toString')) {
+        if (is_scalar($scheme) || method_exists($scheme, '__toString')) {
             $scheme = (string) $scheme;
         }
 
-        if (is_string($scheme) && preg_match(',^[a-z]([-a-z0-9+.]+)?$,i', $scheme)) {
+        if (!is_string($scheme)) {
+            throw new TypeError(sprintf('Expected scheme to be stringable; received %s', gettype($scheme)));
+        }
+
+        if (preg_match(',^[a-z]([-a-z0-9+.]+)?$,i', $scheme)) {
             return strtolower($scheme);
         }
 

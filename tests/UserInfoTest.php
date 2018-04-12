@@ -2,8 +2,8 @@
 
 namespace LeagueTest\Uri\Components;
 
+use League\Uri\Components\Exception;
 use League\Uri\Components\UserInfo;
-use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 

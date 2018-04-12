@@ -3,8 +3,8 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
+use League\Uri\Components\Exception;
 use League\Uri\Components\HierarchicalPath as Path;
-use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 use Traversable;
 
