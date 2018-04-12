@@ -18,7 +18,6 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Exception;
 use Traversable;
 
 /**

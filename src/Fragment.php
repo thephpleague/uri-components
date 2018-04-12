@@ -16,8 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\ComponentInterface;
-use League\Uri\Exception;
 use TypeError;
 
 /**
@@ -88,7 +86,7 @@ final class Fragment implements ComponentInterface
             return null;
         }
 
-        if ((is_object($fragment) && method_exists($fragment, '__toString')) || is_scalar($fragment)) {
+        if (method_exists($fragment, '__toString') || is_scalar($fragment)) {
             $fragment = (string) $fragment;
         }
 

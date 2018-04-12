@@ -3,8 +3,8 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
+use League\Uri\Components\Exception;
 use League\Uri\Components\Host;
-use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -39,7 +39,7 @@ class HostTest extends TestCase
     public function testIterator()
     {
         $host = new Host('uri.thephpleague.com');
-        $this->assertEquals($host->getLabels(), iterator_to_array($host));
+        $this->assertEquals(['com', 'thephpleague', 'uri'], iterator_to_array($host));
     }
 
     /**
@@ -47,9 +47,7 @@ class HostTest extends TestCase
      * @covers ::withContent
      * @covers ::parse
      * @covers ::isValidDomain
-     * @covers ::isValidRegisteredName
      * @covers ::isValidIpv6Hostname
-     * @covers ::isValidIpFuture
      */
     public function testWithContent()
     {
@@ -75,9 +73,7 @@ class HostTest extends TestCase
      * @covers ::__construct
      * @covers ::parse
      * @covers ::isValidDomain
-     * @covers ::isValidRegisteredName
      * @covers ::isValidIpv6Hostname
-     * @covers ::isValidIpFuture
      * @covers ::isIp
      * @covers ::isIpv4
      * @covers ::isIpv6
@@ -292,9 +288,7 @@ class HostTest extends TestCase
      * @covers ::__construct
      * @covers ::parse
      * @covers ::isValidDomain
-     * @covers ::isValidRegisteredName
      * @covers ::isValidIpv6Hostname
-     * @covers ::isValidIpFuture
      */
     public function testInvalidHost($invalid)
     {
@@ -410,13 +404,10 @@ class HostTest extends TestCase
      * @param array       $array
      * @dataProvider countableProvider
      * @covers ::count
-     * @covers ::getLabels
      */
     public function testCountable($host, $nblabels, $array)
     {
-        $obj = new Host($host);
-        $this->assertCount($nblabels, $obj);
-        $this->assertSame($array, $obj->getLabels());
+        $this->assertCount($nblabels, new Host($host));
     }
 
     public function countableProvider()
@@ -542,7 +533,6 @@ class HostTest extends TestCase
         $this->assertSame('example', $host->getLabel(1));
         $this->assertSame('master', $host->getLabel(-1));
         $this->assertNull($host->getLabel(23));
-        $this->assertSame('toto', $host->getLabel(23, 'toto'));
     }
 
     /**
@@ -551,43 +541,39 @@ class HostTest extends TestCase
     public function testOffsets()
     {
         $host = new Host('master.example.com');
-        $this->assertSame([0, 1, 2], $host->keys());
         $this->assertSame([2], $host->keys('master'));
     }
 
     /**
      * @param string $host
-     * @param array  $without
+     * @param int    $without
      * @param string $res
      * @dataProvider withoutProvider
-     * @covers ::withoutLabels
-     * @covers ::filterOffsets
+     * @covers ::withoutLabel
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (string) (new Host($host))->withoutLabels($without));
+        $this->assertSame($res, (string) (new Host($host))->withoutLabel($without));
     }
 
     public function withoutProvider()
     {
         return [
-            'remove unknown label' => ['secure.example.com', [34], 'secure.example.com'],
-            'remove one string label' => ['secure.example.com', [0], 'secure.example'],
-            'remove one string label negative offset' => ['secure.example.com', [-1], 'example.com'],
-            'remove IP based label' => ['127.0.0.1', [0], ''],
-            'remove silent excessive label index' => ['127.0.0.1', [0, 1] , ''],
-            'remove simple label' => ['localhost', [-1], ''],
+            //'remove unknown label' => ['secure.example.com', 34, 'secure.example.com'],
+            'remove one string label' => ['secure.example.com', 0, 'secure.example'],
+            'remove one string label negative offset' => ['secure.example.com', -1, 'example.com'],
+            'remove IP based label' => ['127.0.0.1', 0, ''],
+            'remove simple label' => ['localhost', -1, ''],
         ];
     }
 
     /**
-     * @covers ::withoutLabels
-     * @covers ::filterOffsets
+     * @covers ::withoutLabel
      */
     public function testWithoutTriggersException()
     {
         $this->expectException(Exception::class);
-        (new Host('bébé.be'))->withoutLabels(['be']);
+        (new Host('bébé.be'))->withoutLabel(-23);
     }
 
     /**
@@ -635,85 +621,15 @@ class HostTest extends TestCase
 
     /**
      * @param string $raw
-     * @param string $prepend
-     * @param string $expected
-     * @dataProvider validPrepend
-     * @covers ::prepend
-     * @covers ::filterComponent
-     */
-    public function testPrepend($raw, $prepend, $expected)
-    {
-        $this->assertSame($expected, (string) (new Host($raw))->prepend($prepend));
-    }
-
-    public function validPrepend()
-    {
-        return [
-            ['secure.example.com', 'master', 'master.secure.example.com'],
-            ['secure.example.com', 'master.', 'master.secure.example.com'],
-            ['secure.example.com.', 'master', 'master.secure.example.com.'],
-            ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
-            ['example.com', '', 'example.com'],
-        ];
-    }
-
-    /**
-     * @covers ::prepend
-     * @covers ::filterComponent
-     * @covers ::parse
-     */
-    public function testPrependIpFailed()
-    {
-        $this->expectException(Exception::class);
-        (new Host('::1'))->prepend(new Host('foo'));
-    }
-
-    /**
-     * @param string $raw
-     * @param string $append
-     * @param string $expected
-     * @dataProvider validAppend
-     * @covers ::append
-     * @covers ::filterComponent
-     */
-    public function testAppend($raw, $append, $expected)
-    {
-        $this->assertSame($expected, (string) (new Host($raw))->append($append));
-    }
-
-    public function validAppend()
-    {
-        return [
-            ['secure.example.com', 'master', 'secure.example.com.master'],
-            ['secure.example.com', 'master.', 'secure.example.com.master'],
-            ['secure.example.com.', 'master', 'secure.example.com.master.'],
-            ['127.0.0.1', 'toto', '127.0.0.1.toto'],
-            ['example.com', '', 'example.com'],
-        ];
-    }
-
-    /**
-     * @covers ::append
-     * @covers ::filterComponent
-     * @covers ::parse
-     */
-    public function testAppendIpFailed()
-    {
-        $this->expectException(Exception::class);
-        (new Host('[::1]'))->append('foo');
-    }
-
-    /**
-     * @param string $raw
      * @param string $input
      * @param int    $offset
      * @param string $expected
      * @dataProvider replaceValid
-     * @covers ::replaceLabel
+     * @covers ::withLabel
      */
     public function testReplace($raw, $input, $offset, $expected)
     {
-        $this->assertSame($expected, (new Host($raw))->replaceLabel($offset, $input)->__toString());
+        $this->assertSame($expected, (string) (new Host($raw))->withLabel($offset, $input));
     }
 
     public function replaceValid()
@@ -721,8 +637,6 @@ class HostTest extends TestCase
         return [
             ['master.example.com', 'shop', 2, 'shop.example.com'],
             ['master.example.com', 'master', 2, 'master.example.com'],
-            ['toto', '[::1]', 23, 'toto'],
-            ['127.0.0.1', 'secure.example.com', 2, '127.0.0.1'],
             ['secure.example.com', '127.0.0.1', 0, 'secure.example.127.0.0.1'],
             ['master.example.com', 'shop', -2, 'master.shop.com'],
             ['master.example.com', 'shop', -1, 'shop.example.com'],
@@ -731,13 +645,25 @@ class HostTest extends TestCase
     }
 
     /**
-     * @covers ::replaceLabel
+     * @covers ::withLabel
      * @covers ::parse
+     * @dataProvider replaceInvalid
+     * @param mixed $host
+     * @param mixed $key
+     * @param mixed $label
      */
-    public function testReplaceIpMustFailed()
+    public function testReplaceIpMustFailed($host, $key, $label)
     {
         $this->expectException(Exception::class);
-        (new Host('secure.example.com'))->replaceLabel(2, '[::1]');
+        (new Host($host))->withLabel($key, $label);
+    }
+
+    public function replaceInvalid()
+    {
+        return [
+            ['secure.example.com', 2, '[::1]'],
+            ['toto', 2, 'bar'],
+        ];
     }
 
     /**
@@ -748,7 +674,7 @@ class HostTest extends TestCase
      * @covers ::withRootLabel
      * @covers ::withoutRootLabel
      */
-    public function testWithRooot($host, $expected_with_root, $expected_without_root)
+    public function testWithRoot($host, $expected_with_root, $expected_without_root)
     {
         $host = new Host($host);
         $this->assertSame($expected_with_root, (string) $host->withRootLabel());

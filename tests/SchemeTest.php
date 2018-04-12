@@ -2,9 +2,10 @@
 
 namespace LeagueTest\Uri\Components;
 
+use League\Uri\Components\Exception;
 use League\Uri\Components\Scheme;
-use League\Uri\Exception;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @group scheme
@@ -126,5 +127,11 @@ class SchemeTest extends TestCase
     {
         $this->expectException(Exception::class);
         (new Scheme('http'))->getContent(-1);
+    }
+
+    public function testInvalidSchemeType()
+    {
+        $this->expectException(TypeError::class);
+        new Scheme(date_create());
     }
 }

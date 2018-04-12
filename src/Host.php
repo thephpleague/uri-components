@@ -18,8 +18,6 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\ComponentInterface;
-use League\Uri\Exception;
 use Traversable;
 use TypeError;
 
@@ -59,6 +57,89 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     ];
 
     /**
+     * @internal
+     */
+    const HOST_TYPE = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
+
+    /**
+     * @internal
+     */
+    const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
+
+    /**
+     * @internal
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * Domain name regular expression
+     */
+    const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
+        (?<unreserved> [a-z0-9_~\-])
+        (?<sub_delims> [!$&\'()*+,;=])
+        (?<encoded> %[A-F0-9]{2})
+        (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
+    )
+    ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
+
+    /**
+     * @internal
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * General registered name regular expression
+     */
+    const REGEXP_REGISTERED_NAME = '/(?(DEFINE)
+        (?<unreserved>[a-z0-9_~\-])   # . is missing as it is used to separate labels
+        (?<sub_delims>[!$&\'()*+,;=])
+        (?<encoded>%[A-F0-9]{2})
+        (?<reg_name>(?:(?&unreserved)|(?&sub_delims)|(?&encoded))*)
+    )
+    ^(?:(?&reg_name)\.)*(?&reg_name)\.?$/ix';
+
+    /**
+     * @internal
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * General registered name regular expression
+     */
+    const REGEXP_IP_FUTURE = '/^
+        v(?<version>[A-F0-9]+)\.
+        (?:
+            (?<unreserved>[a-z0-9_~\-\.])|
+            (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
+        )+
+    $/ix';
+
+    /**
+     * @internal
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * invalid characters in host regular expression
+     */
+    const REGEXP_INVALID_HOST_CHARS = '/
+        [:\/?#\[\]@ ]  # gen-delims characters as well as the space character
+    /ix';
+
+    /**
+     * @internal
+     */
+    const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
+
+    /**
+     * @internal
+     *
+     * IDN Host detector regular expression
+     */
+    const REGEXP_IDN_PATTERN = '/[^\x20-\x7f]/';
+
+    /**
+     * @internal
+     */
+    const ADDRESS_BLOCK = "\xfe\x80";
+
+    /**
      * The component Data.
      *
      * @var array
@@ -94,6 +175,18 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     private $is_absolute = self::IS_RELATIVE;
 
     /**
+     * @codeCoverageIgnore
+     */
+    private static function supportIdnHost()
+    {
+        static $idn_support = null;
+        $idn_support = $idn_support ?? function_exists('\idn_to_ascii') && defined('\INTL_IDNA_VARIANT_UTS46');
+        if (!$idn_support) {
+            throw new Exception('IDN host can not be processed. Verify that ext/intl is installed for IDN support and that ICU is at least version 4.6.');
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
@@ -113,8 +206,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     public static function createFromLabels($labels, int $type = self::IS_RELATIVE): self
     {
-        static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
-        if (!isset($type_list[$type])) {
+        if (!isset(self::HOST_TYPE[$type])) {
             throw new Exception(sprintf('"%s" is an invalid flag', $type));
         }
 
@@ -223,9 +315,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
         }
 
         $host = (string) $host;
-
-        static $pattern = '/[\x00-\x1f\x7f]/';
-        if (preg_match($pattern, $host)) {
+        if (preg_match(self::REGEXP_INVALID_URI_CHARS, $host)) {
             throw new Exception(sprintf('Invalid fragment string: %s', $host));
         }
 
@@ -239,20 +329,25 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             ];
         }
 
-        $reg_name = strtolower(rawurldecode($host));
-        if ($this->isValidDomain($reg_name)) {
-            if (false !== strpos($reg_name, 'xn--')) {
-                $reg_name = idn_to_utf8($reg_name, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
+        $domain_name = rawurldecode($host);
+        if (!preg_match(self::REGEXP_IDN_PATTERN, $domain_name)) {
+            $domain_name = strtolower($domain_name);
+        }
+
+        if ($this->isValidDomain($domain_name)) {
+            if (false !== strpos($domain_name, 'xn--')) {
+                self::supportIdnHost();
+                $domain_name = idn_to_utf8($domain_name, 0, INTL_IDNA_VARIANT_UTS46);
             }
 
             $is_absolute = self::IS_RELATIVE;
-            if ('.' === substr($reg_name, -1, 1)) {
+            if ('.' === substr($domain_name, -1, 1)) {
                 $is_absolute = self::IS_ABSOLUTE;
-                $reg_name = substr($reg_name, 0, -1);
+                $domain_name = substr($domain_name, 0, -1);
             }
 
             return [
-                'data' => array_reverse(explode('.', $reg_name)),
+                'data' => array_reverse(explode('.', $domain_name)),
                 'ip_version' => null,
                 'has_zone_identifier' => false,
                 'host_as_domain_name' => true,
@@ -260,9 +355,9 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             ];
         }
 
-        if ($this->isValidRegisteredName($reg_name)) {
+        if (preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
             return [
-                'data' => [$reg_name],
+                'data' => [$domain_name],
                 'ip_version' => null,
                 'has_zone_identifier' => false,
                 'host_as_domain_name' => false,
@@ -270,20 +365,24 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             ];
         }
 
-        if ($this->isValidIpv6Hostname($host)) {
+        if ('[' !== $host[0] || ']' !== substr($host, -1)) {
+            throw new Exception(sprintf('The host `%s` is invalid', $host));
+        }
+
+        $ip_host = substr($host, 1, -1);
+        if ($this->isValidIpv6Hostname($ip_host)) {
             return [
-                'data' => [$host],
+                'data' => [$ip_host],
                 'ip_version' => '6',
-                'has_zone_identifier' =>  false !== strpos($host, '%'),
+                'has_zone_identifier' =>  false !== strpos($ip_host, '%'),
                 'host_as_domain_name' => false,
                 'is_absolute' => self::IS_RELATIVE,
             ];
         }
 
-        if ($this->isValidIpFuture($host)) {
-            preg_match('/^v(?<version>[A-F0-9]+)\./', substr($host, 1, -1), $matches);
+        if (preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
             return [
-                'data' => [$host],
+                'data' => [$ip_host],
                 'ip_version' => $matches['version'],
                 'is_absolute' => self::IS_RELATIVE,
                 'has_zone_identifier' => false,
@@ -291,7 +390,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             ];
         }
 
-        throw new Exception(sprintf('The submitted host `%s` is invalid', $host));
+        throw new Exception(sprintf('The host `%s` is invalid', $host));
     }
 
     /**
@@ -306,61 +405,19 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     private function isValidIpv6Hostname(string $ipv6): bool
     {
-        if ('[' !== ($ipv6[0] ?? '') || ']' !== substr($ipv6, -1)) {
-            return false;
-        }
-
-        $ipv6 = substr($ipv6, 1, -1);
         if (false === ($pos = strpos($ipv6, '%'))) {
             return (bool) filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
         }
 
         $scope = rawurldecode(substr($ipv6, $pos));
-        static $idn_pattern = '/[^\x20-\x7f]/';
-        if (preg_match($idn_pattern, $scope)) {
-            return false;
-        }
-
-        static $gen_delims = '/[:\/?#\[\]@]/';
-        if (preg_match($gen_delims, $scope)) {
+        if (preg_match(self::REGEXP_IDN_PATTERN, $scope) || preg_match(self::REGEXP_GEN_DELIMS, $scope)) {
             return false;
         }
 
         $ipv6 = substr($ipv6, 0, $pos);
-        if (!filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            return false;
-        }
 
-        static $address_block = "\xfe\x80";
-
-        return substr(inet_pton($ipv6) & $address_block, 0, 2) === $address_block;
-    }
-
-    /**
-     * Validates an Ip future as host.
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * @param string $ipfuture
-     *
-     * @return bool
-     */
-    private function isValidIpFuture(string $ipfuture): bool
-    {
-        if ('[' !== ($ipfuture[0] ?? '') || ']' !== substr($ipfuture, -1)) {
-            return false;
-        }
-
-        static $pattern = '/^
-            v(?<version>[A-F0-9]+)\.
-            (?:
-                (?<unreserved>[a-z0-9_~\-\.])|
-                (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
-            )+
-        $/ix';
-
-        return preg_match($pattern, substr($ipfuture, 1, -1), $matches)
-            && !in_array($matches['version'], ['4', '6'], true);
+        return filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+            && (substr(inet_pton($ipv6) & self::ADDRESS_BLOCK, 0, 2)) === self::ADDRESS_BLOCK;
     }
 
     /**
@@ -374,55 +431,16 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     private function isValidDomain(string $host): bool
     {
-        $host = strtolower(rawurldecode($host));
-        // Note that unreserved is purposely missing . as it is used to separate labels.
-        static $reg_name = '/(?(DEFINE)
-                (?<unreserved> [a-z0-9_~\-])
-                (?<sub_delims> [!$&\'()*+,;=])
-                (?<encoded> %[A-F0-9]{2})
-                (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
-            )
-            ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
-        static $gen_delims = '/[:\/?#\[\]@ ]/'; // Also includes space.
-        if (preg_match($reg_name, $host)) {
+        if (preg_match(self::REGEXP_DOMAIN_NAME, $host)) {
             return true;
         }
 
-        if (preg_match($gen_delims, $host)) {
+        if (!preg_match(self::REGEXP_IDN_PATTERN, $host) || preg_match(self::REGEXP_INVALID_HOST_CHARS, $host)) {
             return false;
         }
 
-        $res = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
-
-        return 0 === $arr['errors'];
-    }
-
-    /**
-     * Validates a registered name as host.
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * @param string $host
-     *
-     * @return bool
-     */
-    private function isValidRegisteredName(string $host): bool
-    {
-        static $reg_name = '/^(
-            (?<unreserved>[a-z0-9_~\-\.])|
-            (?<sub_delims>[!$&\'()*+,;=])|
-            (?<encoded>%[A-F0-9]{2})
-        )+$/x';
-        if (preg_match($reg_name, $host)) {
-            return true;
-        }
-
-        static $gen_delims = '/[:\/?#\[\]@ ]/'; // Also includes space.
-        if (preg_match($gen_delims, $host)) {
-            return false;
-        }
-
-        $host = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+        self::supportIdnHost();
+        idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
 
         return 0 === $arr['errors'];
     }
@@ -529,33 +547,22 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an array representation of the Host.
-     *
-     * @return array
-     */
-    public function getLabels(): array
-    {
-        return $this->labels;
-    }
-
-    /**
      * Retrieves a single host label.
      *
      * Retrieves a single host label. If the label offset has not been set,
      * returns the default value provided.
      *
-     * @param int   $offset  the label offset
-     * @param mixed $default Default value to return if the offset does not exist.
+     * @param int $offset the label offset
      *
-     * @return mixed
+     * @return string|null
      */
-    public function getLabel(int $offset, $default = null)
+    public function getLabel(int $offset)
     {
         if ($offset < 0) {
             $offset += count($this->labels);
         }
 
-        return $this->labels[$offset] ?? $default;
+        return $this->labels[$offset] ?? null;
     }
 
     /**
@@ -564,17 +571,13 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      * If a value is specified only the keys associated with
      * the given value will be returned
      *
-     * @param string ...$args the total number of argument given to the method
+     * @param string $label
      *
      * @return array
      */
-    public function keys(string ...$args): array
+    public function keys(string $label): array
     {
-        if (empty($args)) {
-            return array_keys($this->labels);
-        }
-
-        return array_keys($this->labels, $args[0], true);
+        return array_keys($this->labels, $label, true);
     }
 
     /**
@@ -590,13 +593,17 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             return null;
         }
 
-        if (!$this->host_as_domain_name) {
+        if ('4' === $this->ip_version) {
             return $this->labels[0];
         }
 
+        if (null !== $this->ip_version) {
+            return '['.$this->labels[0].']';
+        }
+
         $host = implode(self::SEPARATOR, array_reverse($this->labels));
-        static $pattern = '/[^\x20-\x7f]/';
-        if ($enc_type !== self::RFC3987_ENCODING && preg_match($pattern, $host)) {
+        if ($enc_type !== self::RFC3987_ENCODING && preg_match(self::REGEXP_IDN_PATTERN, $host)) {
+            self::supportIdnHost();
             $host = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46);
         }
 
@@ -621,11 +628,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getUriComponent(): string
     {
-        if (empty($this->labels)) {
-            return '';
-        }
-
-        return $this->getContent();
+        return (string) $this->getContent();
     }
 
     /**
@@ -645,16 +648,15 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             return $this->labels[0];
         }
 
-        $ip = substr($this->labels[0], 1, -1);
         if ('6' !== $this->ip_version) {
-            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $ip);
+            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $this->labels[0]);
         }
 
-        if (false === ($pos = strpos($ip, '%'))) {
-            return $ip;
+        if (false === ($pos = strpos($this->labels[0], '%'))) {
+            return $this->labels[0];
         }
 
-        return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
+        return substr($this->labels[0], 0, $pos).'%'.rawurldecode(substr($this->labels[0], $pos + 3));
     }
 
     /**
@@ -701,7 +703,9 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        return new self(substr($this->labels[0], 0, strpos($this->labels[0], '%')).']');
+        list($ipv6, ) = explode('%', $this->labels[0]);
+
+        return self::createFromIp($ipv6);
     }
 
     /**
@@ -713,7 +717,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withRootLabel(): self
     {
-        if ($this->is_absolute == self::IS_ABSOLUTE || $this->isIp()) {
+        if (self::IS_ABSOLUTE === $this->is_absolute || null !== $this->ip_version) {
             return $this;
         }
 
@@ -732,7 +736,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     public function withoutRootLabel(): self
     {
-        if ($this->is_absolute == self::IS_RELATIVE || $this->isIp()) {
+        if (self::IS_RELATIVE === $this->is_absolute || null !== $this->ip_version) {
             return $this;
         }
 
@@ -743,99 +747,40 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with the specified component prepended.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the prepended data
-     *
-     * @param string $host the component to append
-     *
-     * @return self
-     */
-    public function prepend(string $host): self
-    {
-        $labels = array_merge($this->labels, $this->filterComponent($host));
-        if ($this->labels === $labels) {
-            return $this;
-        }
-
-        return self::createFromLabels($labels, $this->is_absolute);
-    }
-
-    /**
-     * Returns an instance with the specified component appended.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the appended data
-     *
-     * @param string $host the component to append
-     *
-     * @return self
-     */
-    public function append(string $host): self
-    {
-        $labels = array_merge($this->filterComponent($host), $this->labels);
-        if ($this->labels === $labels) {
-            return $this;
-        }
-
-        return self::createFromLabels($labels, $this->is_absolute);
-    }
-
-    /**
-     * Filter the component to append or prepend.
-     *
-     * @param string $component
-     *
-     * @return array
-     */
-    private function filterComponent(string $component): array
-    {
-        if ('' === $component) {
-            return [];
-        }
-
-        if ('.' !== $component && '.' == substr($component, -1)) {
-            $component = substr($component, 0, -1);
-        }
-
-        return $this->parse($component)['data'];
-    }
-
-    /**
      * Returns an instance with the modified label.
      *
      * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the replaced data
+     * an instance that contains the new label
      *
-     * @param int    $offset the label offset to remove and replace by the given component
-     * @param string $host   the component added
+     * If $key is non-negative, the added label will be the label at $key position from the start.
+     * If $key is negative, the added label will be the label at $key position from the end.
+     *
+     * @param int   $key
+     * @param mixed $label
      *
      * @return self
      */
-    public function replaceLabel(int $offset, string $host): self
+    public function withLabel(int $key, $label): self
     {
-        $nb_elements = count($this->labels);
-        $offset = filter_var($offset, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]);
+        $label = (new self($label))->withoutRootLabel();
+        $nb_labels = count($this->labels);
+        $offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_labels - 1, 'max_range' => $nb_labels]]);
         if (false === $offset) {
+            throw new Exception(sprintf('the given key `%s` is invalid', $key));
+        }
+
+        if (0 > $offset) {
+            $offset = $nb_labels + $offset;
+        }
+
+        if ($label->getContent(self::NO_ENCODING) === ($this->labels[$offset] ?? null)) {
             return $this;
         }
 
-        if ($offset < 0) {
-            $offset = $nb_elements + $offset;
-        }
+        $data = $this->labels;
+        $data[$offset] = $label->getContent(self::NO_ENCODING);
 
-        $labels = array_merge(
-            array_slice($this->labels, 0, $offset),
-            $this->parse($host)['data'],
-            array_slice($this->labels, $offset + 1)
-        );
-
-        if ($labels === $this->labels) {
-            return $this;
-        }
-
-        return self::createFromLabels($labels, $this->is_absolute);
+        return self::createFromLabels($data, $this->is_absolute);
     }
 
     /**
@@ -844,51 +789,28 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
-     * @param int[] $offsets the list of keys to remove from the collection
+     * If $key is non-negative, the removed label will be the label at $key position from the start.
+     * If $key is negative, the removed label will be the label at $key position from the end.
+     *
+     * @param int $key the list of keys to remove from the collection
      *
      * @return self
      */
-    public function withoutLabels(array $offsets): self
+    public function withoutLabel(int $key): self
     {
-        if (array_filter($offsets, 'is_int') !== $offsets) {
-            throw new Exception('the list of keys must contain integer only values');
+        $nb_elements = count($this->labels);
+        $offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]);
+        if (false === $offset) {
+            throw new Exception(sprintf('the given key `%s` is invalid', $key));
+        }
+
+        if ($offset < 0) {
+            $offset += $nb_elements;
         }
 
         $data = $this->labels;
-        foreach ($this->filterOffsets(...$offsets) as $offset) {
-            unset($data[$offset]);
-        }
-
-        if ($data === $this->labels) {
-            return $this;
-        }
+        unset($data[$offset]);
 
         return self::createFromLabels($data, $this->is_absolute);
-    }
-
-    /**
-     * Filter Offset list.
-     *
-     * @param int ...$offsets list of keys to remove from the collection
-     *
-     * @return int[]
-     */
-    private function filterOffsets(int ...$offsets)
-    {
-        $nb_elements = count($this->labels);
-        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
-        $keys_to_remove = [];
-        foreach ($offsets as $offset) {
-            $offset = filter_var($offset, FILTER_VALIDATE_INT, $options);
-            if (false === $offset) {
-                continue;
-            }
-            if ($offset < 0) {
-                $offset += $nb_elements;
-            }
-            $keys_to_remove[] = $offset;
-        }
-
-        return array_flip(array_flip(array_reverse($keys_to_remove)));
     }
 }

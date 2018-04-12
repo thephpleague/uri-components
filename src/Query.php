@@ -20,8 +20,6 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use League\Uri;
-use League\Uri\ComponentInterface;
-use League\Uri\Exception;
 use Traversable;
 use TypeError;
 
@@ -50,6 +48,11 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      * @var string
      */
     private $separator;
+
+    /**
+     * @var array
+     */
+    private $params;
 
     /**
      * Returns a new instance from the result of PHP's parse_str.
@@ -81,7 +84,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns a new instance from the result of parse_query.
+     * Returns a new instance from the result of query_parse.
      *
      * @param Traversable|array $pairs
      * @param string            $separator
@@ -102,7 +105,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
             throw new TypeError('the parameters must be iterable');
         }
 
-        return new self(Uri\build_query($pairs, $separator), $separator);
+        return new self(Uri\query_build($pairs, $separator), $separator);
     }
 
     /**
@@ -129,7 +132,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     public function __construct($query = null, string $separator = '&', int $enc_type = self::RFC3986_ENCODING)
     {
         $this->separator = $this->filterSeparator($separator);
-        $this->pairs = Uri\parse_query($query, $separator, $enc_type);
+        $this->pairs = Uri\query_parse($query, $separator, $enc_type);
     }
 
     /**
@@ -179,7 +182,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        return Uri\build_query($this->pairs, $this->separator, $enc_type);
+        return Uri\query_build($this->pairs, $this->separator, $enc_type);
     }
 
     /**
@@ -328,7 +331,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function toParams(): array
     {
-        return Uri\extract_query($this->getContent(), $this->separator);
+        return Uri\query_extract($this->getContent(), $this->separator);
     }
 
     /**
@@ -354,25 +357,11 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with the specified content.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the specified content.
-     *
-     * Users can provide both encoded and decoded content characters.
-     *
-     * A null value is equivalent to removing the component content.
-     *
-     * @param null|string $query
-     *
-     * @throws InvalidArgumentException for invalid component or transformations
-     *                                  that would result in a object in invalid state.
-     *
-     * @return static
+     * {@inheritdoc}
      */
     public function withContent($query): self
     {
-        $pairs = Uri\parse_query($query, $this->separator);
+        $pairs = Uri\query_parse($query, $this->separator);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -544,7 +533,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @param mixed $value
      *
-     * @throws Exception if the value is invalid
+     * @throws TypeError if the value type is invalid
      *
      * @return string|null
      */
@@ -562,7 +551,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
             return (string) $value;
         }
 
-        throw new Exception('The submitted value is invalid.');
+        throw new TypeError('The submitted value is invalid.');
     }
 
     /**
@@ -578,7 +567,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function appendTo(string $key, $value): self
     {
-        if (is_object($value) && method_exists($value, '__toString')) {
+        if (method_exists($value, '__toString')) {
             $value = (string) $value;
         }
 
@@ -640,7 +629,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function merge($query): self
     {
-        $pairs = Uri\parse_query($query, $this->separator);
+        $pairs = Uri\query_parse($query, $this->separator);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -685,7 +674,7 @@ final class Query implements ComponentInterface, Countable, IteratorAggregate
      */
     public function append($query): self
     {
-        $pairs = array_merge($this->pairs, Uri\parse_query($query, $this->separator));
+        $pairs = array_merge($this->pairs, Uri\query_parse($query, $this->separator));
         if ($pairs === $this->pairs) {
             return $this;
         }

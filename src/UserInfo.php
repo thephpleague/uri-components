@@ -16,8 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\ComponentInterface;
-use League\Uri\Exception;
 use TypeError;
 
 /**

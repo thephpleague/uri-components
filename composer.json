@@ -24,12 +24,19 @@
             "email" : "nyamsprod@gmail.com",
             "homepage" : "https://nyamsprod.com"
         }
-    ]   ,
+    ],
+    "repositories" : [
+        {
+            "type" : "vcs",
+            "url" : "https://github.com/thephpleague/uri-query-parser"
+        }
+    ],
     "require": {
         "php": ">=7.0",
         "ext-curl": "*",
         "ext-fileinfo": "*",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "league/uri-query-parser": "dev-master"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3",
@@ -40,13 +47,12 @@
     },
     "autoload": {
         "psr-4": {
-            "League\\Uri\\": "src"
-        },
-        "files": ["src/functions_include.php"]
+            "League\\Uri\\Components\\": "src"
+        }
     },
     "autoload-dev": {
         "psr-4": {
-            "LeagueTest\\Uri\\": "tests"
+            "LeagueTest\\Uri\\Components\\": "tests"
         }
     },
     "scripts": {
