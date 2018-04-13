@@ -26,18 +26,8 @@ use TypeError;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-class Path implements ComponentInterface
+class Path extends AbstractComponent
 {
-    /**
-     * @internal
-     */
-    const ENCODING_LIST = [
-        self::RFC1738_ENCODING => 1,
-        self::RFC3986_ENCODING => 1,
-        self::RFC3987_ENCODING => 1,
-        self::NO_ENCODING => 1,
-    ];
-
     /**
      * @internal
      */
@@ -77,21 +67,9 @@ class Path implements ComponentInterface
      */
     protected function validate($path)
     {
-        if ($path instanceof ComponentInterface) {
-            $path = $path->getContent();
-        }
-
-        if (is_scalar($path) || method_exists($path, '__toString')) {
-            $path = (string) $path;
-        }
-
-        if (!is_string($path)) {
+        $path = $this->filterComponent($path);
+        if (null === $path) {
             throw new TypeError(sprintf('Expected path to be stringable; received %s', gettype($path)));
-        }
-
-        static $pattern = '/[\x00-\x1f\x7f]/';
-        if (preg_match($pattern, $path)) {
-            throw new Exception(sprintf('Invalid path string: %s', $path));
         }
 
         return preg_replace_callback(',%[A-Fa-f0-9]{2},', [$this, 'decodeMatches'], $path);
@@ -139,27 +117,11 @@ class Path implements ComponentInterface
     }
 
     /**
-     * Returns the instance content encoded in RFC3986 or RFC3987.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters depending on the encoding type selected.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3.
-     *
-     * By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
+        $this->filterEncoding($enc_type);
 
         if (self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->path)) {
             return $this->path;
@@ -199,7 +161,7 @@ class Path implements ComponentInterface
      */
     public function isAbsolute(): bool
     {
-        return '/' === ($this->getContent()[0] ?? '');
+        return '/' === ($this->path[0] ?? '');
     }
 
     /**

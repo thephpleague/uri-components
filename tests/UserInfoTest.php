@@ -284,7 +284,7 @@ class UserInfoTest extends TestCase
      */
     public function testWithContentThrowsInvalidArgumentException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(TypeError::class);
         (new UserInfo())->withContent(date_create());
     }
 

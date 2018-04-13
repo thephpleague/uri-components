@@ -30,13 +30,18 @@ use Traversable;
  */
 final class HierarchicalPath extends Path implements Countable, IteratorAggregate
 {
-    const IS_ABSOLUTE = 1;
-    const IS_RELATIVE = 0;
-
     /**
      * @internal
      */
     const SEPARATOR = '/';
+
+    /**
+     * @internal
+     */
+    const REGEXP_INVALID_PATH_CHARS = '/[\x00-\x1f\x7f]/';
+
+    const IS_ABSOLUTE = 1;
+    const IS_RELATIVE = 0;
 
     private $segments;
 
@@ -99,7 +104,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             return [''];
         }
 
-        if ('/' === $path[0]) {
+        if (self::SEPARATOR === $path[0]) {
             $path = substr($path, 1);
         }
 
@@ -179,52 +184,37 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an array representation of the HierarchicalPath.
-     *
-     * @return array
-     */
-    public function getSegments(): array
-    {
-        return $this->segments;
-    }
-
-    /**
      * Retrieves a single path segment.
      *
      * Retrieves a single path segment. If the segment offset has not been set,
      * returns the default value provided.
      *
-     * @param int   $offset  the segment offset
-     * @param mixed $default Default value to return if the offset does not exist.
+     * @param int $offset the segment offset
      *
-     * @return mixed
+     * @return string|null
      */
-    public function getSegment(int $offset, $default = null)
+    public function getSegment(int $offset)
     {
         if ($offset < 0) {
             $offset += count($this->segments);
         }
 
-        return $this->segments[$offset] ?? $default;
+        return $this->segments[$offset] ?? null;
     }
 
     /**
-     * Returns the associated key for each label.
+     * Returns the associated key for a specific segment.
      *
      * If a value is specified only the keys associated with
      * the given value will be returned
      *
-     * @param mixed ...$args the total number of argument given to the method
+     * @param string $segment
      *
      * @return array
      */
-    public function keys(...$args): array
+    public function keys(string $segment): array
     {
-        if (empty($args)) {
-            return array_keys($this->segments);
-        }
-
-        return array_keys($this->segments, $args[0], true);
+        return array_keys($this->segments, $segment, true);
     }
 
     /**
@@ -236,144 +226,92 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * Returns an instance with the specified component prepended.
+     * Returns an instance with the modified segment.
      *
      * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the prepended data
+     * an instance that contains the new segment
      *
-     * @param mixed $path the component to append
+     * If $key is non-negative, the added segment will be the segment at $key position from the start.
+     * If $key is negative, the added segment will be the segment at $key position from the end.
+     *
+     * @param int   $key
+     * @param mixed $segment
+     *
+     * @throws Exception If the key is invalid
      *
      * @return self
      */
-    public function prepend($path): self
-    {
-        $path = $this->validate($path);
-        if ('/' === substr($path, -1, 1)) {
-            $path = substr($path, 0, -1);
-        }
-
-        $old_path = $this->path;
-        if (self::IS_ABSOLUTE === $this->is_absolute) {
-            $old_path = substr($old_path, 1);
-        }
-
-        return new self($path.'/'.$old_path);
-    }
-
-    /**
-     * Returns an instance with the specified component appended.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the appended data
-     *
-     * @param mixed $path the component to append
-     *
-     * @return self
-     */
-    public function append($path): self
-    {
-        $path = $this->validate($path);
-        if ('/' === ($path[0] ?? '')) {
-            $path = substr($path, 1);
-        }
-
-        $old_path = $this->path;
-        if ('/' === substr($old_path, -1, 1)) {
-            $old_path = substr($old_path, 0, -1);
-        }
-
-        return new self($old_path.'/'.$path);
-    }
-
-    /**
-     * Returns an instance with the modified label.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component with the replaced data
-     *
-     * @param int    $offset    the label offset to remove and replace by the given component
-     * @param string $component the component added
-     *
-     * @return self
-     */
-    public function replaceSegment(int $offset, string $component): self
+    public function withSegment(int $key, $segment): self
     {
         $nb_elements = count($this->segments);
-        $offset = filter_var($offset, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]);
-        if (false === $offset) {
-            return $this;
+        if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements - 1, 'max_range' => $nb_elements + 1]]))) {
+            throw new Exception(sprintf('the given key `%s` is invalid', $key));
         }
 
         if ($offset < 0) {
-            $offset = $nb_elements + $offset;
+            $offset += $nb_elements;
         }
 
-        $dest = $this->filterSegments($this->validate($component));
-        if ('' === $dest[count($dest) - 1]) {
-            array_pop($dest);
+        if (!$segment instanceof self) {
+            $segment = new self($segment);
         }
 
-        $segments = array_merge(array_slice($this->segments, 0, $offset), $dest, array_slice($this->segments, $offset + 1));
+        //append segment
+        if ($nb_elements === $offset) {
+            return new self(rtrim($this->path, self::SEPARATOR).self::SEPARATOR.ltrim($segment->path, self::SEPARATOR));
+        }
 
-        if ($segments === $this->segments) {
+        //prepend segment
+        if (-1 === $offset) {
+            return new self(rtrim($segment->path, self::SEPARATOR).self::SEPARATOR.ltrim($this->path, self::SEPARATOR));
+        }
+
+        //replace segment path while respecting path type
+        if (1 === $nb_elements) {
+            return self::IS_ABSOLUTE === $this->is_absolute ? $segment->withLeadingSlash() : $segment;
+        }
+
+        $segment = trim($segment->getContent(self::NO_ENCODING), self::SEPARATOR);
+        if ($segment === $this->segments[$offset]) {
             return $this;
         }
+
+        $segments = $this->segments;
+        $segments[$offset] = $segment;
 
         return self::createFromSegments($segments, $this->is_absolute);
     }
 
     /**
-     * Returns an instance without the specified keys.
+     * Returns an instance without the specified segment.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
-     * @param int[] $offsets the list of keys to remove from the collection
+     * If $key is non-negative, the removed segment will be the segment at $key position from the start.
+     * If $key is negative, the removed segment will be the segment at $key position from the end.
+     *
+     * @param int $key the list of keys to remove from the collection
+     *
+     * @throws Exception If the key is invalid
      *
      * @return self
      */
-    public function withoutSegments(array $offsets): self
+    public function withoutSegment(int $key): self
     {
-        if (array_filter($offsets, 'is_int') !== $offsets) {
-            throw new Exception('the list of keys must contain integer only values');
+        $nb_elements = count($this->segments);
+        if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]))) {
+            throw new Exception(sprintf('the given key `%s` is invalid', $key));
+        }
+
+        if ($offset < 0) {
+            $offset += $nb_elements;
         }
 
         $segments = $this->segments;
-        foreach ($this->filterOffsets(...$offsets) as $offset) {
-            unset($segments[$offset]);
-        }
-
-        if ($segments === $this->segments) {
-            return $this;
-        }
+        unset($segments[$offset]);
 
         return self::createFromSegments($segments, $this->is_absolute);
-    }
-
-    /**
-     * Filter Offset list.
-     *
-     * @param int ...$offsets list of keys to remove from the collection
-     *
-     * @return int[]
-     */
-    protected function filterOffsets(int ...$offsets)
-    {
-        $nb_elements = count($this->segments);
-        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
-        $keys_to_remove = [];
-        foreach ($offsets as $offset) {
-            $offset = filter_var($offset, FILTER_VALIDATE_INT, $options);
-            if (false === $offset) {
-                continue;
-            }
-            if ($offset < 0) {
-                $offset += $nb_elements;
-            }
-            $keys_to_remove[] = $offset;
-        }
-
-        return array_flip(array_flip(array_reverse($keys_to_remove)));
     }
 
     /**
@@ -388,16 +326,15 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function withDirname($path): self
     {
-        $path = $this->validate($path);
-        if ($path === $this->getDirname()) {
+        if (!$path instanceof self) {
+            $path = new self($path);
+        }
+
+        if ($path->getContent() === $this->getDirname()) {
             return $this;
         }
 
-        if ('' !== $path && substr($path, -1, 1) === '/') {
-            $path = substr($path, 0, -1);
-        }
-
-        return new static($path.'/'.array_pop($this->segments));
+        return $path->withSegment(count($path), array_pop($this->segments));
     }
 
     /**
@@ -406,26 +343,21 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
      *
-     * @param string $path the new path basename
+     * @param mixed $basename the new path basename
      *
      * @return self
      */
-    public function withBasename(string $path): self
+    public function withBasename($basename): self
     {
-        $path = $this->validate($path);
-        if (false !== strpos($path, '/')) {
-            throw new Exception('The submitted basename can not contain the path separator');
+        if (!$basename instanceof self) {
+            $basename = new self($basename);
         }
 
-        $segments = $this->segments;
-        $basename = array_pop($segments);
-        if ($path == $basename) {
-            return $this;
+        if (false !== strpos($basename->path, self::SEPARATOR)) {
+            throw new Exception('The basename can not contain the path separator');
         }
 
-        $segments[] = $path;
-
-        return static::createFromSegments($segments, $this->is_absolute);
+        return $this->withSegment(count($this->segments) - 1, $basename);
     }
 
     /**
@@ -434,87 +366,59 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
      *
-     * @param string $extension the new extension
-     *                          can preceeded with or without the dot (.) character
+     * @param mixed $extension the new extension
+     *                         can preceeded with or without the dot (.) character
      *
      * @return self
      */
-    public function withExtension(string $extension): self
+    public function withExtension($extension): self
     {
-        $extension = $this->formatExtension($extension);
-        $segments = $this->segments;
-        $basename = array_pop($segments);
-        $parts = explode(';', $basename, 2) + [1 => null];
-        $basenamePart = $parts[0];
-        if ('' === $basenamePart || null === $basenamePart) {
-            return $this;
+        if (!$extension instanceof self) {
+            $extension = new self($extension);
         }
 
-        $newBasename = $this->buildBasename($basenamePart, $extension, $parts[1]);
-        if ($basename === $newBasename) {
-            return $this;
-        }
-        $segments[] = $newBasename;
-
-        return static::createFromSegments($segments, $this->is_absolute);
-    }
-
-    /**
-     * validate and format the given extension.
-     *
-     * @param string $extension the new extension to use
-     *
-     * @throws Exception If the extension is not valid
-     *
-     * @return string
-     */
-    private function formatExtension(string $extension): string
-    {
-        static $pattern = '/[\x00-\x1f\x7f]/';
-        if (preg_match($pattern, $extension)) {
-            throw new Exception(sprintf('Invalid path string: %s', $extension));
-        }
-
-        if (0 === strpos($extension, '.')) {
-            throw new Exception('an extension sequence can not contain a leading `.` character');
-        }
-
-        if (strpos($extension, self::SEPARATOR)) {
+        if (strpos($extension->path, self::SEPARATOR)) {
             throw new Exception('an extension sequence can not contain a path delimiter');
         }
 
-        return implode(self::SEPARATOR, $this->filterSegments($this->validate($extension)));
+        if (0 === strpos($extension->path, '.')) {
+            throw new Exception('an extension sequence can not contain a leading `.` character');
+        }
+
+        $basename = end($this->segments);
+        list($ext, $param) = explode(';', $basename, 2) + [1 => null];
+        if ('' === $ext) {
+            return $this;
+        }
+
+        return $this->withBasename($this->buildBasename($extension, $ext, $param));
     }
 
     /**
      * create a new basename with a new extension.
      *
-     * @param string $basenamePart  the basename file part
-     * @param string $extension     the new extension to add
-     * @param string $parameterPart the basename parameter part
+     * @param self   $extension the new extension to add
+     * @param string $ext       the basename file part
+     * @param string $param     the basename parameter part
      *
      * @return string
      */
-    private function buildBasename(
-        string $basenamePart,
-        string $extension,
-        string $parameterPart = null
-    ): string {
-        $length = strrpos($basenamePart, '.'.pathinfo($basenamePart, PATHINFO_EXTENSION));
+    private function buildBasename(self $extension, string $ext, string $param = null): string
+    {
+        $length = strrpos($ext, '.'.pathinfo($ext, PATHINFO_EXTENSION));
         if (false !== $length) {
-            $basenamePart = substr($basenamePart, 0, $length);
+            $ext = substr($ext, 0, $length);
         }
 
-        $parameterPart = trim((string) $parameterPart);
-        if ('' !== $parameterPart) {
-            $parameterPart = ";$parameterPart";
+        if (null !== $param && '' !== $param) {
+            $param = ';'.$param;
         }
 
-        $extension = trim($extension);
-        if ('' !== $extension) {
-            $extension = ".$extension";
+        $extension = trim($extension->path);
+        if ('' === $extension) {
+            return $ext.$param;
         }
 
-        return $basenamePart.$extension.$parameterPart;
+        return $ext.'.'.$extension.$param;
     }
 }

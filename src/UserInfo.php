@@ -16,8 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use TypeError;
-
 /**
  * Value object representing the UserInfo part of an URI.
  *
@@ -28,18 +26,8 @@ use TypeError;
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.1
  *
  */
-final class UserInfo implements ComponentInterface
+final class UserInfo extends AbstractComponent
 {
-    /**
-     * @internal
-     */
-    const ENCODING_LIST = [
-        self::RFC1738_ENCODING => 1,
-        self::RFC3986_ENCODING => 1,
-        self::RFC3987_ENCODING => 1,
-        self::NO_ENCODING => 1,
-    ];
-
     /**
      * User user component.
      *
@@ -88,21 +76,9 @@ final class UserInfo implements ComponentInterface
      */
     private function filterPart($str = null)
     {
-        if ($str instanceof ComponentInterface) {
-            $str = $str->getContent();
-        }
-
+        $str = $this->filterComponent($str);
         if (null === $str) {
             return $str;
-        }
-
-        if (!is_scalar($str) && !method_exists($str, '__toString')) {
-            throw new TypeError(sprintf('Expected userinfo to be stringable or null; received %s', gettype($str)));
-        }
-
-        static $pattern = '/[\x00-\x1f\x7f]/';
-        if (preg_match($pattern, $str)) {
-            throw new Exception(sprintf('Invalid string: %s', $str));
         }
 
         static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
@@ -140,9 +116,7 @@ final class UserInfo implements ComponentInterface
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
+        $this->filterEncoding($enc_type);
 
         if (null === $this->user) {
             return null;
@@ -176,10 +150,7 @@ final class UserInfo implements ComponentInterface
      */
     public function getUser(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
-
+        $this->filterEncoding($enc_type);
         if (null === $this->user || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->user)) {
             return $this->user;
         }
@@ -219,10 +190,7 @@ final class UserInfo implements ComponentInterface
      */
     public function getPass(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
-
+        $this->filterEncoding($enc_type);
         if (null === $this->pass || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->pass)) {
             return $this->pass;
         }
@@ -258,10 +226,7 @@ final class UserInfo implements ComponentInterface
      */
     public function withContent($content): ComponentInterface
     {
-        if ($content instanceof ComponentInterface) {
-            $content = $content->getContent();
-        }
-
+        $content = $this->filterComponent($content);
         if ($content === $this->getContent()) {
             return $this;
         }
@@ -270,11 +235,7 @@ final class UserInfo implements ComponentInterface
             return new self();
         }
 
-        if (is_scalar($content) || method_exists($content, '__toString')) {
-            return new self(...explode(':', (string) $content, 2) + [1 => null]);
-        }
-
-        throw new Exception(sprintf('Expected userinfo to be stringable or null; received %s', gettype($content)));
+        return new self(...explode(':', $content, 2) + [1 => null]);
     }
 
     /**
@@ -298,7 +259,7 @@ final class UserInfo implements ComponentInterface
             $pass = null;
         }
 
-        if ($user === $this->user && $pass === $this->pass) {
+        if ($user == $this->user && $pass == $this->pass) {
             return $this;
         }
 

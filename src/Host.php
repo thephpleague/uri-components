@@ -35,7 +35,7 @@ use TypeError;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-final class Host implements ComponentInterface, Countable, IteratorAggregate
+final class Host extends AbstractComponent implements Countable, IteratorAggregate
 {
     const IS_ABSOLUTE = 1;
 
@@ -49,22 +49,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     /**
      * @internal
      */
-    const ENCODING_LIST = [
-        self::RFC1738_ENCODING => 1,
-        self::RFC3986_ENCODING => 1,
-        self::RFC3987_ENCODING => 1,
-        self::NO_ENCODING => 1,
-    ];
-
-    /**
-     * @internal
-     */
     const HOST_TYPE = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
-
-    /**
-     * @internal
-     */
-    const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
 
     /**
      * @internal
@@ -286,9 +271,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     private function parse($host = null): array
     {
-        if ($host instanceof ComponentInterface) {
-            $host = $host->getContent();
-        }
+        $host = $this->filterComponent($host);
 
         if (null === $host) {
             return [
@@ -308,15 +291,6 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
                 'host_as_domain_name' => false,
                 'is_absolute' => self::IS_RELATIVE,
             ];
-        }
-
-        if (!is_scalar($host) && !method_exists($host, '__toString')) {
-            throw new TypeError(sprintf('Expected host to be stringable or null; received %s', gettype($host)));
-        }
-
-        $host = (string) $host;
-        if (preg_match(self::REGEXP_INVALID_URI_CHARS, $host)) {
-            throw new Exception(sprintf('Invalid fragment string: %s', $host));
         }
 
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
@@ -372,7 +346,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
         $ip_host = substr($host, 1, -1);
         if ($this->isValidIpv6Hostname($ip_host)) {
             return [
-                'data' => [$ip_host],
+                'data' => [$host],
                 'ip_version' => '6',
                 'has_zone_identifier' =>  false !== strpos($ip_host, '%'),
                 'host_as_domain_name' => false,
@@ -382,7 +356,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
 
         if (preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
             return [
-                'data' => [$ip_host],
+                'data' => [$host],
                 'ip_version' => $matches['version'],
                 'is_absolute' => self::IS_RELATIVE,
                 'has_zone_identifier' => false,
@@ -451,8 +425,10 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
     public function __debugInfo()
     {
         return [
+            'host' => $this->getContent(),
             'labels' => $this->labels,
             'is_absolute' => (bool) $this->is_absolute,
+            'ip_version' => $this->ip_version,
         ];
     }
 
@@ -585,20 +561,13 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
-
+        $this->filterEncoding($enc_type);
         if ([] === $this->labels) {
             return null;
         }
 
-        if ('4' === $this->ip_version) {
-            return $this->labels[0];
-        }
-
         if (null !== $this->ip_version) {
-            return '['.$this->labels[0].']';
+            return $this->labels[0];
         }
 
         $host = implode(self::SEPARATOR, array_reverse($this->labels));
@@ -648,15 +617,17 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             return $this->labels[0];
         }
 
+        $ip = substr($this->labels[0], 1, -1);
+
         if ('6' !== $this->ip_version) {
-            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $this->labels[0]);
+            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $ip);
         }
 
-        if (false === ($pos = strpos($this->labels[0], '%'))) {
-            return $this->labels[0];
+        if (false === ($pos = strpos($ip, '%'))) {
+            return $ip;
         }
 
-        return substr($this->labels[0], 0, $pos).'%'.rawurldecode(substr($this->labels[0], $pos + 3));
+        return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
     }
 
     /**
@@ -703,7 +674,7 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
             return $this;
         }
 
-        list($ipv6, ) = explode('%', $this->labels[0]);
+        list($ipv6, ) = explode('%', substr($this->labels[0], 1, -1));
 
         return self::createFromIp($ipv6);
     }
@@ -758,11 +729,12 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      * @param int   $key
      * @param mixed $label
      *
+     * @throws Exception If the key is invalid
+     *
      * @return self
      */
     public function withLabel(int $key, $label): self
     {
-        $label = (new self($label))->withoutRootLabel();
         $nb_labels = count($this->labels);
         $offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_labels - 1, 'max_range' => $nb_labels]]);
         if (false === $offset) {
@@ -770,21 +742,23 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
         }
 
         if (0 > $offset) {
-            $offset = $nb_labels + $offset;
+            $offset += $nb_labels;
         }
 
+        $label = (new self($label))->withoutRootLabel();
         if ($label->getContent(self::NO_ENCODING) === ($this->labels[$offset] ?? null)) {
             return $this;
         }
 
         $data = $this->labels;
         $data[$offset] = $label->getContent(self::NO_ENCODING);
+        ksort($data);
 
         return self::createFromLabels($data, $this->is_absolute);
     }
 
     /**
-     * Returns an instance without the specified keys.
+     * Returns an instance without the specified label.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -793,6 +767,8 @@ final class Host implements ComponentInterface, Countable, IteratorAggregate
      * If $key is negative, the removed label will be the label at $key position from the end.
      *
      * @param int $key the list of keys to remove from the collection
+     *
+     * @throws Exception If the key is invalid
      *
      * @return self
      */

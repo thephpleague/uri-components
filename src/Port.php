@@ -16,8 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use TypeError;
-
 /**
  * Value object representing a URI Port component.
  *
@@ -32,18 +30,8 @@ use TypeError;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.3
  */
-final class Port implements ComponentInterface
+final class Port extends AbstractComponent
 {
-    /**
-     * @internal
-     */
-    const ENCODING_LIST = [
-        self::RFC1738_ENCODING => 1,
-        self::RFC3986_ENCODING => 1,
-        self::RFC3987_ENCODING => 1,
-        self::NO_ENCODING => 1,
-    ];
-
     /**
      * @var int|null
      */
@@ -78,20 +66,9 @@ final class Port implements ComponentInterface
      */
     protected function validate($port)
     {
-        if ($port instanceof ComponentInterface) {
-            $port = $port->getContent();
-        }
-
+        $port = $this->filterComponent($port);
         if (null === $port) {
             return null;
-        }
-
-        if (method_exists($port, '__toString') || is_scalar($port)) {
-            $port = (string) $port;
-        }
-
-        if (!is_string($port)) {
-            throw new TypeError(sprintf('Expected port to be a int or null; received %s', gettype($port)));
         }
 
         if (false !== ($fport = filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]))) {
@@ -106,9 +83,7 @@ final class Port implements ComponentInterface
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
+        $this->filterEncoding($enc_type);
 
         return $this->port;
     }
