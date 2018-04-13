@@ -87,6 +87,7 @@ class PathTest extends TestCase
         return [
             [date_create()],
             [[]],
+            [null],
         ];
     }
 

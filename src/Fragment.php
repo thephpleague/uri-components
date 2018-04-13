@@ -16,8 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use TypeError;
-
 /**
  * Value object representing a URI Fragment component.
  *
@@ -32,18 +30,8 @@ use TypeError;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.5
  */
-final class Fragment implements ComponentInterface
+final class Fragment extends AbstractComponent
 {
-    /**
-     * @internal
-     */
-    const ENCODING_LIST = [
-        self::RFC1738_ENCODING => 1,
-        self::RFC3986_ENCODING => 1,
-        self::RFC3987_ENCODING => 1,
-        self::NO_ENCODING => 1,
-    ];
-
     /**
      * @var string|null
      */
@@ -78,25 +66,9 @@ final class Fragment implements ComponentInterface
      */
     private function validate($fragment)
     {
-        if ($fragment instanceof ComponentInterface) {
-            $fragment = $fragment->getContent();
-        }
-
+        $fragment = $this->filterComponent($fragment);
         if (null === $fragment) {
             return null;
-        }
-
-        if (method_exists($fragment, '__toString') || is_scalar($fragment)) {
-            $fragment = (string) $fragment;
-        }
-
-        if (!is_string($fragment)) {
-            throw new TypeError(sprintf('Expected fragment to be stringable; received %s', gettype($fragment)));
-        }
-
-        static $pattern = '/[\x00-\x1f\x7f]/';
-        if (preg_match($pattern, $fragment)) {
-            throw new Exception(sprintf('Invalid fragment string: %s', $fragment));
         }
 
         static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
@@ -126,9 +98,7 @@ final class Fragment implements ComponentInterface
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
+        $this->filterEncoding($enc_type);
 
         if (null === $this->fragment || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->fragment)) {
             return $this->fragment;

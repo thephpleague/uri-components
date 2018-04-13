@@ -16,8 +16,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use TypeError;
-
 /**
  * Value object representing a URI Scheme component.
  *
@@ -32,17 +30,12 @@ use TypeError;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.1
  */
-final class Scheme implements ComponentInterface
+final class Scheme extends AbstractComponent
 {
     /**
      * @internal
      */
-    const ENCODING_LIST = [
-        self::RFC1738_ENCODING => 1,
-        self::RFC3986_ENCODING => 1,
-        self::RFC3987_ENCODING => 1,
-        self::NO_ENCODING => 1,
-    ];
+    const REGEXP_SCHEME = ',^[a-z]([-a-z0-9+.]+)?$,i';
 
     /**
      * @var string|null
@@ -78,27 +71,16 @@ final class Scheme implements ComponentInterface
      */
     private function validate($scheme)
     {
-        if ($scheme instanceof ComponentInterface) {
-            $scheme = $scheme->getContent();
-        }
-
+        $scheme = $this->filterComponent($scheme);
         if (null === $scheme) {
             return $scheme;
         }
 
-        if (is_scalar($scheme) || method_exists($scheme, '__toString')) {
-            $scheme = (string) $scheme;
-        }
-
-        if (!is_string($scheme)) {
-            throw new TypeError(sprintf('Expected scheme to be stringable; received %s', gettype($scheme)));
-        }
-
-        if (preg_match(',^[a-z]([-a-z0-9+.]+)?$,i', $scheme)) {
+        if (preg_match(self::REGEXP_SCHEME, $scheme)) {
             return strtolower($scheme);
         }
 
-        throw new Exception(sprintf("Invalid Submitted scheme: '%s'", $scheme));
+        throw new Exception(sprintf("Ithe scheme  '%s' is invalid", $scheme));
     }
 
     /**
@@ -106,9 +88,7 @@ final class Scheme implements ComponentInterface
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
+        $this->filterEncoding($enc_type);
 
         return $this->scheme;
     }

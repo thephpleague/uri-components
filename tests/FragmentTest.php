@@ -16,6 +16,7 @@ class FragmentTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::validate
+     * @covers ::filterComponent
      * @covers ::getUriComponent
      * @dataProvider getUriComponentProvider
      * @param string $str
@@ -52,6 +53,7 @@ class FragmentTest extends TestCase
      * @dataProvider geValueProvider
      * @covers ::__construct
      * @covers ::validate
+     * @covers ::filterComponent
      * @covers ::getContent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
@@ -89,6 +91,7 @@ class FragmentTest extends TestCase
      * @param string $expected
      * @covers ::__construct
      * @covers ::validate
+     * @covers ::filterComponent
      * @covers ::getContent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
@@ -122,6 +125,9 @@ class FragmentTest extends TestCase
         $this->assertEquals($component, $generateComponent);
     }
 
+    /**
+     * @covers ::filterComponent
+     */
     public function testFailedFragmentException()
     {
         $this->expectException(Exception::class);
