@@ -648,40 +648,28 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::ksort
+     * @covers ::sort
      *
-     * @param array        $data
-     * @param int|callable $sort
-     * @param string       $expected
+     * @param array  $data
+     * @param string $expected
      *
-     * @dataProvider ksortProvider
+     * @dataProvider sortProvider
      */
-    public function testksort($data, $sort, $expected)
+    public function testSort($data, $expected)
     {
-        $this->assertSame($expected, (string) Query::createFromPairs($data)->ksort($sort));
+        $this->assertSame($expected, (string) Query::createFromPairs($data)->sort());
     }
 
-    public function ksortProvider()
+    public function sortProvider()
     {
         return [
             [
                 [['superman', 'lex luthor'], ['batman', 'joker']],
-                SORT_REGULAR,
                 'batman=joker&superman=lex%20luthor',
             ],
             [
-                [['superman', 'lex luthor'], ['batman', 'joker']],
-                function ($dataA, $dataB) {
-                    return strcasecmp($dataA, $dataB);
-                },
+                [['batman', 'joker'], ['superman', 'lex luthor']],
                 'batman=joker&superman=lex%20luthor',
-            ],
-            [
-                [['superman', 'lex luthor'], ['superwoman', 'joker']],
-                function ($dataA, $dataB) {
-                    return strcasecmp($dataA, $dataB);
-                },
-                'superman=lex%20luthor&superwoman=joker',
             ],
         ];
     }

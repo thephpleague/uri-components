@@ -381,20 +381,12 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
-     * @param callable|int $sort a PHP sort flag constant or a comparaison function
-     *                           which must return an integer less than, equal to,
-     *                           or greater than zero if the first argument is
-     *                           considered to be respectively less than, equal to,
-     *                           or greater than the second.
-     *
      * @return self
      */
-    public function ksort($sort = SORT_REGULAR): self
+    public function sort(): self
     {
-        $func = is_callable($sort) ? 'uasort' : 'asort';
-
         $keys = array_column($this->pairs, 0);
-        $func($keys, $sort);
+        asort($keys, SORT_REGULAR);
 
         $pairs = [];
         foreach ($keys as $offset => $keys) {
