@@ -52,45 +52,7 @@ final class Fragment extends AbstractComponent
      */
     public function __construct($fragment = null)
     {
-        $this->fragment = $this->validate($fragment);
-    }
-
-    /**
-     * Validate a port.
-     *
-     * @param mixed $fragment
-     *
-     * @throws Exception if the fragment is invalid
-     *
-     * @return null|string
-     */
-    private function validate($fragment)
-    {
-        $fragment = $this->filterComponent($fragment);
-        if (null === $fragment) {
-            return null;
-        }
-
-        static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
-
-        return preg_replace_callback($encoded_pattern, [$this, 'decodeMatches'], $fragment);
-    }
-
-    /**
-     * Decodes Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
-     */
-    private function decodeMatches(array $matches): string
-    {
-        static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
-        if (preg_match($regexp, $matches[0])) {
-            return strtoupper($matches[0]);
-        }
-
-        return rawurldecode($matches[0]);
+        $this->fragment = $this->validateComponent($fragment);
     }
 
     /**
@@ -115,18 +77,6 @@ final class Fragment extends AbstractComponent
         }
 
         return str_replace(['+', '~'], ['%2B', '%7E'], $content);
-    }
-
-    /**
-     * Encode Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
-     */
-    private function encodeMatches(array $matches): string
-    {
-        return rawurlencode($matches[0]);
     }
 
     /**
@@ -164,7 +114,7 @@ final class Fragment extends AbstractComponent
      */
     public function withContent($content)
     {
-        $content = $this->validate($content);
+        $content = $this->validateComponent($content);
         if ($content === $this->fragment) {
             return $this;
         }

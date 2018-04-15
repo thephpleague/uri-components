@@ -35,7 +35,7 @@ class UserInfoTest extends TestCase
      * @param string      $rfc1738_str
      * @covers ::__debugInfo
      * @covers ::__construct
-     * @covers ::filterPart
+     * @covers ::validateComponent
      * @covers ::getContent
      * @covers ::__toString
      * @covers ::getUriComponent
