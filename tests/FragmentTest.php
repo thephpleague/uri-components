@@ -15,7 +15,7 @@ class FragmentTest extends TestCase
 {
     /**
      * @covers ::__construct
-     * @covers ::validate
+     * @covers ::validateComponent
      * @covers ::filterComponent
      * @covers ::getUriComponent
      * @dataProvider getUriComponentProvider
@@ -52,7 +52,7 @@ class FragmentTest extends TestCase
     /**
      * @dataProvider geValueProvider
      * @covers ::__construct
-     * @covers ::validate
+     * @covers ::validateComponent
      * @covers ::filterComponent
      * @covers ::getContent
      * @covers ::encodeMatches
@@ -90,7 +90,7 @@ class FragmentTest extends TestCase
      * @param int    $enc_type
      * @param string $expected
      * @covers ::__construct
-     * @covers ::validate
+     * @covers ::validateComponent
      * @covers ::filterComponent
      * @covers ::getContent
      * @covers ::encodeMatches
@@ -150,7 +150,7 @@ class FragmentTest extends TestCase
 
     /**
      * @covers ::__toString
-     * @covers ::validate
+     * @covers ::validateComponent
      * @covers ::withContent
      * @covers ::decodeMatches
      */

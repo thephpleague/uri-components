@@ -34,6 +34,11 @@ class Path extends AbstractComponent
     const DOT_SEGMENTS = ['.' => 1, '..' => 1];
 
     /**
+     * @internal
+     */
+    const REGEXP_DECODED_SEQUENCE = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]|2F,i';
+
+    /**
      * @var string
      */
     protected $path;
@@ -67,29 +72,12 @@ class Path extends AbstractComponent
      */
     protected function validate($path)
     {
-        $path = $this->filterComponent($path);
-        if (null === $path) {
-            throw new TypeError(sprintf('Expected path to be stringable; received %s', gettype($path)));
+        $path = $this->validateComponent($path);
+        if (null !== $path) {
+            return $path;
         }
 
-        return preg_replace_callback(',%[A-Fa-f0-9]{2},', [$this, 'decodeMatches'], $path);
-    }
-
-    /**
-     * Decodes Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
-     */
-    private function decodeMatches(array $matches): string
-    {
-        static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]|2F,i';
-        if (preg_match($regexp, $matches[0])) {
-            return strtoupper($matches[0]);
-        }
-
-        return rawurldecode($matches[0]);
+        throw new TypeError(sprintf('Expected path to be stringable; received %s', gettype($path)));
     }
 
     /**
@@ -140,18 +128,6 @@ class Path extends AbstractComponent
         }
 
         return str_replace(['+', '~'], ['%2B', '%7E'], $content);
-    }
-
-    /**
-     * Encode Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
-     */
-    protected function encodeMatches(array $matches): string
-    {
-        return rawurlencode($matches[0]);
     }
 
     /**

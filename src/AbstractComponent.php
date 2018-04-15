@@ -50,6 +50,16 @@ abstract class AbstractComponent implements ComponentInterface
     ];
 
     /**
+     * @internal
+     */
+    const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
+
+    /**
+     * @internal
+     */
+    const REGEXP_DECODED_SEQUENCE = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
+
+    /**
      * Filter encoding.
      *
      * @param  int       $enc_type
@@ -60,6 +70,25 @@ abstract class AbstractComponent implements ComponentInterface
         if (!isset(self::ENCODING_LIST[$enc_type])) {
             throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
         }
+    }
+
+    /**
+     * Validate the component content.
+     *
+     * @param mixed $component
+     *
+     * @throws Exception if the component is not valid
+     *
+     * @return string|null
+     */
+    protected function validateComponent($component)
+    {
+        $component = $this->filterComponent($component);
+        if (null === $component) {
+            return $component;
+        }
+
+        return $this->normalizeComponent($component);
     }
 
     /**
@@ -91,6 +120,48 @@ abstract class AbstractComponent implements ComponentInterface
         }
 
         throw new Exception(sprintf('Invalid fragment string: %s', $component));
+    }
+
+    /**
+     * Filter the URI password component.
+     *
+     * @param string $str
+     *
+     * @throws Exception If the content is invalid
+     *
+     * @return string|null
+     */
+    protected function normalizeComponent(string $str = null)
+    {
+        return preg_replace_callback(self::REGEXP_ENCODED_CHARS, [$this, 'decodeMatches'], $str);
+    }
+
+    /**
+     * Decodes Matches sequence.
+     *
+     * @param array $matches
+     *
+     * @return string
+     */
+    protected function decodeMatches(array $matches): string
+    {
+        if (preg_match(static::REGEXP_DECODED_SEQUENCE, $matches[0])) {
+            return strtoupper($matches[0]);
+        }
+
+        return rawurldecode($matches[0]);
+    }
+
+    /**
+     * Encode Matches sequence.
+     *
+     * @param array $matches
+     *
+     * @return string
+     */
+    protected function encodeMatches(array $matches): string
+    {
+        return rawurlencode($matches[0]);
     }
 
     /**

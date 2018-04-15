@@ -58,49 +58,11 @@ final class UserInfo extends AbstractComponent
      */
     public function __construct($user = null, $pass = null)
     {
-        $this->user = $this->filterPart($user);
-        $this->pass = $this->filterPart($pass);
+        $this->user = $this->validateComponent($user);
+        $this->pass = $this->validateComponent($pass);
         if (null === $this->user || '' === $this->user) {
             $this->pass = null;
         }
-    }
-
-    /**
-     * Filter the URI password component.
-     *
-     * @param mixed $str
-     *
-     * @throws Exception If the content is invalid
-     *
-     * @return string|null
-     */
-    private function filterPart($str = null)
-    {
-        $str = $this->filterComponent($str);
-        if (null === $str) {
-            return $str;
-        }
-
-        static $encoded_pattern = ',%[A-Fa-f0-9]{2},';
-
-        return preg_replace_callback($encoded_pattern, [$this, 'decodeMatches'], $str);
-    }
-
-    /**
-     * Decodes Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
-     */
-    private function decodeMatches(array $matches): string
-    {
-        static $regexp = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
-        if (preg_match($regexp, $matches[0])) {
-            return strtoupper($matches[0]);
-        }
-
-        return rawurldecode($matches[0]);
     }
 
     /**
@@ -167,18 +129,6 @@ final class UserInfo extends AbstractComponent
         }
 
         return str_replace(['+', '~'], ['%2B', '%7E'], $content);
-    }
-
-    /**
-     * Encode Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
-     */
-    private function encodeMatches(array $matches): string
-    {
-        return rawurlencode($matches[0]);
     }
 
     /**
@@ -253,8 +203,8 @@ final class UserInfo extends AbstractComponent
      */
     public function withUserInfo($user, $pass = null): self
     {
-        $user = $this->filterPart($user);
-        $pass = $this->filterPart($pass);
+        $user = $this->validateComponent($user);
+        $pass = $this->validateComponent($pass);
         if (null === $user || '' === $user) {
             $pass = null;
         }
