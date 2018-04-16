@@ -29,6 +29,25 @@ namespace League\Uri\Components;
 final class UserInfo extends AbstractComponent
 {
     /**
+     * @internal
+     *
+     * matches invalid URI chars + URI delimiters and the : character
+     */
+    const REGEXP_USER_RFC3987_ENCODING = '/[\x00-\x1f\x7f\/#\?\:@]/';
+
+    /**
+     * @internal
+     *
+     * matches invalid URI chars + URI delimiters without the : character
+     */
+    const REGEXP_PASS_RFC3987_ENCODING = '/[\x00-\x1f\x7f\/#\?@]/';
+
+    /**
+     * @internal
+     */
+    const REGEXP_USERINFO_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
+
+    /**
      * User user component.
      *
      * @var string|null
@@ -98,6 +117,7 @@ final class UserInfo extends AbstractComponent
     public function __debugInfo()
     {
         return [
+            'component' => $this->getContent(),
             'user' => $this->getUser(),
             'pass' => $this->getPass(),
         ];
@@ -112,23 +132,7 @@ final class UserInfo extends AbstractComponent
      */
     public function getUser(int $enc_type = self::RFC3986_ENCODING)
     {
-        $this->filterEncoding($enc_type);
-        if (null === $this->user || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->user)) {
-            return $this->user;
-        }
-
-        if ($enc_type == self::RFC3987_ENCODING) {
-            static $pattern = '/[\x00-\x1f\x7f\/#\?\:@]/';
-            return preg_replace_callback($pattern, [$this, 'encodeMatches'], $this->user) ?? $this->user;
-        }
-
-        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
-        $content = preg_replace_callback($regexp, [$this, 'encodeMatches'], $this->user) ?? rawurlencode($this->user);
-        if (self::RFC3986_ENCODING === $enc_type) {
-            return $content;
-        }
-
-        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
+        return $this->encodeComponent($this->user, $enc_type, self::REGEXP_USERINFO_ENCODING, self::REGEXP_USER_RFC3987_ENCODING);
     }
 
     /**
@@ -140,23 +144,7 @@ final class UserInfo extends AbstractComponent
      */
     public function getPass(int $enc_type = self::RFC3986_ENCODING)
     {
-        $this->filterEncoding($enc_type);
-        if (null === $this->pass || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->pass)) {
-            return $this->pass;
-        }
-
-        if ($enc_type == self::RFC3987_ENCODING) {
-            static $pattern = '/[\x00-\x1f\x7f\/#\?@]/';
-            return preg_replace_callback($pattern, [$this, 'encodeMatches'], $this->pass) ?? $this->pass;
-        }
-
-        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
-        $content = preg_replace_callback($regexp, [$this, 'encodeMatches'], $this->pass) ?? rawurlencode($this->pass);
-        if (self::RFC3986_ENCODING === $enc_type) {
-            return $content;
-        }
-
-        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
+        return $this->encodeComponent($this->pass, $enc_type, self::REGEXP_USERINFO_ENCODING, self::REGEXP_PASS_RFC3987_ENCODING);
     }
 
     /**

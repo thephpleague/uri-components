@@ -35,12 +35,8 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     const SEPARATOR = '/';
 
-    /**
-     * @internal
-     */
-    const REGEXP_INVALID_PATH_CHARS = '/[\x00-\x1f\x7f]/';
-
     const IS_ABSOLUTE = 1;
+
     const IS_RELATIVE = 0;
 
     private $segments;
@@ -139,7 +135,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     public function __debugInfo()
     {
         return [
-            'path' => $this->path,
+            'component' => $this->path,
             'segments' => $this->segments,
             'is_absolute' => $this->isAbsolute(),
         ];

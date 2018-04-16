@@ -43,6 +43,7 @@ class UserInfoTest extends TestCase
      * @covers ::encodeMatches
      * @covers ::getPass
      * @covers ::getUser
+     * @covers ::encodeComponent
      */
     public function testConstructor(
         $user,

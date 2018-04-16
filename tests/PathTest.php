@@ -24,6 +24,7 @@ class PathTest extends TestCase
      * @covers ::validate
      * @covers ::decodeMatches
      * @covers ::getContent
+     * @covers ::encodeComponent
      * @covers ::getUriComponent
      */
     public function testGetUriComponent($raw, $parsed, $rfc1738)

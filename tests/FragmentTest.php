@@ -55,6 +55,7 @@ class FragmentTest extends TestCase
      * @covers ::validateComponent
      * @covers ::filterComponent
      * @covers ::getContent
+     * @covers ::encodeComponent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      * @param mixed       $str

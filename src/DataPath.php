@@ -34,10 +34,19 @@ use SplFileObject;
  */
 final class DataPath extends Path
 {
+    /**
+     * @internal
+     */
     const DEFAULT_MIMETYPE = 'text/plain';
 
+    /**
+     * @internal
+     */
     const DEFAULT_PARAMETER = 'charset=us-ascii';
 
+    /**
+     * @internal
+     */
     const BINARY_PARAMETER = 'base64';
 
     /**
@@ -136,8 +145,7 @@ final class DataPath extends Path
      */
     private function parse($path): array
     {
-        static $pattern = '/[^\x20-\x7f]/';
-        if (preg_match($pattern, $path) && false === strpos($path, ',')) {
+        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
             throw new Exception(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
@@ -247,7 +255,7 @@ final class DataPath extends Path
     public function __debugInfo()
     {
         return [
-            'path' => $this->path,
+            'component' => $this->path,
             'mimetype' => $this->mimetype,
             'parameters' => $this->parameters,
             'is_binary' => $this->is_binary_data,
