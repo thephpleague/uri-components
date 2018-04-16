@@ -202,6 +202,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::withoutEmptyPairs
+     * @covers ::filterEmptyPair
      */
     public function testNormalization()
     {
@@ -213,14 +214,14 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::merge
-     *
+     * @covers ::filterEmptyValue
      * @dataProvider mergeDataProvider
      *
      * @param string $base_query
-     * @param string $query
+     * @param mixed  $query
      * @param string $expected
      */
-    public function testMerge(string $base_query, string $query, string $expected)
+    public function testMerge(string $base_query, $query, string $expected)
     {
         $base = new Query($base_query);
         $this->assertSame($expected, $base->merge($query)->getContent());
@@ -229,6 +230,11 @@ class QueryTest extends TestCase
     public function mergeDataProvider()
     {
         return [
+            'with componentinterface object' => [
+                'kingkong=toto',
+                new Query('john=doe the john'),
+                'kingkong=toto&john=doe%20the%20john',
+            ],
             'with new data' => [
                 'kingkong=toto',
                 'john=doe the john',
@@ -299,10 +305,11 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::append
+     * @covers ::filterNullPair
      *
      * @dataProvider validAppendValue
      * @param null|string $query
-     * @param null|string $append_data
+     * @param mixed       $append_data
      * @param null|string $expected
      */
     public function testAppend($query, $append_data, $expected)
@@ -321,6 +328,7 @@ class QueryTest extends TestCase
             ['', 'foo=bar', 'foo=bar'],
             ['', 'foo=', 'foo='],
             ['', 'foo', 'foo'],
+            ['foo=bar', new Query('foo=baz'), 'foo=bar&foo=baz'],
             ['foo=bar', 'foo=baz', 'foo=bar&foo=baz'],
             ['foo=bar', 'foo=', 'foo=bar&foo='],
             ['foo=bar', 'foo', 'foo=bar&foo'],
@@ -400,7 +408,7 @@ class QueryTest extends TestCase
         return [
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
             ['foo&bar&baz&to.go=toofan', ['foo', 'unknown'], 'bar&baz&to.go=toofan'],
-            ['foo&bar&baz&to.go=toofan', [], 'foo&bar&baz&to.go=toofan'],
+            ['foo&bar&baz&to.go=toofan', ['tata', 'query'], 'foo&bar&baz&to.go=toofan'],
             ['a=b&c=d', ['a'], 'c=d'],
             ['a=a&b=b&a=a&c=c', ['a'], 'b=b&c=c'],
             ['a=a&=&b=b&c=c', [''], 'a=a&b=b&c=c'],
@@ -541,6 +549,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutNumericIndices
+     * @covers ::encodeNumericIndices
      */
     public function testWithoutNumericIndices()
     {
@@ -649,28 +658,43 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::sort
-     *
-     * @param array  $data
-     * @param string $expected
-     *
-     * @dataProvider sortProvider
+     * @covers ::reducePairs
      */
-    public function testSort($data, $expected)
+    public function testSort()
     {
-        $this->assertSame($expected, (string) Query::createFromPairs($data)->sort());
+        $query = (new Query())
+            ->appendTo('a', 3)
+            ->appendTo('b', 2)
+            ->appendTo('a', 1)
+        ;
+
+        $sortedQuery = $query->sort();
+
+        $this->assertSame('a=3&b=2&a=1', (string) $query);
+        $this->assertSame('a=3&a=1&b=2', (string) $sortedQuery);
+        $this->assertNotEquals($sortedQuery, $query);
     }
 
-    public function sortProvider()
+    /**
+     * @covers ::sort
+     * @covers ::reducePairs
+     *
+     * @dataProvider sameQueryAfterSortingProvider
+     * @param mixed $query
+     */
+    public function testSortReturnSameInstance($query)
+    {
+        $query = new Query($query);
+        $sortedQuery = $query->sort();
+        $this->assertSame($sortedQuery, $query);
+    }
+
+    public function sameQueryAfterSortingProvider()
     {
         return [
-            [
-                [['superman', 'lex luthor'], ['batman', 'joker']],
-                'batman=joker&superman=lex%20luthor',
-            ],
-            [
-                [['batman', 'joker'], ['superman', 'lex luthor']],
-                'batman=joker&superman=lex%20luthor',
-            ],
+            'same already sorted' => ['a=3&a=1&b=2'],
+            'empty query' => [null],
+            'contains each pair key only once' => ['batman=robin&aquaman=aqualad&foo=bar&bar=baz'],
         ];
     }
 
@@ -725,7 +749,7 @@ class QueryTest extends TestCase
                 'foo=bar',
                 'foo',
                 false,
-                ['false'],
+                [false],
             ],
         ];
     }
@@ -743,6 +767,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withPair
+     * @covers ::filterPair
      * @covers ::get
      */
     public function testWithPairGetterMethods()
@@ -754,7 +779,10 @@ class QueryTest extends TestCase
         $this->assertSame('1', $query->get('a'));
 
         $query = $query->withPair('a', 4);
-        $this->assertSame('4', $query->get('a'));
+        $this->assertSame(4, $query->get('a'));
+
+        $query = $query->withPair('q', $query);
+        $this->assertSame('first=4&a=4', $query->get('q'));
     }
 
     /**
@@ -769,6 +797,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutDuplicates
+     * @covers ::removeDuplicates
      *
      * @dataProvider provideWithoutDuplicatesData
      *
@@ -784,12 +813,15 @@ class QueryTest extends TestCase
     public function provideWithoutDuplicatesData()
     {
         return [
-            [null, null],
-            ['foo=bar&foo=bar', 'foo=bar'],
+            'empty query' => [null, null],
+            'remove duplicate pair' => ['foo=bar&foo=bar', 'foo=bar'],
+            'no duplicate pair key' => ['foo=bar&bar=foo', 'foo=bar&bar=foo'],
+            'no diplicate pair value' => ['foo=bar&foo=baz', 'foo=bar&foo=baz'],
         ];
     }
 
     /**
+     * @covers ::filterPair
      * @covers ::appendTo
      */
     public function testAppendToSameName()
@@ -806,6 +838,7 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::filterPair
      * @covers ::appendTo
      */
     public function testAppendToWithEmptyString()
@@ -827,6 +860,7 @@ class QueryTest extends TestCase
 
 
     /**
+     * @covers ::filterPair
      * @covers ::appendTo
      * @covers ::get
      * @covers ::getAll
@@ -851,6 +885,7 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::filterPair
      * @covers ::appendTo
      */
     public function testAppendToThrowsException()

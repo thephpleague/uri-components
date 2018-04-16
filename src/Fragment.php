@@ -33,6 +33,14 @@ namespace League\Uri\Components;
 final class Fragment extends AbstractComponent
 {
     /**
+     * @internal
+     */
+    const REGEXP_FRAGMENT_ENCODING = '/
+        (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@\?]+|
+        %(?![A-Fa-f0-9]{2}))
+    /x';
+
+    /**
      * @var string|null
      */
     private $fragment;
@@ -60,23 +68,7 @@ final class Fragment extends AbstractComponent
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        $this->filterEncoding($enc_type);
-
-        if (null === $this->fragment || self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->fragment)) {
-            return $this->fragment;
-        }
-
-        if (self::RFC3987_ENCODING == $enc_type) {
-            return preg_replace_callback('/[\x00-\x1f\x7f]/', [$this, 'encodeMatches'], $this->fragment) ?? $this->fragment;
-        }
-
-        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@\?]+|%(?![A-Fa-f0-9]{2}))/ux';
-        $content = preg_replace_callback($regexp, [$this, 'encodeMatches'], $this->fragment) ?? rawurlencode($this->fragment);
-        if (self::RFC3986_ENCODING === $enc_type) {
-            return $content;
-        }
-
-        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
+        return $this->encodeComponent($this->fragment, $enc_type, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
     }
 
     /**
@@ -104,9 +96,7 @@ final class Fragment extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return [
-            'fragment' => $this->fragment,
-        ];
+        return ['component' => $this->fragment];
     }
 
     /**

@@ -118,9 +118,7 @@ final class Scheme extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return [
-            'scheme' => $this->scheme,
-        ];
+        return ['component' => $this->scheme];
     }
 
     /**

@@ -37,10 +37,6 @@ use TypeError;
  */
 final class Host extends AbstractComponent implements Countable, IteratorAggregate
 {
-    const IS_ABSOLUTE = 1;
-
-    const IS_RELATIVE = 0;
-
     /**
      * @internal
      */
@@ -114,15 +110,12 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
 
     /**
      * @internal
-     *
-     * IDN Host detector regular expression
-     */
-    const REGEXP_IDN_PATTERN = '/[^\x20-\x7f]/';
-
-    /**
-     * @internal
      */
     const ADDRESS_BLOCK = "\xfe\x80";
+
+    const IS_ABSOLUTE = 1;
+
+    const IS_RELATIVE = 0;
 
     /**
      * The component Data.
@@ -304,7 +297,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         }
 
         $domain_name = rawurldecode($host);
-        if (!preg_match(self::REGEXP_IDN_PATTERN, $domain_name)) {
+        if (!preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name)) {
             $domain_name = strtolower($domain_name);
         }
 
@@ -384,7 +377,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         }
 
         $scope = rawurldecode(substr($ipv6, $pos));
-        if (preg_match(self::REGEXP_IDN_PATTERN, $scope) || preg_match(self::REGEXP_GEN_DELIMS, $scope)) {
+        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope) || preg_match(self::REGEXP_GEN_DELIMS, $scope)) {
             return false;
         }
 
@@ -409,7 +402,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
             return true;
         }
 
-        if (!preg_match(self::REGEXP_IDN_PATTERN, $host) || preg_match(self::REGEXP_INVALID_HOST_CHARS, $host)) {
+        if (!preg_match(self::REGEXP_NON_ASCII_PATTERN, $host) || preg_match(self::REGEXP_INVALID_HOST_CHARS, $host)) {
             return false;
         }
 
@@ -425,7 +418,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
     public function __debugInfo()
     {
         return [
-            'host' => $this->getContent(),
+            'component' => $this->getContent(),
             'labels' => $this->labels,
             'is_absolute' => (bool) $this->is_absolute,
             'ip_version' => $this->ip_version,
@@ -571,7 +564,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         }
 
         $host = implode(self::SEPARATOR, array_reverse($this->labels));
-        if ($enc_type !== self::RFC3987_ENCODING && preg_match(self::REGEXP_IDN_PATTERN, $host)) {
+        if ($enc_type !== self::RFC3987_ENCODING && preg_match(self::REGEXP_NON_ASCII_PATTERN, $host)) {
             self::supportIdnHost();
             $host = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46);
         }

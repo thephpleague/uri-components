@@ -36,7 +36,22 @@ class Path extends AbstractComponent
     /**
      * @internal
      */
-    const REGEXP_DECODED_SEQUENCE = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]|2F,i';
+    const REGEXP_PREVENTS_DECODING = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]|2F,i';
+
+    /**
+     * @internal
+     *
+     * matches invalid URI chars + query and fragment delimiters
+     */
+    const REGEXP_PATH_RFC3987_ENCODING = '/[\x00-\x1f\x7f\#\?]/';
+
+    /**
+     * @internal
+     */
+    const REGEXP_PATH_ENCODING = '/
+        (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|
+        %(?![A-Fa-f0-9]{2}))
+    /x';
 
     /**
      * @var string
@@ -85,7 +100,7 @@ class Path extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return ['path' => $this->path];
+        return ['component' => $this->path];
     }
 
     /**
@@ -109,25 +124,7 @@ class Path extends AbstractComponent
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        $this->filterEncoding($enc_type);
-
-        if (self::NO_ENCODING == $enc_type || !preg_match('/[^A-Za-z0-9_\-\.~]/', $this->path)) {
-            return $this->path;
-        }
-
-        if ($enc_type === self::RFC3987_ENCODING) {
-            static $pattern = '/[\x00-\x1f\x7f\#\?]/';
-
-            return preg_replace_callback($pattern, [$this, 'encodeMatches'], $this->path) ?? $this->path;
-        }
-
-        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
-        $content = preg_replace_callback($regexp, [$this, 'encodeMatches'], $this->path) ?? rawurlencode($this->path);
-        if (self::RFC3986_ENCODING === $enc_type) {
-            return $content;
-        }
-
-        return str_replace(['+', '~'], ['%2B', '%7E'], $content);
+        return $this->encodeComponent($this->path, $enc_type, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_RFC3987_ENCODING);
     }
 
     /**

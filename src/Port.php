@@ -113,9 +113,7 @@ final class Port extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return [
-            'port' => $this->port,
-        ];
+        return ['component' => $this->port];
     }
 
     /**

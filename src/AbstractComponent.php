@@ -57,7 +57,27 @@ abstract class AbstractComponent implements ComponentInterface
     /**
      * @internal
      */
-    const REGEXP_DECODED_SEQUENCE = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
+    const REGEXP_PREVENTS_DECODING = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
+
+    /**
+     * @internal
+     */
+    const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-\.~]/';
+
+    /**
+     * @internal
+     */
+    const RFC1738_ENCODING_CHARS = [
+        'pattern' => ['+', '~'],
+        'replace' => ['%2B', '%7E'],
+    ];
+
+    /**
+     * @internal
+     *
+     * IDN Host detector regular expression
+     */
+    const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
 
     /**
      * Filter encoding.
@@ -88,7 +108,7 @@ abstract class AbstractComponent implements ComponentInterface
             return $component;
         }
 
-        return $this->normalizeComponent($component);
+        return $this->decodeComponent($component);
     }
 
     /**
@@ -131,7 +151,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @return string|null
      */
-    protected function normalizeComponent(string $str = null)
+    protected function decodeComponent(string $str = null)
     {
         return preg_replace_callback(self::REGEXP_ENCODED_CHARS, [$this, 'decodeMatches'], $str);
     }
@@ -145,11 +165,40 @@ abstract class AbstractComponent implements ComponentInterface
      */
     protected function decodeMatches(array $matches): string
     {
-        if (preg_match(static::REGEXP_DECODED_SEQUENCE, $matches[0])) {
+        if (preg_match(static::REGEXP_PREVENTS_DECODING, $matches[0])) {
             return strtoupper($matches[0]);
         }
 
         return rawurldecode($matches[0]);
+    }
+
+    /**
+     * Returns the component as converted for RFC3986 or RFC1738.
+     *
+     * @param null|string $part
+     * @param int         $enc_type
+     * @param string      $regexp_rfc3986
+     * @param string      $regexp_rfc3987
+     *
+     * @return null|string
+     */
+    protected function encodeComponent($part, int $enc_type, string $regexp_rfc3986, string $regexp_rfc3987)
+    {
+        $this->filterEncoding($enc_type);
+        if (self::NO_ENCODING === $enc_type || null === $part || !preg_match(self::REGEXP_NO_ENCODING, $part)) {
+            return $part;
+        }
+
+        if ($enc_type == self::RFC3987_ENCODING) {
+            return preg_replace_callback($regexp_rfc3987, [$this, 'encodeMatches'], $part) ?? $part;
+        }
+
+        $content = preg_replace_callback($regexp_rfc3986, [$this, 'encodeMatches'], $part) ?? rawurlencode($part);
+        if (self::RFC3986_ENCODING === $enc_type) {
+            return $content;
+        }
+
+        return str_replace(self::RFC1738_ENCODING_CHARS['pattern'], self::RFC1738_ENCODING_CHARS['replace'], $content);
     }
 
     /**

@@ -102,7 +102,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         }
 
         if (!is_array($pairs)) {
-            throw new TypeError('the parameters must be iterable');
+            throw new TypeError('the pairs must be iterable');
         }
 
         return new self(Uri\query_build($pairs, $separator), $separator);
@@ -170,8 +170,9 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
     public function __debugInfo()
     {
         return [
-            'pairs' => $this->pairs,
+            'component' => $this->getContent(),
             'separator' => $this->separator,
+            'pairs' => $this->pairs,
         ];
     }
 
@@ -385,14 +386,11 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function sort(): self
     {
-        $keys = array_column($this->pairs, 0);
-        asort($keys, SORT_REGULAR);
-
-        $pairs = [];
-        foreach ($keys as $offset => $keys) {
-            $pairs[] = $this->pairs[$offset];
+        if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
+            return $this;
         }
 
+        $pairs = array_merge(...array_values(array_reduce($this->pairs, [$this, 'reducePairs'], [])));
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -401,6 +399,22 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         $clone->pairs = $pairs;
 
         return $clone;
+    }
+
+    /**
+     * Reduce pairs to help sorting them according to their keys.
+     *
+     * @param array $pairs
+     * @param array $pair
+     *
+     * @return array
+     */
+    private function reducePairs(array $pairs, array $pair): array
+    {
+        $pairs[$pair[0]] = $pairs[$pair[0]] ?? [];
+        $pairs[$pair[0]][] = $pair;
+
+        return $pairs;
     }
 
     /**
@@ -414,13 +428,11 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function withoutDuplicates(): self
     {
-        $pairs = [];
-        foreach ($this->pairs as $pair) {
-            if (!in_array($pair, $pairs, true)) {
-                $pairs[] = $pair;
-            }
+        if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
+            return $this;
         }
 
+        $pairs = array_reduce($this->pairs, [$this, 'removeDuplicates'], []);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -429,6 +441,23 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         $clone->pairs = $pairs;
 
         return $clone;
+    }
+
+    /**
+     * Adds a query pair only if it is not already present in a given array.
+     *
+     * @param array $pairs
+     * @param array $pair
+     *
+     * @return array
+     */
+    private function removeDuplicates(array $pairs, array $pair): array
+    {
+        if (!in_array($pair, $pairs, true)) {
+            $pairs[] = $pair;
+        }
+
+        return $pairs;
     }
 
     /**
@@ -445,13 +474,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function withoutEmptyPairs(): self
     {
-        $filter = function (array $pairs): bool {
-            return '' !== $pairs[0]
-                && null !== $pairs[1]
-                && '' !== $pairs[1];
-        };
-
-        $pairs = array_filter($this->pairs, $filter);
+        $pairs = array_filter($this->pairs, [$this, 'filterEmptyPair']);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -460,6 +483,18 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         $clone->pairs = $pairs;
 
         return $clone;
+    }
+
+    /**
+     * Empty Pair filtering.
+     *
+     * @param array $pair
+     *
+     * @return bool
+     */
+    private function filterEmptyPair(array $pair): bool
+    {
+        return '' !== $pair[0] && null !== $pair[1] && '' !== $pair[1];
     }
 
     /**
@@ -476,13 +511,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function withoutNumericIndices(): self
     {
-        $mapper = function (array $pair): array {
-            $pair[0] = preg_replace(',\[\d+\],', '[]', $pair[0]);
-
-            return $pair;
-        };
-
-        $pairs = array_map($mapper, $this->pairs);
+        $pairs = array_map([$this, 'encodeNumericIndices'], $this->pairs);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -491,6 +520,22 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         $clone->pairs = $pairs;
 
         return $clone;
+    }
+
+    /**
+     * Remove numeric indices from pairs.
+     *
+     * @param array $pair
+     *.
+     * @return array
+     */
+    private function encodeNumericIndices(array $pair): array
+    {
+        static $regexp = ',\[\d+\],';
+
+        $pair[0] = preg_replace($regexp, '[]', $pair[0]);
+
+        return $pair;
     }
 
     /**
@@ -530,19 +575,19 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      *
      * @throws TypeError if the value type is invalid
      *
-     * @return string|null
+     * @return mixed
      */
     private static function filterPair($value)
     {
-        if (null === $value) {
+        if (null === $value || is_scalar($value)) {
             return $value;
         }
 
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
+        if ($value instanceof ComponentInterface) {
+            return $value->getContent();
         }
 
-        if (is_scalar($value) || method_exists($value, '__toString')) {
+        if (method_exists($value, '__toString')) {
             return (string) $value;
         }
 
@@ -562,16 +607,8 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function appendTo(string $key, $value): self
     {
-        if (method_exists($value, '__toString')) {
-            $value = (string) $value;
-        }
-
-        if (null !== $value && !is_scalar($value)) {
-            throw new TypeError('The value must be a scalar or null %s given');
-        }
-
         $clone = clone $this;
-        $clone->pairs[] = [$key, $value];
+        $clone->pairs[] = [$key, $this->filterPair($value)];
 
         return $clone;
     }
@@ -582,28 +619,25 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
-     * @param string ...$keys the list of keys to remove from the collection
+     * @param string $key     the first key to remove
+     * @param string ...$keys the list of remaining keys to remove
      *
      * @return self
      */
-    public function withoutPairs(string ...$keys): self
+    public function withoutPairs(string $key, string ...$keys): self
     {
-        $pairs = [];
-        foreach ($this->pairs as $pair) {
-            foreach ($keys as $key) {
-                if ($key === $pair[0]) {
-                    continue 2;
-                }
-            }
-            $pairs[] = $pair;
-        }
-
-        if ($pairs === $this->pairs) {
+        $keys[] = $key;
+        $keys_to_remove = array_intersect($keys, array_column($this->pairs, 0));
+        if (empty($keys_to_remove)) {
             return $this;
         }
 
+        $filter = function (array $pair) use ($keys_to_remove): bool {
+            return !in_array($pair[0], $keys_to_remove, true);
+        };
+
         $clone = clone $this;
-        $clone->pairs = $pairs;
+        $clone->pairs = array_filter($this->pairs, $filter);
 
         return $clone;
     }
@@ -618,12 +652,16 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      * considered to be empty if its value is equal to the empty string, the null value
      * or its key is equal to the empty string.
      *
-     * @param null|string $query the data to be merged
+     * @param mixed $query the data to be merged
      *
      * @return self
      */
     public function merge($query): self
     {
+        if ($query instanceof ComponentInterface) {
+            $query = $query->getContent();
+        }
+
         $pairs = Uri\query_parse($query, $this->separator);
         if ($pairs === $this->pairs) {
             return $this;
@@ -632,27 +670,27 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         $keys_to_remove = array_intersect(array_column($pairs, 0), array_column($this->pairs, 0));
         $base_pairs = $this->pairs;
         if (!empty($keys_to_remove)) {
-            foreach ($base_pairs as &$pair) {
-                if (in_array($pair[0], $keys_to_remove, true)) {
-                    $pair = null;
-                }
-            }
-            unset($pair);
-            $base_pairs = array_filter($base_pairs);
+            $base_pairs = array_filter($base_pairs, function (array $pair) use ($keys_to_remove): bool {
+                return !in_array($pair[0], $keys_to_remove, true);
+            });
         }
-
-        $pairs = array_merge($base_pairs, $pairs);
-        foreach ($pairs as &$pair) {
-            if ($pair[0] === '' && $pair[1] === null) {
-                $pair = null;
-            }
-        }
-        unset($pair);
 
         $clone = clone $this;
-        $clone->pairs = array_filter($pairs);
+        $clone->pairs = array_filter(array_merge($base_pairs, $pairs), [$this, 'filterEmptyValue']);
 
         return $clone;
+    }
+
+    /**
+     * Empty Pair filtering.
+     *
+     * @param array $pair
+     *
+     * @return bool
+     */
+    private function filterEmptyValue(array $pair): bool
+    {
+        return null !== $pair[1] && '' !== $pair[1];
     }
 
     /**
@@ -663,28 +701,37 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      *
      * If the pair already exists the value will be added to it.
      *
-     * @param string|null $query
+     * @param mixed $query
      *
      * @return self
      */
     public function append($query): self
     {
+        if ($query instanceof ComponentInterface) {
+            $query = $query->getContent();
+        }
+
         $pairs = array_merge($this->pairs, Uri\query_parse($query, $this->separator));
         if ($pairs === $this->pairs) {
             return $this;
         }
 
-        foreach ($pairs as &$pair) {
-            if ($pair[0] === '' && $pair[1] === null) {
-                $pair = null;
-            }
-        }
-        unset($pair);
-
         $clone = clone $this;
-        $clone->pairs = array_filter($pairs);
+        $clone->pairs = array_filter($pairs, [$this, 'filterNullPair']);
 
         return $clone;
+    }
+
+    /**
+     * Empty Pair filtering.
+     *
+     * @param array $pair
+     *
+     * @return bool
+     */
+    private function filterNullPair(array $pair): bool
+    {
+        return '' !== $pair[0] || null !== $pair[1];
     }
 
     /**
@@ -694,22 +741,24 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      * an instance that contains the modified component without PHP's value.
      * PHP's mangled is not taken into account.
      *
-     * @param string ...$offsets the list of params key to remove from the query
+     * @param string $offset     the first offset to remove
+     * @param string ...$offsets the list of remaining offsets to remove
      *
-     * @return static
+     * @return self
      */
-    public function withoutParams(string ...$offsets): self
+    public function withoutParams(string $offset, string ...$offsets): self
     {
-        $pairs = [];
-        foreach ($this->pairs as $pair) {
-            foreach ($offsets as $offset) {
-                if (preg_match(',^'.preg_quote($offset, ',').'(\[.*\].*)?$,', $pair[0])) {
-                    continue 2;
-                }
-            }
-            $pairs[] = $pair;
-        }
+        $offsets[] = $offset;
+        $mapper = function (string $offset): string {
+            return preg_quote($offset, ',').'(\[.*\].*)?';
+        };
 
+        $regexp = ',^('.implode('|', array_map($mapper, $offsets)).')?$,';
+        $filter = function (array $pair) use ($regexp): bool {
+            return !preg_match($regexp, $pair[0]);
+        };
+
+        $pairs = array_filter($this->pairs, $filter);
         if ($pairs === $this->pairs) {
             return $this;
         }
