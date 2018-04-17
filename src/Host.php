@@ -82,7 +82,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
-     * General registered name regular expression
+     * IPvFuture regular expression
      */
     const REGEXP_IP_FUTURE = '/^
         v(?<version>[A-F0-9]+)\.
@@ -711,6 +711,34 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
     }
 
     /**
+     * Appends a label to the host.
+     *
+     * @see ::withLabel
+     *
+     * @param mixed $label
+     *
+     * @return self
+     */
+    public function append($label): self
+    {
+        return $this->withLabel(count($this->labels), $label);
+    }
+
+    /**
+     * Prepends a label to the host.
+     *
+     * @see ::withLabel
+     *
+     * @param mixed $label
+     *
+     * @return self
+     */
+    public function prepend($label): self
+    {
+        return $this->withLabel(- count($this->labels) - 1, $label);
+    }
+
+    /**
      * Returns an instance with the modified label.
      *
      * This method MUST retain the state of the current instance, and return
@@ -738,14 +766,29 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
             $offset += $nb_labels;
         }
 
-        $label = (new self($label))->withoutRootLabel();
-        if ($label->getContent(self::NO_ENCODING) === ($this->labels[$offset] ?? null)) {
+        if (!$label instanceof self) {
+            $label = new self($label);
+        }
+
+        if ($nb_labels === $offset) {
+            return new self(rtrim($this->getContent(), self::SEPARATOR).self::SEPARATOR.ltrim($label->getContent(), self::SEPARATOR));
+        }
+
+        if (-1 === $offset) {
+            return new self(rtrim($label->getContent(), self::SEPARATOR).self::SEPARATOR.ltrim($this->getContent(), self::SEPARATOR));
+        }
+
+        if (1 === $nb_labels) {
+            return self::IS_ABSOLUTE === $this->is_absolute ? $label->withRootLabel() : $label;
+        }
+
+        $label = trim($label->getContent(), self::SEPARATOR);
+        if ($label === $this->labels[$offset]) {
             return $this;
         }
 
         $data = $this->labels;
-        $data[$offset] = $label->getContent(self::NO_ENCODING);
-        ksort($data);
+        $data[$offset] = $label;
 
         return self::createFromLabels($data, $this->is_absolute);
     }

@@ -31,6 +31,11 @@ class Path extends AbstractComponent
     /**
      * @internal
      */
+    const SEPARATOR = '/';
+
+    /**
+     * @internal
+     */
     const DOT_SEGMENTS = ['.' => 1, '..' => 1];
 
     /**
@@ -56,14 +61,14 @@ class Path extends AbstractComponent
     /**
      * @var string
      */
-    protected $path;
+    protected $component;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new static($properties['path']);
+        return new static($properties['component']);
     }
 
     /**
@@ -73,7 +78,7 @@ class Path extends AbstractComponent
      */
     public function __construct($path = '')
     {
-        $this->path = $this->validate($path);
+        $this->component = $this->validate($path);
     }
 
     /**
@@ -92,7 +97,7 @@ class Path extends AbstractComponent
             return $path;
         }
 
-        throw new TypeError(sprintf('Expected path to be stringable; received %s', gettype($path)));
+        throw new TypeError('The path can not be null');
     }
 
     /**
@@ -100,7 +105,7 @@ class Path extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return ['component' => $this->path];
+        return ['component' => $this->component];
     }
 
     /**
@@ -124,7 +129,7 @@ class Path extends AbstractComponent
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        return $this->encodeComponent($this->path, $enc_type, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_RFC3987_ENCODING);
+        return $this->encodeComponent($this->component, $enc_type, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_RFC3987_ENCODING);
     }
 
     /**
@@ -134,7 +139,39 @@ class Path extends AbstractComponent
      */
     public function isAbsolute(): bool
     {
-        return '/' === ($this->path[0] ?? '');
+        return self::SEPARATOR === ($this->component[0] ?? '');
+    }
+
+    /**
+     * Returns whether or not the path has a trailing delimiter.
+     *
+     * @return bool
+     */
+    public function hasTrailingSlash(): bool
+    {
+        $path = $this->__toString();
+
+        return '' !== $path && self::SEPARATOR === substr($path, -1);
+    }
+
+    /**
+     * Returns an instance with the specified string.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified data
+     *
+     * @param string $value
+     *
+     * @return ComponentInterface
+     */
+    public function withContent($value)
+    {
+        $value = $this->validate($value);
+        if ($value === $this->component) {
+            return $this;
+        }
+
+        return new static($value);
     }
 
     /**
@@ -153,10 +190,10 @@ class Path extends AbstractComponent
             return $this;
         }
 
-        $input = explode('/', $current);
-        $new = implode('/', array_reduce($input, [$this, 'filterDotSegments'], []));
+        $input = explode(self::SEPARATOR, $current);
+        $new = implode(self::SEPARATOR, array_reduce($input, [$this, 'filterDotSegments'], []));
         if (isset(self::DOT_SEGMENTS[end($input)])) {
-            $new .= '/';
+            $new .= self::SEPARATOR ;
         }
 
         return new static($new);
@@ -188,26 +225,6 @@ class Path extends AbstractComponent
     }
 
     /**
-     * Returns an instance with the specified string.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified data
-     *
-     * @param string $value
-     *
-     * @return ComponentInterface
-     */
-    public function withContent($value)
-    {
-        $value = $this->validate($value);
-        if ($value === $this->path) {
-            return $this;
-        }
-
-        return new static($value);
-    }
-
-    /**
      * Returns an instance without duplicate delimiters.
      *
      * This method MUST retain the state of the current instance, and return
@@ -218,19 +235,7 @@ class Path extends AbstractComponent
      */
     public function withoutEmptySegments()
     {
-        return new static(preg_replace(',/+,', '/', $this->__toString()));
-    }
-
-    /**
-     * Returns whether or not the path has a trailing delimiter.
-     *
-     * @return bool
-     */
-    public function hasTrailingSlash(): bool
-    {
-        $path = $this->__toString();
-
-        return '' !== $path && '/' === substr($path, -1);
+        return new static(preg_replace(',/+,', self::SEPARATOR, $this->__toString()));
     }
 
     /**
@@ -245,7 +250,7 @@ class Path extends AbstractComponent
      */
     public function withTrailingSlash()
     {
-        return $this->hasTrailingSlash() ? $this : new static($this->__toString().'/');
+        return $this->hasTrailingSlash() ? $this : new static($this->__toString().self::SEPARATOR);
     }
 
     /**
@@ -275,7 +280,7 @@ class Path extends AbstractComponent
      */
     public function withLeadingSlash()
     {
-        return $this->isAbsolute() ? $this : new static('/'.$this->__toString());
+        return $this->isAbsolute() ? $this : new static(self::SEPARATOR.$this->__toString());
     }
 
     /**

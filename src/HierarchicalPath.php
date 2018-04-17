@@ -30,11 +30,6 @@ use Traversable;
  */
 final class HierarchicalPath extends Path implements Countable, IteratorAggregate
 {
-    /**
-     * @internal
-     */
-    const SEPARATOR = '/';
-
     const IS_ABSOLUTE = 1;
 
     const IS_RELATIVE = 0;
@@ -72,7 +67,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
         $path = implode(self::SEPARATOR, $segments);
         if (static::IS_ABSOLUTE !== $type) {
-            return new static(ltrim($path, '/'));
+            return new static(ltrim($path, self::SEPARATOR));
         }
 
         if (self::SEPARATOR !== ($path[0] ?? '')) {
@@ -90,11 +85,18 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     public function __construct($path = '')
     {
         parent::__construct($path);
-        $this->segments = $this->filterSegments($this->path);
+        $this->segments = $this->filterSegments($this->component);
         $this->is_absolute = $this->isAbsolute() ? self::IS_ABSOLUTE : self::IS_RELATIVE;
     }
 
-    private function filterSegments(string $path)
+    /**
+     * Filter the path segments.
+     *
+     * @param string $path
+     *
+     * @return array
+     */
+    private function filterSegments(string $path): array
     {
         if ('' === $path) {
             return [''];
@@ -135,7 +137,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     public function __debugInfo()
     {
         return [
-            'component' => $this->path,
+            'component' => $this->component,
             'segments' => $this->segments,
             'is_absolute' => $this->isAbsolute(),
         ];
@@ -222,6 +224,34 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
+     * Appends a segment to the path.
+     *
+     * @see ::withSegment
+     *
+     * @param mixed $segment
+     *
+     * @return self
+     */
+    public function append($segment): self
+    {
+        return $this->withSegment(count($this->segments), $segment);
+    }
+
+    /**
+     * Prepends a segment to the path.
+     *
+     * @see ::withSegment
+     *
+     * @param mixed $segment
+     *
+     * @return self
+     */
+    public function prepend($segment): self
+    {
+        return $this->withSegment(- count($this->segments) - 1, $segment);
+    }
+
+    /**
      * Returns an instance with the modified segment.
      *
      * This method MUST retain the state of the current instance, and return
@@ -254,12 +284,12 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
         //append segment
         if ($nb_elements === $offset) {
-            return new self(rtrim($this->path, self::SEPARATOR).self::SEPARATOR.ltrim($segment->path, self::SEPARATOR));
+            return new self(rtrim($this->component, self::SEPARATOR).self::SEPARATOR.ltrim($segment->component, self::SEPARATOR));
         }
 
         //prepend segment
         if (-1 === $offset) {
-            return new self(rtrim($segment->path, self::SEPARATOR).self::SEPARATOR.ltrim($this->path, self::SEPARATOR));
+            return new self(rtrim($segment->component, self::SEPARATOR).self::SEPARATOR.ltrim($this->component, self::SEPARATOR));
         }
 
         //replace segment path while respecting path type
@@ -349,7 +379,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             $basename = new self($basename);
         }
 
-        if (false !== strpos($basename->path, self::SEPARATOR)) {
+        if (false !== strpos($basename->component, self::SEPARATOR)) {
             throw new Exception('The basename can not contain the path separator');
         }
 
@@ -373,11 +403,11 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             $extension = new self($extension);
         }
 
-        if (strpos($extension->path, self::SEPARATOR)) {
+        if (strpos($extension->component, self::SEPARATOR)) {
             throw new Exception('an extension sequence can not contain a path delimiter');
         }
 
-        if (0 === strpos($extension->path, '.')) {
+        if (0 === strpos($extension->component, '.')) {
             throw new Exception('an extension sequence can not contain a leading `.` character');
         }
 
@@ -410,7 +440,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             $param = ';'.$param;
         }
 
-        $extension = trim($extension->path);
+        $extension = trim($extension->component);
         if ('' === $extension) {
             return $ext.$param;
         }

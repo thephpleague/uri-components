@@ -40,14 +40,14 @@ final class Scheme extends AbstractComponent
     /**
      * @var string|null
      */
-    private $scheme;
+    private $component;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['scheme']);
+        return new self($properties['component']);
     }
 
     /**
@@ -57,7 +57,7 @@ final class Scheme extends AbstractComponent
      */
     public function __construct($scheme = null)
     {
-        $this->scheme = $this->validate($scheme);
+        $this->component = $this->validate($scheme);
     }
 
     /**
@@ -90,7 +90,7 @@ final class Scheme extends AbstractComponent
     {
         $this->filterEncoding($enc_type);
 
-        return $this->scheme;
+        return $this->component;
     }
 
     /**
@@ -98,7 +98,7 @@ final class Scheme extends AbstractComponent
      */
     public function __toString()
     {
-        return (string) $this->scheme;
+        return (string) $this->component;
     }
 
     /**
@@ -106,11 +106,11 @@ final class Scheme extends AbstractComponent
      */
     public function getUriComponent(): string
     {
-        if (null === $this->scheme) {
+        if (null === $this->component) {
             return '';
         }
 
-        return $this->scheme.':';
+        return $this->component.':';
     }
 
     /**
@@ -118,7 +118,7 @@ final class Scheme extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return ['component' => $this->scheme];
+        return ['component' => $this->component];
     }
 
     /**
@@ -127,12 +127,12 @@ final class Scheme extends AbstractComponent
     public function withContent($content)
     {
         $content = $this->validate($content);
-        if ($content === $this->scheme) {
+        if ($content === $this->component) {
             return $this;
         }
 
         $clone = clone $this;
-        $clone->scheme = $content;
+        $clone->component = $content;
 
         return $clone;
     }

@@ -43,14 +43,14 @@ final class Fragment extends AbstractComponent
     /**
      * @var string|null
      */
-    private $fragment;
+    private $component;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['fragment']);
+        return new self($properties['component']);
     }
 
     /**
@@ -60,7 +60,7 @@ final class Fragment extends AbstractComponent
      */
     public function __construct($fragment = null)
     {
-        $this->fragment = $this->validateComponent($fragment);
+        $this->component = $this->validateComponent($fragment);
     }
 
     /**
@@ -68,7 +68,7 @@ final class Fragment extends AbstractComponent
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
-        return $this->encodeComponent($this->fragment, $enc_type, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
+        return $this->encodeComponent($this->component, $enc_type, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
     }
 
     /**
@@ -84,7 +84,7 @@ final class Fragment extends AbstractComponent
      */
     public function getUriComponent(): string
     {
-        if (null === $this->fragment) {
+        if (null === $this->component) {
             return '';
         }
 
@@ -96,7 +96,7 @@ final class Fragment extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return ['component' => $this->fragment];
+        return ['component' => $this->component];
     }
 
     /**
@@ -105,12 +105,12 @@ final class Fragment extends AbstractComponent
     public function withContent($content)
     {
         $content = $this->validateComponent($content);
-        if ($content === $this->fragment) {
+        if ($content === $this->component) {
             return $this;
         }
 
         $clone = clone $this;
-        $clone->fragment = $content;
+        $clone->component = $content;
 
         return $clone;
     }
