@@ -55,6 +55,19 @@ final class DataPath extends Path
     const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
 
     /**
+     * @internal
+     */
+    const REGEXP_DATAPATH_ENCODING = '/
+        (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+
+        |%(?![A-Fa-f0-9]{2}))
+    /x';
+
+    /**
+     * @internal
+     */
+    const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
+
+    /**
      * The mediatype mimetype.
      *
      * @var string
@@ -111,7 +124,7 @@ final class DataPath extends Path
     public function __construct($path = '')
     {
         parent::__construct($path);
-        $components = $this->parse($this->path);
+        $components = $this->parse($this->component);
         $this->document = $components['document'];
         $this->mimetype = $components['mimetype'];
         $this->parameters = $components['parameters'];
@@ -128,8 +141,7 @@ final class DataPath extends Path
             return 'text/plain;charset=us-ascii,';
         }
 
-        static $pattern  = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
-        if (preg_match($pattern, $path)) {
+        if (preg_match(self::REGEXP_DATAPATH, $path)) {
             return substr($path, 0, -1).'charset=us-ascii,';
         }
 
@@ -255,7 +267,7 @@ final class DataPath extends Path
     public function __debugInfo()
     {
         return [
-            'component' => $this->path,
+            'component' => $this->component,
             'mimetype' => $this->mimetype,
             'parameters' => $this->parameters,
             'is_binary' => $this->is_binary_data,
@@ -393,9 +405,7 @@ final class DataPath extends Path
 
         $path = $mimetype.$parameters.','.$data;
 
-        static $regexp = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|%(?![A-Fa-f0-9]{2}))/x';
-
-        return preg_replace_callback($regexp, [$this, 'encodeMatches'], $path) ?? $path;
+        return preg_replace_callback(self::REGEXP_DATAPATH_ENCODING, [$this, 'encodeMatches'], $path) ?? $path;
     }
 
     /**

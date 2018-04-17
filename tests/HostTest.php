@@ -620,6 +620,78 @@ class HostTest extends TestCase
     }
 
     /**
+     * @covers ::prepend
+     * @covers ::withLabel
+     *
+     * @param string $raw
+     * @param string $prepend
+     * @param string $expected
+     *
+     * @dataProvider validPrepend
+     */
+    public function testPrepend($raw, $prepend, $expected)
+    {
+        $this->assertSame($expected, (string) (new Host($raw))->prepend($prepend));
+    }
+
+    public function validPrepend()
+    {
+        return [
+            ['secure.example.com', 'master', 'master.secure.example.com'],
+            ['secure.example.com', 'master.', 'master.secure.example.com'],
+            ['secure.example.com.', 'master', 'master.secure.example.com.'],
+            ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
+            ['example.com', '', '.example.com'],
+        ];
+    }
+
+    /**
+     * @covers ::prepend
+     * @covers ::withLabel
+     */
+    public function testPrependIpFailed()
+    {
+        $this->expectException(Exception::class);
+        (new Host('::1'))->prepend(new Host('foo'));
+    }
+
+    /**
+     * @covers ::append
+     * @covers ::withLabel
+     *
+     * @param string $raw
+     * @param string $append
+     * @param string $expected
+     *
+     * @dataProvider validAppend
+     */
+    public function testAppend($raw, $append, $expected)
+    {
+        $this->assertSame($expected, (string) (new Host($raw))->append($append));
+    }
+
+    public function validAppend()
+    {
+        return [
+            ['secure.example.com', 'master', 'secure.example.com.master'],
+            ['secure.example.com', 'master.', 'secure.example.com.master.'],
+            ['secure.example.com.', 'master', 'secure.example.com.master'],
+            ['127.0.0.1', 'toto', '127.0.0.1.toto'],
+            ['example.com', '', 'example.com.'],
+        ];
+    }
+
+    /**
+     * @covers ::append
+     * @covers ::withLabel
+     */
+    public function testAppendIpFailed()
+    {
+        $this->expectException(Exception::class);
+        (new Host('[::1]'))->append('foo');
+    }
+
+    /**
      * @param string $raw
      * @param string $input
      * @param int    $offset

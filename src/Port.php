@@ -35,14 +35,14 @@ final class Port extends AbstractComponent
     /**
      * @var int|null
      */
-    private $port;
+    private $component;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['port']);
+        return new self($properties['component']);
     }
 
     /**
@@ -52,7 +52,7 @@ final class Port extends AbstractComponent
      */
     public function __construct($port = null)
     {
-        $this->port = $this->validate($port);
+        $this->component = $this->validate($port);
     }
 
     /**
@@ -85,7 +85,7 @@ final class Port extends AbstractComponent
     {
         $this->filterEncoding($enc_type);
 
-        return $this->port;
+        return $this->component;
     }
 
     /**
@@ -93,7 +93,7 @@ final class Port extends AbstractComponent
      */
     public function __toString()
     {
-        return (string) $this->port;
+        return (string) $this->component;
     }
 
     /**
@@ -101,11 +101,11 @@ final class Port extends AbstractComponent
      */
     public function getUriComponent(): string
     {
-        if (null === $this->port) {
+        if (null === $this->component) {
             return '';
         }
 
-        return ':'.$this->port;
+        return ':'.$this->component;
     }
 
     /**
@@ -113,7 +113,7 @@ final class Port extends AbstractComponent
      */
     public function __debugInfo()
     {
-        return ['component' => $this->port];
+        return ['component' => $this->component];
     }
 
     /**
@@ -122,12 +122,12 @@ final class Port extends AbstractComponent
     public function withContent($content)
     {
         $content = $this->validate($content);
-        if ($content === $this->port) {
+        if ($content === $this->component) {
             return $this;
         }
 
         $clone = clone $this;
-        $clone->port = $content;
+        $clone->component = $content;
 
         return $clone;
     }

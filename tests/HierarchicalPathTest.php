@@ -181,13 +181,14 @@ class HierarchicalPathTest extends TestCase
      * @param string $prepend
      * @param string $res
      * @dataProvider prependData
+     * @covers ::prepend
      * @covers ::withSegment
      */
     public function testPrepend($source, $prepend, $res)
     {
         $path = new Path($source);
 
-        $this->assertSame($res, (string) $path->withSegment(- count($path) - 1, $prepend));
+        $this->assertSame($res, (string) $path->prepend($prepend));
     }
 
     public function prependData()
@@ -207,13 +208,14 @@ class HierarchicalPathTest extends TestCase
      * @param string $append
      * @param string $res
      * @dataProvider appendData
+     * @covers ::append
      * @covers ::withSegment
      */
     public function testAppend($source, $append, $res)
     {
         $path = new Path($source);
 
-        $this->assertSame($res, (string) $path->withSegment(count($path), $append));
+        $this->assertSame($res, (string) $path->append($append));
     }
 
     public function appendData()
