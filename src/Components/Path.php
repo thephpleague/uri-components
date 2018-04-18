@@ -40,11 +40,6 @@ class Path extends AbstractComponent
 
     /**
      * @internal
-     */
-    const REGEXP_PREVENTS_DECODING = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]|2F,i';
-
-    /**
-     * @internal
      *
      * matches invalid URI chars + query and fragment delimiters
      */

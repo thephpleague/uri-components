@@ -549,11 +549,11 @@ class HostTest extends TestCase
      * @param int    $without
      * @param string $res
      * @dataProvider withoutProvider
-     * @covers ::withoutLabel
+     * @covers ::withoutLabels
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (string) (new Host($host))->withoutLabel($without));
+        $this->assertSame($res, (string) (new Host($host))->withoutLabels($without));
     }
 
     public function withoutProvider()
@@ -568,12 +568,12 @@ class HostTest extends TestCase
     }
 
     /**
-     * @covers ::withoutLabel
+     * @covers ::withoutLabels
      */
     public function testWithoutTriggersException()
     {
         $this->expectException(Exception::class);
-        (new Host('bébé.be'))->withoutLabel(-23);
+        (new Host('bébé.be'))->withoutLabels(-23);
     }
 
     /**

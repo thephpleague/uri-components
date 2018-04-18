@@ -12,12 +12,8 @@ System Requirements
 You need:
 
 - **PHP >= 7.0** but the latest stable version of PHP is recommended
-- the `intl` extension
 
-Dependencies
--------
-
-- [League Uri Hostname Parser](https://github.com/thephpleague/uri-hostname-parser)
+In order to handle IDN host you should also install the `intl` extension otherwise and Exception will be thrown when attempting to validate such host.
 
 Installation
 --------

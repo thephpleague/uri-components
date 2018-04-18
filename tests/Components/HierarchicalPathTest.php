@@ -274,15 +274,22 @@ class HierarchicalPathTest extends TestCase
      * Test AbstractSegment::without.
      *
      * @param string $origin
-     * @param int    $without
+     * @param mixed  $without
      * @param string $result
      *
      * @dataProvider withoutProvider
-     * @covers ::withoutSegment
+     * @covers ::withoutSegments
      */
     public function testWithout($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Path($origin))->withoutSegment($without));
+        $rest = [];
+        if (is_array($without)) {
+            $tmp = array_shift($without);
+            $rest = $without;
+            $without = $tmp;
+        }
+
+        $this->assertSame($result, (string) (new Path($origin))->withoutSegments($without, ...$rest));
     }
 
     public function withoutProvider()
@@ -292,16 +299,17 @@ class HierarchicalPathTest extends TestCase
             ['/master/test/query.php', -1, '/master/test'],
             ['/toto/le/heros/masson', 0, '/le/heros/masson'],
             ['/toto', -1, '/'],
+            ['/toto/le/heros/masson', [2, 3], '/toto/le'],
         ];
     }
 
     /**
-     * @covers ::withoutSegment
+     * @covers ::withoutSegments
      */
     public function testWithoutSegmentThrowsException()
     {
         $this->expectException(Exception::class);
-        (new Path('/test/'))->withoutSegment(23);
+        (new Path('/test/'))->withoutSegments(23);
     }
 
     /**

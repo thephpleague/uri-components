@@ -39,17 +39,66 @@ class PathTest extends TestCase
     public function validPathEncoding()
     {
         return [
-            ['toto', 'toto', 'toto'],
-            ['bar---', 'bar---', 'bar---'],
-            ['', '', ''],
-            ['"bad"', '%22bad%22', '%22bad%22'],
-            ['<not good>', '%3Cnot%20good%3E', '%3Cnot%20good%3E'],
-            ['{broken}', '%7Bbroken%7D', '%7Bbroken%7D'],
-            ['`oops`', '%60oops%60', '%60oops%60'],
-            ['\\slashy', '%5Cslashy', '%5Cslashy'],
-            ['foo^bar', 'foo%5Ebar', 'foo%5Ebar'],
-            ['foo^bar/baz', 'foo%5Ebar/baz', 'foo%5Ebar/baz'],
-            ['foo%2Fbar', 'foo%2Fbar', 'foo%2Fbar'],
+            [
+                'toto',
+                'toto',
+                'toto',
+            ],
+            [
+                'bar---',
+                'bar---',
+                'bar---',
+            ],
+            [
+                '',
+                '',
+                '',
+            ],
+            [
+                '"bad"',
+                '%22bad%22',
+                '%22bad%22',
+            ],
+            [
+                '<not good>',
+                '%3Cnot%20good%3E',
+                '%3Cnot%20good%3E',
+            ],
+            [
+                '{broken}',
+                '%7Bbroken%7D',
+                '%7Bbroken%7D',
+            ],
+            [
+                '`oops`',
+                '%60oops%60',
+                '%60oops%60',
+            ],
+            [
+                '\\slashy',
+                '%5Cslashy',
+                '%5Cslashy',
+            ],
+            [
+                'foo^bar',
+                'foo%5Ebar',
+                'foo%5Ebar',
+            ],
+            [
+                'foo^bar/baz',
+                'foo%5Ebar/baz',
+                'foo%5Ebar/baz',
+            ],
+            [
+                'foo%2Fbar',
+                'foo%2Fbar',
+                'foo%2Fbar',
+            ],
+            [
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
+            ],
         ];
     }
 

@@ -787,10 +787,10 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
             return $this;
         }
 
-        $data = $this->labels;
-        $data[$offset] = $label;
+        $labels = $this->labels;
+        $labels[$offset] = $label;
 
-        return self::createFromLabels($data, $this->is_absolute);
+        return self::createFromLabels($labels, $this->is_absolute);
     }
 
     /**
@@ -802,27 +802,40 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      * If $key is non-negative, the removed label will be the label at $key position from the start.
      * If $key is negative, the removed label will be the label at $key position from the end.
      *
-     * @param int $key the list of keys to remove from the collection
+     * @param int $key     required key to remove
+     * @param int ...$keys remaining keys to remove
      *
      * @throws Exception If the key is invalid
      *
      * @return self
      */
-    public function withoutLabel(int $key): self
+    public function withoutLabels(int $key, int ...$keys): self
     {
+        array_unshift($keys, $key);
         $nb_elements = count($this->labels);
-        $offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]);
-        if (false === $offset) {
-            throw new Exception(sprintf('the given key `%s` is invalid', $key));
+        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
+        $deleted_keys = [];
+
+        foreach ($keys as $key) {
+            if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
+                throw new Exception(sprintf('the key `%s` is invalid', $key));
+            }
+
+            if ($offset < 0) {
+                $offset += $nb_elements;
+            }
+
+            $deleted_keys[] = $offset;
         }
 
-        if ($offset < 0) {
-            $offset += $nb_elements;
-        }
+        $deleted_keys = array_keys(array_count_values($deleted_keys));
+        $filter = function ($key) use ($deleted_keys): bool {
+            return !in_array($key, $deleted_keys, true);
+        };
 
-        $data = $this->labels;
-        unset($data[$offset]);
-
-        return self::createFromLabels($data, $this->is_absolute);
+        return self::createFromLabels(
+            array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY),
+            $this->is_absolute
+        );
     }
 }
