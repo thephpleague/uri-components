@@ -2,12 +2,15 @@
 /**
  * League.Uri (http://uri.thephpleague.com).
  *
- * @package   League.uri
- * @author    Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @copyright 2016 Ignace Nyamagana Butera
- * @license   https://github.com/thephpleague/uri/blob/master/LICENSE (MIT License)
- * @version   4.2.0
- * @link      https://github.com/thephpleague/uri/
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    2.0.0
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 declare(strict_types=1);
 
@@ -23,7 +26,7 @@ use Psr\Http\Message\UriInterface;
  *
  * @package League\Uri
  * @author  Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since   1.0.0
+ * @since   2.0.0
  *
  * @internal Use the function League\Uri\relativize instead
  */
