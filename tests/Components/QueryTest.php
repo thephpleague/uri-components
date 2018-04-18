@@ -305,7 +305,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::append
-     * @covers ::filterNullPair
+     * @covers ::filterEmptyValue
      *
      * @dataProvider validAppendValue
      * @param null|string $query

@@ -690,7 +690,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     private function filterEmptyValue(array $pair): bool
     {
-        return null !== $pair[1] && '' !== $pair[1];
+        return '' !== $pair[0] || null !== $pair[1];
     }
 
     /**
@@ -717,21 +717,9 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         }
 
         $clone = clone $this;
-        $clone->pairs = array_filter($pairs, [$this, 'filterNullPair']);
+        $clone->pairs = array_filter($pairs, [$this, 'filterEmptyValue']);
 
         return $clone;
-    }
-
-    /**
-     * Empty Pair filtering.
-     *
-     * @param array $pair
-     *
-     * @return bool
-     */
-    private function filterNullPair(array $pair): bool
-    {
-        return '' !== $pair[0] || null !== $pair[1];
     }
 
     /**

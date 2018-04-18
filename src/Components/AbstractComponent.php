@@ -57,7 +57,13 @@ abstract class AbstractComponent implements ComponentInterface
     /**
      * @internal
      */
-    const REGEXP_PREVENTS_DECODING = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
+    const REGEXP_PREVENTS_DECODING = ',%2[A-F|1-2|4|6-9]|
+        3[0-9|B|D]|
+        4[1-9|A-F]|
+        5[0-9|A|F]|
+        6[1-9|A-F]|
+        7[0-9|E]
+    ,ix';
 
     /**
      * @internal

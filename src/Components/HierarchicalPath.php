@@ -317,27 +317,39 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * If $key is non-negative, the removed segment will be the segment at $key position from the start.
      * If $key is negative, the removed segment will be the segment at $key position from the end.
      *
-     * @param int $key the list of keys to remove from the collection
+     * @param int $key     required key to remove
+     * @param int ...$keys remaining keys to remove
      *
      * @throws Exception If the key is invalid
      *
      * @return self
      */
-    public function withoutSegment(int $key): self
+    public function withoutSegments(int $key, int ...$keys): self
     {
+        array_unshift($keys, $key);
         $nb_elements = count($this->segments);
-        if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]]))) {
-            throw new Exception(sprintf('the given key `%s` is invalid', $key));
+        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
+        $deleted_keys = [];
+        foreach ($keys as $key) {
+            if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
+                throw new Exception(sprintf('the key `%s` is invalid', $key));
+            }
+
+            if ($offset < 0) {
+                $offset += $nb_elements;
+            }
+            $deleted_keys[] = $offset;
         }
 
-        if ($offset < 0) {
-            $offset += $nb_elements;
-        }
+        $deleted_keys = array_keys(array_count_values($deleted_keys));
+        $filter = function ($key) use ($deleted_keys): bool {
+            return !in_array($key, $deleted_keys, true);
+        };
 
-        $segments = $this->segments;
-        unset($segments[$offset]);
-
-        return self::createFromSegments($segments, $this->is_absolute);
+        return self::createFromSegments(
+            array_filter($this->segments, $filter, ARRAY_FILTER_USE_KEY),
+            $this->is_absolute
+        );
     }
 
     /**
