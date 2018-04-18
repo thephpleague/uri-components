@@ -2,13 +2,15 @@
 /**
  * League.Uri (http://uri.thephpleague.com).
  *
- * @package    League.uri
- * @subpackage League\Uri\Modifiers
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @copyright  2017 Ignace Nyamagana Butera
- * @license    https://github.com/thephpleague/uri-manipulations/blob/master/LICENSE (MIT License)
- * @version    1.5.0
- * @link       https://github.com/thephpleague/uri-manipulations
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    2.0.0
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 declare(strict_types=1);
 
@@ -95,14 +97,12 @@ function add_basepath($uri, $path)
  */
 function add_leading_slash($uri)
 {
-    filter_uri($uri);
-
-    $path = $uri->getPath();
-    if ('/' !== $path) {
+    $path = filter_uri($uri)->getPath();
+    if ('/' !== ($path[0] ?? '')) {
         $path = '/'.$path;
     }
 
-    return $uri->withPath($path);
+    return normalize_path($uri, $path);
 }
 
 /**
@@ -128,8 +128,7 @@ function add_root_label($uri)
  */
 function add_trailing_slash($uri)
 {
-    filter_uri($uri);
-    $path = $uri->getPath();
+    $path = filter_uri($uri)->getPath();
     if ('/' !== substr($path, -1)) {
         $path .= '/';
     }
@@ -147,9 +146,7 @@ function add_trailing_slash($uri)
  */
 function append_host($uri, $host)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->append($host));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->append($host));
 }
 
 /**
@@ -162,9 +159,7 @@ function append_host($uri, $host)
  */
 function append_path($uri, string $path)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new HierarchicalPath($uri->getPath()))->append($path));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->append($path));
 }
 
 /**
@@ -177,9 +172,7 @@ function append_path($uri, string $path)
  */
 function append_query($uri, $query)
 {
-    filter_uri($uri);
-
-    return $uri->withQuery((string) (new Query($uri->getQuery()))->append($query));
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->append($query));
 }
 
 /**
@@ -191,9 +184,7 @@ function append_query($uri, $query)
  */
 function host_to_ascii($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost())));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost())));
 }
 
 /**
@@ -205,9 +196,7 @@ function host_to_ascii($uri)
  */
 function host_to_unicode($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->getContent(Host::RFC3987_ENCODING));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->getContent(Host::RFC3987_ENCODING));
 }
 
 /**
@@ -219,9 +208,7 @@ function host_to_unicode($uri)
  */
 function is_absolute($uri): bool
 {
-    filter_uri($uri);
-
-    return '' !== $uri->getScheme();
+    return '' !== filter_uri($uri)->getScheme();
 }
 
 /**
@@ -233,9 +220,7 @@ function is_absolute($uri): bool
  */
 function is_absolute_path($uri): bool
 {
-    filter_uri($uri);
-
-    return '' === $uri->getScheme()
+    return '' === filter_uri($uri)->getScheme()
         && '' === $uri->getAuthority()
         && '/' === substr($uri->getPath(), 0, 1);
 }
@@ -249,9 +234,7 @@ function is_absolute_path($uri): bool
  */
 function is_network_path($uri): bool
 {
-    filter_uri($uri);
-
-    return '' === $uri->getScheme() && '' !== $uri->getAuthority();
+    return '' === filter_uri($uri)->getScheme() && '' !== $uri->getAuthority();
 }
 
 /**
@@ -263,9 +246,9 @@ function is_network_path($uri): bool
  */
 function is_relative_path($uri): bool
 {
-    filter_uri($uri);
-
-    return '' === $uri->getScheme() && '' === $uri->getAuthority() && '/' !== substr($uri->getPath(), 0, 1);
+    return '' === filter_uri($uri)->getScheme()
+        && '' === $uri->getAuthority()
+        && '/' !== substr($uri->getPath(), 0, 1);
 }
 
 /**
@@ -278,8 +261,6 @@ function is_relative_path($uri): bool
  */
 function is_same_document($uri, $base_uri): bool
 {
-    filter_uri($uri);
-
     return (string) normalize($uri)->withFragment('') === (string) normalize($base_uri)->withFragment('');
 }
 
@@ -293,9 +274,7 @@ function is_same_document($uri, $base_uri): bool
  */
 function merge_query($uri, $query)
 {
-    filter_uri($uri);
-
-    return $uri->withQuery((string) (new Query($uri->getQuery()))->merge($query));
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->merge($query));
 }
 
 /**
@@ -307,9 +286,7 @@ function merge_query($uri, $query)
  */
 function normalize($uri)
 {
-    filter_uri($uri);
-
-    $path = $uri->getPath();
+    $path = filter_uri($uri)->getPath();
     if ('/' === ($path[0] ?? '') || '' !== $uri->getScheme().$uri->getAuthority()) {
         $path = (string) (new Path($path))->withoutDotSegments();
     }
@@ -340,9 +317,7 @@ function normalize($uri)
  */
 function path_to_ascii($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withPath((string) (new DataPath($uri->getPath()))->toAscii());
+    return $uri->withPath((string) (new DataPath(filter_uri($uri)->getPath()))->toAscii());
 }
 
 /**
@@ -354,9 +329,7 @@ function path_to_ascii($uri)
  */
 function path_to_binary($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withPath((string) (new DataPath($uri->getPath()))->toBinary());
+    return $uri->withPath((string) (new DataPath(filter_uri($uri)->getPath()))->toBinary());
 }
 
 /**
@@ -369,9 +342,7 @@ function path_to_binary($uri)
  */
 function prepend_host($uri, $host)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->prepend($host));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->prepend($host));
 }
 
 /**
@@ -385,9 +356,7 @@ function prepend_host($uri, $host)
  */
 function prepend_path($uri, $path)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new HierarchicalPath($uri->getPath()))->prepend($path));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->prepend($path));
 }
 
 /**
@@ -444,9 +413,7 @@ function remove_basepath($uri, $path)
  */
 function remove_dot_segments($uri)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new Path($uri->getPath()))->withoutDotSegments());
+    return normalize_path($uri, (string) (new Path(filter_uri($uri)->getPath()))->withoutDotSegments());
 }
 
 /**
@@ -481,9 +448,7 @@ function normalize_path($uri, string $path = null)
  */
 function remove_empty_segments($uri)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new Path($uri->getPath()))->withoutEmptySegments());
+    return normalize_path($uri, (string) (new Path(filter_uri($uri)->getPath()))->withoutEmptySegments());
 }
 
 /**
@@ -496,9 +461,7 @@ function remove_empty_segments($uri)
  */
 function remove_labels($uri, array $keys)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->withoutLabels(...$keys));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutLabels(...$keys));
 }
 
 /**
@@ -510,9 +473,7 @@ function remove_labels($uri, array $keys)
  */
 function remove_leading_slash($uri)
 {
-    filter_uri($uri);
-
-    $path = $uri->getPath();
+    $path = filter_uri($uri)->getPath();
     if ('' !== $path && '/' === $path[0]) {
         $path = substr($path, 1);
     }
@@ -530,9 +491,7 @@ function remove_leading_slash($uri)
  */
 function remove_params($uri, array $keys)
 {
-    filter_uri($uri);
-
-    return $uri->withQuery((string) (new Query($uri->getQuery()))->withoutParams(...$keys));
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutParams(...$keys));
 }
 
 /**
@@ -545,9 +504,7 @@ function remove_params($uri, array $keys)
  */
 function remove_pairs($uri, array $keys)
 {
-    filter_uri($uri);
-
-    return $uri->withQuery((string) (new Query($uri->getQuery()))->withoutPairs(...$keys));
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutPairs(...$keys));
 }
 
 /**
@@ -559,9 +516,7 @@ function remove_pairs($uri, array $keys)
  */
 function remove_root_label($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->withoutRootLabel());
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutRootLabel());
 }
 
 /**
@@ -573,8 +528,7 @@ function remove_root_label($uri)
  */
 function remove_trailing_slash($uri)
 {
-    filter_uri($uri);
-    $path = $uri->getPath();
+    $path = filter_uri($uri)->getPath();
     if ('' !== $path && '/' === substr($path, -1)) {
         $path = substr($path, 0, -1);
     }
@@ -592,9 +546,7 @@ function remove_trailing_slash($uri)
  */
 function remove_segments($uri, array $keys)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new HierarchicalPath($uri->getPath()))->withoutSegments(...$keys));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withoutSegments(...$keys));
 }
 
 /**
@@ -606,101 +558,87 @@ function remove_segments($uri, array $keys)
  */
 function remove_zone_id($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->withoutZoneIdentifier());
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutZoneIdentifier());
 }
 
 /**
  * Replace the URI path basename.
  *
- * @param mixed $uri
- * @param mixed $path
+ * @param LeagueUriInterface|UriInterface $uri
+ * @param mixed                           $path
  *
  * @return LeagueUriInterface|UriInterface
  */
 function replace_basename($uri, $path)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new HierarchicalPath($uri->getPath()))->withBasename($path));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withBasename($path));
 }
 
 /**
  * Replace the data URI path parameters.
  *
- * @param mixed  $uri
- * @param string $parameters
+ * @param LeagueUriInterface|UriInterface $uri
+ * @param string                          $parameters
  *
  * @return LeagueUriInterface|UriInterface
  */
 function replace_data_uri_parameters($uri, string $parameters)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new DataPath($uri->getPath()))->withParameters($parameters));
+    return normalize_path($uri, (string) (new DataPath(filter_uri($uri)->getPath()))->withParameters($parameters));
 }
 
 /**
  * Replace the URI path dirname.
  *
- * @param mixed $uri
- * @param mixed $path
+ * @param LeagueUriInterface|UriInterface $uri
+ * @param mixed                           $path
  *
  * @return LeagueUriInterface|UriInterface
  */
 function replace_dirname($uri, $path)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new HierarchicalPath($uri->getPath()))->withDirname($path));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withDirname($path));
 }
 
 /**
  * Replace the URI path basename extension.
  *
- * @param mixed $uri
- * @param mixed $extension
+ * @param LeagueUriInterface|UriInterface $uri
+ * @param mixed                           $extension
  *
  * @return LeagueUriInterface|UriInterface
  */
 function replace_extension($uri, $extension)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new HierarchicalPath($uri->getPath()))->withExtension($extension));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withExtension($extension));
 }
 
 /**
  * Replace a label of the current URI host.
  *
- * @param mixed $uri
- * @param int   $offset
- * @param mixed $host
+ * @param LeagueUriInterface|UriInterface $uri
+ * @param int                             $offset
+ * @param mixed                           $host
  *
  * @return LeagueUriInterface|UriInterface
  */
 function replace_label($uri, int $offset, $host)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->withLabel($offset, $host));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withLabel($offset, $host));
 }
 
 /**
  * Replace a segment from the URI path according its offset.
  *
- * @param mixed $uri
- * @param int   $offset
- * @param mixed $path
+ * @param LeagueUriInterface|UriInterface $uri
+ * @param int                             $offset
+ * @param mixed                           $path
  *
  * @return LeagueUriInterface|UriInterface
  */
 function replace_segment($uri, int $offset, $path)
 {
-    filter_uri($uri);
-
-    return normalize_path($uri, (string) (new HierarchicalPath($uri->getPath()))->withSegment($offset, $path));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withSegment($offset, $path));
 }
 
 /**
@@ -731,9 +669,7 @@ function resolve($uri, $base_uri)
  */
 function sort_query($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withQuery((string) (new Query($uri->getQuery()))->sort());
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->sort());
 }
 
 /**
@@ -757,8 +693,7 @@ function uri_to_ascii($payload, string $separator = '&')
         return $formatter->format($payload);
     }
 
-    filter_uri($payload);
-    list($remaining_uri, $fragment) = explode('#', (string) $payload, 2) + ['', null];
+    list($remaining_uri, $fragment) = explode('#', (string) filter_uri($payload), 2) + ['', null];
     list(, $query) = explode('?', $remaining_uri, 2) + ['', null];
 
     $formatter->preserveFragment(null !== $fragment);
@@ -788,8 +723,7 @@ function uri_to_unicode($payload, string $separator = '&'): string
         return $formatter->format($payload);
     }
 
-    filter_uri($payload);
-    list($remaining_uri, $fragment) = explode('#', (string) $payload, 2) + [1 => null];
+    list($remaining_uri, $fragment) = explode('#', (string) filter_uri($payload), 2) + [1 => null];
     list(, $query) = explode('?', $remaining_uri, 2) + [1 => null];
 
     $formatter->preserveFragment(null !== $fragment);
