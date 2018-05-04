@@ -18,7 +18,6 @@ namespace League\Uri;
 
 use League\Uri\Components\ComponentInterface;
 use League\Uri\Components\DataPath;
-use League\Uri\Components\Fragment;
 use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
@@ -200,71 +199,6 @@ function host_to_unicode($uri)
 }
 
 /**
- * Tell whether the URI represents an absolute URI.
- *
- * @param LeagueUriInterface|UriInterface $uri
- *
- * @return bool
- */
-function is_absolute($uri): bool
-{
-    return '' !== filter_uri($uri)->getScheme();
-}
-
-/**
- * Tell whether the URI represents an absolute path.
- *
- * @param LeagueUriInterface|UriInterface $uri
- *
- * @return bool
- */
-function is_absolute_path($uri): bool
-{
-    return '' === filter_uri($uri)->getScheme()
-        && '' === $uri->getAuthority()
-        && '/' === substr($uri->getPath(), 0, 1);
-}
-
-/**
- * Tell whether the URI represents a network path.
- *
- * @param LeagueUriInterface|UriInterface $uri
- *
- * @return bool
- */
-function is_network_path($uri): bool
-{
-    return '' === filter_uri($uri)->getScheme() && '' !== $uri->getAuthority();
-}
-
-/**
- * Tell whether the URI represents a relative path.
- *
- * @param LeagueUriInterface|UriInterface $uri
- *
- * @return bool
- */
-function is_relative_path($uri): bool
-{
-    return '' === filter_uri($uri)->getScheme()
-        && '' === $uri->getAuthority()
-        && '/' !== substr($uri->getPath(), 0, 1);
-}
-
-/**
- * Tell whether both URI refers to the same document.
- *
- * @param LeagueUriInterface|UriInterface $uri
- * @param LeagueUriInterface|UriInterface $base_uri
- *
- * @return bool
- */
-function is_same_document($uri, $base_uri): bool
-{
-    return (string) normalize($uri)->withFragment('') === (string) normalize($base_uri)->withFragment('');
-}
-
-/**
  * Merge a new query with the existing URI query.
  *
  * @param LeagueUriInterface|UriInterface $uri
@@ -275,37 +209,6 @@ function is_same_document($uri, $base_uri): bool
 function merge_query($uri, $query)
 {
     return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->merge($query));
-}
-
-/**
- * Normalize an URI for comparison.
- *
- * @param LeagueUriInterface|UriInterface $uri
- *
- * @return LeagueUriInterface|UriInterface
- */
-function normalize($uri)
-{
-    $path = filter_uri($uri)->getPath();
-    if ('/' === ($path[0] ?? '') || '' !== $uri->getScheme().$uri->getAuthority()) {
-        $path = (string) (new Path($path))->withoutDotSegments();
-    }
-    $query = (string) (new Query($uri->getQuery()))->sort();
-    $fragment = (string) (new Fragment($uri->getFragment()));
-
-    $replace = function (array $matches): string {
-        return rawurldecode($matches[0]);
-    };
-
-    static $regexp = ',%(2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]),i';
-    list($path, $query, $fragment) = preg_replace_callback($regexp, $replace, [$path, $query, $fragment]);
-
-    return $uri
-        ->withHost((string) (new Host($uri->getHost())))
-        ->withPath($path)
-        ->withQuery($query)
-        ->withFragment($fragment)
-    ;
 }
 
 /**
@@ -357,25 +260,6 @@ function prepend_host($uri, $host)
 function prepend_path($uri, $path)
 {
     return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->prepend($path));
-}
-
-/**
- * Relativize an URI against a base URI.
- *
- * @see Relativizer::relativize()
- *
- * @param LeagueUriInterface|UriInterface $uri
- * @param LeagueUriInterface|UriInterface $base_uri
- *
- * @return LeagueUriInterface|UriInterface
- */
-function relativize($uri, $base_uri)
-{
-    static $relativizer;
-
-    $relativizer = $relativizer ?? new Relativizer();
-
-    return $relativizer->relativize($uri, $base_uri);
 }
 
 /**
@@ -639,25 +523,6 @@ function replace_label($uri, int $offset, $host)
 function replace_segment($uri, int $offset, $path)
 {
     return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withSegment($offset, $path));
-}
-
-/**
- * Resolve an URI against a base URI.
- *
- * @see Resolver::resolve()
- *
- * @param LeagueUriInterface|UriInterface $uri
- * @param LeagueUriInterface|UriInterface $base_uri
- *
- * @return LeagueUriInterface|UriInterface
- */
-function resolve($uri, $base_uri)
-{
-    static $resolver;
-
-    $resolver = $resolver ?? new Resolver();
-
-    return $resolver->resolve($uri, $base_uri);
 }
 
 /**
