@@ -1,4 +1,5 @@
 <?php
+
 /**
  * League.Uri (http://uri.thephpleague.com).
  *
@@ -7,11 +8,12 @@
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
  * @version    2.0.0
- * @link       https://github.com/thephpleague/uri-components
+ * @link       https://github.com/thephpleague/uri-schemes
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -20,26 +22,24 @@ use Countable;
 use IteratorAggregate;
 use Traversable;
 
-/**
- * Value object representing a URI path component.
- *
- * @package    League\Uri
- * @subpackage League\Uri\Components
- * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since      1.0.0
- */
 final class HierarchicalPath extends Path implements Countable, IteratorAggregate
 {
     const IS_ABSOLUTE = 1;
 
     const IS_RELATIVE = 0;
 
+    /**
+     * @var string[]
+     */
     private $segments;
 
+    /**
+     * @var int
+     */
     private $is_absolute;
 
     /**
-     * return a new instance from an array or a traversable object.
+     * Returns a new instance from an array or a traversable object.
      *
      * @param mixed $segments The segments list
      * @param int   $type     one of the constant IS_ABSOLUTE or IS_RELATIVE

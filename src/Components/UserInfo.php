@@ -1,4 +1,5 @@
 <?php
+
 /**
  * League.Uri (http://uri.thephpleague.com).
  *
@@ -7,25 +8,16 @@
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
  * @version    2.0.0
- * @link       https://github.com/thephpleague/uri-components
+ * @link       https://github.com/thephpleague/uri-schemes
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-/**
- * Value object representing the UserInfo part of an URI.
- *
- * @package    League\Uri
- * @subpackage League\Uri\Components
- * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since      1.0.0
- * @see        https://tools.ietf.org/html/rfc3986#section-3.2.1
- *
- */
 final class UserInfo extends AbstractComponent
 {
     /**
@@ -48,15 +40,11 @@ final class UserInfo extends AbstractComponent
     const REGEXP_USERINFO_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
 
     /**
-     * User user component.
-     *
      * @var string|null
      */
     private $user;
 
     /**
-     * Pass URI component.
-     *
      * @var string|null
      */
     private $pass;
@@ -64,7 +52,7 @@ final class UserInfo extends AbstractComponent
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties): self
+    public static function __set_state(array $properties)
     {
         return new static($properties['user'], $properties['pass']);
     }
@@ -162,7 +150,7 @@ final class UserInfo extends AbstractComponent
     /**
      * {@inheritdoc}
      */
-    public function withContent($content): ComponentInterface
+    public function withContent($content)
     {
         $content = $this->filterComponent($content);
         if ($content === $this->getContent()) {

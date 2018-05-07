@@ -1,4 +1,5 @@
 <?php
+
 /**
  * League.Uri (http://uri.thephpleague.com).
  *
@@ -7,11 +8,12 @@
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
  * @version    2.0.0
- * @link       https://github.com/thephpleague/uri-components
+ * @link       https://github.com/thephpleague/uri-schemes
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -118,36 +120,26 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
     const IS_RELATIVE = 0;
 
     /**
-     * The component Data.
-     *
      * @var array
      */
     private $labels = [];
 
     /**
-     * Tell the host IP version used.
-     *
      * @var string|null
      */
     private $ip_version;
 
     /**
-     * Tell whether the Host is a domain name.
-     *
      * @var bool
      */
     private $host_as_domain_name = false;
 
     /**
-     * Tell whether the Host contains a ZoneID.
-     *
      * @var bool
      */
     private $has_zone_identifier = false;
 
     /**
-     * Is the object considered absolute.
-     *
      * @var int
      */
     private $is_absolute = self::IS_RELATIVE;
@@ -167,7 +159,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties): self
+    public static function __set_state(array $properties)
     {
         return static::createFromLabels($properties['labels'], $properties['is_absolute']);
     }

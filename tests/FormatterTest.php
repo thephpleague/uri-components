@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * League.Uri (http://uri.thephpleague.com).
+ *
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    2.0.0
+ * @link       https://github.com/thephpleague/uri-schemes
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace LeagueTest\Uri;
 
 use InvalidArgumentException;
@@ -261,7 +275,6 @@ class FormatterTest extends TestCase
     /**
      * @dataProvider functionProvider
      *
-     * @covers \League\Uri\is_uri
      * @covers \League\Uri\uri_to_ascii
      * @covers \League\Uri\uri_to_unicode
      *
