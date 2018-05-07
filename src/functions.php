@@ -1,4 +1,5 @@
 <?php
+
 /**
  * League.Uri (http://uri.thephpleague.com).
  *
@@ -7,11 +8,12 @@
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
  * @version    2.0.0
- * @link       https://github.com/thephpleague/uri-components
+ * @link       https://github.com/thephpleague/uri-schemes
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri;
@@ -27,25 +29,11 @@ use Psr\Http\Message\UriInterface;
 use TypeError;
 
 /**
- * Tells whether the URI object is valid.
+ * Filter the URI object.
  *
  * To be valid an URI MUST implement at least one of the following interface:
  *     - Psr\Http\Message\UriInterface
  *     - League\Uri\Interfaces\Uri
- *
- * @param mixed $uri
- *
- * @return bool
- */
-function is_uri($uri): bool
-{
-    return $uri instanceof LeagueUriInterface || $uri instanceof UriInterface;
-}
-
-/**
- * Filter the URI object.
- *
- * @see \League\Uri\is_uri
  *
  * @param mixed $uri
  *
@@ -55,7 +43,7 @@ function is_uri($uri): bool
  */
 function filter_uri($uri)
 {
-    if (is_uri($uri)) {
+    if ($uri instanceof LeagueUriInterface || $uri instanceof UriInterface) {
         return $uri;
     }
 
@@ -113,9 +101,7 @@ function add_leading_slash($uri)
  */
 function add_root_label($uri)
 {
-    filter_uri($uri);
-
-    return $uri->withHost((string) (new Host($uri->getHost()))->withRootLabel());
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withRootLabel());
 }
 
 /**
@@ -561,10 +547,11 @@ function uri_to_ascii($payload, string $separator = '&')
     list($remaining_uri, $fragment) = explode('#', (string) filter_uri($payload), 2) + ['', null];
     list(, $query) = explode('?', $remaining_uri, 2) + ['', null];
 
-    $formatter->preserveFragment(null !== $fragment);
-    $formatter->preserveQuery(null !== $query);
-
-    return $formatter->format($payload);
+    return $formatter
+        ->preserveFragment(null !== $fragment)
+        ->preserveQuery(null !== $query)
+        ->format($payload)
+    ;
 }
 
 /**
@@ -583,16 +570,20 @@ function uri_to_unicode($payload, string $separator = '&'): string
         $formatter->setEncoding(Formatter::RFC3987_ENCODING);
     }
 
-    $formatter->setQuerySeparator($separator);
     if ($payload instanceof ComponentInterface) {
-        return $formatter->format($payload);
+        return $formatter
+            ->setQuerySeparator($separator)
+            ->format($payload)
+        ;
     }
 
     list($remaining_uri, $fragment) = explode('#', (string) filter_uri($payload), 2) + [1 => null];
     list(, $query) = explode('?', $remaining_uri, 2) + [1 => null];
 
-    $formatter->preserveFragment(null !== $fragment);
-    $formatter->preserveQuery(null !== $query);
-
-    return $formatter->format($payload);
+    return $formatter
+        ->preserveFragment(null !== $fragment)
+        ->preserveQuery(null !== $query)
+        ->setQuerySeparator($separator)
+        ->format($payload)
+    ;
 }

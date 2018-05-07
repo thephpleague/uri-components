@@ -1,4 +1,5 @@
 <?php
+
 /**
  * League.Uri (http://uri.thephpleague.com).
  *
@@ -7,11 +8,12 @@
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
  * @version    2.0.0
- * @link       https://github.com/thephpleague/uri-components
+ * @link       https://github.com/thephpleague/uri-schemes
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri;
@@ -27,13 +29,6 @@ use League\Uri\Interfaces\Uri as LeagueUriInterface;
 use Psr\Http\Message\UriInterface;
 use TypeError;
 
-/**
- * A class to manipulate URI and URI components output.
- *
- * @package    League\Uri
- * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since      1.0.0
- */
 final class Formatter implements EncodingInterface
 {
     /**
@@ -47,29 +42,21 @@ final class Formatter implements EncodingInterface
     ];
 
     /**
-     * host encoding property.
-     *
      * @var int
      */
     private $enc_type = self::RFC3986_ENCODING;
 
     /**
-     * query separator property.
-     *
      * @var string
      */
     private $query_separator = '&';
 
     /**
-     * Should the query component be preserved.
-     *
      * @var bool
      */
     private $preserve_query = false;
 
     /**
-     * Should the fragment component string be preserved.
-     *
      * @var bool
      */
     private $preserve_fragment = false;
@@ -78,24 +65,32 @@ final class Formatter implements EncodingInterface
      * Formatting encoding type.
      *
      * @param int $enc_type a predefined constant value
+     *
+     * @return self
      */
-    public function setEncoding(int $enc_type)
+    public function setEncoding(int $enc_type): self
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
             throw new InvalidArgumentException(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
         }
 
         $this->enc_type = $enc_type;
+
+        return $this;
     }
 
     /**
      * Query separator setter.
      *
      * @param string $separator
+     *
+     * @return self
      */
-    public function setQuerySeparator(string $separator)
+    public function setQuerySeparator(string $separator): self
     {
         $this->query_separator = trim(filter_var($separator, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW));
+
+        return $this;
     }
 
     /**
@@ -106,10 +101,14 @@ final class Formatter implements EncodingInterface
      * to the URI regardless of the query string value
      *
      * @param bool $status
+     *
+     * @return self
      */
-    public function preserveQuery(bool $status)
+    public function preserveQuery(bool $status): self
     {
         $this->preserve_query = $status;
+
+        return $this;
     }
 
     /**
@@ -120,10 +119,14 @@ final class Formatter implements EncodingInterface
      * to the URI regardless of the query string value
      *
      * @param bool $status
+     *
+     * @return self
      */
-    public function preserveFragment(bool $status)
+    public function preserveFragment(bool $status): self
     {
         $this->preserve_fragment = $status;
+
+        return $this;
     }
 
     /**
@@ -141,7 +144,7 @@ final class Formatter implements EncodingInterface
      *
      * @return string
      */
-    public function format($input)
+    public function format($input): string
     {
         if ($input instanceof Query) {
             return (string) query_build($input, $this->query_separator, $this->enc_type);
