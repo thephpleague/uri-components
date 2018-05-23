@@ -22,7 +22,7 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use League\Uri;
-use League\Uri\Exception\InvalidArgument;
+use League\Uri\Exception\InvalidUriComponent;
 use Traversable;
 use TypeError;
 
@@ -142,7 +142,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      *
      * @param string $separator
      *
-     * @throws InvalidArgument if the separator is invalid
+     * @throws InvalidUriComponent if the separator is invalid
      *
      * @return string
      */
@@ -152,7 +152,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             return $separator;
         }
 
-        throw new InvalidArgument(sprintf('Invalid separator character `%s`', $separator));
+        throw new InvalidUriComponent(sprintf('Invalid separator character `%s`', $separator));
     }
 
     /**

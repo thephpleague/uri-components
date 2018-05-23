@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Exception\InvalidArgument;
+use League\Uri\Exception\InvalidUriComponent;
 
 final class Scheme extends AbstractComponent
 {
@@ -55,7 +55,7 @@ final class Scheme extends AbstractComponent
      *
      * @param mixed $scheme
      *
-     * @throws InvalidArgument if the scheme is invalid
+     * @throws InvalidUriComponent if the scheme is invalid
      *
      * @return null|string
      */
@@ -70,7 +70,7 @@ final class Scheme extends AbstractComponent
             return strtolower($scheme);
         }
 
-        throw new InvalidArgument(sprintf("The scheme '%s' is invalid", $scheme));
+        throw new InvalidUriComponent(sprintf("The scheme '%s' is invalid", $scheme));
     }
 
     /**

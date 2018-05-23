@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use JsonSerializable;
-use League\Uri\Exception\InvalidArgument;
+use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use TypeError;
 
@@ -111,7 +111,7 @@ abstract class AbstractComponent implements ComponentInterface, JsonSerializable
      *
      * @param mixed $component
      *
-     * @throws InvalidArgument If the component can not be converted to a string or null
+     * @throws InvalidUriComponent If the component can not be converted to a string or null
      *
      * @return null|string
      */
@@ -134,7 +134,7 @@ abstract class AbstractComponent implements ComponentInterface, JsonSerializable
             return $component;
         }
 
-        throw new InvalidArgument(sprintf('Invalid fragment string: %s', $component));
+        throw new InvalidUriComponent(sprintf('Invalid fragment string: %s', $component));
     }
 
     /**
