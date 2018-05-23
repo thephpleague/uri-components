@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Path;
-use League\Uri\Exception\InvalidArgument;
+use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -152,7 +152,7 @@ class PathTest extends TestCase
 
     public function testConstructorThrowsExceptionWithInvalidData()
     {
-        $this->expectException(InvalidArgument::class);
+        $this->expectException(InvalidUriComponent::class);
         new Path("\0");
     }
 

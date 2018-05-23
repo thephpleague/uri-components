@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Scheme;
-use League\Uri\Exception\InvalidArgument;
+use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -125,7 +125,7 @@ class SchemeTest extends TestCase
      */
     public function testInvalidScheme($scheme)
     {
-        $this->expectException(InvalidArgument::class);
+        $this->expectException(InvalidUriComponent::class);
         new Scheme($scheme);
     }
 

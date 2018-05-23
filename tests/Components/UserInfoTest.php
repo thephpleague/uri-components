@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\UserInfo;
-use League\Uri\Exception\InvalidArgument;
+use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -271,7 +271,7 @@ class UserInfoTest extends TestCase
     /**
      * @covers ::getUser
      */
-    public function testGetUserThrowsInvalidArgumentException()
+    public function testGetUserThrowsInvalidUriComponentException()
     {
         $this->expectException(UnknownEncoding::class);
         (new UserInfo())->getUser(-1);
@@ -280,7 +280,7 @@ class UserInfoTest extends TestCase
     /**
      * @covers ::getPass
      */
-    public function testGetPassThrowsInvalidArgumentException()
+    public function testGetPassThrowsInvalidUriComponentException()
     {
         $this->expectException(UnknownEncoding::class);
         (new UserInfo())->getPass(-1);
@@ -298,7 +298,7 @@ class UserInfoTest extends TestCase
     /**
      * @covers ::withContent
      */
-    public function testWithContentThrowsInvalidArgumentException()
+    public function testWithContentThrowsInvalidUriComponentException()
     {
         $this->expectException(TypeError::class);
         (new UserInfo())->withContent(date_create());
@@ -312,7 +312,7 @@ class UserInfoTest extends TestCase
 
     public function testConstructorThrowsException()
     {
-        $this->expectException(InvalidArgument::class);
+        $this->expectException(InvalidUriComponent::class);
         new UserInfo("\0");
     }
 }

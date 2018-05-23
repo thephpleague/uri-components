@@ -17,10 +17,10 @@
 namespace LeagueTest\Uri;
 
 use GuzzleHttp\Psr7;
-use InvalidArgumentException;
 use League\Uri;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\Path;
+use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Schemes\Data;
 use League\Uri\Schemes\Http;
 use PHPUnit\Framework\TestCase;
@@ -189,7 +189,7 @@ class PathModifierTest extends TestCase
      */
     public function testBasenameThrowException()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidUriComponent::class);
         Uri\replace_basename(Psr7\uri_for('http://example.com'), 'foo/baz');
     }
 
@@ -437,7 +437,7 @@ class PathModifierTest extends TestCase
      */
     public function testReplaceSegmentConstructorFailed2()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidUriComponent::class);
         Uri\replace_segment($this->uri, 2, "whyno\0t");
     }
 
@@ -446,7 +446,7 @@ class PathModifierTest extends TestCase
      */
     public function testExtensionProcessFailed()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidUriComponent::class);
         Uri\replace_extension($this->uri, 'to/to');
     }
 }

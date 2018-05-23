@@ -20,8 +20,9 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Exception\InvalidArgument;
 use League\Uri\Exception\InvalidKey;
+use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\UnknownType;
 use Traversable;
 use TypeError;
 
@@ -154,7 +155,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         static $idn_support = null;
         $idn_support = $idn_support ?? function_exists('\idn_to_ascii') && defined('\INTL_IDNA_VARIANT_UTS46');
         if (!$idn_support) {
-            throw new InvalidArgument('IDN host can not be processed. Verify that ext/intl is installed for IDN support and that ICU is at least version 4.6.');
+            throw new InvalidUriComponent('IDN host can not be processed. Verify that ext/intl is installed for IDN support and that ICU is at least version 4.6.');
         }
     }
 
@@ -172,14 +173,16 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      * @param mixed $labels
      * @param int   $type   One of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws InvalidArgument If $type is not a recognized constant
+     * @throws TypeError           If $labels is not iterable
+     * @throws InvalidUriComponent If the labels are malformed
+     * @throws UnknownType         If the type is not recognized/supported
      *
      * @return self
      */
     public static function createFromLabels($labels, int $type = self::IS_RELATIVE): self
     {
         if (!isset(self::HOST_TYPE[$type])) {
-            throw new InvalidArgument(sprintf('"%s" is an invalid flag', $type));
+            throw new UnknownType(sprintf('"%s" is an invalid flag', $type));
         }
 
         if ($labels instanceof Traversable) {
@@ -192,7 +195,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
 
         foreach ($labels as $label) {
             if (!is_scalar($label) && !method_exists($label, '__toString')) {
-                throw new InvalidArgument(sprintf('The labels are malformed'));
+                throw new InvalidUriComponent(sprintf('The labels are malformed'));
             }
         }
 
@@ -272,7 +275,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      *
      * @param mixed $host
      *
-     * @throws InvalidArgument If the host is invalid
+     * @throws InvalidUriComponent If the host is invalid
      *
      * @return array
      */
@@ -347,7 +350,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         }
 
         if ('[' !== $host[0] || ']' !== substr($host, -1)) {
-            throw new InvalidArgument(sprintf('The host `%s` is invalid', $host));
+            throw new InvalidUriComponent(sprintf('The host `%s` is invalid', $host));
         }
 
         $ip_host = substr($host, 1, -1);
@@ -371,7 +374,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
             ];
         }
 
-        throw new InvalidArgument(sprintf('The host `%s` is invalid', $host));
+        throw new InvalidUriComponent(sprintf('The host `%s` is invalid', $host));
     }
 
     /**
