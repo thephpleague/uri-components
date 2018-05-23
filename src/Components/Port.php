@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidArgument;
 
 final class Port extends AbstractComponent
 {
@@ -50,7 +50,7 @@ final class Port extends AbstractComponent
      *
      * @param mixed $port
      *
-     * @throws InvalidComponentArgument if the port is invalid
+     * @throws InvalidArgument if the port is invalid
      *
      * @return null|int
      */
@@ -65,7 +65,7 @@ final class Port extends AbstractComponent
             return $fport;
         }
 
-        throw new InvalidComponentArgument(sprintf('Expected port to be a positive integer or 0; received %s', $port));
+        throw new InvalidArgument(sprintf('Expected port to be a positive integer or 0; received %s', $port));
     }
 
     /**

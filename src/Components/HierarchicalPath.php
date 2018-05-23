@@ -20,7 +20,7 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidArgument;
 use League\Uri\Exception\InvalidKey;
 use Traversable;
 use TypeError;
@@ -47,9 +47,9 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @param mixed $segments The segments list
      * @param int   $type     one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws TypeError                If $segments is not iterable
-     * @throws InvalidComponentArgument If the segments are malformed
-     * @throws InvalidComponentArgument If the type is not recognized/supported
+     * @throws TypeError       If $segments is not iterable
+     * @throws InvalidArgument If the segments are malformed
+     * @throws InvalidArgument If the type is not recognized/supported
      *
      * @return self
      */
@@ -58,7 +58,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
         if (!isset($type_list[$type])) {
-            throw new InvalidComponentArgument(sprintf('"%s" is an invalid flag', $type));
+            throw new InvalidArgument(sprintf('"%s" is an invalid flag', $type));
         }
 
         if ($segments instanceof Traversable) {
@@ -71,7 +71,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
         foreach ($segments as $value) {
             if (!is_scalar($value) && !method_exists($value, '__toString')) {
-                throw new InvalidComponentArgument('The submitted segments are invalid');
+                throw new InvalidArgument('The submitted segments are invalid');
             }
         }
 
@@ -402,7 +402,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (false !== strpos($basename->component, self::SEPARATOR)) {
-            throw new InvalidComponentArgument('The basename can not contain the path separator');
+            throw new InvalidArgument('The basename can not contain the path separator');
         }
 
         return $this->withSegment(count($this->segments) - 1, $basename);
@@ -426,11 +426,11 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (strpos($extension->component, self::SEPARATOR)) {
-            throw new InvalidComponentArgument('an extension sequence can not contain a path delimiter');
+            throw new InvalidArgument('an extension sequence can not contain a path delimiter');
         }
 
         if (0 === strpos($extension->component, '.')) {
-            throw new InvalidComponentArgument('an extension sequence can not contain a leading `.` character');
+            throw new InvalidArgument('an extension sequence can not contain a leading `.` character');
         }
 
         $basename = end($this->segments);

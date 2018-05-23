@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\DataPath as Path;
-use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidArgument;
 use League\Uri\Exception\PathNotFound;
 use PHPUnit\Framework\TestCase;
 use SplFileObject;
@@ -47,7 +47,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailed($path)
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Path($path);
     }
 
@@ -210,7 +210,7 @@ class DataPathTest extends TestCase
      */
     public function testWithParametersFailedWithInvalidParameters($path, $parameters)
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         Path::createFromPath($path)->withParameters($parameters);
     }
 
@@ -268,7 +268,7 @@ class DataPathTest extends TestCase
      */
     public function testUpdateParametersFailed($parameters)
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
@@ -340,7 +340,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidBase64Encoded()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
@@ -354,7 +354,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidComponent()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
@@ -368,7 +368,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidString()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Path('text/plain;boulook€');
     }
 
@@ -382,7 +382,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidMimetype()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Path('data:toto\\bar;foo=bar,');
     }
 }

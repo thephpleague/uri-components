@@ -18,8 +18,7 @@ namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Components\Query;
-use League\Uri\Exception\InvalidComponentArgument;
-use League\Uri\Exception\InvalidQueryArgument;
+use League\Uri\Exception\InvalidArgument;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -67,7 +66,7 @@ class QueryTest extends TestCase
      */
     public function testInvalidSeparator($separator)
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Query('foo=bar', $separator);
     }
 
@@ -212,7 +211,7 @@ class QueryTest extends TestCase
 
     public function testCreateFromPairsFailedWithBadIterable()
     {
-        $this->expectException(InvalidQueryArgument::class);
+        $this->expectException(InvalidArgument::class);
         Query::createFromPairs([['toto' => ['foo' => [(object) []]]]]);
     }
 
