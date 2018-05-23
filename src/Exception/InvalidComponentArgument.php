@@ -16,10 +16,10 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Components;
+namespace League\Uri\Exception;
 
 use InvalidArgumentException;
 
-class Exception extends InvalidArgumentException
+class InvalidComponentArgument extends InvalidArgumentException
 {
 }

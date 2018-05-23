@@ -20,7 +20,10 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidKey;
 use Traversable;
+use TypeError;
 
 final class HierarchicalPath extends Path implements Countable, IteratorAggregate
 {
@@ -44,8 +47,9 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @param mixed $segments The segments list
      * @param int   $type     one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws Exception If $data is invalid
-     * @throws Exception If $type is not a recognized constant
+     * @throws TypeError                If $segments is not iterable
+     * @throws InvalidComponentArgument If the segments are malformed
+     * @throws InvalidComponentArgument If the type is not recognized/supported
      *
      * @return self
      */
@@ -54,7 +58,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
         if (!isset($type_list[$type])) {
-            throw new Exception(sprintf('"%s" is an invalid flag', $type));
+            throw new InvalidComponentArgument(sprintf('"%s" is an invalid flag', $type));
         }
 
         if ($segments instanceof Traversable) {
@@ -62,7 +66,13 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (!is_array($segments)) {
-            throw new Exception('the segments must be iterable');
+            throw new TypeError('the segments must be iterable');
+        }
+
+        foreach ($segments as $value) {
+            if (!is_scalar($value) && !method_exists($value, '__toString')) {
+                throw new InvalidComponentArgument('The submitted segments are invalid');
+            }
         }
 
         $path = implode(self::SEPARATOR, $segments);
@@ -87,6 +97,18 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         parent::__construct($path);
         $this->segments = $this->filterSegments($this->component);
         $this->is_absolute = $this->isAbsolute() ? self::IS_ABSOLUTE : self::IS_RELATIVE;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return [
+            'component' => $this->getContent(),
+            'is_absolute' => self::IS_ABSOLUTE === $this->is_absolute,
+            'segments' => $this->segments,
+        ];
     }
 
     /**
@@ -129,18 +151,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         foreach ($this->segments as $segment) {
             yield $segment;
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->component,
-            'segments' => $this->segments,
-            'is_absolute' => $this->isAbsolute(),
-        ];
     }
 
     /**
@@ -263,7 +273,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @param int   $key
      * @param mixed $segment
      *
-     * @throws Exception If the key is invalid
+     * @throws InvalidKey If the key is invalid
      *
      * @return self
      */
@@ -271,7 +281,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     {
         $nb_elements = count($this->segments);
         if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements - 1, 'max_range' => $nb_elements + 1]]))) {
-            throw new Exception(sprintf('the given key `%s` is invalid', $key));
+            throw new InvalidKey(sprintf('the given key `%s` is invalid', $key));
         }
 
         if ($offset < 0) {
@@ -320,7 +330,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @param int $key     required key to remove
      * @param int ...$keys remaining keys to remove
      *
-     * @throws Exception If the key is invalid
+     * @throws InvalidKey If the key is invalid
      *
      * @return self
      */
@@ -332,7 +342,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         $deleted_keys = [];
         foreach ($keys as $key) {
             if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
-                throw new Exception(sprintf('the key `%s` is invalid', $key));
+                throw new InvalidKey(sprintf('the key `%s` is invalid', $key));
             }
 
             if ($offset < 0) {
@@ -392,7 +402,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (false !== strpos($basename->component, self::SEPARATOR)) {
-            throw new Exception('The basename can not contain the path separator');
+            throw new InvalidComponentArgument('The basename can not contain the path separator');
         }
 
         return $this->withSegment(count($this->segments) - 1, $basename);
@@ -416,11 +426,11 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (strpos($extension->component, self::SEPARATOR)) {
-            throw new Exception('an extension sequence can not contain a path delimiter');
+            throw new InvalidComponentArgument('an extension sequence can not contain a path delimiter');
         }
 
         if (0 === strpos($extension->component, '.')) {
-            throw new Exception('an extension sequence can not contain a leading `.` character');
+            throw new InvalidComponentArgument('an extension sequence can not contain a leading `.` character');
         }
 
         $basename = end($this->segments);

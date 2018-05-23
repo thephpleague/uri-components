@@ -82,14 +82,6 @@ final class Fragment extends AbstractComponent
     /**
      * {@inheritdoc}
      */
-    public function __debugInfo()
-    {
-        return ['component' => $this->component];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function withContent($content)
     {
         $content = $this->validateComponent($content);

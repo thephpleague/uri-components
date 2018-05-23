@@ -92,14 +92,6 @@ class Path extends AbstractComponent
     /**
      * {@inheritdoc}
      */
-    public function __debugInfo()
-    {
-        return ['component' => $this->component];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return (string) $this->getContent();

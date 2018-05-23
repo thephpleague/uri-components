@@ -20,6 +20,8 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidKey;
 use Traversable;
 use TypeError;
 
@@ -152,7 +154,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         static $idn_support = null;
         $idn_support = $idn_support ?? function_exists('\idn_to_ascii') && defined('\INTL_IDNA_VARIANT_UTS46');
         if (!$idn_support) {
-            throw new Exception('IDN host can not be processed. Verify that ext/intl is installed for IDN support and that ICU is at least version 4.6.');
+            throw new InvalidComponentArgument('IDN host can not be processed. Verify that ext/intl is installed for IDN support and that ICU is at least version 4.6.');
         }
     }
 
@@ -170,14 +172,14 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      * @param mixed $labels
      * @param int   $type   One of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws Exception If $type is not a recognized constant
+     * @throws InvalidComponentArgument If $type is not a recognized constant
      *
      * @return self
      */
     public static function createFromLabels($labels, int $type = self::IS_RELATIVE): self
     {
         if (!isset(self::HOST_TYPE[$type])) {
-            throw new Exception(sprintf('"%s" is an invalid flag', $type));
+            throw new InvalidComponentArgument(sprintf('"%s" is an invalid flag', $type));
         }
 
         if ($labels instanceof Traversable) {
@@ -186,6 +188,12 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
 
         if (!is_array($labels)) {
             throw new TypeError('the parameters must be iterable');
+        }
+
+        foreach ($labels as $label) {
+            if (!is_scalar($label) && !method_exists($label, '__toString')) {
+                throw new InvalidComponentArgument(sprintf('The labels are malformed'));
+            }
         }
 
         if ([] === $labels) {
@@ -246,11 +254,25 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return [
+            'component' => $this->getContent(),
+            'is_absolute' => self::IS_ABSOLUTE === $this->is_absolute,
+            'ip_version' => $this->ip_version,
+            'has_zone_id' => $this->has_zone_identifier,
+            'labels' => $this->labels,
+        ];
+    }
+
+    /**
      * Validates the submitted data.
      *
      * @param mixed $host
      *
-     * @throws Exception If the host is invalid
+     * @throws InvalidComponentArgument If the host is invalid
      *
      * @return array
      */
@@ -325,7 +347,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         }
 
         if ('[' !== $host[0] || ']' !== substr($host, -1)) {
-            throw new Exception(sprintf('The host `%s` is invalid', $host));
+            throw new InvalidComponentArgument(sprintf('The host `%s` is invalid', $host));
         }
 
         $ip_host = substr($host, 1, -1);
@@ -349,7 +371,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
             ];
         }
 
-        throw new Exception(sprintf('The host `%s` is invalid', $host));
+        throw new InvalidComponentArgument(sprintf('The host `%s` is invalid', $host));
     }
 
     /**
@@ -402,19 +424,6 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
 
         return 0 === $arr['errors'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'labels' => $this->labels,
-            'is_absolute' => (bool) $this->is_absolute,
-            'ip_version' => $this->ip_version,
-        ];
     }
 
     /**
@@ -742,7 +751,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      * @param int   $key
      * @param mixed $label
      *
-     * @throws Exception If the key is invalid
+     * @throws InvalidKey If the key is invalid
      *
      * @return self
      */
@@ -751,7 +760,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         $nb_labels = count($this->labels);
         $offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_labels - 1, 'max_range' => $nb_labels]]);
         if (false === $offset) {
-            throw new Exception(sprintf('the given key `%s` is invalid', $key));
+            throw new InvalidKey(sprintf('the given key `%s` is invalid', $key));
         }
 
         if (0 > $offset) {
@@ -797,7 +806,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      * @param int $key     required key to remove
      * @param int ...$keys remaining keys to remove
      *
-     * @throws Exception If the key is invalid
+     * @throws InvalidKey If the key is invalid
      *
      * @return self
      */
@@ -810,7 +819,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
 
         foreach ($keys as $key) {
             if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
-                throw new Exception(sprintf('the key `%s` is invalid', $key));
+                throw new InvalidKey(sprintf('the key `%s` is invalid', $key));
             }
 
             if ($offset < 0) {

@@ -16,8 +16,9 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\Fragment;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -129,15 +130,8 @@ class FragmentTest extends TestCase
 
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new Fragment('host'))->getContent(-1);
-    }
-
-    public function testSetState()
-    {
-        $component = new Fragment('yolo');
-        $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
     }
 
     /**
@@ -145,7 +139,7 @@ class FragmentTest extends TestCase
      */
     public function testFailedFragmentException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidComponentArgument::class);
         new Fragment("\0");
     }
 
@@ -156,11 +150,33 @@ class FragmentTest extends TestCase
     }
 
     /**
+     * @covers ::__set_state
+     */
+    public function testSetState()
+    {
+        $component = new Fragment('yolo');
+        $generateComponent = eval('return '.var_export($component, true).';');
+        $this->assertEquals($component, $generateComponent);
+    }
+
+    /**
+     * @covers ::jsonSerialize
+     */
+    public function testJsonSerialize()
+    {
+        $component = new Fragment('yolo');
+        $this->assertEquals('"yolo"', json_encode($component));
+    }
+
+    /**
      * @covers ::__debugInfo
      */
     public function testDebugInfo()
     {
-        $this->assertInternalType('array', (new Fragment('yolo'))->__debugInfo());
+        $component = new Fragment('yolo');
+        $debugInfo = $component->__debugInfo();
+        $this->assertArrayHasKey('component', $debugInfo);
+        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**

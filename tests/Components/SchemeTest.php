@@ -16,8 +16,9 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\Scheme;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -36,6 +37,17 @@ class SchemeTest extends TestCase
         $component = new Scheme('ignace');
         $generateComponent = eval('return '.var_export($component, true).';');
         $this->assertEquals($component, $generateComponent);
+    }
+
+    /**
+     * @covers ::__debugInfo
+     */
+    public function testDebugInfo()
+    {
+        $component = new Scheme('ftp');
+        $debugInfo = $component->__debugInfo();
+        $this->assertArrayHasKey('component', $debugInfo);
+        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**
@@ -63,14 +75,6 @@ class SchemeTest extends TestCase
         $scheme = new Scheme('ftp');
         $this->assertSame($scheme, $scheme->withContent('FtP'));
         $this->assertNotSame($scheme, $scheme->withContent('Http'));
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $this->assertInternalType('array', (new Scheme('ftp'))->__debugInfo());
     }
 
     /**
@@ -121,7 +125,7 @@ class SchemeTest extends TestCase
      */
     public function testInvalidScheme($scheme)
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidComponentArgument::class);
         new Scheme($scheme);
     }
 
@@ -139,7 +143,7 @@ class SchemeTest extends TestCase
      */
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new Scheme('http'))->getContent(-1);
     }
 
