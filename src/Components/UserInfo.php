@@ -83,6 +83,18 @@ final class UserInfo extends AbstractComponent
     /**
      * {@inheritdoc}
      */
+    public function __debugInfo()
+    {
+        return [
+            'component' => $this->getContent(),
+            'user' => $this->getUser(),
+            'pass' => $this->getPass(),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
         $this->filterEncoding($enc_type);
@@ -97,18 +109,6 @@ final class UserInfo extends AbstractComponent
         }
 
         return $userInfo.':'.$this->getPass($enc_type);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'user' => $this->getUser(),
-            'pass' => $this->getPass(),
-        ];
     }
 
     /**

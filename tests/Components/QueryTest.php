@@ -17,9 +17,10 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
-use League\Uri\Components\Exception;
 use League\Uri\Components\Query;
-use League\Uri\Parser\InvalidQueryArgument;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidQueryArgument;
+use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -49,13 +50,24 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::__debugInfo
+     */
+    public function testDebugInfo()
+    {
+        $component = new Query('foo=bar&baz');
+        $debugInfo = $component->__debugInfo();
+        $this->assertArrayHasKey('component', $debugInfo);
+        $this->assertSame($component->getContent(), $debugInfo['component']);
+    }
+
+    /**
      * @covers ::filterSeparator
      * @dataProvider invalidSeparatorProvider
      * @param mixed $separator
      */
     public function testInvalidSeparator($separator)
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidComponentArgument::class);
         new Query('foo=bar', $separator);
     }
 
@@ -77,14 +89,6 @@ class QueryTest extends TestCase
         $this->assertSame('&', $query->getSeparator());
         $this->assertSame('|', $new_query->getSeparator());
         $this->assertSame('foo=bar|kingkong=toto', $new_query->getContent());
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $this->assertInternalType('array', $this->query->__debugInfo());
     }
 
     /**
@@ -716,7 +720,7 @@ class QueryTest extends TestCase
      */
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new Query('query'))->getContent(-1);
     }
 

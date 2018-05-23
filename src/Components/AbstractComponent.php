@@ -18,9 +18,12 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use JsonSerializable;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\UnknownEncoding;
 use TypeError;
 
-abstract class AbstractComponent implements ComponentInterface
+abstract class AbstractComponent implements ComponentInterface, JsonSerializable
 {
     /**
      * @internal
@@ -82,7 +85,7 @@ abstract class AbstractComponent implements ComponentInterface
     protected function filterEncoding(int $enc_type)
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+            throw new UnknownEncoding(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
         }
     }
 
@@ -90,8 +93,6 @@ abstract class AbstractComponent implements ComponentInterface
      * Validate the component content.
      *
      * @param mixed $component
-     *
-     * @throws Exception if the component is not valid
      *
      * @return string|null
      */
@@ -110,7 +111,7 @@ abstract class AbstractComponent implements ComponentInterface
      *
      * @param mixed $component
      *
-     * @throws If the component can not be converted to a string or null
+     * @throws InvalidComponentArgument If the component can not be converted to a string or null
      *
      * @return null|string
      */
@@ -133,15 +134,13 @@ abstract class AbstractComponent implements ComponentInterface
             return $component;
         }
 
-        throw new Exception(sprintf('Invalid fragment string: %s', $component));
+        throw new InvalidComponentArgument(sprintf('Invalid fragment string: %s', $component));
     }
 
     /**
      * Filter the URI password component.
      *
      * @param string $str
-     *
-     * @throws Exception If the content is invalid
      *
      * @return string|null
      */
@@ -205,6 +204,22 @@ abstract class AbstractComponent implements ComponentInterface
     protected function encodeMatches(array $matches): string
     {
         return rawurlencode($matches[0]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->getContent();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return ['component' => $this->getContent()];
     }
 
     /**

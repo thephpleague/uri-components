@@ -16,8 +16,9 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\Port;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -43,6 +44,17 @@ class PortTest extends TestCase
         $component = new Port(42);
         $generateComponent = eval('return '.var_export($component, true).';');
         $this->assertEquals($component, $generateComponent);
+    }
+
+    /**
+     * @covers ::__debugInfo
+     */
+    public function testDebugInfo()
+    {
+        $component = new Port(42);
+        $debugInfo = $component->__debugInfo();
+        $this->assertArrayHasKey('component', $debugInfo);
+        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**
@@ -81,7 +93,7 @@ class PortTest extends TestCase
 
     public function testFailedPortException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidComponentArgument::class);
         new Port(-1);
     }
 
@@ -97,16 +109,8 @@ class PortTest extends TestCase
 
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new Port(23))->getContent(-1);
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $this->assertInternalType('array', (new Port(23))->__debugInfo());
     }
 
     /**

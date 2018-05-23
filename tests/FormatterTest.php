@@ -16,11 +16,11 @@
 
 namespace LeagueTest\Uri;
 
-use InvalidArgumentException;
 use League\Uri;
 use League\Uri\Components\Host;
 use League\Uri\Components\Query;
 use League\Uri\Components\Scheme;
+use League\Uri\Exception\UnknownEncoding;
 use League\Uri\Formatter;
 use League\Uri\Schemes\Http;
 use PHPUnit\Framework\TestCase;
@@ -60,7 +60,7 @@ class FormatterTest extends TestCase
      */
     public function testInvalidEncoding()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(UnknownEncoding::class);
         (new Formatter())->setEncoding(24);
     }
 

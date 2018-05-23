@@ -16,8 +16,9 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\Path;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -118,14 +119,8 @@ class PathTest extends TestCase
 
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new Path('query'))->getContent(-1);
-    }
-
-    public function testDebugInfo()
-    {
-        $component = new Path('this is a normal path');
-        $this->assertInternalType('array', $component->__debugInfo());
     }
 
     public function testWithContent()
@@ -157,7 +152,7 @@ class PathTest extends TestCase
 
     public function testConstructorThrowsExceptionWithInvalidData()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidComponentArgument::class);
         new Path("\0");
     }
 
@@ -166,6 +161,17 @@ class PathTest extends TestCase
         $component = new Path(42);
         $generateComponent = eval('return '.var_export($component, true).';');
         $this->assertEquals($component, $generateComponent);
+    }
+
+    /**
+     * @covers ::__debugInfo
+     */
+    public function testDebugInfo()
+    {
+        $component = new Path('yolo');
+        $debugInfo = $component->__debugInfo();
+        $this->assertArrayHasKey('component', $debugInfo);
+        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**

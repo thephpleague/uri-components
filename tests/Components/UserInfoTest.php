@@ -16,8 +16,9 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\Exception;
 use League\Uri\Components\UserInfo;
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -28,16 +29,6 @@ use TypeError;
 class UserInfoTest extends TestCase
 {
     /**
-     * @covers ::__debugInfo
-     * @covers ::__construct
-     */
-    public function testDebugInfo()
-    {
-        $component = new UserInfo('yolo', 'oloy');
-        $this->assertInternalType('array', $component->__debugInfo());
-    }
-
-    /**
      * @dataProvider userInfoProvider
      * @param mixed       $user
      * @param mixed       $pass
@@ -47,7 +38,6 @@ class UserInfoTest extends TestCase
      * @param string      $uri_component
      * @param string      $iri_str
      * @param string      $rfc1738_str
-     * @covers ::__debugInfo
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::getContent
@@ -244,6 +234,17 @@ class UserInfoTest extends TestCase
     }
 
     /**
+     * @covers ::__debugInfo
+     */
+    public function testDebugInfo()
+    {
+        $component = new UserInfo('user', 'pass');
+        $debugInfo = $component->__debugInfo();
+        $this->assertArrayHasKey('component', $debugInfo);
+        $this->assertSame($component->getContent(), $debugInfo['component']);
+    }
+
+    /**
      * @dataProvider withUserInfoProvider
      * @param mixed  $user
      * @param mixed  $pass
@@ -272,7 +273,7 @@ class UserInfoTest extends TestCase
      */
     public function testGetUserThrowsInvalidArgumentException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new UserInfo())->getUser(-1);
     }
 
@@ -281,7 +282,7 @@ class UserInfoTest extends TestCase
      */
     public function testGetPassThrowsInvalidArgumentException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new UserInfo())->getPass(-1);
     }
 
@@ -290,7 +291,7 @@ class UserInfoTest extends TestCase
      */
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(UnknownEncoding::class);
         (new UserInfo('user', 'pass'))->getContent(-1);
     }
 
@@ -311,7 +312,7 @@ class UserInfoTest extends TestCase
 
     public function testConstructorThrowsException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidComponentArgument::class);
         new UserInfo("\0");
     }
 }

@@ -22,6 +22,7 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use League\Uri;
+use League\Uri\Exception\InvalidComponentArgument;
 use Traversable;
 use TypeError;
 
@@ -125,11 +126,23 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function __debugInfo()
+    {
+        return [
+            'component' => $this->getContent(),
+            'separator' => $this->separator,
+            'pairs' => $this->pairs,
+        ];
+    }
+
+    /**
      * Filter the incoming separator.
      *
      * @param string $separator
      *
-     * @throws Exception if the separator is invalid
+     * @throws InvalidComponentArgument if the separator is invalid
      *
      * @return string
      */
@@ -139,7 +152,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             return $separator;
         }
 
-        throw new Exception(sprintf('Invalid separator character `%s`', $separator));
+        throw new InvalidComponentArgument(sprintf('Invalid separator character `%s`', $separator));
     }
 
     /**
@@ -150,18 +163,6 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
     public function getSeparator(): string
     {
         return $this->separator;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'separator' => $this->separator,
-            'pairs' => $this->pairs,
-        ];
     }
 
     /**

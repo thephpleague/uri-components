@@ -18,6 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\PathNotFound;
 use SplFileObject;
 
 final class DataPath extends Path
@@ -88,14 +90,14 @@ final class DataPath extends Path
      *
      * @param string $path
      *
-     * @throws Exception If the File is not readable
+     * @throws PathNotFound If the File is not readable
      *
      * @return static
      */
     public static function createFromPath(string $path): self
     {
         if (!file_exists($path) || !is_readable($path)) {
-            throw new Exception(sprintf('`%s` does not exist or is not readabele', $path));
+            throw new PathNotFound(sprintf('`%s` does not exist or is not readabele', $path));
         }
 
         return new static(
@@ -122,6 +124,20 @@ final class DataPath extends Path
     /**
      * {@inheritdoc}
      */
+    public function __debugInfo()
+    {
+        return [
+            'component' => $this->getContent(),
+            'is_binary_data' => $this->is_binary_data,
+            'mimetype' => $this->mimetype,
+            'parameters' => $this->getParameters(),
+            'document' => $this->document,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function validate($path)
     {
         $path = parent::validate($path);
@@ -141,12 +157,14 @@ final class DataPath extends Path
      *
      * @param string $path
      *
+     * @throws InvalidComponentArgument if the path is invalid
+     *
      * @return array
      */
-    private function parse($path): array
+    private function parse(string $path): array
     {
         if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
-            throw new Exception(sprintf('The path `%s` is invalid according to RFC2937', $path));
+            throw new InvalidComponentArgument(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
         $is_binary_data = false;
@@ -169,7 +187,7 @@ final class DataPath extends Path
      *
      * @param string $mimetype
      *
-     * @throws Exception If the mimetype is invalid
+     * @throws InvalidComponentArgument If the mimetype is invalid
      *
      * @return string
      */
@@ -183,7 +201,7 @@ final class DataPath extends Path
             return $mimetype;
         }
 
-        throw new Exception(sprintf('invalid mimeType, `%s`', $mimetype));
+        throw new InvalidComponentArgument(sprintf('invalid mimeType, `%s`', $mimetype));
     }
 
     /**
@@ -192,7 +210,7 @@ final class DataPath extends Path
      * @param string $parameters
      * @param bool   $is_binary_data
      *
-     * @throws Exception If the mediatype parameters contain invalid data
+     * @throws InvalidComponentArgument If the mediatype parameters contain invalid data
      *
      * @return string[]
      */
@@ -209,7 +227,7 @@ final class DataPath extends Path
 
         $params = array_filter(explode(';', $parameters));
         if (!empty(array_filter($params, [$this, 'validateParameter']))) {
-            throw new Exception(sprintf('invalid mediatype parameters, `%s`', $parameters));
+            throw new InvalidComponentArgument(sprintf('invalid mediatype parameters, `%s`', $parameters));
         }
 
         return $params;
@@ -235,7 +253,7 @@ final class DataPath extends Path
      * @param string $document
      * @param bool   $is_binary_data
      *
-     * @throws Exception If the data is invalid
+     * @throws InvalidComponentArgument If the data is invalid
      */
     private function validateDocument(string $document, bool $is_binary_data)
     {
@@ -245,22 +263,8 @@ final class DataPath extends Path
 
         $res = base64_decode($document, true);
         if (false === $res || $document !== base64_encode($res)) {
-            throw new Exception(sprintf('invalid document, `%s`', $document));
+            throw new InvalidComponentArgument(sprintf('invalid document, `%s`', $document));
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->component,
-            'mimetype' => $this->mimetype,
-            'parameters' => $this->parameters,
-            'is_binary' => $this->is_binary_data,
-            'data' => $this->document,
-        ];
     }
 
     /**
