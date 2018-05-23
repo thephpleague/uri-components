@@ -24,8 +24,8 @@ use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
 use League\Uri\Converter\StringConverter;
-use League\Uri\Interfaces\Uri as LeagueUriInterface;
-use Psr\Http\Message\UriInterface;
+use League\Uri\Interfaces\Uri as DeprecatedLeagueUriInterface;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 
 /**
@@ -39,11 +39,14 @@ use TypeError;
  *
  * @throws TypeError if the URI object does not implements the supported interfaces.
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function filter_uri($uri)
 {
-    if ($uri instanceof LeagueUriInterface || $uri instanceof UriInterface) {
+    if ($uri instanceof DeprecatedLeagueUriInterface
+        || $uri instanceof Psr7UriInterface
+        || $uri instanceof UriInterface
+    ) {
         return $uri;
     }
 
@@ -53,10 +56,10 @@ function filter_uri($uri)
 /**
  * Add a new basepath to the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function add_basepath($uri, $path)
 {
@@ -78,9 +81,9 @@ function add_basepath($uri, $path)
 /**
  * Add a leading slash to the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function add_leading_slash($uri)
 {
@@ -95,9 +98,9 @@ function add_leading_slash($uri)
 /**
  * Add the root label to the URI.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function add_root_label($uri)
 {
@@ -107,9 +110,9 @@ function add_root_label($uri)
 /**
  * Add a trailing slash to the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function add_trailing_slash($uri)
 {
@@ -124,10 +127,10 @@ function add_trailing_slash($uri)
 /**
  * Append a label or a host to the current URI host.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $host
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $host
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function append_host($uri, $host)
 {
@@ -137,10 +140,10 @@ function append_host($uri, $host)
 /**
  * Append an new segment or a new path to the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param string                          $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param string                                                     $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function append_path($uri, string $path)
 {
@@ -150,10 +153,10 @@ function append_path($uri, string $path)
 /**
  * Add the new query data to the existing URI query.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $query
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $query
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function append_query($uri, $query)
 {
@@ -163,9 +166,9 @@ function append_query($uri, $query)
 /**
  * Convert the URI host part to its ascii value.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function host_to_ascii($uri)
 {
@@ -175,9 +178,9 @@ function host_to_ascii($uri)
 /**
  * Convert the URI host part to its unicode value.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function host_to_unicode($uri)
 {
@@ -187,10 +190,10 @@ function host_to_unicode($uri)
 /**
  * Merge a new query with the existing URI query.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $query
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $query
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function merge_query($uri, $query)
 {
@@ -200,9 +203,9 @@ function merge_query($uri, $query)
 /**
  * Convert the Data URI path to its ascii form.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function datapath_to_ascii($uri)
 {
@@ -212,9 +215,9 @@ function datapath_to_ascii($uri)
 /**
  * Convert the Data URI path to its binary (base64encoded) form.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function datapath_to_binary($uri)
 {
@@ -224,10 +227,10 @@ function datapath_to_binary($uri)
 /**
  * Prepend a label or a host to the current URI host.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $host
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $host
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function prepend_host($uri, $host)
 {
@@ -238,10 +241,10 @@ function prepend_host($uri, $host)
  * Prepend an new segment or a new path to the URI path.
  *
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function prepend_path($uri, $path)
 {
@@ -251,10 +254,10 @@ function prepend_path($uri, $path)
 /**
  * Remove a basepath from the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_basepath($uri, $path)
 {
@@ -277,9 +280,9 @@ function remove_basepath($uri, $path)
 /**
  * Remove dot segments from the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_dot_segments($uri)
 {
@@ -292,10 +295,10 @@ function remove_dot_segments($uri)
  * Make sure the path always has a leading slash if an authority is present
  * and the path is not the empty string.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param string|null                     $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param string|null                                                $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function normalize_path($uri, string $path = null)
 {
@@ -312,9 +315,9 @@ function normalize_path($uri, string $path = null)
 /**
  * Remove empty segments from the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_empty_segments($uri)
 {
@@ -324,10 +327,10 @@ function remove_empty_segments($uri)
 /**
  * Remove host labels according to their offset.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param int[]                           $keys
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param int[]                                                      $keys
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_labels($uri, array $keys)
 {
@@ -337,9 +340,9 @@ function remove_labels($uri, array $keys)
 /**
  * Remove the leading slash from the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_leading_slash($uri)
 {
@@ -354,10 +357,10 @@ function remove_leading_slash($uri)
 /**
  * Remove query data according to their key name.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param string[]                        $keys
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param string[]                                                   $keys
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_params($uri, array $keys)
 {
@@ -367,10 +370,10 @@ function remove_params($uri, array $keys)
 /**
  * Remove query data according to their key name.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param string[]                        $keys
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param string[]                                                   $keys
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_pairs($uri, array $keys)
 {
@@ -380,9 +383,9 @@ function remove_pairs($uri, array $keys)
 /**
  * Remove the root label to the URI.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_root_label($uri)
 {
@@ -392,9 +395,9 @@ function remove_root_label($uri)
 /**
  * Remove the trailing slash from the URI path.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_trailing_slash($uri)
 {
@@ -409,10 +412,10 @@ function remove_trailing_slash($uri)
 /**
  * Remove path segments from the URI path according to their offsets.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param int[]                           $keys
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param int[]                                                      $keys
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_segments($uri, array $keys)
 {
@@ -422,9 +425,9 @@ function remove_segments($uri, array $keys)
 /**
  * Remove the host zone identifier.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function remove_zone_id($uri)
 {
@@ -434,10 +437,10 @@ function remove_zone_id($uri)
 /**
  * Replace the URI path basename.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function replace_basename($uri, $path)
 {
@@ -447,10 +450,10 @@ function replace_basename($uri, $path)
 /**
  * Replace the data URI path parameters.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param string                          $parameters
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param string                                                     $parameters
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function replace_data_uri_parameters($uri, string $parameters)
 {
@@ -460,10 +463,10 @@ function replace_data_uri_parameters($uri, string $parameters)
 /**
  * Replace the URI path dirname.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function replace_dirname($uri, $path)
 {
@@ -473,10 +476,10 @@ function replace_dirname($uri, $path)
 /**
  * Replace the URI path basename extension.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param mixed                           $extension
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param mixed                                                      $extension
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function replace_extension($uri, $extension)
 {
@@ -486,11 +489,11 @@ function replace_extension($uri, $extension)
 /**
  * Replace a label of the current URI host.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param int                             $offset
- * @param mixed                           $host
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param int                                                        $offset
+ * @param mixed                                                      $host
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function replace_label($uri, int $offset, $host)
 {
@@ -500,11 +503,11 @@ function replace_label($uri, int $offset, $host)
 /**
  * Replace a segment from the URI path according its offset.
  *
- * @param LeagueUriInterface|UriInterface $uri
- * @param int                             $offset
- * @param mixed                           $path
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
+ * @param int                                                        $offset
+ * @param mixed                                                      $path
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function replace_segment($uri, int $offset, $path)
 {
@@ -514,9 +517,9 @@ function replace_segment($uri, int $offset, $path)
 /**
  * Sort the URI query by keys.
  *
- * @param LeagueUriInterface|UriInterface $uri
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
  *
- * @return LeagueUriInterface|UriInterface
+ * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
  */
 function sort_query($uri)
 {

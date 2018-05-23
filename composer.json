@@ -35,7 +35,7 @@
         "php": ">=7.0",
         "ext-curl": "*",
         "ext-fileinfo": "*",
-        "league/uri-interfaces": "^1.0",
+        "league/uri-interfaces": "^1.1",
         "league/uri-query-parser": "dev-master",
         "psr/http-message": "^1.0"
     },
