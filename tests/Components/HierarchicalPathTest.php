@@ -18,7 +18,7 @@ namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Components\HierarchicalPath as Path;
-use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidArgument;
 use League\Uri\Exception\InvalidKey;
 use PHPUnit\Framework\TestCase;
 use Traversable;
@@ -182,7 +182,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromSegmentsFailedWithInvalidType()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         Path::createFromSegments(['all', 'is', 'good'], 23);
     }
 
@@ -191,7 +191,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromSegmentsFailed()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         Path::createFromSegments([date_create()], Path::IS_RELATIVE);
     }
 
@@ -485,7 +485,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithExtensionWithInvalidExtension($extension)
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         (new Path())->withExtension($extension);
     }
 
@@ -663,7 +663,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithBasenameThrowException()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         (new Path('foo/bar'))->withBasename('foo/bar');
     }
 }

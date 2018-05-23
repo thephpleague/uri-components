@@ -18,7 +18,7 @@ namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Components\Host;
-use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidArgument;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
@@ -309,7 +309,7 @@ class HostTest extends TestCase
      */
     public function testInvalidHost($invalid)
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Host($invalid);
     }
 
@@ -472,7 +472,7 @@ class HostTest extends TestCase
      */
     public function testcreateFromLabelsFailedWithInvalidFlag()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         Host::createFromLabels(['all', 'is', 'good'], 23);
     }
 
@@ -490,7 +490,7 @@ class HostTest extends TestCase
      */
     public function testcreateFromLabelsFailedWithInvalidArrayInput()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         Host::createFromLabels([date_create()], Host::IS_RELATIVE);
     }
 
@@ -525,7 +525,7 @@ class HostTest extends TestCase
      */
     public function testCreateFromIpFailed($input)
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         Host::createFromIp($input);
     }
 
@@ -666,7 +666,7 @@ class HostTest extends TestCase
      */
     public function testPrependIpFailed()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         (new Host('::1'))->prepend(new Host('foo'));
     }
 
@@ -702,7 +702,7 @@ class HostTest extends TestCase
      */
     public function testAppendIpFailed()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         (new Host('[::1]'))->append('foo');
     }
 
@@ -737,7 +737,7 @@ class HostTest extends TestCase
      */
     public function testReplaceIpMustFailed()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         (new Host('secure.example.com'))->withLabel(2, '[::1]');
     }
 

@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Fragment;
-use League\Uri\Exception\InvalidComponentArgument;
+use League\Uri\Exception\InvalidArgument;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -139,7 +139,7 @@ class FragmentTest extends TestCase
      */
     public function testFailedFragmentException()
     {
-        $this->expectException(InvalidComponentArgument::class);
+        $this->expectException(InvalidArgument::class);
         new Fragment("\0");
     }
 

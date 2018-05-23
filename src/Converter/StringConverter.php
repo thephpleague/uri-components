@@ -72,7 +72,7 @@ final class StringConverter implements EncodingInterface
             return (string) $input->getContent($enc_type);
         }
 
-        throw new TypeError('input must be an URI object or a League URI Component object');
+        throw new TypeError('the first argument must be an URI object or a League URI Component object');
     }
 
     /**
