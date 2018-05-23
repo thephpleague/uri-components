@@ -43,7 +43,7 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers \League\Uri\path_to_binary
+     * @covers \League\Uri\datapath_to_binary
      * @covers \League\Uri\normalize_path
      *
      * @dataProvider fileProvider
@@ -53,11 +53,11 @@ class PathModifierTest extends TestCase
      */
     public function testToBinary(Data $binary, Data $ascii)
     {
-        $this->assertSame((string) $binary, (string) Uri\path_to_binary($ascii));
+        $this->assertSame((string) $binary, (string) Uri\datapath_to_binary($ascii));
     }
 
     /**
-     * @covers \League\Uri\path_to_ascii
+     * @covers \League\Uri\datapath_to_ascii
      * @covers \League\Uri\normalize_path
      *
      * @dataProvider fileProvider
@@ -67,7 +67,7 @@ class PathModifierTest extends TestCase
      */
     public function testToAscii(Data $binary, Data $ascii)
     {
-        $this->assertSame((string) $ascii, (string) Uri\path_to_ascii($binary));
+        $this->assertSame((string) $ascii, (string) Uri\datapath_to_ascii($binary));
     }
 
     public function fileProvider()

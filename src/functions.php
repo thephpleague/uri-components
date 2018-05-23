@@ -18,12 +18,12 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\ComponentInterface;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
+use League\Uri\Converter\StringConverter;
 use League\Uri\Interfaces\Uri as LeagueUriInterface;
 use Psr\Http\Message\UriInterface;
 use TypeError;
@@ -204,7 +204,7 @@ function merge_query($uri, $query)
  *
  * @return LeagueUriInterface|UriInterface
  */
-function path_to_ascii($uri)
+function datapath_to_ascii($uri)
 {
     return $uri->withPath((string) (new DataPath(filter_uri($uri)->getPath()))->toAscii());
 }
@@ -216,7 +216,7 @@ function path_to_ascii($uri)
  *
  * @return LeagueUriInterface|UriInterface
  */
-function path_to_binary($uri)
+function datapath_to_binary($uri)
 {
     return $uri->withPath((string) (new DataPath(filter_uri($uri)->getPath()))->toBinary());
 }
@@ -531,27 +531,13 @@ function sort_query($uri)
  *
  * @return string
  */
-function uri_to_ascii($payload, string $separator = '&')
+function to_ascii($payload, string $separator = '&')
 {
-    static $formatter;
-    if (null === $formatter) {
-        $formatter = $formatter ?? new Formatter();
-        $formatter->setEncoding(Formatter::RFC3986_ENCODING);
-    }
+    static $converter;
 
-    $formatter->setQuerySeparator($separator);
-    if ($payload instanceof ComponentInterface) {
-        return $formatter->format($payload);
-    }
+    $converter = $converter ?? new StringConverter();
 
-    list($remaining_uri, $fragment) = explode('#', (string) filter_uri($payload), 2) + ['', null];
-    list(, $query) = explode('?', $remaining_uri, 2) + ['', null];
-
-    return $formatter
-        ->preserveFragment(null !== $fragment)
-        ->preserveQuery(null !== $query)
-        ->format($payload)
-    ;
+    return $converter->convert($payload, StringConverter::RFC3986_ENCODING, $separator);
 }
 
 /**
@@ -562,28 +548,11 @@ function uri_to_ascii($payload, string $separator = '&')
  *
  * @return string
  */
-function uri_to_unicode($payload, string $separator = '&'): string
+function to_unicode($payload, string $separator = '&'): string
 {
-    static $formatter;
-    if (null === $formatter) {
-        $formatter = $formatter ?? new Formatter();
-        $formatter->setEncoding(Formatter::RFC3987_ENCODING);
-    }
+    static $converter;
 
-    if ($payload instanceof ComponentInterface) {
-        return $formatter
-            ->setQuerySeparator($separator)
-            ->format($payload)
-        ;
-    }
+    $converter = $converter ?? new StringConverter();
 
-    list($remaining_uri, $fragment) = explode('#', (string) filter_uri($payload), 2) + [1 => null];
-    list(, $query) = explode('?', $remaining_uri, 2) + [1 => null];
-
-    return $formatter
-        ->preserveFragment(null !== $fragment)
-        ->preserveQuery(null !== $query)
-        ->setQuerySeparator($separator)
-        ->format($payload)
-    ;
+    return $converter->convert($payload, StringConverter::RFC3987_ENCODING, $separator);
 }
