@@ -529,8 +529,8 @@ function sort_query($uri)
 /**
  * Returns the RFC3986 string representation of the given URI object or URI Component object.
  *
- * @param mixed  $payload
- * @param string $separator
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface|ComponentInterface $payload
+ * @param string                                                                        $separator
  *
  * @return string
  */
@@ -546,8 +546,8 @@ function to_ascii($payload, string $separator = '&')
 /**
  * Returns the RFC3987 string representation of the given URI object or URI Component object.
  *
- * @param mixed  $payload
- * @param string $separator
+ * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface|ComponentInterface $payload
+ * @param string                                                                        $separator
  *
  * @return string
  */
