@@ -35,14 +35,15 @@
         "php": ">=7.0",
         "ext-curl": "*",
         "ext-fileinfo": "*",
-        "league/uri-interfaces": "^1.1",
+        "league/uri-interfaces": "dev-develop",
         "league/uri-query-parser": "dev-master",
         "psr/http-message": "^1.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3",
         "guzzlehttp/psr7": "^1.4",
-        "league/uri-schemes": "^1.2",
+        "league/uri-parser": "dev-develop",
+        "league/uri-schemes": "dev-develop",
         "phpstan/phpstan": "^0.9.2",
         "phpstan/phpstan-phpunit": "^0.9.4",
         "phpstan/phpstan-strict-rules": "^0.9.0",

@@ -25,7 +25,6 @@ use League\Uri\Component\Query;
 use League\Uri\Component\UserInfo;
 use League\Uri\ComponentInterface;
 use League\Uri\EncodingInterface;
-use League\Uri\Interfaces\Uri as DeprecatedLeagueUriInterface;
 use League\Uri\UriInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
@@ -50,7 +49,6 @@ final class StringConverter implements EncodingInterface
      * Converts according to the given parameters.
      * The object must implement one of the following interface:
      * <ul>
-     * <li>League\Uri\Interfaces\Uri
      * <li>League\Uri\UriInterface
      * <li>League\Uri\ComponentInterface
      * <li>Psr\Http\Message\UriInterface
@@ -65,10 +63,7 @@ final class StringConverter implements EncodingInterface
     public static function convert($input, int $enc_type = self::RFC3986_ENCODING, string $separator = '&'): string
     {
         $separator = trim(filter_var($separator, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW));
-        if ($input instanceof DeprecatedLeagueUriInterface
-            || $input instanceof UriInterface
-            || $input instanceof Psr7UriInterface
-        ) {
+        if ($input instanceof UriInterface || $input instanceof Psr7UriInterface) {
             return self::convertURI($input, $enc_type, $separator);
         }
 
@@ -86,9 +81,9 @@ final class StringConverter implements EncodingInterface
     /**
      * Format an Uri according to the Formatter properties.
      *
-     * @param DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface $uri
-     * @param int                                                        $enc_type
-     * @param string                                                     $separator
+     * @param Psr7UriInterface|UriInterface $uri
+     * @param int                           $enc_type
+     * @param string                        $separator
      *
      * @return string
      */

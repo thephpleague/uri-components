@@ -24,7 +24,6 @@ use League\Uri\Component\Host;
 use League\Uri\Component\Path;
 use League\Uri\Component\Query;
 use League\Uri\Converter\StringConverter;
-use League\Uri\Interfaces\Uri as DeprecatedLeagueUriInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 
@@ -39,14 +38,11 @@ use TypeError;
  *
  * @throws TypeError if the URI object does not implements the supported interfaces.
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function filter_uri($uri)
 {
-    if ($uri instanceof DeprecatedLeagueUriInterface
-        || $uri instanceof Psr7UriInterface
-        || $uri instanceof UriInterface
-    ) {
+    if ($uri instanceof Psr7UriInterface || $uri instanceof UriInterface) {
         return $uri;
     }
 
@@ -59,7 +55,7 @@ function filter_uri($uri)
  * @param mixed $uri
  * @param mixed $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function add_basepath($uri, $path)
 {
@@ -83,7 +79,7 @@ function add_basepath($uri, $path)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function add_leading_slash($uri)
 {
@@ -100,7 +96,7 @@ function add_leading_slash($uri)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function add_root_label($uri)
 {
@@ -112,7 +108,7 @@ function add_root_label($uri)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function add_trailing_slash($uri)
 {
@@ -130,7 +126,7 @@ function add_trailing_slash($uri)
  * @param mixed $uri
  * @param mixed $host
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function append_host($uri, $host)
 {
@@ -143,7 +139,7 @@ function append_host($uri, $host)
  * @param mixed  $uri
  * @param string $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function append_path($uri, string $path)
 {
@@ -156,7 +152,7 @@ function append_path($uri, string $path)
  * @param mixed $uri
  * @param mixed $query
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function append_query($uri, $query)
 {
@@ -168,7 +164,7 @@ function append_query($uri, $query)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function host_to_ascii($uri)
 {
@@ -180,7 +176,7 @@ function host_to_ascii($uri)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function host_to_unicode($uri)
 {
@@ -193,7 +189,7 @@ function host_to_unicode($uri)
  * @param mixed $uri
  * @param mixed $query
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function merge_query($uri, $query)
 {
@@ -205,7 +201,7 @@ function merge_query($uri, $query)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function datapath_to_ascii($uri)
 {
@@ -217,7 +213,7 @@ function datapath_to_ascii($uri)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function datapath_to_binary($uri)
 {
@@ -230,7 +226,7 @@ function datapath_to_binary($uri)
  * @param mixed $uri
  * @param mixed $host
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function prepend_host($uri, $host)
 {
@@ -244,7 +240,7 @@ function prepend_host($uri, $host)
  * @param mixed $uri
  * @param mixed $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function prepend_path($uri, $path)
 {
@@ -257,7 +253,7 @@ function prepend_path($uri, $path)
  * @param mixed $uri
  * @param mixed $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_basepath($uri, $path)
 {
@@ -282,7 +278,7 @@ function remove_basepath($uri, $path)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_dot_segments($uri)
 {
@@ -298,7 +294,7 @@ function remove_dot_segments($uri)
  * @param mixed       $uri
  * @param string|null $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function normalize_path($uri, string $path = null)
 {
@@ -317,7 +313,7 @@ function normalize_path($uri, string $path = null)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_empty_segments($uri)
 {
@@ -330,7 +326,7 @@ function remove_empty_segments($uri)
  * @param mixed $uri
  * @param int[] $keys
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_labels($uri, array $keys)
 {
@@ -342,7 +338,7 @@ function remove_labels($uri, array $keys)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_leading_slash($uri)
 {
@@ -360,7 +356,7 @@ function remove_leading_slash($uri)
  * @param mixed    $uri
  * @param string[] $keys
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_params($uri, array $keys)
 {
@@ -373,7 +369,7 @@ function remove_params($uri, array $keys)
  * @param mixed    $uri
  * @param string[] $keys
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_pairs($uri, array $keys)
 {
@@ -385,7 +381,7 @@ function remove_pairs($uri, array $keys)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_root_label($uri)
 {
@@ -397,7 +393,7 @@ function remove_root_label($uri)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_trailing_slash($uri)
 {
@@ -415,7 +411,7 @@ function remove_trailing_slash($uri)
  * @param mixed $uri
  * @param int[] $keys
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_segments($uri, array $keys)
 {
@@ -427,7 +423,7 @@ function remove_segments($uri, array $keys)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function remove_zone_id($uri)
 {
@@ -440,7 +436,7 @@ function remove_zone_id($uri)
  * @param mixed $uri
  * @param mixed $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function replace_basename($uri, $path)
 {
@@ -453,7 +449,7 @@ function replace_basename($uri, $path)
  * @param mixed  $uri
  * @param string $parameters
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function replace_data_uri_parameters($uri, string $parameters)
 {
@@ -466,7 +462,7 @@ function replace_data_uri_parameters($uri, string $parameters)
  * @param mixed $uri
  * @param mixed $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function replace_dirname($uri, $path)
 {
@@ -479,7 +475,7 @@ function replace_dirname($uri, $path)
  * @param mixed $uri
  * @param mixed $extension
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function replace_extension($uri, $extension)
 {
@@ -493,7 +489,7 @@ function replace_extension($uri, $extension)
  * @param int   $offset
  * @param mixed $host
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function replace_label($uri, int $offset, $host)
 {
@@ -507,7 +503,7 @@ function replace_label($uri, int $offset, $host)
  * @param int   $offset
  * @param mixed $path
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function replace_segment($uri, int $offset, $path)
 {
@@ -519,7 +515,7 @@ function replace_segment($uri, int $offset, $path)
  *
  * @param mixed $uri
  *
- * @return DeprecatedLeagueUriInterface|Psr7UriInterface|UriInterface
+ * @return Psr7UriInterface|UriInterface
  */
 function sort_query($uri)
 {
