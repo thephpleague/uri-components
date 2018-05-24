@@ -17,9 +17,9 @@
 namespace LeagueTest\Uri\Converter;
 
 use League\Uri;
-use League\Uri\Components\Host;
-use League\Uri\Components\Query;
-use League\Uri\Components\Scheme;
+use League\Uri\Component\Host;
+use League\Uri\Component\Query;
+use League\Uri\Component\Scheme;
 use League\Uri\Converter\StringConverter;
 use League\Uri\Exception\UnknownEncoding;
 use League\Uri\Http;

@@ -18,11 +18,11 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\DataPath;
-use League\Uri\Components\HierarchicalPath;
-use League\Uri\Components\Host;
-use League\Uri\Components\Path;
-use League\Uri\Components\Query;
+use League\Uri\Component\DataPath;
+use League\Uri\Component\HierarchicalPath;
+use League\Uri\Component\Host;
+use League\Uri\Component\Path;
+use League\Uri\Component\Query;
 use League\Uri\Converter\StringConverter;
 use League\Uri\Interfaces\Uri as DeprecatedLeagueUriInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;

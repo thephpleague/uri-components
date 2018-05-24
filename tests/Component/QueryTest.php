@@ -14,10 +14,10 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
-use League\Uri\Components\Query;
+use League\Uri\Component\Query;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +25,7 @@ use TypeError;
 
 /**
  * @group query
- * @coversDefaultClass \League\Uri\Components\Query
+ * @coversDefaultClass \League\Uri\Component\Query
  */
 class QueryTest extends TestCase
 {

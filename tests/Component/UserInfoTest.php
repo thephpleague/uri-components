@@ -14,9 +14,9 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
-use League\Uri\Components\UserInfo;
+use League\Uri\Component\UserInfo;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +24,7 @@ use TypeError;
 
 /**
  * @group userinfo
- * @coversDefaultClass \League\Uri\Components\UserInfo
+ * @coversDefaultClass \League\Uri\Component\UserInfo
  */
 class UserInfoTest extends TestCase
 {

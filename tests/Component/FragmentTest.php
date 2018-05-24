@@ -14,9 +14,9 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
-use League\Uri\Components\Fragment;
+use League\Uri\Component\Fragment;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +24,7 @@ use TypeError;
 
 /**
  * @group fragment
- * @coversDefaultClass \League\Uri\Components\Fragment
+ * @coversDefaultClass \League\Uri\Component\Fragment
  */
 class FragmentTest extends TestCase
 {

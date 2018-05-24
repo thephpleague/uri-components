@@ -14,9 +14,9 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
-use League\Uri\Components\DataPath as Path;
+use League\Uri\Component\DataPath as Path;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\PathNotFound;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +25,7 @@ use SplFileObject;
 /**
  * @group path
  * @group datapath
- * @coversDefaultClass \League\Uri\Components\DataPath
+ * @coversDefaultClass \League\Uri\Component\DataPath
  */
 class DataPathTest extends TestCase
 {

@@ -14,9 +14,9 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
-use League\Uri\Components\Port;
+use League\Uri\Component\Port;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +24,7 @@ use TypeError;
 
 /**
  * @group port
- * @coversDefaultClass \League\Uri\Components\Port
+ * @coversDefaultClass \League\Uri\Component\Port
  */
 class PortTest extends TestCase
 {

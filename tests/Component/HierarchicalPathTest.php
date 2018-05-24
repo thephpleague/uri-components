@@ -14,10 +14,10 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
-use League\Uri\Components\HierarchicalPath as Path;
+use League\Uri\Component\HierarchicalPath as Path;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
@@ -27,7 +27,7 @@ use TypeError;
 /**
  * @group path
  * @group hierarchicalpath
- * @coversDefaultClass \League\Uri\Components\HierarchicalPath
+ * @coversDefaultClass \League\Uri\Component\HierarchicalPath
  */
 class HierarchicalPathTest extends TestCase
 {

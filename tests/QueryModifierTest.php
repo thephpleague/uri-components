@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri;
 
 use League\Uri;
-use League\Uri\Components\Query;
+use League\Uri\Component\Query;
 use League\Uri\Schemes\Http;
 use PHPUnit\Framework\TestCase;
 

@@ -19,12 +19,12 @@ declare(strict_types=1);
 namespace League\Uri\Converter;
 
 use League\Uri;
-use League\Uri\Components\ComponentInterface;
-use League\Uri\Components\Fragment;
-use League\Uri\Components\Host;
-use League\Uri\Components\Path;
-use League\Uri\Components\Query;
-use League\Uri\Components\UserInfo;
+use League\Uri\Component\ComponentInterface;
+use League\Uri\Component\Fragment;
+use League\Uri\Component\Host;
+use League\Uri\Component\Path;
+use League\Uri\Component\Query;
+use League\Uri\Component\UserInfo;
 use League\Uri\EncodingInterface;
 use League\Uri\Interfaces\Uri as DeprecatedLeagueUriInterface;
 use League\Uri\UriInterface;
