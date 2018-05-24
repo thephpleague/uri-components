@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace League\Uri\Components;
+namespace League\Uri\Component;
 
 use InvalidUriComponentException;
 use League\Uri\EncodingInterface;
@@ -29,7 +29,7 @@ use League\Uri\EncodingInterface;
  *
  * @see        https://tools.ietf.org/html/rfc3986#section-3
  * @package    League\Uri
- * @subpackage League\Uri\Components
+ * @subpackage League\Uri\Component
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */

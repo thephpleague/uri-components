@@ -18,8 +18,8 @@ namespace LeagueTest\Uri;
 
 use GuzzleHttp\Psr7;
 use League\Uri;
-use League\Uri\Components\DataPath;
-use League\Uri\Components\Path;
+use League\Uri\Component\DataPath;
+use League\Uri\Component\Path;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Schemes\Data;
 use League\Uri\Schemes\Http;

@@ -14,9 +14,9 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
-use League\Uri\Components\Scheme;
+use League\Uri\Component\Scheme;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +24,7 @@ use TypeError;
 
 /**
  * @group scheme
- * @coversDefaultClass \League\Uri\Components\Scheme
+ * @coversDefaultClass \League\Uri\Component\Scheme
  */
 class SchemeTest extends TestCase
 {

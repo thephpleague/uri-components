@@ -14,9 +14,9 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
-use League\Uri\Components\Path;
+use League\Uri\Component\Path;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +25,7 @@ use TypeError;
 /**
  * @group path
  * @group defaultpath
- * @coversDefaultClass \League\Uri\Components\Path
+ * @coversDefaultClass \League\Uri\Component\Path
  */
 class PathTest extends TestCase
 {

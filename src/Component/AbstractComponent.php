@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Components;
+namespace League\Uri\Component;
 
 use JsonSerializable;
 use League\Uri\Exception\InvalidUriComponent;

@@ -14,10 +14,10 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
-use League\Uri\Components\Host;
+use League\Uri\Component\Host;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
@@ -26,7 +26,7 @@ use TypeError;
 
 /**
  * @group host
- * @coversDefaultClass \League\Uri\Components\Host
+ * @coversDefaultClass \League\Uri\Component\Host
  */
 class HostTest extends TestCase
 {

@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri;
 
 use League\Uri;
-use League\Uri\Components\Host;
+use League\Uri\Component\Host;
 use League\Uri\Schemes\Http;
 use PHPUnit\Framework\TestCase;
 use TypeError;

@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Components;
+namespace League\Uri\Component;
 
 use Countable;
 use IteratorAggregate;
@@ -36,7 +36,7 @@ use TypeError;
  * changed state.
  *
  * @package    League\Uri
- * @subpackage League\Uri\Components
+ * @subpackage League\Uri\Component
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
