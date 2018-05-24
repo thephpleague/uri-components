@@ -16,7 +16,7 @@
 
 namespace League\Uri\Component;
 
-use InvalidUriComponentException;
+use InvalidArgumentException;
 use League\Uri\EncodingInterface;
 
 /**
@@ -91,8 +91,8 @@ interface ComponentInterface extends EncodingInterface
      *
      * @param mixed $content
      *
-     * @throws InvalidUriComponentException for invalid component or transformations
-     *                                      that would result in a object in invalid state.
+     * @throws InvalidArgumentException for invalid component or transformations
+     *                                  that would result in a object in invalid state.
      *
      * @return static
      */
