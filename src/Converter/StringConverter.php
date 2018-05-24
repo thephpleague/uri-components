@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Converter;
 
-use League\Uri;
 use League\Uri\Component\Fragment;
 use League\Uri\Component\Host;
 use League\Uri\Component\Path;
@@ -30,12 +29,21 @@ use League\Uri\Interfaces\Uri as DeprecatedLeagueUriInterface;
 use League\Uri\UriInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
+use function League\Uri\query_build;
+use function League\Uri\query_parse;
 
 /**
  * @internal Use the function League\Uri\to_ascii or League\Uri\to_unicode instead
  */
 final class StringConverter implements EncodingInterface
 {
+    /**
+     * @codeCoverageIgnore
+     */
+    private function __construct()
+    {
+    }
+
     /**
      * Convert an Uri object or a Component Object into a string.
      *
@@ -54,18 +62,18 @@ final class StringConverter implements EncodingInterface
      *
      * @return string
      */
-    public function convert($input, int $enc_type = self::RFC3986_ENCODING, string $separator = '&'): string
+    public static function convert($input, int $enc_type = self::RFC3986_ENCODING, string $separator = '&'): string
     {
         $separator = trim(filter_var($separator, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW));
         if ($input instanceof DeprecatedLeagueUriInterface
             || $input instanceof UriInterface
             || $input instanceof Psr7UriInterface
         ) {
-            return $this->convertURI($input, $enc_type, $separator);
+            return self::convertURI($input, $enc_type, $separator);
         }
 
         if ($input instanceof Query) {
-            return (string) Uri\query_build($input, $separator, $enc_type);
+            return (string) query_build($input, $separator, $enc_type);
         }
 
         if ($input instanceof ComponentInterface) {
@@ -84,7 +92,7 @@ final class StringConverter implements EncodingInterface
      *
      * @return string
      */
-    private function convertURI($uri, int $enc_type, string $separator): string
+    private static function convertURI($uri, int $enc_type, string $separator): string
     {
         $scheme = $uri->getScheme();
         if ('' !== $scheme) {
@@ -115,7 +123,7 @@ final class StringConverter implements EncodingInterface
         list(, $query) = explode('?', $remaining_uri, 2) + ['', null];
 
         if (null !== $query) {
-            $query = '?'.Uri\query_build(Uri\query_parse($uri->getQuery()), $separator, $enc_type);
+            $query = '?'.query_build(query_parse($uri->getQuery()), $separator, $enc_type);
         }
 
         if (null !== $fragment) {

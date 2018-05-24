@@ -16,12 +16,20 @@
 
 namespace LeagueTest\Uri;
 
-use League\Uri;
 use League\Uri\Component\Host;
-use League\Uri\Schemes\Http;
+use League\Uri\Http;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use Zend\Diactoros\Uri as ZendUri;
+use function League\Uri\add_root_label;
+use function League\Uri\append_host;
+use function League\Uri\host_to_ascii;
+use function League\Uri\host_to_unicode;
+use function League\Uri\prepend_host;
+use function League\Uri\remove_labels;
+use function League\Uri\remove_root_label;
+use function League\Uri\remove_zone_id;
+use function League\Uri\replace_label;
 
 /**
  * @group host
@@ -53,7 +61,7 @@ class HostModifierTest extends TestCase
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
-        $this->assertSame($prepend, Uri\prepend_host($this->uri, $label)->getHost());
+        $this->assertSame($prepend, prepend_host($this->uri, $label)->getHost());
     }
 
     /**
@@ -69,7 +77,7 @@ class HostModifierTest extends TestCase
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
-        $this->assertSame($append, Uri\append_host($this->uri, $label)->getHost());
+        $this->assertSame($append, append_host($this->uri, $label)->getHost());
     }
 
     /**
@@ -85,7 +93,7 @@ class HostModifierTest extends TestCase
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
-        $this->assertSame($replace, Uri\replace_label($this->uri, $key, $label)->getHost());
+        $this->assertSame($replace, replace_label($this->uri, $key, $label)->getHost());
     }
 
     public function validHostProvider()
@@ -104,7 +112,7 @@ class HostModifierTest extends TestCase
         $uri = Http::createFromString('http://مثال.إختبار/where/to/go');
         $this->assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
-            (string) Uri\host_to_ascii($uri)
+            (string) host_to_ascii($uri)
         );
     }
 
@@ -115,7 +123,7 @@ class HostModifierTest extends TestCase
     {
         $uri = new ZendUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
         $expected = 'http://مثال.إختبار/where/to/go';
-        $this->assertSame($expected, (string) Uri\host_to_unicode($uri));
+        $this->assertSame($expected, (string) host_to_unicode($uri));
     }
 
     /**
@@ -126,7 +134,7 @@ class HostModifierTest extends TestCase
         $uri = Http::createFromString('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
         $this->assertSame(
             'http://[fe80::1234]/path/to/the/sky.php',
-            (string) Uri\remove_zone_id($uri)
+            (string) remove_zone_id($uri)
         );
     }
 
@@ -140,7 +148,7 @@ class HostModifierTest extends TestCase
      */
     public function testwithoutLabelProcess(array $keys, string $expected)
     {
-        $this->assertSame($expected, Uri\remove_labels($this->uri, $keys)->getHost());
+        $this->assertSame($expected, remove_labels($this->uri, $keys)->getHost());
     }
 
     public function validwithoutLabelProvider()
@@ -155,7 +163,7 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveLabels()
     {
-        $this->assertSame('example.com', Uri\remove_labels($this->uri, [2])->getHost());
+        $this->assertSame('example.com', remove_labels($this->uri, [2])->getHost());
     }
 
     /**
@@ -168,7 +176,7 @@ class HostModifierTest extends TestCase
     public function testRemoveLabelsFailedConstructor(array $params)
     {
         $this->expectException(TypeError::class);
-        Uri\remove_labels($this->uri, $params);
+        remove_labels($this->uri, $params);
     }
 
     public function invalidRemoveLabelsParameters()
@@ -183,7 +191,7 @@ class HostModifierTest extends TestCase
      */
     public function testAddRootLabel()
     {
-        $this->assertSame('www.example.com.', Uri\add_root_label($this->uri)->getHost());
+        $this->assertSame('www.example.com.', add_root_label($this->uri)->getHost());
     }
 
     /**
@@ -191,6 +199,6 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveRootLabel()
     {
-        $this->assertSame('www.example.com', Uri\remove_root_label($this->uri)->getHost());
+        $this->assertSame('www.example.com', remove_root_label($this->uri)->getHost());
     }
 }

@@ -65,7 +65,7 @@ class StringConverterTest extends TestCase
     public function testInvalidEncoding()
     {
         $this->expectException(UnknownEncoding::class);
-        (new StringConverter())->convert(new Host(), 24);
+        StringConverter::convert(new Host(), 24);
     }
 
     /**
@@ -168,7 +168,7 @@ class StringConverterTest extends TestCase
     public function testStringConverterFailed()
     {
         $this->expectException(TypeError::class);
-        (new StringConverter())->convert('http://www.example.com');
+        StringConverter::convert('http://www.example.com');
     }
 
     /**
@@ -201,7 +201,7 @@ class StringConverterTest extends TestCase
     public function testUriConversion($str, $rfc3986, $rfc3987, $host3986, $host3987)
     {
         $host = new Host($host3986);
-        $uri = Uri\Http::createFromString($str);
+        $uri = Http::createFromString($str);
         $this->assertSame($rfc3986, Uri\to_ascii($uri));
         $this->assertSame($rfc3987, Uri\to_unicode($uri));
         $this->assertSame($host3986, Uri\to_ascii($host));
