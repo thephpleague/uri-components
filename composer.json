@@ -33,7 +33,6 @@
     ],
     "require": {
         "php": ">=7.0",
-        "ext-curl": "*",
         "ext-fileinfo": "*",
         "league/uri-interfaces": "dev-develop",
         "league/uri-query-parser": "dev-master",
