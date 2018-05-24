@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\ComponentInterface;
 use TypeError;
 
 class Path extends AbstractComponent
