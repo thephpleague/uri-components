@@ -21,6 +21,7 @@ namespace League\Uri\Components;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Exception\InvalidKey;
+use League\Uri\Exception\InvalidPathSegment;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownType;
 use Traversable;
@@ -48,9 +49,9 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @param mixed $segments The segments list
      * @param int   $type     one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws TypeError           If $segments is not iterable
-     * @throws InvalidUriComponent If the segments are malformed
-     * @throws UnknownType         If the type is not recognized/supported
+     * @throws TypeError          If $segments is not iterable
+     * @throws InvalidPathSegment If the segments are malformed
+     * @throws UnknownType        If the type is not recognized/supported
      *
      * @return self
      */
@@ -72,7 +73,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
         foreach ($segments as $value) {
             if (!is_scalar($value) && !method_exists($value, '__toString')) {
-                throw new InvalidUriComponent('The submitted segments are invalid');
+                throw new InvalidPathSegment('The submitted segments are invalid');
             }
         }
 
@@ -202,7 +203,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      *
      * @return string|null
      */
-    public function getSegment(int $offset)
+    public function get(int $offset)
     {
         if ($offset < 0) {
             $offset += count($this->segments);
@@ -335,7 +336,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      *
      * @return self
      */
-    public function withoutSegments(int $key, int ...$keys): self
+    public function withoutSegment(int $key, int ...$keys): self
     {
         array_unshift($keys, $key);
         $nb_elements = count($this->segments);

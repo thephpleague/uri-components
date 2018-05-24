@@ -133,17 +133,17 @@ class HostModifierTest extends TestCase
     /**
      * @covers \League\Uri\remove_labels
      *
-     * @dataProvider validWithoutLabelsProvider
+     * @dataProvider validwithoutLabelProvider
      *
      * @param array  $keys
      * @param string $expected
      */
-    public function testWithoutLabelsProcess(array $keys, string $expected)
+    public function testwithoutLabelProcess(array $keys, string $expected)
     {
         $this->assertSame($expected, Uri\remove_labels($this->uri, $keys)->getHost());
     }
 
-    public function validWithoutLabelsProvider()
+    public function validwithoutLabelProvider()
     {
         return [
             [[1], 'www.com'],

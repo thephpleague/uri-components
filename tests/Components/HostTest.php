@@ -539,15 +539,15 @@ class HostTest extends TestCase
     }
 
     /**
-     * @covers ::getLabel
+     * @covers ::get
      */
-    public function testGetLabel()
+    public function testget()
     {
         $host = new Host('master.example.com');
-        $this->assertSame('com', $host->getLabel(0));
-        $this->assertSame('example', $host->getLabel(1));
-        $this->assertSame('master', $host->getLabel(-1));
-        $this->assertNull($host->getLabel(23));
+        $this->assertSame('com', $host->get(0));
+        $this->assertSame('example', $host->get(1));
+        $this->assertSame('master', $host->get(-1));
+        $this->assertNull($host->get(23));
     }
 
     /**
@@ -564,11 +564,11 @@ class HostTest extends TestCase
      * @param int    $without
      * @param string $res
      * @dataProvider withoutProvider
-     * @covers ::withoutLabels
+     * @covers ::withoutLabel
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (string) (new Host($host))->withoutLabels($without));
+        $this->assertSame($res, (string) (new Host($host))->withoutLabel($without));
     }
 
     public function withoutProvider()
@@ -583,12 +583,12 @@ class HostTest extends TestCase
     }
 
     /**
-     * @covers ::withoutLabels
+     * @covers ::withoutLabel
      */
     public function testWithoutTriggersException()
     {
         $this->expectException(InvalidKey::class);
-        (new Host('bébé.be'))->withoutLabels(-23);
+        (new Host('bébé.be'))->withoutLabel(-23);
     }
 
     /**
