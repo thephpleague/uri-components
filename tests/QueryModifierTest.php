@@ -16,10 +16,15 @@
 
 namespace LeagueTest\Uri;
 
-use League\Uri;
 use League\Uri\Component\Query;
-use League\Uri\Schemes\Http;
+use League\Uri\Http;
 use PHPUnit\Framework\TestCase;
+use function League\Uri\append_query;
+use function League\Uri\create;
+use function League\Uri\merge_query;
+use function League\Uri\remove_pairs;
+use function League\Uri\remove_params;
+use function League\Uri\sort_query;
 
 /**
  * @group query
@@ -48,7 +53,7 @@ class QueryModifierTest extends TestCase
      */
     public function testMergeQuery(string $query, string $expected)
     {
-        $this->assertSame($expected, Uri\merge_query($this->uri, $query)->getQuery());
+        $this->assertSame($expected, merge_query($this->uri, $query)->getQuery());
     }
 
     public function validMergeQueryProvider()
@@ -69,7 +74,7 @@ class QueryModifierTest extends TestCase
      */
     public function testAppendQuery(string $query, string $expected)
     {
-        $this->assertSame($expected, Uri\append_query($this->uri, $query)->getQuery());
+        $this->assertSame($expected, append_query($this->uri, $query)->getQuery());
     }
 
     public function validAppendQueryProvider()
@@ -86,7 +91,7 @@ class QueryModifierTest extends TestCase
     public function testKsortQuery()
     {
         $uri = Http::createFromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
-        $this->assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', Uri\sort_query($uri)->getQuery());
+        $this->assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', sort_query($uri)->getQuery());
     }
 
     /**
@@ -99,7 +104,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryValuesProcess(array $input, $expected)
     {
-        $this->assertSame($expected, Uri\remove_pairs($this->uri, $input)->getQuery());
+        $this->assertSame($expected, remove_pairs($this->uri, $input)->getQuery());
     }
 
     public function validWithoutQueryValuesProvider()
@@ -120,7 +125,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, string $expected)
     {
-        $this->assertSame($expected, Uri\remove_params(Uri\create($uri), $input)->getQuery());
+        $this->assertSame($expected, remove_params(create($uri), $input)->getQuery());
     }
 
     public function removeParamsProvider()

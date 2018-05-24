@@ -21,11 +21,13 @@ namespace League\Uri\Component;
 use Countable;
 use Iterator;
 use IteratorAggregate;
-use League\Uri;
 use League\Uri\ComponentInterface;
 use League\Uri\Exception\InvalidUriComponent;
 use Traversable;
 use TypeError;
+use function League\Uri\query_build;
+use function League\Uri\query_extract;
+use function League\Uri\query_parse;
 
 final class Query extends AbstractComponent implements Countable, IteratorAggregate
 {
@@ -95,7 +97,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             throw new TypeError('the pairs must be iterable');
         }
 
-        return new self(Uri\query_build($pairs, $separator), $separator);
+        return new self(query_build($pairs, $separator), $separator);
     }
 
     /**
@@ -123,7 +125,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
     {
         $this->filterEncoding($enc_type);
         $this->separator = $this->filterSeparator($separator);
-        $this->pairs = Uri\query_parse($query, $separator, $enc_type);
+        $this->pairs = query_parse($query, $separator, $enc_type);
     }
 
     /**
@@ -176,7 +178,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
     {
         $this->filterEncoding($enc_type);
 
-        return Uri\query_build($this->pairs, $this->separator, $enc_type);
+        return query_build($this->pairs, $this->separator, $enc_type);
     }
 
     /**
@@ -325,7 +327,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function toParams(): array
     {
-        return Uri\query_extract($this->getContent(), $this->separator);
+        return query_extract($this->getContent(), $this->separator);
     }
 
     /**
@@ -355,7 +357,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function withContent($query): self
     {
-        $pairs = Uri\query_parse($query, $this->separator);
+        $pairs = query_parse($query, $this->separator);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -652,7 +654,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             $query = $query->getContent();
         }
 
-        $pairs = Uri\query_parse($query, $this->separator);
+        $pairs = query_parse($query, $this->separator);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -701,7 +703,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             $query = $query->getContent();
         }
 
-        $pairs = array_merge($this->pairs, Uri\query_parse($query, $this->separator));
+        $pairs = array_merge($this->pairs, query_parse($query, $this->separator));
         if ($pairs === $this->pairs) {
             return $this;
         }
