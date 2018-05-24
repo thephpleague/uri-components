@@ -20,6 +20,7 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
+use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownType;
@@ -173,9 +174,9 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      * @param mixed $labels
      * @param int   $type   One of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws TypeError           If $labels is not iterable
-     * @throws InvalidUriComponent If the labels are malformed
-     * @throws UnknownType         If the type is not recognized/supported
+     * @throws TypeError        If $labels is not iterable
+     * @throws InvalidHostLabel If the labels are malformed
+     * @throws UnknownType      If the type is not recognized/supported
      *
      * @return self
      */
@@ -195,7 +196,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
 
         foreach ($labels as $label) {
             if (!is_scalar($label) && !method_exists($label, '__toString')) {
-                throw new InvalidUriComponent(sprintf('The labels are malformed'));
+                throw new InvalidHostLabel(sprintf('The labels are malformed'));
             }
         }
 
@@ -529,7 +530,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      *
      * @return string|null
      */
-    public function getLabel(int $offset)
+    public function get(int $offset)
     {
         if ($offset < 0) {
             $offset += count($this->labels);
@@ -813,7 +814,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      *
      * @return self
      */
-    public function withoutLabels(int $key, int ...$keys): self
+    public function withoutLabel(int $key, int ...$keys): self
     {
         array_unshift($keys, $key);
         $nb_elements = count($this->labels);

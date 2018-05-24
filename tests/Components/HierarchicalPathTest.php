@@ -125,16 +125,16 @@ class HierarchicalPathTest extends TestCase
      * @param string $raw
      * @param int    $key
      * @param string $expected
-     * @dataProvider getSegmentProvider
+     * @dataProvider getProvider
      * @covers ::filterSegments
-     * @covers ::getSegment
+     * @covers ::get
      */
-    public function testGetSegment($raw, $key, $expected)
+    public function testget($raw, $key, $expected)
     {
-        $this->assertSame($expected, (new Path($raw))->getSegment($key));
+        $this->assertSame($expected, (new Path($raw))->get($key));
     }
 
-    public function getSegmentProvider()
+    public function getProvider()
     {
         return [
             ['/shop/rev iew/', 1, 'rev iew'],
@@ -306,7 +306,7 @@ class HierarchicalPathTest extends TestCase
      * @param string $result
      *
      * @dataProvider withoutProvider
-     * @covers ::withoutSegments
+     * @covers ::withoutSegment
      */
     public function testWithout($origin, $without, $result)
     {
@@ -317,7 +317,7 @@ class HierarchicalPathTest extends TestCase
             $without = $tmp;
         }
 
-        $this->assertSame($result, (string) (new Path($origin))->withoutSegments($without, ...$rest));
+        $this->assertSame($result, (string) (new Path($origin))->withoutSegment($without, ...$rest));
     }
 
     public function withoutProvider()
@@ -332,12 +332,12 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @covers ::withoutSegments
+     * @covers ::withoutSegment
      */
     public function testWithoutSegmentThrowsException()
     {
         $this->expectException(InvalidKey::class);
-        (new Path('/test/'))->withoutSegments(23);
+        (new Path('/test/'))->withoutSegment(23);
     }
 
     /**
@@ -354,12 +354,12 @@ class HierarchicalPathTest extends TestCase
 
     /**
      * @param string $input
-     * @param array  $getSegments
+     * @param array  $gets
      * @param int    $nbSegment
      * @dataProvider arrayProvider
      * @covers ::count
      */
-    public function testCountable($input, $getSegments, $nbSegment)
+    public function testCountable($input, $gets, $nbSegment)
     {
         $path = new Path($input);
         $this->assertCount($nbSegment, $path);

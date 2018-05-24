@@ -332,17 +332,17 @@ class PathModifierTest extends TestCase
      * @covers \League\Uri\remove_segments
      * @covers \League\Uri\normalize_path
      *
-     * @dataProvider validWithoutSegmentsProvider
+     * @dataProvider validwithoutSegmentProvider
      *
      * @param array  $keys
      * @param string $expected
      */
-    public function testWithoutSegments(array $keys, string $expected)
+    public function testwithoutSegment(array $keys, string $expected)
     {
         $this->assertSame($expected, Uri\remove_segments($this->uri, $keys)->getPath());
     }
 
-    public function validWithoutSegmentsProvider()
+    public function validwithoutSegmentProvider()
     {
         return [
             [[1], '/path/the/sky.php'],

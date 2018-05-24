@@ -273,7 +273,7 @@ function remove_basepath($uri, $path)
     }
 
     return $uri->withPath(
-        (string) (new HierarchicalPath($currentpath))->withoutSegments(...range(0, count($basepath) - 1))
+        (string) (new HierarchicalPath($currentpath))->withoutSegment(...range(0, count($basepath) - 1))
     );
 }
 
@@ -334,7 +334,7 @@ function remove_empty_segments($uri)
  */
 function remove_labels($uri, array $keys)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutLabels(...$keys));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutLabel(...$keys));
 }
 
 /**
@@ -419,7 +419,7 @@ function remove_trailing_slash($uri)
  */
 function remove_segments($uri, array $keys)
 {
-    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withoutSegments(...$keys));
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withoutSegment(...$keys));
 }
 
 /**
