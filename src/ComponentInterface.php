@@ -14,10 +14,9 @@
  * file that was distributed with this source code.
  */
 
-namespace League\Uri\Component;
+namespace League\Uri;
 
 use InvalidArgumentException;
-use League\Uri\EncodingInterface;
 
 /**
  * Value object representing a URI component.

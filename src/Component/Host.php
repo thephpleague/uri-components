@@ -20,6 +20,7 @@ namespace League\Uri\Component;
 
 use Countable;
 use IteratorAggregate;
+use League\Uri\ComponentInterface;
 use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;

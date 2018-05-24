@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use JsonSerializable;
+use League\Uri\ComponentInterface;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use TypeError;

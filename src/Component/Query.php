@@ -22,6 +22,7 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use League\Uri;
+use League\Uri\ComponentInterface;
 use League\Uri\Exception\InvalidUriComponent;
 use Traversable;
 use TypeError;
