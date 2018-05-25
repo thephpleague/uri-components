@@ -22,7 +22,7 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use League\Uri\ComponentInterface;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use Traversable;
 use TypeError;
 use function League\Uri\query_build;
@@ -69,10 +69,10 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         }
 
         if (empty($params)) {
-            return new self(null, $separator);
+            return new self(null, self::RFC3986_ENCODING, $separator);
         }
 
-        return new self(http_build_query($params, '', $separator, self::RFC3986_ENCODING), $separator);
+        return new self(http_build_query($params, '', $separator, self::RFC3986_ENCODING), self::RFC3986_ENCODING, $separator);
     }
 
     /**
@@ -97,7 +97,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             throw new TypeError('the pairs must be iterable');
         }
 
-        return new self(query_build($pairs, $separator), $separator);
+        return new self(query_build($pairs, self::RFC3986_ENCODING, $separator), self::RFC3986_ENCODING, $separator);
     }
 
     /**
@@ -116,16 +116,16 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      * Returns a new instance.
      *
      * @param mixed  $query
-     * @param string $separator
      * @param int    $enc_type
+     * @param string $separator
      *
      * @return self
      */
-    public function __construct($query = null, string $separator = '&', int $enc_type = self::RFC3986_ENCODING)
+    public function __construct($query = null, int $enc_type = self::RFC3986_ENCODING, string $separator = '&')
     {
         $this->filterEncoding($enc_type);
         $this->separator = $this->filterSeparator($separator);
-        $this->pairs = query_parse($query, $separator, $enc_type);
+        $this->pairs = query_parse($query, $enc_type, $separator);
     }
 
     /**
@@ -145,7 +145,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      *
      * @param string $separator
      *
-     * @throws InvalidUriComponent if the separator is invalid
+     * @throws MalformedUriComponent if the separator is invalid
      *
      * @return string
      */
@@ -155,7 +155,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             return $separator;
         }
 
-        throw new InvalidUriComponent(sprintf('Invalid separator character `%s`', $separator));
+        throw new MalformedUriComponent(sprintf('Invalid separator character `%s`', $separator));
     }
 
     /**
@@ -178,7 +178,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
     {
         $this->filterEncoding($enc_type);
 
-        return query_build($this->pairs, $this->separator, $enc_type);
+        return query_build($this->pairs, $enc_type, $this->separator);
     }
 
     /**
@@ -327,7 +327,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function toParams(): array
     {
-        return query_extract($this->getContent(), $this->separator);
+        return query_extract($this->getContent(), self::RFC3986_ENCODING, $this->separator);
     }
 
     /**
@@ -357,7 +357,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
      */
     public function withContent($query): self
     {
-        $pairs = query_parse($query, $this->separator);
+        $pairs = query_parse($query, self::RFC3986_ENCODING, $this->separator);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -654,7 +654,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             $query = $query->getContent();
         }
 
-        $pairs = query_parse($query, $this->separator);
+        $pairs = query_parse($query, self::RFC3986_ENCODING, $this->separator);
         if ($pairs === $this->pairs) {
             return $this;
         }
@@ -703,7 +703,7 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
             $query = $query->getContent();
         }
 
-        $pairs = array_merge($this->pairs, query_parse($query, $this->separator));
+        $pairs = array_merge($this->pairs, query_parse($query, self::RFC3986_ENCODING, $this->separator));
         if ($pairs === $this->pairs) {
             return $this;
         }

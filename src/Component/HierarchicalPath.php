@@ -22,7 +22,7 @@ use Countable;
 use IteratorAggregate;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidPathSegment;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use Traversable;
 use TypeError;
@@ -404,7 +404,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (false !== strpos($basename->component, self::SEPARATOR)) {
-            throw new InvalidUriComponent('The basename can not contain the path separator');
+            throw new MalformedUriComponent('The basename can not contain the path separator');
         }
 
         return $this->withSegment(count($this->segments) - 1, $basename);
@@ -428,11 +428,11 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (strpos($extension->component, self::SEPARATOR)) {
-            throw new InvalidUriComponent('an extension sequence can not contain a path delimiter');
+            throw new MalformedUriComponent('an extension sequence can not contain a path delimiter');
         }
 
         if (0 === strpos($extension->component, '.')) {
-            throw new InvalidUriComponent('an extension sequence can not contain a leading `.` character');
+            throw new MalformedUriComponent('an extension sequence can not contain a leading `.` character');
         }
 
         $basename = end($this->segments);

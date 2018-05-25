@@ -67,7 +67,7 @@ class QueryTest extends TestCase
     public function testInvalidSeparator($separator)
     {
         $this->expectException(InvalidUriComponent::class);
-        new Query('foo=bar', $separator);
+        new Query('foo=bar', Query::RFC3986_ENCODING, $separator);
     }
 
     public function invalidSeparatorProvider()

@@ -68,7 +68,7 @@ final class StringConverter implements EncodingInterface
         }
 
         if ($input instanceof Query) {
-            return (string) query_build($input, $separator, $enc_type);
+            return (string) query_build($input, $enc_type, $separator);
         }
 
         if ($input instanceof ComponentInterface) {
@@ -118,7 +118,7 @@ final class StringConverter implements EncodingInterface
         list(, $query) = explode('?', $remaining_uri, 2) + ['', null];
 
         if (null !== $query) {
-            $query = '?'.query_build(query_parse($uri->getQuery()), $separator, $enc_type);
+            $query = '?'.query_build(query_parse($uri->getQuery()), $enc_type, $separator);
         }
 
         if (null !== $fragment) {
