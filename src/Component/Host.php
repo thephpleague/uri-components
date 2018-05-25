@@ -24,6 +24,7 @@ use League\Uri\ComponentInterface;
 use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use Traversable;
 use TypeError;
@@ -277,7 +278,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
      *
      * @param mixed $host
      *
-     * @throws InvalidUriComponent If the host is invalid
+     * @throws MalformedUriComponent If the host is invalid
      *
      * @return array
      */
@@ -352,7 +353,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         }
 
         if ('[' !== $host[0] || ']' !== substr($host, -1)) {
-            throw new InvalidUriComponent(sprintf('The host `%s` is invalid', $host));
+            throw new MalformedUriComponent(sprintf('The host `%s` is invalid', $host));
         }
 
         $ip_host = substr($host, 1, -1);
@@ -376,7 +377,7 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
             ];
         }
 
-        throw new InvalidUriComponent(sprintf('The host `%s` is invalid', $host));
+        throw new MalformedUriComponent(sprintf('The host `%s` is invalid', $host));
     }
 
     /**

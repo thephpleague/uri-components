@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\PathNotFound;
 use SplFileObject;
 
@@ -157,14 +157,14 @@ final class DataPath extends Path
      *
      * @param string $path
      *
-     * @throws InvalidUriComponent if the path is invalid
+     * @throws MalformedUriComponent if the path is invalid
      *
      * @return array
      */
     private function parse(string $path): array
     {
         if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
-            throw new InvalidUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
+            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
         $is_binary_data = false;
@@ -187,7 +187,7 @@ final class DataPath extends Path
      *
      * @param string $mimetype
      *
-     * @throws InvalidUriComponent If the mimetype is invalid
+     * @throws MalformedUriComponent If the mimetype is invalid
      *
      * @return string
      */
@@ -201,7 +201,7 @@ final class DataPath extends Path
             return $mimetype;
         }
 
-        throw new InvalidUriComponent(sprintf('invalid mimeType, `%s`', $mimetype));
+        throw new MalformedUriComponent(sprintf('invalid mimeType, `%s`', $mimetype));
     }
 
     /**
@@ -210,7 +210,7 @@ final class DataPath extends Path
      * @param string $parameters
      * @param bool   $is_binary_data
      *
-     * @throws InvalidUriComponent If the mediatype parameters contain invalid data
+     * @throws MalformedUriComponent If the mediatype parameters contain invalid data
      *
      * @return string[]
      */
@@ -227,7 +227,7 @@ final class DataPath extends Path
 
         $params = array_filter(explode(';', $parameters));
         if (!empty(array_filter($params, [$this, 'validateParameter']))) {
-            throw new InvalidUriComponent(sprintf('invalid mediatype parameters, `%s`', $parameters));
+            throw new MalformedUriComponent(sprintf('invalid mediatype parameters, `%s`', $parameters));
         }
 
         return $params;
@@ -253,7 +253,7 @@ final class DataPath extends Path
      * @param string $document
      * @param bool   $is_binary_data
      *
-     * @throws InvalidUriComponent If the data is invalid
+     * @throws MalformedUriComponent If the data is invalid
      */
     private function validateDocument(string $document, bool $is_binary_data)
     {
@@ -263,7 +263,7 @@ final class DataPath extends Path
 
         $res = base64_decode($document, true);
         if (false === $res || $document !== base64_encode($res)) {
-            throw new InvalidUriComponent(sprintf('invalid document, `%s`', $document));
+            throw new MalformedUriComponent(sprintf('invalid document, `%s`', $document));
         }
     }
 
