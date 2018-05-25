@@ -217,7 +217,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      * The key of each pair is a string
      * The value of each pair is a scalar or the null value
      *
-     * @return \Iterator
+     * @return Iterator
      */
     public function pairs()
     {
@@ -600,7 +600,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * @return self
      */
-    public function withoutPairs(string $key, string ...$keys): self
+    public function withoutPair(string $key, string ...$keys): self
     {
         $keys[] = $key;
         $keys_to_remove = array_intersect($keys, array_column($this->pairs, 0));
@@ -710,7 +710,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * @return self
      */
-    public function withoutParams(string $offset, string ...$offsets): self
+    public function withoutParam(string $offset, string ...$offsets): self
     {
         $offsets[] = $offset;
         $mapper = function (string $offset): string {

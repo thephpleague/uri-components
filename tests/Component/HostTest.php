@@ -636,7 +636,6 @@ class HostTest extends TestCase
 
     /**
      * @covers ::prepend
-     * @covers ::withLabel
      *
      * @param string $raw
      * @param string $prepend
@@ -662,7 +661,6 @@ class HostTest extends TestCase
 
     /**
      * @covers ::prepend
-     * @covers ::withLabel
      */
     public function testPrependIpFailed()
     {
@@ -672,7 +670,6 @@ class HostTest extends TestCase
 
     /**
      * @covers ::append
-     * @covers ::withLabel
      *
      * @param string $raw
      * @param string $append
@@ -698,7 +695,6 @@ class HostTest extends TestCase
 
     /**
      * @covers ::append
-     * @covers ::withLabel
      */
     public function testAppendIpFailed()
     {
@@ -713,6 +709,8 @@ class HostTest extends TestCase
      * @param string $expected
      * @dataProvider replaceValid
      * @covers ::withLabel
+     * @covers ::append
+     * @covers ::prepend
      */
     public function testReplace($raw, $input, $offset, $expected)
     {
@@ -722,6 +720,8 @@ class HostTest extends TestCase
     public function replaceValid()
     {
         return [
+            ['master.example.com', 'shop', 3, 'master.example.com.shop'],
+            ['master.example.com', 'shop', -4, 'shop.master.example.com'],
             ['master.example.com', 'shop', 2, 'shop.example.com'],
             ['master.example.com', 'master', 2, 'master.example.com'],
             ['secure.example.com', '127.0.0.1', 0, 'secure.example.127.0.0.1'],

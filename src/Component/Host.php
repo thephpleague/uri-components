@@ -525,8 +525,7 @@ final class Host extends Component implements Countable, IteratorAggregate
     /**
      * Retrieves a single host label.
      *
-     * Retrieves a single host label. If the label offset has not been set,
-     * returns the default value provided.
+     * If the label offset has not been set, returns the null value.
      *
      * @param int $offset the label offset
      *
@@ -542,10 +541,7 @@ final class Host extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns the associated key for each label.
-     *
-     * If a value is specified only the keys associated with
-     * the given value will be returned
+     * Returns the associated key for a specific label.
      *
      * @param string $label
      *
@@ -709,23 +705,7 @@ final class Host extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Appends a label to the host.
-     *
-     * @see ::withLabel
-     *
-     * @param mixed $label
-     *
-     * @return self
-     */
-    public function append($label): self
-    {
-        return $this->withLabel(count($this->labels), $label);
-    }
-
-    /**
      * Prepends a label to the host.
-     *
-     * @see ::withLabel
      *
      * @param mixed $label
      *
@@ -733,7 +713,27 @@ final class Host extends Component implements Countable, IteratorAggregate
      */
     public function prepend($label): self
     {
-        return $this->withLabel(- count($this->labels) - 1, $label);
+        if (!$label instanceof self) {
+            $label = new self($label);
+        }
+
+        return $label->append($this);
+    }
+
+    /**
+     * Appends a label to the host.
+     *
+     * @param mixed $label
+     *
+     * @return self
+     */
+    public function append($label): self
+    {
+        if (!$label instanceof self) {
+            $label = new self($label);
+        }
+
+        return new self(rtrim($this->getContent(), self::SEPARATOR).self::SEPARATOR.ltrim($label->getContent(), self::SEPARATOR));
     }
 
     /**
@@ -755,38 +755,38 @@ final class Host extends Component implements Countable, IteratorAggregate
     public function withLabel(int $key, $label): self
     {
         $nb_labels = count($this->labels);
-        $offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_labels - 1, 'max_range' => $nb_labels]]);
-        if (false === $offset) {
+        if ($key < - $nb_labels - 1 || $key > $nb_labels) {
             throw new InvalidKey(sprintf('the given key `%s` is invalid', $key));
         }
 
-        if (0 > $offset) {
-            $offset += $nb_labels;
+        if (0 > $key) {
+            $key += $nb_labels;
         }
 
         if (!$label instanceof self) {
             $label = new self($label);
         }
 
-        if ($nb_labels === $offset) {
-            return new self(rtrim($this->getContent(), self::SEPARATOR).self::SEPARATOR.ltrim($label->getContent(), self::SEPARATOR));
+        if ($nb_labels === $key) {
+            return $this->append($label);
         }
 
-        if (-1 === $offset) {
-            return new self(rtrim($label->getContent(), self::SEPARATOR).self::SEPARATOR.ltrim($this->getContent(), self::SEPARATOR));
+        if (-1 === $key) {
+            return $label->append($this);
         }
 
         if (1 === $nb_labels) {
-            return self::IS_ABSOLUTE === $this->is_absolute ? $label->withRootLabel() : $label;
+            $label->is_absolute = $this->is_absolute;
+            return $label;
         }
 
         $label = trim($label->getContent(), self::SEPARATOR);
-        if ($label === $this->labels[$offset]) {
+        if ($label === $this->labels[$key]) {
             return $this;
         }
 
         $labels = $this->labels;
-        $labels[$offset] = $label;
+        $labels[$key] = $label;
 
         return self::createFromLabels($labels, $this->is_absolute);
     }
@@ -810,30 +810,23 @@ final class Host extends Component implements Countable, IteratorAggregate
     public function withoutLabel(int $key, int ...$keys): self
     {
         array_unshift($keys, $key);
-        $nb_elements = count($this->labels);
-        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
-        $deleted_keys = [];
-
-        foreach ($keys as $key) {
-            if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
+        $nb_labels = count($this->labels);
+        foreach ($keys as &$key) {
+            if (- $nb_labels > $key || $nb_labels - 1 < $key) {
                 throw new InvalidKey(sprintf('the key `%s` is invalid', $key));
             }
 
-            if ($offset < 0) {
-                $offset += $nb_elements;
+            if (0 > $key) {
+                $key += $nb_labels;
             }
-
-            $deleted_keys[] = $offset;
         }
+        unset($key);
 
-        $deleted_keys = array_keys(array_count_values($deleted_keys));
+        $deleted_keys = array_keys(array_count_values($keys));
         $filter = function ($key) use ($deleted_keys): bool {
             return !in_array($key, $deleted_keys, true);
         };
 
-        return self::createFromLabels(
-            array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY),
-            $this->is_absolute
-        );
+        return self::createFromLabels(array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY), $this->is_absolute);
     }
 }

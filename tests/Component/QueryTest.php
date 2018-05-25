@@ -406,20 +406,20 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::withoutPairs
+     * @covers ::withoutPair
      *
      * @param string $origin
      * @param array  $without
      * @param string $result
      *
-     * @dataProvider withoutPairsProvider
+     * @dataProvider withoutPairProvider
      */
-    public function testWithoutPairs($origin, $without, $result)
+    public function testwithoutPair($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Query($origin))->withoutPairs(...$without));
+        $this->assertSame($result, (string) (new Query($origin))->withoutPair(...$without));
     }
 
-    public function withoutPairsProvider()
+    public function withoutPairProvider()
     {
         return [
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
@@ -433,38 +433,38 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::withoutPairs
+     * @covers ::withoutPair
      */
-    public function testWithoutPairsGetterMethod()
+    public function testwithoutPairGetterMethod()
     {
         $query = (new Query())->appendTo('first', 1);
         $this->assertTrue($query->has('first'));
         $this->assertSame(1, $query->get('first'));
-        $query = $query->withoutPairs('first');
+        $query = $query->withoutPair('first');
         $this->assertFalse($query->has('first'));
         $query = $query
             ->appendTo('first', 1)
             ->appendTo('first', 10)
-            ->withoutPairs('first')
+            ->withoutPair('first')
         ;
         $this->assertFalse($query->has('first'));
     }
 
     /**
-     * @covers ::withoutParams
+     * @covers ::withoutParam
      *
      * @param array  $origin
      * @param array  $without
      * @param string $expected
      *
-     * @dataProvider withoutParamsProvider
+     * @dataProvider withoutParamProvider
      */
-    public function testWithoutParams(array $origin, array $without, string $expected)
+    public function testwithoutParam(array $origin, array $without, string $expected)
     {
-        $this->assertSame($expected, (string) Query::createFromParams($origin)->withoutParams(...$without));
+        $this->assertSame($expected, (string) Query::createFromParams($origin)->withoutParam(...$without));
     }
 
-    public function withoutParamsProvider()
+    public function withoutParamProvider()
     {
         $data = [
             'filter' => [
@@ -512,11 +512,11 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::withoutParams
+     * @covers ::withoutParam
      * @covers ::createFromParams
      * @covers ::toParams
      */
-    public function testWithoutParamsDoesNotChangeParamsKey()
+    public function testwithoutParamDoesNotChangeParamsKey()
     {
         $data = [
             'foo' => [
@@ -527,7 +527,7 @@ class QueryTest extends TestCase
 
         $query = Query::createFromParams($data);
         $this->assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->getContent());
-        $new_query = $query->withoutParams('foo[0]');
+        $new_query = $query->withoutParam('foo[0]');
         $this->assertSame('foo%5B1%5D=baz', $new_query->getContent());
         $this->assertSame(['foo' => [1 => 'baz']], $new_query->toParams());
     }
