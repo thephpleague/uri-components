@@ -360,7 +360,7 @@ function remove_leading_slash($uri)
  */
 function remove_params($uri, array $keys)
 {
-    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutParams(...$keys));
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutParam(...$keys));
 }
 
 /**
@@ -373,7 +373,7 @@ function remove_params($uri, array $keys)
  */
 function remove_pairs($uri, array $keys)
 {
-    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutPairs(...$keys));
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutPair(...$keys));
 }
 
 /**

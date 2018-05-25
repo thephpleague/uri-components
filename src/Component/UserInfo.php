@@ -177,7 +177,7 @@ final class UserInfo extends Component
             $pass = null;
         }
 
-        if ($user == $this->user && $pass == $this->pass) {
+        if ($user === $this->user && $pass === $this->pass) {
             return $this;
         }
 

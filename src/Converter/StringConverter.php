@@ -62,7 +62,7 @@ final class StringConverter implements EncodingInterface
      */
     public static function convert($input, int $enc_type = self::RFC3986_ENCODING, string $separator = '&'): string
     {
-        $separator = trim(filter_var($separator, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW));
+        $separator = filter_var($separator, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
         if ($input instanceof UriInterface || $input instanceof Psr7UriInterface) {
             return self::convertURI($input, $enc_type, $separator);
         }
