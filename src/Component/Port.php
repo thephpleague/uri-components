@@ -20,7 +20,7 @@ namespace League\Uri\Component;
 
 use League\Uri\Exception\MalformedUriComponent;
 
-final class Port extends AbstractComponent
+final class Port extends Component
 {
     /**
      * @var int|null
@@ -76,14 +76,6 @@ final class Port extends AbstractComponent
         $this->filterEncoding($enc_type);
 
         return $this->component;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->component;
     }
 
     /**

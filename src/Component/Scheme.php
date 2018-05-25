@@ -20,7 +20,7 @@ namespace League\Uri\Component;
 
 use League\Uri\Exception\MalformedUriComponent;
 
-final class Scheme extends AbstractComponent
+final class Scheme extends Component
 {
     /**
      * @internal
@@ -81,14 +81,6 @@ final class Scheme extends AbstractComponent
         $this->filterEncoding($enc_type);
 
         return $this->component;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->component;
     }
 
     /**

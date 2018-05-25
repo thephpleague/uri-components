@@ -29,7 +29,7 @@ use function League\Uri\query_build;
 use function League\Uri\query_extract;
 use function League\Uri\query_parse;
 
-final class Query extends AbstractComponent implements Countable, IteratorAggregate
+final class Query extends Component implements Countable, IteratorAggregate
 {
     /**
      * @var array
@@ -275,22 +275,6 @@ final class Query extends AbstractComponent implements Countable, IteratorAggreg
         };
 
         return array_column(array_filter($this->pairs, $filter), 1);
-    }
-
-    /**
-     * Returns the instance RFC3986 string representation.
-     *
-     * If the instance is defined, the value returned MUST be percent-encoded,
-     * but MUST NOT double-encode any characters. To determine what characters
-     * to encode, please refer to RFC 3986, Sections 2 and 3.
-     *
-     * If the instance is not defined an empty string is returned
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return (string) $this->getContent();
     }
 
     /**
