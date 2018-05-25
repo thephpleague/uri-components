@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-final class Fragment extends AbstractComponent
+final class Fragment extends Component
 {
     /**
      * @internal
@@ -57,14 +57,6 @@ final class Fragment extends AbstractComponent
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
         return $this->encodeComponent($this->component, $enc_type, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->getContent();
     }
 
     /**

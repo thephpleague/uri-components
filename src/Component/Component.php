@@ -24,7 +24,7 @@ use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use TypeError;
 
-abstract class AbstractComponent implements ComponentInterface, JsonSerializable
+abstract class Component implements ComponentInterface, JsonSerializable
 {
     /**
      * @internal
@@ -135,7 +135,7 @@ abstract class AbstractComponent implements ComponentInterface, JsonSerializable
             return $component;
         }
 
-        throw new MalformedUriComponent(sprintf('Invalid fragment string: %s', $component));
+        throw new MalformedUriComponent(sprintf('Invalid component string: %s', $component));
     }
 
     /**
@@ -231,7 +231,10 @@ abstract class AbstractComponent implements ComponentInterface, JsonSerializable
     /**
      * {@inheritdoc}
      */
-    abstract public function __toString();
+    public function __toString()
+    {
+        return (string) $this->getContent();
+    }
 
     /**
      * {@inheritdoc}

@@ -43,7 +43,7 @@ use TypeError;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-final class Host extends AbstractComponent implements Countable, IteratorAggregate
+final class Host extends Component implements Countable, IteratorAggregate
 {
     /**
      * @internal
@@ -581,15 +581,6 @@ final class Host extends AbstractComponent implements Countable, IteratorAggrega
         }
 
         return $host.self::SEPARATOR;
-    }
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->getContent();
     }
 
     /**

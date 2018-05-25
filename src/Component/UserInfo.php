@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-final class UserInfo extends AbstractComponent
+final class UserInfo extends Component
 {
     /**
      * @internal
@@ -70,14 +70,6 @@ final class UserInfo extends AbstractComponent
         if (null === $this->user || '' === $this->user) {
             $this->pass = null;
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->getContent();
     }
 
     /**

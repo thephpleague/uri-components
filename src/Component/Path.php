@@ -21,7 +21,7 @@ namespace League\Uri\Component;
 use League\Uri\ComponentInterface;
 use TypeError;
 
-class Path extends AbstractComponent
+class Path extends Component
 {
     /**
      * @internal
@@ -88,14 +88,6 @@ class Path extends AbstractComponent
         }
 
         throw new TypeError('The path can not be null');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->getContent();
     }
 
     /**
