@@ -228,14 +228,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return (string) $this->getContent();
-    }
-
-    /**
      * Appends a segment to the path.
      *
      * @see ::withSegment
@@ -246,7 +238,11 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function append($segment): self
     {
-        return $this->withSegment(count($this->segments), $segment);
+        if (!$segment instanceof self) {
+            $segment = new self($segment);
+        }
+
+        return new self(rtrim($this->component, self::SEPARATOR).self::SEPARATOR.ltrim($segment->component, self::SEPARATOR));
     }
 
     /**
@@ -260,7 +256,11 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function prepend($segment): self
     {
-        return $this->withSegment(- count($this->segments) - 1, $segment);
+        if (!$segment instanceof self) {
+            $segment = new self($segment);
+        }
+
+        return $segment->append($this);
     }
 
     /**
@@ -281,43 +281,39 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function withSegment(int $key, $segment): self
     {
-        $nb_elements = count($this->segments);
-        if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, ['options' => ['min_range' => - $nb_elements - 1, 'max_range' => $nb_elements + 1]]))) {
+        $nb_segments = count($this->segments);
+        if ($key < - $nb_segments - 1 || $key > $nb_segments) {
             throw new InvalidKey(sprintf('the given key `%s` is invalid', $key));
         }
 
-        if ($offset < 0) {
-            $offset += $nb_elements;
+        if (0 > $key) {
+            $key += $nb_segments;
         }
 
         if (!$segment instanceof self) {
             $segment = new self($segment);
         }
 
-        //append segment
-        if ($nb_elements === $offset) {
-            return new self(rtrim($this->component, self::SEPARATOR).self::SEPARATOR.ltrim($segment->component, self::SEPARATOR));
+        if ($nb_segments === $key) {
+            return $this->append($segment);
         }
 
-        //prepend segment
-        if (-1 === $offset) {
-            return new self(rtrim($segment->component, self::SEPARATOR).self::SEPARATOR.ltrim($this->component, self::SEPARATOR));
+        if (-1 === $key) {
+            return $segment->append($this);
         }
 
-        //replace segment path while respecting path type
-        if (1 === $nb_elements) {
-            return self::IS_ABSOLUTE === $this->is_absolute ? $segment->withLeadingSlash() : $segment;
-        }
-
-        $segment = trim($segment->getContent(self::NO_ENCODING), self::SEPARATOR);
-        if ($segment === $this->segments[$offset]) {
+        $segment = $segment->getContent(self::NO_ENCODING);
+        if ($segment === $this->segments[$key]) {
             return $this;
         }
 
         $segments = $this->segments;
-        $segments[$offset] = $segment;
+        $segments[$key] = $segment;
+        if (self::IS_ABSOLUTE === $this->is_absolute) {
+            array_unshift($segments, '');
+        }
 
-        return self::createFromSegments($segments, $this->is_absolute);
+        return new self(implode(self::SEPARATOR, $segments));
     }
 
     /**
@@ -339,8 +335,8 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     public function withoutSegment(int $key, int ...$keys): self
     {
         array_unshift($keys, $key);
-        $nb_elements = count($this->segments);
-        $options = ['options' => ['min_range' => - $nb_elements, 'max_range' => $nb_elements - 1]];
+        $nb_segments = count($this->segments);
+        $options = ['options' => ['min_range' => - $nb_segments, 'max_range' => $nb_segments - 1]];
         $deleted_keys = [];
         foreach ($keys as $key) {
             if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
@@ -348,7 +344,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             }
 
             if ($offset < 0) {
-                $offset += $nb_elements;
+                $offset += $nb_segments;
             }
             $deleted_keys[] = $offset;
         }

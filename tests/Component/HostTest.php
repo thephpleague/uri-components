@@ -652,7 +652,7 @@ class HostTest extends TestCase
     {
         return [
             ['secure.example.com', 'master', 'master.secure.example.com'],
-            ['secure.example.com', 'master.', 'master.secure.example.com'],
+            ['secure.example.com', 'master.', 'master..secure.example.com'],
             ['secure.example.com.', 'master', 'master.secure.example.com.'],
             ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
             ['example.com', '', '.example.com'],
@@ -687,7 +687,7 @@ class HostTest extends TestCase
         return [
             ['secure.example.com', 'master', 'secure.example.com.master'],
             ['secure.example.com', 'master.', 'secure.example.com.master.'],
-            ['secure.example.com.', 'master', 'secure.example.com.master'],
+            ['secure.example.com.', 'master', 'secure.example.com..master'],
             ['127.0.0.1', 'toto', '127.0.0.1.toto'],
             ['example.com', '', 'example.com.'],
         ];
@@ -725,7 +725,7 @@ class HostTest extends TestCase
             ['master.example.com', 'shop', 2, 'shop.example.com'],
             ['master.example.com', 'master', 2, 'master.example.com'],
             ['secure.example.com', '127.0.0.1', 0, 'secure.example.127.0.0.1'],
-            ['master.example.com', 'shop', -2, 'master.shop.com'],
+            ['master.example.com.', 'shop', -2, 'master.shop.com.'],
             ['master.example.com', 'shop', -1, 'shop.example.com'],
             ['foo', 'bar', -1, 'bar'],
         ];
@@ -772,6 +772,28 @@ class HostTest extends TestCase
             ['example.com', 'example.com.', 'example.com'],
             ['example.com.', 'example.com.', 'example.com'],
             ['127.0.0.1', '127.0.0.1', '127.0.0.1'],
+        ];
+    }
+
+    /**
+     * @dataProvider emptyLabelProvider
+     * @param string|null $host
+     * @param string|null $expected
+     * @covers ::withoutEmptyLabels
+     */
+    public function testWithoutEmptyLabels($host, $expected)
+    {
+        $this->assertSame($expected, (new Host($host))->withoutEmptyLabels()->getContent());
+    }
+
+    public function emptyLabelProvider()
+    {
+        return [
+            [null, null],
+            ['test.be', 'test.be'],
+            ['example.com.', 'example.com.'],
+            ['test.....com', 'test.com'],
+            ['....test.com', '.test.com'],
         ];
     }
 }
