@@ -733,7 +733,7 @@ final class Host extends Component implements Countable, IteratorAggregate
             $label = new self($label);
         }
 
-        return new self(rtrim($this->getContent(), self::SEPARATOR).self::SEPARATOR.ltrim($label->getContent(), self::SEPARATOR));
+        return new self($this->getContent().self::SEPARATOR.$label->getContent());
     }
 
     /**
@@ -775,20 +775,18 @@ final class Host extends Component implements Countable, IteratorAggregate
             return $label->append($this);
         }
 
-        if (1 === $nb_labels) {
-            $label->is_absolute = $this->is_absolute;
-            return $label;
-        }
-
-        $label = trim($label->getContent(), self::SEPARATOR);
+        $label = $label->getContent();
         if ($label === $this->labels[$key]) {
             return $this;
         }
 
         $labels = $this->labels;
         $labels[$key] = $label;
+        if (self::IS_ABSOLUTE === $this->is_absolute) {
+            array_unshift($labels, '');
+        }
 
-        return self::createFromLabels($labels, $this->is_absolute);
+        return new self(implode(self::SEPARATOR, array_reverse($labels)));
     }
 
     /**
@@ -828,5 +826,23 @@ final class Host extends Component implements Countable, IteratorAggregate
         };
 
         return self::createFromLabels(array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY), $this->is_absolute);
+    }
+
+    /**
+     * Returns an instance without duplicate separators.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component normalized by removing
+     * multiple consecutive empty segment
+     *
+     * @return self
+     */
+    public function withoutEmptyLabels(): self
+    {
+        if (empty($this->labels)) {
+            return $this;
+        }
+
+        return $this->withContent(preg_replace(',\.+,', self::SEPARATOR, $this->getContent()));
     }
 }
