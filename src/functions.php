@@ -19,8 +19,10 @@ declare(strict_types=1);
 namespace League\Uri;
 
 use League\Uri\Component\DataPath;
+use League\Uri\Component\Domain;
 use League\Uri\Component\HierarchicalPath;
 use League\Uri\Component\Host;
+use League\Uri\Component\IpAddress;
 use League\Uri\Component\Path;
 use League\Uri\Component\Query;
 use League\Uri\Converter\StringConverter;
@@ -100,7 +102,7 @@ function add_leading_slash($uri)
  */
 function add_root_label($uri)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withRootLabel());
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withRootLabel());
 }
 
 /**
@@ -130,7 +132,7 @@ function add_trailing_slash($uri)
  */
 function append_host($uri, $host)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->append($host));
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->append($host));
 }
 
 /**
@@ -230,7 +232,7 @@ function datapath_to_binary($uri)
  */
 function prepend_host($uri, $host)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->prepend($host));
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->prepend($host));
 }
 
 /**
@@ -330,7 +332,7 @@ function remove_empty_segments($uri)
  */
 function remove_labels($uri, array $keys)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutLabel(...$keys));
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withoutLabel(...$keys));
 }
 
 /**
@@ -385,7 +387,7 @@ function remove_pairs($uri, array $keys)
  */
 function remove_root_label($uri)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutRootLabel());
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withoutRootLabel());
 }
 
 /**
@@ -427,7 +429,7 @@ function remove_segments($uri, array $keys)
  */
 function remove_zone_id($uri)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutZoneIdentifier());
+    return $uri->withHost((string) (new IpAddress(filter_uri($uri)->getHost()))->withoutZoneIdentifier());
 }
 
 /**
@@ -493,7 +495,7 @@ function replace_extension($uri, $extension)
  */
 function replace_label($uri, int $offset, $host)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withLabel($offset, $host));
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withLabel($offset, $host));
 }
 
 /**

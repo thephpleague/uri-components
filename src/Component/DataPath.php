@@ -107,21 +107,6 @@ final class DataPath extends Path
     }
 
     /**
-     * new instance.
-     *
-     * @param mixed $path the component value
-     */
-    public function __construct($path = '')
-    {
-        parent::__construct($path);
-        $components = $this->parse($this->component);
-        $this->document = $components['document'];
-        $this->mimetype = $components['mimetype'];
-        $this->parameters = $components['parameters'];
-        $this->is_binary_data = $components['is_binary_data'];
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function __debugInfo()
@@ -153,33 +138,21 @@ final class DataPath extends Path
     }
 
     /**
-     * Validate the submitted path.
-     *
-     * @param string $path
-     *
-     * @throws MalformedUriComponent if the path is invalid
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    private function parse(string $path): array
+    protected function parse()
     {
-        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
-            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
+        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $this->component) && false === strpos($this->component, ',')) {
+            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $this->component));
         }
 
         $is_binary_data = false;
-        list($mediatype, $document) = explode(',', $path, 2) + [1 => ''];
+        list($mediatype, $this->document) = explode(',', $this->component, 2) + [1 => ''];
         list($mimetype, $parameters) = explode(';', $mediatype, 2) + [1 => ''];
-        $mimetype = $this->filterMimeType($mimetype);
-        $parameters = $this->filterParameters($parameters, $is_binary_data);
-        $this->validateDocument($document, $is_binary_data);
-
-        return [
-            'document' => $document,
-            'mimetype' => $mimetype,
-            'parameters' => $parameters,
-            'is_binary_data' => $is_binary_data,
-        ];
+        $this->mimetype = $this->filterMimeType($mimetype);
+        $this->parameters = $this->filterParameters($parameters, $is_binary_data);
+        $this->is_binary_data = $is_binary_data;
+        $this->validateDocument();
     }
 
     /**
@@ -250,20 +223,17 @@ final class DataPath extends Path
     /**
      * Validate the path document string representation.
      *
-     * @param string $document
-     * @param bool   $is_binary_data
-     *
      * @throws MalformedUriComponent If the data is invalid
      */
-    private function validateDocument(string $document, bool $is_binary_data)
+    private function validateDocument()
     {
-        if (!$is_binary_data) {
+        if (!$this->is_binary_data) {
             return;
         }
 
-        $res = base64_decode($document, true);
-        if (false === $res || $document !== base64_encode($res)) {
-            throw new MalformedUriComponent(sprintf('invalid document, `%s`', $document));
+        $res = base64_decode($this->document, true);
+        if (false === $res || $this->document !== base64_encode($res)) {
+            throw new MalformedUriComponent(sprintf('invalid document, `%s`', $this->document));
         }
     }
 

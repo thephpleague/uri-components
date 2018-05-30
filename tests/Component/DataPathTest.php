@@ -42,8 +42,8 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidDataUriPath
-     * @param string $path
      * @covers ::parse
+     * @param string $path
      */
     public function testConstructorFailed($path)
     {
@@ -61,7 +61,6 @@ class DataPathTest extends TestCase
     /**
      * @covers ::__set_state
      * @covers ::validate
-     * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateDocument
@@ -86,9 +85,8 @@ class DataPathTest extends TestCase
 
     /**
      * @covers ::withContent
-     * @covers ::__construct
-     * @covers ::validate
      * @covers ::parse
+     * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateDocument
@@ -136,7 +134,7 @@ class DataPathTest extends TestCase
      * @param string $mimetype
      * @param string $mediatype
      * @covers ::createFromPath
-     * @covers ::__construct
+     * @covers ::parse
      * @covers ::validate
      * @covers ::format
      * @covers ::getMimeType
@@ -164,7 +162,6 @@ class DataPathTest extends TestCase
     /**
      * @covers ::withParameters
      * @covers ::validate
-     * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
@@ -180,7 +177,6 @@ class DataPathTest extends TestCase
     /**
      * @covers ::withParameters
      * @covers ::validate
-     * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
@@ -200,9 +196,9 @@ class DataPathTest extends TestCase
      *
      * @param string $path
      * @param string $parameters
+     * @covers ::parse
      * @covers ::withParameters
      * @covers ::validate
-     * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
@@ -263,6 +259,7 @@ class DataPathTest extends TestCase
     /**
      * @dataProvider invalidParameters
      * @param string $parameters
+     * @covers ::parse
      * @covers ::format
      * @covers ::withParameters
      */
@@ -319,7 +316,6 @@ class DataPathTest extends TestCase
 
     /**
      * @covers ::validate
-     * @covers ::parse
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
@@ -331,8 +327,8 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::validate
      * @covers ::parse
+     * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
@@ -345,8 +341,8 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::validate
      * @covers ::parse
+     * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
@@ -359,8 +355,8 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::validate
      * @covers ::parse
+     * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
@@ -373,8 +369,8 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::validate
      * @covers ::parse
+     * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
