@@ -95,12 +95,8 @@ final class Domain extends Host implements Countable, IteratorAggregate
             }
         }
 
-        if ([] === $labels) {
-            return new self();
-        }
-
-        if ([''] === $labels) {
-            return new self('');
+        if (2 > count($labels)) {
+            return new self(array_pop($labels));
         }
 
         return new self(implode(self::SEPARATOR, array_reverse($labels)));
@@ -229,7 +225,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
      */
     public function prepend($label): self
     {
-        if (!$label instanceof Host && !$label instanceof self) {
+        if (!$label instanceof Host) {
             $label = new Host($label);
         }
 
@@ -245,7 +241,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
      */
     public function append($label): self
     {
-        if (!$label instanceof Host && !$label instanceof self) {
+        if (!$label instanceof Host) {
             $label = new Host($label);
         }
 
@@ -314,7 +310,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
             $key += $nb_labels;
         }
 
-        if (!$label instanceof Host && !$label instanceof self) {
+        if (!$label instanceof Host) {
             $label = new Host($label);
         }
 

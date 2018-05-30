@@ -46,7 +46,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      *
      * @throws TypeError          If $segments is not iterable
      * @throws InvalidPathSegment If the segments are malformed
-     * @throws UnknownType        If the type is not recognized/supported
      *
      * @return self
      */
@@ -89,22 +88,12 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     protected function parse()
     {
-        $this->segments = $this->filterSegments();
-    }
-
-    /**
-     * Filter the path segments.
-     *
-     * @return array
-     */
-    private function filterSegments(): array
-    {
         $path = $this->component;
         if (self::SEPARATOR === ($path[0] ?? '')) {
             $path = substr($path, 1);
         }
 
-        return explode(self::SEPARATOR, $path);
+        $this->segments = explode(self::SEPARATOR, $path);
     }
 
     /**
@@ -220,7 +209,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function append($segment): self
     {
-        if (!$segment instanceof self) {
+        if (!$segment instanceof Path) {
             $segment = new self($segment);
         }
 
@@ -238,11 +227,11 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function prepend($segment): self
     {
-        if (!$segment instanceof self) {
+        if (!$segment instanceof Path) {
             $segment = new self($segment);
         }
 
-        return $segment->append($this);
+        return new self(rtrim($segment->component, self::SEPARATOR).self::SEPARATOR.ltrim($this->component, self::SEPARATOR));
     }
 
     /**
@@ -272,7 +261,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             $key += $nb_segments;
         }
 
-        if (!$segment instanceof self) {
+        if (!$segment instanceof Path) {
             $segment = new self($segment);
         }
 
@@ -281,7 +270,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         if (-1 === $key) {
-            return $segment->append($this);
+            return $this->prepend($segment);
         }
 
         $segment = $segment->getContent(self::NO_ENCODING);
@@ -338,7 +327,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
         $path = implode(self::SEPARATOR, array_filter($this->segments, $filter, ARRAY_FILTER_USE_KEY));
         if ($this->isAbsolute()) {
-            $path = '/'.$path;
+            return new self(self::SEPARATOR.$path);
         }
 
         return new self($path);

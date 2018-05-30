@@ -126,7 +126,6 @@ class HierarchicalPathTest extends TestCase
      * @param int    $key
      * @param string $expected
      * @dataProvider getProvider
-     * @covers ::filterSegments
      * @covers ::get
      */
     public function testget($raw, $key, $expected)
@@ -327,7 +326,7 @@ class HierarchicalPathTest extends TestCase
             ['/master/test/query.php', -1, '/master/test'],
             ['/toto/le/heros/masson', 0, '/le/heros/masson'],
             ['/toto', -1, '/'],
-            ['/toto/le/heros/masson', [2, 3], '/toto/le'],
+            ['toto/le/heros/masson', [2, 3], 'toto/le'],
         ];
     }
 
