@@ -167,7 +167,7 @@ final class UserInfo extends Component
      * @param mixed $user The user to use with the new instance.
      * @param mixed $pass The pass to use with the new instance.
      *
-     * @return static
+     * @return self
      */
     public function withUserInfo($user, $pass = null): self
     {

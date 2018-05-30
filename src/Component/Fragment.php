@@ -76,14 +76,11 @@ final class Fragment extends Component
      */
     public function withContent($content)
     {
-        $content = $this->validateComponent($content);
-        if ($content === $this->component) {
+        $content = $this->filterComponent($content);
+        if ($content === $this->getContent()) {
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->component = $content;
-
-        return $clone;
+        return new self($content);
     }
 }

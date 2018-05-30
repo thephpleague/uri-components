@@ -39,11 +39,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     private $segments;
 
     /**
-     * @var int
-     */
-    private $is_absolute;
-
-    /**
      * Returns a new instance from an array or a traversable object.
      *
      * @param mixed $segments The segments list
@@ -79,26 +74,37 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
         $path = implode(self::SEPARATOR, $segments);
         if (static::IS_ABSOLUTE !== $type) {
-            return new static(ltrim($path, self::SEPARATOR));
+            return new self(ltrim($path, self::SEPARATOR));
         }
 
         if (self::SEPARATOR !== ($path[0] ?? '')) {
-            return new static(self::SEPARATOR.$path);
+            return new self(self::SEPARATOR.$path);
         }
 
-        return new static($path);
+        return new self($path);
     }
 
     /**
-     * New Instance.
-     *
-     * @param mixed $path
+     * {@inheritdoc}
      */
-    public function __construct($path = '')
+    protected function parse()
     {
-        parent::__construct($path);
-        $this->segments = $this->filterSegments($this->component);
-        $this->is_absolute = $this->isAbsolute() ? self::IS_ABSOLUTE : self::IS_RELATIVE;
+        $this->segments = $this->filterSegments();
+    }
+
+    /**
+     * Filter the path segments.
+     *
+     * @return array
+     */
+    private function filterSegments(): array
+    {
+        $path = $this->component;
+        if (self::SEPARATOR === ($path[0] ?? '')) {
+            $path = substr($path, 1);
+        }
+
+        return explode(self::SEPARATOR, $path);
     }
 
     /**
@@ -108,33 +114,9 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     {
         return [
             'component' => $this->getContent(),
-            'is_absolute' => self::IS_ABSOLUTE === $this->is_absolute,
+            'is_absolute' => $this->isAbsolute(),
             'segments' => $this->segments,
         ];
-    }
-
-    /**
-     * Filter the path segments.
-     *
-     * @param string $path
-     *
-     * @return array
-     */
-    private function filterSegments(string $path): array
-    {
-        if ('' === $path) {
-            return [''];
-        }
-
-        if (self::SEPARATOR === $path[0]) {
-            $path = substr($path, 1);
-        }
-
-        $filterSegment = function ($segment) {
-            return isset($segment);
-        };
-
-        return array_filter(explode(self::SEPARATOR, $path), $filterSegment);
     }
 
     /**
@@ -165,7 +147,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         return str_replace(
             ['\\', "\0"],
             [self::SEPARATOR, '\\'],
-            dirname(str_replace('\\', "\0", $this->__toString()))
+            dirname(str_replace('\\', "\0", $this->component))
         );
     }
 
@@ -309,7 +291,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
         $segments = $this->segments;
         $segments[$key] = $segment;
-        if (self::IS_ABSOLUTE === $this->is_absolute) {
+        if ($this->isAbsolute()) {
             array_unshift($segments, '');
         }
 
@@ -354,10 +336,12 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             return !in_array($key, $deleted_keys, true);
         };
 
-        return self::createFromSegments(
-            array_filter($this->segments, $filter, ARRAY_FILTER_USE_KEY),
-            $this->is_absolute
-        );
+        $path = implode(self::SEPARATOR, array_filter($this->segments, $filter, ARRAY_FILTER_USE_KEY));
+        if ($this->isAbsolute()) {
+            $path = '/'.$path;
+        }
+
+        return new self($path);
     }
 
     /**

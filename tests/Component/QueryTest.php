@@ -230,6 +230,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::merge
+     * @covers ::mergePair
      * @covers ::filterEmptyValue
      * @dataProvider mergeDataProvider
      *

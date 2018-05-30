@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use League\Uri\ComponentInterface;
 use TypeError;
 
 class Path extends Component
@@ -69,6 +68,16 @@ class Path extends Component
     public function __construct($path = '')
     {
         $this->component = $this->validate($path);
+        $this->parse();
+    }
+
+    /**
+     * Further parse the path component if needed.
+     *
+     * @throws InvalidUriComponent if the parsing fails
+     */
+    protected function parse()
+    {
     }
 
     /**
@@ -129,23 +138,16 @@ class Path extends Component
     }
 
     /**
-     * Returns an instance with the specified string.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified data
-     *
-     * @param string $value
-     *
-     * @return ComponentInterface
+     * {@inheritdoc}
      */
-    public function withContent($value)
+    public function withContent($content)
     {
-        $value = $this->validate($value);
-        if ($value === $this->component) {
+        $content = $this->filterComponent($content);
+        if ($content === $this->getContent()) {
             return $this;
         }
 
-        return new static($value);
+        return new self($content);
     }
 
     /**

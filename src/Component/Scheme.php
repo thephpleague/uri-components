@@ -100,14 +100,11 @@ final class Scheme extends Component
      */
     public function withContent($content)
     {
-        $content = $this->validate($content);
+        $content = $this->validate($this->filterComponent($content));
         if ($content === $this->component) {
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->component = $content;
-
-        return $clone;
+        return new self($content);
     }
 }
