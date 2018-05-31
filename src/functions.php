@@ -186,19 +186,6 @@ function host_to_unicode($uri)
 }
 
 /**
- * Merge a new query with the existing URI query.
- *
- * @param mixed $uri
- * @param mixed $query
- *
- * @return Psr7UriInterface|UriInterface
- */
-function merge_query($uri, $query)
-{
-    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->merge($query));
-}
-
-/**
  * Convert the Data URI path to its ascii form.
  *
  * @param mixed $uri

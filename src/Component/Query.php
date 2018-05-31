@@ -440,8 +440,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      * an instance that contains the query component normalized by removing
      * empty pairs.
      *
-     * A pair is considered empty if its value is equal to the empty string or the null value
-     * or if its key is the empty string.
+     * A pair is considered empty if its value is equal to the null value
      *
      * @return self
      */
@@ -569,25 +568,6 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns a new instance with a specified key/value pair appended as a new pair.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * @param string $key
-     * @param mixed  $value must be a scalar or the null value
-     *
-     * @return self
-     */
-    public function appendTo(string $key, $value): self
-    {
-        $clone = clone $this;
-        $clone->pairs[] = [$key, $this->filterPair($value)];
-
-        return $clone;
-    }
-
-    /**
      * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
@@ -617,54 +597,22 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance merge with the specified query.
+     * Returns a new instance with a specified key/value pair appended as a new pair.
      *
      * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query.
+     * an instance that contains the modified query
      *
-     * The return query is normalized by removing empty pairs. A key/value pair is
-     * considered to be empty if its value is equal to the empty string, the null value
-     * or its key is equal to the empty string.
-     *
-     * @param mixed $query the data to be merged
+     * @param string $key
+     * @param mixed  $value must be a scalar or the null value
      *
      * @return self
      */
-    public function merge($query): self
+    public function appendTo(string $key, $value): self
     {
-        if ($query instanceof ComponentInterface) {
-            $query = $query->getContent();
-        }
-
-        $pairs = query_parse($query, self::RFC3986_ENCODING, $this->separator);
-        if ($pairs === $this->pairs) {
-            return $this;
-        }
-
-        $keys_to_remove = array_intersect(array_column($pairs, 0), array_column($this->pairs, 0));
-        $base_pairs = $this->pairs;
-        if (!empty($keys_to_remove)) {
-            $base_pairs = array_filter($base_pairs, function (array $pair) use ($keys_to_remove): bool {
-                return !in_array($pair[0], $keys_to_remove, true);
-            });
-        }
-
         $clone = clone $this;
-        $clone->pairs = array_filter(array_merge($base_pairs, $pairs), [$this, 'filterEmptyValue']);
+        $clone->pairs[] = [$key, $this->filterPair($value)];
 
         return $clone;
-    }
-
-    /**
-     * Empty Pair filtering.
-     *
-     * @param array $pair
-     *
-     * @return bool
-     */
-    private function filterEmptyValue(array $pair): bool
-    {
-        return '' !== $pair[0] || null !== $pair[1];
     }
 
     /**
@@ -694,6 +642,18 @@ final class Query extends Component implements Countable, IteratorAggregate
         $clone->pairs = array_filter($pairs, [$this, 'filterEmptyValue']);
 
         return $clone;
+    }
+
+    /**
+     * Empty Pair filtering.
+     *
+     * @param array $pair
+     *
+     * @return bool
+     */
+    private function filterEmptyValue(array $pair): bool
+    {
+        return '' !== $pair[0] || null !== $pair[1];
     }
 
     /**
