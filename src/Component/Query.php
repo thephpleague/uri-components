@@ -641,45 +641,18 @@ final class Query extends Component implements Countable, IteratorAggregate
             return $this;
         }
 
+        $keys_to_remove = array_intersect(array_column($pairs, 0), array_column($this->pairs, 0));
+        $base_pairs = $this->pairs;
+        if (!empty($keys_to_remove)) {
+            $base_pairs = array_filter($base_pairs, function (array $pair) use ($keys_to_remove): bool {
+                return !in_array($pair[0], $keys_to_remove, true);
+            });
+        }
+
         $clone = clone $this;
-        $clone->pairs = array_filter(
-            array_reduce($pairs, [$this, 'mergePair'], $this->pairs),
-            [$this, 'filterEmptyValue']
-        );
+        $clone->pairs = array_filter(array_merge($base_pairs, $pairs), [$this, 'filterEmptyValue']);
 
         return $clone;
-    }
-
-    /**
-     * Merge a single key/value pair.
-     *
-     * @param array $pairs
-     * @param array $pair
-     *
-     * @return array
-     */
-    private function mergePair(array $pairs, array $pair): array
-    {
-        $found = false;
-        $mergedPairs = [];
-        foreach ($pairs as $oldPair) {
-            if ($oldPair[0] !== $pair[0]) {
-                $mergedPairs[] = $oldPair;
-                continue;
-            }
-
-            if (!$found) {
-                $mergedPairs[] = $pair;
-                $found = true;
-                continue;
-            }
-        }
-
-        if (!$found) {
-            $mergedPairs[] = $pair;
-        }
-
-        return $mergedPairs;
     }
 
     /**

@@ -60,7 +60,7 @@ class QueryModifierTest extends TestCase
     {
         return [
             ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
-            ['kingkong=ape', 'kingkong=ape&foo=bar%20baz'],
+            ['kingkong=ape', 'foo=bar%20baz&kingkong=ape'],
         ];
     }
 
