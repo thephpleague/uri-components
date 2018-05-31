@@ -21,7 +21,6 @@ use League\Uri\Http;
 use PHPUnit\Framework\TestCase;
 use function League\Uri\append_query;
 use function League\Uri\create;
-use function League\Uri\merge_query;
 use function League\Uri\remove_pairs;
 use function League\Uri\remove_params;
 use function League\Uri\sort_query;
@@ -41,27 +40,6 @@ class QueryModifierTest extends TestCase
         $this->uri = Http::createFromString(
             'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar%20baz#doc3'
         );
-    }
-
-    /**
-     * @covers \League\Uri\merge_query
-     *
-     * @dataProvider validMergeQueryProvider
-     *
-     * @param string $query
-     * @param string $expected
-     */
-    public function testMergeQuery(string $query, string $expected)
-    {
-        $this->assertSame($expected, merge_query($this->uri, $query)->getQuery());
-    }
-
-    public function validMergeQueryProvider()
-    {
-        return [
-            ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
-            ['kingkong=ape', 'foo=bar%20baz&kingkong=ape'],
-        ];
     }
 
     /**
