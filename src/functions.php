@@ -275,6 +275,19 @@ function remove_dot_segments($uri)
 }
 
 /**
+ * Merge a new query with the existing URI query.
+ *
+ * @param mixed $uri
+ * @param mixed $query
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function merge_query($uri, $query)
+{
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->merge($query));
+}
+
+/**
  * Normalize a URI path.
  *
  * Make sure the path always has a leading slash if an authority is present
