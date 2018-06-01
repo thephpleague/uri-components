@@ -49,30 +49,46 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * Returns a new instance from the result of PHP's parse_str.
      *
-     * @param Traversable|array $params
-     * @param string            $separator
+     * @param mixed  $params
+     * @param string $separator
      *
      * @return self
      */
     public static function createFromParams($params, string $separator = '&'): self
     {
         if ($params instanceof self) {
-            $params = $params->toParams();
+            return new self(
+                http_build_query($params->toParams(), '', $separator, self::RFC3986_ENCODING),
+                self::RFC3986_ENCODING,
+                $separator
+            );
         }
 
         if ($params instanceof Traversable) {
             $params = iterator_to_array($params, true);
         }
 
+        if (is_object($params)) {
+            return new self(
+                http_build_query($params, '', $separator, self::RFC3986_ENCODING),
+                self::RFC3986_ENCODING,
+                $separator
+            );
+        }
+
         if (!is_array($params)) {
-            throw new TypeError('the parameters must be iterable');
+            throw new TypeError(sprintf('The parameter is expected to be an array or an Object `%s` given', gettype($params)));
         }
 
         if (empty($params)) {
             return new self(null, self::RFC3986_ENCODING, $separator);
         }
 
-        return new self(http_build_query($params, '', $separator, self::RFC3986_ENCODING), self::RFC3986_ENCODING, $separator);
+        return new self(
+            http_build_query($params, '', $separator, self::RFC3986_ENCODING),
+            self::RFC3986_ENCODING,
+            $separator
+        );
     }
 
     /**
@@ -89,15 +105,11 @@ final class Query extends Component implements Countable, IteratorAggregate
             return $pairs->withSeparator($separator);
         }
 
-        if ($pairs instanceof Traversable) {
-            $pairs = iterator_to_array($pairs);
+        if ($pairs instanceof Traversable || is_array($pairs)) {
+            return new self(query_build($pairs, self::RFC3986_ENCODING, $separator), self::RFC3986_ENCODING, $separator);
         }
 
-        if (!is_array($pairs)) {
-            throw new TypeError('the pairs must be iterable');
-        }
-
-        return new self(query_build($pairs, self::RFC3986_ENCODING, $separator), self::RFC3986_ENCODING, $separator);
+        throw new TypeError('the pairs must be iterable');
     }
 
     /**
@@ -229,6 +241,8 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * Tell whether a parameter with a specific name exists.
      *
+     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-has
+     *
      * @param string $key
      *
      * @return bool
@@ -242,6 +256,8 @@ final class Query extends Component implements Countable, IteratorAggregate
      * Returns the first value associated to the given parameter.
      *
      * If no value is found null is returned
+     *
+     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-get
      *
      * @param string $key
      *
@@ -264,6 +280,8 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * If no value is found an empty array is returned
      *
+     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-getall
+     *
      * @param string $key
      *
      * @return array
@@ -278,15 +296,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns the instance string representation with its optional URI delimiters.
-     *
-     * The value returned MUST be percent-encoded, but MUST NOT double-encode any
-     * characters. To determine what characters to encode, please refer to RFC 3986,
-     * Sections 2 and 3.
-     *
-     * If the instance is not defined an empty string is returned
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getUriComponent(): string
     {
@@ -355,6 +365,8 @@ final class Query extends Component implements Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
+     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-sort
+     *
      * @return self
      */
     public function sort(): self
@@ -397,7 +409,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      * an instance that contains the query component normalized by removing
      * duplicate pairs whose key/value are the same.
      *
-     * @return static
+     * @return self
      */
     public function withoutDuplicates(): self
     {
@@ -511,12 +523,14 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with the a new pairs added to it.
+     * Returns an instance with the a new key/value pair added to it.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
      * If the pair already exists the value will replace the existing value.
+     *
+     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
      *
      * @param string $key
      * @param mixed  $value
@@ -525,14 +539,84 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function withPair(string $key, $value): self
     {
-        $pair = [$key, $this->filterPair($value)];
+        $pairs = $this->addPair($this->pairs, [$key, $this->filterPair($value)]);
+        if ($pairs === $this->pairs) {
+            return $this;
+        }
 
-        $filter = function (array $pair) use ($key): bool {
-            return $key !== $pair[0];
+        $clone = clone $this;
+        $clone->pairs = $pairs;
+
+        return $clone;
+    }
+
+    /**
+     * Add a new pair to the query key/value list.
+     *
+     * If there are any key/value pair whose kay is kay, in the list,
+     * set the value of the first such key/value pair to value and remove the others.
+     * Otherwise, append a new key/value pair whose key is key and value is value, to the list.
+     *
+     * @param array $list
+     * @param array $pair
+     *
+     * @return array
+     */
+    private function addPair(array $list, array $pair): array
+    {
+        $found = false;
+        $reducer = function (array $pairs, array $srcPair) use ($pair, &$found): array {
+            if ($pair[0] !== $srcPair[0]) {
+                $pairs[] = $srcPair;
+
+                return $pairs;
+            }
+
+            if (!$found) {
+                $pairs[] = $pair;
+                $found = true;
+
+                return $pairs;
+            }
+
+            return $pairs;
         };
 
-        $pairs = array_filter($this->pairs, $filter);
-        $pairs[] = $pair;
+        $pairs = array_reduce($list, $reducer, []);
+        if (!$found) {
+            $pairs[] = $pair;
+        }
+
+        return $pairs;
+    }
+
+    /**
+     * Returns an instance with the new pairs set to it.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the modified query
+     *
+     * @see ::withPair
+     *
+     * @param mixed $query
+     *
+     * @return self
+     */
+    public function merge($query): self
+    {
+        if ($query instanceof ComponentInterface) {
+            $query = $query->getContent();
+        }
+
+        $pairs = $this->pairs;
+        foreach (query_parse($query, self::RFC3986_ENCODING, $this->separator) as $pair) {
+            $pairs = $this->addPair($pairs, $pair);
+        }
+
+        if ($pairs === $this->pairs) {
+            return $this;
+        }
+
         $clone = clone $this;
         $clone->pairs = $pairs;
 

@@ -540,6 +540,17 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::createFromParams
+     */
+    public function testCreateFromParamsWithObject()
+    {
+        $query = Query::createFromParams(date_create());
+        $this->assertTrue($query->has('timezone'));
+        $this->assertTrue($query->has('timezone_type'));
+        $this->assertTrue($query->has('date'));
+    }
+
+    /**
      * @covers ::getContent
      */
     public function testGetContentOnEmptyContent()
@@ -681,17 +692,72 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withPair
+     * @covers ::addPair
      * @covers ::filterPair
      */
     public function testWithPairBasic()
     {
-        $this->assertSame('c=d&a=B', (string) (new Query('a=b&c=d'))->withPair('a', 'B'));
-        $this->assertSame('c=d&a=B', (string) (new Query('a=b&c=d&a=e'))->withPair('a', 'B'));
+        $this->assertSame('a=B&c=d', (string) (new Query('a=b&c=d'))->withPair('a', 'B'));
+        $this->assertSame('a=B&c=d', (string) (new Query('a=b&c=d&a=e'))->withPair('a', 'B'));
         $this->assertSame('a=b&c=d&e=f', (string) (new Query('a=b&c=d'))->withPair('e', 'f'));
     }
 
     /**
+     * @covers ::merge
+     * @covers ::addPair
+     * @covers ::filterPair
+     *
+     * @dataProvider mergeBasicProvider
+     *
+     * @param mixed $src
+     * @param mixed $dest
+     * @param mixed $expected
+     */
+    public function testMergeBasic($src, $dest, $expected)
+    {
+        $this->assertSame($expected, (string) (new Query($src))->merge($dest));
+    }
+
+    public function mergeBasicProvider()
+    {
+        return [
+            'merging null' => [
+                'src' => 'a=b&c=d',
+                'dest' => null,
+                'expected' => 'a=b&c=d',
+            ],
+            'merging empty string' => [
+                'src' => 'a=b&c=d',
+                'dest' => '',
+                'expected' => 'a=b&c=d&',
+            ],
+            'merging simple string string' => [
+                'src' => 'a=b&c=d',
+                'dest' => 'a=B',
+                'expected' => 'a=B&c=d',
+            ],
+            'merging strip additional pairs with same key' => [
+                'src' => 'a=b&c=d&a=e',
+                'dest' => 'a=B',
+                'expected' => 'a=B&c=d',
+            ],
+            'merging append new data if not found in src query' => [
+                'src' => 'a=b&c=d',
+                'dest' => 'e=f',
+                'expected' => 'a=b&c=d&e=f',
+            ],
+            'merge can use ComponentInterface' => [
+                'src' => 'a=b&c=d',
+                'dest' => new Query(null),
+                'expected' => 'a=b&c=d',
+            ],
+        ];
+    }
+
+
+    /**
      * @covers ::withPair
+     * @covers ::addPair
      * @covers ::filterPair
      * @covers ::get
      */
@@ -707,7 +773,28 @@ class QueryTest extends TestCase
         $this->assertSame(4, $query->get('a'));
 
         $query = $query->withPair('q', $query);
-        $this->assertSame('first=4&a=4', $query->get('q'));
+        $this->assertSame('a=4&first=4', $query->get('q'));
+    }
+
+    /**
+     * @covers ::merge
+     * @covers ::addPair
+     * @covers ::filterPair
+     * @covers ::get
+     */
+    public function testMergeGetterMethods()
+    {
+        $query = new Query('a=1&a=2&a=3');
+        $this->assertSame('1', $query->get('a'));
+
+        $query = $query->merge(new Query('first=4'));
+        $this->assertSame('1', $query->get('a'));
+
+        $query = $query->merge('a=4');
+        $this->assertSame('4', $query->get('a'));
+
+        $query = $query->merge(Query::createFromPairs([['q', $query->getContent()]]));
+        $this->assertSame('a=4&first=4', $query->get('q'));
     }
 
     /**
