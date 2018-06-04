@@ -130,18 +130,6 @@ final class UserInfo extends Component
     /**
      * {@inheritdoc}
      */
-    public function getUriComponent(): string
-    {
-        if (null === $this->user || '' === $this->user) {
-            return '';
-        }
-
-        return $this->getContent().'@';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function withContent($content)
     {
         $content = $this->filterComponent($content);

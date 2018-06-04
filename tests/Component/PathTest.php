@@ -33,19 +33,16 @@ class PathTest extends TestCase
      * @dataProvider validPathEncoding
      *
      * @param string $raw
-     * @param string $parsed
      * @param string $rfc1738
      * @covers ::__construct
      * @covers ::validate
      * @covers ::decodeMatches
      * @covers ::getContent
      * @covers ::encodeComponent
-     * @covers ::getUriComponent
      */
-    public function testGetUriComponent($raw, $parsed, $rfc1738)
+    public function testGetUriComponent($raw, $rfc1738)
     {
         $path = new Path($raw);
-        $this->assertSame($parsed, $path->getUriComponent());
         $this->assertSame($raw, $path->getContent(Path::RFC3987_ENCODING));
         $this->assertSame($raw, $path->getContent(Path::NO_ENCODING));
         $this->assertSame($rfc1738, $path->getContent(Path::RFC1738_ENCODING));
@@ -57,10 +54,8 @@ class PathTest extends TestCase
             [
                 'toto',
                 'toto',
-                'toto',
             ],
             [
-                'bar---',
                 'bar---',
                 'bar---',
             ],
@@ -72,45 +67,36 @@ class PathTest extends TestCase
             [
                 '"bad"',
                 '%22bad%22',
-                '%22bad%22',
             ],
             [
                 '<not good>',
-                '%3Cnot%20good%3E',
                 '%3Cnot%20good%3E',
             ],
             [
                 '{broken}',
                 '%7Bbroken%7D',
-                '%7Bbroken%7D',
             ],
             [
                 '`oops`',
-                '%60oops%60',
                 '%60oops%60',
             ],
             [
                 '\\slashy',
                 '%5Cslashy',
-                '%5Cslashy',
             ],
             [
                 'foo^bar',
-                'foo%5Ebar',
                 'foo%5Ebar',
             ],
             [
                 'foo^bar/baz',
                 'foo%5Ebar/baz',
-                'foo%5Ebar/baz',
             ],
             [
                 'foo%2Fbar',
                 'foo%2Fbar',
-                'foo%2Fbar',
             ],
             [
-                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
                 '/v1/people/~:(first-name,last-name,email-address,picture-url)',
                 '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
             ],

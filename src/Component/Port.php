@@ -81,18 +81,6 @@ final class Port extends Component
     /**
      * {@inheritdoc}
      */
-    public function getUriComponent(): string
-    {
-        if (null === $this->component) {
-            return '';
-        }
-
-        return ':'.$this->component;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function withContent($content)
     {
         $content = $this->validate($this->filterComponent($content));

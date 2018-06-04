@@ -112,26 +112,4 @@ class PortTest extends TestCase
         $this->expectException(UnknownEncoding::class);
         (new Port(23))->getContent(-1);
     }
-
-    /**
-     * @param int|null $input
-     * @param string   $expected
-     *
-     * @covers ::getUriComponent
-     *
-     * @dataProvider getUriComponentProvider
-     */
-    public function testGetUriComponent($input, $expected)
-    {
-        $this->assertSame($expected, (new Port($input))->getUriComponent());
-    }
-
-    public function getUriComponentProvider()
-    {
-        return [
-            [443, ':443'],
-            [null, ''],
-            [23, ':23'],
-        ];
-    }
 }

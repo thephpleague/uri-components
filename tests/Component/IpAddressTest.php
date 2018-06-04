@@ -84,7 +84,6 @@ class IpAddressTest extends TestCase
      * @covers ::isIpFuture
      * @covers ::getIp
      * @covers ::getContent
-     * @covers ::getUriComponent
      * @covers ::getIpVersion
      */
     public function testValidIpAddress($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
@@ -94,7 +93,6 @@ class IpAddressTest extends TestCase
         $this->assertSame($isIpv4, $host->isIpv4());
         $this->assertSame($isIpv6, $host->isIpv6());
         $this->assertSame($isIpFuture, $host->isIpFuture());
-        $this->assertSame($uri, $host->getUriComponent());
         $this->assertSame($ip, $host->getIp());
         $this->assertSame($iri, $host->getContent(IpAddress::RFC3987_ENCODING));
         $this->assertSame($ipVersion, $host->getIpVersion());

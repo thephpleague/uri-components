@@ -35,14 +35,12 @@ class UserInfoTest extends TestCase
      * @param string|null $expected_user
      * @param string|null $expected_pass
      * @param string      $expected_str
-     * @param string      $uri_component
      * @param string      $iri_str
      * @param string      $rfc1738_str
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::getContent
      * @covers ::__toString
-     * @covers ::getUriComponent
      * @covers ::decodeMatches
      * @covers ::encodeMatches
      * @covers ::getPass
@@ -55,7 +53,6 @@ class UserInfoTest extends TestCase
         $expected_user,
         $expected_pass,
         $expected_str,
-        $uri_component,
         $iri_str,
         $rfc1738_str
     ) {
@@ -63,7 +60,6 @@ class UserInfoTest extends TestCase
         $this->assertSame($expected_user, $userinfo->getUser());
         $this->assertSame($expected_pass, $userinfo->getPass());
         $this->assertSame($expected_str, (string) $userinfo);
-        $this->assertSame($uri_component, $userinfo->getUriComponent());
         $this->assertSame($iri_str, $userinfo->getContent(UserInfo::RFC3987_ENCODING));
         $this->assertSame($rfc1738_str, $userinfo->getContent(UserInfo::RFC1738_ENCODING));
     }
@@ -77,7 +73,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => 'login',
                 'expected_pass' => 'pass',
                 'expected_str' => 'login:pass',
-                'uri_component' => 'login:pass@',
                 'iri_str' => 'login:pass',
                 'rfc1738_str' => 'login:pass',
             ],
@@ -87,7 +82,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => 'login',
                 'expected_pass' => 'pass',
                 'expected_str' => 'login:pass',
-                'uri_component' => 'login:pass@',
                 'iri_str' => 'login:pass',
                 'rfc1738_str' => 'login:pass',
             ],
@@ -97,7 +91,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => 'login%61',
                 'expected_pass' => 'pass',
                 'expected_str' => 'login%61:pass',
-                'uri_component' => 'login%61:pass@',
                 'iri_str' => 'login%61:pass',
                 'rfc1738_str' => 'login%61:pass',
             ],
@@ -107,7 +100,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => 'login',
                 'expected_pass' => null,
                 'expected_str' => 'login',
-                'uri_component' => 'login@',
                 'iri_str' => 'login',
                 'rfc1738_str' => 'login',
             ],
@@ -117,7 +109,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => null,
                 'expected_pass' => null,
                 'expected_str' => '',
-                'uri_component' => '',
                 'iri_str' => null,
                 'rfc1738_str' => null,
             ],
@@ -127,7 +118,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => '',
                 'expected_pass' => null,
                 'expected_str' => '',
-                'uri_component' => '',
                 'iri_str' => '',
                 'rfc1738_str' => '',
             ],
@@ -137,7 +127,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => '',
                 'expected_pass' => null,
                 'expected_str' => '',
-                'uri_component' => '',
                 'iri_str' => '',
                 'rfc1738_str' => '',
             ],
@@ -147,7 +136,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => null,
                 'expected_pass' => null,
                 'expected_str' => '',
-                'uri_component' => '',
                 'iri_str' => null,
                 'rfc1738_str' => null,
             ],
@@ -157,7 +145,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => 'fo%C3%B2',
                 'expected_pass' => 'bar',
                 'expected_str' => 'fo%C3%B2:bar',
-                'uri_component' => 'fo%C3%B2:bar@',
                 'iri_str' => 'foò:bar',
                 'rfc1738_str' => 'fo%C3%B2:bar',
             ],
@@ -167,7 +154,6 @@ class UserInfoTest extends TestCase
                 'expected_user' => 'fo+o',
                 'expected_pass' => 'ba+r',
                 'expected_str' => 'fo+o:ba+r',
-                'uri_component' => 'fo+o:ba+r@',
                 'iri_str' => 'fo+o:ba+r',
                 'rfc1738_str' => 'fo%2Bo:ba%2Br',
             ],
