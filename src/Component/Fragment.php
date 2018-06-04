@@ -62,18 +62,6 @@ final class Fragment extends Component
     /**
      * {@inheritdoc}
      */
-    public function getUriComponent(): string
-    {
-        if (null === $this->component) {
-            return '';
-        }
-
-        return '#'.$this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function withContent($content)
     {
         $content = $this->filterComponent($content);

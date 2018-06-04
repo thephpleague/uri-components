@@ -284,14 +284,6 @@ class Host extends Component
     /**
      * {@inheritdoc}
      */
-    public function getUriComponent(): string
-    {
-        return (string) $this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function withContent($content)
     {
         $content = $this->filterComponent($content);

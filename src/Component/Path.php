@@ -102,14 +102,6 @@ class Path extends Component
     /**
      * {@inheritdoc}
      */
-    public function getUriComponent(): string
-    {
-        return (string) $this->getContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getContent(int $enc_type = self::RFC3986_ENCODING)
     {
         return $this->encodeComponent($this->component, $enc_type, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_RFC3987_ENCODING);

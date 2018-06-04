@@ -55,7 +55,6 @@ class SchemeTest extends TestCase
      * @covers ::getContent
      * @covers ::__toString
      * @covers ::validate
-     * @covers ::getUriComponent
      */
     public function testWithValue()
     {
@@ -63,7 +62,6 @@ class SchemeTest extends TestCase
         $http_scheme = $scheme->withContent('HTTP');
         $this->assertSame('http', $http_scheme->getContent());
         $this->assertSame('http', (string) $http_scheme);
-        $this->assertSame('http:', $http_scheme->getUriComponent());
     }
 
     /**
@@ -77,15 +75,6 @@ class SchemeTest extends TestCase
         $this->assertNotSame($scheme, $scheme->withContent('Http'));
     }
 
-    /**
-     * @covers ::getUriComponent
-     */
-    public function testEmptyScheme()
-    {
-        $scheme = new Scheme();
-        $this->assertSame('', (string) $scheme);
-        $this->assertSame('', $scheme->getUriComponent());
-    }
 
     /**
      * @dataProvider validSchemeProvider

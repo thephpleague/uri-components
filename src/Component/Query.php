@@ -296,18 +296,6 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getUriComponent(): string
-    {
-        if ([] === $this->pairs) {
-            return '';
-        }
-
-        return '?'.$this->getContent();
-    }
-
-    /**
      * Returns the store PHP variables as elements of an array.
      *
      * The result is similar as PHP parse_str when used with its

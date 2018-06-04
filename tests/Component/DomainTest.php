@@ -81,12 +81,11 @@ class DomainTest extends TestCase
      * @covers ::__construct
      * @covers ::parse
      * @covers ::getContent
-     * @covers ::getUriComponent
      */
     public function testValidDomain($host, $uri, $iri)
     {
         $host = new Domain($host);
-        $this->assertSame($uri, $host->getUriComponent());
+        $this->assertSame($uri, $host->getContent());
         $this->assertSame($iri, $host->getContent(Domain::RFC3987_ENCODING));
     }
 
@@ -105,7 +104,7 @@ class DomainTest extends TestCase
             ],
             'null' => [
                 null,
-                '',
+                null,
                 null,
             ],
             'dot ending' => [

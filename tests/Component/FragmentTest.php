@@ -32,14 +32,14 @@ class FragmentTest extends TestCase
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::filterComponent
-     * @covers ::getUriComponent
+     * @covers ::__toString
      * @dataProvider getUriComponentProvider
      * @param string $str
      * @param string $encoded
      */
     public function testGetUriComponent($str, $encoded)
     {
-        $this->assertSame($encoded, (new Fragment($str))->getUriComponent());
+        $this->assertSame($encoded, (string) new Fragment($str));
     }
 
     public function getUriComponentProvider()
@@ -48,19 +48,19 @@ class FragmentTest extends TestCase
 
         return [
             'null' => [null, ''],
-            'empty' => ['', '#'],
-            'evaluate empty' => ['0', '#0'],
-            'hash' => ['#', '#%23'],
-            'toofan' => ['toofan', '#toofan'],
-            'notencoded' => ["azAZ0-9/?-._~!$&'()*+,;=:@", '#azAZ0-9/?-._~!$&\'()*+,;=:@'],
-            'encoded' => ['%^[]{}"<>\\', '#%25%5E%5B%5D%7B%7D%22%3C%3E%5C'],
-            'Percent encode spaces' => ['frag ment', '#frag%20ment'],
-            'Percent encode multibyte' => ['€', '#%E2%82%AC'],
-            "Don't encode something that's already encoded" => ['frag%20ment', '#frag%20ment'],
-            'Percent encode invalid percent encodings' => ['frag%2-ment', '#frag%252-ment'],
-            "Don't encode path segments" => ['frag/ment', '#frag/ment'],
-            "Don't encode unreserved chars or sub-delimiters" => [$unreserved, '#'.$unreserved],
-            'Encoded unreserved chars are not decoded' => ['fr%61gment', '#fr%61gment'],
+            'empty' => ['', ''],
+            'evaluate empty' => ['0', '0'],
+            'hash' => ['#', '%23'],
+            'toofan' => ['toofan', 'toofan'],
+            'notencoded' => ["azAZ0-9/?-._~!$&'()*+,;=:@", 'azAZ0-9/?-._~!$&\'()*+,;=:@'],
+            'encoded' => ['%^[]{}"<>\\', '%25%5E%5B%5D%7B%7D%22%3C%3E%5C'],
+            'Percent encode spaces' => ['frag ment', 'frag%20ment'],
+            'Percent encode multibyte' => ['€', '%E2%82%AC'],
+            "Don't encode something that's already encoded" => ['frag%20ment', 'frag%20ment'],
+            'Percent encode invalid percent encodings' => ['frag%2-ment', 'frag%252-ment'],
+            "Don't encode path segments" => ['frag/ment', 'frag/ment'],
+            "Don't encode unreserved chars or sub-delimiters" => [$unreserved, $unreserved],
+            'Encoded unreserved chars are not decoded' => ['fr%61gment', 'fr%61gment'],
         ];
     }
 

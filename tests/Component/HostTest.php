@@ -72,12 +72,10 @@ class HostTest extends TestCase
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::getContent
-     * @covers ::getUriComponent
      */
     public function testValidHost($host, $uri, $iri)
     {
         $host = new Host($host);
-        $this->assertSame($uri, $host->getUriComponent());
         $this->assertSame($iri, $host->getContent(Host::RFC3987_ENCODING));
     }
 

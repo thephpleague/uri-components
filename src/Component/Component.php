@@ -239,10 +239,5 @@ abstract class Component implements ComponentInterface, JsonSerializable
     /**
      * {@inheritdoc}
      */
-    abstract public function getUriComponent(): string;
-
-    /**
-     * {@inheritdoc}
-     */
     abstract public function withContent($content);
 }
