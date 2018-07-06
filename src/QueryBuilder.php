@@ -17,7 +17,7 @@ declare(strict_types=1);
 namespace League\Uri;
 
 use League\Uri\Components\EncodingInterface;
-use League\Uri\Components\Exception;
+use League\Uri\Components\Exception as UriComponentException;
 
 use Traversable;
 
@@ -88,7 +88,7 @@ class QueryBuilder implements EncodingInterface
      * @param string $separator
      * @param int    $enc_type
      *
-     * @throws Exception If the encoding type is invalid
+     * @throws UriComponentException If the encoding type is invalid
      *
      * @return callable
      */
@@ -127,7 +127,7 @@ class QueryBuilder implements EncodingInterface
             };
         }
 
-        throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        throw new UriComponentException(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
     }
 
     /**
@@ -198,7 +198,7 @@ class QueryBuilder implements EncodingInterface
      *
      * @param mixed $value
      *
-     * @throws Exception If the value content can not be normalized
+     * @throws UriComponentException If the value content can not be normalized
      *
      * @return mixed
      */
@@ -208,6 +208,6 @@ class QueryBuilder implements EncodingInterface
             return $value;
         }
 
-        throw new Exception('Invalid value contained in the submitted pairs');
+        throw new UriComponentException('Invalid value contained in the submitted pairs');
     }
 }
