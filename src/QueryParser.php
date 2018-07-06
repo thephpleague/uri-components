@@ -17,7 +17,7 @@ declare(strict_types=1);
 namespace League\Uri;
 
 use League\Uri\Components\EncodingInterface;
-use League\Uri\Components\Exception;
+use League\Uri\Components\Exception as UriComponentException;
 use Traversable;
 use TypeError;
 
@@ -95,14 +95,14 @@ class QueryParser implements EncodingInterface
      *
      * @param int $enc_type
      *
-     * @throws Exception
+     * @throws UriComponentException
      *
      * @return callable
      */
     protected function getDecoder(int $enc_type): callable
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new Exception(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+            throw new UriComponentException(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
         }
 
         if (self::RFC1738_ENCODING === $enc_type) {

@@ -2,6 +2,25 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.8.1 - 2018-07-06
+
+### Added
+
+- None
+
+### Fixed
+
+- Issue [#21](https://github.com/thephpleague/uri-components/issues/21) namespace collision
+with exception usage in `Uri\QueryParser` and Q`Uri\QueryBuilder`
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.8.0 - 2018-03-14
 
 ### Added
