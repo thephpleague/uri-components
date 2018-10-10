@@ -73,7 +73,7 @@ trait ComponentTrait
      *
      * @var string
      */
-    protected static $unreserved_chars_encoded = '2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]';
+    protected static $unreserved_chars_encoded = '2[D|E|5]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]';
 
     /**
      * Encode a component string
