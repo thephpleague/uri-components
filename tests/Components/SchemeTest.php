@@ -9,28 +9,28 @@ use PHPUnit\Framework\TestCase;
 /**
  * @group scheme
  */
-class SchemeTest extends TestCase
+final class SchemeTest extends TestCase
 {
     public function testSetState()
     {
         $component = new Scheme('ignace');
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     public function testWithValue()
     {
         $scheme = new Scheme('ftp');
         $http_scheme = $scheme->withContent('HTTP');
-        $this->assertSame('http', $http_scheme->__toString());
-        $this->assertSame('http:', $http_scheme->getUriComponent());
+        self::assertSame('http', $http_scheme->__toString());
+        self::assertSame('http:', $http_scheme->getUriComponent());
     }
 
     public function testEmptyScheme()
     {
         $scheme = new Scheme();
-        $this->assertSame('', (string) $scheme);
-        $this->assertSame('', $scheme->getUriComponent());
+        self::assertSame('', (string) $scheme);
+        self::assertSame('', $scheme->getUriComponent());
     }
 
     /**
@@ -40,7 +40,7 @@ class SchemeTest extends TestCase
      */
     public function testValidScheme($scheme, $toString)
     {
-        $this->assertSame($toString, (new Scheme($scheme))->__toString());
+        self::assertSame($toString, (new Scheme($scheme))->__toString());
     }
 
     public function validSchemeProvider()

@@ -13,7 +13,7 @@ use TypeError;
  * @group function
  * @group parser
  */
-class FunctionsTest extends TestCase
+final class FunctionsTest extends TestCase
 {
     public function testEncodingThrowsExceptionWithQueryParser()
     {
@@ -31,7 +31,7 @@ class FunctionsTest extends TestCase
     {
         $expected = ['a' => ['1', '2', 'false']];
         $pairs = new ArrayIterator(['a[]' => [1, '2', false]]);
-        $this->assertSame($expected, (new Uri\QueryParser())->convert($pairs));
+        self::assertSame($expected, (new Uri\QueryParser())->convert($pairs));
     }
 
     /**
@@ -61,7 +61,7 @@ class FunctionsTest extends TestCase
      */
     public function testExtractQuery($query, $expectedData)
     {
-        $this->assertSame($expectedData, Uri\extract_query($query));
+        self::assertSame($expectedData, Uri\extract_query($query));
     }
 
     public function extractQueryProvider()
@@ -134,7 +134,7 @@ class FunctionsTest extends TestCase
      */
     public function testParse($query, $separator, $expected, $encoding)
     {
-        $this->assertSame($expected, Uri\parse_query($query, $separator, $encoding));
+        self::assertSame($expected, Uri\parse_query($query, $separator, $encoding));
     }
 
     public function parserProvider()
@@ -260,10 +260,10 @@ class FunctionsTest extends TestCase
         $expected_rfc3987,
         $expected_no_encoding
     ) {
-        $this->assertSame($expected_rfc1738, Uri\build_query($pairs, '&', PHP_QUERY_RFC1738));
-        $this->assertSame($expected_rfc3986, Uri\build_query($pairs, '&', PHP_QUERY_RFC3986));
-        $this->assertSame($expected_rfc3987, Uri\build_query($pairs, '&', Query::RFC3987_ENCODING));
-        $this->assertSame($expected_no_encoding, Uri\build_query($pairs, '&', Query::NO_ENCODING));
+        self::assertSame($expected_rfc1738, Uri\build_query($pairs, '&', PHP_QUERY_RFC1738));
+        self::assertSame($expected_rfc3986, Uri\build_query($pairs, '&', PHP_QUERY_RFC3986));
+        self::assertSame($expected_rfc3987, Uri\build_query($pairs, '&', Query::RFC3987_ENCODING));
+        self::assertSame($expected_no_encoding, Uri\build_query($pairs, '&', Query::NO_ENCODING));
     }
 
     public function buildProvider()

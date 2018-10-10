@@ -12,26 +12,26 @@ use Traversable;
  * @group path
  * @group hierarchicalpath
  */
-class HierarchicalPathTest extends TestCase
+final class HierarchicalPathTest extends TestCase
 {
     public function testDebugInfo()
     {
         $component = new Path('yolo');
-        $this->assertInternalType('array', $component->__debugInfo());
+        self::assertInternalType('array', $component->__debugInfo());
     }
 
     public function testSetState()
     {
         $component = new Path('yolo');
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     public function testDefined()
     {
         $component = new Path('yolo');
-        $this->assertFalse($component->isNull());
-        $this->assertFalse($component->withContent(null)->isNull());
+        self::assertFalse($component->isNull());
+        self::assertFalse($component->withContent(null)->isNull());
     }
 
     /**
@@ -42,7 +42,7 @@ class HierarchicalPathTest extends TestCase
     public function testValidPath($raw, $parsed)
     {
         $path = new Path($raw);
-        $this->assertSame($parsed, $path->__toString());
+        self::assertSame($parsed, $path->__toString());
     }
 
     public function validPathProvider()
@@ -74,7 +74,7 @@ class HierarchicalPathTest extends TestCase
     {
         $path = new Path('/path/to/the/sky');
         $alt_path = $path->withContent('/path/to/the/sky');
-        $this->assertSame($alt_path, $path);
+        self::assertSame($alt_path, $path);
     }
 
     /**
@@ -85,7 +85,7 @@ class HierarchicalPathTest extends TestCase
     public function testIsAbsolute($raw, $expected)
     {
         $path = new Path($raw);
-        $this->assertSame($expected, $path->isAbsolute());
+        self::assertSame($expected, $path->isAbsolute());
     }
 
     public function isAbsoluteProvider()
@@ -108,7 +108,7 @@ class HierarchicalPathTest extends TestCase
     public function testGetSegment($raw, $key, $value, $default)
     {
         $path = new Path($raw);
-        $this->assertSame($value, $path->getSegment($key, $default));
+        self::assertSame($value, $path->getSegment($key, $default));
     }
 
     public function getSegmentProvider()
@@ -130,7 +130,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromSegments($input, $has_front_delimiter, $expected)
     {
-        $this->assertSame($expected, (string) Path::createFromSegments($input, $has_front_delimiter));
+        self::assertSame($expected, (string) Path::createFromSegments($input, $has_front_delimiter));
     }
 
     public function createFromSegmentsValid()
@@ -179,7 +179,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testPrepend($source, $prepend, $res)
     {
-        $this->assertSame($res, (string) (new Path($source))->prepend($prepend));
+        self::assertSame($res, (string) (new Path($source))->prepend($prepend));
     }
 
     public function prependData()
@@ -200,7 +200,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testAppend($source, $append, $res)
     {
-        $this->assertSame($res, (string) (new Path($source))->append($append));
+        self::assertSame($res, (string) (new Path($source))->append($append));
     }
 
     public function appendData()
@@ -226,7 +226,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithout($origin, $without, $result)
     {
-        $this->assertSame($result, (string) (new Path($origin))->withoutSegments($without));
+        self::assertSame($result, (string) (new Path($origin))->withoutSegments($without));
     }
 
     public function withoutProvider()
@@ -259,7 +259,7 @@ class HierarchicalPathTest extends TestCase
     {
         $path = new Path($raw);
         $newPath = $path->replaceSegment($offset, $input);
-        $this->assertSame($expected, $newPath->__toString());
+        self::assertSame($expected, $newPath->__toString());
     }
 
     public function replaceValid()
@@ -282,11 +282,11 @@ class HierarchicalPathTest extends TestCase
     public function testKeys()
     {
         $path = new Path('/bar/3/troll/3');
-        $this->assertCount(4, $path->keys());
-        $this->assertCount(0, $path->keys('foo'));
-        $this->assertSame([0], $path->keys('bar'));
-        $this->assertCount(2, $path->keys('3'));
-        $this->assertSame([1, 3], $path->keys('3'));
+        self::assertCount(4, $path->keys());
+        self::assertCount(0, $path->keys('foo'));
+        self::assertSame([0], $path->keys('bar'));
+        self::assertCount(2, $path->keys('3'));
+        self::assertSame([1, 3], $path->keys('3'));
     }
 
     /**
@@ -298,8 +298,8 @@ class HierarchicalPathTest extends TestCase
     public function testCountable($input, $getSegments, $nbSegment)
     {
         $path = new Path($input);
-        $this->assertCount($nbSegment, $path);
-        $this->assertSame($getSegments, $path->getSegments());
+        self::assertCount($nbSegment, $path);
+        self::assertSame($getSegments, $path->getSegments());
     }
 
     public function arrayProvider()
@@ -314,7 +314,7 @@ class HierarchicalPathTest extends TestCase
     public function testGetBasemane()
     {
         $path = new Path('/path/to/my/file.txt');
-        $this->assertSame('file.txt', $path->getBasename());
+        self::assertSame('file.txt', $path->getBasename());
     }
 
     /**
@@ -324,7 +324,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testGetDirmane($path, $dirname)
     {
-        $this->assertSame($dirname, (new Path($path))->getDirname());
+        self::assertSame($dirname, (new Path($path))->getDirname());
     }
 
     public function dirnameProvider()
@@ -344,7 +344,7 @@ class HierarchicalPathTest extends TestCase
     public function testGetBasemaneWithEmptyBasename()
     {
         $path = new Path('/path/to/my/');
-        $this->assertEmpty($path->getBasename());
+        self::assertEmpty($path->getBasename());
     }
 
     /**
@@ -354,7 +354,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testGetExtension($raw, $parsed)
     {
-        $this->assertSame($parsed, (new Path($raw))->getExtension());
+        self::assertSame($parsed, (new Path($raw))->getExtension());
     }
 
     public function extensionProvider()
@@ -377,8 +377,8 @@ class HierarchicalPathTest extends TestCase
     public function testWithExtension($raw, $raw_ext, $new_path, $parsed_ext)
     {
         $newPath = (new Path($raw))->withExtension($raw_ext);
-        $this->assertSame($new_path, (string) $newPath);
-        $this->assertSame($parsed_ext, $newPath->getExtension());
+        self::assertSame($new_path, (string) $newPath);
+        self::assertSame($parsed_ext, $newPath->getExtension());
     }
 
     public function withExtensionProvider()
@@ -428,7 +428,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithExtensionPreserveTypeCode($uri, $extension, $expected)
     {
-        $this->assertSame(
+        self::assertSame(
             $expected,
             (string) (new Path($uri))->withExtension($extension)
         );
@@ -453,7 +453,7 @@ class HierarchicalPathTest extends TestCase
     public function testGetExtensionPreserveTypeCode($uri, $extension)
     {
         $ftp = new Path($uri);
-        $this->assertSame($extension, $ftp->getExtension());
+        self::assertSame($extension, $ftp->getExtension());
     }
 
     public function getExtensionProvider()
@@ -472,7 +472,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testGetContent($expected, $path)
     {
-        $this->assertSame($expected, (new Path($path))->getContent(Path::RFC3987_ENCODING));
+        self::assertSame($expected, (new Path($path))->getContent(Path::RFC3987_ENCODING));
     }
 
     public function geValueProvider()
@@ -493,16 +493,16 @@ class HierarchicalPathTest extends TestCase
     public function testContentPreserveEncodedChars()
     {
         $path = new Path('/hi%2520');
-        $this->assertSame('/hi%2520', (string) $path);
+        self::assertSame('/hi%2520', (string) $path);
 
         $src = new Path('/');
-        $this->assertSame('/hi%2520', (string) $src->append((string) $path));
+        self::assertSame('/hi%2520', (string) $src->append((string) $path));
     }
 
     public function testAppendDoestNotValidatedPrematurelyString()
     {
         $src = new Path('/');
-        $this->assertSame('/hi%11', (string) $src->append('hi%11'));
+        self::assertSame('/hi%11', (string) $src->append('hi%11'));
     }
 
     /**
@@ -514,7 +514,7 @@ class HierarchicalPathTest extends TestCase
     public function testWithDirname($path, $dirname, $expected)
     {
         $path = new Path($path);
-        $this->assertSame($expected, (string) $path->withDirname($dirname));
+        self::assertSame($expected, (string) $path->withDirname($dirname));
     }
 
     public function getDirnameProvider()
@@ -563,7 +563,7 @@ class HierarchicalPathTest extends TestCase
     public function testWithBasename($path, $basename, $expected)
     {
         $path = new Path($path);
-        $this->assertSame($expected, (string) $path->withBasename($basename));
+        self::assertSame($expected, (string) $path->withBasename($basename));
     }
 
     public function getBasenameProvider()

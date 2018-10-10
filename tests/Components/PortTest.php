@@ -9,18 +9,18 @@ use PHPUnit\Framework\TestCase;
 /**
  * @group port
  */
-class PortTest extends TestCase
+final class PortTest extends TestCase
 {
     public function testPortSetter()
     {
-        $this->assertSame('443', (new Port(443))->__toString());
+        self::assertSame('443', (new Port(443))->__toString());
     }
 
     public function testSetState()
     {
         $component = new Port(42);
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     /**
@@ -30,7 +30,7 @@ class PortTest extends TestCase
      */
     public function testToInt($input, $expected)
     {
-        $this->assertSame($expected, (new Port($input))->getContent());
+        self::assertSame($expected, (new Port($input))->getContent());
     }
 
     public function getToIntProvider()
@@ -69,7 +69,7 @@ class PortTest extends TestCase
      */
     public function testGetUriComponent($input, $expected)
     {
-        $this->assertSame($expected, (new Port($input))->getUriComponent());
+        self::assertSame($expected, (new Port($input))->getUriComponent());
     }
 
     public function getUriComponentProvider()
