@@ -464,6 +464,17 @@ class HierarchicalPathTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider geValueProvider
+     *
+     * @param string $expected
+     * @param string $path
+     */
+    public function testGetContent($expected, $path)
+    {
+        $this->assertSame($expected, (new Path($path))->getContent(Path::RFC3987_ENCODING));
+    }
+
     public function geValueProvider()
     {
         return [
@@ -471,12 +482,27 @@ class HierarchicalPathTest extends TestCase
             ['0', '0'],
             ['azAZ0-9/%3F-._~!$&\'()*+,;=:@%^/[]{}\"<>\\', 'azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\'],
             ['€', '€'],
-            ['%E2%82%AC', '€'],
+            ['€', '%E2%82%AC'],
             ['frag ment', 'frag ment'],
-            ['frag%20ment', 'frag ment'],
+            ['frag ment', 'frag%20ment'],
             ['frag%2-ment', 'frag%2-ment'],
             ['fr%61gment', 'fr%61gment'],
         ];
+    }
+
+    public function testContentPreserveEncodedChars()
+    {
+        $path = new Path('/hi%2520');
+        $this->assertSame('/hi%2520', (string) $path);
+
+        $src = new Path('/');
+        $this->assertSame('/hi%2520', (string) $src->append((string) $path));
+    }
+
+    public function testAppendDoestNotValidatedPrematurelyString()
+    {
+        $src = new Path('/');
+        $this->assertSame('/hi%11', (string) $src->append('hi%11'));
     }
 
     /**

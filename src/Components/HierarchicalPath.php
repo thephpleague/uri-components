@@ -64,6 +64,13 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
             throw Exception::fromInvalidFlag($type);
         }
 
+        if ($data instanceof self) {
+            $new = clone $data;
+            $new->is_absolute = $type;
+
+            return $new;
+        }
+
         $path = implode(static::$separator, static::filterIterable($data));
         if (static::IS_ABSOLUTE === $type) {
             if (static::$separator !== substr($path, 0, 1)) {
@@ -313,7 +320,11 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
             $path = substr($path, 1);
         }
 
-        return $this->validate($path);
+        $filterSegment = function ($segment) {
+            return isset($segment);
+        };
+
+        return array_filter(explode(static::$separator, $path), $filterSegment);
     }
 
     /**
