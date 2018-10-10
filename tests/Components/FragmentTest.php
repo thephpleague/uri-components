@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @group fragment
  */
-class FragmentTest extends TestCase
+final class FragmentTest extends TestCase
 {
     /**
      * @dataProvider getUriComponentProvider
@@ -18,7 +18,7 @@ class FragmentTest extends TestCase
      */
     public function testGetUriComponent($str, $encoded)
     {
-        $this->assertSame($encoded, (new Fragment($str))->getUriComponent());
+        self::assertSame($encoded, (new Fragment($str))->getUriComponent());
     }
 
     public function getUriComponentProvider()
@@ -45,8 +45,8 @@ class FragmentTest extends TestCase
 
     public function testIsNull()
     {
-        $this->assertTrue((new Fragment(null))->isNull());
-        $this->assertFalse((new Fragment(''))->isNull());
+        self::assertTrue((new Fragment(null))->isNull());
+        self::assertFalse((new Fragment(''))->isNull());
     }
 
     /**
@@ -57,7 +57,7 @@ class FragmentTest extends TestCase
      */
     public function testGetValue($str, $expected, $enc_type)
     {
-        $this->assertSame($expected, (new Fragment($str))->getContent($enc_type));
+        self::assertSame($expected, (new Fragment($str))->getContent($enc_type));
     }
 
     public function geValueProvider()
@@ -85,7 +85,7 @@ class FragmentTest extends TestCase
      */
     public function testGetContent($input, $enc_type, $expected)
     {
-        $this->assertSame($expected, (new Fragment($input))->getContent($enc_type));
+        self::assertSame($expected, (new Fragment($input))->getContent($enc_type));
     }
 
     public function getContentProvider()
@@ -106,15 +106,15 @@ class FragmentTest extends TestCase
 
     public function testDebugInfo()
     {
-        $this->assertInternalType('array', (new Fragment('yolo'))->__debugInfo());
+        self::assertInternalType('array', (new Fragment('yolo'))->__debugInfo());
     }
 
     public function testPreserverDelimiter()
     {
         $fragment = new Fragment();
         $altFragment = $fragment->withContent(null);
-        $this->assertSame($fragment, $altFragment);
-        $this->assertNull($altFragment->getContent());
-        $this->assertSame('', $altFragment->__toString());
+        self::assertSame($fragment, $altFragment);
+        self::assertNull($altFragment->getContent());
+        self::assertSame('', $altFragment->__toString());
     }
 }

@@ -15,36 +15,36 @@ use Traversable;
 /**
  * @group host
  */
-class HostTest extends TestCase
+final class HostTest extends TestCase
 {
     public function testDebugInfo()
     {
         $host = new Host('uri.thephpleague.com');
-        $this->assertInternalType('array', $host->__debugInfo());
+        self::assertInternalType('array', $host->__debugInfo());
     }
 
     public function testSetState()
     {
         $host = new Host('uri.thephpleague.com');
-        $this->assertSame('thephpleague.com', $host->getRegisterableDomain());
+        self::assertSame('thephpleague.com', $host->getRegisterableDomain());
         $generateHost = eval('return '.var_export($host, true).';');
-        $this->assertEquals($host, $generateHost);
+        self::assertEquals($host, $generateHost);
     }
 
     public function testDefined()
     {
         $component = new Host('yolo');
-        $this->assertFalse($component->isNull());
-        $this->assertTrue($component->withContent(null)->isNull());
-        $this->assertTrue($component->withContent(null)->isEmpty());
-        $this->assertTrue($component->withContent('')->isEmpty());
+        self::assertFalse($component->isNull());
+        self::assertTrue($component->withContent(null)->isNull());
+        self::assertTrue($component->withContent(null)->isEmpty());
+        self::assertTrue($component->withContent('')->isEmpty());
     }
 
     public function testWithContent()
     {
         $host = new Host('uri.thephpleague.com');
         $alt_host = $host->withContent('uri.thephpleague.com');
-        $this->assertSame($alt_host, $host);
+        self::assertSame($alt_host, $host);
     }
 
     public function testWithDomainResolver()
@@ -52,14 +52,14 @@ class HostTest extends TestCase
         $resolver = (new ICANNSectionManager(new Cache(), new CurlHttpClient()))->getRules();
         $host = new Host('uri.thephpleague.com');
         $newHost = $host->withDomainResolver($resolver);
-        $this->assertNotEquals($newHost, $host);
+        self::assertNotEquals($newHost, $host);
     }
 
     public function testWithDomainResolverOnSameResolver()
     {
         $host = new Host('uri.thephpleague.com');
         $newHost = $host->withDomainResolver();
-        $this->assertInstanceOf(Host::class, $host);
+        self::assertInstanceOf(Host::class, $host);
     }
 
     /**
@@ -79,15 +79,15 @@ class HostTest extends TestCase
     public function testValidHost($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
     {
         $host = new Host($host);
-        $this->assertSame($isDomain, $host->isDomain());
-        $this->assertSame($isIp, $host->isIp());
-        $this->assertSame($isIpv4, $host->isIpv4());
-        $this->assertSame($isIpv6, $host->isIpv6());
-        $this->assertSame($isIpFuture, $host->isIpFuture());
-        $this->assertSame($uri, $host->getUriComponent());
-        $this->assertSame($ip, $host->getIp());
-        $this->assertSame($iri, $host->getContent(Host::RFC3987_ENCODING));
-        $this->assertSame($ipVersion, $host->getIpVersion());
+        self::assertSame($isDomain, $host->isDomain());
+        self::assertSame($isIp, $host->isIp());
+        self::assertSame($isIpv4, $host->isIpv4());
+        self::assertSame($isIpv6, $host->isIpv6());
+        self::assertSame($isIpFuture, $host->isIpFuture());
+        self::assertSame($uri, $host->getUriComponent());
+        self::assertSame($ip, $host->getIp());
+        self::assertSame($iri, $host->getContent(Host::RFC3987_ENCODING));
+        self::assertSame($ipVersion, $host->getIpVersion());
     }
 
     public function validHostProvider()
@@ -318,7 +318,7 @@ class HostTest extends TestCase
      */
     public function testIsAbsolute($raw, $expected)
     {
-        $this->assertSame($expected, (new Host($raw))->isAbsolute());
+        self::assertSame($expected, (new Host($raw))->isAbsolute());
     }
 
     public function isAbsoluteProvider()
@@ -340,8 +340,8 @@ class HostTest extends TestCase
     public function testValidUnicodeHost($unicode, $ascii)
     {
         $host = new Host($unicode);
-        $this->assertSame($ascii, $host->getContent(Host::RFC3986_ENCODING));
-        $this->assertSame($unicode, $host->getContent(Host::RFC3987_ENCODING));
+        self::assertSame($ascii, $host->getContent(Host::RFC3986_ENCODING));
+        self::assertSame($unicode, $host->getContent(Host::RFC3987_ENCODING));
     }
 
     public function hostnamesProvider()
@@ -383,8 +383,8 @@ class HostTest extends TestCase
     public function testCountable($host, $nblabels, $array)
     {
         $obj = new Host($host);
-        $this->assertCount($nblabels, $obj);
-        $this->assertSame($array, $obj->getLabels());
+        self::assertCount($nblabels, $obj);
+        self::assertSame($array, $obj->getLabels());
     }
 
     public function countableProvider()
@@ -406,7 +406,7 @@ class HostTest extends TestCase
      */
     public function testCreateFromLabels($input, $is_absolute, $expected)
     {
-        $this->assertSame($expected, (string) Host::createFromLabels($input, $is_absolute));
+        self::assertSame($expected, (string) Host::createFromLabels($input, $is_absolute));
     }
 
     public function createFromLabelsValid()
@@ -449,7 +449,7 @@ class HostTest extends TestCase
      */
     public function testCreateFromIp($input, $expected)
     {
-        $this->assertSame($expected, (string) Host::createFromIp($input));
+        self::assertSame($expected, (string) Host::createFromIp($input));
     }
 
     public function createFromIpValid()
@@ -484,18 +484,18 @@ class HostTest extends TestCase
     public function testGetLabel()
     {
         $host = new Host('master.example.com');
-        $this->assertSame('com', $host->getLabel(0));
-        $this->assertSame('example', $host->getLabel(1));
-        $this->assertSame('master', $host->getLabel(-1));
-        $this->assertNull($host->getLabel(23));
-        $this->assertSame('toto', $host->getLabel(23, 'toto'));
+        self::assertSame('com', $host->getLabel(0));
+        self::assertSame('example', $host->getLabel(1));
+        self::assertSame('master', $host->getLabel(-1));
+        self::assertNull($host->getLabel(23));
+        self::assertSame('toto', $host->getLabel(23, 'toto'));
     }
 
     public function testOffsets()
     {
         $host = new Host('master.example.com');
-        $this->assertSame([0, 1, 2], $host->keys());
-        $this->assertSame([2], $host->keys('master'));
+        self::assertSame([0, 1, 2], $host->keys());
+        self::assertSame([2], $host->keys('master'));
     }
 
     /**
@@ -506,7 +506,7 @@ class HostTest extends TestCase
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (string) (new Host($host))->withoutLabels($without));
+        self::assertSame($res, (string) (new Host($host))->withoutLabels($without));
     }
 
     public function withoutProvider()
@@ -534,7 +534,7 @@ class HostTest extends TestCase
      */
     public function testWithoutZoneIdentifier($host, $expected)
     {
-        $this->assertSame($expected, (string) (new Host($host))->withoutZoneIdentifier());
+        self::assertSame($expected, (string) (new Host($host))->withoutZoneIdentifier());
     }
 
     public function withoutZoneIdentifierProvider()
@@ -555,7 +555,7 @@ class HostTest extends TestCase
      */
     public function testHasZoneIdentifier($host, $expected)
     {
-        $this->assertSame($expected, (new Host($host))->hasZoneIdentifier());
+        self::assertSame($expected, (new Host($host))->hasZoneIdentifier());
     }
 
     public function hasZoneIdentifierProvider()
@@ -576,7 +576,7 @@ class HostTest extends TestCase
      */
     public function testPrepend($raw, $prepend, $expected)
     {
-        $this->assertSame($expected, (string) (new Host($raw))->prepend($prepend));
+        self::assertSame($expected, (string) (new Host($raw))->prepend($prepend));
     }
 
     public function validPrepend()
@@ -604,7 +604,7 @@ class HostTest extends TestCase
      */
     public function testAppend($raw, $append, $expected)
     {
-        $this->assertSame($expected, (string) (new Host($raw))->append($append));
+        self::assertSame($expected, (string) (new Host($raw))->append($append));
     }
 
     public function validAppend()
@@ -635,7 +635,7 @@ class HostTest extends TestCase
      */
     public function testReplace($raw, $input, $offset, $expected)
     {
-        $this->assertSame($expected, (new Host($raw))->replaceLabel($offset, $input)->__toString());
+        self::assertSame($expected, (new Host($raw))->replaceLabel($offset, $input)->__toString());
     }
 
     public function replaceValid()
@@ -674,10 +674,10 @@ class HostTest extends TestCase
         $isValidSuffix
     ) {
         $host = new Host($host);
-        $this->assertSame($subdomain, $host->getSubDomain());
-        $this->assertSame($registerableDomain, $host->getRegisterableDomain());
-        $this->assertSame($publicSuffix, $host->getPublicSuffix());
-        $this->assertSame($isValidSuffix, $host->isPublicSuffixValid());
+        self::assertSame($subdomain, $host->getSubDomain());
+        self::assertSame($registerableDomain, $host->getRegisterableDomain());
+        self::assertSame($publicSuffix, $host->getPublicSuffix());
+        self::assertSame($isValidSuffix, $host->isPublicSuffixValid());
     }
 
     public function parseDataProvider()
@@ -702,7 +702,7 @@ class HostTest extends TestCase
      */
     public function testWithPublicSuffix($publicsuffix, $host, $expected)
     {
-        $this->assertSame(
+        self::assertSame(
             $expected,
             (string) (new Host($host))->withPublicSuffix($publicsuffix)
         );
@@ -710,7 +710,7 @@ class HostTest extends TestCase
 
     public function testWithPublicSuffixOnEmptySource()
     {
-        $this->assertSame(
+        self::assertSame(
             '',
             (string) (new Host(''))->withPublicSuffix('')
         );
@@ -720,7 +720,7 @@ class HostTest extends TestCase
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The submitted host `.` is invalid');
-        $this->assertSame(
+        self::assertSame(
             '',
             (string) (new Host('.'))->withPublicSuffix('.')
         );
@@ -752,7 +752,7 @@ class HostTest extends TestCase
      */
     public function testWithRegisterableDomain($newhost, $host, $expected)
     {
-        $this->assertSame($expected, (string) (new Host($host))->withRegisterableDomain($newhost));
+        self::assertSame($expected, (string) (new Host($host))->withRegisterableDomain($newhost));
     }
 
     public function validRegisterableDomain()
@@ -788,7 +788,7 @@ class HostTest extends TestCase
      */
     public function testWithSubDomain($new_subdomain, $host, $expected)
     {
-        $this->assertSame($expected, (string) (new Host($host))->withSubDomain($new_subdomain));
+        self::assertSame($expected, (string) (new Host($host))->withSubDomain($new_subdomain));
     }
 
     public function validSubDomain()
@@ -827,8 +827,8 @@ class HostTest extends TestCase
     public function testWithRooot($host, $expected_with_root, $expected_without_root)
     {
         $host = new Host($host);
-        $this->assertSame($expected_with_root, (string) $host->withRootLabel());
-        $this->assertSame($expected_without_root, (string) $host->withoutRootLabel());
+        self::assertSame($expected_with_root, (string) $host->withRootLabel());
+        self::assertSame($expected_without_root, (string) $host->withoutRootLabel());
     }
 
     public function rootProvider()

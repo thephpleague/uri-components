@@ -9,12 +9,12 @@ use PHPUnit\Framework\TestCase;
 /**
  * @group userinfo
  */
-class UserInfoTest extends TestCase
+final class UserInfoTest extends TestCase
 {
     public function testDebugInfo()
     {
         $component = new UserInfo('yolo', 'oloy');
-        $this->assertInternalType('array', $component->__debugInfo());
+        self::assertInternalType('array', $component->__debugInfo());
     }
 
     /**
@@ -39,12 +39,12 @@ class UserInfoTest extends TestCase
         $rfc1738_str
     ) {
         $userinfo = new UserInfo($user, $pass);
-        $this->assertSame($expected_user, $userinfo->getUser());
-        $this->assertSame($expected_pass, $userinfo->getPass());
-        $this->assertSame($expected_str, (string) $userinfo);
-        $this->assertSame($uri_component, $userinfo->getUriComponent());
-        $this->assertSame($iri_str, $userinfo->getContent(UserInfo::RFC3987_ENCODING));
-        $this->assertSame($rfc1738_str, $userinfo->getContent(UserInfo::RFC1738_ENCODING));
+        self::assertSame($expected_user, $userinfo->getUser());
+        self::assertSame($expected_pass, $userinfo->getPass());
+        self::assertSame($expected_str, (string) $userinfo);
+        self::assertSame($uri_component, $userinfo->getUriComponent());
+        self::assertSame($iri_str, $userinfo->getContent(UserInfo::RFC3987_ENCODING));
+        self::assertSame($rfc1738_str, $userinfo->getContent(UserInfo::RFC1738_ENCODING));
     }
 
     public function userInfoProvider()
@@ -136,14 +136,14 @@ class UserInfoTest extends TestCase
 
     public function testIsNull()
     {
-        $this->assertTrue((new UserInfo(null))->isNull());
-        $this->assertFalse((new UserInfo(''))->isNull());
+        self::assertTrue((new UserInfo(null))->isNull());
+        self::assertFalse((new UserInfo(''))->isNull());
     }
 
     public function testIsEmpty()
     {
-        $this->assertTrue((new UserInfo(null))->isEmpty());
-        $this->assertTrue((new UserInfo(''))->isEmpty());
+        self::assertTrue((new UserInfo(null))->isEmpty());
+        self::assertTrue((new UserInfo(''))->isEmpty());
     }
 
     /**
@@ -156,9 +156,9 @@ class UserInfoTest extends TestCase
     public function testWithContent($str, $expected_user, $expected_pass, $expected_str)
     {
         $conn = (new UserInfo())->withContent($str);
-        $this->assertSame($expected_user, $conn->getUser());
-        $this->assertSame($expected_pass, $conn->getPass());
-        $this->assertSame($expected_str, (string) $conn);
+        self::assertSame($expected_user, $conn->getUser());
+        self::assertSame($expected_pass, $conn->getPass());
+        self::assertSame($expected_str, (string) $conn);
     }
 
     public function createFromStringProvider()
@@ -177,17 +177,17 @@ class UserInfoTest extends TestCase
     public function testWithContentReturnSameInstance()
     {
         $conn = new UserInfo();
-        $this->assertEquals($conn, $conn->withContent(':pass'));
+        self::assertEquals($conn, $conn->withContent(':pass'));
 
         $conn = new UserInfo('user', 'pass');
-        $this->assertSame($conn, $conn->withContent('user:pass'));
+        self::assertSame($conn, $conn->withContent('user:pass'));
     }
 
     public function testSetState()
     {
         $conn = new UserInfo('user', 'pass');
         $generateConn = eval('return '.var_export($conn, true).';');
-        $this->assertEquals($conn, $generateConn);
+        self::assertEquals($conn, $generateConn);
     }
 
     /**
@@ -198,7 +198,7 @@ class UserInfoTest extends TestCase
      */
     public function testWithUserInfo($user, $pass, $expected)
     {
-        $this->assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
+        self::assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
     }
 
     public function withUserInfoProvider()
