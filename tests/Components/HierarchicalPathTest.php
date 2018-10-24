@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * League.Uri (https://uri.thephpleague.com/components/).
+ *
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    1.8.2
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
@@ -102,7 +116,6 @@ final class HierarchicalPathTest extends TestCase
      * @param string $raw
      * @param int    $key
      * @param string $value
-     * @param mixed  $default
      * @dataProvider getSegmentProvider
      */
     public function testGetSegment($raw, $key, $value, $default)
@@ -160,7 +173,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromSegmentsFailed($input, $flags)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Path::createFromSegments($input, $flags);
     }
 
@@ -216,7 +229,7 @@ final class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * Test AbstractSegment::without
+     * Test AbstractSegment::without.
      *
      * @param string $origin
      * @param array  $without
@@ -244,7 +257,7 @@ final class HierarchicalPathTest extends TestCase
 
     public function testWithoutTriggersException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Path('/path/where'))->withoutSegments(['where']);
     }
 
@@ -407,7 +420,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithExtensionWithInvalidExtension($extension)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Path())->withExtension($extension);
     }
 
@@ -507,9 +520,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getDirnameProvider
-     * @param mixed $path
-     * @param mixed $dirname
-     * @param mixed $expected
      */
     public function testWithDirname($path, $dirname, $expected)
     {
@@ -556,9 +566,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getBasenameProvider
-     * @param mixed $path
-     * @param mixed $basename
-     * @param mixed $expected
      */
     public function testWithBasename($path, $basename, $expected)
     {
@@ -599,7 +606,7 @@ final class HierarchicalPathTest extends TestCase
 
     public function testWithBasenameThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Path('foo/bar'))->withBasename('foo/bar');
     }
 }

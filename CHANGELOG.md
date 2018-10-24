@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 1.8.2 - 2018-10-24
+
+### Added
+
+- None
+
+### Fixed
+
+- Issues [#22](https://github.com/thephpleague/uri-components/issues/22) bug with path encoding and path validation before path modification see issue [#4](https://github.com/thephpleague/uri-manipulations/issues/4)
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 1.8.1 - 2018-07-06
 
 ### Added

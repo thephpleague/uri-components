@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri;
@@ -55,7 +57,7 @@ class QueryBuilder implements EncodingInterface
     protected $encoder;
 
     /**
-     * Build a query string from an associative array
+     * Build a query string from an associative array.
      *
      * The method expects the return value from Query::parse to build
      * a valid query string. This method differs from PHP http_build_query as:
@@ -66,7 +68,6 @@ class QueryBuilder implements EncodingInterface
      * @param string            $separator Query string separator
      * @param int               $enc_type  Query encoding type
      *
-     * @return string
      */
     public function build(
         $pairs,
@@ -85,12 +86,9 @@ class QueryBuilder implements EncodingInterface
     /**
      * Returns the query string encoding mechanism.
      *
-     * @param string $separator
-     * @param int    $enc_type
      *
      * @throws UriComponentException If the encoding type is invalid
      *
-     * @return callable
      */
     protected function getEncoder(string $separator, int $enc_type): callable
     {
@@ -136,7 +134,6 @@ class QueryBuilder implements EncodingInterface
      * @param string $str    The string to encode
      * @param string $regexp a regular expression
      *
-     * @return string
      */
     protected function encode(string $str, string $regexp): string
     {
@@ -157,7 +154,6 @@ class QueryBuilder implements EncodingInterface
      * @param string|int $key   The pair key
      * @param mixed      $value The pair value
      *
-     * @return array
      */
     protected function buildPair($key, $value): array
     {
@@ -173,11 +169,9 @@ class QueryBuilder implements EncodingInterface
     }
 
     /**
-     * Normalize the pair value
+     * Normalize the pair value.
      *
-     * @param mixed $content
      *
-     * @return array
      */
     protected function normalize($content): array
     {
@@ -194,13 +188,11 @@ class QueryBuilder implements EncodingInterface
     }
 
     /**
-     * Normalize a value
+     * Normalize a value.
      *
-     * @param mixed $value
      *
      * @throws UriComponentException If the value content can not be normalized
      *
-     * @return mixed
      */
     protected function normalizeValue($value)
     {

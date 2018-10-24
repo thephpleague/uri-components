@@ -1,12 +1,13 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -28,7 +29,7 @@ namespace League\Uri\Components;
 trait PathInfoTrait
 {
     /**
-     * Dot Segment pattern
+     * Dot Segment pattern.
      *
      * @var array
      */
@@ -45,7 +46,6 @@ trait PathInfoTrait
     /**
      * Returns whether or not the component is defined.
      *
-     * @return bool
      */
     public function isNull(): bool
     {
@@ -55,7 +55,6 @@ trait PathInfoTrait
     /**
      * Returns whether or not the component is empty.
      *
-     * @return bool
      */
     public function isEmpty(): bool
     {
@@ -63,9 +62,8 @@ trait PathInfoTrait
     }
 
     /**
-     * Returns whether or not the path is absolute or relative
+     * Returns whether or not the path is absolute or relative.
      *
-     * @return bool
      */
     public function isAbsolute(): bool
     {
@@ -92,7 +90,6 @@ trait PathInfoTrait
      *
      * If the instance is not defined null is returned
      *
-     * @param int $enc_type
      *
      * @return string|null
      */
@@ -120,23 +117,21 @@ trait PathInfoTrait
     }
 
     /**
-     * Validate the encoding type value
+     * Validate the encoding type value.
      *
-     * @param int $enc_type
      *
      * @throws Exception If the encoding type is invalid
      */
     abstract protected function assertValidEncoding(int $enc_type);
 
     /**
-     * Return the decoded string representation of the component
+     * Return the decoded string representation of the component.
      *
-     * @return string
      */
     abstract protected function getDecoded(): string;
 
     /**
-     * Encode a path string according to RFC3986
+     * Encode a path string according to RFC3986.
      *
      * @param string $str can be a string or an array
      *
@@ -145,16 +140,14 @@ trait PathInfoTrait
     abstract protected function encodePath(string $str): string;
 
     /**
-     * Convert a RFC3986 encoded string into a RFC1738 string
+     * Convert a RFC3986 encoded string into a RFC1738 string.
      *
-     * @param string $str
      *
-     * @return string
      */
     abstract protected function toRFC1738(string $str): string;
 
     /**
-     * Returns an instance without dot segments
+     * Returns an instance without dot segments.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component normalized by removing
@@ -179,14 +172,13 @@ trait PathInfoTrait
     }
 
     /**
-     * Filter Dot segment according to RFC3986
+     * Filter Dot segment according to RFC3986.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-5.2.4
      *
      * @param array  $carry   Path segments
      * @param string $segment a path segment
      *
-     * @return array
      */
     protected function filterDotSegments(array $carry, string $segment): array
     {
@@ -204,19 +196,18 @@ trait PathInfoTrait
     }
 
     /**
-     * Returns an instance with the specified string
+     * Returns an instance with the specified string.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified data
      *
      * @param string $value
      *
-     * @return ComponentInterface
      */
     abstract public function withContent($value): ComponentInterface;
 
     /**
-     * Returns an instance without duplicate delimiters
+     * Returns an instance without duplicate delimiters.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component normalized by removing
@@ -230,9 +221,8 @@ trait PathInfoTrait
     }
 
     /**
-     * Returns whether or not the path has a trailing delimiter
+     * Returns whether or not the path has a trailing delimiter.
      *
-     * @return bool
      */
     public function hasTrailingSlash(): bool
     {
@@ -242,7 +232,7 @@ trait PathInfoTrait
     }
 
     /**
-     * Returns an instance with a trailing slash
+     * Returns an instance with a trailing slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a trailing slash
@@ -257,7 +247,7 @@ trait PathInfoTrait
     }
 
     /**
-     * Returns an instance without a trailing slash
+     * Returns an instance without a trailing slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a trailing slash
@@ -272,7 +262,7 @@ trait PathInfoTrait
     }
 
     /**
-     * Returns an instance with a leading slash
+     * Returns an instance with a leading slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a leading slash
@@ -287,7 +277,7 @@ trait PathInfoTrait
     }
 
     /**
-     * Returns an instance without a leading slash
+     * Returns an instance without a leading slash.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a leading slash

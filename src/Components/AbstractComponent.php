@@ -1,23 +1,25 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
 
 /**
- * An abstract class to ease component manipulation
+ * An abstract class to ease component manipulation.
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -29,7 +31,7 @@ abstract class AbstractComponent implements ComponentInterface
     use ComponentTrait;
 
     /**
-     * The component data
+     * The component data.
      *
      * @var mixed
      */
@@ -44,7 +46,7 @@ abstract class AbstractComponent implements ComponentInterface
     }
 
     /**
-     * new instance
+     * new instance.
      *
      * @param string|null $data the component value
      */
@@ -54,13 +56,11 @@ abstract class AbstractComponent implements ComponentInterface
     }
 
     /**
-     * Validate the component content
+     * Validate the component content.
      *
-     * @param mixed $data
      *
      * @throws InvalidArgumentException if the component is no valid
      *
-     * @return mixed
      */
     protected function validate($data)
     {

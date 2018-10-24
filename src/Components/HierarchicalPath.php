@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -31,7 +33,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     use PathInfoTrait;
 
     /**
-     * Path segment separator
+     * Path segment separator.
      *
      * @var string
      */
@@ -46,7 +48,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * return a new instance from an array or a traversable object
+     * return a new instance from an array or a traversable object.
      *
      * @param Traversable|array $data The segments list
      * @param int               $type one of the constant IS_ABSOLUTE or IS_RELATIVE
@@ -84,9 +86,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * New Instance
+     * New Instance.
      *
-     * @param string|null $path
      */
     public function __construct(string $path = null)
     {
@@ -114,11 +115,9 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * validate the submitted data
+     * validate the submitted data.
      *
-     * @param string $data
      *
-     * @return array
      */
     protected function validate(string $data): array
     {
@@ -144,9 +143,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns parent directory's path
+     * Returns parent directory's path.
      *
-     * @return string
      */
     public function getDirname(): string
     {
@@ -158,9 +156,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns the path basename
+     * Returns the path basename.
      *
-     * @return string
      */
     public function getBasename(): string
     {
@@ -170,9 +167,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns the basename extension
+     * Returns the basename extension.
      *
-     * @return string
      */
     public function getExtension(): string
     {
@@ -182,9 +178,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns an array representation of the HierarchicalPath
+     * Returns an array representation of the HierarchicalPath.
      *
-     * @return array
      */
     public function getSegments(): array
     {
@@ -200,7 +195,6 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      * @param int   $offset  the segment offset
      * @param mixed $default Default value to return if the offset does not exist.
      *
-     * @return mixed
      */
     public function getSegment(int $offset, $default = null)
     {
@@ -219,7 +213,6 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
      *
      * @param mixed ...$args the total number of argument given to the method
      *
-     * @return array
      */
     public function keys(...$args): array
     {
@@ -231,9 +224,8 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Return the decoded string representation of the component
+     * Return the decoded string representation of the component.
      *
-     * @return string
      */
     protected function getDecoded(): string
     {
@@ -266,7 +258,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns an instance with the specified component prepended
+     * Returns an instance with the specified component prepended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the prepended data
@@ -286,7 +278,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns an instance with the specified component appended
+     * Returns an instance with the specified component appended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
@@ -307,11 +299,9 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Filter the component to append or prepend
+     * Filter the component to append or prepend.
      *
-     * @param string $path
      *
-     * @return array
      */
     protected function filterComponent(string $path): array
     {
@@ -328,7 +318,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns an instance with the modified label
+     * Returns an instance with the modified label.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the replaced data
@@ -350,7 +340,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
 
 
     /**
-     * Returns an instance without the specified keys
+     * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -422,7 +412,7 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * Returns an instance with the specified basename extension
+     * Returns an instance with the specified basename extension.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
@@ -453,13 +443,12 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * create a new basename with a new extension
+     * create a new basename with a new extension.
      *
      * @param string $basenamePart  the basename file part
      * @param string $extension     the new extension to add
      * @param string $parameterPart the basename parameter part
      *
-     * @return string
      */
     protected function buildBasename(
         string $basenamePart,
@@ -485,13 +474,12 @@ class HierarchicalPath extends AbstractHierarchicalComponent implements Componen
     }
 
     /**
-     * validate and format the given extension
+     * validate and format the given extension.
      *
      * @param string $extension the new extension to use
      *
      * @throws Exception If the extension is not valid
      *
-     * @return string
      */
     protected function formatExtension(string $extension): string
     {

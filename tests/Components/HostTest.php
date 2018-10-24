@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * League.Uri (https://uri.thephpleague.com/components/).
+ *
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    1.8.2
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
@@ -63,7 +77,8 @@ final class HostTest extends TestCase
     }
 
     /**
-     * Test valid Host
+     * Test valid Host.
+     *
      * @param string|null $host
      * @param bool        $isDomain
      * @param bool        $isIp
@@ -270,13 +285,13 @@ final class HostTest extends TestCase
      */
     public function testInvalidHost($invalid)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         new Host($invalid);
     }
 
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('host'))->getContent(-1);
     }
 
@@ -331,7 +346,7 @@ final class HostTest extends TestCase
     }
 
     /**
-     * Test Punycode support
+     * Test Punycode support.
      *
      * @param string $unicode Unicode Hostname
      * @param string $ascii   Ascii Hostname
@@ -373,7 +388,7 @@ final class HostTest extends TestCase
     }
 
     /**
-     * Test Countable
+     * Test Countable.
      *
      * @param string|null $host
      * @param int         $nblabels
@@ -430,7 +445,7 @@ final class HostTest extends TestCase
      */
     public function testcreateFromLabelsFailed($input, $is_absolute)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Host::createFromLabels($input, $is_absolute);
     }
 
@@ -468,7 +483,7 @@ final class HostTest extends TestCase
      */
     public function testCreateFromIpFailed($input)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Host::createFromIp($input);
     }
 
@@ -523,7 +538,7 @@ final class HostTest extends TestCase
 
     public function testWithoutTriggersException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('bébé.be'))->withoutLabels(['be']);
     }
 
@@ -592,7 +607,7 @@ final class HostTest extends TestCase
 
     public function testPrependIpFailed()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('::1'))->prepend(new Host('foo'));
     }
 
@@ -654,7 +669,7 @@ final class HostTest extends TestCase
 
     public function testReplaceIpMustFailed()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('secure.example.com'))->replaceLabel(2, '[::1]');
     }
 
@@ -718,8 +733,8 @@ final class HostTest extends TestCase
 
     public function testWithPublicSuffixOnInvalidHostName()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('The submitted host `.` is invalid');
+        self::expectException(\Exception::class);
+        self::expectExceptionMessage('The submitted host `.` is invalid');
         self::assertSame(
             '',
             (string) (new Host('.'))->withPublicSuffix('.')
@@ -740,7 +755,7 @@ final class HostTest extends TestCase
 
     public function testWithPublicSuffixThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('[::1]'))->withPublicSuffix('example.com');
     }
 
@@ -770,13 +785,13 @@ final class HostTest extends TestCase
 
     public function testWithRegisterableDomainThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('[::1]'))->withRegisterableDomain('example.com');
     }
 
     public function testWithSubDomainThrowExceptionWithAbsoluteRegisterableDomain()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('example.com'))->withRegisterableDomain('example.com.');
     }
 
@@ -808,13 +823,13 @@ final class HostTest extends TestCase
 
     public function testWithSubDomainThrowExceptionWithIPHost()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('[::1]'))->withSubDomain('example.com');
     }
 
     public function testWithSubDomainThrowExceptionWithAbsoluteSubDomain()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Host('example.com'))->withSubDomain('example.com.');
     }
 

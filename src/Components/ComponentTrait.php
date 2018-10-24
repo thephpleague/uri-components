@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -19,7 +21,7 @@ namespace League\Uri\Components;
 use Traversable;
 
 /**
- * Common methods for a URI component Value Object
+ * Common methods for a URI component Value Object.
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -31,7 +33,7 @@ use Traversable;
 trait ComponentTrait
 {
     /**
-     * Invalid Characters
+     * Invalid Characters.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-2
      *
@@ -40,7 +42,7 @@ trait ComponentTrait
     protected static $invalid_uri_chars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F";
 
     /**
-     * Encoded Characters regular expression pattern
+     * Encoded Characters regular expression pattern.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-2.1
      *
@@ -49,7 +51,7 @@ trait ComponentTrait
     protected static $encoded_chars = '[A-Fa-f0-9]{2}';
 
     /**
-     * RFC3986 Sub delimiter characters regular expression pattern
+     * RFC3986 Sub delimiter characters regular expression pattern.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-2.2
      *
@@ -58,7 +60,7 @@ trait ComponentTrait
     protected static $subdelim_chars = "\!\$&'\(\)\*\+,;\=%";
 
     /**
-     * RFC3986 unreserved characters regular expression pattern
+     * RFC3986 unreserved characters regular expression pattern.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-2.3
      *
@@ -67,7 +69,7 @@ trait ComponentTrait
     protected static $unreserved_chars = 'A-Za-z0-9_\-\.~';
 
     /**
-     * RFC3986 unreserved characters encoded regular expression pattern
+     * RFC3986 unreserved characters encoded regular expression pattern.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-2.3
      *
@@ -76,12 +78,11 @@ trait ComponentTrait
     protected static $unreserved_chars_encoded = '2[D|E|5]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E]';
 
     /**
-     * Encode a component string
+     * Encode a component string.
      *
      * @param string $str    The string to encode
      * @param string $regexp a regular expression
      *
-     * @return string
      */
     protected static function encode(string $str, string $regexp): string
     {
@@ -97,7 +98,7 @@ trait ComponentTrait
     }
 
     /**
-     * Encode a path string according to RFC3986
+     * Encode a path string according to RFC3986.
      *
      * @param string $str can be a string or an array
      *
@@ -115,12 +116,11 @@ trait ComponentTrait
     }
 
     /**
-     * Decode a component string
+     * Decode a component string.
      *
      * @param string $str     The string to decode
      * @param string $pattern a regular expression pattern
      *
-     * @return string
      */
     protected static function decode(string $str, string $pattern): string
     {
@@ -137,11 +137,9 @@ trait ComponentTrait
     }
 
     /**
-     * Decode a component according to RFC3986
+     * Decode a component according to RFC3986.
      *
-     * @param string $str
      *
-     * @return string
      */
     protected static function decodeComponent(string $str): string
     {
@@ -149,11 +147,9 @@ trait ComponentTrait
     }
 
     /**
-     * Decode a path component according to RFC3986
+     * Decode a path component according to RFC3986.
      *
-     * @param string $str
      *
-     * @return string
      */
     protected static function decodePath(string $str): string
     {
@@ -161,13 +157,12 @@ trait ComponentTrait
     }
 
     /**
-     * validate a string
+     * validate a string.
      *
      * @param string $str the value to evaluate as a string
      *
      * @throws InvalidArgumentException if the submitted data can not be converted to string
      *
-     * @return string
      */
     protected static function validateString(string $str): string
     {
@@ -179,13 +174,12 @@ trait ComponentTrait
     }
 
     /**
-     * Validate an Iterator or an array
+     * Validate an Iterator or an array.
      *
      * @param Traversable|array $data
      *
      * @throws InvalidArgumentException if the value can not be converted
      *
-     * @return array
      */
     protected static function filterIterable($data): array
     {
@@ -201,9 +195,8 @@ trait ComponentTrait
     }
 
     /**
-     * Validate the encoding type value
+     * Validate the encoding type value.
      *
-     * @param int $enc_type
      *
      * @throws Exception If the encoding type is invalid
      */
@@ -225,11 +218,9 @@ trait ComponentTrait
     }
 
     /**
-     * Convert a RFC3986 encoded string into a RFC1738 string
+     * Convert a RFC3986 encoded string into a RFC1738 string.
      *
-     * @param string $str
      *
-     * @return string
      */
     protected static function toRFC1738(string $str): string
     {

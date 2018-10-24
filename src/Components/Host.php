@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -50,14 +52,14 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     const SUB_DELIMITERS = '!$&\'()*+,;=';
 
     /**
-     * Tell whether the Host is a domain name
+     * Tell whether the Host is a domain name.
      *
      * @var bool
      */
     protected $host_as_domain_name = false;
 
     /**
-     * Tell whether the Host is an IPv4
+     * Tell whether the Host is an IPv4.
      *
      * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
@@ -66,7 +68,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     protected $host_as_ipv4 = false;
 
     /**
-     * Tell whether the Host is an IPv6
+     * Tell whether the Host is an IPv6.
      *
      * @deprecated 1.8.0 No longer used by internal code and not recommend
      *
@@ -75,28 +77,28 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     protected $host_as_ipv6 = false;
 
     /**
-     * Tell the host IP version used
+     * Tell the host IP version used.
      *
      * @var string|null
      */
     protected $ip_version;
 
     /**
-     * Tell whether the Host contains a ZoneID
+     * Tell whether the Host contains a ZoneID.
      *
      * @var bool
      */
     protected $has_zone_identifier = false;
 
     /**
-     * Host separator
+     * Host separator.
      *
      * @var string
      */
     protected static $separator = '.';
 
     /**
-     * Hostname public info
+     * Hostname public info.
      *
      * @var array
      */
@@ -126,9 +128,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Returns a new instance from an array or a traversable object.
      *
-     * @param Traversable|array $data     The segments list
-     * @param int               $type     One of the constant IS_ABSOLUTE or IS_RELATIVE
-     * @param null|Rules        $resolver
+     * @param Traversable|array $data The segments list
+     * @param int               $type One of the constant IS_ABSOLUTE or IS_RELATIVE
      *
      * @throws Exception If $type is not a recognized constant
      *
@@ -162,8 +163,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Returns a host from an IP address.
      *
-     * @param string     $ip
-     * @param null|Rules $resolver
      *
      * @return static
      */
@@ -182,10 +181,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * New instance
+     * New instance.
      *
-     * @param null|string $host
-     * @param null|Rules  $resolver
      */
     public function __construct(string $host = null, Rules $resolver = null)
     {
@@ -203,11 +200,9 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     /**
      * Validates the submitted data.
      *
-     * @param string|null $host
      *
      * @throws Exception If the host is invalid
      *
-     * @return array
      */
     protected function parseHost(string $host = null): array
     {
@@ -298,14 +293,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Validates an Ipv6 as Host
+     * Validates an Ipv6 as Host.
      *
      * @see http://tools.ietf.org/html/rfc6874#section-2
      * @see http://tools.ietf.org/html/rfc6874#section-4
      *
-     * @param string $ipv6
      *
-     * @return bool
      */
     protected function isValidIpv6Hostname(string $ipv6): bool
     {
@@ -344,9 +337,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
      *
-     * @param string $ipfuture
      *
-     * @return bool
      */
     private function isValidIpFuture(string $ipfuture): bool
     {
@@ -371,9 +362,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
      *
-     * @param string $host
      *
-     * @return bool
      */
     private function isValidDomain(string $host): bool
     {
@@ -405,9 +394,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
      *
-     * @param string $host
      *
-     * @return bool
      */
     private function isValidRegisteredName(string $host): bool
     {
@@ -445,7 +432,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Resolve domain name information
+     * Resolve domain name information.
      */
     protected function lazyloadInfo()
     {
@@ -481,9 +468,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Return the host public suffix
+     * Return the host public suffix.
      *
-     * @return string
      */
     public function getPublicSuffix(): string
     {
@@ -500,7 +486,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * @deprecated 1.5.0 Typo fix in name
      * @see        Host::getRegistrableDomain
      *
-     * @return string
      */
     public function getRegisterableDomain(): string
     {
@@ -508,9 +493,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Return the host registrable domain
+     * Return the host registrable domain.
      *
-     * @return string
      */
     public function getRegistrableDomain(): string
     {
@@ -520,9 +504,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Return the hostname subdomain
+     * Return the hostname subdomain.
      *
-     * @return string
      */
     public function getSubDomain(): string
     {
@@ -532,9 +515,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Tell whether the current public suffix is valid
+     * Tell whether the current public suffix is valid.
      *
-     * @return bool
      */
     public function isPublicSuffixValid(): bool
     {
@@ -560,9 +542,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns whether or not the host is an IP address
+     * Returns whether or not the host is an IP address.
      *
-     * @return bool
      */
     public function isIp(): bool
     {
@@ -570,9 +551,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns whether or not the host is an IPv4 address
+     * Returns whether or not the host is an IPv4 address.
      *
-     * @return bool
      */
     public function isIpv4(): bool
     {
@@ -580,9 +560,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address
+     * Returns whether or not the host is an IPv6 address.
      *
-     * @return bool
      */
     public function isIpv6(): bool
     {
@@ -590,9 +569,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns whether or not the host has a ZoneIdentifier
+     * Returns whether or not the host has a ZoneIdentifier.
      *
-     * @return bool
      *
      * @see http://tools.ietf.org/html/rfc6874#section-4
      */
@@ -602,9 +580,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address
+     * Returns whether or not the host is an IPv6 address.
      *
-     * @return bool
      */
     public function isIpFuture(): bool
     {
@@ -612,9 +589,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address
+     * Returns whether or not the host is an IPv6 address.
      *
-     * @return bool
      */
     public function isDomain(): bool
     {
@@ -622,9 +598,8 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an array representation of the Host
+     * Returns an array representation of the Host.
      *
-     * @return array
      */
     public function getLabels(): array
     {
@@ -640,7 +615,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * @param int   $offset  the label offset
      * @param mixed $default Default value to return if the offset does not exist.
      *
-     * @return mixed
      */
     public function getLabel(int $offset, $default = null)
     {
@@ -659,7 +633,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @param mixed ...$args the total number of argument given to the method
      *
-     * @return array
      */
     public function keys(...$args): array
     {
@@ -677,7 +650,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
      * making the conversion
      *
-     * @param string $label
      *
      * @return string|false
      */
@@ -725,7 +697,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * if a '%' sub delimiter is detected the label MUST be rawurldecode prior to
      * making the conversion
      *
-     * @param string $label
      *
      * @return string|false
      */
@@ -769,7 +740,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns the IP version
+     * Returns the IP version.
      *
      * If the host is a not an IP this method will return null
      *
@@ -798,7 +769,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Return an host without its zone identifier according to RFC6874
+     * Return an host without its zone identifier according to RFC6874.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance without the host zone identifier according to RFC6874
@@ -820,7 +791,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns a host instance with its Root label
+     * Returns a host instance with its Root label.
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
@@ -839,7 +810,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns a host instance without the Root label
+     * Returns a host instance without the Root label.
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
@@ -858,7 +829,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the specified component prepended
+     * Returns an instance with the specified component prepended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the prepended data
@@ -883,7 +854,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the specified component appended
+     * Returns an instance with the specified component appended.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the appended data
@@ -908,11 +879,9 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Filter the component to append or prepend
+     * Filter the component to append or prepend.
      *
-     * @param string $component
      *
-     * @return array
      */
     protected function filterComponent(string $component): array
     {
@@ -929,7 +898,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the modified label
+     * Returns an instance with the modified label.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the replaced data
@@ -955,7 +924,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance without the specified keys
+     * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -980,7 +949,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the specified registerable domain added
+     * Returns an instance with the specified registerable domain added.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the new registerable domain
@@ -1027,7 +996,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * validate the submitted data
+     * validate the submitted data.
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
@@ -1035,11 +1004,9 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @codeCoverageIgnore
      *
-     * @param string|null $host
      *
      * @throws Exception If the host is invalid
      *
-     * @return array
      */
     protected function validate(string $host = null): array
     {
@@ -1090,7 +1057,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * validate the submitted data
+     * validate the submitted data.
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
@@ -1098,11 +1065,9 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @codeCoverageIgnore
      *
-     * @param string|null $host
      *
      * @throws Exception If the host is invalid
      *
-     * @return array
      */
     protected function normalizeLabels(string $host = null): array
     {
@@ -1153,7 +1118,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the specified registerable domain added
+     * Returns an instance with the specified registerable domain added.
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
@@ -1170,7 +1135,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the specified registerable domain added
+     * Returns an instance with the specified registerable domain added.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the new registerable domain
@@ -1216,7 +1181,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with the specified sub domain added
+     * Returns an instance with the specified sub domain added.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the new sud domain
@@ -1262,13 +1227,12 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns an instance with a different domain resolver
+     * Returns an instance with a different domain resolver.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains a different domain resolver, and update the
      * host domain information.
      *
-     * @param Rules|null $resolver
      *
      * @return static
      */
@@ -1306,9 +1270,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * @see https://tools.ietf.org/html/rfc1035#section-2.3.4
      * @see https://blogs.msdn.microsoft.com/oldnewthing/20120412-00/?p=7873/
      *
-     * @param string $host
      *
-     * @return bool
      */
     protected function isValidHostname(string $host): bool
     {
@@ -1320,7 +1282,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
     }
 
     /**
-     * Returns whether the registered name label is valid
+     * Returns whether the registered name label is valid.
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
@@ -1340,7 +1302,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @param string $label
      *
-     * @return bool
      */
     protected function isValidLabel($label): bool
     {
@@ -1357,7 +1318,6 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      *
      * @codeCoverageIgnore
      *
-     * @param string|null $str
      *
      * @return string|null
      */
@@ -1386,9 +1346,7 @@ class Host extends AbstractHierarchicalComponent implements ComponentInterface
      * @codeCoverageIgnore
      *
      * @param array $data The segments list
-     * @param int   $type
      *
-     * @return string
      */
     protected static function format(array $data, int $type): string
     {

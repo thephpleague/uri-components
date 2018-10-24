@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -45,28 +47,28 @@ class DataPath extends AbstractComponent
     const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
 
     /**
-     * The mediatype mimetype
+     * The mediatype mimetype.
      *
      * @var string
      */
     protected $mimetype;
 
     /**
-     * The mediatype parameters
+     * The mediatype parameters.
      *
      * @var string[]
      */
     protected $parameters;
 
     /**
-     * Is the Document bas64 encoded
+     * Is the Document bas64 encoded.
      *
      * @var bool
      */
     protected $is_binary_data;
 
     /**
-     * The document string representation
+     * The document string representation.
      *
      * @var string
      */
@@ -81,9 +83,8 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Create a new instance from a file path
+     * Create a new instance from a file path.
      *
-     * @param string $path
      *
      * @throws Exception If the File is not readable
      *
@@ -104,7 +105,7 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * new instance
+     * new instance.
      *
      * @param string|null $path the component value
      */
@@ -118,9 +119,8 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Return the decoded string representation of the component
+     * Return the decoded string representation of the component.
      *
-     * @return string
      */
     protected function getDecoded(): string
     {
@@ -128,7 +128,7 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * validate the submitted path
+     * validate the submitted path.
      *
      * @param string $path
      */
@@ -163,13 +163,11 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Filter the mimeType property
+     * Filter the mimeType property.
      *
-     * @param string $mimetype
      *
      * @throws Exception If the mimetype is invalid
      *
-     * @return string
      */
     protected function filterMimeType(string $mimetype): string
     {
@@ -185,9 +183,8 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Extract and set the binary flag from the parameters if it exists
+     * Extract and set the binary flag from the parameters if it exists.
      *
-     * @param string $parameters
      *
      * @throws Exception If the mediatype parameters contain invalid data
      *
@@ -214,11 +211,10 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Validate mediatype parameter
+     * Validate mediatype parameter.
      *
      * @param string $parameter a mediatype parameter
      *
-     * @return bool
      */
     protected function validateParameter(string $parameter): bool
     {
@@ -228,7 +224,7 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Validate the path document string representation
+     * Validate the path document string representation.
      *
      * @throws Exception If the data is invalid
      */
@@ -245,14 +241,9 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Format the DataURI string
+     * Format the DataURI string.
      *
-     * @param string $mimetype
-     * @param string $parameters
-     * @param bool   $is_binary_data
-     * @param string $data
      *
-     * @return string
      */
     protected static function format(
         string $mimetype,
@@ -291,7 +282,6 @@ class DataPath extends AbstractComponent
      * Retrieves the data part of the path. If no data part is provided return
      * a empty string
      *
-     * @return string
      */
     public function getData(): string
     {
@@ -299,9 +289,8 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Tells whether the data is binary safe encoded
+     * Tells whether the data is binary safe encoded.
      *
-     * @return bool
      */
     public function isBinaryData(): bool
     {
@@ -351,12 +340,11 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Save the data to a specific file
+     * Save the data to a specific file.
      *
      * @param string $path The path to the file where to save the data
      * @param string $mode The mode parameter specifies the type of access you require to the stream.
      *
-     * @return SplFileObject
      */
     public function save(string $path, string $mode = 'w'): SplFileObject
     {
@@ -368,7 +356,7 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Returns an instance where the data part is base64 encoded
+     * Returns an instance where the data part is base64 encoded.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance where the data part is base64 encoded
@@ -390,7 +378,7 @@ class DataPath extends AbstractComponent
     }
 
     /**
-     * Returns an instance where the data part is url encoded following RFC3986 rules
+     * Returns an instance where the data part is url encoded following RFC3986 rules.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance where the data part is url encoded
