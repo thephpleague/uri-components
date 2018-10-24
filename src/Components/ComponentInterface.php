@@ -1,13 +1,14 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @license    https://github.com/thephpleague/uri-interfaces/blob/master/LICENSE (MIT License)
- * @version    1.8.0
- * @link       https://github.com/thephpleague/uri-interfaces/
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    1.8.2
+ * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -36,14 +37,12 @@ interface ComponentInterface extends EncodingInterface
     /**
      * Returns whether or not the component is null.
      *
-     * @return bool
      */
     public function isNull(): bool;
 
     /**
      * Returns whether or not the component is empty (null or empty string).
      *
-     * @return bool
      */
     public function isEmpty(): bool;
 
@@ -59,9 +58,7 @@ interface ComponentInterface extends EncodingInterface
      *
      * If the instance is not defined null is returned
      *
-     * @param int $enc_type
      *
-     * @return mixed
      */
     public function getContent(int $enc_type = self::RFC3986_ENCODING);
 
@@ -79,7 +76,7 @@ interface ComponentInterface extends EncodingInterface
     public function __toString();
 
     /**
-     * Returns the instance string representation with its optional URI delimiters
+     * Returns the instance string representation with its optional URI delimiters.
      *
      * The value returned MUST be percent-encoded, but MUST NOT double-encode any
      * characters. To determine what characters to encode, please refer to RFC 3986,
@@ -87,7 +84,6 @@ interface ComponentInterface extends EncodingInterface
      *
      * If the instance is not defined an empty string is returned
      *
-     * @return string
      */
     public function getUriComponent(): string;
 
@@ -101,7 +97,6 @@ interface ComponentInterface extends EncodingInterface
      *
      * A null value is equivalent to removing the component content.
      *
-     * @param mixed $content
      *
      * @throws InvalidArgumentException for invalid component or transformations
      *                                  that would result in a object in invalid state.

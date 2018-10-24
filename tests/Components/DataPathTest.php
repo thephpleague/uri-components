@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * League.Uri (https://uri.thephpleague.com/components/).
+ *
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    1.8.2
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\DataPath as Path;
@@ -19,7 +33,7 @@ final class DataPathTest extends TestCase
      */
     public function testCreateFromPathFailed($path)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Path::createFromPath($path);
     }
 
@@ -29,7 +43,7 @@ final class DataPathTest extends TestCase
      */
     public function testConstructorFailed($path)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         new Path($path);
     }
 
@@ -131,7 +145,7 @@ final class DataPathTest extends TestCase
      */
     public function testWithParametersFailedWithInvalidParameters($path, $parameters)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Path::createFromPath($path)->withParameters($parameters);
     }
 
@@ -181,7 +195,7 @@ final class DataPathTest extends TestCase
      */
     public function testUpdateParametersFailed($parameters)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
@@ -230,19 +244,19 @@ final class DataPathTest extends TestCase
 
     public function testInvalidBase64Encoded()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
     public function testInvalidComponent()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
     public function testInvalidMimetype()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         new Path('data:toto\\bar;foo=bar,');
     }
 }

@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * League.Uri (https://uri.thephpleague.com/components/).
+ *
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    1.8.2
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
@@ -35,11 +49,10 @@ final class QueryTest extends TestCase
     /**
      * @covers ::filterSeparator
      * @dataProvider invalidSeparatorProvider
-     * @param mixed $separator
      */
     public function testInvalidSeparator($separator)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         new Query('foo=bar', $separator);
     }
 
@@ -52,28 +65,28 @@ final class QueryTest extends TestCase
 
     public function testInvalidSetterThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         $path = new Query();
         $path->unknownProperty = true;
     }
 
     public function testInvalidGetterThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         $path = new Query();
         $path->unknownProperty;
     }
 
     public function testInvalidIssetThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         $path = new Query();
         isset($path->unknownProperty);
     }
 
     public function testInvalidUnssetThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         $path = new Query();
         unset($path->unknownProperty);
     }
@@ -182,12 +195,11 @@ final class QueryTest extends TestCase
      * @covers ::createFromPairs
      * @covers \League\Uri\Components\Exception
      *
-     * @param mixed $input
      * @dataProvider createFromPairsFailedProvider
      */
     public function testcreateFromPairsFailed($input)
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Query::createFromPairs($input);
     }
 
@@ -217,9 +229,6 @@ final class QueryTest extends TestCase
      * @covers ::removeEmptyPairs
      * @dataProvider mergeDataProvider
      *
-     * @param string $base_query
-     * @param string $query
-     * @param string $expected
      */
     public function testMerge(string $base_query, string $query, string $expected)
     {
@@ -418,8 +427,6 @@ final class QueryTest extends TestCase
      * @dataProvider getParamProvider
      * @param string $query
      * @param string $offset
-     * @param mixed  $default
-     * @param mixed  $expected
      */
     public function testGetParam($query, $offset, $default, $expected)
     {
@@ -471,9 +478,6 @@ final class QueryTest extends TestCase
      * @covers ::withoutParams
      * @covers ::createFromParams
      *
-     * @param array  $origin
-     * @param array  $without
-     * @param string $expected
      *
      * @dataProvider withoutParamsProvider
      */
@@ -683,7 +687,6 @@ final class QueryTest extends TestCase
     /**
      * @covers ::ksort
      * @param array $data
-     * @param mixed $sort
      * @param array $expected
      * @dataProvider ksortProvider
      */
@@ -998,7 +1001,7 @@ final class QueryTest extends TestCase
      */
     public function testThrowsExceptionOnInvalidEncodingType()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Query::build([], '&', -1);
     }
 
@@ -1007,7 +1010,7 @@ final class QueryTest extends TestCase
      */
     public function testThrowsExceptionOnInvalidPairs()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         Query::build(['foo' => (object)[]]);
     }
 
@@ -1016,7 +1019,7 @@ final class QueryTest extends TestCase
      */
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Query('query'))->getContent(-1);
     }
 

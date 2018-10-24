@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri;
@@ -60,7 +62,7 @@ class QueryParser implements EncodingInterface
     protected $encoded_sep;
 
     /**
-     * Parse a query string into an associative array
+     * Parse a query string into an associative array.
      *
      * Multiple identical key will generate an array. This function
      * differ from PHP parse_str as:
@@ -71,7 +73,6 @@ class QueryParser implements EncodingInterface
      * @param string $separator The query string separator
      * @param int    $enc_type  The query encoding algorithm
      *
-     * @return array
      */
     public function parse(
         string $str,
@@ -93,11 +94,9 @@ class QueryParser implements EncodingInterface
     /**
      * Returns the query string decoding mechanism.
      *
-     * @param int $enc_type
      *
      * @throws UriComponentException
      *
-     * @return callable
      */
     protected function getDecoder(int $enc_type): callable
     {
@@ -115,11 +114,9 @@ class QueryParser implements EncodingInterface
     }
 
     /**
-     * Decode a component according to RFC3986
+     * Decode a component according to RFC3986.
      *
-     * @param string $str
      *
-     * @return string
      */
     protected function decode(string $str): string
     {
@@ -135,12 +132,11 @@ class QueryParser implements EncodingInterface
     }
 
     /**
-     * Parse a query string pair
+     * Parse a query string pair.
      *
      * @param array  $res  The associative array to add the pair to
      * @param string $pair The query string pair
      *
-     * @return array
      */
     protected function parsePair(array $res, string $pair): array
     {
@@ -178,7 +174,6 @@ class QueryParser implements EncodingInterface
      * @param string $separator a the query string single character separator
      * @param int    $enc_type  the query encoding
      *
-     * @return array
      */
     public function extract(string $str, string $separator = '&', int $enc_type = self::RFC3986_ENCODING): array
     {
@@ -199,7 +194,6 @@ class QueryParser implements EncodingInterface
      *
      * @param Traversable|array $pairs the query string pairs
      *
-     * @return array
      */
     public function convert($pairs): array
     {
@@ -222,11 +216,9 @@ class QueryParser implements EncodingInterface
     }
 
     /**
-     * Format the value of the parse query array
+     * Format the value of the parse query array.
      *
-     * @param mixed $value
      *
-     * @return string
      */
     protected function normalize($value): string
     {

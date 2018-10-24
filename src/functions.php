@@ -1,14 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
- * @package   League.uri
- * @author    Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @copyright 2017 Ignace Nyamagana Butera
- * @license   https://github.com/thephpleague/uri/blob/master/LICENSE (MIT License)
- * @version   1.8.0
- * @link      https://github.com/thephpleague/uri/
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    1.8.2
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri;
@@ -16,7 +21,7 @@ namespace League\Uri;
 use Traversable;
 
 /**
- * Build a query string from an associative array
+ * Build a query string from an associative array.
  *
  * @see QueryBuilder::build
  *
@@ -24,7 +29,6 @@ use Traversable;
  * @param string            $separator The query string separator
  * @param int               $enc_type  The query encoding type
  *
- * @return string
  */
 function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): string
 {
@@ -36,7 +40,7 @@ function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_
 }
 
 /**
- * Parse a query string into an associative array of key/value pairs
+ * Parse a query string into an associative array of key/value pairs.
  *
  * @see QueryParser::parse
  *
@@ -44,7 +48,6 @@ function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_
  * @param string $separator The query string separator
  * @param int    $enc_type  The query encoding algorithm
  *
- * @return array
  */
 function parse_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
 {
@@ -56,7 +59,7 @@ function parse_query(string $query, string $separator = '&', int $enc_type = PHP
 }
 
 /**
- * Parse the query string like parse_str without mangling the results
+ * Parse the query string like parse_str without mangling the results.
  *
  * @see QueryParser::extract
  *
@@ -64,7 +67,6 @@ function parse_query(string $query, string $separator = '&', int $enc_type = PHP
  * @param string $separator The query string separator
  * @param int    $enc_type  The query encoding algorithm
  *
- * @return array
  */
 function extract_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
 {
@@ -76,13 +78,12 @@ function extract_query(string $query, string $separator = '&', int $enc_type = P
 }
 
 /**
- * Convert a Collection of key/value pairs into PHP variables
+ * Convert a Collection of key/value pairs into PHP variables.
  *
  * @see QueryParser::convert
  *
  * @param Traversable|array $pairs The collection of key/value pairs
  *
- * @return array
  */
 function pairs_to_params($pairs): array
 {

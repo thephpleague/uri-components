@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -41,35 +43,35 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     use ComponentTrait;
 
     /**
-     * pair separator character
+     * pair separator character.
      *
      * @var string
      */
     protected $separator;
 
     /**
-     * Preserve the delimiter
+     * Preserve the delimiter.
      *
      * @var bool
      */
     protected $preserve_delimiter;
 
     /**
-     * The deserialized query arguments
+     * The deserialized query arguments.
      *
      * @var array
      */
     protected $params;
 
     /**
-     * The query pairs
+     * The query pairs.
      *
      * @var array
      */
     protected $pairs;
 
     /**
-     * The query pairs keys
+     * The query pairs keys.
      *
      * @var array
      */
@@ -87,7 +89,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * @param string $separator a the query string single character separator
      * @param int    $enc_type  the query encoding
      *
-     * @return array
      */
     public static function extract(
         string $str,
@@ -98,7 +99,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Parse a query string into an associative array
+     * Parse a query string into an associative array.
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
@@ -109,7 +110,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * @param string $separator The query string separator
      * @param int    $enc_type  The query encoding algorithm
      *
-     * @return array
      */
     public static function parse(
         string $str,
@@ -120,7 +120,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Build a query string from an associative array
+     * Build a query string from an associative array.
      *
      * DEPRECATION WARNING! This method will be removed in the next major point release
      *
@@ -131,7 +131,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * @param string            $separator Query string separator
      * @param int               $enc_type  Query encoding type
      *
-     * @return string
      */
     public static function build(
         $pairs,
@@ -145,7 +144,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * Returns a new instance from a collection of iterable properties.
      *
      * @param Traversable|array $params
-     * @param string            $separator
      *
      * @return static
      */
@@ -160,10 +158,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Return a new instance from a collection of key pairs
+     * Return a new instance from a collection of key pairs.
      *
      * @param Traversable|array $pairs
-     * @param string            $separator
      *
      * @return static
      */
@@ -178,9 +175,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     *  This static method is called for classes exported by var_export()
+     *  This static method is called for classes exported by var_export().
      *
-     * @param array $properties
      *
      * @return static
      */
@@ -192,10 +188,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * a new instance
+     * a new instance.
      *
      * @param string $data
-     * @param string $separator
      */
     public function __construct(string $data = null, string $separator = '&')
     {
@@ -207,13 +202,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Filter the submitted query separator
+     * Filter the submitted query separator.
      *
-     * @param string $separator
      *
      * @throws Exception If the separator is invalid
      *
-     * @return string
      */
     protected static function filterSeparator(string $separator): string
     {
@@ -225,11 +218,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * sanitize the submitted data
+     * sanitize the submitted data.
      *
-     * @param string|null $str
      *
-     * @return array
      */
     protected function validate(string $str = null): array
     {
@@ -248,7 +239,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * Because isset is a language construct
      * it can not be used directly with array_filter.
      *
-     * @param mixed $value
      *
      * @return bool
      */
@@ -320,9 +310,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns the query string separator character
+     * Returns the query string separator character.
      *
-     * @return string
      */
     public function getSeparator(): string
     {
@@ -348,7 +337,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     /**
      * Returns the deserialized query string arguments, if any.
      *
-     * @return array
      */
     public function getParams(): array
     {
@@ -357,12 +345,10 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
 
     /**
      * Returns a single deserialized query string argument, if any
-     * otherwise return the provided default value
+     * otherwise return the provided default value.
      *
-     * @param string     $offset
      * @param null|mixed $default
      *
-     * @return mixed
      */
     public function getParam(string $offset, $default = null)
     {
@@ -370,9 +356,8 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an array representation of the query
+     * Returns an array representation of the query.
      *
-     * @return array
      */
     public function getPairs(): array
     {
@@ -388,7 +373,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      * @param string $offset  the parameter name
      * @param mixed  $default Default value to return if the parameter does not exist.
      *
-     * @return mixed
      */
     public function getPair(string $offset, $default = null)
     {
@@ -401,11 +385,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns whether the given key exists in the current instance
+     * Returns whether the given key exists in the current instance.
      *
-     * @param string $offset
      *
-     * @return bool
      */
     public function hasPair(string $offset): bool
     {
@@ -423,7 +405,6 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
      *
      * @param mixed ...$args the total number of argument given to the method
      *
-     * @return array
      */
     public function keys(...$args): array
     {
@@ -447,12 +428,11 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance with a different separator
+     * Returns an instance with a different separator.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the query component with a different separator
      *
-     * @param string $separator
      *
      * @return static
      */
@@ -496,7 +476,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance merge with the specified query
+     * Returns an instance merge with the specified query.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
@@ -520,11 +500,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Normalize a query string by removing empty pairs
+     * Normalize a query string by removing empty pairs.
      *
-     * @param array $pairs
      *
-     * @return array
      */
     protected function removeEmptyPairs(array $pairs): array
     {
@@ -584,13 +562,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Append a key/pair to query pairs collection
+     * Append a key/pair to query pairs collection.
      *
-     * @param array  $pairs
-     * @param string $key
-     * @param mixed  $value
      *
-     * @return array
      */
     protected function appendToPair(array $pairs, string $key, $value): array
     {
@@ -615,7 +589,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without the specified keys
+     * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -642,7 +616,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without the specified params
+     * Returns an instance without the specified params.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
@@ -672,7 +646,7 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Returns an instance without empty pairs
+     * Returns an instance without empty pairs.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the query component normalized by removing
@@ -711,11 +685,9 @@ class Query implements ComponentInterface, Countable, IteratorAggregate
     }
 
     /**
-     * Remove the numeric index from the key pair
+     * Remove the numeric index from the key pair.
      *
-     * @param string $pair
      *
-     * @return string
      */
     protected function removeNumericIndex(string $pair): string
     {

@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -21,7 +23,7 @@ use Countable;
 use IteratorAggregate;
 
 /**
- * An abstract class to ease collection like object manipulation
+ * An abstract class to ease collection like object manipulation.
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -37,27 +39,27 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
     const IS_RELATIVE = 0;
 
     /**
-     * Hierarchical component separator
+     * Hierarchical component separator.
      *
      * @var string
      */
     protected static $separator;
 
     /**
-     * Is the object considered absolute
+     * Is the object considered absolute.
      *
      * @var int
      */
     protected $is_absolute = self::IS_RELATIVE;
     /**
-     * The component Data
+     * The component Data.
      *
      * @var array
      */
     protected $data = [];
 
     /**
-     * new instance
+     * new instance.
      *
      * @param string|null $data the component value
      */
@@ -80,9 +82,8 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
     }
 
     /**
-     * Returns whether or not the component is absolute or not
+     * Returns whether or not the component is absolute or not.
      *
-     * @return bool
      */
     public function isAbsolute(): bool
     {
@@ -116,7 +117,7 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
     }
 
     /**
-     * Returns an instance with the modified segment
+     * Returns an instance with the modified segment.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component with the replaced data
@@ -124,7 +125,6 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
      * @param int    $offset    the label offset to remove and replace by the given component
      * @param string $component the component added
      *
-     * @return array
      */
     protected function replace(int $offset, string $component): array
     {
@@ -153,14 +153,13 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
     }
 
     /**
-     * Returns an instance without the specified keys
+     * Returns an instance without the specified keys.
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified component
      *
      * @param int[] $offsets the list of keys to remove from the collection
      *
-     * @return array
      */
     protected function delete(array $offsets): array
     {
@@ -177,7 +176,7 @@ abstract class AbstractHierarchicalComponent implements Countable, IteratorAggre
     }
 
     /**
-     * Filter Offset list
+     * Filter Offset list.
      *
      * @param int ...$offsets list of keys to remove from the collection
      *

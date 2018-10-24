@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * League.Uri (https://uri.thephpleague.com/components/).
+ *
+ * @package    League\Uri
+ * @subpackage League\Uri\Components
+ * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
+ * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
+ * @version    1.8.2
+ * @link       https://github.com/thephpleague/uri-components
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\Exception;
@@ -56,7 +70,7 @@ final class PathTest extends TestCase
 
     public function testInvalidEncodingTypeThrowException()
     {
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         (new Path('query'))->getContent(-1);
     }
 
@@ -67,7 +81,7 @@ final class PathTest extends TestCase
     }
 
     /**
-     * Test Removing Dot Segment
+     * Test Removing Dot Segment.
      *
      * @param string $expected
      * @param string $path
@@ -79,7 +93,7 @@ final class PathTest extends TestCase
     }
 
     /**
-     * Provides different segment to be normalized
+     * Provides different segment to be normalized.
      *
      * @return array
      */

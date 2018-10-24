@@ -1,17 +1,19 @@
 <?php
+
 /**
- * League.Uri (http://uri.thephpleague.com)
+ * League.Uri (https://uri.thephpleague.com/components/).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.0
+ * @version    1.8.2
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace League\Uri\Components;
@@ -31,24 +33,22 @@ class UserInfo implements ComponentInterface
     use ComponentTrait;
 
     /**
-     * User user component
+     * User user component.
      *
      * @var string|null
      */
     protected $user;
 
     /**
-     * Pass URI component
+     * Pass URI component.
      *
      * @var string|null
      */
     protected $pass;
 
     /**
-     * Create a new instance of UserInfo
+     * Create a new instance of UserInfo.
      *
-     * @param string|null $user
-     * @param string|null $pass
      */
     public function __construct(string $user = null, string $pass = null)
     {
@@ -87,9 +87,8 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Filter the URI user component
+     * Filter the URI user component.
      *
-     * @param string|null $str
      *
      * @throws Exception If the content is invalid
      *
@@ -107,9 +106,8 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Filter the URI password component
+     * Filter the URI password component.
      *
-     * @param string|null $str
      *
      * @throws Exception If the content is invalid
      *
@@ -127,9 +125,8 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Retrieve the user component of the URI User Info part
+     * Retrieve the user component of the URI User Info part.
      *
-     * @param int $enc_type
      *
      * @return string|null
      */
@@ -156,9 +153,8 @@ class UserInfo implements ComponentInterface
     }
 
     /**
-     * Retrieve the pass component of the URI User Info part
+     * Retrieve the pass component of the URI User Info part.
      *
-     * @param int $enc_type
      *
      * @return string|null
      */
