@@ -40,8 +40,7 @@ final class Port extends Component
 
     /**
      * New instance.
-     *
-     * @param mixed $port
+     * @param null|mixed $port
      */
     public function __construct($port = null)
     {
@@ -51,13 +50,9 @@ final class Port extends Component
     /**
      * Validate a port.
      *
-     * @param mixed $port
-     *
      * @throws MalformedUriComponent if the port is invalid
-     *
-     * @return null|int
      */
-    protected function validate($port)
+    protected function validate($port): ?int
     {
         $port = $this->filterComponent($port);
         if (null === $port) {
@@ -74,7 +69,7 @@ final class Port extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         if (null === $this->component) {
             return $this->component;
@@ -83,7 +78,10 @@ final class Port extends Component
         return (string) $this->component;
     }
 
-    public function toInt()
+    /**
+     * Returns the integer representation of the Port.
+     */
+    public function toInt(): ?int
     {
         return $this->component;
     }

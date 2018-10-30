@@ -104,8 +104,6 @@ final class DataPath extends Path
     /**
      * Create a new instance from a file path.
      *
-     * @param string $path
-     *
      * @throws PathNotFound If the File is not readable
      *
      * @return static
@@ -125,7 +123,7 @@ final class DataPath extends Path
     /**
      * {@inheritdoc}
      */
-    protected function validate($path)
+    protected function validate($path): string
     {
         $path = parent::validate($path);
         if ('' === $path || ',' === $path) {
@@ -142,7 +140,7 @@ final class DataPath extends Path
     /**
      * {@inheritdoc}
      */
-    protected function parse()
+    protected function parse(): void
     {
         if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $this->component) && false === strpos($this->component, ',')) {
             throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $this->component));
@@ -160,11 +158,7 @@ final class DataPath extends Path
     /**
      * Filter the mimeType property.
      *
-     * @param string $mimetype
-     *
      * @throws MalformedUriComponent If the mimetype is invalid
-     *
-     * @return string
      */
     private function filterMimeType(string $mimetype): string
     {
@@ -182,8 +176,7 @@ final class DataPath extends Path
     /**
      * Extract and set the binary flag from the parameters if it exists.
      *
-     * @param string $parameters
-     * @param bool   $is_binary_data
+     * @param bool $is_binary_data the binary flag to set
      *
      * @throws MalformedUriComponent If the mediatype parameters contain invalid data
      *
@@ -210,10 +203,6 @@ final class DataPath extends Path
 
     /**
      * Validate mediatype parameter.
-     *
-     * @param string $parameter a mediatype parameter
-     *
-     * @return bool
      */
     private function validateParameter(string $parameter): bool
     {
@@ -227,7 +216,7 @@ final class DataPath extends Path
      *
      * @throws MalformedUriComponent If the data is invalid
      */
-    private function validateDocument()
+    private function validateDocument(): void
     {
         if (!$this->is_binary_data) {
             return;
@@ -244,8 +233,6 @@ final class DataPath extends Path
      *
      * Retrieves the data part of the path. If no data part is provided return
      * a empty string
-     *
-     * @return string
      */
     public function getData(): string
     {
@@ -254,8 +241,6 @@ final class DataPath extends Path
 
     /**
      * Tells whether the data is binary safe encoded.
-     *
-     * @return bool
      */
     public function isBinaryData(): bool
     {
@@ -307,10 +292,6 @@ final class DataPath extends Path
     /**
      * Save the data to a specific file.
      *
-     * @param string $path The path to the file where to save the data
-     * @param string $mode The mode parameter specifies the type of access you require to the stream.
-     *
-     * @return SplFileObject
      */
     public function save(string $path, string $mode = 'w'): SplFileObject
     {
@@ -327,7 +308,6 @@ final class DataPath extends Path
      * This method MUST retain the state of the current instance, and return
      * an instance where the data part is base64 encoded
      *
-     * @return static
      */
     public function toBinary(): self
     {
@@ -345,13 +325,6 @@ final class DataPath extends Path
 
     /**
      * Format the DataURI string.
-     *
-     * @param string $mimetype
-     * @param string $parameters
-     * @param bool   $is_binary_data
-     * @param string $data
-     *
-     * @return string
      */
     private function formatComponent(
         string $mimetype,
@@ -404,11 +377,9 @@ final class DataPath extends Path
      *
      * An empty parameters value is equivalent to removing the parameter.
      *
-     * @param string $parameters The mediatype parameters to use with the new instance.
      *
      * @throws Exception for invalid query strings.
      *
-     * @return static A new instance with the specified mediatype parameters.
      */
     public function withParameters(string $parameters): self
     {

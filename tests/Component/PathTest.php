@@ -31,8 +31,6 @@ class PathTest extends TestCase
     /**
      * @dataProvider validPathEncoding
      *
-     * @param mixed $decoded
-     * @param mixed $encoded
      * @covers ::__construct
      * @covers ::validate
      * @covers ::decodeMatches
@@ -116,7 +114,6 @@ class PathTest extends TestCase
     /**
      * @dataProvider invalidPath
      *
-     * @param mixed $path
      */
     public function testConstructorThrowsWithInvalidData($path)
     {

@@ -95,12 +95,8 @@ abstract class Component implements ComponentInterface
 
     /**
      * Validate the component content.
-     *
-     * @param mixed $component
-     *
-     * @return string|null
      */
-    protected function validateComponent($component)
+    protected function validateComponent($component): ?string
     {
         $component = $this->filterComponent($component);
         if (null === $component) {
@@ -113,13 +109,9 @@ abstract class Component implements ComponentInterface
     /**
      * Filter the input component.
      *
-     * @param mixed $component
-     *
      * @throws MalformedUriComponent If the component can not be converted to a string or null
-     *
-     * @return null|string
      */
-    protected function filterComponent($component)
+    protected function filterComponent($component): ?string
     {
         if ($component instanceof ComponentInterface) {
             return $component->getContent();
@@ -145,20 +137,14 @@ abstract class Component implements ComponentInterface
      * Filter the URI password component.
      *
      * @param string $str
-     *
-     * @return string|null
      */
-    protected function decodeComponent(string $str = null)
+    protected function decodeComponent(string $str = null): ?string
     {
         return preg_replace_callback(self::REGEXP_ENCODED_CHARS, [$this, 'decodeMatches'], $str);
     }
 
     /**
      * Decodes Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
      */
     protected function decodeMatches(array $matches): string
     {
@@ -173,12 +159,8 @@ abstract class Component implements ComponentInterface
      * Returns the component as converted for RFC3986 or RFC1738.
      *
      * @param null|string $str
-     * @param int         $enc_type
-     * @param string      $regexp
-     *
-     * @return null|string
      */
-    protected function encodeComponent($str, int $enc_type, string $regexp)
+    protected function encodeComponent($str, int $enc_type, string $regexp): ?string
     {
         if (self::NO_ENCODING === $enc_type || null === $str || !preg_match(self::REGEXP_NO_ENCODING, $str)) {
             return $str;
@@ -189,10 +171,6 @@ abstract class Component implements ComponentInterface
 
     /**
      * Encode Matches sequence.
-     *
-     * @param array $matches
-     *
-     * @return string
      */
     protected function encodeMatches(array $matches): string
     {
@@ -202,7 +180,7 @@ abstract class Component implements ComponentInterface
     /**
      * {@inheritdoc}
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): ?string
     {
         return $this->getContent();
     }
@@ -210,12 +188,12 @@ abstract class Component implements ComponentInterface
     /**
      * {@inheritdoc}
      */
-    abstract public function getContent();
+    abstract public function getContent(): ?string;
 
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getContent();
     }

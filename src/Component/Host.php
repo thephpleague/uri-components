@@ -133,7 +133,7 @@ class Host extends Component
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return new static($properties['component']);
     }
@@ -141,7 +141,7 @@ class Host extends Component
     /**
      * @codeCoverageIgnore
      */
-    protected static function supportIdnHost()
+    protected static function supportIdnHost(): void
     {
         static $idn_support = null;
         $idn_support = $idn_support ?? function_exists('\idn_to_ascii') && defined('\INTL_IDNA_VARIANT_UTS46');
@@ -152,8 +152,7 @@ class Host extends Component
 
     /**
      * New instance.
-     *
-     * @param mixed $host
+     * @param null|mixed $host
      */
     public function __construct($host = null)
     {
@@ -164,11 +163,9 @@ class Host extends Component
     /**
      * Validates the submitted data.
      *
-     * @param null|string $host
-     *
      * @throws MalformedUriComponent If the host is invalid
      */
-    protected function parse(string $host = null)
+    protected function parse(string $host = null): void
     {
         $this->ip_version = null;
 
@@ -234,10 +231,6 @@ class Host extends Component
      * Retrieves and format IDNA conversion error message.
      *
      * @see http://icu-project.org/apiref/icu4j/com/ibm/icu/text/IDNA.Error.html
-     *
-     * @param int $error_byte
-     *
-     * @return string
      */
     protected function getIDNAErrors(int $error_byte): string
     {
@@ -275,10 +268,6 @@ class Host extends Component
      *
      * @see http://tools.ietf.org/html/rfc6874#section-2
      * @see http://tools.ietf.org/html/rfc6874#section-4
-     *
-     * @param string $host
-     *
-     * @return bool
      */
     protected function isValidIpv6Hostname(string $host): bool
     {
@@ -298,27 +287,23 @@ class Host extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         return $this->component;
     }
 
     /**
      * Returns the Host ascii representation.
-     *
-     * @return null|string
      */
-    public function toAscii()
+    public function toAscii(): ?string
     {
         return $this->getContent();
     }
 
     /**
      * Returns the Host unicode representation.
-     *
-     * @return null|string
      */
-    public function toUnicode()
+    public function toUnicode(): ?string
     {
         if (null !== $this->ip_version
             || null === $this->component

@@ -87,7 +87,6 @@ interface ComponentInterface extends JsonSerializable
      *
      * A null value is equivalent to removing the component content.
      *
-     * @param mixed $content
      *
      * @throws InvalidArgumentException for invalid component or transformations
      *                                  that would result in a object in invalid state.

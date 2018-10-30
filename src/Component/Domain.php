@@ -94,13 +94,9 @@ final class Domain extends Host implements Countable, IteratorAggregate
     /**
      * Returns a new instance from an array or a traversable object.
      *
-     * @param mixed $labels
-     *
      * @throws TypeError        If $labels is not iterable
      * @throws InvalidHostLabel If the labels are malformed
      * @throws UnknownType      If the type is not recognized/supported
-     *
-     * @return self
      */
     public static function createFromLabels($labels): self
     {
@@ -128,7 +124,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    protected function parse(string $host = null)
+    protected function parse(string $host = null): void
     {
         $this->component = $host;
 
@@ -178,7 +174,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function count()
+    public function count(): int
     {
         return count($this->labels);
     }
@@ -197,12 +193,8 @@ final class Domain extends Host implements Countable, IteratorAggregate
      * Retrieves a single host label.
      *
      * If the label offset has not been set, returns the null value.
-     *
-     * @param int $offset the label offset
-     *
-     * @return string|null
      */
-    public function get(int $offset)
+    public function get(int $offset): ?string
     {
         if ($offset < 0) {
             $offset += count($this->labels);
@@ -213,10 +205,6 @@ final class Domain extends Host implements Countable, IteratorAggregate
 
     /**
      * Returns the associated key for a specific label.
-     *
-     * @param string $label
-     *
-     * @return array
      */
     public function keys(string $label): array
     {
@@ -230,10 +218,6 @@ final class Domain extends Host implements Countable, IteratorAggregate
 
     /**
      * Prepends a label to the host.
-     *
-     * @param mixed $label
-     *
-     * @return self
      */
     public function prepend($label): self
     {
@@ -246,10 +230,6 @@ final class Domain extends Host implements Countable, IteratorAggregate
 
     /**
      * Appends a label to the host.
-     *
-     * @param mixed $label
-     *
-     * @return self
      */
     public function append($label): self
     {
@@ -264,8 +244,6 @@ final class Domain extends Host implements Countable, IteratorAggregate
      * Returns an instance with its Root label.
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * @return self
      */
     public function withRootLabel(): self
     {
@@ -280,8 +258,6 @@ final class Domain extends Host implements Countable, IteratorAggregate
      * Returns an instance without its Root label.
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * @return self
      */
     public function withoutRootLabel(): self
     {
@@ -304,12 +280,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
      * If $key is non-negative, the added label will be the label at $key position from the start.
      * If $key is negative, the added label will be the label at $key position from the end.
      *
-     * @param int   $key
-     * @param mixed $label
-     *
      * @throws InvalidKey If the key is invalid
-     *
-     * @return self
      */
     public function withLabel(int $key, $label): self
     {
@@ -354,12 +325,9 @@ final class Domain extends Host implements Countable, IteratorAggregate
      * If $key is non-negative, the removed label will be the label at $key position from the start.
      * If $key is negative, the removed label will be the label at $key position from the end.
      *
-     * @param int $key     required key to remove
-     * @param int ...$keys remaining keys to remove
+     * @param int ...$keys
      *
      * @throws InvalidKey If the key is invalid
-     *
-     * @return self
      */
     public function withoutLabel(int $key, int ...$keys): self
     {

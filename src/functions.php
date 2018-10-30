@@ -39,7 +39,6 @@ use function substr;
  *     - Psr\Http\Message\UriInterface
  *     - League\Uri\Interfaces\Uri
  *
- * @param mixed $uri
  *
  * @throws TypeError if the URI object does not implements the supported interfaces.
  *
@@ -57,8 +56,6 @@ function filter_uri($uri)
 /**
  * Add a new basepath to the URI path.
  *
- * @param mixed $uri
- * @param mixed $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -82,7 +79,6 @@ function add_basepath($uri, $path)
 /**
  * Add a leading slash to the URI path.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -99,7 +95,6 @@ function add_leading_slash($uri)
 /**
  * Add the root label to the URI.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -111,7 +106,6 @@ function add_root_label($uri)
 /**
  * Add a trailing slash to the URI path.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -128,8 +122,6 @@ function add_trailing_slash($uri)
 /**
  * Append a label or a host to the current URI host.
  *
- * @param mixed $uri
- * @param mixed $host
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -141,8 +133,6 @@ function append_host($uri, $host)
 /**
  * Append an new segment or a new path to the URI path.
  *
- * @param mixed  $uri
- * @param string $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -154,8 +144,6 @@ function append_path($uri, string $path)
 /**
  * Add the new query data to the existing URI query.
  *
- * @param mixed $uri
- * @param mixed $query
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -167,7 +155,6 @@ function append_query($uri, $query)
 /**
  * Convert the URI host part to its ascii value.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -179,7 +166,6 @@ function host_to_ascii($uri)
 /**
  * Convert the URI host part to its unicode value.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -191,7 +177,6 @@ function host_to_unicode($uri)
 /**
  * Convert the Data URI path to its ascii form.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -203,7 +188,6 @@ function datapath_to_ascii($uri)
 /**
  * Convert the Data URI path to its binary (base64encoded) form.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -215,8 +199,6 @@ function datapath_to_binary($uri)
 /**
  * Prepend a label or a host to the current URI host.
  *
- * @param mixed $uri
- * @param mixed $host
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -229,8 +211,6 @@ function prepend_host($uri, $host)
  * Prepend an new segment or a new path to the URI path.
  *
  *
- * @param mixed $uri
- * @param mixed $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -242,8 +222,6 @@ function prepend_path($uri, $path)
 /**
  * Remove a basepath from the URI path.
  *
- * @param mixed $uri
- * @param mixed $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -268,7 +246,6 @@ function remove_basepath($uri, $path)
 /**
  * Remove dot segments from the URI path.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -280,8 +257,6 @@ function remove_dot_segments($uri)
 /**
  * Merge a new query with the existing URI query.
  *
- * @param mixed $uri
- * @param mixed $query
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -296,8 +271,6 @@ function merge_query($uri, $query)
  * Make sure the path always has a leading slash if an authority is present
  * and the path is not the empty string.
  *
- * @param mixed       $uri
- * @param string|null $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -316,7 +289,6 @@ function normalize_path($uri, string $path = null)
 /**
  * Remove empty segments from the URI path.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -328,7 +300,6 @@ function remove_empty_segments($uri)
 /**
  * Remove host labels according to their offset.
  *
- * @param mixed $uri
  * @param int[] $keys
  *
  * @return Psr7UriInterface|UriInterface
@@ -341,7 +312,6 @@ function remove_labels($uri, array $keys)
 /**
  * Remove the leading slash from the URI path.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -358,7 +328,6 @@ function remove_leading_slash($uri)
 /**
  * Remove query data according to their key name.
  *
- * @param mixed    $uri
  * @param string[] $keys
  *
  * @return Psr7UriInterface|UriInterface
@@ -371,7 +340,6 @@ function remove_params($uri, array $keys)
 /**
  * Remove query data according to their key name.
  *
- * @param mixed    $uri
  * @param string[] $keys
  *
  * @return Psr7UriInterface|UriInterface
@@ -384,7 +352,6 @@ function remove_pairs($uri, array $keys)
 /**
  * Remove the root label to the URI.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -396,7 +363,6 @@ function remove_root_label($uri)
 /**
  * Remove the trailing slash from the URI path.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -413,7 +379,6 @@ function remove_trailing_slash($uri)
 /**
  * Remove path segments from the URI path according to their offsets.
  *
- * @param mixed $uri
  * @param int[] $keys
  *
  * @return Psr7UriInterface|UriInterface
@@ -426,7 +391,6 @@ function remove_segments($uri, array $keys)
 /**
  * Remove the host zone identifier.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -438,8 +402,6 @@ function remove_zone_id($uri)
 /**
  * Replace the URI path basename.
  *
- * @param mixed $uri
- * @param mixed $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -451,8 +413,6 @@ function replace_basename($uri, $path)
 /**
  * Replace the data URI path parameters.
  *
- * @param mixed  $uri
- * @param string $parameters
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -464,8 +424,6 @@ function replace_data_uri_parameters($uri, string $parameters)
 /**
  * Replace the URI path dirname.
  *
- * @param mixed $uri
- * @param mixed $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -477,8 +435,6 @@ function replace_dirname($uri, $path)
 /**
  * Replace the URI path basename extension.
  *
- * @param mixed $uri
- * @param mixed $extension
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -490,9 +446,6 @@ function replace_extension($uri, $extension)
 /**
  * Replace a label of the current URI host.
  *
- * @param mixed $uri
- * @param int   $offset
- * @param mixed $host
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -504,9 +457,6 @@ function replace_label($uri, int $offset, $host)
 /**
  * Replace a segment from the URI path according its offset.
  *
- * @param mixed $uri
- * @param int   $offset
- * @param mixed $path
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -518,7 +468,6 @@ function replace_segment($uri, int $offset, $path)
 /**
  * Sort the URI query by keys.
  *
- * @param mixed $uri
  *
  * @return Psr7UriInterface|UriInterface
  */

@@ -72,10 +72,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * Returns a new instance from the result of PHP's parse_str.
      *
-     * @param mixed  $params
-     * @param string $separator
      *
-     * @return self
      */
     public static function createFromParams($params, string $separator = '&'): self
     {
@@ -118,9 +115,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * Returns a new instance from the result of query_parse.
      *
      * @param Traversable|array $pairs
-     * @param string            $separator
-     *
-     * @return self
      */
     public static function createFromPairs($pairs, string $separator = '&'): self
     {
@@ -138,7 +132,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         $instance = new self();
         $instance->pairs = $properties['pairs'];
@@ -150,10 +144,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * Returns a new instance.
      *
-     * @param mixed  $query
-     * @param int    $enc_type
-     * @param string $separator
-     *
+     * @param  null|mixed $query
      * @return self
      */
     public function __construct($query = null, int $enc_type = PHP_QUERY_RFC3986, string $separator = '&')
@@ -165,11 +156,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * Filter the incoming separator.
      *
-     * @param string $separator
-     *
      * @throws MalformedUriComponent if the separator is invalid
-     *
-     * @return string
      */
     private function filterSeparator(string $separator): string
     {
@@ -182,8 +169,6 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Returns the query separator.
-     *
-     * @return string
      */
     public function getSeparator(): string
     {
@@ -192,20 +177,16 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Returns the RFC3986 encoded query.
-     *
-     * @return null|string
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         return query_build($this->pairs, $this->separator, PHP_QUERY_RFC3986);
     }
 
     /**
      * Returns the RFC1738 encoded query.
-     *
-     * @return null|string
      */
-    public function toRFC1738()
+    public function toRFC1738(): ?string
     {
         return query_build($this->pairs, $this->separator, PHP_QUERY_RFC1738);
     }
@@ -214,20 +195,16 @@ final class Query extends Component implements Countable, IteratorAggregate
      * Returns the RFC3986 encoded query.
      *
      * @see ::getContent
-     *
-     * @return null|string
      */
-    public function toRFC3986()
+    public function toRFC3986(): ?string
     {
         return $this->getContent();
     }
 
     /**
      * Returns the decoded query.
-     *
-     * @return null|string
      */
-    public function decoded()
+    public function decoded(): ?string
     {
         $query = $this->getContent();
         if (null === $query) {
@@ -240,17 +217,15 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): ?string
     {
         return $this->toRFC1738();
     }
 
     /**
      * Returns the number of key/value pairs present in the object.
-     *
-     * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->pairs);
     }
@@ -294,10 +269,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * Tell whether a parameter with a specific name exists.
      *
      * @see https://url.spec.whatwg.org/#dom-urlsearchparams-has
-     *
-     * @param string $key
-     *
-     * @return bool
      */
     public function has(string $key): bool
     {
@@ -310,10 +281,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * If no value is found null is returned
      *
      * @see https://url.spec.whatwg.org/#dom-urlsearchparams-get
-     *
-     * @param string $key
-     *
-     * @return mixed
      */
     public function get(string $key)
     {
@@ -333,10 +300,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * If no value is found an empty array is returned
      *
      * @see https://url.spec.whatwg.org/#dom-urlsearchparams-getall
-     *
-     * @param string $key
-     *
-     * @return array
      */
     public function getAll(string $key): array
     {
@@ -356,8 +319,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * @see http://php.net/parse_str
      * @see https://wiki.php.net/rfc/on_demand_name_mangling
-     *
-     * @return array
      */
     public function toParams(): array
     {
@@ -369,10 +330,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the query component with a different separator
-     *
-     * @param string $separator
-     *
-     * @return self
      */
     public function withSeparator(string $separator): self
     {
@@ -406,8 +363,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * an instance that contains the modified query
      *
      * @see https://url.spec.whatwg.org/#dom-urlsearchparams-sort
-     *
-     * @return self
      */
     public function sort(): self
     {
@@ -428,11 +383,6 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Reduce pairs to help sorting them according to their keys.
-     *
-     * @param array $pairs
-     * @param array $pair
-     *
-     * @return array
      */
     private function reducePairs(array $pairs, array $pair): array
     {
@@ -448,8 +398,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the query component normalized by removing
      * duplicate pairs whose key/value are the same.
-     *
-     * @return self
      */
     public function withoutDuplicates(): self
     {
@@ -470,11 +418,6 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Adds a query pair only if it is not already present in a given array.
-     *
-     * @param array $pairs
-     * @param array $pair
-     *
-     * @return array
      */
     private function removeDuplicates(array $pairs, array $pair): array
     {
@@ -493,8 +436,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * empty pairs.
      *
      * A pair is considered empty if its value is equal to the null value
-     *
-     * @return self
      */
     public function withoutEmptyPairs(): self
     {
@@ -511,10 +452,6 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Empty Pair filtering.
-     *
-     * @param array $pair
-     *
-     * @return bool
      */
     private function filterEmptyPair(array $pair): bool
     {
@@ -528,10 +465,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      * an instance that contains the query component normalized so that numeric indexes
      * are removed from the pair key value.
      *
-     *
      * ie.: toto[3]=bar[3]&foo=bar becomes toto[]=bar[3]&foo=bar
-     *
-     * @return self
      */
     public function withoutNumericIndices(): self
     {
@@ -548,10 +482,6 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Remove numeric indices from pairs.
-     *
-     * @param array $pair
-     *.
-     * @return array
      */
     private function encodeNumericIndices(array $pair): array
     {
@@ -571,11 +501,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * If the pair already exists the value will replace the existing value.
      *
      * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return self
      */
     public function withPair(string $key, $value): self
     {
@@ -596,11 +521,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * If there are any key/value pair whose kay is kay, in the list,
      * set the value of the first such key/value pair to value and remove the others.
      * Otherwise, append a new key/value pair whose key is key and value is value, to the list.
-     *
-     * @param array $list
-     * @param array $pair
-     *
-     * @return array
      */
     private function addPair(array $list, array $pair): array
     {
@@ -637,10 +557,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * an instance that contains the modified query
      *
      * @see ::withPair
-     *
-     * @param mixed $query
-     *
-     * @return self
      */
     public function merge($query): self
     {
@@ -668,11 +584,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * To be valid the pair must be the null value, a scalar or a collection of scalar and null values.
      *
-     * @param mixed $value
-     *
      * @throws TypeError if the value type is invalid
-     *
-     * @return mixed
      */
     private static function filterPair($value)
     {
@@ -699,8 +611,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * @param string $key     the first key to remove
      * @param string ...$keys the list of remaining keys to remove
-     *
-     * @return self
      */
     public function withoutPair(string $key, string ...$keys): self
     {
@@ -726,10 +636,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the modified query
      *
-     * @param string $key
-     * @param mixed  $value must be a scalar or the null value
-     *
-     * @return self
+     * @param mixed $value must be a scalar or the null value
      */
     public function appendTo(string $key, $value): self
     {
@@ -746,10 +653,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * an instance that contains the modified query
      *
      * If the pair already exists the value will be added to it.
-     *
-     * @param mixed $query
-     *
-     * @return self
      */
     public function append($query): self
     {
@@ -770,10 +673,6 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Empty Pair filtering.
-     *
-     * @param array $pair
-     *
-     * @return bool
      */
     private function filterEmptyValue(array $pair): bool
     {
@@ -787,10 +686,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      * an instance that contains the modified component without PHP's value.
      * PHP's mangled is not taken into account.
      *
-     * @param string $offset     the first offset to remove
-     * @param string ...$offsets the list of remaining offsets to remove
-     *
-     * @return self
+     * @param string ...$offsets
      */
     public function withoutParam(string $offset, string ...$offsets): self
     {
