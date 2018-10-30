@@ -35,7 +35,7 @@ class DomainTest extends TestCase
     public function testSetState()
     {
         $host = new Domain('uri.thephpleague.com');
-        $this->assertEquals($host, eval('return '.var_export($host, true).';'));
+        self::assertEquals($host, eval('return '.var_export($host, true).';'));
     }
 
     /**
@@ -44,7 +44,7 @@ class DomainTest extends TestCase
     public function testIterator()
     {
         $host = new Domain('uri.thephpleague.com');
-        $this->assertEquals(['com', 'thephpleague', 'uri'], iterator_to_array($host));
+        self::assertEquals(['com', 'thephpleague', 'uri'], iterator_to_array($host));
     }
 
     /**
@@ -55,9 +55,9 @@ class DomainTest extends TestCase
     public function testWithContent()
     {
         $host = new Domain('uri.thephpleague.com');
-        $this->assertSame($host, $host->withContent('uri.thephpleague.com'));
-        $this->assertSame($host, $host->withContent($host));
-        $this->assertNotSame($host, $host->withContent('csv.thephpleague.com'));
+        self::assertSame($host, $host->withContent('uri.thephpleague.com'));
+        self::assertSame($host, $host->withContent($host));
+        self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
     }
 
     /**
@@ -74,8 +74,8 @@ class DomainTest extends TestCase
     public function testValidDomain($host, $uri, $iri)
     {
         $host = new Domain($host);
-        $this->assertSame($uri, $host->getContent());
-        $this->assertSame($iri, $host->toUnicode());
+        self::assertSame($uri, $host->getContent());
+        self::assertSame($iri, $host->toUnicode());
     }
 
     public function validDomainProvider()
@@ -138,7 +138,7 @@ class DomainTest extends TestCase
      */
     public function testInvalidDomain($invalid)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Domain($invalid);
     }
 
@@ -169,7 +169,7 @@ class DomainTest extends TestCase
 
     public function testTypeErrorOnDomainConstruction()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new Domain(date_create());
     }
 
@@ -181,7 +181,7 @@ class DomainTest extends TestCase
      */
     public function testIsAbsolute($raw, $expected)
     {
-        $this->assertSame($expected, (new Domain($raw))->isAbsolute());
+        self::assertSame($expected, (new Domain($raw))->isAbsolute());
     }
 
     public function isAbsoluteProvider()
@@ -204,8 +204,8 @@ class DomainTest extends TestCase
     public function testValidUnicodeDomain($unicode, $ascii)
     {
         $host = new Domain($unicode);
-        $this->assertSame($ascii, $host->toAscii());
-        $this->assertSame($unicode, $host->toUnicode());
+        self::assertSame($ascii, $host->toAscii());
+        self::assertSame($unicode, $host->toUnicode());
     }
 
     public function hostnamesProvider()
@@ -245,7 +245,7 @@ class DomainTest extends TestCase
      */
     public function testCountable($host, $nblabels, $array)
     {
-        $this->assertCount($nblabels, new Domain($host));
+        self::assertCount($nblabels, new Domain($host));
     }
 
     public function countableProvider()
@@ -268,7 +268,7 @@ class DomainTest extends TestCase
      */
     public function testCreateFromLabels($input, $expected)
     {
-        $this->assertSame($expected, (string) Domain::createFromLabels($input));
+        self::assertSame($expected, (string) Domain::createFromLabels($input));
     }
 
     public function createFromLabelsValid()
@@ -288,7 +288,7 @@ class DomainTest extends TestCase
      */
     public function testcreateFromLabelsFailedWithInvalidInput()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         Domain::createFromLabels(date_create());
     }
 
@@ -297,7 +297,7 @@ class DomainTest extends TestCase
      */
     public function testcreateFromLabelsFailedWithInvalidArrayInput()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         Domain::createFromLabels([date_create()]);
     }
 
@@ -307,10 +307,10 @@ class DomainTest extends TestCase
     public function testGet()
     {
         $host = new Domain('master.example.com');
-        $this->assertSame('com', $host->get(0));
-        $this->assertSame('example', $host->get(1));
-        $this->assertSame('master', $host->get(-1));
-        $this->assertNull($host->get(23));
+        self::assertSame('com', $host->get(0));
+        self::assertSame('example', $host->get(1));
+        self::assertSame('master', $host->get(-1));
+        self::assertNull($host->get(23));
     }
 
     /**
@@ -319,7 +319,7 @@ class DomainTest extends TestCase
     public function testOffsets()
     {
         $host = new Domain('master.example.com');
-        $this->assertSame([2], $host->keys('master'));
+        self::assertSame([2], $host->keys('master'));
     }
 
     /**
@@ -331,7 +331,7 @@ class DomainTest extends TestCase
      */
     public function testWithout($host, $without, $res)
     {
-        $this->assertSame($res, (string) (new Domain($host))->withoutLabel($without));
+        self::assertSame($res, (string) (new Domain($host))->withoutLabel($without));
     }
 
     public function withoutProvider()
@@ -349,7 +349,7 @@ class DomainTest extends TestCase
      */
     public function testWithoutTriggersException()
     {
-        $this->expectException(InvalidKey::class);
+        self::expectException(InvalidKey::class);
         (new Domain('bébé.be'))->withoutLabel(-23);
     }
 
@@ -364,7 +364,7 @@ class DomainTest extends TestCase
      */
     public function testPrepend($raw, $prepend, $expected)
     {
-        $this->assertSame($expected, (string) (new Domain($raw))->prepend($prepend));
+        self::assertSame($expected, (string) (new Domain($raw))->prepend($prepend));
     }
 
     public function validPrepend()
@@ -381,7 +381,7 @@ class DomainTest extends TestCase
      */
     public function testPrependIpFailed()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         (new Domain('secure.example.com'))->prepend(new Domain('master.'));
     }
 
@@ -396,7 +396,7 @@ class DomainTest extends TestCase
      */
     public function testAppend($raw, $append, $expected)
     {
-        $this->assertSame($expected, (string) (new Domain($raw))->append($append));
+        self::assertSame($expected, (string) (new Domain($raw))->append($append));
     }
 
     public function validAppend()
@@ -414,7 +414,7 @@ class DomainTest extends TestCase
      */
     public function testAppendIpFailed()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         (new Domain('secure.example.com.'))->append('master');
     }
 
@@ -430,7 +430,7 @@ class DomainTest extends TestCase
      */
     public function testReplace($raw, $input, $offset, $expected)
     {
-        $this->assertSame($expected, (string) (new Domain($raw))->withLabel($offset, $input));
+        self::assertSame($expected, (string) (new Domain($raw))->withLabel($offset, $input));
     }
 
     public function replaceValid()
@@ -453,7 +453,7 @@ class DomainTest extends TestCase
      */
     public function testReplaceIpMustFailed()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         (new Domain('secure.example.com'))->withLabel(2, '[::1]');
     }
 
@@ -463,7 +463,7 @@ class DomainTest extends TestCase
      */
     public function testReplaceMustFailed()
     {
-        $this->expectException(InvalidKey::class);
+        self::expectException(InvalidKey::class);
         (new Domain('secure.example.com'))->withLabel(23, 'foo');
     }
 
@@ -478,8 +478,8 @@ class DomainTest extends TestCase
     public function testWithRoot($host, $expected_with_root, $expected_without_root)
     {
         $host = new Domain($host);
-        $this->assertSame($expected_with_root, (string) $host->withRootLabel());
-        $this->assertSame($expected_without_root, (string) $host->withoutRootLabel());
+        self::assertSame($expected_with_root, (string) $host->withRootLabel());
+        self::assertSame($expected_without_root, (string) $host->withoutRootLabel());
     }
 
     public function rootProvider()

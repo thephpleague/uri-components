@@ -61,7 +61,7 @@ class HostModifierTest extends TestCase
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
-        $this->assertSame($prepend, prepend_host($this->uri, $label)->getHost());
+        self::assertSame($prepend, prepend_host($this->uri, $label)->getHost());
     }
 
     /**
@@ -77,7 +77,7 @@ class HostModifierTest extends TestCase
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
-        $this->assertSame($append, append_host($this->uri, $label)->getHost());
+        self::assertSame($append, append_host($this->uri, $label)->getHost());
     }
 
     /**
@@ -93,7 +93,7 @@ class HostModifierTest extends TestCase
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
-        $this->assertSame($replace, replace_label($this->uri, $key, $label)->getHost());
+        self::assertSame($replace, replace_label($this->uri, $key, $label)->getHost());
     }
 
     public function validHostProvider()
@@ -110,7 +110,7 @@ class HostModifierTest extends TestCase
     public function testHostToAsciiProcess()
     {
         $uri = Http::createFromString('http://مثال.إختبار/where/to/go');
-        $this->assertSame(
+        self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
             (string) host_to_ascii($uri)
         );
@@ -123,7 +123,7 @@ class HostModifierTest extends TestCase
     {
         $uri = new ZendUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
         $expected = 'http://مثال.إختبار/where/to/go';
-        $this->assertSame($expected, (string) host_to_unicode($uri));
+        self::assertSame($expected, (string) host_to_unicode($uri));
     }
 
     /**
@@ -132,7 +132,7 @@ class HostModifierTest extends TestCase
     public function testWithoutZoneIdentifierProcess()
     {
         $uri = Http::createFromString('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
-        $this->assertSame(
+        self::assertSame(
             'http://[fe80::1234]/path/to/the/sky.php',
             (string) remove_zone_id($uri)
         );
@@ -148,7 +148,7 @@ class HostModifierTest extends TestCase
      */
     public function testwithoutLabelProcess(array $keys, string $expected)
     {
-        $this->assertSame($expected, remove_labels($this->uri, $keys)->getHost());
+        self::assertSame($expected, remove_labels($this->uri, $keys)->getHost());
     }
 
     public function validwithoutLabelProvider()
@@ -163,7 +163,7 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveLabels()
     {
-        $this->assertSame('example.com', remove_labels($this->uri, [2])->getHost());
+        self::assertSame('example.com', remove_labels($this->uri, [2])->getHost());
     }
 
     /**
@@ -175,7 +175,7 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveLabelsFailedConstructor(array $params)
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         remove_labels($this->uri, $params);
     }
 
@@ -191,7 +191,7 @@ class HostModifierTest extends TestCase
      */
     public function testAddRootLabel()
     {
-        $this->assertSame('www.example.com.', add_root_label($this->uri)->getHost());
+        self::assertSame('www.example.com.', add_root_label($this->uri)->getHost());
     }
 
     /**
@@ -199,6 +199,6 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveRootLabel()
     {
-        $this->assertSame('www.example.com', remove_root_label($this->uri)->getHost());
+        self::assertSame('www.example.com', remove_root_label($this->uri)->getHost());
     }
 }

@@ -58,10 +58,10 @@ class UserInfoTest extends TestCase
         $rfc1738_str
     ) {
         $userinfo = new UserInfo($user, $pass);
-        $this->assertSame($expected_user, $userinfo->getUser());
-        $this->assertSame($expected_pass, $userinfo->getPass());
-        $this->assertSame($expected_str, (string) $userinfo);
-        $this->assertSame($iri_str, $userinfo->decoded());
+        self::assertSame($expected_user, $userinfo->getUser());
+        self::assertSame($expected_pass, $userinfo->getPass());
+        self::assertSame($expected_str, (string) $userinfo);
+        self::assertSame($iri_str, $userinfo->decoded());
     }
 
     public function userInfoProvider()
@@ -176,9 +176,9 @@ class UserInfoTest extends TestCase
     public function testWithContent($user, $str, $expected_user, $expected_pass, $expected_str)
     {
         $conn = (new UserInfo($user))->withContent($str);
-        $this->assertSame($expected_user, $conn->getUser());
-        $this->assertSame($expected_pass, $conn->getPass());
-        $this->assertSame($expected_str, (string) $conn);
+        self::assertSame($expected_user, $conn->getUser());
+        self::assertSame($expected_pass, $conn->getPass());
+        self::assertSame($expected_str, (string) $conn);
     }
 
     public function createFromStringProvider()
@@ -203,10 +203,10 @@ class UserInfoTest extends TestCase
     public function testWithContentReturnSameInstance()
     {
         $conn = new UserInfo();
-        $this->assertEquals($conn, $conn->withContent(':pass'));
+        self::assertEquals($conn, $conn->withContent(':pass'));
 
         $conn = new UserInfo('user', 'pass');
-        $this->assertSame($conn, $conn->withContent('user:pass'));
+        self::assertSame($conn, $conn->withContent('user:pass'));
     }
 
     /**
@@ -216,7 +216,7 @@ class UserInfoTest extends TestCase
     {
         $conn = new UserInfo('user', 'pass');
         $generateConn = eval('return '.var_export($conn, true).';');
-        $this->assertEquals($conn, $generateConn);
+        self::assertEquals($conn, $generateConn);
     }
 
     /**
@@ -229,7 +229,7 @@ class UserInfoTest extends TestCase
      */
     public function testWithUserInfo($user, $pass, $expected)
     {
-        $this->assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
+        self::assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
     }
 
     public function withUserInfoProvider()
@@ -249,7 +249,7 @@ class UserInfoTest extends TestCase
      */
     public function testGetPassThrowsInvalidUriComponentException()
     {
-        $this->expectException(UnknownEncoding::class);
+        self::expectException(UnknownEncoding::class);
         (new UserInfo())->getPass(-1);
     }
 
@@ -258,19 +258,19 @@ class UserInfoTest extends TestCase
      */
     public function testWithContentThrowsInvalidUriComponentException()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         (new UserInfo())->withContent(date_create());
     }
 
     public function testConstructorThrowsTypeError()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new UserInfo(date_create());
     }
 
     public function testConstructorThrowsException()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new UserInfo("\0");
     }
 }

@@ -33,7 +33,7 @@ class HostTest extends TestCase
     public function testSetState()
     {
         $host = new Host('uri.thephpleague.com');
-        $this->assertEquals($host, eval('return '.var_export($host, true).';'));
+        self::assertEquals($host, eval('return '.var_export($host, true).';'));
     }
 
     /**
@@ -45,9 +45,9 @@ class HostTest extends TestCase
     public function testWithContent()
     {
         $host = new Host('uri.thephpleague.com');
-        $this->assertSame($host, $host->withContent('uri.thephpleague.com'));
-        $this->assertSame($host, $host->withContent($host));
-        $this->assertNotSame($host, $host->withContent('csv.thephpleague.com'));
+        self::assertSame($host, $host->withContent('uri.thephpleague.com'));
+        self::assertSame($host, $host->withContent($host));
+        self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
     }
 
     /**
@@ -64,7 +64,7 @@ class HostTest extends TestCase
     public function testValidHost($host, $uri, $iri)
     {
         $host = new Host($host);
-        $this->assertSame($iri, $host->toUnicode());
+        self::assertSame($iri, $host->toUnicode());
     }
 
     public function validHostProvider()
@@ -152,7 +152,7 @@ class HostTest extends TestCase
      */
     public function testInvalidHost($invalid)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Host($invalid);
     }
 
@@ -180,7 +180,7 @@ class HostTest extends TestCase
 
     public function testTypeErrorOnHostConstruction()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new Host(date_create());
     }
 
@@ -196,8 +196,8 @@ class HostTest extends TestCase
     public function testValidUnicodeHost($unicode, $ascii)
     {
         $host = new Host($unicode);
-        $this->assertSame($ascii, $host->toAscii());
-        $this->assertSame($unicode, $host->toUnicode());
+        self::assertSame($ascii, $host->toAscii());
+        self::assertSame($unicode, $host->toUnicode());
     }
 
     public function hostnamesProvider()

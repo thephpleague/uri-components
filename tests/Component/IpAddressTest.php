@@ -33,7 +33,7 @@ class IpAddressTest extends TestCase
     public function testSetState()
     {
         $host = new IpAddress('[::1]');
-        $this->assertEquals($host, eval('return '.var_export($host, true).';'));
+        self::assertEquals($host, eval('return '.var_export($host, true).';'));
     }
 
     /**
@@ -45,9 +45,9 @@ class IpAddressTest extends TestCase
     public function testWithContent()
     {
         $host = new IpAddress('127.0.0.1');
-        $this->assertSame($host, $host->withContent('127.0.0.1'));
-        $this->assertSame($host, $host->withContent($host));
-        $this->assertNotSame($host, $host->withContent('[::1]'));
+        self::assertSame($host, $host->withContent('127.0.0.1'));
+        self::assertSame($host, $host->withContent($host));
+        self::assertNotSame($host, $host->withContent('[::1]'));
     }
 
     /**
@@ -76,12 +76,12 @@ class IpAddressTest extends TestCase
     public function testValidIpAddress($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
     {
         $host = new IpAddress($host);
-        $this->assertSame($isIp, $host->isIp());
-        $this->assertSame($isIpv4, $host->isIpv4());
-        $this->assertSame($isIpv6, $host->isIpv6());
-        $this->assertSame($isIpFuture, $host->isIpFuture());
-        $this->assertSame($ip, $host->getIp());
-        $this->assertSame($ipVersion, $host->getIpVersion());
+        self::assertSame($isIp, $host->isIp());
+        self::assertSame($isIpv4, $host->isIpv4());
+        self::assertSame($isIpv6, $host->isIpv6());
+        self::assertSame($isIpFuture, $host->isIpFuture());
+        self::assertSame($ip, $host->getIp());
+        self::assertSame($ipVersion, $host->getIpVersion());
     }
 
     public function validIpAddressProvider()
@@ -157,7 +157,7 @@ class IpAddressTest extends TestCase
      */
     public function testInvalidIpAddress($invalid)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new IpAddress($invalid);
     }
 
@@ -188,7 +188,7 @@ class IpAddressTest extends TestCase
 
     public function testTypeErrorOnIpAddressConstruction()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new IpAddress(date_create());
     }
 
@@ -201,7 +201,7 @@ class IpAddressTest extends TestCase
      */
     public function testCreateFromIp($input, $version, $expected)
     {
-        $this->assertSame($expected, (string) IpAddress::createFromIp($input, $version));
+        self::assertSame($expected, (string) IpAddress::createFromIp($input, $version));
     }
 
     public function createFromIpValid()
@@ -223,7 +223,7 @@ class IpAddressTest extends TestCase
      */
     public function testCreateFromIpFailed($input)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         IpAddress::createFromIp($input);
     }
 
@@ -244,7 +244,7 @@ class IpAddressTest extends TestCase
      */
     public function testWithoutZoneIdentifier($host, $expected)
     {
-        $this->assertSame($expected, (string) (new IpAddress($host))->withoutZoneIdentifier());
+        self::assertSame($expected, (string) (new IpAddress($host))->withoutZoneIdentifier());
     }
 
     public function withoutZoneIdentifierProvider()
@@ -265,7 +265,7 @@ class IpAddressTest extends TestCase
      */
     public function testHasZoneIdentifier($host, $expected)
     {
-        $this->assertSame($expected, (new IpAddress($host))->hasZoneIdentifier());
+        self::assertSame($expected, (new IpAddress($host))->hasZoneIdentifier());
     }
 
     public function hasZoneIdentifierProvider()

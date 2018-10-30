@@ -32,7 +32,7 @@ class PortTest extends TestCase
      */
     public function testPortSetter()
     {
-        $this->assertSame('443', (new Port(443))->__toString());
+        self::assertSame('443', (new Port(443))->__toString());
     }
 
     /**
@@ -43,7 +43,7 @@ class PortTest extends TestCase
     {
         $component = new Port(42);
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     /**
@@ -57,8 +57,8 @@ class PortTest extends TestCase
      */
     public function testToInt($input, $expected, $string_expected)
     {
-        $this->assertSame($expected, (new Port($input))->toInt());
-        $this->assertSame($string_expected, (new Port($input))->getContent());
+        self::assertSame($expected, (new Port($input))->toInt());
+        self::assertSame($string_expected, (new Port($input))->getContent());
     }
 
     public function getToIntProvider()
@@ -79,13 +79,13 @@ class PortTest extends TestCase
 
     public function testFailedPortTypeError()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new Port(date_create());
     }
 
     public function testFailedPortException()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Port(-1);
     }
 
@@ -95,7 +95,7 @@ class PortTest extends TestCase
     public function testWithContent()
     {
         $port = new Port(23);
-        $this->assertSame($port, $port->withContent('23'));
-        $this->assertNotSame($port, $port->withContent('42'));
+        self::assertSame($port, $port->withContent('23'));
+        self::assertNotSame($port, $port->withContent('42'));
     }
 }
