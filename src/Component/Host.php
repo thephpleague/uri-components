@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -20,6 +20,38 @@ namespace League\Uri\Component;
 
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\MalformedUriComponent;
+use function defined;
+use function explode;
+use function filter_var;
+use function function_exists;
+use function idn_to_ascii;
+use function idn_to_utf8;
+use function implode;
+use function in_array;
+use function inet_pton;
+use function preg_match;
+use function rawurldecode;
+use function sprintf;
+use function strpos;
+use function strtolower;
+use function substr;
+use const FILTER_FLAG_IPV4;
+use const FILTER_FLAG_IPV6;
+use const FILTER_VALIDATE_IP;
+use const IDNA_ERROR_BIDI;
+use const IDNA_ERROR_CONTEXTJ;
+use const IDNA_ERROR_DISALLOWED;
+use const IDNA_ERROR_DOMAIN_NAME_TOO_LONG;
+use const IDNA_ERROR_EMPTY_LABEL;
+use const IDNA_ERROR_HYPHEN_3_4;
+use const IDNA_ERROR_INVALID_ACE_LABEL;
+use const IDNA_ERROR_LABEL_HAS_DOT;
+use const IDNA_ERROR_LABEL_TOO_LONG;
+use const IDNA_ERROR_LEADING_COMBINING_MARK;
+use const IDNA_ERROR_LEADING_HYPHEN;
+use const IDNA_ERROR_PUNYCODE;
+use const IDNA_ERROR_TRAILING_HYPHEN;
+use const INTL_IDNA_VARIANT_UTS46;
 
 /**
  * Value object representing a URI Host component.
@@ -235,7 +267,7 @@ class Host extends Component
             }
         }
 
-        return empty($res) ? 'Unknown IDNA conversion error.' : implode(', ', $res).'.';
+        return [] === $res ? 'Unknown IDNA conversion error.' : implode(', ', $res).'.';
     }
 
     /**

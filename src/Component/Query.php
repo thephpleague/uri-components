@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -25,9 +25,32 @@ use League\Uri\ComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use Traversable;
 use TypeError;
+use function array_column;
+use function array_count_values;
+use function array_filter;
+use function array_flip;
+use function array_intersect;
+use function array_map;
+use function array_merge;
+use function array_values;
+use function count;
+use function http_build_query;
+use function implode;
+use function is_array;
+use function is_object;
+use function is_scalar;
+use function iterator_to_array;
 use function League\Uri\query_build;
 use function League\Uri\query_extract;
 use function League\Uri\query_parse;
+use function method_exists;
+use function preg_match;
+use function preg_quote;
+use function preg_replace;
+use function rawurldecode;
+use function sprintf;
+use const PHP_QUERY_RFC1738;
+use const PHP_QUERY_RFC3986;
 
 final class Query extends Component implements Countable, IteratorAggregate
 {
@@ -80,7 +103,7 @@ final class Query extends Component implements Countable, IteratorAggregate
             throw new TypeError(sprintf('The parameter is expected to be an array or an Object `%s` given', gettype($params)));
         }
 
-        if (empty($params)) {
+        if ([] === $params) {
             return new self(null, PHP_QUERY_RFC3986, $separator);
         }
 
@@ -317,7 +340,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function getAll(string $key): array
     {
-        $filter = function (array $pair) use ($key): bool {
+        $filter = static function (array $pair) use ($key): bool {
             return $key === $pair[0];
         };
 
@@ -582,7 +605,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     private function addPair(array $list, array $pair): array
     {
         $found = false;
-        $reducer = function (array $pairs, array $srcPair) use ($pair, &$found): array {
+        $reducer = static function (array $pairs, array $srcPair) use ($pair, &$found): array {
             if ($pair[0] !== $srcPair[0]) {
                 $pairs[] = $srcPair;
 
@@ -683,11 +706,11 @@ final class Query extends Component implements Countable, IteratorAggregate
     {
         $keys[] = $key;
         $keys_to_remove = array_intersect($keys, array_column($this->pairs, 0));
-        if (empty($keys_to_remove)) {
+        if ([] === $keys_to_remove) {
             return $this;
         }
 
-        $filter = function (array $pair) use ($keys_to_remove): bool {
+        $filter = static function (array $pair) use ($keys_to_remove): bool {
             return !in_array($pair[0], $keys_to_remove, true);
         };
 
@@ -772,12 +795,12 @@ final class Query extends Component implements Countable, IteratorAggregate
     public function withoutParam(string $offset, string ...$offsets): self
     {
         $offsets[] = $offset;
-        $mapper = function (string $offset): string {
+        $mapper = static function (string $offset): string {
             return preg_quote($offset, ',').'(\[.*\].*)?';
         };
 
         $regexp = ',^('.implode('|', array_map($mapper, $offsets)).')?$,';
-        $filter = function (array $pair) use ($regexp): bool {
+        $filter = static function (array $pair) use ($regexp): bool {
             return !preg_match($regexp, $pair[0]);
         };
 

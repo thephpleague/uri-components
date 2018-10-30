@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -26,6 +26,30 @@ use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use Traversable;
 use TypeError;
+use function array_count_values;
+use function array_filter;
+use function array_keys;
+use function array_pop;
+use function array_unshift;
+use function count;
+use function dirname;
+use function end;
+use function explode;
+use function implode;
+use function is_array;
+use function is_scalar;
+use function iterator_to_array;
+use function ltrim;
+use function method_exists;
+use function rtrim;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function strrpos;
+use function substr;
+use const ARRAY_FILTER_USE_KEY;
+use const FILTER_VALIDATE_INT;
+use const PATHINFO_EXTENSION;
 
 final class HierarchicalPath extends Path implements Countable, IteratorAggregate
 {
@@ -54,7 +78,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
         if (!isset($type_list[$type])) {
-            throw new UnknownType(sprintf('"%s" is an invalid or unsupported %s type', $type, __CLASS__));
+            throw new UnknownType(sprintf('"%s" is an invalid or unsupported %s type', $type, self::class));
         }
 
         if ($segments instanceof Traversable) {
@@ -309,7 +333,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         $deleted_keys = array_keys(array_count_values($deleted_keys));
-        $filter = function ($key) use ($deleted_keys): bool {
+        $filter = static function ($key) use ($deleted_keys): bool {
             return !in_array($key, $deleted_keys, true);
         };
 

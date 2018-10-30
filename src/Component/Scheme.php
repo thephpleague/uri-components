@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -19,6 +19,9 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Exception\MalformedUriComponent;
+use function preg_match;
+use function sprintf;
+use function strtolower;
 
 final class Scheme extends Component
 {

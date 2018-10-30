@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -26,6 +26,29 @@ use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use Traversable;
 use TypeError;
+use function array_count_values;
+use function array_filter;
+use function array_keys;
+use function array_pop;
+use function array_reverse;
+use function array_shift;
+use function array_unshift;
+use function count;
+use function explode;
+use function idn_to_ascii;
+use function implode;
+use function is_array;
+use function is_scalar;
+use function iterator_to_array;
+use function method_exists;
+use function preg_match;
+use function rawurldecode;
+use function reset;
+use function sprintf;
+use function strtolower;
+use const FILTER_FLAG_IPV4;
+use const FILTER_VALIDATE_IP;
+use const INTL_IDNA_VARIANT_UTS46;
 
 /**
  * Value object representing a URI Host component.
@@ -354,7 +377,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
         unset($key);
 
         $deleted_keys = array_keys(array_count_values($keys));
-        $filter = function ($key) use ($deleted_keys): bool {
+        $filter = static function ($key) use ($deleted_keys): bool {
             return !in_array($key, $deleted_keys, true);
         };
 
