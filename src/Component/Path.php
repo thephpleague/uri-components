@@ -74,8 +74,6 @@ class Path extends Component
 
     /**
      * Further parse the path component if needed.
-     *
-     * @throws InvalidUriComponent if the parsing fails
      */
     protected function parse(): void
     {
@@ -84,7 +82,7 @@ class Path extends Component
     /**
      * Validate the component content.
      *
-     * @throws Exception if the component is no valid
+     * @throws TypeError if the component is no valid
      */
     protected function validate($path): string
     {
@@ -211,8 +209,6 @@ class Path extends Component
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a trailing slash
      *
-     * @throws Exception for transformations that would result in a invalid object.
-     *
      * @return static
      */
     public function withTrailingSlash()
@@ -225,8 +221,6 @@ class Path extends Component
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a trailing slash
-     *
-     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */
@@ -241,8 +235,6 @@ class Path extends Component
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a leading slash
      *
-     * @throws Exception for transformations that would result in a invalid object.
-     *
      * @return static
      */
     public function withLeadingSlash()
@@ -255,8 +247,6 @@ class Path extends Component
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a leading slash
-     *
-     * @throws Exception for transformations that would result in a invalid object.
      *
      * @return static
      */
