@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -18,9 +18,25 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use finfo;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\PathNotFound;
 use SplFileObject;
+use function base64_decode;
+use function base64_encode;
+use function count;
+use function explode;
+use function file_exists;
+use function file_get_contents;
+use function implode;
+use function preg_match;
+use function preg_replace_callback;
+use function rawurldecode;
+use function rawurlencode;
+use function sprintf;
+use function str_replace;
+use function strlen;
+use function strtolower;
 
 final class DataPath extends Path
 {
@@ -101,7 +117,7 @@ final class DataPath extends Path
         }
 
         return new static(
-            str_replace(' ', '', (new \finfo(FILEINFO_MIME))->file($path))
+            str_replace(' ', '', (new finfo(FILEINFO_MIME))->file($path))
             .';base64,'.base64_encode(file_get_contents($path))
         );
     }
@@ -185,7 +201,7 @@ final class DataPath extends Path
         }
 
         $params = array_filter(explode(';', $parameters));
-        if (!empty(array_filter($params, [$this, 'validateParameter']))) {
+        if ([] !== array_filter($params, [$this, 'validateParameter'])) {
             throw new MalformedUriComponent(sprintf('invalid mediatype parameters, `%s`', $parameters));
         }
 

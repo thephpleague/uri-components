@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -56,7 +56,7 @@ final class Fragment extends Component
      */
     public function getContent()
     {
-        return $this->encodeComponent($this->component, PHP_QUERY_RFC3986, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
+        return $this->encodeComponent($this->component, self::RFC3986_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
     }
 
     /**
@@ -66,7 +66,7 @@ final class Fragment extends Component
      */
     public function decoded()
     {
-        return $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
+        return $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
     }
 
     /**

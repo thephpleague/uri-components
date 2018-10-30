@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -18,7 +18,6 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\UserInfo;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -36,7 +35,6 @@ class UserInfoTest extends TestCase
      * @param string|null $expected_pass
      * @param string      $expected_str
      * @param string      $iri_str
-     * @param string      $rfc1738_str
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::getContent
@@ -54,8 +52,7 @@ class UserInfoTest extends TestCase
         $expected_user,
         $expected_pass,
         $expected_str,
-        $iri_str,
-        $rfc1738_str
+        $iri_str
     ) {
         $userinfo = new UserInfo($user, $pass);
         self::assertSame($expected_user, $userinfo->getUser());
@@ -74,7 +71,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'pass',
                 'expected_str' => 'login:pass',
                 'iri_str' => 'login:pass',
-                'rfc1738_str' => 'login:pass',
             ],
             [
                 'user' => 'login',
@@ -83,7 +79,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'pass',
                 'expected_str' => 'login:pass',
                 'iri_str' => 'login:pass',
-                'rfc1738_str' => 'login:pass',
             ],
             [
                 'user' => 'login%61',
@@ -92,7 +87,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'pass',
                 'expected_str' => 'login%61:pass',
                 'iri_str' => 'login%61:pass',
-                'rfc1738_str' => 'login%61:pass',
             ],
             [
                 'user' => 'login',
@@ -101,7 +95,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => 'login',
                 'iri_str' => 'login',
-                'rfc1738_str' => 'login',
             ],
             [
                 'user' => null,
@@ -110,7 +103,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => null,
-                'rfc1738_str' => null,
             ],
             [
                 'user' => '',
@@ -119,7 +111,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => '',
-                'rfc1738_str' => '',
             ],
             [
                 'user' => '',
@@ -128,7 +119,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => '',
-                'rfc1738_str' => '',
             ],
             [
                 'user' => null,
@@ -137,16 +127,14 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => null,
-                'rfc1738_str' => null,
             ],
             [
                 'user' => 'foò',
                 'pass' => 'bar',
-                'expected_user' => 'fo%C3%B2',
+                'expected_user' => 'foò',
                 'expected_pass' => 'bar',
                 'expected_str' => 'fo%C3%B2:bar',
                 'iri_str' => 'foò:bar',
-                'rfc1738_str' => 'fo%C3%B2:bar',
             ],
             [
                 'user' => 'fo+o',
@@ -155,7 +143,6 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'ba+r',
                 'expected_str' => 'fo+o:ba+r',
                 'iri_str' => 'fo+o:ba+r',
-                'rfc1738_str' => 'fo%2Bo:ba%2Br',
             ],
 
         ];
@@ -190,7 +177,7 @@ class UserInfoTest extends TestCase
             'no login but has password' => [null, ':pass', '', null, ''],
             'empty all' => [null, '', '', null, ''],
             'null content' => [null, null, null, null, ''],
-            'encoded chars' => [null, 'foo%40bar:bar%40foo', 'foo%40bar', 'bar%40foo', 'foo%40bar:bar%40foo'],
+            'encoded chars' => [null, 'foo%40bar:bar%40foo', 'foo@bar', 'bar@foo', 'foo%40bar:bar%40foo'],
             'component interface' => [null, new UserInfo('user', 'pass'), 'user', 'pass', 'user:pass'],
             'reset object' => ['login', new UserInfo(null), null, null, ''],
         ];
@@ -241,16 +228,6 @@ class UserInfoTest extends TestCase
             'no login but has password' => ['', 'pass', ''],
             'empty all' => ['', '', ''],
         ];
-    }
-
-    /**
-     * @covers ::getPass
-     * @covers ::encodeComponent
-     */
-    public function testGetPassThrowsInvalidUriComponentException()
-    {
-        self::expectException(UnknownEncoding::class);
-        (new UserInfo())->getPass(-1);
     }
 
     /**

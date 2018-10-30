@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -19,6 +19,19 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Exception\MalformedUriComponent;
+use function explode;
+use function filter_var;
+use function in_array;
+use function preg_match;
+use function preg_replace;
+use function rawurldecode;
+use function rawurlencode;
+use function sprintf;
+use function strpos;
+use function substr;
+use const FILTER_FLAG_IPV4;
+use const FILTER_FLAG_IPV6;
+use const FILTER_VALIDATE_IP;
 
 /**
  * Value object representing a URI Host component.

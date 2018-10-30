@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -18,22 +18,10 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use function explode;
+
 final class UserInfo extends Component
 {
-    /**
-     * @internal
-     *
-     * matches invalid URI chars + URI delimiters and the : character
-     */
-    const REGEXP_USER_RFC3987_ENCODING = '/[\x00-\x1f\x7f\/#\?\:@]/';
-
-    /**
-     * @internal
-     *
-     * matches invalid URI chars + URI delimiters without the : character
-     */
-    const REGEXP_PASS_RFC3987_ENCODING = '/[\x00-\x1f\x7f\/#\?@]/';
-
     /**
      * @internal
      */
@@ -81,12 +69,12 @@ final class UserInfo extends Component
             return null;
         }
 
-        $userInfo = $this->getUser(self::RFC3986_ENCODING);
+        $userInfo = $this->encodeComponent($this->user, self::RFC3986_ENCODING, self::REGEXP_USERINFO_ENCODING);
         if (null === $this->pass) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$this->getPass(self::RFC3986_ENCODING);
+        return $userInfo.':'.$this->encodeComponent($this->pass, self::RFC3986_ENCODING, self::REGEXP_USERINFO_ENCODING);
     }
 
     /**
@@ -100,36 +88,32 @@ final class UserInfo extends Component
             return null;
         }
 
-        $userInfo = $this->getUser(self::NO_ENCODING);
+        $userInfo = $this->getUser();
         if (null === $this->pass) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$this->getPass(self::NO_ENCODING);
+        return $userInfo.':'.$this->getPass();
     }
 
     /**
      * Retrieve the user component of the URI User Info part.
      *
-     * @param int $enc_type
-     *
      * @return string|null
      */
-    public function getUser(int $enc_type = self::RFC3986_ENCODING)
+    public function getUser()
     {
-        return $this->encodeComponent($this->user, $enc_type, self::REGEXP_USERINFO_ENCODING, self::REGEXP_USER_RFC3987_ENCODING);
+        return $this->encodeComponent($this->user, self::NO_ENCODING, self::REGEXP_USERINFO_ENCODING);
     }
 
     /**
      * Retrieve the pass component of the URI User Info part.
      *
-     * @param int $enc_type
-     *
      * @return string|null
      */
-    public function getPass(int $enc_type = self::RFC3986_ENCODING)
+    public function getPass()
     {
-        return $this->encodeComponent($this->pass, $enc_type, self::REGEXP_USERINFO_ENCODING, self::REGEXP_PASS_RFC3987_ENCODING);
+        return $this->encodeComponent($this->pass, self::NO_ENCODING, self::REGEXP_USERINFO_ENCODING);
     }
 
     /**

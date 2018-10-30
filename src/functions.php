@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -27,6 +27,10 @@ use League\Uri\Component\Path;
 use League\Uri\Component\Query;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
+use function count;
+use function range;
+use function strpos;
+use function substr;
 
 /**
  * Filter the URI object.

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -20,8 +20,17 @@ namespace League\Uri\Component;
 
 use League\Uri\ComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use TypeError;
+use function gettype;
+use function is_scalar;
+use function method_exists;
+use function preg_match;
+use function preg_replace_callback;
+use function rawurldecode;
+use function rawurlencode;
+use function sprintf;
+use function strtoupper;
+use const PHP_QUERY_RFC3986;
 
 abstract class Component implements ComponentInterface
 {
@@ -163,24 +172,19 @@ abstract class Component implements ComponentInterface
     /**
      * Returns the component as converted for RFC3986 or RFC1738.
      *
-     * @param null|string $part
+     * @param null|string $str
      * @param int         $enc_type
-     * @param string      $regexp_rfc3986
-     * @param string      $regexp_rfc3987
+     * @param string      $regexp
      *
      * @return null|string
      */
-    protected function encodeComponent($part, int $enc_type, string $regexp_rfc3986, string $regexp_rfc3987)
+    protected function encodeComponent($str, int $enc_type, string $regexp)
     {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new UnknownEncoding(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        if (self::NO_ENCODING === $enc_type || null === $str || !preg_match(self::REGEXP_NO_ENCODING, $str)) {
+            return $str;
         }
 
-        if (self::NO_ENCODING === $enc_type || null === $part || !preg_match(self::REGEXP_NO_ENCODING, $part)) {
-            return $part;
-        }
-
-        return preg_replace_callback($regexp_rfc3986, [$this, 'encodeMatches'], $part) ?? rawurlencode($part);
+        return preg_replace_callback($regexp, [$this, 'encodeMatches'], $str) ?? rawurlencode($str);
     }
 
     /**

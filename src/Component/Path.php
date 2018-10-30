@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -19,6 +19,14 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use TypeError;
+use function array_pop;
+use function array_reduce;
+use function end;
+use function explode;
+use function implode;
+use function preg_replace;
+use function strpos;
+use function substr;
 
 class Path extends Component
 {
@@ -31,13 +39,6 @@ class Path extends Component
      * @internal
      */
     const DOT_SEGMENTS = ['.' => 1, '..' => 1];
-
-    /**
-     * @internal
-     *
-     * matches invalid URI chars + query and fragment delimiters
-     */
-    const REGEXP_PATH_NO_ENCODING = '/[\x00-\x1f\x7f\#\?]/';
 
     /**
      * @internal
@@ -104,7 +105,7 @@ class Path extends Component
      */
     public function getContent()
     {
-        return $this->encodeComponent($this->component, self::RFC3986_ENCODING, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_NO_ENCODING);
+        return $this->encodeComponent($this->component, self::RFC3986_ENCODING, self::REGEXP_PATH_ENCODING);
     }
 
     /**
@@ -114,7 +115,7 @@ class Path extends Component
      */
     public function decoded()
     {
-        return (string) $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_NO_ENCODING);
+        return (string) $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_PATH_ENCODING);
     }
 
     /**
