@@ -20,7 +20,6 @@ use ArrayIterator;
 use League\Uri\Component\Domain;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -37,17 +36,6 @@ class DomainTest extends TestCase
     {
         $host = new Domain('uri.thephpleague.com');
         $this->assertEquals($host, eval('return '.var_export($host, true).';'));
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Domain('uri.thephpleague.com');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**
@@ -81,12 +69,13 @@ class DomainTest extends TestCase
      * @covers ::__construct
      * @covers ::parse
      * @covers ::getContent
+     * @covers ::toUnicode
      */
     public function testValidDomain($host, $uri, $iri)
     {
         $host = new Domain($host);
         $this->assertSame($uri, $host->getContent());
-        $this->assertSame($iri, $host->getContent(Domain::RFC3987_ENCODING));
+        $this->assertSame($iri, $host->toUnicode());
     }
 
     public function validDomainProvider()
@@ -185,15 +174,6 @@ class DomainTest extends TestCase
     }
 
     /**
-     * @covers ::getContent
-     */
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new Domain('host'))->getContent(-1);
-    }
-
-    /**
      * @param string $raw
      * @param bool   $expected
      * @dataProvider isAbsoluteProvider
@@ -218,13 +198,14 @@ class DomainTest extends TestCase
      * @param string $unicode Unicode Domainname
      * @param string $ascii   Ascii Domainname
      * @dataProvider hostnamesProvider
-     * @covers ::getContent
+     * @covers ::toUnicode
+     * @covers ::toAscii
      */
     public function testValidUnicodeDomain($unicode, $ascii)
     {
         $host = new Domain($unicode);
-        $this->assertSame($ascii, $host->getContent(Domain::RFC3986_ENCODING));
-        $this->assertSame($unicode, $host->getContent(Domain::RFC3987_ENCODING));
+        $this->assertSame($ascii, $host->toAscii());
+        $this->assertSame($unicode, $host->toUnicode());
     }
 
     public function hostnamesProvider()

@@ -18,7 +18,6 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Host;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -35,17 +34,6 @@ class HostTest extends TestCase
     {
         $host = new Host('uri.thephpleague.com');
         $this->assertEquals($host, eval('return '.var_export($host, true).';'));
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Host('uri.thephpleague.com');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**
@@ -71,12 +59,12 @@ class HostTest extends TestCase
      * @covers ::__construct
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
-     * @covers ::getContent
+     * @covers ::toUnicode
      */
     public function testValidHost($host, $uri, $iri)
     {
         $host = new Host($host);
-        $this->assertSame($iri, $host->getContent(Host::RFC3987_ENCODING));
+        $this->assertSame($iri, $host->toUnicode());
     }
 
     public function validHostProvider()
@@ -197,27 +185,19 @@ class HostTest extends TestCase
     }
 
     /**
-     * @covers ::getContent
-     */
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new Host('host'))->getContent(-1);
-    }
-
-    /**
      * Test Punycode support.
      *
      * @param string $unicode Unicode Hostname
      * @param string $ascii   Ascii Hostname
      * @dataProvider hostnamesProvider
-     * @covers ::getContent
+     * @covers ::toAscii
+     * @covers ::toUnicode
      */
     public function testValidUnicodeHost($unicode, $ascii)
     {
         $host = new Host($unicode);
-        $this->assertSame($ascii, $host->getContent(Host::RFC3986_ENCODING));
-        $this->assertSame($unicode, $host->getContent(Host::RFC3987_ENCODING));
+        $this->assertSame($ascii, $host->toAscii());
+        $this->assertSame($unicode, $host->toUnicode());
     }
 
     public function hostnamesProvider()

@@ -18,7 +18,6 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\IpAddress;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -35,17 +34,6 @@ class IpAddressTest extends TestCase
     {
         $host = new IpAddress('[::1]');
         $this->assertEquals($host, eval('return '.var_export($host, true).';'));
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new IpAddress('127.0.0.1');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**
@@ -83,7 +71,6 @@ class IpAddressTest extends TestCase
      * @covers ::isIpv6
      * @covers ::isIpFuture
      * @covers ::getIp
-     * @covers ::getContent
      * @covers ::getIpVersion
      */
     public function testValidIpAddress($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
@@ -94,7 +81,6 @@ class IpAddressTest extends TestCase
         $this->assertSame($isIpv6, $host->isIpv6());
         $this->assertSame($isIpFuture, $host->isIpFuture());
         $this->assertSame($ip, $host->getIp());
-        $this->assertSame($iri, $host->getContent(IpAddress::RFC3987_ENCODING));
         $this->assertSame($ipVersion, $host->getIpVersion());
     }
 
@@ -204,39 +190,6 @@ class IpAddressTest extends TestCase
     {
         $this->expectException(TypeError::class);
         new IpAddress(date_create());
-    }
-
-    /**
-     * @covers ::getContent
-     */
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new IpAddress('[::1]'))->getContent(-1);
-    }
-
-    /**
-     * Test Punycode support.
-     *
-     * @param string $unicode Unicode IpAddressname
-     * @param string $ascii   Ascii IpAddressname
-     * @dataProvider hostnamesProvider
-     * @covers ::getContent
-     */
-    public function testValidUnicodeIpAddress($unicode, $ascii)
-    {
-        $host = new IpAddress($unicode);
-        $this->assertSame($ascii, $host->getContent(IpAddress::RFC3986_ENCODING));
-        $this->assertSame($unicode, $host->getContent(IpAddress::RFC3987_ENCODING));
-    }
-
-    public function hostnamesProvider()
-    {
-        // http://en.wikipedia.org/wiki/.test_(international_domain_name)#Test_TLDs
-        return [
-            ['[::1]', '[::1]'],
-            ['127.0.0.1', '127.0.0.1'],
-        ];
     }
 
     /**

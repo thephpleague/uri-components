@@ -39,17 +39,6 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Path('yolo');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
-    }
-
-    /**
      * @covers ::getIterator
      */
     public function testIterator()

@@ -37,13 +37,13 @@ class Path extends Component
      *
      * matches invalid URI chars + query and fragment delimiters
      */
-    const REGEXP_PATH_RFC3987_ENCODING = '/[\x00-\x1f\x7f\#\?]/';
+    const REGEXP_PATH_NO_ENCODING = '/[\x00-\x1f\x7f\#\?]/';
 
     /**
      * @internal
      */
     const REGEXP_PATH_ENCODING = '/
-        (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+|
+        (?:[^A-Za-z0-9_\-\.\!\$&\'\(\)\*\+,;\=%\:\/@]+|
         %(?![A-Fa-f0-9]{2}))
     /x';
 
@@ -102,9 +102,19 @@ class Path extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    public function getContent()
     {
-        return $this->encodeComponent($this->component, $enc_type, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_RFC3987_ENCODING);
+        return $this->encodeComponent($this->component, self::RFC3986_ENCODING, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_NO_ENCODING);
+    }
+
+    /**
+     * Returns the decoded path.
+     *
+     * @return string
+     */
+    public function decoded()
+    {
+        return (string) $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_PATH_ENCODING, self::REGEXP_PATH_NO_ENCODING);
     }
 
     /**

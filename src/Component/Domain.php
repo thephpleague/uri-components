@@ -155,17 +155,6 @@ final class Domain extends Host implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->component,
-            'labels' => $this->labels,
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function count()
     {
         return count($this->labels);

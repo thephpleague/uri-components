@@ -18,7 +18,6 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Path;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -32,20 +31,20 @@ class PathTest extends TestCase
     /**
      * @dataProvider validPathEncoding
      *
-     * @param string $raw
-     * @param string $rfc1738
+     * @param mixed $decoded
+     * @param mixed $encoded
      * @covers ::__construct
      * @covers ::validate
      * @covers ::decodeMatches
+     * @covers ::decoded
      * @covers ::getContent
      * @covers ::encodeComponent
      */
-    public function testGetUriComponent($raw, $rfc1738)
+    public function testGetUriComponent($decoded, $encoded)
     {
-        $path = new Path($raw);
-        $this->assertSame($raw, $path->getContent(Path::RFC3987_ENCODING));
-        $this->assertSame($raw, $path->getContent(Path::NO_ENCODING));
-        $this->assertSame($rfc1738, $path->getContent(Path::RFC1738_ENCODING));
+        $path = new Path($decoded);
+        $this->assertSame($decoded, $path->decoded());
+        $this->assertSame($encoded, $path->getContent());
     }
 
     public function validPathEncoding()
@@ -97,16 +96,14 @@ class PathTest extends TestCase
                 'foo%2Fbar',
             ],
             [
-                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
                 '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
             ],
+            [
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+            ],
         ];
-    }
-
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new Path('query'))->getContent(-1);
     }
 
     public function testWithContent()
@@ -147,17 +144,6 @@ class PathTest extends TestCase
         $component = new Path(42);
         $generateComponent = eval('return '.var_export($component, true).';');
         $this->assertEquals($component, $generateComponent);
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Path('yolo');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**

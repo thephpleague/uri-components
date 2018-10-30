@@ -19,7 +19,6 @@ namespace LeagueTest\Uri\Component;
 use ArrayIterator;
 use League\Uri\Component\Query;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -46,17 +45,6 @@ class QueryTest extends TestCase
     {
         $generateComponent = eval('return '.var_export($this->query, true).';');
         $this->assertEquals($this->query, $generateComponent);
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Query('foo=bar&baz');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**
@@ -125,6 +113,15 @@ class QueryTest extends TestCase
 
         $this->assertSame(['a', 'b', 'c', 'a'], $keysp);
         $this->assertSame(['1', '2', '3', '4'], $valuesp);
+    }
+
+    /**
+     * @covers ::jsonSerialize
+     */
+    public function testJsonEncode()
+    {
+        $query = new Query('a=1&b=2&c=3&a=4&a=3%20d');
+        $this->assertSame('"a=1&b=2&c=3&a=4&a=3+d"', json_encode($query));
     }
 
     /**
@@ -218,17 +215,22 @@ class QueryTest extends TestCase
      * @covers ::__construct
      * @covers ::withoutEmptyPairs
      * @covers ::filterEmptyPair
+     * @covers ::toRFC3986
+     * @covers ::toRFC1738
+     * @covers ::getContent
      */
     public function testNormalization()
     {
-        $this->assertSame('foo=bar', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->getContent());
-        $this->assertNull((new Query('&=bar&='))->withoutEmptyPairs()->getContent());
-        $this->assertNull((new Query('&&&&&&&&&&&'))->withoutEmptyPairs()->getContent());
+        $this->assertSame('foo=bar', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->toRFC3986());
+        $this->assertNull((new Query('&=bar&='))->withoutEmptyPairs()->toRFC1738());
+        $this->assertNull((new Query('&&&&&&&&&&&'))->withoutEmptyPairs()->toRFC1738());
         $this->assertSame($this->query, $this->query->withoutEmptyPairs());
     }
 
     /**
      * @covers ::append
+     * @covers ::toRFC3986
+     * @covers ::getContent
      * @covers ::filterEmptyValue
      *
      * @dataProvider validAppendValue
@@ -239,7 +241,7 @@ class QueryTest extends TestCase
     public function testAppend($query, $append_data, $expected)
     {
         $base = new Query($query);
-        $this->assertSame($expected, $base->append($append_data)->getContent());
+        $this->assertSame($expected, $base->append($append_data)->toRFC3986());
     }
 
     public function validAppendValue()
@@ -282,6 +284,14 @@ class QueryTest extends TestCase
         $this->assertNull($query->get(''));
         $this->assertSame(['toto', 'barbaz'], $query->getAll('kingkong'));
         $this->assertSame([null, '', 'b'], $query->getAll(''));
+    }
+
+    /**
+     * @covers ::decoded
+     */
+    public function testDecodedReturnsNull()
+    {
+        $this->assertNull((new Query())->decoded());
     }
 
     /**
@@ -513,11 +523,12 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutNumericIndices
+     * @covers ::decoded
      */
     public function testWithoutNumericIndicesReturnsAnother()
     {
         $query = new Query('foo[3]');
-        $this->assertSame('foo[]', $query->withoutNumericIndices()->getContent(Query::NO_ENCODING));
+        $this->assertSame('foo[]', $query->withoutNumericIndices()->decoded());
     }
 
     /**
@@ -631,15 +642,6 @@ class QueryTest extends TestCase
             'empty query' => [null],
             'contains each pair key only once' => ['batman=robin&aquaman=aqualad&foo=bar&bar=baz'],
         ];
-    }
-
-    /**
-     * @covers ::getContent
-     */
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new Query('query'))->getContent(-1);
     }
 
     /**

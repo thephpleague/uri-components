@@ -40,6 +40,7 @@ class UserInfoTest extends TestCase
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::getContent
+     * @covers ::decoded
      * @covers ::__toString
      * @covers ::decodeMatches
      * @covers ::encodeMatches
@@ -60,8 +61,7 @@ class UserInfoTest extends TestCase
         $this->assertSame($expected_user, $userinfo->getUser());
         $this->assertSame($expected_pass, $userinfo->getPass());
         $this->assertSame($expected_str, (string) $userinfo);
-        $this->assertSame($iri_str, $userinfo->getContent(UserInfo::RFC3987_ENCODING));
-        $this->assertSame($rfc1738_str, $userinfo->getContent(UserInfo::RFC1738_ENCODING));
+        $this->assertSame($iri_str, $userinfo->decoded());
     }
 
     public function userInfoProvider()
@@ -220,17 +220,6 @@ class UserInfoTest extends TestCase
     }
 
     /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new UserInfo('user', 'pass');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
-    }
-
-    /**
      * @dataProvider withUserInfoProvider
      * @param mixed  $user
      * @param mixed  $pass
@@ -255,30 +244,13 @@ class UserInfoTest extends TestCase
     }
 
     /**
-     * @covers ::getUser
-     */
-    public function testGetUserThrowsInvalidUriComponentException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new UserInfo())->getUser(-1);
-    }
-
-    /**
      * @covers ::getPass
+     * @covers ::encodeComponent
      */
     public function testGetPassThrowsInvalidUriComponentException()
     {
         $this->expectException(UnknownEncoding::class);
         (new UserInfo())->getPass(-1);
-    }
-
-    /**
-     * @covers ::getContent
-     */
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new UserInfo('user', 'pass'))->getContent(-1);
     }
 
     /**

@@ -17,6 +17,7 @@
 namespace League\Uri;
 
 use InvalidArgumentException;
+use JsonSerializable;
 
 /**
  * Value object representing a URI component.
@@ -32,26 +33,8 @@ use InvalidArgumentException;
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @since      1.0.0
  */
-interface ComponentInterface extends EncodingInterface
+interface ComponentInterface extends JsonSerializable
 {
-    /**
-     * Returns the instance content.
-     *
-     * If the instance is defined, the value returned MUST be encoded according to the
-     * selected encoding algorithm. In any case, the value MUST NOT double-encode any character
-     * depending on the selected encoding algorithm.
-     *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3. By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
-     *
-     * @param int $enc_type
-     *
-     * @return mixed
-     */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING);
-
     /**
      * Returns the instance string representation.
      *
@@ -64,6 +47,35 @@ interface ComponentInterface extends EncodingInterface
      * @return string
      */
     public function __toString();
+
+    /**
+     * Returns the instance json representation.
+     *
+     * If the instance is defined, the value returned MUST be percent-encoded,
+     * but MUST NOT double-encode any characters. To determine what characters
+     * to encode, please refer to RFC 3986 or RFC 1738.
+     *
+     * If the instance is not defined null is returned
+     *
+     * @return string|null
+     */
+    public function jsonSerialize();
+
+    /**
+     * Returns the instance content.
+     *
+     * If the instance is defined, the value returned MUST be encoded according to the
+     * selected encoding algorithm. In any case, the value MUST NOT double-encode any character
+     * depending on the selected encoding algorithm.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3. By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     *
+     * @return string|null
+     */
+    public function getContent();
 
     /**
      * Returns an instance with the specified content.

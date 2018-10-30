@@ -99,18 +99,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     /**
      * {@inheritdoc}
      */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'is_absolute' => $this->isAbsolute(),
-            'segments' => $this->segments,
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function count()
     {
         return count($this->segments);
@@ -273,7 +261,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             return $this->prepend($segment);
         }
 
-        $segment = $segment->getContent(self::NO_ENCODING);
+        $segment = $segment->decoded();
         if ($segment === $this->segments[$key]) {
             return $this;
         }
