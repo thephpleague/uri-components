@@ -46,7 +46,7 @@ final class Scheme extends Component
     /**
      * New instance.
      *
-     * @param mixed $scheme
+     * @param null|mixed $scheme
      */
     public function __construct($scheme = null)
     {
@@ -56,13 +56,9 @@ final class Scheme extends Component
     /**
      * Validate a scheme.
      *
-     * @param mixed $scheme
-     *
      * @throws MalformedUriComponent if the scheme is invalid
-     *
-     * @return null|string
      */
-    private function validate($scheme)
+    private function validate($scheme): ?string
     {
         $scheme = $this->filterComponent($scheme);
         if (null === $scheme) {
@@ -79,7 +75,7 @@ final class Scheme extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         return $this->component;
     }

@@ -29,8 +29,6 @@ class UserInfoTest extends TestCase
 {
     /**
      * @dataProvider userInfoProvider
-     * @param mixed       $user
-     * @param mixed       $pass
      * @param string|null $expected_user
      * @param string|null $expected_pass
      * @param string      $expected_str
@@ -150,10 +148,6 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider createFromStringProvider
-     * @param mixed  $user
-     * @param mixed  $str
-     * @param mixed  $expected_user
-     * @param mixed  $expected_pass
      * @param string $expected_str
      * @covers ::withContent
      * @covers ::getUser
@@ -208,8 +202,6 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider withUserInfoProvider
-     * @param mixed  $user
-     * @param mixed  $pass
      * @param string $expected
      * @covers ::withUserInfo
      * @covers ::decodeMatches

@@ -50,7 +50,6 @@ class QueryTest extends TestCase
     /**
      * @covers ::filterSeparator
      * @dataProvider invalidSeparatorProvider
-     * @param mixed $separator
      */
     public function testInvalidSeparator($separator)
     {
@@ -188,7 +187,6 @@ class QueryTest extends TestCase
      * @covers ::createFromPairs
      * @covers ::filterPair
      *
-     * @param mixed $input
      * @dataProvider createFromPairsFailedProvider
      */
     public function testCreateFromPairsFailed($input)
@@ -235,7 +233,6 @@ class QueryTest extends TestCase
      *
      * @dataProvider validAppendValue
      * @param null|string $query
-     * @param mixed       $append_data
      * @param null|string $expected
      */
     public function testAppend($query, $append_data, $expected)
@@ -371,9 +368,6 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutParam
      *
-     * @param array  $origin
-     * @param array  $without
-     * @param string $expected
      *
      * @dataProvider withoutParamProvider
      */
@@ -626,7 +620,6 @@ class QueryTest extends TestCase
      * @covers ::reducePairs
      *
      * @dataProvider sameQueryAfterSortingProvider
-     * @param mixed $query
      */
     public function testSortReturnSameInstance($query)
     {
@@ -652,7 +645,6 @@ class QueryTest extends TestCase
      *
      * @param null|string $query
      * @param string      $key
-     * @param mixed       $value
      * @param array       $expected
      */
     public function testWithPair($query, $key, $value, $expected)
@@ -710,9 +702,6 @@ class QueryTest extends TestCase
      *
      * @dataProvider mergeBasicProvider
      *
-     * @param mixed $src
-     * @param mixed $dest
-     * @param mixed $expected
      */
     public function testMergeBasic($src, $dest, $expected)
     {

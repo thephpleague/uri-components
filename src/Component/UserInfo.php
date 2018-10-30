@@ -47,9 +47,8 @@ final class UserInfo extends Component
 
     /**
      * Create a new instance of UserInfo.
-     *
-     * @param mixed $user
-     * @param mixed $pass
+     * @param null|mixed $user
+     * @param null|mixed $pass
      */
     public function __construct($user = null, $pass = null)
     {
@@ -63,7 +62,7 @@ final class UserInfo extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         if (null === $this->user) {
             return null;
@@ -79,10 +78,8 @@ final class UserInfo extends Component
 
     /**
      * Returns the decoded component.
-     *
-     * @return null|string
      */
-    public function decoded()
+    public function decoded(): ?string
     {
         if (null === $this->user) {
             return null;
@@ -98,20 +95,16 @@ final class UserInfo extends Component
 
     /**
      * Retrieve the user component of the URI User Info part.
-     *
-     * @return string|null
      */
-    public function getUser()
+    public function getUser(): ?string
     {
         return $this->encodeComponent($this->user, self::NO_ENCODING, self::REGEXP_USERINFO_ENCODING);
     }
 
     /**
      * Retrieve the pass component of the URI User Info part.
-     *
-     * @return string|null
      */
-    public function getPass()
+    public function getPass(): ?string
     {
         return $this->encodeComponent($this->pass, self::NO_ENCODING, self::REGEXP_USERINFO_ENCODING);
     }
@@ -140,11 +133,7 @@ final class UserInfo extends Component
      * an instance that contains the specified user.
      *
      * An empty user is equivalent to removing the user information.
-     *
-     * @param mixed $user The user to use with the new instance.
-     * @param mixed $pass The pass to use with the new instance.
-     *
-     * @return self
+     * @param null|mixed $pass
      */
     public function withUserInfo($user, $pass = null): self
     {

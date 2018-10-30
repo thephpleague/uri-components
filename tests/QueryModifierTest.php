@@ -48,8 +48,6 @@ class QueryModifierTest extends TestCase
      *
      * @dataProvider validMergeQueryProvider
      *
-     * @param string $query
-     * @param string $expected
      */
     public function testMergeQuery(string $query, string $expected)
     {
@@ -69,8 +67,6 @@ class QueryModifierTest extends TestCase
      *
      * @dataProvider validAppendQueryProvider
      *
-     * @param string $query
-     * @param string $expected
      */
     public function testAppendQuery(string $query, string $expected)
     {
@@ -99,7 +95,6 @@ class QueryModifierTest extends TestCase
      *
      * @dataProvider validWithoutQueryValuesProvider
      *
-     * @param array  $input
      * @param string $expected
      */
     public function testWithoutQueryValuesProcess(array $input, $expected)
@@ -119,9 +114,6 @@ class QueryModifierTest extends TestCase
      * @covers \League\Uri\remove_params
      *
      * @dataProvider removeParamsProvider
-     * @param string $uri
-     * @param array  $input
-     * @param string $expected
      */
     public function testWithoutQueryParams(string $uri, array $input, string $expected)
     {

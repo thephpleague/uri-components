@@ -290,7 +290,6 @@ class HierarchicalPathTest extends TestCase
      * Test AbstractSegment::without.
      *
      * @param string $origin
-     * @param mixed  $without
      * @param string $result
      *
      * @dataProvider withoutProvider
@@ -552,9 +551,6 @@ class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getDirnameProvider
-     * @param mixed $path
-     * @param mixed $dirname
-     * @param mixed $expected
      * @covers ::withDirname
      * @covers ::withSegment
      */
@@ -602,9 +598,6 @@ class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getBasenameProvider
-     * @param mixed $path
-     * @param mixed $basename
-     * @param mixed $expected
      * @covers ::withBasename
      * @covers ::withSegment
      * @covers ::buildBasename

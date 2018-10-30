@@ -71,7 +71,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @throws TypeError          If $segments is not iterable
      * @throws InvalidPathSegment If the segments are malformed
      *
-     * @return self
      */
     public static function createFromSegments($segments, int $type = self::IS_RELATIVE): self
     {
@@ -110,7 +109,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     /**
      * {@inheritdoc}
      */
-    protected function parse()
+    protected function parse(): void
     {
         $path = $this->component;
         if (self::SEPARATOR === ($path[0] ?? '')) {
@@ -140,8 +139,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
     /**
      * Returns parent directory's path.
-     *
-     * @return string
      */
     public function getDirname(): string
     {
@@ -154,8 +151,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
     /**
      * Returns the path basename.
-     *
-     * @return string
      */
     public function getBasename(): string
     {
@@ -166,8 +161,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
 
     /**
      * Returns the basename extension.
-     *
-     * @return string
      */
     public function getExtension(): string
     {
@@ -200,10 +193,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      *
      * If a value is specified only the keys associated with
      * the given value will be returned
-     *
-     * @param string $segment
-     *
-     * @return array
      */
     public function keys(string $segment): array
     {
@@ -214,10 +203,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * Appends a segment to the path.
      *
      * @see ::withSegment
-     *
-     * @param mixed $segment
-     *
-     * @return self
      */
     public function append($segment): self
     {
@@ -232,10 +217,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * Prepends a segment to the path.
      *
      * @see ::withSegment
-     *
-     * @param mixed $segment
-     *
-     * @return self
      */
     public function prepend($segment): self
     {
@@ -255,12 +236,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * If $key is non-negative, the added segment will be the segment at $key position from the start.
      * If $key is negative, the added segment will be the segment at $key position from the end.
      *
-     * @param int   $key
-     * @param mixed $segment
-     *
      * @throws InvalidKey If the key is invalid
-     *
-     * @return self
      */
     public function withSegment(int $key, $segment): self
     {
@@ -312,8 +288,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @param int ...$keys remaining keys to remove
      *
      * @throws InvalidKey If the key is invalid
-     *
-     * @return self
      */
     public function withoutSegment(int $key, int ...$keys): self
     {
@@ -350,10 +324,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
-     *
-     * @param mixed $path the new parent directory path
-     *
-     * @return self
      */
     public function withDirname($path): self
     {
@@ -373,10 +343,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
-     *
-     * @param mixed $basename the new path basename
-     *
-     * @return self
      */
     public function withBasename($basename): self
     {
@@ -396,11 +362,6 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the extension basename modified.
-     *
-     * @param mixed $extension the new extension
-     *                         can preceeded with or without the dot (.) character
-     *
-     * @return self
      */
     public function withExtension($extension): self
     {
@@ -426,13 +387,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     }
 
     /**
-     * create a new basename with a new extension.
-     *
-     * @param self   $extension the new extension to add
-     * @param string $ext       the basename file part
-     * @param string $param     the basename parameter part
-     *
-     * @return string
+     * Creates a new basename with a new extension.
      */
     private function buildBasename(self $extension, string $ext, string $param = null): string
     {

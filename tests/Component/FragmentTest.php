@@ -72,7 +72,6 @@ class FragmentTest extends TestCase
      * @covers ::encodeComponent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
-     * @param mixed       $str
      * @param string|null $expected
      */
     public function testGetValue($str, $expected)

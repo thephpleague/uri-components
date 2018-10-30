@@ -47,9 +47,7 @@ class PortTest extends TestCase
     }
 
     /**
-     * @param mixed    $input
      * @param null|int $expected
-     * @param mixed    $string_expected
      * @dataProvider getToIntProvider
      * @covers ::toInt
      * @covers ::getContent

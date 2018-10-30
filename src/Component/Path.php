@@ -56,7 +56,7 @@ class Path extends Component
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return new static($properties['component']);
     }
@@ -77,20 +77,16 @@ class Path extends Component
      *
      * @throws InvalidUriComponent if the parsing fails
      */
-    protected function parse()
+    protected function parse(): void
     {
     }
 
     /**
      * Validate the component content.
      *
-     * @param mixed $path
-     *
      * @throws Exception if the component is no valid
-     *
-     * @return mixed
      */
-    protected function validate($path)
+    protected function validate($path): string
     {
         $path = $this->validateComponent($path);
         if (null !== $path) {
@@ -103,25 +99,21 @@ class Path extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         return $this->encodeComponent($this->component, self::RFC3986_ENCODING, self::REGEXP_PATH_ENCODING);
     }
 
     /**
      * Returns the decoded path.
-     *
-     * @return string
      */
-    public function decoded()
+    public function decoded(): string
     {
         return (string) $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_PATH_ENCODING);
     }
 
     /**
      * Returns whether or not the path is absolute or relative.
-     *
-     * @return bool
      */
     public function isAbsolute(): bool
     {
@@ -130,8 +122,6 @@ class Path extends Component
 
     /**
      * Returns whether or not the path has a trailing delimiter.
-     *
-     * @return bool
      */
     public function hasTrailingSlash(): bool
     {
@@ -185,8 +175,6 @@ class Path extends Component
      *
      * @param array  $carry   Path segments
      * @param string $segment a path segment
-     *
-     * @return array
      */
     private function filterDotSegments(array $carry, string $segment): array
     {

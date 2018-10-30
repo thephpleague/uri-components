@@ -67,8 +67,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider fileProvider
      *
-     * @param Data $binary
-     * @param Data $ascii
      */
     public function testToBinary(Data $binary, Data $ascii)
     {
@@ -81,8 +79,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider fileProvider
      *
-     * @param Data $binary
-     * @param Data $ascii
      */
     public function testToAscii(Data $binary, Data $ascii)
     {
@@ -125,11 +121,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validPathProvider
      *
-     * @param string $segment
-     * @param int    $key
-     * @param string $append
-     * @param string $prepend
-     * @param string $replace
      */
     public function testAppendProcess(string $segment, int $key, string $append, string $prepend, string $replace)
     {
@@ -143,9 +134,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validAppendPathProvider
      *
-     * @param string $uri
-     * @param string $segment
-     * @param string $expected
      */
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected)
     {
@@ -184,9 +172,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validBasenameProvider
      *
-     * @param string $path
-     * @param string $uri
-     * @param string $expected
      */
     public function testBasename(string $path, string $uri, string $expected)
     {
@@ -231,9 +216,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validDirnameProvider
      *
-     * @param string $path
-     * @param string $uri
-     * @param string $expected
      */
     public function testDirname(string $path, string $uri, string $expected)
     {
@@ -256,11 +238,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validPathProvider
      *
-     * @param string $segment
-     * @param int    $key
-     * @param string $append
-     * @param string $prepend
-     * @param string $replace
      */
     public function testPrependProcess(string $segment, int $key, string $append, string $prepend, string $replace)
     {
@@ -273,11 +250,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validPathProvider
      *
-     * @param string $segment
-     * @param int    $key
-     * @param string $append
-     * @param string $prepend
-     * @param string $replace
      */
     public function testReplaceSegmentProcess(string $segment, int $key, string $append, string $prepend, string $replace)
     {
@@ -298,8 +270,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider addBasePathProvider
      *
-     * @param string $basepath
-     * @param string $expected
      */
     public function testAddBasePath(string $basepath, string $expected)
     {
@@ -332,8 +302,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider removeBasePathProvider
      *
-     * @param string $basepath
-     * @param string $expected
      */
     public function testRemoveBasePath(string $basepath, string $expected)
     {
@@ -366,8 +334,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validwithoutSegmentProvider
      *
-     * @param array  $keys
-     * @param string $expected
      */
     public function testwithoutSegment(array $keys, string $expected)
     {
@@ -420,8 +386,6 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider validExtensionProvider
      *
-     * @param string $extension
-     * @param string $expected
      */
     public function testExtensionProcess(string $extension, string $expected)
     {

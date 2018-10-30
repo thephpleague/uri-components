@@ -53,11 +53,6 @@ class HostModifierTest extends TestCase
      *
      * @covers \League\Uri\prepend_host
      *
-     * @param string $label
-     * @param int    $key
-     * @param string $prepend
-     * @param string $append
-     * @param string $replace
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
@@ -69,11 +64,6 @@ class HostModifierTest extends TestCase
      *
      * @covers \League\Uri\append_host
      *
-     * @param string $label
-     * @param int    $key
-     * @param string $prepend
-     * @param string $append
-     * @param string $replace
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
@@ -85,11 +75,6 @@ class HostModifierTest extends TestCase
      *
      * @covers \League\Uri\replace_label
      *
-     * @param string $label
-     * @param int    $key
-     * @param string $prepend
-     * @param string $append
-     * @param string $replace
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
     {
@@ -143,8 +128,6 @@ class HostModifierTest extends TestCase
      *
      * @dataProvider validwithoutLabelProvider
      *
-     * @param array  $keys
-     * @param string $expected
      */
     public function testwithoutLabelProcess(array $keys, string $expected)
     {
@@ -171,7 +154,6 @@ class HostModifierTest extends TestCase
      *
      * @dataProvider invalidRemoveLabelsParameters
      *
-     * @param array $params
      */
     public function testRemoveLabelsFailedConstructor(array $params)
     {

@@ -57,10 +57,7 @@ final class IpAddress extends Host
     /**
      * Returns a host from an IP address.
      *
-     * @param string $ip
-     * @param string $version
      *
-     * @return self
      */
     public static function createFromIp(string $ip, string $version = ''): self
     {
@@ -83,7 +80,7 @@ final class IpAddress extends Host
     /**
      * {@inheritdoc}
      */
-    protected function parse(string $host = null)
+    protected function parse(string $host = null): void
     {
         $this->component = $host;
         $this->has_zone_identifier = false;
@@ -123,18 +120,14 @@ final class IpAddress extends Host
      * Returns the IP version.
      *
      * If the host is a not an IP this method will return null
-     *
-     * @return string|null
      */
-    public function getIpVersion()
+    public function getIpVersion(): ?string
     {
         return $this->ip_version;
     }
 
     /**
      * Returns whether or not the host is an IP address.
-     *
-     * @return bool
      */
     public function isIp(): bool
     {
@@ -143,8 +136,6 @@ final class IpAddress extends Host
 
     /**
      * Returns whether or not the host is an IPv4 address.
-     *
-     * @return bool
      */
     public function isIpv4(): bool
     {
@@ -153,8 +144,6 @@ final class IpAddress extends Host
 
     /**
      * Returns whether or not the host is an IPv6 address.
-     *
-     * @return bool
      */
     public function isIpv6(): bool
     {
@@ -163,8 +152,6 @@ final class IpAddress extends Host
 
     /**
      * Returns whether or not the host is an IPv6 address.
-     *
-     * @return bool
      */
     public function isIpFuture(): bool
     {
@@ -173,8 +160,6 @@ final class IpAddress extends Host
 
     /**
      * Returns whether or not the host has a ZoneIdentifier.
-     *
-     * @return bool
      *
      * @see http://tools.ietf.org/html/rfc6874#section-4
      */
@@ -187,10 +172,8 @@ final class IpAddress extends Host
      * Retrieve the IP component If the Host is an IP adress.
      *
      * If the host is a not an IP this method will return null
-     *
-     * @return string|null
      */
-    public function getIp()
+    public function getIp(): ?string
     {
         if ('4' === $this->ip_version) {
             return $this->component;
@@ -216,8 +199,6 @@ final class IpAddress extends Host
      * an instance without the host zone identifier according to RFC6874
      *
      * @see http://tools.ietf.org/html/rfc6874#section-4
-     *
-     * @return self
      */
     public function withoutZoneIdentifier(): self
     {

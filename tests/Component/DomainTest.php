@@ -259,7 +259,6 @@ class DomainTest extends TestCase
     }
 
     /**
-     * @param mixed  $input
      * @param string $expected
      * @covers ::createFromLabels
      * @covers ::__toString
