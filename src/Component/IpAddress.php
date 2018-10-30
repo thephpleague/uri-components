@@ -107,18 +107,6 @@ final class IpAddress extends Host
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->component,
-            'ip_version' => $this->ip_version,
-            'has_zone_id' => $this->has_zone_identifier,
-        ];
-    }
-
-    /**
      * Returns the IP version.
      *
      * If the host is a not an IP this method will return null

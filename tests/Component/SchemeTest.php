@@ -18,7 +18,6 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Scheme;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -37,17 +36,6 @@ class SchemeTest extends TestCase
         $component = new Scheme('ignace');
         $generateComponent = eval('return '.var_export($component, true).';');
         $this->assertEquals($component, $generateComponent);
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Scheme('ftp');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**
@@ -125,15 +113,6 @@ class SchemeTest extends TestCase
             'invalid char' => ['in,valid'],
             'integer like string' => ['123'],
         ];
-    }
-
-    /**
-     * @covers ::getContent
-     */
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new Scheme('http'))->getContent(-1);
     }
 
     public function testInvalidSchemeType()

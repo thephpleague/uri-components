@@ -18,13 +18,12 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use JsonSerializable;
 use League\Uri\ComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownEncoding;
 use TypeError;
 
-abstract class Component implements ComponentInterface, JsonSerializable
+abstract class Component implements ComponentInterface
 {
     /**
      * @internal
@@ -34,10 +33,18 @@ abstract class Component implements ComponentInterface, JsonSerializable
     /**
      * @internal
      */
+    const RFC3986_ENCODING = PHP_QUERY_RFC3986;
+
+    /**
+     * @internal
+     */
+    const NO_ENCODING = 0;
+
+    /**
+     * @internal
+     */
     const ENCODING_LIST = [
-        self::RFC1738_ENCODING => 1,
         self::RFC3986_ENCODING => 1,
-        self::RFC3987_ENCODING => 1,
         self::NO_ENCODING => 1,
     ];
 
@@ -76,19 +83,6 @@ abstract class Component implements ComponentInterface, JsonSerializable
      * IDN Host detector regular expression
      */
     const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
-
-    /**
-     * Filter encoding.
-     *
-     * @param  int       $enc_type
-     * @throws Exception if the encoding is not supported
-     */
-    protected function filterEncoding(int $enc_type)
-    {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new UnknownEncoding(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
-        }
-    }
 
     /**
      * Validate the component content.
@@ -178,21 +172,15 @@ abstract class Component implements ComponentInterface, JsonSerializable
      */
     protected function encodeComponent($part, int $enc_type, string $regexp_rfc3986, string $regexp_rfc3987)
     {
-        $this->filterEncoding($enc_type);
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new UnknownEncoding(sprintf('Unsupported or Unknown Encoding: %s', $enc_type));
+        }
+
         if (self::NO_ENCODING === $enc_type || null === $part || !preg_match(self::REGEXP_NO_ENCODING, $part)) {
             return $part;
         }
 
-        if ($enc_type == self::RFC3987_ENCODING) {
-            return preg_replace_callback($regexp_rfc3987, [$this, 'encodeMatches'], $part) ?? $part;
-        }
-
-        $content = preg_replace_callback($regexp_rfc3986, [$this, 'encodeMatches'], $part) ?? rawurlencode($part);
-        if (self::RFC3986_ENCODING === $enc_type) {
-            return $content;
-        }
-
-        return str_replace(self::RFC1738_ENCODING_CHARS['pattern'], self::RFC1738_ENCODING_CHARS['replace'], $content);
+        return preg_replace_callback($regexp_rfc3986, [$this, 'encodeMatches'], $part) ?? rawurlencode($part);
     }
 
     /**
@@ -218,15 +206,7 @@ abstract class Component implements ComponentInterface, JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function __debugInfo()
-    {
-        return ['component' => $this->getContent()];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    abstract public function getContent(int $enc_type = self::RFC3986_ENCODING);
+    abstract public function getContent();
 
     /**
      * {@inheritdoc}

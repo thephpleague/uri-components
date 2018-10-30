@@ -76,10 +76,8 @@ final class Scheme extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    public function getContent()
     {
-        $this->filterEncoding($enc_type);
-
         return $this->component;
     }
 

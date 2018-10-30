@@ -71,10 +71,17 @@ final class Port extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    public function getContent()
     {
-        $this->filterEncoding($enc_type);
+        if (null === $this->component) {
+            return $this->component;
+        }
 
+        return (string) $this->component;
+    }
+
+    public function toInt()
+    {
         return $this->component;
     }
 

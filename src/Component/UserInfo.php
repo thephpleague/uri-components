@@ -75,32 +75,37 @@ final class UserInfo extends Component
     /**
      * {@inheritdoc}
      */
-    public function __debugInfo()
+    public function getContent()
     {
-        return [
-            'component' => $this->getContent(),
-            'user' => $this->getUser(),
-            'pass' => $this->getPass(),
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
-    {
-        $this->filterEncoding($enc_type);
-
         if (null === $this->user) {
             return null;
         }
 
-        $userInfo = $this->getUser($enc_type);
+        $userInfo = $this->getUser(self::RFC3986_ENCODING);
         if (null === $this->pass) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$this->getPass($enc_type);
+        return $userInfo.':'.$this->getPass(self::RFC3986_ENCODING);
+    }
+
+    /**
+     * Returns the decoded component.
+     *
+     * @return null|string
+     */
+    public function decoded()
+    {
+        if (null === $this->user) {
+            return null;
+        }
+
+        $userInfo = $this->getUser(self::NO_ENCODING);
+        if (null === $this->pass) {
+            return $userInfo;
+        }
+
+        return $userInfo.':'.$this->getPass(self::NO_ENCODING);
     }
 
     /**

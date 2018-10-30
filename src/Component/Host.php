@@ -266,12 +266,29 @@ class Host extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    public function getContent()
     {
-        $this->filterEncoding($enc_type);
+        return $this->component;
+    }
 
-        if (self::RFC3986_ENCODING === $enc_type
-            || null !== $this->ip_version
+    /**
+     * Returns the Host ascii representation.
+     *
+     * @return null|string
+     */
+    public function toAscii()
+    {
+        return $this->getContent();
+    }
+
+    /**
+     * Returns the Host unicode representation.
+     *
+     * @return null|string
+     */
+    public function toUnicode()
+    {
+        if (null !== $this->ip_version
             || null === $this->component
             || false === strpos($this->component, 'xn--')
         ) {

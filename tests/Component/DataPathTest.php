@@ -73,17 +73,6 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Path(';,Bonjour%20le%20monde%21');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
-    }
-
-    /**
      * @covers ::withContent
      * @covers ::parse
      * @covers ::validate
@@ -136,7 +125,7 @@ class DataPathTest extends TestCase
      * @covers ::createFromPath
      * @covers ::parse
      * @covers ::validate
-     * @covers ::format
+     * @covers ::formatComponent
      * @covers ::getMimeType
      * @covers ::getMediaType
      * @covers ::filterMimeType
@@ -228,7 +217,7 @@ class DataPathTest extends TestCase
      * @dataProvider fileProvider
      * @param Path $uri
      * @covers ::isBinaryData
-     * @covers ::format
+     * @covers ::formatComponent
      * @covers ::toBinary
      */
     public function testToBinary($uri)
@@ -240,7 +229,7 @@ class DataPathTest extends TestCase
      * @dataProvider fileProvider
      * @param Path $uri
      * @covers ::isBinaryData
-     * @covers ::format
+     * @covers ::formatComponent
      * @covers ::toAscii
      */
     public function testToAscii($uri)
@@ -260,7 +249,7 @@ class DataPathTest extends TestCase
      * @dataProvider invalidParameters
      * @param string $parameters
      * @covers ::parse
-     * @covers ::format
+     * @covers ::formatComponent
      * @covers ::withParameters
      */
     public function testUpdateParametersFailed($parameters)

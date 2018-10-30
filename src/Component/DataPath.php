@@ -109,20 +109,6 @@ final class DataPath extends Path
     /**
      * {@inheritdoc}
      */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'is_binary_data' => $this->is_binary_data,
-            'mimetype' => $this->mimetype,
-            'parameters' => $this->getParameters(),
-            'document' => $this->document,
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     protected function validate($path)
     {
         $path = parent::validate($path);
@@ -333,7 +319,7 @@ final class DataPath extends Path
             return $this;
         }
 
-        return new static($this->format(
+        return new static($this->formatComponent(
             $this->mimetype,
             $this->getParameters(),
             !$this->is_binary_data,
@@ -351,7 +337,7 @@ final class DataPath extends Path
      *
      * @return string
      */
-    private function format(
+    private function formatComponent(
         string $mimetype,
         string $parameters,
         bool $is_binary_data,
@@ -384,7 +370,7 @@ final class DataPath extends Path
             return $this;
         }
 
-        return new static($this->format(
+        return new static($this->formatComponent(
             $this->mimetype,
             $this->getParameters(),
             !$this->is_binary_data,
@@ -414,6 +400,6 @@ final class DataPath extends Path
             return $this;
         }
 
-        return new static($this->format($this->mimetype, $parameters, $this->is_binary_data, $this->document));
+        return new static($this->formatComponent($this->mimetype, $parameters, $this->is_binary_data, $this->document));
     }
 }

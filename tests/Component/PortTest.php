@@ -18,7 +18,6 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Port;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -38,6 +37,7 @@ class PortTest extends TestCase
 
     /**
      * @covers ::__set_state
+     * @covers ::__construct
      */
     public function testSetState()
     {
@@ -47,41 +47,33 @@ class PortTest extends TestCase
     }
 
     /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Port(42);
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
-    }
-
-    /**
      * @param mixed    $input
      * @param null|int $expected
+     * @param mixed    $string_expected
      * @dataProvider getToIntProvider
+     * @covers ::toInt
      * @covers ::getContent
      * @covers ::validate
      */
-    public function testToInt($input, $expected)
+    public function testToInt($input, $expected, $string_expected)
     {
-        $this->assertSame($expected, (new Port($input))->getContent());
+        $this->assertSame($expected, (new Port($input))->toInt());
+        $this->assertSame($string_expected, (new Port($input))->getContent());
     }
 
     public function getToIntProvider()
     {
         return [
-            [null, null],
-            [23, 23],
-            ['23', 23],
+            [null, null, null],
+            [23, 23, '23'],
+            ['23', 23, '23'],
             [new class() {
                 public function __toString()
                 {
                     return '23';
                 }
-            }, 23],
-            [new Port(23), 23],
+            }, 23, '23'],
+            [new Port(23), 23, '23'],
         ];
     }
 
@@ -105,11 +97,5 @@ class PortTest extends TestCase
         $port = new Port(23);
         $this->assertSame($port, $port->withContent('23'));
         $this->assertNotSame($port, $port->withContent('42'));
-    }
-
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new Port(23))->getContent(-1);
     }
 }

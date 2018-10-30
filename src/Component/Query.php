@@ -58,8 +58,8 @@ final class Query extends Component implements Countable, IteratorAggregate
     {
         if ($params instanceof self) {
             return new self(
-                http_build_query($params->toParams(), '', $separator, self::RFC3986_ENCODING),
-                self::RFC3986_ENCODING,
+                http_build_query($params->toParams(), '', $separator, PHP_QUERY_RFC3986),
+                PHP_QUERY_RFC3986,
                 $separator
             );
         }
@@ -70,8 +70,8 @@ final class Query extends Component implements Countable, IteratorAggregate
 
         if (is_object($params)) {
             return new self(
-                http_build_query($params, '', $separator, self::RFC3986_ENCODING),
-                self::RFC3986_ENCODING,
+                http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
+                PHP_QUERY_RFC3986,
                 $separator
             );
         }
@@ -81,12 +81,12 @@ final class Query extends Component implements Countable, IteratorAggregate
         }
 
         if (empty($params)) {
-            return new self(null, self::RFC3986_ENCODING, $separator);
+            return new self(null, PHP_QUERY_RFC3986, $separator);
         }
 
         return new self(
-            http_build_query($params, '', $separator, self::RFC3986_ENCODING),
-            self::RFC3986_ENCODING,
+            http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
+            PHP_QUERY_RFC3986,
             $separator
         );
     }
@@ -106,7 +106,7 @@ final class Query extends Component implements Countable, IteratorAggregate
         }
 
         if ($pairs instanceof Traversable || is_array($pairs)) {
-            return new self(query_build($pairs, self::RFC3986_ENCODING, $separator), self::RFC3986_ENCODING, $separator);
+            return new self(query_build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
         }
 
         throw new TypeError('the pairs must be iterable');
@@ -133,23 +133,10 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * @return self
      */
-    public function __construct($query = null, int $enc_type = self::RFC3986_ENCODING, string $separator = '&')
+    public function __construct($query = null, int $enc_type = PHP_QUERY_RFC3986, string $separator = '&')
     {
-        $this->filterEncoding($enc_type);
         $this->separator = $this->filterSeparator($separator);
-        $this->pairs = query_parse($query, $enc_type, $separator);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __debugInfo()
-    {
-        return [
-            'component' => $this->getContent(),
-            'separator' => $this->separator,
-            'pairs' => $this->pairs,
-        ];
+        $this->pairs = query_parse($query, $separator, $enc_type);
     }
 
     /**
@@ -181,16 +168,58 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns the encoded query.
+     * Returns the RFC3986 encoded query.
      *
-     * @param  int         $enc_type
      * @return null|string
      */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    public function getContent()
     {
-        $this->filterEncoding($enc_type);
+        return query_build($this->pairs, $this->separator, PHP_QUERY_RFC3986);
+    }
 
-        return query_build($this->pairs, $enc_type, $this->separator);
+    /**
+     * Returns the RFC1738 encoded query.
+     *
+     * @return null|string
+     */
+    public function toRFC1738()
+    {
+        return query_build($this->pairs, $this->separator, PHP_QUERY_RFC1738);
+    }
+
+    /**
+     * Returns the RFC3986 encoded query.
+     *
+     * @see ::getContent
+     *
+     * @return null|string
+     */
+    public function toRFC3986()
+    {
+        return $this->getContent();
+    }
+
+    /**
+     * Returns the decoded query.
+     *
+     * @return null|string
+     */
+    public function decoded()
+    {
+        $query = $this->getContent();
+        if (null === $query) {
+            return $query;
+        }
+
+        return rawurldecode($query);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->toRFC1738();
     }
 
     /**
@@ -309,7 +338,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function toParams(): array
     {
-        return query_extract($this->getContent(), self::RFC3986_ENCODING, $this->separator);
+        return query_extract($this->getContent(), $this->separator, PHP_QUERY_RFC3986);
     }
 
     /**
@@ -597,7 +626,7 @@ final class Query extends Component implements Countable, IteratorAggregate
         }
 
         $pairs = $this->pairs;
-        foreach (query_parse($query, self::RFC3986_ENCODING, $this->separator) as $pair) {
+        foreach (query_parse($query, $this->separator, PHP_QUERY_RFC3986) as $pair) {
             $pairs = $this->addPair($pairs, $pair);
         }
 
@@ -705,7 +734,7 @@ final class Query extends Component implements Countable, IteratorAggregate
             $query = $query->getContent();
         }
 
-        $pairs = array_merge($this->pairs, query_parse($query, self::RFC3986_ENCODING, $this->separator));
+        $pairs = array_merge($this->pairs, query_parse($query, $this->separator, PHP_QUERY_RFC3986));
         if ($pairs === $this->pairs) {
             return $this;
         }

@@ -18,7 +18,6 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Fragment;
 use League\Uri\Exception\InvalidUriComponent;
-use League\Uri\Exception\UnknownEncoding;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -69,41 +68,40 @@ class FragmentTest extends TestCase
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::filterComponent
-     * @covers ::getContent
+     * @covers ::decoded
      * @covers ::encodeComponent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      * @param mixed       $str
      * @param string|null $expected
-     * @param int         $enc_type
      */
-    public function testGetValue($str, $expected, $enc_type)
+    public function testGetValue($str, $expected)
     {
-        $this->assertSame($expected, (new Fragment($str))->getContent($enc_type));
+        $this->assertSame($expected, (new Fragment($str))->decoded());
     }
 
     public function geValueProvider()
     {
         return [
-            [new Fragment(), null, Fragment::RFC3987_ENCODING],
-            [null, null, Fragment::RFC3987_ENCODING],
-            ['', '', Fragment::RFC3987_ENCODING],
-            ['0', '0', Fragment::RFC3987_ENCODING],
-            ['azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\', 'azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\', Fragment::RFC3987_ENCODING],
-            ['€', '€', Fragment::RFC3987_ENCODING],
-            ['%E2%82%AC', '€', Fragment::RFC3987_ENCODING],
-            ['frag ment', 'frag ment', Fragment::RFC3987_ENCODING],
-            ['frag%20ment', 'frag ment', Fragment::RFC3987_ENCODING],
-            ['frag%2-ment', 'frag%2-ment', Fragment::RFC3987_ENCODING],
-            ['fr%61gment', 'fr%61gment', Fragment::RFC3987_ENCODING],
-            ['frag+ment', 'frag%2Bment', Fragment::RFC1738_ENCODING],
+            [new Fragment(), null],
+            [null, null],
+            ['', ''],
+            ['0', '0'],
+            ['azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\', 'azAZ0-9/?-._~!$&\'()*+,;=:@%^/[]{}\"<>\\'],
+            ['€', '€'],
+            ['%E2%82%AC', '€'],
+            ['frag ment', 'frag ment'],
+            ['frag%20ment', 'frag ment'],
+            ['frag%2-ment', 'frag%2-ment'],
+            ['fr%61gment', 'fr%61gment'],
+            ['frag%2Bment', 'frag%2Bment'],
+            ['frag+ment', 'frag+ment'],
         ];
     }
 
     /**
      * @dataProvider getContentProvider
      * @param string $input
-     * @param int    $enc_type
      * @param string $expected
      * @covers ::__construct
      * @covers ::validateComponent
@@ -112,26 +110,18 @@ class FragmentTest extends TestCase
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      */
-    public function testGetContent($input, $enc_type, $expected)
+    public function testGetContent($input, $expected)
     {
-        $this->assertSame($expected, (new Fragment($input))->getContent($enc_type));
+        $this->assertSame($expected, (new Fragment($input))->getContent());
     }
 
     public function getContentProvider()
     {
         return [
-            ['€', Fragment::RFC3987_ENCODING, '€'],
-            ['€', Fragment::RFC3986_ENCODING, '%E2%82%AC'],
-            ['%E2%82%AC', Fragment::RFC3987_ENCODING, '€'],
-            ['%E2%82%AC', Fragment::RFC3986_ENCODING, '%E2%82%AC'],
-            ['action=v%61lue',  Fragment::RFC3986_ENCODING, 'action=v%61lue'],
+            ['€', '%E2%82%AC'],
+            ['%E2%82%AC', '%E2%82%AC'],
+            ['action=v%61lue', 'action=v%61lue'],
         ];
-    }
-
-    public function testInvalidEncodingTypeThrowException()
-    {
-        $this->expectException(UnknownEncoding::class);
-        (new Fragment('host'))->getContent(-1);
     }
 
     /**
@@ -166,17 +156,6 @@ class FragmentTest extends TestCase
     {
         $component = new Fragment('yolo');
         $this->assertEquals('"yolo"', json_encode($component));
-    }
-
-    /**
-     * @covers ::__debugInfo
-     */
-    public function testDebugInfo()
-    {
-        $component = new Fragment('yolo');
-        $debugInfo = $component->__debugInfo();
-        $this->assertArrayHasKey('component', $debugInfo);
-        $this->assertSame($component->getContent(), $debugInfo['component']);
     }
 
     /**

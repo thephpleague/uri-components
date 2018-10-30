@@ -54,9 +54,19 @@ final class Fragment extends Component
     /**
      * {@inheritdoc}
      */
-    public function getContent(int $enc_type = self::RFC3986_ENCODING)
+    public function getContent()
     {
-        return $this->encodeComponent($this->component, $enc_type, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
+        return $this->encodeComponent($this->component, PHP_QUERY_RFC3986, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
+    }
+
+    /**
+     * Returns the decoded query.
+     *
+     * @return null|string
+     */
+    public function decoded()
+    {
+        return $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_FRAGMENT_ENCODING, self::REGEXP_INVALID_URI_CHARS);
     }
 
     /**

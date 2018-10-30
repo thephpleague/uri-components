@@ -25,7 +25,6 @@ use League\Uri\Component\Host;
 use League\Uri\Component\IpAddress;
 use League\Uri\Component\Path;
 use League\Uri\Component\Query;
-use League\Uri\Converter\StringConverter;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 
@@ -182,7 +181,7 @@ function host_to_ascii($uri)
  */
 function host_to_unicode($uri)
 {
-    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->getContent(Host::RFC3987_ENCODING));
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->toUnicode());
 }
 
 /**
@@ -522,30 +521,4 @@ function replace_segment($uri, int $offset, $path)
 function sort_query($uri)
 {
     return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->sort());
-}
-
-/**
- * Returns the RFC3986 string representation of the given URI object or URI Component object.
- *
- * @param mixed  $payload
- * @param string $separator
- *
- * @return string
- */
-function to_ascii($payload, string $separator = '&'): string
-{
-    return StringConverter::convert($payload, StringConverter::RFC3986_ENCODING, $separator);
-}
-
-/**
- * Returns the RFC3987 string representation of the given URI object or URI Component object.
- *
- * @param mixed  $payload
- * @param string $separator
- *
- * @return string
- */
-function to_unicode($payload, string $separator = '&'): string
-{
-    return StringConverter::convert($payload, StringConverter::RFC3987_ENCODING, $separator);
 }
