@@ -23,7 +23,6 @@ use IteratorAggregate;
 use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\Exception\UnknownType;
 use Traversable;
 use TypeError;
 use function array_count_values;
@@ -96,7 +95,6 @@ final class Domain extends Host implements Countable, IteratorAggregate
      *
      * @throws TypeError        If $labels is not iterable
      * @throws InvalidHostLabel If the labels are malformed
-     * @throws UnknownType      If the type is not recognized/supported
      */
     public static function createFromLabels($labels): self
     {
@@ -161,14 +159,16 @@ final class Domain extends Host implements Countable, IteratorAggregate
         self::supportIdnHost();
 
         $domain_name = idn_to_ascii($domain_name, 0, INTL_IDNA_VARIANT_UTS46, $arr);
-        if (0 === $arr['errors']) {
-            $this->component = $domain_name;
-            $this->labels = array_reverse(explode(self::SEPARATOR, $domain_name));
-
-            return;
+        if (0 !== $arr['errors']) {
+            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
         }
 
-        throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
+        if (false !== strpos($domain_name, '%')) {
+            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
+        }
+
+        $this->component = $domain_name;
+        $this->labels = array_reverse(explode(self::SEPARATOR, $domain_name));
     }
 
     /**

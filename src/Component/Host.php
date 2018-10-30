@@ -168,14 +168,12 @@ class Host extends Component
     protected function parse(string $host = null): void
     {
         $this->ip_version = null;
-
+        $this->component = $host;
         if (null === $host || '' === $host) {
-            $this->component = $host;
             return;
         }
 
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            $this->component = $host;
             $this->ip_version = '4';
 
             return;
@@ -184,14 +182,12 @@ class Host extends Component
         if ('[' === $host[0] && ']' === substr($host, -1)) {
             $ip_host = substr($host, 1, -1);
             if ($this->isValidIpv6Hostname($ip_host)) {
-                $this->component = $host;
                 $this->ip_version = '6';
 
                 return;
             }
 
             if (preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
-                $this->component = $host;
                 $this->ip_version = $matches['version'];
 
                 return;
@@ -205,9 +201,8 @@ class Host extends Component
             $domain_name = strtolower($domain_name);
         }
 
+        $this->component = $domain_name;
         if (preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
-            $this->component = $domain_name;
-
             return;
         }
 
@@ -217,14 +212,16 @@ class Host extends Component
 
         self::supportIdnHost();
 
-        $domain_name = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
-        if (0 === $arr['errors']) {
-            $this->component = $domain_name;
-
-            return;
+        $domain_name = idn_to_ascii($domain_name, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+        if (0 !== $arr['errors']) {
+            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
         }
 
-        throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
+        if (false !== strpos($domain_name, '%')) {
+            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
+        }
+
+        $this->component = $domain_name;
     }
 
     /**

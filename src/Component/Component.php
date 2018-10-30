@@ -136,9 +136,8 @@ abstract class Component implements ComponentInterface
     /**
      * Filter the URI password component.
      *
-     * @param string $str
      */
-    protected function decodeComponent(string $str = null): ?string
+    protected function decodeComponent(string $str): ?string
     {
         return preg_replace_callback(self::REGEXP_ENCODED_CHARS, [$this, 'decodeMatches'], $str);
     }

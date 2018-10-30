@@ -82,13 +82,12 @@ final class IpAddress extends Host
      */
     protected function parse(string $host = null): void
     {
-        $this->component = $host;
-        $this->has_zone_identifier = false;
-
         if (null === $host || '' === $host) {
             throw new MalformedUriComponent('The IP host can not be an empty string or the null value');
         }
 
+        $this->component = $host;
+        $this->has_zone_identifier = false;
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $this->ip_version = '4';
 
@@ -173,7 +172,7 @@ final class IpAddress extends Host
      *
      * If the host is a not an IP this method will return null
      */
-    public function getIp(): ?string
+    public function getIp(): string
     {
         if ('4' === $this->ip_version) {
             return $this->component;

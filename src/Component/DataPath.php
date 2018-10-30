@@ -37,6 +37,7 @@ use function sprintf;
 use function str_replace;
 use function strlen;
 use function strtolower;
+use const FILEINFO_MIME;
 
 final class DataPath extends Path
 {
@@ -376,10 +377,6 @@ final class DataPath extends Path
      * Users must provide encoded characters.
      *
      * An empty parameters value is equivalent to removing the parameter.
-     *
-     *
-     * @throws Exception for invalid query strings.
-     *
      */
     public function withParameters(string $parameters): self
     {
