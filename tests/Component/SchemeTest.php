@@ -35,7 +35,7 @@ class SchemeTest extends TestCase
     {
         $component = new Scheme('ignace');
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     /**
@@ -48,8 +48,8 @@ class SchemeTest extends TestCase
     {
         $scheme = new Scheme('ftp');
         $http_scheme = $scheme->withContent('HTTP');
-        $this->assertSame('http', $http_scheme->getContent());
-        $this->assertSame('http', (string) $http_scheme);
+        self::assertSame('http', $http_scheme->getContent());
+        self::assertSame('http', (string) $http_scheme);
     }
 
     /**
@@ -59,8 +59,8 @@ class SchemeTest extends TestCase
     public function testWithContent()
     {
         $scheme = new Scheme('ftp');
-        $this->assertSame($scheme, $scheme->withContent('FtP'));
-        $this->assertNotSame($scheme, $scheme->withContent('Http'));
+        self::assertSame($scheme, $scheme->withContent('FtP'));
+        self::assertNotSame($scheme, $scheme->withContent('Http'));
     }
 
 
@@ -73,7 +73,7 @@ class SchemeTest extends TestCase
      */
     public function testValidScheme($scheme, $toString)
     {
-        $this->assertSame($toString, (string) new Scheme($scheme));
+        self::assertSame($toString, (string) new Scheme($scheme));
     }
 
     public function validSchemeProvider()
@@ -102,7 +102,7 @@ class SchemeTest extends TestCase
      */
     public function testInvalidScheme($scheme)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Scheme($scheme);
     }
 
@@ -117,7 +117,7 @@ class SchemeTest extends TestCase
 
     public function testInvalidSchemeType()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new Scheme(date_create());
     }
 }

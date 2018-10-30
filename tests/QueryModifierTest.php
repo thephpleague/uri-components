@@ -53,7 +53,7 @@ class QueryModifierTest extends TestCase
      */
     public function testMergeQuery(string $query, string $expected)
     {
-        $this->assertSame($expected, merge_query($this->uri, $query)->getQuery());
+        self::assertSame($expected, merge_query($this->uri, $query)->getQuery());
     }
 
     public function validMergeQueryProvider()
@@ -74,7 +74,7 @@ class QueryModifierTest extends TestCase
      */
     public function testAppendQuery(string $query, string $expected)
     {
-        $this->assertSame($expected, append_query($this->uri, $query)->getQuery());
+        self::assertSame($expected, append_query($this->uri, $query)->getQuery());
     }
 
     public function validAppendQueryProvider()
@@ -91,7 +91,7 @@ class QueryModifierTest extends TestCase
     public function testKsortQuery()
     {
         $uri = Http::createFromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
-        $this->assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', sort_query($uri)->getQuery());
+        self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', sort_query($uri)->getQuery());
     }
 
     /**
@@ -104,7 +104,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryValuesProcess(array $input, $expected)
     {
-        $this->assertSame($expected, remove_pairs($this->uri, $input)->getQuery());
+        self::assertSame($expected, remove_pairs($this->uri, $input)->getQuery());
     }
 
     public function validWithoutQueryValuesProvider()
@@ -125,7 +125,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, string $expected)
     {
-        $this->assertSame($expected, remove_params(create($uri), $input)->getQuery());
+        self::assertSame($expected, remove_params(create($uri), $input)->getQuery());
     }
 
     public function removeParamsProvider()

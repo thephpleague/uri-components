@@ -43,8 +43,8 @@ class PathTest extends TestCase
     public function testGetUriComponent($decoded, $encoded)
     {
         $path = new Path($decoded);
-        $this->assertSame($decoded, $path->decoded());
-        $this->assertSame($encoded, $path->getContent());
+        self::assertSame($decoded, $path->decoded());
+        self::assertSame($encoded, $path->getContent());
     }
 
     public function validPathEncoding()
@@ -109,8 +109,8 @@ class PathTest extends TestCase
     public function testWithContent()
     {
         $component = new Path('this is a normal path');
-        $this->assertSame($component, $component->withContent($component));
-        $this->assertNotSame($component, $component->withContent('new/path'));
+        self::assertSame($component, $component->withContent($component));
+        self::assertNotSame($component, $component->withContent('new/path'));
     }
 
     /**
@@ -120,7 +120,7 @@ class PathTest extends TestCase
      */
     public function testConstructorThrowsWithInvalidData($path)
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new Path($path);
     }
 
@@ -135,7 +135,7 @@ class PathTest extends TestCase
 
     public function testConstructorThrowsExceptionWithInvalidData()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Path("\0");
     }
 
@@ -143,7 +143,7 @@ class PathTest extends TestCase
     {
         $component = new Path(42);
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     /**
@@ -155,7 +155,7 @@ class PathTest extends TestCase
      */
     public function testWithoutDotSegments($path, $expected)
     {
-        $this->assertSame($expected, (new Path($path))->withoutDotSegments()->__toString());
+        self::assertSame($expected, (new Path($path))->withoutDotSegments()->__toString());
     }
 
     /**
@@ -181,7 +181,7 @@ class PathTest extends TestCase
      */
     public function testWithoutEmptySegments($path, $expected)
     {
-        $this->assertSame($expected, (string) (new Path($path))->withoutEmptySegments());
+        self::assertSame($expected, (string) (new Path($path))->withoutEmptySegments());
     }
 
     public function withoutEmptySegmentsProvider()
@@ -201,7 +201,7 @@ class PathTest extends TestCase
      */
     public function testHasTrailingSlash($path, $expected)
     {
-        $this->assertSame($expected, (new Path($path))->hasTrailingSlash());
+        self::assertSame($expected, (new Path($path))->hasTrailingSlash());
     }
 
     public function trailingSlashProvider()
@@ -223,7 +223,7 @@ class PathTest extends TestCase
      */
     public function testWithTrailingSlash($path, $expected)
     {
-        $this->assertSame($expected, (string) (new Path($path))->withTrailingSlash());
+        self::assertSame($expected, (string) (new Path($path))->withTrailingSlash());
     }
 
     public function withTrailingSlashProvider()
@@ -245,7 +245,7 @@ class PathTest extends TestCase
      */
     public function testWithoutTrailingSlash($path, $expected)
     {
-        $this->assertSame($expected, (string) (new Path($path))->withoutTrailingSlash());
+        self::assertSame($expected, (string) (new Path($path))->withoutTrailingSlash());
     }
 
     public function withoutTrailingSlashProvider()
@@ -267,7 +267,7 @@ class PathTest extends TestCase
      */
     public function testWithLeadingSlash($path, $expected)
     {
-        $this->assertSame($expected, (string) (new Path($path))->withLeadingSlash());
+        self::assertSame($expected, (string) (new Path($path))->withLeadingSlash());
     }
 
     public function withLeadingSlashProvider()
@@ -289,7 +289,7 @@ class PathTest extends TestCase
      */
     public function testWithoutLeadingSlash($path, $expected)
     {
-        $this->assertSame($expected, (string) (new Path($path))->withoutLeadingSlash());
+        self::assertSame($expected, (string) (new Path($path))->withoutLeadingSlash());
     }
 
     public function withoutLeadingSlashProvider()

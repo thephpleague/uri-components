@@ -38,7 +38,7 @@ class FragmentTest extends TestCase
      */
     public function testGetUriComponent($str, $encoded)
     {
-        $this->assertSame($encoded, (string) new Fragment($str));
+        self::assertSame($encoded, (string) new Fragment($str));
     }
 
     public function getUriComponentProvider()
@@ -77,7 +77,7 @@ class FragmentTest extends TestCase
      */
     public function testGetValue($str, $expected)
     {
-        $this->assertSame($expected, (new Fragment($str))->decoded());
+        self::assertSame($expected, (new Fragment($str))->decoded());
     }
 
     public function geValueProvider()
@@ -112,7 +112,7 @@ class FragmentTest extends TestCase
      */
     public function testGetContent($input, $expected)
     {
-        $this->assertSame($expected, (new Fragment($input))->getContent());
+        self::assertSame($expected, (new Fragment($input))->getContent());
     }
 
     public function getContentProvider()
@@ -129,13 +129,13 @@ class FragmentTest extends TestCase
      */
     public function testFailedFragmentException()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Fragment("\0");
     }
 
     public function testFailedFragmentTypeError()
     {
-        $this->expectException(TypeError::class);
+        self::expectException(TypeError::class);
         new Fragment(date_create());
     }
 
@@ -146,7 +146,7 @@ class FragmentTest extends TestCase
     {
         $component = new Fragment('yolo');
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     /**
@@ -155,7 +155,7 @@ class FragmentTest extends TestCase
     public function testJsonSerialize()
     {
         $component = new Fragment('yolo');
-        $this->assertEquals('"yolo"', json_encode($component));
+        self::assertEquals('"yolo"', json_encode($component));
     }
 
     /**
@@ -168,9 +168,9 @@ class FragmentTest extends TestCase
     {
         $fragment = new Fragment();
         $altFragment = $fragment->withContent(null);
-        $this->assertSame($fragment, $altFragment);
-        $this->assertNull($altFragment->getContent());
-        $this->assertSame('', $altFragment->__toString());
+        self::assertSame($fragment, $altFragment);
+        self::assertNull($altFragment->getContent());
+        self::assertSame('', $altFragment->__toString());
     }
 
     /**
@@ -181,7 +181,7 @@ class FragmentTest extends TestCase
     public function testWithContent()
     {
         $fragment = new Fragment('coucou');
-        $this->assertSame($fragment, $fragment->withContent('coucou'));
-        $this->assertNotSame($fragment, $fragment->withContent('Coucou'));
+        self::assertSame($fragment, $fragment->withContent('coucou'));
+        self::assertNotSame($fragment, $fragment->withContent('Coucou'));
     }
 }

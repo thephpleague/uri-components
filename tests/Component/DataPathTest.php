@@ -36,7 +36,7 @@ class DataPathTest extends TestCase
      */
     public function testCreateFromPathFailed($path)
     {
-        $this->expectException(PathNotFound::class);
+        self::expectException(PathNotFound::class);
         Path::createFromPath($path);
     }
 
@@ -47,7 +47,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailed($path)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Path($path);
     }
 
@@ -69,7 +69,7 @@ class DataPathTest extends TestCase
     {
         $component = new Path(';,Bonjour%20le%20monde%21');
         $generateComponent = eval('return '.var_export($component, true).';');
-        $this->assertEquals($component, $generateComponent);
+        self::assertEquals($component, $generateComponent);
     }
 
     /**
@@ -83,8 +83,8 @@ class DataPathTest extends TestCase
     public function testWithPath()
     {
         $path = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-        $this->assertSame($path, $path->withContent($path));
-        $this->assertNotSame($path, $path->withContent(''));
+        self::assertSame($path, $path->withContent($path));
+        self::assertNotSame($path, $path->withContent(''));
     }
 
     /**
@@ -96,7 +96,7 @@ class DataPathTest extends TestCase
      */
     public function testDefaultConstructor($path, $expected)
     {
-        $this->assertSame($expected, (string) (new Path($path)));
+        self::assertSame($expected, (string) (new Path($path)));
     }
 
     public function validPathContent()
@@ -136,8 +136,8 @@ class DataPathTest extends TestCase
     public function testCreateFromPath($path, $mimetype, $mediatype)
     {
         $uri = Path::createFromPath(__DIR__.'/data/'.$path);
-        $this->assertSame($mimetype, $uri->getMimeType());
-        $this->assertSame($mediatype, $uri->getMediaType());
+        self::assertSame($mimetype, $uri->getMimeType());
+        self::assertSame($mediatype, $uri->getMediaType());
     }
 
     public function validFilePath()
@@ -160,7 +160,7 @@ class DataPathTest extends TestCase
     {
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $newUri = $uri->withParameters('charset=us-ascii');
-        $this->assertSame($newUri, $uri);
+        self::assertSame($newUri, $uri);
     }
 
     /**
@@ -177,7 +177,7 @@ class DataPathTest extends TestCase
         $expected = 'charset=binary;foo=bar';
         $uri = Path::createFromPath(__DIR__.'/data/red-nose.gif');
         $newUri = $uri->withParameters($expected);
-        $this->assertSame($expected, $newUri->getParameters());
+        self::assertSame($expected, $newUri->getParameters());
     }
 
     /**
@@ -195,7 +195,7 @@ class DataPathTest extends TestCase
      */
     public function testWithParametersFailedWithInvalidParameters($path, $parameters)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         Path::createFromPath($path)->withParameters($parameters);
     }
 
@@ -222,7 +222,7 @@ class DataPathTest extends TestCase
      */
     public function testToBinary($uri)
     {
-        $this->assertTrue($uri->toBinary()->isBinaryData());
+        self::assertTrue($uri->toBinary()->isBinaryData());
     }
 
     /**
@@ -234,7 +234,7 @@ class DataPathTest extends TestCase
      */
     public function testToAscii($uri)
     {
-        $this->assertFalse($uri->toAscii()->isBinaryData());
+        self::assertFalse($uri->toAscii()->isBinaryData());
     }
 
     public function fileProvider()
@@ -254,7 +254,7 @@ class DataPathTest extends TestCase
      */
     public function testUpdateParametersFailed($parameters)
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
@@ -275,9 +275,9 @@ class DataPathTest extends TestCase
         $newFilePath = __DIR__.'/data/temp.gif';
         $uri = Path::createFromPath(__DIR__.'/data/red-nose.gif');
         $res = $uri->save($newFilePath);
-        $this->assertInstanceOf(SplFileObject::class, $res);
+        self::assertInstanceOf(SplFileObject::class, $res);
         $res = null;
-        $this->assertSame((string) $uri, (string) Path::createFromPath($newFilePath));
+        self::assertSame((string) $uri, (string) Path::createFromPath($newFilePath));
 
         // Ensure file handle of \SplFileObject gets closed.
         $res = null;
@@ -293,10 +293,10 @@ class DataPathTest extends TestCase
         $newFilePath = __DIR__.'/data/temp.txt';
         $uri = Path::createFromPath(__DIR__.'/data/hello-world.txt');
         $res = $uri->save($newFilePath);
-        $this->assertInstanceOf(SplFileObject::class, $res);
-        $this->assertSame((string) $uri, (string) Path::createFromPath($newFilePath));
+        self::assertInstanceOf(SplFileObject::class, $res);
+        self::assertSame((string) $uri, (string) Path::createFromPath($newFilePath));
         $data = file_get_contents($newFilePath);
-        $this->assertSame(base64_encode($data), $uri->getData());
+        self::assertSame(base64_encode($data), $uri->getData());
 
         // Ensure file handle of \SplFileObject gets closed.
         $res = null;
@@ -312,7 +312,7 @@ class DataPathTest extends TestCase
      */
     public function testDataPathConstructor()
     {
-        $this->assertSame('text/plain;charset=us-ascii,', (string) new Path());
+        self::assertSame('text/plain;charset=us-ascii,', (string) new Path());
     }
 
     /**
@@ -325,7 +325,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidBase64Encoded()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
@@ -339,7 +339,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidComponent()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
@@ -353,7 +353,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidString()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Path('text/plain;boulook€');
     }
 
@@ -367,7 +367,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidMimetype()
     {
-        $this->expectException(InvalidUriComponent::class);
+        self::expectException(InvalidUriComponent::class);
         new Path('data:toto\\bar;foo=bar,');
     }
 }
