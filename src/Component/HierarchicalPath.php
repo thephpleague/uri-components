@@ -164,7 +164,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function getExtension(): string
     {
-        list($basename, ) = explode(';', $this->getBasename(), 2);
+        [$basename, ] = explode(';', $this->getBasename(), 2);
 
         return pathinfo($basename, PATHINFO_EXTENSION);
     }
@@ -378,7 +378,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         $basename = end($this->segments);
-        list($ext, $param) = explode(';', $basename, 2) + [1 => null];
+        [$ext, $param] = explode(';', $basename, 2) + [1 => null];
         if ('' === $ext) {
             return $this;
         }

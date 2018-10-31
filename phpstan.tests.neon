@@ -1,8 +1,6 @@
 includes:
-    - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
     - vendor/phpstan/phpstan-phpunit/rules.neon
-    - vendor/phpstan/phpstan-phpunit/strictRules.neon
 parameters:
     ignoreErrors:
         - '#Parameter \#1 \$params of static method League\\Uri\\Component\\Query::createFromParams\(\) expects array\|Traversable, string given\.#'

@@ -213,7 +213,7 @@ class Host extends Component
         self::supportIdnHost();
 
         $domain_name = idn_to_ascii($domain_name, 0, INTL_IDNA_VARIANT_UTS46, $arr);
-        if (0 !== $arr['errors']) {
+        if (false === $domain_name || 0 !== $arr['errors']) {
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
         }
 
@@ -268,17 +268,18 @@ class Host extends Component
      */
     protected function isValidIpv6Hostname(string $host): bool
     {
-        list($ipv6, $scope) = explode('%', $host, 2) + [1 => null];
+        [$ipv6, $scope] = explode('%', $host, 2) + [1 => null];
         if (null === $scope) {
             return (bool) filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
         }
 
         $scope = rawurldecode('%'.$scope);
+        $packed_ip = (string) inet_pton((string) $ipv6);
 
         return !preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope)
             && !preg_match(self::REGEXP_GEN_DELIMS, $scope)
             && filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
-            && substr(inet_pton($ipv6) & self::ADDRESS_BLOCK, 0, 2) === self::ADDRESS_BLOCK;
+            && substr($packed_ip & self::ADDRESS_BLOCK, 0, 2) === self::ADDRESS_BLOCK;
     }
 
     /**
@@ -309,7 +310,7 @@ class Host extends Component
             return $this->component;
         }
 
-        return idn_to_utf8($this->component, 0, INTL_IDNA_VARIANT_UTS46);
+        return (string) idn_to_utf8($this->component, 0, INTL_IDNA_VARIANT_UTS46);
     }
 
     /**

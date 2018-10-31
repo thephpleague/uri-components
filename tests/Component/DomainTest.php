@@ -166,6 +166,7 @@ class DomainTest extends TestCase
             'invalid IDN domain' => ['a⒈com'],
             'invalid Host with fullwith (1)' =>  ['％００.com'],
             'invalid host with fullwidth escaped' =>   ['%ef%bc%85%ef%bc%94%ef%bc%91.com'],
+            'registered name not domaine name' => ['master..plan.be'],
         ];
     }
 
