@@ -34,20 +34,14 @@ use function array_shift;
 use function array_unshift;
 use function count;
 use function explode;
-use function idn_to_ascii;
 use function implode;
 use function is_array;
 use function is_scalar;
 use function iterator_to_array;
 use function method_exists;
 use function preg_match;
-use function rawurldecode;
 use function reset;
 use function sprintf;
-use function strtolower;
-use const FILTER_FLAG_IPV4;
-use const FILTER_VALIDATE_IP;
-use const INTL_IDNA_VARIANT_UTS46;
 
 /**
  * Value object representing a URI Host component.
@@ -124,51 +118,26 @@ final class Domain extends Host implements Countable, IteratorAggregate
      */
     protected function parse(string $host = null): void
     {
-        $this->component = $host;
+        parent::parse($host);
+        if (null !== $this->ip_version) {
+            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is an IP host', $host));
+        }
 
-        if (null === $host) {
-            $this->labels = [];
+        if (null === $this->component) {
             return;
         }
 
-        if ('' === $host) {
-            $this->labels = [$host];
-
+        if ('' === $this->component) {
+            $this->labels = [''];
             return;
         }
 
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is an IPv4 host', $host));
-        }
-
-        $domain_name = rawurldecode($host);
-        if (!preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name)) {
-            $domain_name = strtolower($domain_name);
-        }
-
-        if (preg_match(self::REGEXP_DOMAIN_NAME, $domain_name)) {
-            $this->component = $domain_name;
-            $this->labels = array_reverse(explode(self::SEPARATOR, $domain_name));
+        if (preg_match(self::REGEXP_DOMAIN_NAME, $this->component)) {
+            $this->labels = array_reverse(explode(self::SEPARATOR, $this->component));
             return;
         }
 
-        if (!preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name) || preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : the host contains invalid characters', $host));
-        }
-
-        self::supportIdnHost();
-
-        $domain_name = idn_to_ascii($domain_name, 0, INTL_IDNA_VARIANT_UTS46, $arr);
-        if (0 !== $arr['errors']) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
-        }
-
-        if (false !== strpos($domain_name, '%')) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
-        }
-
-        $this->component = $domain_name;
-        $this->labels = array_reverse(explode(self::SEPARATOR, $domain_name));
+        throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is a registered name', $host));
     }
 
     /**
@@ -211,6 +180,9 @@ final class Domain extends Host implements Countable, IteratorAggregate
         return array_keys($this->labels, $label, true);
     }
 
+    /**
+     * Tells whether the domain is absolute.
+     */
     public function isAbsolute(): bool
     {
         return count($this->labels) > 1 && '' === reset($this->labels);

@@ -208,10 +208,10 @@ class IpAddressTest extends TestCase
     {
         return [
             'ipv4' => ['127.0.0.1', '', '127.0.0.1'],
-            'ipv4 does not care about the version string' => ['127.0.0.1', 'foo', '127.0.0.1'],
+            'ipv4 does care about the version string' => ['127.0.0.1', 'FA', '[vFA.127.0.0.1]'],
             'ipv6' => ['::1', '', '[::1]'],
-            'ipv6 does not care about the version string' => ['::1', 'bar', '[::1]'],
-            'ipv6 with scope' => ['fe80:1234::%1', 'foo', '[fe80:1234::%251]'],
+            'ipv6 does care about the version string' => ['::1', '12', '[v12.::1]'],
+            'ipv6 with scope' => ['fe80:1234::%1', '', '[fe80:1234::%251]'],
             'valid IpFuture' => ['csucj.$&+;::', 'AF', '[vAF.csucj.$&+;::]'],
         ];
     }

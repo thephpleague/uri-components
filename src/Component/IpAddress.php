@@ -22,8 +22,6 @@ use League\Uri\Exception\MalformedUriComponent;
 use function explode;
 use function filter_var;
 use function in_array;
-use function preg_match;
-use function preg_replace;
 use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
@@ -57,10 +55,14 @@ final class IpAddress extends Host
     /**
      * Returns a host from an IP address.
      *
-     *
+     * @throws MalformedUriComponent If the $ip can not be converted into a Host
      */
     public static function createFromIp(string $ip, string $version = ''): self
     {
+        if ('' !== $version) {
+            return new self('[v'.$version.'.'.$ip.']');
+        }
+
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return new self($ip);
         }
@@ -70,11 +72,12 @@ final class IpAddress extends Host
         }
 
         if (false !== strpos($ip, '%')) {
-            list($ipv6, $zoneId) = explode('%', rawurldecode($ip), 2) + [1 => ''];
+            [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
+
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        return new self('[v'.$version.'.'.$ip.']');
+        throw new MalformedUriComponent(sprintf('`%s` is an invalid IP Host', $ip));
     }
 
     /**
@@ -82,37 +85,14 @@ final class IpAddress extends Host
      */
     protected function parse(string $host = null): void
     {
-        if (null === $host || '' === $host) {
-            throw new MalformedUriComponent('The IP host can not be an empty string or the null value');
+        parent::parse($host);
+        if (null === $this->ip_version || null === $host || '' === $host) {
+            throw new MalformedUriComponent(sprintf('`%s` is an invalid IP Host', $host));
         }
 
-        $this->component = $host;
-        $this->has_zone_identifier = false;
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            $this->ip_version = '4';
-
-            return;
+        if ('6' === $this->ip_version) {
+            $this->has_zone_identifier = false !== strpos(substr($host, 1, -1), '%');
         }
-
-        if ('[' !== $host[0] || ']' !== substr($host, -1)) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid IP literal format : required delimiters are missing', $host));
-        }
-
-        $ip_host = substr($host, 1, -1);
-        if ($this->isValidIpv6Hostname($ip_host)) {
-            $this->ip_version = '6';
-            $this->has_zone_identifier = false !== strpos($ip_host, '%');
-
-            return;
-        }
-
-        if (preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
-            $this->ip_version = $matches['version'];
-
-            return;
-        }
-
-        throw new MalformedUriComponent(sprintf('`%s` is an invalid IP Host', $host));
     }
 
     /**
@@ -174,17 +154,18 @@ final class IpAddress extends Host
      */
     public function getIp(): string
     {
+        $component = (string) $this->component;
         if ('4' === $this->ip_version) {
-            return $this->component;
+            return $component;
         }
 
-        $ip = substr($this->component, 1, -1);
-
+        $ip = substr($component, 1, -1);
         if ('6' !== $this->ip_version) {
-            return preg_replace('/^v(?<version>[A-F0-9]+)\./', '', $ip);
+            return substr($ip, strpos($ip, '.') + 1);
         }
 
-        if (false === ($pos = strpos($ip, '%'))) {
+        $pos = strpos($ip, '%');
+        if (false === $pos) {
             return $ip;
         }
 
@@ -205,7 +186,7 @@ final class IpAddress extends Host
             return $this;
         }
 
-        list($ipv6, ) = explode('%', substr($this->component, 1, -1));
+        [$ipv6, ] = explode('%', substr((string) $this->component, 1, -1));
 
         return self::createFromIp($ipv6);
     }

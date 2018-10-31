@@ -34,7 +34,7 @@ class DataPathTest extends TestCase
      * @covers ::createFromPath
      * @param string $path
      */
-    public function testCreateFromPathFailed($path)
+    public function testCreateFromPathFailed($path): void
     {
         self::expectException(PathNotFound::class);
         Path::createFromPath($path);
@@ -45,13 +45,13 @@ class DataPathTest extends TestCase
      * @covers ::parse
      * @param string $path
      */
-    public function testConstructorFailed($path)
+    public function testConstructorFailed($path): void
     {
         self::expectException(InvalidUriComponent::class);
         new Path($path);
     }
 
-    public function invalidDataUriPath()
+    public function invalidDataUriPath(): array
     {
         return [
             'invalid format' => ['/usr/bin/yeah'],
@@ -65,7 +65,7 @@ class DataPathTest extends TestCase
      * @covers ::filterParameters
      * @covers ::validateDocument
      */
-    public function testSetState()
+    public function testSetState(): void
     {
         $component = new Path(';,Bonjour%20le%20monde%21');
         $generateComponent = eval('return '.var_export($component, true).';');
@@ -80,7 +80,7 @@ class DataPathTest extends TestCase
      * @covers ::filterParameters
      * @covers ::validateDocument
      */
-    public function testWithPath()
+    public function testWithPath(): void
     {
         $path = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         self::assertSame($path, $path->withContent($path));
@@ -94,12 +94,12 @@ class DataPathTest extends TestCase
      * @covers ::validate
      * @covers ::__toString
      */
-    public function testDefaultConstructor($path, $expected)
+    public function testDefaultConstructor($path, $expected): void
     {
         self::assertSame($expected, (string) (new Path($path)));
     }
 
-    public function validPathContent()
+    public function validPathContent(): array
     {
         return [
             [
@@ -285,18 +285,26 @@ class DataPathTest extends TestCase
     }
 
     /**
+     * @covers ::createFromPath
      * @covers ::save
      * @covers ::getData
      */
     public function testRawSave()
     {
+        $context = stream_context_create([
+            'http'=> [
+                'method' => 'GET',
+                'header' => "Accept-language: en\r\nCookie: foo=bar\r\n",
+            ],
+        ]);
+
         $newFilePath = __DIR__.'/data/temp.txt';
-        $uri = Path::createFromPath(__DIR__.'/data/hello-world.txt');
+        $uri = Path::createFromPath(__DIR__.'/data/hello-world.txt', $context);
         $res = $uri->save($newFilePath);
         self::assertInstanceOf(SplFileObject::class, $res);
         self::assertSame((string) $uri, (string) Path::createFromPath($newFilePath));
         $data = file_get_contents($newFilePath);
-        self::assertSame(base64_encode($data), $uri->getData());
+        self::assertSame(base64_encode((string) $data), $uri->getData());
 
         // Ensure file handle of \SplFileObject gets closed.
         $res = null;

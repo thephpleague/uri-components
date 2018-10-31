@@ -26,7 +26,6 @@ use function base64_decode;
 use function base64_encode;
 use function count;
 use function explode;
-use function file_exists;
 use function file_get_contents;
 use function implode;
 use function preg_match;
@@ -105,19 +104,26 @@ final class DataPath extends Path
     /**
      * Create a new instance from a file path.
      *
-     * @throws PathNotFound If the File is not readable
      *
+     * @param  null|mixed   $context
+     * @throws PathNotFound If the File is not readable
      * @return static
      */
-    public static function createFromPath(string $path): self
+    public static function createFromPath(string $path, $context = null): self
     {
-        if (!file_exists($path) || !is_readable($path)) {
-            throw new PathNotFound(sprintf('`%s` does not exist or is not readabele', $path));
+        $args = [$path, false];
+        if (null !== $context) {
+            $args[] = $context;
+        }
+
+        $content = @file_get_contents(...$args);
+        if (false === $content) {
+            throw new PathNotFound(sprintf('`%s` failed to open stream: No such file or directory', $path));
         }
 
         return new static(
             str_replace(' ', '', (new finfo(FILEINFO_MIME))->file($path))
-            .';base64,'.base64_encode(file_get_contents($path))
+            .';base64,'.base64_encode($content)
         );
     }
 
@@ -148,8 +154,8 @@ final class DataPath extends Path
         }
 
         $is_binary_data = false;
-        list($mediatype, $this->document) = explode(',', $this->component, 2) + [1 => ''];
-        list($mimetype, $parameters) = explode(';', $mediatype, 2) + [1 => ''];
+        [$mediatype, $this->document] = explode(',', $this->component, 2) + [1 => ''];
+        [$mimetype, $parameters] = explode(';', $mediatype, 2) + [1 => ''];
         $this->mimetype = $this->filterMimeType($mimetype);
         $this->parameters = $this->filterParameters($parameters, $is_binary_data);
         $this->is_binary_data = $is_binary_data;
@@ -298,7 +304,7 @@ final class DataPath extends Path
     {
         $file = new SplFileObject($path, $mode);
         $data = $this->is_binary_data ? base64_decode($this->document) : rawurldecode($this->document);
-        $file->fwrite($data);
+        $file->fwrite((string) $data);
 
         return $file;
     }
@@ -356,15 +362,15 @@ final class DataPath extends Path
      */
     public function toAscii(): self
     {
-        if (!$this->is_binary_data) {
+        if (false === $this->is_binary_data) {
             return $this;
         }
 
         return new static($this->formatComponent(
             $this->mimetype,
             $this->getParameters(),
-            !$this->is_binary_data,
-            rawurlencode(base64_decode($this->document))
+            false,
+            rawurlencode((string) base64_decode($this->document))
         ));
     }
 
