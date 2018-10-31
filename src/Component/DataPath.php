@@ -40,38 +40,20 @@ use const FILEINFO_MIME;
 
 final class DataPath extends Path
 {
-    /**
-     * @internal
-     */
-    const DEFAULT_MIMETYPE = 'text/plain';
+    private const DEFAULT_MIMETYPE = 'text/plain';
 
-    /**
-     * @internal
-     */
-    const DEFAULT_PARAMETER = 'charset=us-ascii';
+    private const DEFAULT_PARAMETER = 'charset=us-ascii';
 
-    /**
-     * @internal
-     */
-    const BINARY_PARAMETER = 'base64';
+    private const BINARY_PARAMETER = 'base64';
 
-    /**
-     * @internal
-     */
-    const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
+    private const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
 
-    /**
-     * @internal
-     */
-    const REGEXP_DATAPATH_ENCODING = '/
+    private const REGEXP_DATAPATH_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+
         |%(?![A-Fa-f0-9]{2}))
     /x';
 
-    /**
-     * @internal
-     */
-    const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
+    private const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
 
     /**
      * The mediatype mimetype.

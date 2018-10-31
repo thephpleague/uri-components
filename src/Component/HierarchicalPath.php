@@ -51,9 +51,9 @@ use const PATHINFO_EXTENSION;
 
 final class HierarchicalPath extends Path implements Countable, IteratorAggregate
 {
-    const IS_ABSOLUTE = 1;
+    public const IS_ABSOLUTE = 1;
 
-    const IS_RELATIVE = 0;
+    public const IS_RELATIVE = 0;
 
     /**
      * @var string[]

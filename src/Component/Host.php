@@ -70,24 +70,20 @@ use const INTL_IDNA_VARIANT_UTS46;
 class Host extends Component
 {
     /**
-     * @internal
-     *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
      * invalid characters in host regular expression
      */
-    const REGEXP_INVALID_HOST_CHARS = '/
+    protected const REGEXP_INVALID_HOST_CHARS = '/
         [:\/?#\[\]@ ]  # gen-delims characters as well as the space character
     /ix';
 
     /**
-     * @internal
-     *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
      * General registered name regular expression
      */
-    const REGEXP_REGISTERED_NAME = '/(?(DEFINE)
+    protected const REGEXP_REGISTERED_NAME = '/(?(DEFINE)
         (?<unreserved>[a-z0-9_~\-])   # . is missing as it is used to separate labels
         (?<sub_delims>[!$&\'()*+,;=])
         (?<encoded>%[A-F0-9]{2})
@@ -96,13 +92,11 @@ class Host extends Component
     ^(?:(?&reg_name)\.)*(?&reg_name)\.?$/ix';
 
     /**
-     * @internal
-     *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
      * IPvFuture regular expression
      */
-    const REGEXP_IP_FUTURE = '/^
+    protected const REGEXP_IP_FUTURE = '/^
         v(?<version>[A-F0-9]+)\.
         (?:
             (?<unreserved>[a-z0-9_~\-\.])|
@@ -110,15 +104,9 @@ class Host extends Component
         )+
     $/ix';
 
-    /**
-     * @internal
-     */
-    const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
+    protected const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
 
-    /**
-     * @internal
-     */
-    const ADDRESS_BLOCK = "\xfe\x80";
+    protected const ADDRESS_BLOCK = "\xfe\x80";
 
     /**
      * @var string|null

@@ -33,17 +33,17 @@ class Path extends Component
     /**
      * @internal
      */
-    const SEPARATOR = '/';
+    protected const SEPARATOR = '/';
 
     /**
      * @internal
      */
-    const DOT_SEGMENTS = ['.' => 1, '..' => 1];
+    protected const DOT_SEGMENTS = ['.' => 1, '..' => 1];
 
     /**
      * @internal
      */
-    const REGEXP_PATH_ENCODING = '/
+    protected const REGEXP_PATH_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.\!\$&\'\(\)\*\+,;\=%\:\/@]+|
         %(?![A-Fa-f0-9]{2}))
     /x';

@@ -25,10 +25,7 @@ use function strtolower;
 
 final class Scheme extends Component
 {
-    /**
-     * @internal
-     */
-    const REGEXP_SCHEME = ',^[a-z]([-a-z0-9+.]+)?$,i';
+    private const REGEXP_SCHEME = ',^[a-z]([-a-z0-9+.]+)?$,i';
 
     /**
      * @var string|null
