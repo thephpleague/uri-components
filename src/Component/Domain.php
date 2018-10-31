@@ -140,7 +140,7 @@ final class Domain extends Host implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function getIterator()
+    public function getIterator(): iterable
     {
         foreach ($this->labels as $label) {
             yield $label;

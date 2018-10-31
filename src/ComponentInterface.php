@@ -43,10 +43,8 @@ interface ComponentInterface extends JsonSerializable
      * to encode, please refer to RFC 3986, Sections 2 and 3.
      *
      * If the instance is not defined an empty string is returned
-     *
-     * @return string
      */
-    public function __toString();
+    public function __toString(): string;
 
     /**
      * Returns the instance json representation.
@@ -56,10 +54,8 @@ interface ComponentInterface extends JsonSerializable
      * to encode, please refer to RFC 3986 or RFC 1738.
      *
      * If the instance is not defined null is returned
-     *
-     * @return string|null
      */
-    public function jsonSerialize();
+    public function jsonSerialize(): ?string;
 
     /**
      * Returns the instance content.
@@ -72,10 +68,8 @@ interface ComponentInterface extends JsonSerializable
      * or RFC 3987 Section 3. By default the content is encoded according to RFC3986
      *
      * If the instance is not defined null is returned
-     *
-     * @return string|null
      */
-    public function getContent();
+    public function getContent(): ?string;
 
     /**
      * Returns an instance with the specified content.

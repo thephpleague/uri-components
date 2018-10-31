@@ -90,7 +90,7 @@ final class Port extends Component
     /**
      * {@inheritdoc}
      */
-    public function withContent($content)
+    public function withContent($content): self
     {
         $content = $this->validate($this->filterComponent($content));
         if ($content === $this->component) {

@@ -70,7 +70,7 @@ final class Fragment extends Component
     /**
      * {@inheritdoc}
      */
-    public function withContent($content)
+    public function withContent($content): self
     {
         $content = $this->filterComponent($content);
         if ($content === $this->getContent()) {

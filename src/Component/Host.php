@@ -138,7 +138,7 @@ class Host extends Component
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties): self
+    public static function __set_state(array $properties)
     {
         return new static($properties['component']);
     }
@@ -159,8 +159,10 @@ class Host extends Component
      * Returns a host from an IP address.
      *
      * @throws MalformedUriComponent If the $ip can not be converted into a Host
+     *
+     * @return static
      */
-    public static function createFromIp(string $ip, string $version = ''): self
+    public static function createFromIp(string $ip, string $version = '')
     {
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
@@ -435,8 +437,10 @@ class Host extends Component
      * an instance without the host zone identifier according to RFC6874
      *
      * @see http://tools.ietf.org/html/rfc6874#section-4
+     *
+     * @return static
      */
-    public function withoutZoneIdentifier(): self
+    public function withoutZoneIdentifier()
     {
         if (!$this->has_zone_identifier) {
             return $this;
@@ -444,7 +448,7 @@ class Host extends Component
 
         [$ipv6, ] = explode('%', substr((string) $this->component, 1, -1));
 
-        return self::createFromIp($ipv6);
+        return static::createFromIp($ipv6);
     }
 
     /**
@@ -457,6 +461,6 @@ class Host extends Component
             return $this;
         }
 
-        return new self($content);
+        return new static($content);
     }
 }
