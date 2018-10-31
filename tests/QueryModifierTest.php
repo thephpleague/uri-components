@@ -36,7 +36,7 @@ class QueryModifierTest extends TestCase
      */
     private $uri;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->uri = Http::createFromString(
             'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar%20baz#doc3'
@@ -49,12 +49,12 @@ class QueryModifierTest extends TestCase
      * @dataProvider validMergeQueryProvider
      *
      */
-    public function testMergeQuery(string $query, string $expected)
+    public function testMergeQuery(string $query, string $expected): void
     {
         self::assertSame($expected, merge_query($this->uri, $query)->getQuery());
     }
 
-    public function validMergeQueryProvider()
+    public function validMergeQueryProvider(): array
     {
         return [
             ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
@@ -68,12 +68,12 @@ class QueryModifierTest extends TestCase
      * @dataProvider validAppendQueryProvider
      *
      */
-    public function testAppendQuery(string $query, string $expected)
+    public function testAppendQuery(string $query, string $expected): void
     {
         self::assertSame($expected, append_query($this->uri, $query)->getQuery());
     }
 
-    public function validAppendQueryProvider()
+    public function validAppendQueryProvider(): array
     {
         return [
             ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
@@ -84,25 +84,24 @@ class QueryModifierTest extends TestCase
     /**
      * @covers \League\Uri\sort_query
      */
-    public function testKsortQuery()
+    public function testKsortQuery(): void
     {
         $uri = Http::createFromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
         self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', sort_query($uri)->getQuery());
     }
 
     /**
-     * @covers \League\Uri\remove_pairs
-     *
      * @dataProvider validWithoutQueryValuesProvider
      *
-     * @param string $expected
+     * @covers \League\Uri\remove_pairs
+     *
      */
-    public function testWithoutQueryValuesProcess(array $input, $expected)
+    public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
         self::assertSame($expected, remove_pairs($this->uri, $input)->getQuery());
     }
 
-    public function validWithoutQueryValuesProvider()
+    public function validWithoutQueryValuesProvider(): array
     {
         return [
             [['1'], 'kingkong=toto&foo=bar%20baz'],
@@ -111,16 +110,16 @@ class QueryModifierTest extends TestCase
     }
 
     /**
-     * @covers \League\Uri\remove_params
-     *
      * @dataProvider removeParamsProvider
+     *
+     * @covers \League\Uri\remove_params
      */
-    public function testWithoutQueryParams(string $uri, array $input, string $expected)
+    public function testWithoutQueryParams(string $uri, array $input, string $expected): void
     {
         self::assertSame($expected, remove_params(create($uri), $input)->getQuery());
     }
 
-    public function removeParamsProvider()
+    public function removeParamsProvider(): array
     {
         return [
             [

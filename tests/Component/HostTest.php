@@ -20,6 +20,8 @@ use League\Uri\Component\Host;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function date_create;
+use function var_export;
 
 /**
  * @group host
@@ -30,7 +32,7 @@ class HostTest extends TestCase
     /**
      * @covers ::__set_state
      */
-    public function testSetState()
+    public function testSetState(): void
     {
         $host = new Host('uri.thephpleague.com');
         self::assertEquals($host, eval('return '.var_export($host, true).';'));
@@ -42,7 +44,7 @@ class HostTest extends TestCase
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
      */
-    public function testWithContent()
+    public function testWithContent(): void
     {
         $host = new Host('uri.thephpleague.com');
         self::assertSame($host, $host->withContent('uri.thephpleague.com'));
@@ -61,13 +63,14 @@ class HostTest extends TestCase
      * @covers ::isValidIpv6Hostname
      * @covers ::toUnicode
      */
-    public function testValidHost($host, $uri, $iri)
+    public function testValidHost($host, ?string $uri, ?string $iri): void
     {
         $host = new Host($host);
+        self::assertSame($uri, $host->toAscii());
         self::assertSame($iri, $host->toUnicode());
     }
 
-    public function validHostProvider()
+    public function validHostProvider(): array
     {
         return [
             'ipv4' => [
@@ -102,7 +105,7 @@ class HostTest extends TestCase
             ],
             'null' => [
                 null,
-                '',
+                null,
                 null,
             ],
             'dot ending' => [
@@ -144,19 +147,18 @@ class HostTest extends TestCase
     }
 
     /**
-     * @param string $invalid
      * @dataProvider invalidHostProvider
      * @covers ::__construct
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
      */
-    public function testInvalidHost($invalid)
+    public function testInvalidHost(string $invalid): void
     {
         self::expectException(InvalidUriComponent::class);
         new Host($invalid);
     }
 
-    public function invalidHostProvider()
+    public function invalidHostProvider(): array
     {
         return [
             'empty label' => ['tot.    .coucou.com'],
@@ -180,7 +182,7 @@ class HostTest extends TestCase
         ];
     }
 
-    public function testTypeErrorOnHostConstruction()
+    public function testTypeErrorOnHostConstruction(): void
     {
         self::expectException(TypeError::class);
         new Host(date_create());
@@ -195,14 +197,14 @@ class HostTest extends TestCase
      * @covers ::toAscii
      * @covers ::toUnicode
      */
-    public function testValidUnicodeHost($unicode, $ascii)
+    public function testValidUnicodeHost(string $unicode, string $ascii): void
     {
         $host = new Host($unicode);
         self::assertSame($ascii, $host->toAscii());
         self::assertSame($unicode, $host->toUnicode());
     }
 
-    public function hostnamesProvider()
+    public function hostnamesProvider(): array
     {
         // http://en.wikipedia.org/wiki/.test_(international_domain_name)#Test_TLDs
         return [

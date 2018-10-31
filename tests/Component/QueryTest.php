@@ -21,6 +21,10 @@ use League\Uri\Component\Query;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function date_create;
+use function is_array;
+use function json_encode;
+use function var_export;
 
 /**
  * @group query
@@ -33,7 +37,7 @@ class QueryTest extends TestCase
      */
     protected $query;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->query = new Query('kingkong=toto');
     }
@@ -41,7 +45,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::__set_state
      */
-    public function testSetState()
+    public function testSetState(): void
     {
         $generateComponent = eval('return '.var_export($this->query, true).';');
         self::assertEquals($this->query, $generateComponent);
@@ -51,13 +55,13 @@ class QueryTest extends TestCase
      * @covers ::filterSeparator
      * @dataProvider invalidSeparatorProvider
      */
-    public function testInvalidSeparator($separator)
+    public function testInvalidSeparator(string $separator): void
     {
         self::expectException(InvalidUriComponent::class);
         new Query('foo=bar', Query::RFC3986_ENCODING, $separator);
     }
 
-    public function invalidSeparatorProvider()
+    public function invalidSeparatorProvider(): array
     {
         return [
             'separator can not be `=`' => ['='],
@@ -68,7 +72,7 @@ class QueryTest extends TestCase
      * @covers ::getSeparator
      * @covers ::withSeparator
      */
-    public function testSeparator()
+    public function testSeparator(): void
     {
         $query = new Query('foo=bar&kingkong=toto');
         $new_query = $query->withSeparator('|');
@@ -80,7 +84,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withContent
      */
-    public function testWithContent()
+    public function testWithContent(): void
     {
         self::assertSame($this->query, $this->query->withContent('kingkong=toto'));
         self::assertNotSame($this->query, $this->query->withContent('kingkong=tata'));
@@ -90,7 +94,7 @@ class QueryTest extends TestCase
      * @covers ::getIterator
      * @covers ::pairs
      */
-    public function testIterator()
+    public function testIterator(): void
     {
         $query = new Query('a=1&b=2&c=3&a=4');
 
@@ -117,26 +121,29 @@ class QueryTest extends TestCase
     /**
      * @covers ::jsonSerialize
      */
-    public function testJsonEncode()
+    public function testJsonEncode(): void
     {
         $query = new Query('a=1&b=2&c=3&a=4&a=3%20d');
         self::assertSame('"a=1&b=2&c=3&a=4&a=3+d"', json_encode($query));
     }
 
     /**
-     * @covers ::createFromPairs
      * @dataProvider queryProvider
+     *
+     * @covers ::__construct
+     * @covers ::createFromPairs
+     *
      * @param string|array $input
      * @param string       $expected
      */
-    public function testGetUriComponent($input, $expected)
+    public function testGetUriComponent($input, $expected): void
     {
         $query = is_array($input) ? Query::createFromPairs($input) : new Query($input);
 
         self::assertSame($expected, (string) $query);
     }
 
-    public function queryProvider()
+    public function queryProvider(): array
     {
         $unreserved = 'a-zA-Z0-9.-_~!$&\'()*+,;=:@';
 
@@ -168,7 +175,7 @@ class QueryTest extends TestCase
      * @covers ::createFromPairs
      * @covers ::filterPair
      */
-    public function testCreateFromPairsWithTraversable()
+    public function testCreateFromPairsWithTraversable(): void
     {
         $query = Query::createFromPairs(new ArrayIterator([['john', 'doe the john']]));
         self::assertCount(1, $query);
@@ -177,7 +184,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::createFromPairs
      */
-    public function testcreateFromPairsWithQueryObject()
+    public function testcreateFromPairsWithQueryObject(): void
     {
         $query = new Query('a=1&b=2');
         self::assertEquals($query, Query::createFromPairs($query));
@@ -186,7 +193,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::createFromPairs
      */
-    public function testCreateFromPairsFailedWithBadIterable()
+    public function testCreateFromPairsFailedWithBadIterable(): void
     {
         self::expectException(InvalidUriComponent::class);
         Query::createFromPairs([['toto' => ['foo' => [(object) []]]]]);
@@ -200,7 +207,7 @@ class QueryTest extends TestCase
      * @covers ::toRFC1738
      * @covers ::getContent
      */
-    public function testNormalization()
+    public function testNormalization(): void
     {
         self::assertSame('foo=bar', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->toRFC3986());
         self::assertNull((new Query('&=bar&='))->withoutEmptyPairs()->toRFC1738());
@@ -209,22 +216,24 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @dataProvider validAppendValue
+     *
      * @covers ::append
      * @covers ::toRFC3986
      * @covers ::getContent
      * @covers ::filterEmptyValue
      *
-     * @dataProvider validAppendValue
-     * @param null|string $query
-     * @param null|string $expected
+     * @param ?string    $query
+     * @param mixed|null $append_data
+     * @param ?string    $expected
      */
-    public function testAppend($query, $append_data, $expected)
+    public function testAppend(?string $query, $append_data, ?string $expected): void
     {
         $base = new Query($query);
         self::assertSame($expected, $base->append($append_data)->toRFC3986());
     }
 
-    public function validAppendValue()
+    public function validAppendValue(): array
     {
         return [
             ['', 'foo=bar&foo=baz', 'foo=bar&foo=baz'],
@@ -255,7 +264,7 @@ class QueryTest extends TestCase
      * @covers ::get
      * @covers ::getAll
      */
-    public function testGetParameter()
+    public function testGetParameter(): void
     {
         $query = new Query('kingkong=toto&kingkong=barbaz&&=&=b');
         self::assertNull($query->get('togo'));
@@ -269,7 +278,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::decoded
      */
-    public function testDecodedReturnsNull()
+    public function testDecodedReturnsNull(): void
     {
         self::assertNull((new Query())->decoded());
     }
@@ -277,7 +286,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::has
      */
-    public function testHas()
+    public function testHas(): void
     {
         self::assertTrue($this->query->has('kingkong'));
         self::assertFalse($this->query->has('togo'));
@@ -286,7 +295,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::count
      */
-    public function testCountable()
+    public function testCountable(): void
     {
         $query = new Query('kingkong=toto&kingkong=barbaz');
         self::assertCount(2, $query);
@@ -295,7 +304,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::get
      */
-    public function testStringWithoutContent()
+    public function testStringWithoutContent(): void
     {
         $query = new Query('foo&bar&baz');
         self::assertNull($query->get('foo'));
@@ -304,20 +313,17 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @dataProvider withoutPairProvider
+     *
      * @covers ::withoutPair
      *
-     * @param string $origin
-     * @param array  $without
-     * @param string $result
-     *
-     * @dataProvider withoutPairProvider
      */
-    public function testwithoutPair($origin, $without, $result)
+    public function testwithoutPair(string $origin, array $without, string $result): void
     {
         self::assertSame($result, (string) (new Query($origin))->withoutPair(...$without));
     }
 
-    public function withoutPairProvider()
+    public function withoutPairProvider(): array
     {
         return [
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
@@ -333,7 +339,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutPair
      */
-    public function testwithoutPairGetterMethod()
+    public function testwithoutPairGetterMethod(): void
     {
         $query = (new Query())->appendTo('first', 1);
         self::assertTrue($query->has('first'));
@@ -349,17 +355,16 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::withoutParam
-     *
-     *
      * @dataProvider withoutParamProvider
+     *
+     * @covers ::withoutParam
      */
-    public function testwithoutParam(array $origin, array $without, string $expected)
+    public function testwithoutParam(array $origin, array $without, string $expected): void
     {
         self::assertSame($expected, (string) Query::createFromParams($origin)->withoutParam(...$without));
     }
 
-    public function withoutParamProvider()
+    public function withoutParamProvider(): array
     {
         $data = [
             'filter' => [
@@ -411,7 +416,7 @@ class QueryTest extends TestCase
      * @covers ::createFromParams
      * @covers ::toParams
      */
-    public function testwithoutParamDoesNotChangeParamsKey()
+    public function testwithoutParamDoesNotChangeParamsKey(): void
     {
         $data = [
             'foo' => [
@@ -431,7 +436,7 @@ class QueryTest extends TestCase
      * @covers ::createFromParams
      * @covers ::toParams
      */
-    public function testCreateFromParamsWithTraversable()
+    public function testCreateFromParamsWithTraversable(): void
     {
         $data = [
             'foo' => [
@@ -443,7 +448,7 @@ class QueryTest extends TestCase
         self::assertSame($data, $query->toParams());
     }
 
-    public function testCreateFromParamsWithQueryObject()
+    public function testCreateFromParamsWithQueryObject(): void
     {
         $query = new Query('a=1&b=2');
         self::assertEquals($query, Query::createFromParams($query));
@@ -452,7 +457,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::createFromParams
      */
-    public function testCreateFromParamsThrowsException()
+    public function testCreateFromParamsThrowsException(): void
     {
         self::expectException(TypeError::class);
         Query::createFromParams('foo=bar');
@@ -462,7 +467,7 @@ class QueryTest extends TestCase
      * @covers ::withoutNumericIndices
      * @covers ::encodeNumericIndices
      */
-    public function testWithoutNumericIndices()
+    public function testWithoutNumericIndices(): void
     {
         $data = [
             'filter' => [
@@ -493,7 +498,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutNumericIndices
      */
-    public function testWithoutNumericIndicesRetursSameInstance()
+    public function testWithoutNumericIndicesRetursSameInstance(): void
     {
         self::assertSame($this->query->withoutNumericIndices(), $this->query);
     }
@@ -502,7 +507,7 @@ class QueryTest extends TestCase
      * @covers ::withoutNumericIndices
      * @covers ::decoded
      */
-    public function testWithoutNumericIndicesReturnsAnother()
+    public function testWithoutNumericIndicesReturnsAnother(): void
     {
         $query = new Query('foo[3]');
         self::assertSame('foo[]', $query->withoutNumericIndices()->decoded());
@@ -511,7 +516,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutNumericIndices
      */
-    public function testWithoutNumericIndicesDoesNotAffectPairValue()
+    public function testWithoutNumericIndicesDoesNotAffectPairValue(): void
     {
         $query = Query::createFromParams(['foo' => 'bar[3]']);
         self::assertSame($query, $query->withoutNumericIndices());
@@ -520,7 +525,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::createFromParams
      */
-    public function testCreateFromParamsOnEmptyParams()
+    public function testCreateFromParamsOnEmptyParams(): void
     {
         $query = Query::createFromParams([]);
         self::assertSame($query, $query->withoutNumericIndices());
@@ -529,7 +534,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::createFromParams
      */
-    public function testCreateFromParamsWithObject()
+    public function testCreateFromParamsWithObject(): void
     {
         $query = Query::createFromParams(date_create());
         self::assertTrue($query->has('timezone'));
@@ -540,7 +545,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::getContent
      */
-    public function testGetContentOnEmptyContent()
+    public function testGetContentOnEmptyContent(): void
     {
         self::assertNull(Query::createFromParams([])->getContent());
     }
@@ -548,7 +553,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::getContent
      */
-    public function testGetContentOnHavingContent()
+    public function testGetContentOnHavingContent(): void
     {
         self::assertSame('foo=bar', Query::createFromParams(['foo' => 'bar'])->getContent());
     }
@@ -556,7 +561,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::__toString
      */
-    public function testGetContentOnToString()
+    public function testGetContentOnToString(): void
     {
         self::assertSame('foo=bar', (string) Query::createFromParams(['foo' => 'bar']));
     }
@@ -564,7 +569,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withSeparator
      */
-    public function testWithSeperatorOnHavingSeparator()
+    public function testWithSeperatorOnHavingSeparator(): void
     {
         $query = Query::createFromParams(['foo' => '/bar']);
         self::assertSame($query, $query->withSeparator('&'));
@@ -573,7 +578,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutNumericIndices
      */
-    public function testWithoutNumericIndicesOnEmptyContent()
+    public function testWithoutNumericIndicesOnEmptyContent(): void
     {
         $query = Query::createFromParams([]);
         self::assertSame($query, $query->withoutNumericIndices());
@@ -583,7 +588,7 @@ class QueryTest extends TestCase
      * @covers ::sort
      * @covers ::reducePairs
      */
-    public function testSort()
+    public function testSort(): void
     {
         $query = (new Query())
             ->appendTo('a', 3)
@@ -599,19 +604,20 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @dataProvider sameQueryAfterSortingProvider
+     *
      * @covers ::sort
      * @covers ::reducePairs
-     *
-     * @dataProvider sameQueryAfterSortingProvider
+     * @param ?string $query
      */
-    public function testSortReturnSameInstance($query)
+    public function testSortReturnSameInstance(?string $query): void
     {
         $query = new Query($query);
         $sortedQuery = $query->sort();
         self::assertSame($sortedQuery, $query);
     }
 
-    public function sameQueryAfterSortingProvider()
+    public function sameQueryAfterSortingProvider(): array
     {
         return [
             'same already sorted' => ['a=3&a=1&b=2'],
@@ -621,22 +627,20 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @dataProvider provideWithPairData
+     *
      * @covers ::withPair
      * @covers ::filterPair
      *
-     * @dataProvider provideWithPairData
-     *
-     * @param null|string $query
-     * @param string      $key
-     * @param array       $expected
+     * @param ?string    $query
+     * @param mixed|null $value
      */
-    public function testWithPair($query, $key, $value, $expected)
+    public function testWithPair(?string $query, string $key, $value, array $expected): void
     {
-        $query = new Query($query);
-        self::assertSame($expected, $query->withPair($key, $value)->getAll($key));
+        self::assertSame($expected, (new Query($query))->withPair($key, $value)->getAll($key));
     }
 
-    public function provideWithPairData()
+    public function provideWithPairData(): array
     {
         return [
             [
@@ -671,7 +675,7 @@ class QueryTest extends TestCase
      * @covers ::addPair
      * @covers ::filterPair
      */
-    public function testWithPairBasic()
+    public function testWithPairBasic(): void
     {
         self::assertSame('a=B&c=d', (string) (new Query('a=b&c=d'))->withPair('a', 'B'));
         self::assertSame('a=B&c=d', (string) (new Query('a=b&c=d&a=e'))->withPair('a', 'B'));
@@ -679,19 +683,20 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @dataProvider mergeBasicProvider
+     *
      * @covers ::merge
      * @covers ::addPair
      * @covers ::filterPair
      *
-     * @dataProvider mergeBasicProvider
-     *
+     * @param mixed|null $dest
      */
-    public function testMergeBasic($src, $dest, $expected)
+    public function testMergeBasic(string $src, $dest, string $expected): void
     {
         self::assertSame($expected, (string) (new Query($src))->merge($dest));
     }
 
-    public function mergeBasicProvider()
+    public function mergeBasicProvider(): array
     {
         return [
             'merging null' => [
@@ -734,7 +739,7 @@ class QueryTest extends TestCase
      * @covers ::filterPair
      * @covers ::get
      */
-    public function testWithPairGetterMethods()
+    public function testWithPairGetterMethods(): void
     {
         $query = new Query('a=1&a=2&a=3');
         self::assertSame('1', $query->get('a'));
@@ -755,7 +760,7 @@ class QueryTest extends TestCase
      * @covers ::filterPair
      * @covers ::get
      */
-    public function testMergeGetterMethods()
+    public function testMergeGetterMethods(): void
     {
         $query = new Query('a=1&a=2&a=3');
         self::assertSame('1', $query->get('a'));
@@ -774,28 +779,28 @@ class QueryTest extends TestCase
      * @covers ::withPair
      * @covers ::filterPair
      */
-    public function testWithPairThrowsException()
+    public function testWithPairThrowsException(): void
     {
         self::expectException(TypeError::class);
         (new Query(null))->withPair('foo', (object) ['data']);
     }
 
     /**
+     * @dataProvider provideWithoutDuplicatesData
+     *
      * @covers ::withoutDuplicates
      * @covers ::removeDuplicates
      *
-     * @dataProvider provideWithoutDuplicatesData
-     *
-     * @param null|string $query
-     * @param null|string $expected
+     * @param ?string $query
+     * @param ?string $expected
      */
-    public function testWithoutDuplicates($query, $expected)
+    public function testWithoutDuplicates(?string $query, ?string $expected): void
     {
         $query = new Query($query);
         self::assertSame($expected, $query->withoutDuplicates()->getContent());
     }
 
-    public function provideWithoutDuplicatesData()
+    public function provideWithoutDuplicatesData(): array
     {
         return [
             'empty query' => [null, null],
@@ -809,7 +814,7 @@ class QueryTest extends TestCase
      * @covers ::filterPair
      * @covers ::appendTo
      */
-    public function testAppendToSameName()
+    public function testAppendToSameName(): void
     {
         $query = new Query(null);
         self::assertSame('a=b', (string) $query->appendTo('a', 'b'));
@@ -826,7 +831,7 @@ class QueryTest extends TestCase
      * @covers ::filterPair
      * @covers ::appendTo
      */
-    public function testAppendToWithEmptyString()
+    public function testAppendToWithEmptyString(): void
     {
         $query = new Query(null);
         self::assertSame('', (string) $query->appendTo('', null));
@@ -850,7 +855,7 @@ class QueryTest extends TestCase
      * @covers ::get
      * @covers ::getAll
      */
-    public function testAppendToWithGetter()
+    public function testAppendToWithGetter(): void
     {
         $query = (new Query(null))
             ->appendTo('first', 1)
@@ -873,7 +878,7 @@ class QueryTest extends TestCase
      * @covers ::filterPair
      * @covers ::appendTo
      */
-    public function testAppendToThrowsException()
+    public function testAppendToThrowsException(): void
     {
         self::expectException(TypeError::class);
         (new Query())->appendTo('foo', ['bar']);

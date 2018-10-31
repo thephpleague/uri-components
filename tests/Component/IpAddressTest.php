@@ -27,21 +27,12 @@ use PHPUnit\Framework\TestCase;
 class IpAddressTest extends TestCase
 {
     /**
-     * @covers ::__set_state
-     */
-    public function testSetState()
-    {
-        $host = new Host('[::1]');
-        self::assertEquals($host, eval('return '.var_export($host, true).';'));
-    }
-
-    /**
      * @covers ::__construct
      * @covers ::withContent
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
      */
-    public function testWithContent()
+    public function testWithContent(): void
     {
         $host = new Host('127.0.0.1');
         self::assertSame($host, $host->withContent('127.0.0.1'));
@@ -51,16 +42,9 @@ class IpAddressTest extends TestCase
 
     /**
      * Test valid IpAddress.
-     * @param string|null $host
-     * @param bool        $isDomain
-     * @param bool        $isIp
-     * @param bool        $isIpv4
-     * @param bool        $isIpv6
-     * @param bool        $isIpFuture
-     * @param string|null $ipVersion
-     * @param string      $uri
-     * @param string      $ip
-     * @param string      $iri
+     * @param mixed|null $host
+     * @param string     $ip
+     * @param ?string    $ipVersion
      * @dataProvider validIpAddressProvider
      * @covers ::__construct
      * @covers ::parse
@@ -72,8 +56,18 @@ class IpAddressTest extends TestCase
      * @covers ::getIp
      * @covers ::getIpVersion
      */
-    public function testValidIpAddress($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
-    {
+    public function testValidIpAddress(
+        $host,
+        bool $isDomain,
+        bool $isIp,
+        bool $isIpv4,
+        bool $isIpv6,
+        bool $isIpFuture,
+        ?string $ipVersion,
+        string $uri,
+        ?string $ip,
+        string $iri
+    ): void {
         $host = new Host($host);
         self::assertSame($isIp, $host->isIp());
         self::assertSame($isIpv4, $host->isIpv4());
@@ -83,10 +77,10 @@ class IpAddressTest extends TestCase
         self::assertSame($ipVersion, $host->getIpVersion());
     }
 
-    public function validIpAddressProvider()
+    public function validIpAddressProvider(): array
     {
         return [
-            'ipv4' => [
+            'ip host object' => [
                 Host::createFromIp('127.0.0.1'),
                 false,
                 true,
@@ -97,6 +91,8 @@ class IpAddressTest extends TestCase
                 '127.0.0.1',
                 '127.0.0.1',
                 '127.0.0.1',
+            ],
+            'ipv4' => [
                 '127.0.0.1',
                 false,
                 true,
@@ -161,17 +157,14 @@ class IpAddressTest extends TestCase
 
     /**
      * @dataProvider createFromIpValid
-     * @param string $input
-     * @param string $version
-     * @param string $expected
      * @covers ::createFromIp
      */
-    public function testCreateFromIp($input, $version, $expected)
+    public function testCreateFromIp(string $input, string $version, string $expected): void
     {
         self::assertSame($expected, (string) Host::createFromIp($input, $version));
     }
 
-    public function createFromIpValid()
+    public function createFromIpValid(): array
     {
         return [
             'ipv4' => ['127.0.0.1', '', '127.0.0.1'],
@@ -185,16 +178,15 @@ class IpAddressTest extends TestCase
 
     /**
      * @dataProvider createFromIpFailed
-     * @param string $input
      * @covers ::createFromIp
      */
-    public function testCreateFromIpFailed($input)
+    public function testCreateFromIpFailed(string $input): void
     {
         self::expectException(InvalidUriComponent::class);
         Host::createFromIp($input);
     }
 
-    public function createFromIpFailed()
+    public function createFromIpFailed(): array
     {
         return [
             'false ipv4' => ['127.0.0'],
@@ -204,17 +196,15 @@ class IpAddressTest extends TestCase
     }
 
     /**
-     * @param string $host
-     * @param string $expected
      * @dataProvider withoutZoneIdentifierProvider
      * @covers ::withoutZoneIdentifier
      */
-    public function testWithoutZoneIdentifier($host, $expected)
+    public function testWithoutZoneIdentifier(string $host, string $expected): void
     {
         self::assertSame($expected, (string) (new Host($host))->withoutZoneIdentifier());
     }
 
-    public function withoutZoneIdentifierProvider()
+    public function withoutZoneIdentifierProvider(): array
     {
         return [
             'ipv4 host' => ['127.0.0.1', '127.0.0.1'],
@@ -225,17 +215,15 @@ class IpAddressTest extends TestCase
     }
 
     /**
-     * @param string $host
-     * @param bool   $expected
      * @dataProvider hasZoneIdentifierProvider
      * @covers ::hasZoneIdentifier
      */
-    public function testHasZoneIdentifier($host, $expected)
+    public function testHasZoneIdentifier(string $host, bool $expected): void
     {
         self::assertSame($expected, (new Host($host))->hasZoneIdentifier());
     }
 
-    public function hasZoneIdentifierProvider()
+    public function hasZoneIdentifierProvider(): array
     {
         return [
             ['127.0.0.1', false],

@@ -20,6 +20,8 @@ use League\Uri\Component\UserInfo;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function date_create;
+use function var_export;
 
 /**
  * @group userinfo
@@ -29,10 +31,7 @@ class UserInfoTest extends TestCase
 {
     /**
      * @dataProvider userInfoProvider
-     * @param string|null $expected_user
-     * @param string|null $expected_pass
-     * @param string      $expected_str
-     * @param string      $iri_str
+     *
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::getContent
@@ -43,15 +42,21 @@ class UserInfoTest extends TestCase
      * @covers ::getPass
      * @covers ::getUser
      * @covers ::encodeComponent
+     *
+     * @param mixed|null $user
+     * @param mixed|null $pass
+     * @param ?string    $expected_user
+     * @param ?string    $expected_pass
+     * @param string     $iri_str
      */
     public function testConstructor(
         $user,
         $pass,
-        $expected_user,
-        $expected_pass,
-        $expected_str,
-        $iri_str
-    ) {
+        ?string $expected_user,
+        ?string $expected_pass,
+        string $expected_str,
+        ?string $iri_str
+    ): void {
         $userinfo = new UserInfo($user, $pass);
         self::assertSame($expected_user, $userinfo->getUser());
         self::assertSame($expected_pass, $userinfo->getPass());
@@ -59,7 +64,7 @@ class UserInfoTest extends TestCase
         self::assertSame($iri_str, $userinfo->decoded());
     }
 
-    public function userInfoProvider()
+    public function userInfoProvider(): array
     {
         return [
             [
@@ -148,21 +153,31 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider createFromStringProvider
-     * @param string $expected_str
+     *
      * @covers ::withContent
      * @covers ::getUser
      * @covers ::getPass
      * @covers ::decodeMatches
+     *
+     * @param mixed|null $str
+     * @param ?string    $expected_user
+     * @param ?string    $expected_pass
+     * @param ?string    $user
      */
-    public function testWithContent($user, $str, $expected_user, $expected_pass, $expected_str)
-    {
+    public function testWithContent(
+        ?string $user,
+        $str,
+        ?string $expected_user,
+        ?string $expected_pass,
+        string $expected_str
+    ): void {
         $conn = (new UserInfo($user))->withContent($str);
         self::assertSame($expected_user, $conn->getUser());
         self::assertSame($expected_pass, $conn->getPass());
         self::assertSame($expected_str, (string) $conn);
     }
 
-    public function createFromStringProvider()
+    public function createFromStringProvider(): array
     {
         return [
             'simple' => [null, 'user:pass', 'user', 'pass', 'user:pass'],
@@ -181,7 +196,7 @@ class UserInfoTest extends TestCase
      * @covers ::withContent
      * @covers ::decodeMatches
      */
-    public function testWithContentReturnSameInstance()
+    public function testWithContentReturnSameInstance(): void
     {
         $conn = new UserInfo();
         self::assertEquals($conn, $conn->withContent(':pass'));
@@ -193,7 +208,7 @@ class UserInfoTest extends TestCase
     /**
      * @covers ::__set_state
      */
-    public function testSetState()
+    public function testSetState(): void
     {
         $conn = new UserInfo('user', 'pass');
         $generateConn = eval('return '.var_export($conn, true).';');
@@ -202,16 +217,18 @@ class UserInfoTest extends TestCase
 
     /**
      * @dataProvider withUserInfoProvider
-     * @param string $expected
+     *
      * @covers ::withUserInfo
      * @covers ::decodeMatches
+     *
+     * @param ?string $pass
      */
-    public function testWithUserInfo($user, $pass, $expected)
+    public function testWithUserInfo(string $user, ?string $pass, string $expected): void
     {
         self::assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
     }
 
-    public function withUserInfoProvider()
+    public function withUserInfoProvider(): array
     {
         return [
             'simple' => ['user', 'pass', 'user:pass'],
@@ -225,19 +242,19 @@ class UserInfoTest extends TestCase
     /**
      * @covers ::withContent
      */
-    public function testWithContentThrowsInvalidUriComponentException()
+    public function testWithContentThrowsInvalidUriComponentException(): void
     {
         self::expectException(TypeError::class);
         (new UserInfo())->withContent(date_create());
     }
 
-    public function testConstructorThrowsTypeError()
+    public function testConstructorThrowsTypeError(): void
     {
         self::expectException(TypeError::class);
         new UserInfo(date_create());
     }
 
-    public function testConstructorThrowsException()
+    public function testConstructorThrowsException(): void
     {
         self::expectException(InvalidUriComponent::class);
         new UserInfo("\0");

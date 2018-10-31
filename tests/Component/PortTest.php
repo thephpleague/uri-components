@@ -20,6 +20,8 @@ use League\Uri\Component\Port;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function date_create;
+use function var_export;
 
 /**
  * @group port
@@ -30,7 +32,7 @@ class PortTest extends TestCase
     /**
      * @covers ::__toString
      */
-    public function testPortSetter()
+    public function testPortSetter(): void
     {
         self::assertSame('443', (new Port(443))->__toString());
     }
@@ -39,7 +41,7 @@ class PortTest extends TestCase
      * @covers ::__set_state
      * @covers ::__construct
      */
-    public function testSetState()
+    public function testSetState(): void
     {
         $component = new Port(42);
         $generateComponent = eval('return '.var_export($component, true).';');
@@ -47,19 +49,23 @@ class PortTest extends TestCase
     }
 
     /**
-     * @param null|int $expected
      * @dataProvider getToIntProvider
+     *
      * @covers ::toInt
      * @covers ::getContent
      * @covers ::validate
+     *
+     * @param mixed|null $input
+     * @param ?int       $expected
+     * @param ?string    $string_expected
      */
-    public function testToInt($input, $expected, $string_expected)
+    public function testToInt($input, ?int $expected, ?string $string_expected): void
     {
         self::assertSame($expected, (new Port($input))->toInt());
         self::assertSame($string_expected, (new Port($input))->getContent());
     }
 
-    public function getToIntProvider()
+    public function getToIntProvider(): array
     {
         return [
             [null, null, null],
@@ -75,13 +81,13 @@ class PortTest extends TestCase
         ];
     }
 
-    public function testFailedPortTypeError()
+    public function testFailedPortTypeError(): void
     {
         self::expectException(TypeError::class);
         new Port(date_create());
     }
 
-    public function testFailedPortException()
+    public function testFailedPortException(): void
     {
         self::expectException(InvalidUriComponent::class);
         new Port(-1);
@@ -90,7 +96,7 @@ class PortTest extends TestCase
     /**
      * @covers ::withContent
      */
-    public function testWithContent()
+    public function testWithContent(): void
     {
         $port = new Port(23);
         self::assertSame($port, $port->withContent('23'));

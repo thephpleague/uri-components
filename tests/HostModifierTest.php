@@ -41,7 +41,7 @@ class HostModifierTest extends TestCase
      */
     private $uri;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->uri = Http::createFromString(
             'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar+baz#doc3'
@@ -54,7 +54,7 @@ class HostModifierTest extends TestCase
      * @covers \League\Uri\prepend_host
      *
      */
-    public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
+    public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
         self::assertSame($prepend, prepend_host($this->uri, $label)->getHost());
     }
@@ -65,7 +65,7 @@ class HostModifierTest extends TestCase
      * @covers \League\Uri\append_host
      *
      */
-    public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
+    public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
         self::assertSame($append, append_host($this->uri, $label)->getHost());
     }
@@ -76,12 +76,12 @@ class HostModifierTest extends TestCase
      * @covers \League\Uri\replace_label
      *
      */
-    public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace)
+    public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
         self::assertSame($replace, replace_label($this->uri, $key, $label)->getHost());
     }
 
-    public function validHostProvider()
+    public function validHostProvider(): array
     {
         return [
             ['toto', 2, 'toto.www.example.com', 'www.example.com.toto', 'toto.example.com'],
@@ -92,7 +92,7 @@ class HostModifierTest extends TestCase
     /**
      * @covers \League\Uri\host_to_ascii
      */
-    public function testHostToAsciiProcess()
+    public function testHostToAsciiProcess(): void
     {
         $uri = Http::createFromString('http://مثال.إختبار/where/to/go');
         self::assertSame(
@@ -104,7 +104,7 @@ class HostModifierTest extends TestCase
     /**
      * @covers \League\Uri\host_to_unicode
      */
-    public function testHostToUnicodeProcess()
+    public function testHostToUnicodeProcess(): void
     {
         $uri = new ZendUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
         $expected = 'http://مثال.إختبار/where/to/go';
@@ -114,7 +114,7 @@ class HostModifierTest extends TestCase
     /**
      * @covers \League\Uri\remove_zone_id
      */
-    public function testWithoutZoneIdentifierProcess()
+    public function testWithoutZoneIdentifierProcess(): void
     {
         $uri = Http::createFromString('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
         self::assertSame(
@@ -129,12 +129,12 @@ class HostModifierTest extends TestCase
      * @dataProvider validwithoutLabelProvider
      *
      */
-    public function testwithoutLabelProcess(array $keys, string $expected)
+    public function testwithoutLabelProcess(array $keys, string $expected): void
     {
         self::assertSame($expected, remove_labels($this->uri, $keys)->getHost());
     }
 
-    public function validwithoutLabelProvider()
+    public function validwithoutLabelProvider(): array
     {
         return [
             [[1], 'www.com'],
@@ -144,7 +144,7 @@ class HostModifierTest extends TestCase
     /**
      * @covers \League\Uri\remove_labels
      */
-    public function testRemoveLabels()
+    public function testRemoveLabels(): void
     {
         self::assertSame('example.com', remove_labels($this->uri, [2])->getHost());
     }
@@ -155,13 +155,13 @@ class HostModifierTest extends TestCase
      * @dataProvider invalidRemoveLabelsParameters
      *
      */
-    public function testRemoveLabelsFailedConstructor(array $params)
+    public function testRemoveLabelsFailedConstructor(array $params): void
     {
         self::expectException(TypeError::class);
         remove_labels($this->uri, $params);
     }
 
-    public function invalidRemoveLabelsParameters()
+    public function invalidRemoveLabelsParameters(): array
     {
         return [
             'array contains float' => [[1, 2, '3.1']],
@@ -171,7 +171,7 @@ class HostModifierTest extends TestCase
     /**
      * @covers \League\Uri\add_root_label
      */
-    public function testAddRootLabel()
+    public function testAddRootLabel(): void
     {
         self::assertSame('www.example.com.', add_root_label($this->uri)->getHost());
     }
@@ -179,7 +179,7 @@ class HostModifierTest extends TestCase
     /**
      * @covers \League\Uri\remove_root_label
      */
-    public function testRemoveRootLabel()
+    public function testRemoveRootLabel(): void
     {
         self::assertSame('www.example.com', remove_root_label($this->uri)->getHost());
     }

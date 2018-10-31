@@ -23,7 +23,6 @@ use IteratorAggregate;
 use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
-use Traversable;
 use function array_count_values;
 use function array_filter;
 use function array_keys;
@@ -35,7 +34,6 @@ use function count;
 use function explode;
 use function implode;
 use function is_scalar;
-use function iterator_to_array;
 use function method_exists;
 use function preg_match;
 use function reset;
@@ -83,27 +81,25 @@ final class Domain extends Host implements Countable, IteratorAggregate
     private $labels = [];
 
     /**
-     * Returns a new instance from an array or a traversable object.
+     * Returns a new instance from an iterable structure.
      *
      * @throws InvalidHostLabel If the labels are malformed
      */
     public static function createFromLabels(iterable $labels): self
     {
-        if ($labels instanceof Traversable) {
-            $labels = iterator_to_array($labels, false);
-        }
-
+        $hostLabels = [];
         foreach ($labels as $label) {
             if (!is_scalar($label) && !method_exists($label, '__toString')) {
                 throw new InvalidHostLabel(sprintf('The labels are malformed'));
             }
+            $hostLabels[] = (string) $label;
         }
 
-        if (2 > count($labels)) {
-            return new self(array_pop($labels));
+        if (2 > count($hostLabels)) {
+            return new self(array_pop($hostLabels));
         }
 
-        return new self(implode(self::SEPARATOR, array_reverse($labels)));
+        return new self(implode(self::SEPARATOR, array_reverse($hostLabels)));
     }
 
     /**
