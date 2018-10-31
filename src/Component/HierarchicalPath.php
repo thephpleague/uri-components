@@ -124,7 +124,7 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     /**
      * {@inheritdoc}
      */
-    public function getIterator()
+    public function getIterator(): iterable
     {
         foreach ($this->segments as $segment) {
             yield $segment;

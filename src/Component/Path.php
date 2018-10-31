@@ -56,7 +56,7 @@ class Path extends Component
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties): self
+    public static function __set_state(array $properties)
     {
         return new static($properties['component']);
     }

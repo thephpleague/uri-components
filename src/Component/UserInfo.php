@@ -40,7 +40,7 @@ final class UserInfo extends Component
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return new static($properties['user'], $properties['pass']);
     }
@@ -113,7 +113,7 @@ final class UserInfo extends Component
     /**
      * {@inheritdoc}
      */
-    public function withContent($content)
+    public function withContent($content): self
     {
         $content = $this->filterComponent($content);
         if ($content === $this->getContent()) {
