@@ -55,19 +55,14 @@ use function sprintf;
  */
 final class Domain extends Host implements Countable, IteratorAggregate
 {
-    /**
-     * @internal
-     */
-    const SEPARATOR = '.';
+    private const SEPARATOR = '.';
 
     /**
-     * @internal
-     *
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
      * Domain name regular expression
      */
-    const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
+    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
         (?<unreserved> [a-z0-9_~\-])
         (?<sub_delims> [!$&\'()*+,;=])
         (?<encoded> %[A-F0-9]{2})

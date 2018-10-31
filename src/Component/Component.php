@@ -34,30 +34,15 @@ use const PHP_QUERY_RFC3986;
 
 abstract class Component implements ComponentInterface
 {
-    /**
-     * @internal
-     */
-    const RFC3986_ENCODING = PHP_QUERY_RFC3986;
+    protected const RFC3986_ENCODING = PHP_QUERY_RFC3986;
 
-    /**
-     * @internal
-     */
-    const NO_ENCODING = 0;
+    protected const NO_ENCODING = 0;
 
-    /**
-     * @internal
-     */
-    const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
+    protected const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
 
-    /**
-     * @internal
-     */
-    const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
+    protected const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
 
-    /**
-     * @internal
-     */
-    const REGEXP_PREVENTS_DECODING = ',%2[A-F|1-2|4|6-9]|
+    protected const REGEXP_PREVENTS_DECODING = ',%2[A-F|1-2|4|6-9]|
         3[0-9|B|D]|
         4[1-9|A-F]|
         5[0-9|A|F]|
@@ -65,17 +50,12 @@ abstract class Component implements ComponentInterface
         7[0-9|E]
     ,ix';
 
-    /**
-     * @internal
-     */
-    const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-\.~]/';
+    protected const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-\.~]/';
 
     /**
-     * @internal
-     *
-     * IDN Host detector regular expression
+     * IDN Host detector regular expression.
      */
-    const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
+    protected const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
 
     /**
      * Validate the component content.

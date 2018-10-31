@@ -20,10 +20,7 @@ namespace League\Uri\Component;
 
 final class Fragment extends Component
 {
-    /**
-     * @internal
-     */
-    const REGEXP_FRAGMENT_ENCODING = '/
+    private const REGEXP_FRAGMENT_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@\?]+|
         %(?![A-Fa-f0-9]{2}))
     /x';

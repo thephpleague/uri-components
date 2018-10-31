@@ -25,6 +25,7 @@ use function date_create;
 use function is_array;
 use function json_encode;
 use function var_export;
+use const PHP_QUERY_RFC3986;
 
 /**
  * @group query
@@ -58,7 +59,7 @@ class QueryTest extends TestCase
     public function testInvalidSeparator(string $separator): void
     {
         self::expectException(InvalidUriComponent::class);
-        new Query('foo=bar', Query::RFC3986_ENCODING, $separator);
+        new Query('foo=bar', PHP_QUERY_RFC3986, $separator);
     }
 
     public function invalidSeparatorProvider(): array
