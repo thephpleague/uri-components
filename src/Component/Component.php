@@ -80,14 +80,6 @@ abstract class Component implements ComponentInterface
 
     /**
      * @internal
-     */
-    const RFC1738_ENCODING_CHARS = [
-        'pattern' => ['+', '~'],
-        'replace' => ['%2B', '%7E'],
-    ];
-
-    /**
-     * @internal
      *
      * IDN Host detector regular expression
      */

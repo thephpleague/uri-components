@@ -46,7 +46,8 @@ final class UserInfo extends Component
     }
 
     /**
-     * Create a new instance of UserInfo.
+     * New instance.
+     *
      * @param null|mixed $user
      * @param null|mixed $pass
      */

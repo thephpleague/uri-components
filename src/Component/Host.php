@@ -131,6 +131,11 @@ class Host extends Component
     protected $ip_version;
 
     /**
+     * @var bool
+     */
+    protected $has_zone_identifier = false;
+
+    /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
@@ -151,7 +156,36 @@ class Host extends Component
     }
 
     /**
+     * Returns a host from an IP address.
+     *
+     * @throws MalformedUriComponent If the $ip can not be converted into a Host
+     */
+    public static function createFromIp(string $ip, string $version = ''): self
+    {
+        if ('' !== $version) {
+            return new self('[v'.$version.'.'.$ip.']');
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return new self($ip);
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return new self('['.$ip.']');
+        }
+
+        if (false !== strpos($ip, '%')) {
+            [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
+
+            return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
+        }
+
+        throw new MalformedUriComponent(sprintf('`%s` is an invalid IP Host', $ip));
+    }
+
+    /**
      * New instance.
+     *
      * @param null|mixed $host
      */
     public function __construct($host = null)
@@ -183,6 +217,7 @@ class Host extends Component
             $ip_host = substr($host, 1, -1);
             if ($this->isValidIpv6Hostname($ip_host)) {
                 $this->ip_version = '6';
+                $this->has_zone_identifier = false !== strpos($ip_host, '%');
 
                 return;
             }
@@ -311,6 +346,105 @@ class Host extends Component
         }
 
         return (string) idn_to_utf8($this->component, 0, INTL_IDNA_VARIANT_UTS46);
+    }
+
+    /**
+     * Returns the IP version.
+     *
+     * If the host is a not an IP this method will return null
+     */
+    public function getIpVersion(): ?string
+    {
+        return $this->ip_version;
+    }
+
+    /**
+     * Returns whether or not the host is an IP address.
+     */
+    public function isIp(): bool
+    {
+        return null !== $this->ip_version;
+    }
+
+    /**
+     * Returns whether or not the host is an IPv4 address.
+     */
+    public function isIpv4(): bool
+    {
+        return '4' === $this->ip_version;
+    }
+
+    /**
+     * Returns whether or not the host is an IPv6 address.
+     */
+    public function isIpv6(): bool
+    {
+        return '6' === $this->ip_version;
+    }
+
+    /**
+     * Returns whether or not the host is an IPv6 address.
+     */
+    public function isIpFuture(): bool
+    {
+        return !in_array($this->ip_version, [null, '4', '6'], true);
+    }
+
+    /**
+     * Returns whether or not the host has a ZoneIdentifier.
+     *
+     * @see http://tools.ietf.org/html/rfc6874#section-4
+     */
+    public function hasZoneIdentifier(): bool
+    {
+        return $this->has_zone_identifier;
+    }
+
+    /**
+     * Returns the IP component If the Host is an IP adress.
+     *
+     * If the host is a not an IP this method will return null
+     */
+    public function getIp(): ?string
+    {
+        if (null === $this->ip_version) {
+            return null;
+        }
+
+        if ('4' === $this->ip_version) {
+            return $this->component;
+        }
+
+        $ip = substr((string) $this->component, 1, -1);
+        if ('6' !== $this->ip_version) {
+            return substr($ip, strpos($ip, '.') + 1);
+        }
+
+        $pos = strpos($ip, '%');
+        if (false === $pos) {
+            return $ip;
+        }
+
+        return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
+    }
+
+    /**
+     * Returns an host without its zone identifier according to RFC6874.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance without the host zone identifier according to RFC6874
+     *
+     * @see http://tools.ietf.org/html/rfc6874#section-4
+     */
+    public function withoutZoneIdentifier(): self
+    {
+        if (!$this->has_zone_identifier) {
+            return $this;
+        }
+
+        [$ipv6, ] = explode('%', substr((string) $this->component, 1, -1));
+
+        return self::createFromIp($ipv6);
     }
 
     /**

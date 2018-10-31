@@ -40,6 +40,7 @@ final class Port extends Component
 
     /**
      * New instance.
+     *
      * @param null|mixed $port
      */
     public function __construct($port = null)

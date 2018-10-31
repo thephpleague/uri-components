@@ -25,7 +25,6 @@ use League\Uri\Exception\InvalidPathSegment;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use Traversable;
-use TypeError;
 use function array_count_values;
 use function array_filter;
 use function array_keys;
@@ -36,7 +35,6 @@ use function dirname;
 use function end;
 use function explode;
 use function implode;
-use function is_array;
 use function is_scalar;
 use function iterator_to_array;
 use function ltrim;
@@ -65,14 +63,12 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     /**
      * Returns a new instance from an array or a traversable object.
      *
-     * @param mixed $segments The segments list
-     * @param int   $type     one of the constant IS_ABSOLUTE or IS_RELATIVE
+     * @param int $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws TypeError          If $segments is not iterable
+     * @throws UnknownType        If the type is not recognized
      * @throws InvalidPathSegment If the segments are malformed
-     *
      */
-    public static function createFromSegments($segments, int $type = self::IS_RELATIVE): self
+    public static function createFromSegments(iterable $segments, int $type = self::IS_RELATIVE): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
@@ -84,17 +80,15 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
             $segments = iterator_to_array($segments, false);
         }
 
-        if (!is_array($segments)) {
-            throw new TypeError('The segments must be iterable');
-        }
-
+        $pathSegments = [];
         foreach ($segments as $value) {
             if (!is_scalar($value) && !method_exists($value, '__toString')) {
                 throw new InvalidPathSegment('The submitted segments are invalid');
             }
+            $pathSegments[] = (string) $value;
         }
 
-        $path = implode(self::SEPARATOR, $segments);
+        $path = implode(self::SEPARATOR, $pathSegments);
         if (static::IS_ABSOLUTE !== $type) {
             return new self(ltrim($path, self::SEPARATOR));
         }

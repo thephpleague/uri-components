@@ -16,14 +16,13 @@
 
 namespace LeagueTest\Uri\Component;
 
-use League\Uri\Component\IpAddress;
+use League\Uri\Component\Host;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * @group host
- * @coversDefaultClass \League\Uri\Component\IpAddress
+ * @coversDefaultClass \League\Uri\Component\Host
  */
 class IpAddressTest extends TestCase
 {
@@ -32,7 +31,7 @@ class IpAddressTest extends TestCase
      */
     public function testSetState()
     {
-        $host = new IpAddress('[::1]');
+        $host = new Host('[::1]');
         self::assertEquals($host, eval('return '.var_export($host, true).';'));
     }
 
@@ -44,7 +43,7 @@ class IpAddressTest extends TestCase
      */
     public function testWithContent()
     {
-        $host = new IpAddress('127.0.0.1');
+        $host = new Host('127.0.0.1');
         self::assertSame($host, $host->withContent('127.0.0.1'));
         self::assertSame($host, $host->withContent($host));
         self::assertNotSame($host, $host->withContent('[::1]'));
@@ -75,7 +74,7 @@ class IpAddressTest extends TestCase
      */
     public function testValidIpAddress($host, $isDomain, $isIp, $isIpv4, $isIpv6, $isIpFuture, $ipVersion, $uri, $ip, $iri)
     {
-        $host = new IpAddress($host);
+        $host = new Host($host);
         self::assertSame($isIp, $host->isIp());
         self::assertSame($isIpv4, $host->isIpv4());
         self::assertSame($isIpv6, $host->isIpv6());
@@ -88,7 +87,7 @@ class IpAddressTest extends TestCase
     {
         return [
             'ipv4' => [
-                IpAddress::createFromIp('127.0.0.1'),
+                Host::createFromIp('127.0.0.1'),
                 false,
                 true,
                 true,
@@ -145,51 +144,19 @@ class IpAddressTest extends TestCase
                 'ZZ.ZZ',
                 '[v1.ZZ.ZZ]',
             ],
+            'registered name' => [
+                'uri.thephpleague.com',
+                false,
+                false,
+                false,
+                false,
+                false,
+                null,
+                'uri.thephpleague.com',
+                null,
+                'uri.thephpleague.com',
+            ],
         ];
-    }
-
-    /**
-     * @param string $invalid
-     * @dataProvider invalidIpAddressProvider
-     * @covers ::__construct
-     * @covers ::parse
-     * @covers ::isValidIpv6Hostname
-     */
-    public function testInvalidIpAddress($invalid)
-    {
-        self::expectException(InvalidUriComponent::class);
-        new IpAddress($invalid);
-    }
-
-    public function invalidIpAddressProvider()
-    {
-        return [
-            'empty string' => [''],
-            'null' => [null],
-            'domain name' => ['uri.thephpleague.com'],
-            'empty label' => ['tot.    .coucou.com'],
-            'space in the label' => ['re view'],
-            'Invalid IPv4 format' => ['[127.0.0.1]'],
-            'Invalid IPv6 format' => ['[[::1]]'],
-            'Invalid IPv6 format 2' => ['[::1'],
-            'naked ipv6' => ['::1'],
-            'scoped naked ipv6' => ['fe80:1234::%251'],
-            'invalid character in scope ipv6' => ['[fe80:1234::%25%23]'],
-            'space character in starting label' => ['example. com'],
-            'invalid character in host label' => ["examp\0le.com"],
-            'invalid IP with scope' => ['[127.2.0.1%253]'],
-            'invalid scope IPv6' => ['[ab23::1234%251]'],
-            'invalid scope ID' => ['[fe80::1234%25?@]'],
-            'invalid scope ID with utf8 character' => ['[fe80::1234%25€]'],
-            'invalid IPFuture' => ['[v4.1.2.3]'],
-            'invalid host with mix content' => ['_b%C3%A9bé.be-'],
-        ];
-    }
-
-    public function testTypeErrorOnIpAddressConstruction()
-    {
-        self::expectException(TypeError::class);
-        new IpAddress(date_create());
     }
 
     /**
@@ -201,7 +168,7 @@ class IpAddressTest extends TestCase
      */
     public function testCreateFromIp($input, $version, $expected)
     {
-        self::assertSame($expected, (string) IpAddress::createFromIp($input, $version));
+        self::assertSame($expected, (string) Host::createFromIp($input, $version));
     }
 
     public function createFromIpValid()
@@ -224,7 +191,7 @@ class IpAddressTest extends TestCase
     public function testCreateFromIpFailed($input)
     {
         self::expectException(InvalidUriComponent::class);
-        IpAddress::createFromIp($input);
+        Host::createFromIp($input);
     }
 
     public function createFromIpFailed()
@@ -244,7 +211,7 @@ class IpAddressTest extends TestCase
      */
     public function testWithoutZoneIdentifier($host, $expected)
     {
-        self::assertSame($expected, (string) (new IpAddress($host))->withoutZoneIdentifier());
+        self::assertSame($expected, (string) (new Host($host))->withoutZoneIdentifier());
     }
 
     public function withoutZoneIdentifierProvider()
@@ -265,7 +232,7 @@ class IpAddressTest extends TestCase
      */
     public function testHasZoneIdentifier($host, $expected)
     {
-        self::assertSame($expected, (new IpAddress($host))->hasZoneIdentifier());
+        self::assertSame($expected, (new Host($host))->hasZoneIdentifier());
     }
 
     public function hasZoneIdentifierProvider()

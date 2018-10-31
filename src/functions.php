@@ -22,7 +22,6 @@ use League\Uri\Component\DataPath;
 use League\Uri\Component\Domain;
 use League\Uri\Component\HierarchicalPath;
 use League\Uri\Component\Host;
-use League\Uri\Component\IpAddress;
 use League\Uri\Component\Path;
 use League\Uri\Component\Query;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -396,7 +395,7 @@ function remove_segments($uri, array $keys)
  */
 function remove_zone_id($uri)
 {
-    return $uri->withHost((string) (new IpAddress(filter_uri($uri)->getHost()))->withoutZoneIdentifier());
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutZoneIdentifier());
 }
 
 /**

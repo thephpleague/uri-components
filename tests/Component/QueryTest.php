@@ -185,24 +185,7 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::createFromPairs
-     * @covers ::filterPair
-     *
-     * @dataProvider createFromPairsFailedProvider
      */
-    public function testCreateFromPairsFailed($input)
-    {
-        self::expectException(TypeError::class);
-        Query::createFromPairs($input);
-    }
-
-    public function createFromPairsFailedProvider()
-    {
-        return [
-            'Non traversable object' => [(object) []],
-            'String' => ['toto=23'],
-        ];
-    }
-
     public function testCreateFromPairsFailedWithBadIterable()
     {
         self::expectException(InvalidUriComponent::class);

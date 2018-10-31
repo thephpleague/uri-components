@@ -71,8 +71,6 @@ final class Query extends Component implements Countable, IteratorAggregate
 
     /**
      * Returns a new instance from the result of PHP's parse_str.
-     *
-     *
      */
     public static function createFromParams($params, string $separator = '&'): self
     {
@@ -96,37 +94,31 @@ final class Query extends Component implements Countable, IteratorAggregate
             );
         }
 
-        if (!is_array($params)) {
-            throw new TypeError(sprintf('The parameter is expected to be an array or an Object `%s` given', gettype($params)));
-        }
-
         if ([] === $params) {
             return new self(null, PHP_QUERY_RFC3986, $separator);
         }
 
-        return new self(
-            http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
-            PHP_QUERY_RFC3986,
-            $separator
-        );
+        if (is_array($params)) {
+            return new self(
+                http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
+                PHP_QUERY_RFC3986,
+                $separator
+            );
+        }
+
+        throw new TypeError(sprintf('The parameter is expected to be iterable or an Object `%s` given', gettype($params)));
     }
 
     /**
      * Returns a new instance from the result of query_parse.
-     *
-     * @param Traversable|array $pairs
      */
-    public static function createFromPairs($pairs, string $separator = '&'): self
+    public static function createFromPairs(iterable $pairs, string $separator = '&'): self
     {
         if ($pairs instanceof self) {
             return $pairs->withSeparator($separator);
         }
 
-        if ($pairs instanceof Traversable || is_array($pairs)) {
-            return new self(query_build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
-        }
-
-        throw new TypeError('the pairs must be iterable');
+        return new self(query_build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
     }
 
     /**
@@ -144,8 +136,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * Returns a new instance.
      *
-     * @param  null|mixed $query
-     * @return self
+     * @param null|mixed $query
      */
     public function __construct($query = null, int $enc_type = PHP_QUERY_RFC3986, string $separator = '&')
     {

@@ -24,7 +24,6 @@ use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
 use Traversable;
-use TypeError;
 use function array_count_values;
 use function array_filter;
 use function array_keys;
@@ -35,7 +34,6 @@ use function array_unshift;
 use function count;
 use function explode;
 use function implode;
-use function is_array;
 use function is_scalar;
 use function iterator_to_array;
 use function method_exists;
@@ -87,17 +85,12 @@ final class Domain extends Host implements Countable, IteratorAggregate
     /**
      * Returns a new instance from an array or a traversable object.
      *
-     * @throws TypeError        If $labels is not iterable
      * @throws InvalidHostLabel If the labels are malformed
      */
-    public static function createFromLabels($labels): self
+    public static function createFromLabels(iterable $labels): self
     {
         if ($labels instanceof Traversable) {
             $labels = iterator_to_array($labels, false);
-        }
-
-        if (!is_array($labels)) {
-            throw new TypeError('the parameters must be iterable');
         }
 
         foreach ($labels as $label) {
