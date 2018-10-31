@@ -37,11 +37,6 @@ abstract class Component implements ComponentInterface
     /**
      * @internal
      */
-    const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
-
-    /**
-     * @internal
-     */
     const RFC3986_ENCODING = PHP_QUERY_RFC3986;
 
     /**
@@ -52,10 +47,7 @@ abstract class Component implements ComponentInterface
     /**
      * @internal
      */
-    const ENCODING_LIST = [
-        self::RFC3986_ENCODING => 1,
-        self::NO_ENCODING => 1,
-    ];
+    const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
 
     /**
      * @internal
