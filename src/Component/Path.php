@@ -62,9 +62,7 @@ class Path extends Component
     }
 
     /**
-     * new instance.
-     *
-     * @param mixed $path the component value
+     * New instance.
      */
     public function __construct($path = '')
     {

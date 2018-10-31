@@ -104,10 +104,10 @@ final class DataPath extends Path
     /**
      * Create a new instance from a file path.
      *
+     * @param null|resource $context
      *
-     * @param  null|mixed   $context
      * @throws PathNotFound If the File is not readable
-     * @return static
+     *
      */
     public static function createFromPath(string $path, $context = null): self
     {
@@ -121,7 +121,7 @@ final class DataPath extends Path
             throw new PathNotFound(sprintf('`%s` failed to open stream: No such file or directory', $path));
         }
 
-        return new static(
+        return new self(
             str_replace(' ', '', (new finfo(FILEINFO_MIME))->file($path))
             .';base64,'.base64_encode($content)
         );

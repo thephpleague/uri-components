@@ -22,7 +22,6 @@ use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
 use Traversable;
-use TypeError;
 
 /**
  * @group path
@@ -181,15 +180,6 @@ class HierarchicalPathTest extends TestCase
     {
         self::expectException(InvalidUriComponent::class);
         Path::createFromSegments([date_create()], Path::IS_RELATIVE);
-    }
-
-    /**
-     * @covers ::createFromSegments
-     */
-    public function testCreateFromSegmentsFailed3()
-    {
-        self::expectException(TypeError::class);
-        Path::createFromSegments(date_create(), Path::IS_RELATIVE);
     }
 
     /**
