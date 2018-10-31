@@ -20,6 +20,8 @@ use League\Uri\Component\Scheme;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function date_create;
+use function var_export;
 
 /**
  * @group scheme
@@ -31,7 +33,7 @@ class SchemeTest extends TestCase
      * @covers ::__set_state
      * @covers ::__construct
      */
-    public function testSetState()
+    public function testSetState(): void
     {
         $component = new Scheme('ignace');
         $generateComponent = eval('return '.var_export($component, true).';');
@@ -44,7 +46,7 @@ class SchemeTest extends TestCase
      * @covers ::__toString
      * @covers ::validate
      */
-    public function testWithValue()
+    public function testWithValue(): void
     {
         $scheme = new Scheme('ftp');
         $http_scheme = $scheme->withContent('HTTP');
@@ -56,7 +58,7 @@ class SchemeTest extends TestCase
      * @covers ::withContent
      * @covers ::validate
      */
-    public function testWithContent()
+    public function testWithContent(): void
     {
         $scheme = new Scheme('ftp');
         self::assertSame($scheme, $scheme->withContent('FtP'));
@@ -66,17 +68,19 @@ class SchemeTest extends TestCase
 
     /**
      * @dataProvider validSchemeProvider
-     * @param null|string $scheme
-     * @param string      $toString
+     *
      * @covers ::validate
      * @covers ::__toString
+     *
+     * @param null|mixed $scheme
+     *
      */
-    public function testValidScheme($scheme, $toString)
+    public function testValidScheme($scheme, string $toString): void
     {
         self::assertSame($toString, (string) new Scheme($scheme));
     }
 
-    public function validSchemeProvider()
+    public function validSchemeProvider(): array
     {
         return [
             [null, ''],
@@ -96,17 +100,17 @@ class SchemeTest extends TestCase
     }
 
     /**
-     * @param string $scheme
      * @dataProvider invalidSchemeProvider
+     *
      * @covers ::validate
      */
-    public function testInvalidScheme($scheme)
+    public function testInvalidScheme(string $scheme): void
     {
         self::expectException(InvalidUriComponent::class);
         new Scheme($scheme);
     }
 
-    public function invalidSchemeProvider()
+    public function invalidSchemeProvider(): array
     {
         return [
             'empty string' => [''],
@@ -115,7 +119,7 @@ class SchemeTest extends TestCase
         ];
     }
 
-    public function testInvalidSchemeType()
+    public function testInvalidSchemeType(): void
     {
         self::expectException(TypeError::class);
         new Scheme(date_create());

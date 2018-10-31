@@ -20,6 +20,8 @@ use League\Uri\Component\Fragment;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function date_create;
+use function var_export;
 
 /**
  * @group fragment
@@ -28,20 +30,21 @@ use TypeError;
 class FragmentTest extends TestCase
 {
     /**
+     * @dataProvider getUriComponentProvider
+     *
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::filterComponent
      * @covers ::__toString
-     * @dataProvider getUriComponentProvider
-     * @param string $str
-     * @param string $encoded
+     *
+     * @param ?string $str
      */
-    public function testGetUriComponent($str, $encoded)
+    public function testGetUriComponent(?string $str, string $encoded): void
     {
         self::assertSame($encoded, (string) new Fragment($str));
     }
 
-    public function getUriComponentProvider()
+    public function getUriComponentProvider(): array
     {
         $unreserved = 'a-zA-Z0-9.-_~!$&\'()*+,;=:@';
 
@@ -65,6 +68,7 @@ class FragmentTest extends TestCase
 
     /**
      * @dataProvider geValueProvider
+     *
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::filterComponent
@@ -72,14 +76,16 @@ class FragmentTest extends TestCase
      * @covers ::encodeComponent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
-     * @param string|null $expected
+     *
+     * @param null|mixed $str
+     * @param ?string    $expected
      */
-    public function testGetValue($str, $expected)
+    public function testGetValue($str, ?string $expected): void
     {
         self::assertSame($expected, (new Fragment($str))->decoded());
     }
 
-    public function geValueProvider()
+    public function geValueProvider(): array
     {
         return [
             [new Fragment(), null],
@@ -100,8 +106,7 @@ class FragmentTest extends TestCase
 
     /**
      * @dataProvider getContentProvider
-     * @param string $input
-     * @param string $expected
+     *
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::filterComponent
@@ -109,12 +114,12 @@ class FragmentTest extends TestCase
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      */
-    public function testGetContent($input, $expected)
+    public function testGetContent(string $input, string $expected): void
     {
         self::assertSame($expected, (new Fragment($input))->getContent());
     }
 
-    public function getContentProvider()
+    public function getContentProvider(): array
     {
         return [
             ['€', '%E2%82%AC'],
@@ -126,13 +131,13 @@ class FragmentTest extends TestCase
     /**
      * @covers ::filterComponent
      */
-    public function testFailedFragmentException()
+    public function testFailedFragmentException(): void
     {
         self::expectException(InvalidUriComponent::class);
         new Fragment("\0");
     }
 
-    public function testFailedFragmentTypeError()
+    public function testFailedFragmentTypeError(): void
     {
         self::expectException(TypeError::class);
         new Fragment(date_create());
@@ -141,7 +146,7 @@ class FragmentTest extends TestCase
     /**
      * @covers ::__set_state
      */
-    public function testSetState()
+    public function testSetState(): void
     {
         $component = new Fragment('yolo');
         $generateComponent = eval('return '.var_export($component, true).';');
@@ -151,7 +156,7 @@ class FragmentTest extends TestCase
     /**
      * @covers ::jsonSerialize
      */
-    public function testJsonSerialize()
+    public function testJsonSerialize(): void
     {
         $component = new Fragment('yolo');
         self::assertEquals('"yolo"', json_encode($component));
@@ -163,7 +168,7 @@ class FragmentTest extends TestCase
      * @covers ::withContent
      * @covers ::decodeMatches
      */
-    public function testPreserverDelimiter()
+    public function testPreserverDelimiter(): void
     {
         $fragment = new Fragment();
         $altFragment = $fragment->withContent(null);
@@ -177,7 +182,7 @@ class FragmentTest extends TestCase
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      */
-    public function testWithContent()
+    public function testWithContent(): void
     {
         $fragment = new Fragment('coucou');
         self::assertSame($fragment, $fragment->withContent('coucou'));
