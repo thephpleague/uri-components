@@ -177,11 +177,12 @@ final class Domain extends Host implements Countable, IteratorAggregate
      */
     public function prepend($label): self
     {
-        if (!$label instanceof Host) {
-            $label = new Host($label);
+        $label = $this->filterComponent($label);
+        if (null === $label) {
+            return $this;
         }
 
-        return new self($label->getContent().self::SEPARATOR.$this->getContent());
+        return new self($label.self::SEPARATOR.$this->getContent());
     }
 
     /**
@@ -189,11 +190,12 @@ final class Domain extends Host implements Countable, IteratorAggregate
      */
     public function append($label): self
     {
-        if (!$label instanceof Host) {
-            $label = new Host($label);
+        $label = $this->filterComponent($label);
+        if (null === $label) {
+            return $this;
         }
 
-        return new self($this->getContent().self::SEPARATOR.$label->getContent());
+        return new self($this->getContent().self::SEPARATOR.$label);
     }
 
     /**
