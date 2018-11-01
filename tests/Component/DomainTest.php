@@ -342,10 +342,9 @@ class DomainTest extends TestCase
     }
 
     /**
-     * @covers ::prepend
-     *
-     *
      * @dataProvider validPrepend
+     *
+     * @covers ::prepend
      */
     public function testPrepend(string $raw, string $prepend, string $expected): void
     {
@@ -371,10 +370,18 @@ class DomainTest extends TestCase
     }
 
     /**
-     * @covers ::append
-     *
-     *
+     * @covers ::prepend
+     */
+    public function testPrependNull(): void
+    {
+        $domain = new Domain('secure.example.com');
+        self::assertSame($domain->prepend(null), $domain);
+    }
+
+    /**
      * @dataProvider validAppend
+     *
+     * @covers ::append
      */
     public function testAppend(string $raw, string $append, string $expected): void
     {
@@ -398,6 +405,15 @@ class DomainTest extends TestCase
     {
         self::expectException(InvalidUriComponent::class);
         (new Domain('secure.example.com.'))->append('master');
+    }
+
+    /**
+     * @covers ::append
+     */
+    public function testAppendNull(): void
+    {
+        $domain = new Domain('secure.example.com');
+        self::assertSame($domain->append(null), $domain);
     }
 
     /**

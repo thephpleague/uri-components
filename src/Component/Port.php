@@ -60,7 +60,8 @@ final class Port extends Component
             return null;
         }
 
-        if (false !== ($fport = filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]))) {
+        $fport = filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false !== $fport) {
             return $fport;
         }
 
