@@ -42,7 +42,7 @@ abstract class Component implements ComponentInterface
 
     protected const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
 
-    protected const REGEXP_PREVENTS_DECODING = ',%2[A-F|1-2|4|6-9]|
+    protected const REGEXP_PREVENTS_DECODING = ',%2[A-F|1-2|4-9]|
         3[0-9|B|D]|
         4[1-9|A-F]|
         5[0-9|A|F]|

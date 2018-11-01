@@ -299,12 +299,11 @@ class Host extends Component
         }
 
         $scope = rawurldecode('%'.$scope);
-        $packed_ip = (string) inet_pton((string) $ipv6);
 
         return !preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope)
             && !preg_match(self::REGEXP_GEN_DELIMS, $scope)
             && filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
-            && substr($packed_ip & self::ADDRESS_BLOCK, 0, 2) === self::ADDRESS_BLOCK;
+            && 0 === strpos((string) inet_pton((string) $ipv6), self::ADDRESS_BLOCK);
     }
 
     /**

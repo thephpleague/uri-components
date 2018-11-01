@@ -25,6 +25,7 @@ use League\Uri\Exception\InvalidPathSegment;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use Traversable;
+use TypeError;
 use function array_count_values;
 use function array_filter;
 use function array_keys;
@@ -200,11 +201,12 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function append($segment): self
     {
-        if (!$segment instanceof Path) {
-            $segment = new self($segment);
+        $segment = $this->filterComponent($segment);
+        if (null === $segment) {
+            throw new TypeError('The appended path can not be null');
         }
 
-        return new self(rtrim($this->component, self::SEPARATOR).self::SEPARATOR.ltrim($segment->component, self::SEPARATOR));
+        return new self(rtrim($this->component, self::SEPARATOR).self::SEPARATOR.ltrim($segment, self::SEPARATOR));
     }
 
     /**
@@ -214,11 +216,12 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      */
     public function prepend($segment): self
     {
-        if (!$segment instanceof Path) {
-            $segment = new self($segment);
+        $segment = $this->filterComponent($segment);
+        if (null === $segment) {
+            throw new TypeError('The prepended path can not be null');
         }
 
-        return new self(rtrim($segment->component, self::SEPARATOR).self::SEPARATOR.ltrim($this->component, self::SEPARATOR));
+        return new self(rtrim($segment, self::SEPARATOR).self::SEPARATOR.ltrim($this->component, self::SEPARATOR));
     }
 
     /**
