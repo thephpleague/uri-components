@@ -21,6 +21,7 @@ use League\Uri\Component\HierarchicalPath as Path;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidUriComponent;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 use function date_create;
 use function iterator_to_array;
 use function var_export;
@@ -210,6 +211,12 @@ class HierarchicalPathTest extends TestCase
         ];
     }
 
+    public function testPrependThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+        (new Path(''))->prepend(null);
+    }
+
     /**
      * @dataProvider appendData
      *
@@ -233,6 +240,12 @@ class HierarchicalPathTest extends TestCase
             ['test',   '/',        'test/'],
             ['/',      'test',     '/test'],
         ];
+    }
+
+    public function testAppendThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+        (new Path(''))->append(null);
     }
 
     /**

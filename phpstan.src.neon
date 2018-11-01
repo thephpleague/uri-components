@@ -3,7 +3,6 @@ includes:
 - vendor/phpstan/phpstan-phpunit/rules.neon
 parameters:
     ignoreErrors:
-    	- '#Parameter \#2 \$str of function explode expects string, string\|false given.#'
-    	- '#Parameter \#2 \$ext of method League\\Uri\\Component\\HierarchicalPath::buildBasename\(\) expects string, string\|null given.#'
-    	- '#^Binary operation "&"#'
+        - '#Parameter \#2 \$str of function explode expects string, string\|false given.#'
+        - '#Parameter \#2 \$ext of method League\\Uri\\Component\\HierarchicalPath::buildBasename\(\) expects string, string\|null given.#'
     reportUnmatchedIgnoredErrors: true

@@ -103,6 +103,10 @@ class PathTest extends TestCase
                 '/v1/people/~:(first-name,last-name,email-address,picture-url)',
                 '/v1/people/~:(first-name,last-name,email-address,picture-url)',
             ],
+            [
+                'foo%2520bar',
+                'foo%2520bar',
+            ],
         ];
     }
 
