@@ -38,7 +38,7 @@ use function strlen;
 use function strtolower;
 use const FILEINFO_MIME;
 
-final class DataPath extends Path
+final class DataPath extends Component
 {
     private const DEFAULT_MIMETYPE = 'text/plain';
 
@@ -54,6 +54,11 @@ final class DataPath extends Path
     /x';
 
     private const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
+
+    /**
+     * @var Path
+     */
+    private $path;
 
     /**
      * The mediatype mimetype.
@@ -84,6 +89,14 @@ final class DataPath extends Path
     private $document;
 
     /**
+     * {@inheritdoc}
+     */
+    public static function __set_state(array $properties)
+    {
+        return new static($properties['path']);
+    }
+
+    /**
      * Create a new instance from a file path.
      *
      * @param null|resource $context
@@ -112,9 +125,12 @@ final class DataPath extends Path
     /**
      * {@inheritdoc}
      */
-    protected function validate($path): string
+    protected function validate($path): ?string
     {
-        $path = parent::validate($path);
+        if (null === $path) {
+            return $path;
+        }
+
         if ('' === $path || ',' === $path) {
             return 'text/plain;charset=us-ascii,';
         }
@@ -129,14 +145,18 @@ final class DataPath extends Path
     /**
      * {@inheritdoc}
      */
-    protected function parse(): void
+    public function __construct($path = '')
     {
-        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $this->component) && false === strpos($this->component, ',')) {
-            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $this->component));
+        $path = $this->validate($this->filterComponent($path));
+        $this->path = new Path($path);
+
+        $path = (string) $path;
+        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
+            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
         $is_binary_data = false;
-        [$mediatype, $this->document] = explode(',', $this->component, 2) + [1 => ''];
+        [$mediatype, $this->document] = explode(',', $path, 2) + [1 => ''];
         [$mimetype, $parameters] = explode(';', $mediatype, 2) + [1 => ''];
         $this->mimetype = $this->filterMimeType($mimetype);
         $this->parameters = $this->filterParameters($parameters, $is_binary_data);
@@ -215,6 +235,14 @@ final class DataPath extends Path
         if (false === $res || $this->document !== base64_encode($res)) {
             throw new MalformedUriComponent(sprintf('invalid document, `%s`', $this->document));
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContent(): ?string
+    {
+        return $this->path->getContent();
     }
 
     /**
@@ -354,6 +382,19 @@ final class DataPath extends Path
             false,
             rawurlencode((string) base64_decode($this->document))
         ));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContent($content)
+    {
+        $content = $this->filterComponent($content);
+        if ($content === $this->path->getContent()) {
+            return $this;
+        }
+
+        return new self($content);
     }
 
     /**
