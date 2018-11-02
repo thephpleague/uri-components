@@ -20,13 +20,6 @@ namespace League\Uri;
 
 interface PathInterface extends ComponentInterface
 {
-    public const SEPARATOR = '/';
-
-    /**
-     * Returns the decoded path.
-     */
-    public function decoded(): string;
-
     /**
      * Returns whether or not the path is absolute or relative.
      */

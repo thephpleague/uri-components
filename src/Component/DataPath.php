@@ -91,9 +91,9 @@ final class DataPath extends Component
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
-        return new static($properties['path']);
+        return new self($properties['path']);
     }
 
     /**
@@ -246,14 +246,6 @@ final class DataPath extends Component
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function decoded(): string
-    {
-        return $this->path->decoded();
-    }
-
-    /**
      * Retrieves the data string.
      *
      * Retrieves the data part of the path. If no data part is provided return
@@ -348,7 +340,7 @@ final class DataPath extends Component
             return $this;
         }
 
-        return new static($this->formatComponent(
+        return new self($this->formatComponent(
             $this->mimetype,
             $this->getParameters(),
             !$this->is_binary_data,
@@ -392,7 +384,7 @@ final class DataPath extends Component
             return $this;
         }
 
-        return new static($this->formatComponent(
+        return new self($this->formatComponent(
             $this->mimetype,
             $this->getParameters(),
             false,
@@ -453,6 +445,6 @@ final class DataPath extends Component
             return $this;
         }
 
-        return new static($this->formatComponent($this->mimetype, $parameters, $this->is_binary_data, $this->document));
+        return new self($this->formatComponent($this->mimetype, $parameters, $this->is_binary_data, $this->document));
     }
 }

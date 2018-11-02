@@ -30,14 +30,10 @@ use function substr;
 
 final class Path extends Component implements PathInterface
 {
-    /**
-     * @internal
-     */
+    private const SEPARATOR = '/';
+
     private const DOT_SEGMENTS = ['.' => 1, '..' => 1];
 
-    /**
-     * @internal
-     */
     private const REGEXP_PATH_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.\!\$&\'\(\)\*\+,;\=%\:\/@]+|
         %(?![A-Fa-f0-9]{2}))
@@ -62,14 +58,6 @@ final class Path extends Component implements PathInterface
     public function __construct($path = '')
     {
         $this->component = $this->validate($path);
-        $this->parse();
-    }
-
-    /**
-     * Further parse the path component if needed.
-     */
-    private function parse(): void
-    {
     }
 
     /**
@@ -156,7 +144,7 @@ final class Path extends Component implements PathInterface
             $new .= self::SEPARATOR ;
         }
 
-        return new static($new);
+        return new self($new);
     }
 
     /**
@@ -192,7 +180,7 @@ final class Path extends Component implements PathInterface
      */
     public function withTrailingSlash()
     {
-        return $this->hasTrailingSlash() ? $this : new static($this->__toString().self::SEPARATOR);
+        return $this->hasTrailingSlash() ? $this : new self($this->__toString().self::SEPARATOR);
     }
 
     /**
@@ -205,7 +193,7 @@ final class Path extends Component implements PathInterface
      */
     public function withoutTrailingSlash()
     {
-        return !$this->hasTrailingSlash() ? $this : new static(substr($this->__toString(), 0, -1));
+        return !$this->hasTrailingSlash() ? $this : new self(substr($this->__toString(), 0, -1));
     }
 
     /**
@@ -218,7 +206,7 @@ final class Path extends Component implements PathInterface
      */
     public function withLeadingSlash()
     {
-        return $this->isAbsolute() ? $this : new static(self::SEPARATOR.$this->__toString());
+        return $this->isAbsolute() ? $this : new self(self::SEPARATOR.$this->__toString());
     }
 
     /**
@@ -231,6 +219,6 @@ final class Path extends Component implements PathInterface
      */
     public function withoutLeadingSlash()
     {
-        return !$this->isAbsolute() ? $this : new static(substr($this->__toString(), 1));
+        return !$this->isAbsolute() ? $this : new self(substr($this->__toString(), 1));
     }
 }
