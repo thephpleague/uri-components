@@ -20,6 +20,7 @@ use League\Uri\Component\DataPath as Path;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\PathNotFound;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 use function base64_encode;
 use function file_get_contents;
 use function var_export;
@@ -31,6 +32,13 @@ use function var_export;
  */
 class DataPathTest extends TestCase
 {
+
+    public function testConstructorFailedWithNullValue(): void
+    {
+        self::expectException(TypeError::class);
+        new Path(null);
+    }
+
     /**
      * @dataProvider invalidDataUriPath
      * @covers ::createFromPath
@@ -44,8 +52,8 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidDataUriPath
-     * @covers ::parse
      * @param string $path
+     * @covers ::__construct
      */
     public function testConstructorFailed($path): void
     {
@@ -76,7 +84,6 @@ class DataPathTest extends TestCase
 
     /**
      * @covers ::withContent
-     * @covers ::parse
      * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
@@ -94,6 +101,7 @@ class DataPathTest extends TestCase
      * @param string $path
      * @param string $expected
      * @covers ::validate
+     * @covers ::getContent
      * @covers ::__toString
      */
     public function testDefaultConstructor($path, $expected): void
@@ -125,7 +133,6 @@ class DataPathTest extends TestCase
      * @param string $mimetype
      * @param string $mediatype
      * @covers ::createFromPath
-     * @covers ::parse
      * @covers ::validate
      * @covers ::formatComponent
      * @covers ::getMimeType
@@ -187,13 +194,13 @@ class DataPathTest extends TestCase
      *
      * @param string $path
      * @param string $parameters
-     * @covers ::parse
      * @covers ::withParameters
      * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
      * @covers ::validateDocument
+     * @covers ::__construct
      */
     public function testWithParametersFailedWithInvalidParameters($path, $parameters): void
     {
@@ -250,9 +257,9 @@ class DataPathTest extends TestCase
     /**
      * @dataProvider invalidParameters
      * @param string $parameters
-     * @covers ::parse
      * @covers ::formatComponent
      * @covers ::withParameters
+     * @covers ::__construct
      */
     public function testUpdateParametersFailed($parameters): void
     {
@@ -317,6 +324,7 @@ class DataPathTest extends TestCase
      * @covers ::filterParameters
      * @covers ::validateParameter
      * @covers ::validateDocument
+     * @covers ::__construct
      */
     public function testDataPathConstructor(): void
     {
@@ -324,12 +332,12 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::parse
      * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
      * @covers ::validateDocument
+     * @covers ::__construct
      */
     public function testInvalidBase64Encoded(): void
     {
@@ -338,12 +346,12 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::parse
      * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
      * @covers ::validateDocument
+     * @covers ::__construct
      */
     public function testInvalidComponent(): void
     {
@@ -352,12 +360,12 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::parse
      * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
      * @covers ::validateDocument
+     * @covers ::__construct
      */
     public function testInvalidString(): void
     {
@@ -366,12 +374,12 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::parse
      * @covers ::validate
      * @covers ::filterMimeType
      * @covers ::filterParameters
      * @covers ::validateParameter
      * @covers ::validateDocument
+     * @covers ::__construct
      */
     public function testInvalidMimetype(): void
     {
