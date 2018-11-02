@@ -117,7 +117,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return new self($properties['path']);
     }
@@ -210,14 +210,11 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * Retrieves a single path segment.
      *
-     * Retrieves a single path segment. If the segment offset has not been set,
-     * returns the default value provided.
+     * Retrieves a single path segment.
      *
-     * @param int $offset the segment offset
-     *
-     * @return string|null
+     * If the segment offset has not been set, returns null.
      */
-    public function get(int $offset)
+    public function get(int $offset): ?string
     {
         if ($offset < 0) {
             $offset += count($this->segments);
@@ -240,7 +237,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * {@inheritdoc}
      */
-    public function withoutDotSegments()
+    public function withoutDotSegments(): self
     {
         $path = $this->path->withoutDotSegments();
         if ($path !== $this->path) {
@@ -253,7 +250,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * {@inheritdoc}
      */
-    public function withLeadingSlash()
+    public function withLeadingSlash(): self
     {
         $path = $this->path->withLeadingSlash();
         if ($path !== $this->path) {
@@ -266,7 +263,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * {@inheritdoc}
      */
-    public function withoutLeadingSlash()
+    public function withoutLeadingSlash(): self
     {
         $path = $this->path->withoutLeadingSlash();
         if ($path !== $this->path) {
@@ -279,7 +276,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * {@inheritdoc}
      */
-    public function withContent($content)
+    public function withContent($content): self
     {
         $content = $this->filterComponent($content);
         if ($content === $this->path->getContent()) {
@@ -373,8 +370,6 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component normalized by removing
      * multiple consecutive empty segment
-     *
-     * @return static
      */
     public function withoutEmptySegments(): self
     {

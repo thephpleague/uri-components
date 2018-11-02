@@ -47,7 +47,7 @@ final class Path extends Component implements PathInterface
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
         return new self($properties['component']);
     }
@@ -92,7 +92,7 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * Returns whether or not the path is absolute or relative.
+     * {@inheritdoc}
      */
     public function isAbsolute(): bool
     {
@@ -112,7 +112,7 @@ final class Path extends Component implements PathInterface
     /**
      * {@inheritdoc}
      */
-    public function withContent($content)
+    public function withContent($content): self
     {
         $content = $this->filterComponent($content);
         if ($content === $this->getContent()) {
@@ -123,15 +123,9 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * Returns an instance without dot segments.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the path component normalized by removing
-     * the dot segment.
-     *
-     * @return static
+     * {@inheritdoc}
      */
-    public function withoutDotSegments()
+    public function withoutDotSegments(): self
     {
         $current = $this->__toString();
         if (false === strpos($current, '.')) {
@@ -175,10 +169,8 @@ final class Path extends Component implements PathInterface
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a trailing slash
-     *
-     * @return static
      */
-    public function withTrailingSlash()
+    public function withTrailingSlash(): self
     {
         return $this->hasTrailingSlash() ? $this : new self($this->__toString().self::SEPARATOR);
     }
@@ -188,36 +180,24 @@ final class Path extends Component implements PathInterface
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a trailing slash
-     *
-     * @return static
      */
-    public function withoutTrailingSlash()
+    public function withoutTrailingSlash(): self
     {
         return !$this->hasTrailingSlash() ? $this : new self(substr($this->__toString(), 0, -1));
     }
 
     /**
-     * Returns an instance with a leading slash.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the path component with a leading slash
-     *
-     * @return static
+     * {@inheritdoc}
      */
-    public function withLeadingSlash()
+    public function withLeadingSlash(): self
     {
         return $this->isAbsolute() ? $this : new self(self::SEPARATOR.$this->__toString());
     }
 
     /**
-     * Returns an instance without a leading slash.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the path component without a leading slash
-     *
-     * @return static
+     * {@inheritdoc}
      */
-    public function withoutLeadingSlash()
+    public function withoutLeadingSlash(): self
     {
         return !$this->isAbsolute() ? $this : new self(substr($this->__toString(), 1));
     }
