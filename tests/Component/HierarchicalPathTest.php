@@ -53,7 +53,7 @@ class HierarchicalPathTest extends TestCase
      * @dataProvider validPathProvider
      *
      * @covers ::__toString
-     * @covers ::parse
+     * @covers ::__construct
      * @covers ::getContent
      */
     public function testValidPath(string $raw, string $expected): void
@@ -94,6 +94,7 @@ class HierarchicalPathTest extends TestCase
         $str = '/path/to/the/sky';
         $path = new Path($str);
         self::assertSame($path, $path->withContent($str));
+        self::assertNotEquals($path, $path->withContent('foo/bar'));
     }
 
     /**
@@ -137,6 +138,147 @@ class HierarchicalPathTest extends TestCase
             ['/shop/rev iew/', -2, 'rev iew'],
             ['/shop/rev%20iew/', -2, 'rev iew'],
             ['/shop/rev%20iew/', 28, null],
+        ];
+    }
+
+    /**
+     * Test Removing Dot Segment.
+     *
+     * @dataProvider normalizeProvider
+     */
+    public function testWithoutDotSegments(string $path, string $expected): void
+    {
+        self::assertSame($expected, (new Path($path))->withoutDotSegments()->__toString());
+    }
+
+    /**
+     * Provides different segment to be normalized.
+     */
+    public function normalizeProvider(): array
+    {
+        return [
+            ['/a/b/c/./../../g', '/a/g'],
+            ['mid/content=5/../6', 'mid/6'],
+            ['a/b/c', 'a/b/c'],
+            ['a/b/c/.', 'a/b/c/'],
+            ['/a/b/c', '/a/b/c'],
+        ];
+    }
+    /**
+     * @dataProvider validPathEncoding
+     *
+     * @covers ::__construct
+     * @covers ::decodeMatches
+     * @covers ::decoded
+     * @covers ::getContent
+     * @covers ::encodeComponent
+     */
+    public function testGetUriComponent(string $decoded, string $encoded): void
+    {
+        $path = new Path($decoded);
+        self::assertSame($decoded, $path->decoded());
+        self::assertSame($encoded, $path->getContent());
+    }
+
+    public function validPathEncoding(): array
+    {
+        return [
+            [
+                'toto',
+                'toto',
+            ],
+            [
+                'bar---',
+                'bar---',
+            ],
+            [
+                '',
+                '',
+                '',
+            ],
+            [
+                '"bad"',
+                '%22bad%22',
+            ],
+            [
+                '<not good>',
+                '%3Cnot%20good%3E',
+            ],
+            [
+                '{broken}',
+                '%7Bbroken%7D',
+            ],
+            [
+                '`oops`',
+                '%60oops%60',
+            ],
+            [
+                '\\slashy',
+                '%5Cslashy',
+            ],
+            [
+                'foo^bar',
+                'foo%5Ebar',
+            ],
+            [
+                'foo^bar/baz',
+                'foo%5Ebar/baz',
+            ],
+            [
+                'foo%2Fbar',
+                'foo%2Fbar',
+            ],
+            [
+                '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
+            ],
+            [
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+            ],
+            [
+                'foo%2520bar',
+                'foo%2520bar',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider withLeadingSlashProvider
+     */
+    public function testWithLeadingSlash(string $path, string $expected): void
+    {
+        self::assertSame($expected, (string) (new Path($path))->withLeadingSlash());
+    }
+
+    public function withLeadingSlashProvider(): array
+    {
+        return [
+            'relative path without leading slash' => ['toto', '/toto'],
+            'absolute path' => ['/toto', '/toto'],
+            'root path' => ['/', '/'],
+            'empty path' => ['', '/'],
+            'relative path with ending slash' => ['toto/', '/toto/'],
+            'absolute path with ending slash' => ['/toto/', '/toto/'],
+        ];
+    }
+
+    /**
+     * @dataProvider withoutLeadingSlashProvider
+     */
+    public function testWithoutLeadingSlash(string $path, string $expected): void
+    {
+        self::assertSame($expected, (string) (new Path($path))->withoutLeadingSlash());
+    }
+
+    public function withoutLeadingSlashProvider(): array
+    {
+        return [
+            'relative path without ending slash' => ['toto', 'toto'],
+            'absolute path without ending slash' => ['/toto', 'toto'],
+            'root path' => ['/', ''],
+            'empty path' => ['', ''],
+            'absolute path with ending slash' => ['/toto/', 'toto/'],
         ];
     }
 
@@ -246,6 +388,24 @@ class HierarchicalPathTest extends TestCase
     {
         self::expectException(TypeError::class);
         (new Path(''))->append(null);
+    }
+
+    /**
+     * @dataProvider withoutEmptySegmentsProvider
+     */
+    public function testWithoutEmptySegments(string $path, string $expected): void
+    {
+        self::assertSame($expected, (string) (new Path($path))->withoutEmptySegments());
+    }
+
+    public function withoutEmptySegmentsProvider(): array
+    {
+        return [
+            ['/a/b/c', '/a/b/c'],
+            ['//a//b//c', '/a/b/c'],
+            ['a//b/c//', 'a/b/c/'],
+            ['/a/b/c//', '/a/b/c/'],
+        ];
     }
 
     /**

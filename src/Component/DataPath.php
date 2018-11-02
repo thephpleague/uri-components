@@ -125,7 +125,7 @@ final class DataPath extends Component
     /**
      * {@inheritdoc}
      */
-    protected function validate($path): ?string
+    private function validate($path): ?string
     {
         if (null === $path) {
             return $path;
@@ -246,6 +246,14 @@ final class DataPath extends Component
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function decoded(): string
+    {
+        return $this->path->decoded();
+    }
+
+    /**
      * Retrieves the data string.
      *
      * Retrieves the data part of the path. If no data part is provided return
@@ -304,6 +312,14 @@ final class DataPath extends Component
     public function getMediaType(): string
     {
         return $this->getMimeType().';'.$this->getParameters();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isAbsolute(): bool
+    {
+        return $this->path->isAbsolute();
     }
 
     /**
@@ -382,6 +398,30 @@ final class DataPath extends Component
             false,
             rawurlencode((string) base64_decode($this->document))
         ));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withoutDotSegments()
+    {
+        return new self($this->path->withoutDotSegments());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withLeadingSlash()
+    {
+        return new self($this->path->withLeadingSlash());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withoutLeadingSlash()
+    {
+        return new self($this->path->withoutLeadingSlash());
     }
 
     /**

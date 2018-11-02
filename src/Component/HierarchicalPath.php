@@ -24,6 +24,7 @@ use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\InvalidPathSegment;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
+use League\Uri\PathInterface;
 use Traversable;
 use TypeError;
 use function array_count_values;
@@ -50,7 +51,7 @@ use const ARRAY_FILTER_USE_KEY;
 use const FILTER_VALIDATE_INT;
 use const PATHINFO_EXTENSION;
 
-final class HierarchicalPath extends Path implements Countable, IteratorAggregate
+final class HierarchicalPath extends Component implements Countable, IteratorAggregate, PathInterface
 {
     public const IS_ABSOLUTE = 1;
 
@@ -60,6 +61,16 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
      * @var string[]
      */
     private $segments;
+
+    /**
+     * @var string
+     */
+    private $component;
+
+    /**
+     * @var PathInterface
+     */
+    private $path;
 
     /**
      * Returns a new instance from an array or a traversable object.
@@ -104,14 +115,28 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     /**
      * {@inheritdoc}
      */
-    protected function parse(): void
+    public static function __set_state(array $properties)
     {
-        $path = $this->component;
-        if (self::SEPARATOR === ($path[0] ?? '')) {
-            $path = substr($path, 1);
+        return new self($properties['path']);
+    }
+
+    /**
+     * New instance.
+     */
+    public function __construct($path = '')
+    {
+        if (!$path instanceof PathInterface) {
+            $path = new Path($path);
         }
 
-        $this->segments = explode(self::SEPARATOR, $path);
+        $this->path = $path;
+        $this->component = (string) $this->validateComponent((string) $path);
+        $segments = $this->component;
+        if ($this->path->isAbsolute()) {
+            $segments = substr($segments, 1);
+        }
+
+        $this->segments = explode(self::SEPARATOR, $segments);
     }
 
     /**
@@ -130,6 +155,30 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         foreach ($this->segments as $segment) {
             yield $segment;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isAbsolute(): bool
+    {
+        return $this->path->isAbsolute();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContent(): ?string
+    {
+        return $this->path->getContent();
+    }
+
+    /**
+     * Returns the decoded path.
+     */
+    public function decoded(): string
+    {
+        return $this->path->decoded();
     }
 
     /**
@@ -192,6 +241,58 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
     public function keys(string $segment): array
     {
         return array_keys($this->segments, $segment, true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withoutDotSegments()
+    {
+        $path = $this->path->withoutDotSegments();
+        if ($path !== $this->path) {
+            return new self($path);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withLeadingSlash()
+    {
+        $path = $this->path->withLeadingSlash();
+        if ($path !== $this->path) {
+            return new self($path);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withoutLeadingSlash()
+    {
+        $path = $this->path->withoutLeadingSlash();
+        if ($path !== $this->path) {
+            return new self($path);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContent($content)
+    {
+        $content = $this->filterComponent($content);
+        if ($content === $this->path->getContent()) {
+            return $this;
+        }
+
+        return new self($content);
     }
 
     /**
@@ -270,6 +371,20 @@ final class HierarchicalPath extends Path implements Countable, IteratorAggregat
         }
 
         return new self(implode(self::SEPARATOR, $segments));
+    }
+
+    /**
+     * Returns an instance without duplicate delimiters.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the path component normalized by removing
+     * multiple consecutive empty segment
+     *
+     * @return static
+     */
+    public function withoutEmptySegments(): self
+    {
+        return new self(preg_replace(',/+,', self::SEPARATOR, $this->__toString()));
     }
 
     /**

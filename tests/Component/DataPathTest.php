@@ -32,6 +32,50 @@ use function var_export;
  */
 class DataPathTest extends TestCase
 {
+    /**
+     * @covers ::isAbsolute
+     */
+    public function testIsAbsolute(): void
+    {
+        $path = new Path(';,Bonjour%20le%20monde!');
+        self::assertFalse($path->isAbsolute());
+    }
+
+    /**
+     * @covers ::decoded
+     */
+    public function testDecoded(): void
+    {
+        $path = new Path(';,Bonjour%20le%20monde!');
+        self::assertEquals(';,Bonjour le monde!', $path->decoded());
+    }
+
+    /**
+     * @covers ::withoutDotSegments
+     */
+    public function testWithoutDotSegments(): void
+    {
+        $path = new Path(';,Bonjour%20le%20monde%21');
+        self::assertEquals($path, $path->withoutDotSegments());
+    }
+
+    /**
+     * @covers ::withLeadingSlash
+     */
+    public function testWithLeadingSlash(): void
+    {
+        self::expectException(InvalidUriComponent::class);
+        (new Path(';,Bonjour%20le%20monde%21'))->withLeadingSlash();
+    }
+
+    /**
+     * @covers ::withoutLeadingSlash
+     */
+    public function testWithoutLeadingSlash(): void
+    {
+        $path = new Path(';,Bonjour%20le%20monde%21');
+        self::assertEquals($path, $path->withoutLeadingSlash());
+    }
 
     public function testConstructorFailedWithNullValue(): void
     {

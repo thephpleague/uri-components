@@ -54,16 +54,19 @@ class HostTest extends TestCase
 
     /**
      * Test valid Host.
-     * @param string|null $host
-     * @param string      $uri
-     * @param string      $iri
+     *
      * @dataProvider validHostProvider
+     *
      * @covers ::__construct
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::getContent
      * @covers ::toAscii
      * @covers ::toUnicode
+     *
+     * @param mixed|null $host
+     * @param string     $uri
+     * @param string     $iri
      */
     public function testValidHost($host, ?string $uri, ?string $iri): void
     {

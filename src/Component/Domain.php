@@ -23,6 +23,7 @@ use IteratorAggregate;
 use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\HostInterface;
 use function array_count_values;
 use function array_filter;
 use function array_keys;
@@ -53,7 +54,7 @@ use function sprintf;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-final class Domain extends Component implements Countable, IteratorAggregate
+final class Domain extends Component implements Countable, HostInterface, IteratorAggregate
 {
     private const SEPARATOR = '.';
 
@@ -71,7 +72,7 @@ final class Domain extends Component implements Countable, IteratorAggregate
     ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
 
     /**
-     * @var Host
+     * @var HostInterface
      */
     private $host;
 
@@ -105,9 +106,9 @@ final class Domain extends Component implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
-        return new static($properties['host']);
+        return new self($properties['host']);
     }
 
     /**
@@ -115,7 +116,7 @@ final class Domain extends Component implements Countable, IteratorAggregate
      */
     public function __construct($host = null)
     {
-        if (!$host instanceof Host) {
+        if (!$host instanceof HostInterface) {
             $host = new Host($host);
         }
         
@@ -151,7 +152,7 @@ final class Domain extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns the Host ascii representation.
+     * {@inheritdoc}
      */
     public function toAscii(): ?string
     {
@@ -159,11 +160,27 @@ final class Domain extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns the Host unicode representation.
+     * {@inheritdoc}
      */
     public function toUnicode(): ?string
     {
         return $this->host->toUnicode();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIpVersion(): ?string
+    {
+        return $this->host->getIpVersion();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIp(): ?string
+    {
+        return $this->host->getIp();
     }
 
     /**
