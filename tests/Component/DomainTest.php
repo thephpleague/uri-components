@@ -52,7 +52,6 @@ class DomainTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::withContent
-     * @covers ::parse
      */
     public function testWithContent(): void
     {
@@ -66,7 +65,6 @@ class DomainTest extends TestCase
      * Test valid Domain.
      * @dataProvider validDomainProvider
      * @covers ::__construct
-     * @covers ::parse
      * @covers ::getContent
      * @covers ::toUnicode
      * @param ?string $host
@@ -134,8 +132,6 @@ class DomainTest extends TestCase
     /**
      * @dataProvider invalidDomainProvider
      * @covers ::__construct
-     * @covers ::parse
-     * @covers ::getIDNAErrors
      */
     public function testInvalidDomain(string $invalid): void
     {
@@ -443,7 +439,6 @@ class DomainTest extends TestCase
 
     /**
      * @covers ::withLabel
-     * @covers ::parse
      */
     public function testReplaceIpMustFailed(): void
     {
@@ -453,7 +448,6 @@ class DomainTest extends TestCase
 
     /**
      * @covers ::withLabel
-     * @covers ::parse
      */
     public function testReplaceMustFailed(): void
     {
