@@ -127,9 +127,9 @@ final class Host extends Component implements HostInterface
     /**
      * {@inheritdoc}
      */
-    public static function __set_state(array $properties)
+    public static function __set_state(array $properties): self
     {
-        return new static($properties['component']);
+        return new self($properties['component']);
     }
 
     /**
@@ -445,6 +445,6 @@ final class Host extends Component implements HostInterface
             return $this;
         }
 
-        return new static($content);
+        return new self($content);
     }
 }

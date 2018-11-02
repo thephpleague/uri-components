@@ -42,15 +42,6 @@ class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::decoded
-     */
-    public function testDecoded(): void
-    {
-        $path = new Path(';,Bonjour%20le%20monde!');
-        self::assertEquals(';,Bonjour le monde!', $path->decoded());
-    }
-
-    /**
      * @covers ::withoutDotSegments
      */
     public function testWithoutDotSegments(): void

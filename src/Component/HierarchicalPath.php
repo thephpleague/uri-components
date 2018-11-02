@@ -57,6 +57,8 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
 
     public const IS_RELATIVE = 0;
 
+    private const SEPARATOR = '/';
+
     /**
      * @var string[]
      */
@@ -171,14 +173,6 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     public function getContent(): ?string
     {
         return $this->path->getContent();
-    }
-
-    /**
-     * Returns the decoded path.
-     */
-    public function decoded(): string
-    {
-        return $this->path->decoded();
     }
 
     /**
@@ -347,10 +341,6 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
             $key += $nb_segments;
         }
 
-        if (!$segment instanceof Path) {
-            $segment = new self($segment);
-        }
-
         if ($nb_segments === $key) {
             return $this->append($segment);
         }
@@ -359,7 +349,11 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
             return $this->prepend($segment);
         }
 
-        $segment = $segment->decoded();
+        if (!$segment instanceof PathInterface) {
+            $segment = new self($segment);
+        }
+
+        $segment = $this->decodeComponent((string) $segment);
         if ($segment === $this->segments[$key]) {
             return $this;
         }

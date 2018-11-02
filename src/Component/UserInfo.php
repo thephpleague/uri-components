@@ -39,7 +39,7 @@ final class UserInfo extends Component
      */
     public static function __set_state(array $properties): self
     {
-        return new static($properties['user'], $properties['pass']);
+        return new self($properties['user'], $properties['pass']);
     }
 
     /**
