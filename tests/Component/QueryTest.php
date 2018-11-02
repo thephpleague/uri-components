@@ -277,14 +277,6 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::decoded
-     */
-    public function testDecodedReturnsNull(): void
-    {
-        self::assertNull((new Query())->decoded());
-    }
-
-    /**
      * @covers ::has
      */
     public function testHas(): void
@@ -506,12 +498,12 @@ class QueryTest extends TestCase
 
     /**
      * @covers ::withoutNumericIndices
-     * @covers ::decoded
      */
     public function testWithoutNumericIndicesReturnsAnother(): void
     {
-        $query = new Query('foo[3]');
-        self::assertSame('foo[]', $query->withoutNumericIndices()->decoded());
+        $query = (new Query('foo[3]'))->withoutNumericIndices();
+        self::assertTrue($query->has('foo[]'));
+        self::assertFalse($query->has('foo[3]'));
     }
 
     /**

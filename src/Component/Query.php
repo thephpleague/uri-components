@@ -47,7 +47,6 @@ use function method_exists;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
-use function rawurldecode;
 use function sprintf;
 use const PHP_QUERY_RFC1738;
 use const PHP_QUERY_RFC3986;
@@ -190,19 +189,6 @@ final class Query extends Component implements Countable, IteratorAggregate
     public function toRFC3986(): ?string
     {
         return $this->getContent();
-    }
-
-    /**
-     * Returns the decoded query.
-     */
-    public function decoded(): ?string
-    {
-        $query = $this->getContent();
-        if (null === $query) {
-            return $query;
-        }
-
-        return rawurldecode($query);
     }
 
     /**

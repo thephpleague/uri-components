@@ -61,6 +61,8 @@ class HostTest extends TestCase
      * @covers ::__construct
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
+     * @covers ::getContent
+     * @covers ::toAscii
      * @covers ::toUnicode
      */
     public function testValidHost($host, ?string $uri, ?string $iri): void
@@ -150,6 +152,7 @@ class HostTest extends TestCase
      * @dataProvider invalidHostProvider
      * @covers ::__construct
      * @covers ::parse
+     * @covers ::getIDNAErrors
      * @covers ::isValidIpv6Hostname
      */
     public function testInvalidHost(string $invalid): void

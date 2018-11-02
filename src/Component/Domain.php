@@ -53,7 +53,7 @@ use function sprintf;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-final class Domain extends Host implements Countable, IteratorAggregate
+final class Domain extends Component implements Countable, IteratorAggregate
 {
     private const SEPARATOR = '.';
 
@@ -71,7 +71,12 @@ final class Domain extends Host implements Countable, IteratorAggregate
     ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
 
     /**
-     * @var array
+     * @var Host
+     */
+    private $host;
+
+    /**
+     * @var string[]
      */
     private $labels = [];
 
@@ -100,28 +105,65 @@ final class Domain extends Host implements Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    protected function parse(string $host = null): void
+    public static function __set_state(array $properties)
     {
-        parent::parse($host);
-        if (null !== $this->ip_version) {
+        return new static($properties['host']);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct($host = null)
+    {
+        if (!$host instanceof Host) {
+            $host = new Host($host);
+        }
+        
+        $this->host = $host;
+        if (null !== $host->getIpVersion()) {
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is an IP host', $host));
         }
 
-        if (null === $this->component) {
+        $component = $host->getContent();
+        if (null === $component) {
             return;
         }
 
-        if ('' === $this->component) {
+        if ('' === $component) {
             $this->labels = [''];
             return;
         }
 
-        if (preg_match(self::REGEXP_DOMAIN_NAME, $this->component)) {
-            $this->labels = array_reverse(explode(self::SEPARATOR, $this->component));
+        if (preg_match(self::REGEXP_DOMAIN_NAME, $component)) {
+            $this->labels = array_reverse(explode(self::SEPARATOR, $component));
             return;
         }
 
         throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is a registered name', $host));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContent(): ?string
+    {
+        return $this->host->getContent();
+    }
+
+    /**
+     * Returns the Host ascii representation.
+     */
+    public function toAscii(): ?string
+    {
+        return $this->host->toAscii();
+    }
+
+    /**
+     * Returns the Host unicode representation.
+     */
+    public function toUnicode(): ?string
+    {
+        return $this->host->toUnicode();
     }
 
     /**
@@ -196,6 +238,19 @@ final class Domain extends Host implements Countable, IteratorAggregate
         }
 
         return new self($this->getContent().self::SEPARATOR.$label);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContent($content)
+    {
+        $content = $this->filterComponent($content);
+        if ($content === $this->host->getContent()) {
+            return $this;
+        }
+
+        return new self($content);
     }
 
     /**

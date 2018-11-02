@@ -42,7 +42,8 @@ abstract class Component implements ComponentInterface
 
     protected const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
 
-    protected const REGEXP_PREVENTS_DECODING = ',%2[A-F|1-2|4-9]|
+    protected const REGEXP_PREVENTS_DECODING = ',%
+     	2[A-F|1-2|4-9]|
         3[0-9|B|D]|
         4[1-9|A-F]|
         5[0-9|A|F]|
@@ -52,9 +53,6 @@ abstract class Component implements ComponentInterface
 
     protected const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-\.~]/';
 
-    /**
-     * IDN Host detector regular expression.
-     */
     protected const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
 
     /**
