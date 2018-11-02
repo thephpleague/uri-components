@@ -293,7 +293,7 @@ function normalize_path($uri, string $path = null)
  */
 function remove_empty_segments($uri)
 {
-    return normalize_path($uri, (string) (new Path(filter_uri($uri)->getPath()))->withoutEmptySegments());
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withoutEmptySegments());
 }
 
 /**

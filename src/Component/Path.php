@@ -18,32 +18,27 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\PathInterface;
 use TypeError;
 use function array_pop;
 use function array_reduce;
 use function end;
 use function explode;
 use function implode;
-use function preg_replace;
 use function strpos;
 use function substr;
 
-class Path extends Component
+final class Path extends Component implements PathInterface
 {
     /**
      * @internal
      */
-    protected const SEPARATOR = '/';
+    private const DOT_SEGMENTS = ['.' => 1, '..' => 1];
 
     /**
      * @internal
      */
-    protected const DOT_SEGMENTS = ['.' => 1, '..' => 1];
-
-    /**
-     * @internal
-     */
-    protected const REGEXP_PATH_ENCODING = '/
+    private const REGEXP_PATH_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.\!\$&\'\(\)\*\+,;\=%\:\/@]+|
         %(?![A-Fa-f0-9]{2}))
     /x';
@@ -51,14 +46,14 @@ class Path extends Component
     /**
      * @var string
      */
-    protected $component;
+    private $component;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties)
     {
-        return new static($properties['component']);
+        return new self($properties['component']);
     }
 
     /**
@@ -73,7 +68,7 @@ class Path extends Component
     /**
      * Further parse the path component if needed.
      */
-    protected function parse(): void
+    private function parse(): void
     {
     }
 
@@ -82,7 +77,7 @@ class Path extends Component
      *
      * @throws TypeError if the component is no valid
      */
-    protected function validate($path): string
+    private function validate($path): string
     {
         $path = $this->validateComponent($path);
         if (null !== $path) {
@@ -185,20 +180,6 @@ class Path extends Component
         }
 
         return $carry;
-    }
-
-    /**
-     * Returns an instance without duplicate delimiters.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the path component normalized by removing
-     * multiple consecutive empty segment
-     *
-     * @return static
-     */
-    public function withoutEmptySegments()
-    {
-        return new static(preg_replace(',/+,', self::SEPARATOR, $this->__toString()));
     }
 
     /**

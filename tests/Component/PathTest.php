@@ -175,24 +175,6 @@ class PathTest extends TestCase
     }
 
     /**
-     * @dataProvider withoutEmptySegmentsProvider
-     */
-    public function testWithoutEmptySegments(string $path, string $expected): void
-    {
-        self::assertSame($expected, (string) (new Path($path))->withoutEmptySegments());
-    }
-
-    public function withoutEmptySegmentsProvider(): array
-    {
-        return [
-            ['/a/b/c', '/a/b/c'],
-            ['//a//b//c', '/a/b/c'],
-            ['a//b/c//', 'a/b/c/'],
-            ['/a/b/c//', '/a/b/c/'],
-        ];
-    }
-
-    /**
      * @dataProvider trailingSlashProvider
      */
     public function testHasTrailingSlash(string $path, bool $expected): void

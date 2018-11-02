@@ -193,6 +193,17 @@ class DomainTest extends TestCase
     }
 
     /**
+     * @covers ::getIp
+     * @covers ::getIpVersion
+     */
+    public function testIpProperty(): void
+    {
+        $host = new Domain('example.com');
+        self::assertNull($host->getIpVersion());
+        self::assertNull($host->getIp());
+    }
+
+    /**
      * Test Punycode support.
      *
      * @param string $unicode Unicode Domainname

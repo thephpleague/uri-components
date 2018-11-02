@@ -53,7 +53,7 @@ final class Port extends Component
      *
      * @throws MalformedUriComponent if the port is invalid
      */
-    protected function validate($port): ?int
+    private function validate($port): ?int
     {
         $port = $this->filterComponent($port);
         if (null === $port) {

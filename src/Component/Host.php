@@ -20,6 +20,7 @@ namespace League\Uri\Component;
 
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\HostInterface;
 use function defined;
 use function explode;
 use function filter_var;
@@ -67,14 +68,14 @@ use const INTL_IDNA_VARIANT_UTS46;
  * @since      1.0.0
  * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
  */
-class Host extends Component
+final class Host extends Component implements HostInterface
 {
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
      * invalid characters in host regular expression
      */
-    protected const REGEXP_INVALID_HOST_CHARS = '/
+    private const REGEXP_INVALID_HOST_CHARS = '/
         [:\/?#\[\]@ ]  # gen-delims characters as well as the space character
     /ix';
 
@@ -83,7 +84,7 @@ class Host extends Component
      *
      * General registered name regular expression
      */
-    protected const REGEXP_REGISTERED_NAME = '/(?(DEFINE)
+    private const REGEXP_REGISTERED_NAME = '/(?(DEFINE)
         (?<unreserved>[a-z0-9_~\-])   # . is missing as it is used to separate labels
         (?<sub_delims>[!$&\'()*+,;=])
         (?<encoded>%[A-F0-9]{2})
@@ -96,7 +97,7 @@ class Host extends Component
      *
      * IPvFuture regular expression
      */
-    protected const REGEXP_IP_FUTURE = '/^
+    private const REGEXP_IP_FUTURE = '/^
         v(?<version>[A-F0-9]+)\.
         (?:
             (?<unreserved>[a-z0-9_~\-\.])|
@@ -104,24 +105,24 @@ class Host extends Component
         )+
     $/ix';
 
-    protected const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
+    private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
 
-    protected const ADDRESS_BLOCK = "\xfe\x80";
-
-    /**
-     * @var string|null
-     */
-    protected $component;
+    private const ADDRESS_BLOCK = "\xfe\x80";
 
     /**
      * @var string|null
      */
-    protected $ip_version;
+    private $component;
+
+    /**
+     * @var string|null
+     */
+    private $ip_version;
 
     /**
      * @var bool
      */
-    protected $has_zone_identifier = false;
+    private $has_zone_identifier = false;
 
     /**
      * {@inheritdoc}
@@ -134,7 +135,7 @@ class Host extends Component
     /**
      * @codeCoverageIgnore
      */
-    protected static function supportIdnHost(): void
+    private static function supportIdnHost(): void
     {
         static $idn_support = null;
         $idn_support = $idn_support ?? function_exists('\idn_to_ascii') && defined('\INTL_IDNA_VARIANT_UTS46');
@@ -189,7 +190,7 @@ class Host extends Component
      *
      * @throws MalformedUriComponent If the host is invalid
      */
-    protected function parse(string $host = null): void
+    private function parse(string $host = null): void
     {
         $this->ip_version = null;
         $this->component = $host;
@@ -254,7 +255,7 @@ class Host extends Component
      *
      * @see http://icu-project.org/apiref/icu4j/com/ibm/icu/text/IDNA.Error.html
      */
-    protected function getIDNAErrors(int $error_byte): string
+    private function getIDNAErrors(int $error_byte): string
     {
         /**
          * IDNA errors.
@@ -291,7 +292,7 @@ class Host extends Component
      * @see http://tools.ietf.org/html/rfc6874#section-2
      * @see http://tools.ietf.org/html/rfc6874#section-4
      */
-    protected function isValidIpv6Hostname(string $host): bool
+    private function isValidIpv6Hostname(string $host): bool
     {
         [$ipv6, $scope] = explode('%', $host, 2) + [1 => null];
         if (null === $scope) {
@@ -315,7 +316,7 @@ class Host extends Component
     }
 
     /**
-     * Returns the Host ascii representation.
+     * {@inheritdoc}
      */
     public function toAscii(): ?string
     {
@@ -323,7 +324,7 @@ class Host extends Component
     }
 
     /**
-     * Returns the Host unicode representation.
+     * {@inheritdoc}
      */
     public function toUnicode(): ?string
     {
@@ -338,9 +339,7 @@ class Host extends Component
     }
 
     /**
-     * Returns the IP version.
-     *
-     * If the host is a not an IP this method will return null
+     * {@inheritdoc}
      */
     public function getIpVersion(): ?string
     {
@@ -348,7 +347,33 @@ class Host extends Component
     }
 
     /**
-     * Returns whether or not the host is an IP address.
+     * {@inheritdoc}
+     */
+    public function getIp(): ?string
+    {
+        if (null === $this->ip_version) {
+            return null;
+        }
+
+        if ('4' === $this->ip_version) {
+            return $this->component;
+        }
+
+        $ip = substr((string) $this->component, 1, -1);
+        if ('6' !== $this->ip_version) {
+            return substr($ip, strpos($ip, '.') + 1);
+        }
+
+        $pos = strpos($ip, '%');
+        if (false === $pos) {
+            return $ip;
+        }
+
+        return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function isIp(): bool
     {
@@ -387,34 +412,6 @@ class Host extends Component
     public function hasZoneIdentifier(): bool
     {
         return $this->has_zone_identifier;
-    }
-
-    /**
-     * Returns the IP component If the Host is an IP adress.
-     *
-     * If the host is a not an IP this method will return null
-     */
-    public function getIp(): ?string
-    {
-        if (null === $this->ip_version) {
-            return null;
-        }
-
-        if ('4' === $this->ip_version) {
-            return $this->component;
-        }
-
-        $ip = substr((string) $this->component, 1, -1);
-        if ('6' !== $this->ip_version) {
-            return substr($ip, strpos($ip, '.') + 1);
-        }
-
-        $pos = strpos($ip, '%');
-        if (false === $pos) {
-            return $ip;
-        }
-
-        return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
     }
 
     /**
