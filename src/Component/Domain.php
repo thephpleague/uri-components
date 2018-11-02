@@ -260,7 +260,7 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
     /**
      * {@inheritdoc}
      */
-    public function withContent($content)
+    public function withContent($content): self
     {
         $content = $this->filterComponent($content);
         if ($content === $this->host->getContent()) {

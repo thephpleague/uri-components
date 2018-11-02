@@ -395,7 +395,7 @@ final class DataPath extends Component
     /**
      * {@inheritdoc}
      */
-    public function withoutDotSegments()
+    public function withoutDotSegments(): self
     {
         return new self($this->path->withoutDotSegments());
     }
@@ -403,7 +403,7 @@ final class DataPath extends Component
     /**
      * {@inheritdoc}
      */
-    public function withLeadingSlash()
+    public function withLeadingSlash(): self
     {
         return new self($this->path->withLeadingSlash());
     }
@@ -411,7 +411,7 @@ final class DataPath extends Component
     /**
      * {@inheritdoc}
      */
-    public function withoutLeadingSlash()
+    public function withoutLeadingSlash(): self
     {
         return new self($this->path->withoutLeadingSlash());
     }
@@ -419,7 +419,7 @@ final class DataPath extends Component
     /**
      * {@inheritdoc}
      */
-    public function withContent($content)
+    public function withContent($content): self
     {
         $content = $this->filterComponent($content);
         if ($content === $this->path->getContent()) {
