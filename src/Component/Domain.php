@@ -331,7 +331,7 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
             return $this->prepend($label);
         }
 
-        if (!$label instanceof Host) {
+        if (!$label instanceof HostInterface) {
             $label = new Host($label);
         }
 

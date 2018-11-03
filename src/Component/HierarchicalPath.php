@@ -392,7 +392,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      */
     public function withoutSegment(int $key, int ...$keys): self
     {
-        array_unshift($keys, $key);
+        $keys[] = $key;
         $nb_segments = count($this->segments);
         $options = ['options' => ['min_range' => - $nb_segments, 'max_range' => $nb_segments - 1]];
         $deleted_keys = [];
@@ -447,11 +447,12 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      */
     public function withBasename($basename): self
     {
-        if (!$basename instanceof self) {
-            $basename = new self($basename);
+        $basename = $this->validateComponent($basename);
+        if (null === $basename) {
+            throw new MalformedUriComponent('a basename sequence can not be null');
         }
 
-        if (false !== strpos($basename->component, self::SEPARATOR)) {
+        if (false !== strpos($basename, self::SEPARATOR)) {
             throw new MalformedUriComponent('The basename can not contain the path separator');
         }
 
@@ -466,15 +467,16 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      */
     public function withExtension($extension): self
     {
-        if (!$extension instanceof self) {
-            $extension = new self($extension);
+        $extension = $this->validateComponent($extension);
+        if (null === $extension) {
+            throw new MalformedUriComponent('an extension sequence can not be null');
         }
 
-        if (strpos($extension->component, self::SEPARATOR)) {
+        if (false !== strpos($extension, self::SEPARATOR)) {
             throw new MalformedUriComponent('an extension sequence can not contain a path delimiter');
         }
 
-        if (0 === strpos($extension->component, '.')) {
+        if (0 === strpos($extension, '.')) {
             throw new MalformedUriComponent('an extension sequence can not contain a leading `.` character');
         }
 
@@ -490,7 +492,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * Creates a new basename with a new extension.
      */
-    private function buildBasename(self $extension, string $ext, string $param = null): string
+    private function buildBasename(string $extension, string $ext, string $param = null): string
     {
         $length = strrpos($ext, '.'.pathinfo($ext, PATHINFO_EXTENSION));
         if (false !== $length) {
@@ -501,7 +503,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
             $param = ';'.$param;
         }
 
-        $extension = trim($extension->component);
+        $extension = trim($extension);
         if ('' === $extension) {
             return $ext.$param;
         }
