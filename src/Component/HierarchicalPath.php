@@ -65,11 +65,6 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     private $segments;
 
     /**
-     * @var string
-     */
-    private $component;
-
-    /**
      * @var PathInterface
      */
     private $path;
@@ -132,8 +127,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
         }
 
         $this->path = $path;
-        $this->component = (string) $this->validateComponent((string) $path);
-        $segments = $this->component;
+        $segments = (string) $this->decodeComponent($path->__toString());
         if ($this->path->isAbsolute()) {
             $segments = substr($segments, 1);
         }
@@ -180,10 +174,12 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      */
     public function getDirname(): string
     {
+        $path = (string) $this->decodeComponent($this->path->__toString());
+
         return str_replace(
             ['\\', "\0"],
             [self::SEPARATOR, '\\'],
-            dirname(str_replace('\\', "\0", $this->component))
+            dirname(str_replace('\\', "\0", $path))
         );
     }
 
@@ -298,7 +294,11 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
             throw new TypeError('The appended path can not be null');
         }
 
-        return new self(rtrim($this->component, self::SEPARATOR).self::SEPARATOR.ltrim($segment, self::SEPARATOR));
+        return new self(
+            rtrim($this->path->__toString(), self::SEPARATOR)
+            .self::SEPARATOR
+            .ltrim($segment, self::SEPARATOR)
+        );
     }
 
     /**
@@ -313,7 +313,11 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
             throw new TypeError('The prepended path can not be null');
         }
 
-        return new self(rtrim($segment, self::SEPARATOR).self::SEPARATOR.ltrim($this->component, self::SEPARATOR));
+        return new self(
+            rtrim($segment, self::SEPARATOR)
+            .self::SEPARATOR
+            .ltrim($this->path->__toString(), self::SEPARATOR)
+        );
     }
 
     /**
@@ -428,15 +432,19 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      */
     public function withDirname($path): self
     {
-        if (!$path instanceof self) {
-            $path = new self($path);
+        if (!$path instanceof PathInterface) {
+            $path = new Path($path);
         }
 
         if ($path->getContent() === $this->getDirname()) {
             return $this;
         }
 
-        return $path->withSegment(count($path), array_pop($this->segments));
+        return new self(
+            rtrim($path->__toString(), self::SEPARATOR)
+            .self::SEPARATOR
+            .array_pop($this->segments)
+        );
     }
 
     /**
