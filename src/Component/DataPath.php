@@ -21,6 +21,7 @@ namespace League\Uri\Component;
 use finfo;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\PathNotFound;
+use League\Uri\PathInterface;
 use SplFileObject;
 use function base64_decode;
 use function base64_encode;
@@ -38,7 +39,7 @@ use function strlen;
 use function strtolower;
 use const FILEINFO_MIME;
 
-final class DataPath extends Component
+final class DataPath extends Component implements PathInterface
 {
     private const DEFAULT_MIMETYPE = 'text/plain';
 
@@ -311,7 +312,7 @@ final class DataPath extends Component
      */
     public function isAbsolute(): bool
     {
-        return $this->path->isAbsolute();
+        return false;
     }
 
     /**
@@ -397,7 +398,7 @@ final class DataPath extends Component
      */
     public function withoutDotSegments(): self
     {
-        return new self($this->path->withoutDotSegments());
+        return $this;
     }
 
     /**
@@ -405,7 +406,7 @@ final class DataPath extends Component
      */
     public function withLeadingSlash(): self
     {
-        return new self($this->path->withLeadingSlash());
+        throw new MalformedUriComponent(sprintf('A %s can not have a leading slash', self::class));
     }
 
     /**
@@ -413,7 +414,7 @@ final class DataPath extends Component
      */
     public function withoutLeadingSlash(): self
     {
-        return new self($this->path->withoutLeadingSlash());
+        return $this;
     }
 
     /**

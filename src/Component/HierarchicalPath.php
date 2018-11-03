@@ -144,7 +144,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     /**
      * {@inheritdoc}
      */
-    public function count()
+    public function count(): int
     {
         return count($this->segments);
     }
