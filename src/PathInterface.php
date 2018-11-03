@@ -18,6 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use InvalidArgumentException;
+
 interface PathInterface extends ComponentInterface
 {
     /**
@@ -32,6 +34,9 @@ interface PathInterface extends ComponentInterface
      * an instance that contains the path component normalized by removing
      * the dot segment.
      *
+     * @throws InvalidArgumentException for invalid component or transformations
+     *                                  that would result in a object in invalid state.
+     *
      * @return static
      */
     public function withoutDotSegments();
@@ -42,6 +47,9 @@ interface PathInterface extends ComponentInterface
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a leading slash
      *
+     * @throws InvalidArgumentException for invalid component or transformations
+     *                                  that would result in a object in invalid state.
+     *
      * @return static
      */
     public function withLeadingSlash();
@@ -51,6 +59,9 @@ interface PathInterface extends ComponentInterface
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a leading slash
+     *
+     * @throws InvalidArgumentException for invalid component or transformations
+     *                                  that would result in a object in invalid state.
      *
      * @return static
      */
