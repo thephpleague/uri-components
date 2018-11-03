@@ -68,10 +68,23 @@ class DataPathTest extends TestCase
         self::assertEquals($path, $path->withoutLeadingSlash());
     }
 
+    /**
+     * @covers ::validate
+     * @covers ::__construct
+     */
     public function testConstructorFailedWithNullValue(): void
     {
         self::expectException(TypeError::class);
         new Path(null);
+    }
+
+    /**
+     * @covers ::__construct
+     */
+    public function testConstructorFailedMalformePath(): void
+    {
+        self::expectException(InvalidUriComponent::class);
+        new Path('€');
     }
 
     /**

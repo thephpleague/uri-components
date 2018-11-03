@@ -60,14 +60,14 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     private const SEPARATOR = '/';
 
     /**
-     * @var string[]
-     */
-    private $segments;
-
-    /**
      * @var PathInterface
      */
     private $path;
+
+    /**
+     * @var string[]
+     */
+    private $segments;
 
     /**
      * Returns a new instance from an array or a traversable object.

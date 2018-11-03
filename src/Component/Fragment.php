@@ -28,14 +28,14 @@ final class Fragment extends Component
     /**
      * @var string|null
      */
-    private $component;
+    private $fragment;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['component']);
+        return new self($properties['fragment']);
     }
 
     /**
@@ -45,7 +45,7 @@ final class Fragment extends Component
      */
     public function __construct($fragment = null)
     {
-        $this->component = $this->validateComponent($fragment);
+        $this->fragment = $this->validateComponent($fragment);
     }
 
     /**
@@ -53,7 +53,7 @@ final class Fragment extends Component
      */
     public function getContent(): ?string
     {
-        return $this->encodeComponent($this->component, self::RFC3986_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
+        return $this->encodeComponent($this->fragment, self::RFC3986_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
     }
 
     /**
@@ -61,7 +61,7 @@ final class Fragment extends Component
      */
     public function decoded(): ?string
     {
-        return $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
+        return $this->encodeComponent($this->fragment, self::NO_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
     }
 
     /**
