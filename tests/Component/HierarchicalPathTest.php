@@ -531,10 +531,10 @@ class HierarchicalPathTest extends TestCase
      * @covers ::withExtension
      * @covers ::withBasename
      * @covers ::withSegment
-     * @covers ::withExtension
      * @covers ::buildBasename
+     * @param ?string $extension
      */
-    public function testWithExtensionWithInvalidExtension(string $extension): void
+    public function testWithExtensionWithInvalidExtension(?string $extension): void
     {
         self::expectException(InvalidUriComponent::class);
         (new Path())->withExtension($extension);
@@ -545,7 +545,8 @@ class HierarchicalPathTest extends TestCase
         return [
             'invalid format' => ['t/xt'],
             'starting with a dot' => ['.csv'],
-            'invali chars' => ["\0"],
+            'invalid chars' => ["\0"],
+            'null chars' => [null],
         ];
     }
 
@@ -700,11 +701,25 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
+     * @dataProvider basenameInvalidProvider
+     *
      * @covers ::withBasename
+     * @param ?string $path
      */
-    public function testWithBasenameThrowException(): void
+    public function testWithBasenameThrowException(?string $path): void
     {
         self::expectException(InvalidUriComponent::class);
-        (new Path('foo/bar'))->withBasename('foo/bar');
+        (new Path('foo/bar'))->withBasename($path);
+    }
+
+    /**
+     * @covers ::withBasename
+     */
+    public function basenameInvalidProvider(): array
+    {
+        return [
+            ['foo/bar'],
+            [null],
+        ];
     }
 }
