@@ -30,14 +30,14 @@ final class Scheme extends Component
     /**
      * @var string|null
      */
-    private $component;
+    private $scheme;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['component']);
+        return new self($properties['scheme']);
     }
 
     /**
@@ -47,7 +47,7 @@ final class Scheme extends Component
      */
     public function __construct($scheme = null)
     {
-        $this->component = $this->validate($scheme);
+        $this->scheme = $this->validate($scheme);
     }
 
     /**
@@ -74,7 +74,7 @@ final class Scheme extends Component
      */
     public function getContent(): ?string
     {
-        return $this->component;
+        return $this->scheme;
     }
 
     /**
@@ -83,7 +83,7 @@ final class Scheme extends Component
     public function withContent($content): self
     {
         $content = $this->validate($this->filterComponent($content));
-        if ($content === $this->component) {
+        if ($content === $this->scheme) {
             return $this;
         }
 

@@ -313,6 +313,17 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
+     * @covers ::append
+     * @covers ::withSegment
+     */
+    public function testWithSegmentUseAppend(): void
+    {
+        $path = new Path('foo/bar');
+        self::assertEquals($path->withSegment(2, 'baz'), $path->append('baz'));
+    }
+
+
+    /**
      * @dataProvider withoutEmptySegmentsProvider
      */
     public function testWithoutEmptySegments(string $path, string $expected): void

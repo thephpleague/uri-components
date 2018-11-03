@@ -42,14 +42,14 @@ final class Path extends Component implements PathInterface
     /**
      * @var string
      */
-    private $component;
+    private $path;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['component']);
+        return new self($properties['path']);
     }
 
     /**
@@ -57,7 +57,7 @@ final class Path extends Component implements PathInterface
      */
     public function __construct($path = '')
     {
-        $this->component = $this->validate($path);
+        $this->path = $this->validate($path);
     }
 
     /**
@@ -80,7 +80,7 @@ final class Path extends Component implements PathInterface
      */
     public function getContent(): ?string
     {
-        return $this->encodeComponent($this->component, self::RFC3986_ENCODING, self::REGEXP_PATH_ENCODING);
+        return $this->encodeComponent($this->path, self::RFC3986_ENCODING, self::REGEXP_PATH_ENCODING);
     }
 
     /**
@@ -88,7 +88,7 @@ final class Path extends Component implements PathInterface
      */
     public function decoded(): string
     {
-        return (string) $this->encodeComponent($this->component, self::NO_ENCODING, self::REGEXP_PATH_ENCODING);
+        return (string) $this->encodeComponent($this->path, self::NO_ENCODING, self::REGEXP_PATH_ENCODING);
     }
 
     /**
@@ -96,7 +96,7 @@ final class Path extends Component implements PathInterface
      */
     public function isAbsolute(): bool
     {
-        return self::SEPARATOR === ($this->component[0] ?? '');
+        return self::SEPARATOR === ($this->path[0] ?? '');
     }
 
     /**

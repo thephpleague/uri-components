@@ -28,14 +28,14 @@ final class Port extends Component
     /**
      * @var int|null
      */
-    private $component;
+    private $port;
 
     /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['component']);
+        return new self($properties['port']);
     }
 
     /**
@@ -45,7 +45,7 @@ final class Port extends Component
      */
     public function __construct($port = null)
     {
-        $this->component = $this->validate($port);
+        $this->port = $this->validate($port);
     }
 
     /**
@@ -73,11 +73,11 @@ final class Port extends Component
      */
     public function getContent(): ?string
     {
-        if (null === $this->component) {
-            return $this->component;
+        if (null === $this->port) {
+            return $this->port;
         }
 
-        return (string) $this->component;
+        return (string) $this->port;
     }
 
     /**
@@ -85,7 +85,7 @@ final class Port extends Component
      */
     public function toInt(): ?int
     {
-        return $this->component;
+        return $this->port;
     }
 
     /**
@@ -94,7 +94,7 @@ final class Port extends Component
     public function withContent($content): self
     {
         $content = $this->validate($this->filterComponent($content));
-        if ($content === $this->component) {
+        if ($content === $this->port) {
             return $this;
         }
 

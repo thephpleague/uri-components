@@ -90,14 +90,6 @@ final class DataPath extends Component implements PathInterface
     private $document;
 
     /**
-     * {@inheritdoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['path']);
-    }
-
-    /**
      * Create a new instance from a file path.
      *
      * @param null|resource $context
@@ -126,7 +118,36 @@ final class DataPath extends Component implements PathInterface
     /**
      * {@inheritdoc}
      */
-    private function validate($path): ?string
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['path']);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct($path = '')
+    {
+        $path = $this->validate($this->filterComponent($path));
+        if (null !== $path && preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
+            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
+        }
+
+        $this->path = new Path($path);
+        $str = $this->path->__toString();
+        $is_binary_data = false;
+        [$mediatype, $this->document] = explode(',', $str, 2) + [1 => ''];
+        [$mimetype, $parameters] = explode(';', $mediatype, 2) + [1 => ''];
+        $this->mimetype = $this->filterMimeType($mimetype);
+        $this->parameters = $this->filterParameters($parameters, $is_binary_data);
+        $this->is_binary_data = $is_binary_data;
+        $this->validateDocument();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    private function validate(?string $path): ?string
     {
         if (null === $path) {
             return $path;
@@ -141,28 +162,6 @@ final class DataPath extends Component implements PathInterface
         }
 
         return $path;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct($path = '')
-    {
-        $path = $this->validate($this->filterComponent($path));
-        $this->path = new Path($path);
-
-        $path = (string) $path;
-        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
-            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
-        }
-
-        $is_binary_data = false;
-        [$mediatype, $this->document] = explode(',', $path, 2) + [1 => ''];
-        [$mimetype, $parameters] = explode(';', $mediatype, 2) + [1 => ''];
-        $this->mimetype = $this->filterMimeType($mimetype);
-        $this->parameters = $this->filterParameters($parameters, $is_binary_data);
-        $this->is_binary_data = $is_binary_data;
-        $this->validateDocument();
     }
 
     /**
