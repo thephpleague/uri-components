@@ -537,12 +537,8 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function merge($query): self
     {
-        if ($query instanceof ComponentInterface) {
-            $query = $query->getContent();
-        }
-
         $pairs = $this->pairs;
-        foreach (query_parse($query, $this->separator, PHP_QUERY_RFC3986) as $pair) {
+        foreach (query_parse($this->filterComponent($query), $this->separator, PHP_QUERY_RFC3986) as $pair) {
             $pairs = $this->addPair($pairs, $pair);
         }
 
@@ -563,7 +559,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * @throws TypeError if the value type is invalid
      */
-    private static function filterPair($value)
+    private function filterPair($value)
     {
         if (null === $value || is_scalar($value)) {
             return $value;
