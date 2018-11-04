@@ -11,7 +11,7 @@ System Requirements
 
 You need:
 
-- **PHP >= 7.0** but the latest stable version of PHP is recommended
+- **PHP >= 7.1.3** but the latest stable version of PHP is recommended
 
 In order to handle IDN host you should also install the `intl` extension otherwise and Exception will be thrown when attempting to validate such host.
 
@@ -25,7 +25,7 @@ $ composer require league/uri-components
 Documentation
 --------
 
-Full documentation can be found at [uri.thephpleague.com](http://uri.thephpleague.com).
+Full documentation can be found at [uri.thephpleague.com](http://uri.thephpleague.com/components/).
 
 Contributing
 -------
