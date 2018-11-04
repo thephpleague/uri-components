@@ -54,20 +54,6 @@ use const IDNA_ERROR_PUNYCODE;
 use const IDNA_ERROR_TRAILING_HYPHEN;
 use const INTL_IDNA_VARIANT_UTS46;
 
-/**
- * Value object representing a URI Host component.
- *
- * Instances of this interface are considered immutable; all methods that
- * might change state MUST be implemented such that they retain the internal
- * state of the current instance and return an instance that contains the
- * changed state.
- *
- * @package    League\Uri
- * @subpackage League\Uri\Component
- * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @since      1.0.0
- * @see        https://tools.ietf.org/html/rfc3986#section-3.2.2
- */
 final class Host extends Component implements HostInterface
 {
     /**
