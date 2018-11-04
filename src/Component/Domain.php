@@ -107,7 +107,7 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
         }
         
         $this->host = $host;
-        if (null !== $host->getIpVersion()) {
+        if ($host->isIp()) {
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is an IP host', $host));
         }
 
@@ -156,9 +156,25 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
     /**
      * {@inheritdoc}
      */
+    public function isIp(): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isDomain(): bool
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getIpVersion(): ?string
     {
-        return $this->host->getIpVersion();
+        return null;
     }
 
     /**
@@ -166,7 +182,7 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
      */
     public function getIp(): ?string
     {
-        return $this->host->getIp();
+        return null;
     }
 
     /**

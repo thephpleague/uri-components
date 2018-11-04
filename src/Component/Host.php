@@ -98,7 +98,7 @@ final class Host extends Component implements HostInterface
     /**
      * @var string|null
      */
-    private $component;
+    private $host;
 
     /**
      * @var string|null
@@ -111,11 +111,16 @@ final class Host extends Component implements HostInterface
     private $has_zone_identifier = false;
 
     /**
+     * @var bool
+     */
+    private $is_domain_name = false;
+
+    /**
      * {@inheritdoc}
      */
     public static function __set_state(array $properties): self
     {
-        return new self($properties['component']);
+        return new self($properties['host']);
     }
 
     /**
@@ -179,7 +184,7 @@ final class Host extends Component implements HostInterface
     private function parse(string $host = null): void
     {
         $this->ip_version = null;
-        $this->component = $host;
+        $this->host = $host;
         if (null === $host || '' === $host) {
             return;
         }
@@ -213,8 +218,9 @@ final class Host extends Component implements HostInterface
             $domain_name = strtolower($domain_name);
         }
 
-        $this->component = $domain_name;
+        $this->host = $domain_name;
         if (preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
+            $this->is_domain_name = true;
             return;
         }
 
@@ -233,7 +239,8 @@ final class Host extends Component implements HostInterface
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
         }
 
-        $this->component = $domain_name;
+        $this->host = $domain_name;
+        $this->is_domain_name = (bool) preg_match(self::REGEXP_REGISTERED_NAME, $domain_name);
     }
 
     /**
@@ -298,7 +305,7 @@ final class Host extends Component implements HostInterface
      */
     public function getContent(): ?string
     {
-        return $this->component;
+        return $this->host;
     }
 
     /**
@@ -315,13 +322,13 @@ final class Host extends Component implements HostInterface
     public function toUnicode(): ?string
     {
         if (null !== $this->ip_version
-            || null === $this->component
-            || false === strpos($this->component, 'xn--')
+            || null === $this->host
+            || false === strpos($this->host, 'xn--')
         ) {
-            return $this->component;
+            return $this->host;
         }
 
-        return (string) idn_to_utf8($this->component, 0, INTL_IDNA_VARIANT_UTS46);
+        return (string) idn_to_utf8($this->host, 0, INTL_IDNA_VARIANT_UTS46);
     }
 
     /**
@@ -342,10 +349,10 @@ final class Host extends Component implements HostInterface
         }
 
         if ('4' === $this->ip_version) {
-            return $this->component;
+            return $this->host;
         }
 
-        $ip = substr((string) $this->component, 1, -1);
+        $ip = substr((string) $this->host, 1, -1);
         if ('6' !== $this->ip_version) {
             return substr($ip, strpos($ip, '.') + 1);
         }
@@ -356,6 +363,14 @@ final class Host extends Component implements HostInterface
         }
 
         return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isDomain(): bool
+    {
+        return $this->is_domain_name;
     }
 
     /**
@@ -416,7 +431,7 @@ final class Host extends Component implements HostInterface
             return $this;
         }
 
-        [$ipv6, ] = explode('%', substr((string) $this->component, 1, -1));
+        [$ipv6, ] = explode('%', substr((string) $this->host, 1, -1));
 
         return static::createFromIp($ipv6);
     }
