@@ -128,12 +128,7 @@ final class DataPath extends Component implements PathInterface
      */
     public function __construct($path = '')
     {
-        $path = $this->validate($this->filterComponent($path));
-        if (null !== $path && preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
-            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
-        }
-
-        $this->path = new Path($path);
+        $this->path = new Path($this->filterPath($this->filterComponent($path)));
         $str = $this->path->__toString();
         $is_binary_data = false;
         [$mediatype, $this->document] = explode(',', $str, 2) + [1 => ''];
@@ -145,12 +140,17 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Filter the data path.
+     *
+     * @param ?string $path
+     *
+     * @throws MalformedUriComponent If the path is null
+     * @throws MalformedUriComponent If the path is not valid according to RFC2937
      */
-    private function validate(?string $path): ?string
+    private function filterPath(?string $path): string
     {
         if (null === $path) {
-            return $path;
+            throw new MalformedUriComponent('The path can not be null');
         }
 
         if ('' === $path || ',' === $path) {
@@ -158,7 +158,11 @@ final class DataPath extends Component implements PathInterface
         }
 
         if (preg_match(self::REGEXP_DATAPATH, $path)) {
-            return substr($path, 0, -1).'charset=us-ascii,';
+            $path = substr($path, 0, -1).'charset=us-ascii,';
+        }
+
+        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
+            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
         return $path;

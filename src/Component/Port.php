@@ -62,7 +62,7 @@ final class Port extends Component
 
         $fport = filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
         if (false !== $fport) {
-            return $fport;
+            return (int) $fport;
         }
 
         throw new MalformedUriComponent(sprintf('Expected port to be a positive integer or 0; received %s', $port));
