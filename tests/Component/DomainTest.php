@@ -42,11 +42,15 @@ class DomainTest extends TestCase
 
     /**
      * @covers ::getIterator
+     * @covers ::isDomain
+     * @covers ::isIp
      */
     public function testIterator(): void
     {
         $host = new Domain('uri.thephpleague.com');
         self::assertEquals(['com', 'thephpleague', 'uri'], iterator_to_array($host));
+        self::assertFalse($host->isIp());
+        self::assertTrue($host->isDomain());
     }
 
     /**

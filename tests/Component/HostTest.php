@@ -43,6 +43,7 @@ class HostTest extends TestCase
      * @covers ::withContent
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
+     * @covers ::isDomain
      */
     public function testWithContent(): void
     {
@@ -50,6 +51,8 @@ class HostTest extends TestCase
         self::assertSame($host, $host->withContent('uri.thephpleague.com'));
         self::assertSame($host, $host->withContent($host));
         self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
+        self::assertTrue($host->isDomain());
+        self::assertFalse((new Host('[::1]'))->isDomain());
     }
 
     /**
