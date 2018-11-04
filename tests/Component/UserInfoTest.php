@@ -42,6 +42,7 @@ class UserInfoTest extends TestCase
      * @covers ::getPass
      * @covers ::getUser
      * @covers ::encodeComponent
+     * @covers ::getUriComponent
      *
      * @param mixed|null $user
      * @param mixed|null $pass
@@ -55,13 +56,15 @@ class UserInfoTest extends TestCase
         ?string $expected_user,
         ?string $expected_pass,
         string $expected_str,
-        ?string $iri_str
+        ?string $iri_str,
+        string $uriComponent
     ): void {
         $userinfo = new UserInfo($user, $pass);
         self::assertSame($expected_user, $userinfo->getUser());
         self::assertSame($expected_pass, $userinfo->getPass());
         self::assertSame($expected_str, (string) $userinfo);
         self::assertSame($iri_str, $userinfo->decoded());
+        self::assertSame($uriComponent, $userinfo->getUriComponent());
     }
 
     public function userInfoProvider(): array
@@ -74,6 +77,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'pass',
                 'expected_str' => 'login:pass',
                 'iri_str' => 'login:pass',
+                'uriComponent' => 'login:pass@',
             ],
             [
                 'user' => 'login',
@@ -82,6 +86,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'pass',
                 'expected_str' => 'login:pass',
                 'iri_str' => 'login:pass',
+                'uriComponent' => 'login:pass@',
             ],
             [
                 'user' => 'login%61',
@@ -90,6 +95,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'pass',
                 'expected_str' => 'login%61:pass',
                 'iri_str' => 'login%61:pass',
+                'uriComponent' => 'login%61:pass@',
             ],
             [
                 'user' => 'login',
@@ -98,6 +104,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => 'login',
                 'iri_str' => 'login',
+                'uriComponent' => 'login@',
             ],
             [
                 'user' => null,
@@ -106,6 +113,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => null,
+                'uriComponent' => '',
             ],
             [
                 'user' => '',
@@ -114,6 +122,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => '',
+                'uriComponent' => '@',
             ],
             [
                 'user' => '',
@@ -122,6 +131,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => '',
+                'uriComponent' => '@',
             ],
             [
                 'user' => null,
@@ -130,6 +140,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => null,
                 'expected_str' => '',
                 'iri_str' => null,
+                'uriComponent' => '',
             ],
             [
                 'user' => 'foò',
@@ -138,6 +149,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'bar',
                 'expected_str' => 'fo%C3%B2:bar',
                 'iri_str' => 'foò:bar',
+                'uriComponent' => 'fo%C3%B2:bar@',
             ],
             [
                 'user' => 'fo+o',
@@ -146,6 +158,7 @@ class UserInfoTest extends TestCase
                 'expected_pass' => 'ba+r',
                 'expected_str' => 'fo+o:ba+r',
                 'iri_str' => 'fo+o:ba+r',
+                'uriComponent' => 'fo+o:ba+r@',
             ],
 
         ];

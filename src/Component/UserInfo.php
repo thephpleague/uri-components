@@ -75,6 +75,19 @@ final class UserInfo extends Component
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getUriComponent(): string
+    {
+        $str = $this->__toString();
+        if (null === $this->user) {
+            return $str;
+        }
+
+        return $str.'@';
+    }
+
+    /**
      * Returns the decoded component.
      */
     public function decoded(): ?string

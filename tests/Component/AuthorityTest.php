@@ -232,6 +232,7 @@ class AuthorityTest extends TestCase
      * @covers ::jsonSerialize
      * @covers ::__toString
      * @covers ::getContent
+     * @covers ::getUriComponent
      *
      * @param ?string $authority
      * @param ?string $json
@@ -241,12 +242,14 @@ class AuthorityTest extends TestCase
         ?string $authority,
         string $string,
         ?string $json,
-        ?string $content
+        ?string $content,
+        string $uriComponent
     ): void {
         $authority = new Authority($authority);
         self::assertSame($string, (string) $authority);
         self::assertSame($json, json_encode($authority));
         self::assertSame($content, $authority->getContent());
+        self::assertSame($uriComponent, $authority->getUriComponent());
     }
 
     public function stringRepresentationDataProvider(): array
@@ -257,24 +260,28 @@ class AuthorityTest extends TestCase
                 'string' => '',
                 'json' => 'null',
                 'content' => null,
+                'uriComponent' => '',
             ],
             'empty string' => [
                 'authority' => '',
                 'string' => '',
                 'json' => '""',
                 'content' => '',
+                'uriComponent' => '//',
             ],
             'full authority' => [
                 'authority' => 'foo:bar@eXAmPle.cOm:443',
                 'string' => 'foo:bar@example.com:443',
                 'json' => '"foo:bar@example.com:443"',
                 'content' => 'foo:bar@example.com:443',
+                'uriComponent' => '//foo:bar@example.com:443',
             ],
             'unicode host' => [
                 'authority' => 'foo:bar@مثال.إختبار:443',
                 'string' => 'foo:bar@xn--mgbh0fb.xn--kgbechtv:443',
                 'json' => '"foo:bar@xn--mgbh0fb.xn--kgbechtv:443"',
                 'content' => 'foo:bar@xn--mgbh0fb.xn--kgbechtv:443',
+                'uriComponent' => '//foo:bar@xn--mgbh0fb.xn--kgbechtv:443',
             ],
         ];
     }

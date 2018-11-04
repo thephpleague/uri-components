@@ -39,7 +39,7 @@ class FragmentTest extends TestCase
      *
      * @param ?string $str
      */
-    public function testGetUriComponent(?string $str, string $encoded): void
+    public function testStringRepresentation(?string $str, string $encoded): void
     {
         self::assertSame($encoded, (string) new Fragment($str));
     }
@@ -151,6 +151,15 @@ class FragmentTest extends TestCase
         $component = new Fragment('yolo');
         $generateComponent = eval('return '.var_export($component, true).';');
         self::assertEquals($component, $generateComponent);
+    }
+
+    /**
+     * @covers ::getUriComponent
+     */
+    public function testGetUriComponent(): void
+    {
+        self::assertSame('#yolo', (new Fragment('yolo'))->getUriComponent());
+        self::assertEquals('', (new Fragment())->getUriComponent());
     }
 
     /**

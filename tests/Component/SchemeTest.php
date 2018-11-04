@@ -71,31 +71,34 @@ class SchemeTest extends TestCase
      *
      * @covers ::validate
      * @covers ::__toString
+     * @covers ::getUriComponent
      *
      * @param null|mixed $scheme
      *
      */
-    public function testValidScheme($scheme, string $toString): void
+    public function testValidScheme($scheme, string $toString, string $uriComponent): void
     {
-        self::assertSame($toString, (string) new Scheme($scheme));
+        $scheme = new Scheme($scheme);
+        self::assertSame($toString, (string) $scheme);
+        self::assertSame($uriComponent, $scheme->getUriComponent());
     }
 
     public function validSchemeProvider(): array
     {
         return [
-            [null, ''],
-            [new Scheme('foo'), 'foo'],
+            [null, '', ''],
+            [new Scheme('foo'), 'foo', 'foo:'],
             [new class() {
                 public function __toString()
                 {
                     return 'foo';
                 }
-            }, 'foo'],
-            ['a', 'a'],
-            ['ftp', 'ftp'],
-            ['HtTps', 'https'],
-            ['wSs', 'wss'],
-            ['telnEt', 'telnet'],
+            }, 'foo', 'foo:'],
+            ['a', 'a', 'a:'],
+            ['ftp', 'ftp', 'ftp:'],
+            ['HtTps', 'https', 'https:'],
+            ['wSs', 'wss', 'wss:'],
+            ['telnEt', 'telnet', 'telnet:'],
         ];
     }
 

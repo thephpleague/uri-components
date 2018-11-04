@@ -174,6 +174,19 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getUriComponent(): string
+    {
+        $str = $this->__toString();
+        if ([] === $this->pairs) {
+            return $str;
+        }
+
+        return '?'.$str;
+    }
+
+    /**
      * Returns the RFC1738 encoded query.
      */
     public function toRFC1738(): ?string

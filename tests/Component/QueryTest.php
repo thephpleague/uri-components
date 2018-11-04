@@ -129,6 +129,16 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::getUriComponent
+     */
+    public function testGetUriComponent(): void
+    {
+        self::assertSame('', (new Query())->getUriComponent());
+        self::assertSame('?', (new Query(''))->getUriComponent());
+        self::assertSame('?foo=bar', (new Query('foo=bar'))->getUriComponent());
+    }
+
+    /**
      * @dataProvider queryProvider
      *
      * @covers ::__construct
@@ -137,7 +147,7 @@ class QueryTest extends TestCase
      * @param string|array $input
      * @param string       $expected
      */
-    public function testGetUriComponent($input, $expected): void
+    public function testStringRepresentationComponent($input, $expected): void
     {
         $query = is_array($input) ? Query::createFromPairs($input) : new Query($input);
 

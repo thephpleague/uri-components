@@ -53,31 +53,37 @@ class PortTest extends TestCase
      *
      * @covers ::toInt
      * @covers ::getContent
+     * @covers ::getUriComponent
      * @covers ::validate
      *
      * @param mixed|null $input
      * @param ?int       $expected
      * @param ?string    $string_expected
      */
-    public function testToInt($input, ?int $expected, ?string $string_expected): void
-    {
+    public function testToInt(
+        $input,
+        ?int $expected,
+        ?string $string_expected,
+        string $uri_expected
+    ): void {
         self::assertSame($expected, (new Port($input))->toInt());
         self::assertSame($string_expected, (new Port($input))->getContent());
+        self::assertSame($uri_expected, (new Port($input))->getUriComponent());
     }
 
     public function getToIntProvider(): array
     {
         return [
-            [null, null, null],
-            [23, 23, '23'],
-            ['23', 23, '23'],
+            [null, null, null, ''],
+            [23, 23, '23', ':23'],
+            ['23', 23, '23', ':23'],
             [new class() {
                 public function __toString()
                 {
                     return '23';
                 }
-            }, 23, '23'],
-            [new Port(23), 23, '23'],
+            }, 23, '23', ':23'],
+            [new Port(23), 23, '23', ':23'],
         ];
     }
 
