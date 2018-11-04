@@ -134,6 +134,19 @@ final class Authority extends Component
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getUriComponent(): string
+    {
+        $str = $this->__toString();
+        if (null === $this->host->getContent()) {
+            return $str;
+        }
+
+        return '//'.$str;
+    }
+
+    /**
      * Retrieve the user component of the URI User Info part.
      */
     public function getHost(): ?string

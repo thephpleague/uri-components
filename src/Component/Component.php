@@ -149,6 +149,14 @@ abstract class Component implements ComponentInterface
     /**
      * {@inheritdoc}
      */
+    public function getUriComponent(): string
+    {
+        return $this->__toString();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     abstract public function getContent(): ?string;
 
     /**

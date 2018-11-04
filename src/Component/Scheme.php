@@ -80,6 +80,19 @@ final class Scheme extends Component
     /**
      * {@inheritdoc}
      */
+    public function getUriComponent(): string
+    {
+        $str = $this->__toString();
+        if (null === $this->scheme) {
+            return $str;
+        }
+
+        return $str.':';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function withContent($content): self
     {
         $content = $this->validate($this->filterComponent($content));

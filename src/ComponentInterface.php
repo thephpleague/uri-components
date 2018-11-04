@@ -38,6 +38,20 @@ use JsonSerializable;
 interface ComponentInterface extends JsonSerializable
 {
     /**
+     * Returns the instance content.
+     *
+     * If the instance is defined, the value returned MUST be encoded according to the
+     * selected encoding algorithm. In any case, the value MUST NOT double-encode any character
+     * depending on the selected encoding algorithm.
+     *
+     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
+     * or RFC 3987 Section 3. By default the content is encoded according to RFC3986
+     *
+     * If the instance is not defined null is returned
+     */
+    public function getContent(): ?string;
+
+    /**
      * Returns the instance string representation.
      *
      * If the instance is defined, the value returned MUST be percent-encoded,
@@ -60,18 +74,15 @@ interface ComponentInterface extends JsonSerializable
     public function jsonSerialize(): ?string;
 
     /**
-     * Returns the instance content.
+     * Returns the instance string representation with its optional URI delimiters.
      *
-     * If the instance is defined, the value returned MUST be encoded according to the
-     * selected encoding algorithm. In any case, the value MUST NOT double-encode any character
-     * depending on the selected encoding algorithm.
+     * The value returned MUST be percent-encoded, but MUST NOT double-encode any
+     * characters. To determine what characters to encode, please refer to RFC 3986,
+     * Sections 2 and 3.
      *
-     * To determine what characters to encode, please refer to RFC 3986, Sections 2 and 3.
-     * or RFC 3987 Section 3. By default the content is encoded according to RFC3986
-     *
-     * If the instance is not defined null is returned
+     * If the instance is not defined an empty string is returned
      */
-    public function getContent(): ?string;
+    public function getUriComponent(): string;
 
     /**
      * Returns an instance with the specified content.

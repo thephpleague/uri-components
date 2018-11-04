@@ -57,6 +57,19 @@ final class Fragment extends Component
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getUriComponent(): string
+    {
+        $str = $this->__toString();
+        if (null === $this->fragment) {
+            return $str;
+        }
+
+        return '#'.$str;
+    }
+
+    /**
      * Returns the decoded query.
      */
     public function decoded(): ?string

@@ -61,6 +61,7 @@ class HostTest extends TestCase
      * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::getContent
+     * @covers ::getUriComponent
      * @covers ::toAscii
      * @covers ::toUnicode
      *
@@ -72,6 +73,7 @@ class HostTest extends TestCase
     {
         $host = new Host($host);
         self::assertSame($uri, $host->toAscii());
+        self::assertSame($host->__toString(), $host->getUriComponent());
         self::assertSame($iri, $host->toUnicode());
     }
 
