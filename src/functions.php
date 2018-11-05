@@ -78,7 +78,6 @@ function add_basepath($uri, $path)
 /**
  * Add a leading slash to the URI path.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function add_leading_slash($uri)
@@ -93,7 +92,6 @@ function add_leading_slash($uri)
 
 /**
  * Add the root label to the URI.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -121,7 +119,6 @@ function add_trailing_slash($uri)
 /**
  * Append a label or a host to the current URI host.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function append_host($uri, $host)
@@ -132,7 +129,6 @@ function append_host($uri, $host)
 /**
  * Append an new segment or a new path to the URI path.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function append_path($uri, string $path)
@@ -142,7 +138,6 @@ function append_path($uri, string $path)
 
 /**
  * Add the new query data to the existing URI query.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -165,7 +160,6 @@ function host_to_ascii($uri)
 /**
  * Convert the URI host part to its unicode value.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function host_to_unicode($uri)
@@ -175,7 +169,6 @@ function host_to_unicode($uri)
 
 /**
  * Convert the Data URI path to its ascii form.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -187,7 +180,6 @@ function datapath_to_ascii($uri)
 /**
  * Convert the Data URI path to its binary (base64encoded) form.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function datapath_to_binary($uri)
@@ -197,7 +189,6 @@ function datapath_to_binary($uri)
 
 /**
  * Prepend a label or a host to the current URI host.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -209,8 +200,6 @@ function prepend_host($uri, $host)
 /**
  * Prepend an new segment or a new path to the URI path.
  *
- *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function prepend_path($uri, $path)
@@ -220,7 +209,6 @@ function prepend_path($uri, $path)
 
 /**
  * Remove a basepath from the URI path.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -245,7 +233,6 @@ function remove_basepath($uri, $path)
 /**
  * Remove dot segments from the URI path.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function remove_dot_segments($uri)
@@ -255,7 +242,6 @@ function remove_dot_segments($uri)
 
 /**
  * Merge a new query with the existing URI query.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -269,7 +255,6 @@ function merge_query($uri, $query)
  *
  * Make sure the path always has a leading slash if an authority is present
  * and the path is not the empty string.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -287,7 +272,6 @@ function normalize_path($uri, string $path = null)
 
 /**
  * Remove empty segments from the URI path.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -310,7 +294,6 @@ function remove_labels($uri, array $keys)
 
 /**
  * Remove the leading slash from the URI path.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -351,7 +334,6 @@ function remove_pairs($uri, array $keys)
 /**
  * Remove the root label to the URI.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function remove_root_label($uri)
@@ -361,7 +343,6 @@ function remove_root_label($uri)
 
 /**
  * Remove the trailing slash from the URI path.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -390,7 +371,6 @@ function remove_segments($uri, array $keys)
 /**
  * Remove the host zone identifier.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function remove_zone_id($uri)
@@ -400,7 +380,6 @@ function remove_zone_id($uri)
 
 /**
  * Replace the URI path basename.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -412,7 +391,6 @@ function replace_basename($uri, $path)
 /**
  * Replace the data URI path parameters.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function replace_data_uri_parameters($uri, string $parameters)
@@ -422,7 +400,6 @@ function replace_data_uri_parameters($uri, string $parameters)
 
 /**
  * Replace the URI path dirname.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -434,7 +411,6 @@ function replace_dirname($uri, $path)
 /**
  * Replace the URI path basename extension.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function replace_extension($uri, $extension)
@@ -444,7 +420,6 @@ function replace_extension($uri, $extension)
 
 /**
  * Replace a label of the current URI host.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
@@ -456,7 +431,6 @@ function replace_label($uri, int $offset, $host)
 /**
  * Replace a segment from the URI path according its offset.
  *
- *
  * @return Psr7UriInterface|UriInterface
  */
 function replace_segment($uri, int $offset, $path)
@@ -466,7 +440,6 @@ function replace_segment($uri, int $offset, $path)
 
 /**
  * Sort the URI query by keys.
- *
  *
  * @return Psr7UriInterface|UriInterface
  */
