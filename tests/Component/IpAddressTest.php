@@ -29,7 +29,6 @@ class IpAddressTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::withContent
-     * @covers ::parse
      * @covers ::isValidIpv6Hostname
      */
     public function testWithContent(): void
@@ -42,12 +41,14 @@ class IpAddressTest extends TestCase
 
     /**
      * Test valid IpAddress.
+     *
+     * @dataProvider validIpAddressProvider
+     *
      * @param mixed|null $host
      * @param string     $ip
      * @param ?string    $ipVersion
-     * @dataProvider validIpAddressProvider
+     *
      * @covers ::__construct
-     * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::isIp
      * @covers ::isIpv4

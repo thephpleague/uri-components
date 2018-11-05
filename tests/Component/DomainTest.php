@@ -297,10 +297,19 @@ class DomainTest extends TestCase
     /**
      * @covers ::createFromLabels
      */
-    public function testcreateFromLabelsFailedWithInvalidArrayInput(): void
+    public function testCreateFromLabelsFailedWithInvalidArrayInput(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(TypeError::class);
         Domain::createFromLabels([date_create()]);
+    }
+
+    /**
+     * @covers ::createFromLabels
+     */
+    public function testCreateFromLabelsFailedWithNullLabel(): void
+    {
+        self::expectException(TypeError::class);
+        Domain::createFromLabels([null]);
     }
 
     /**

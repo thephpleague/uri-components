@@ -73,7 +73,7 @@ abstract class Component implements ComponentInterface
      *
      * @throws MalformedUriComponent If the component can not be converted to a string or null
      */
-    protected function filterComponent($component): ?string
+    protected static function filterComponent($component): ?string
     {
         if ($component instanceof ComponentInterface) {
             return $component->getContent();
