@@ -87,12 +87,12 @@ class PathModifierTest extends TestCase
     public function fileProvider(): array
     {
         $textPath = new DataPath('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-        $binPath = DataPath::createFromPath(__DIR__.'/data/red-nose.gif');
+        $binPath = DataPath::createFromPath(__DIR__.'/Component/data/red-nose.gif');
 
         $ascii = Data::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $binary = Data::createFromString('data:'.$textPath->toBinary());
 
-        $pathBin = Data::createFromPath(__DIR__.'/data/red-nose.gif');
+        $pathBin = Data::createFromPath(__DIR__.'/Component/data/red-nose.gif');
         $pathAscii = Data::createFromString('data:'.$binPath->toAscii());
 
         return [
