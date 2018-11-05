@@ -20,42 +20,25 @@ namespace League\Uri\Component;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Exception\InvalidHostLabel;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\HostInterface;
+use TypeError;
 use function array_count_values;
 use function array_filter;
 use function array_keys;
-use function array_pop;
 use function array_reverse;
 use function array_shift;
 use function array_unshift;
 use function count;
 use function explode;
 use function implode;
-use function is_scalar;
-use function method_exists;
-use function preg_match;
 use function reset;
 use function sprintf;
 
 final class Domain extends Component implements Countable, HostInterface, IteratorAggregate
 {
     private const SEPARATOR = '.';
-
-    /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * Domain name regular expression
-     */
-    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
-        (?<unreserved> [a-z0-9_~\-])
-        (?<sub_delims> [!$&\'()*+,;=])
-        (?<encoded> %[A-F0-9]{2})
-        (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
-    )
-    ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
 
     /**
      * @var HostInterface
@@ -70,20 +53,17 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
     /**
      * Returns a new instance from an iterable structure.
      *
-     * @throws InvalidHostLabel If the labels are malformed
+     * @throws TypeError If a label is the null value
      */
     public static function createFromLabels(iterable $labels): self
     {
         $hostLabels = [];
         foreach ($labels as $label) {
-            if (!is_scalar($label) && !method_exists($label, '__toString')) {
-                throw new InvalidHostLabel(sprintf('The labels are malformed'));
+            $label = self::filterComponent($label);
+            if (null === $label) {
+                throw new TypeError('a label can not be null');
             }
-            $hostLabels[] = (string) $label;
-        }
-
-        if (2 > count($hostLabels)) {
-            return new self(array_pop($hostLabels));
+            $hostLabels[] = $label;
         }
 
         return new self(implode(self::SEPARATOR, array_reverse($hostLabels)));
@@ -105,28 +85,23 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
         if (!$host instanceof HostInterface) {
             $host = new Host($host);
         }
-        
+
         $this->host = $host;
-        if ($host->isIp()) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is an IP host', $host));
+        if (!$this->host->isDomain()) {
+            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
         }
 
-        $component = $host->getContent();
-        if (null === $component) {
+        $content = $this->host->getContent();
+        if (null === $content) {
             return;
         }
 
-        if ('' === $component) {
+        if ('' === $content) {
             $this->labels = [''];
             return;
         }
 
-        if (preg_match(self::REGEXP_DOMAIN_NAME, $component)) {
-            $this->labels = array_reverse(explode(self::SEPARATOR, $component));
-            return;
-        }
-
-        throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : this is a registered name', $host));
+        $this->labels = array_reverse(explode(self::SEPARATOR, $content));
     }
 
     /**

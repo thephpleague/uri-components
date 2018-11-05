@@ -41,7 +41,6 @@ class HostTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::withContent
-     * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::isDomain
      */
@@ -61,7 +60,6 @@ class HostTest extends TestCase
      * @dataProvider validHostProvider
      *
      * @covers ::__construct
-     * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::getContent
      * @covers ::getUriComponent
@@ -158,8 +156,8 @@ class HostTest extends TestCase
 
     /**
      * @dataProvider invalidHostProvider
+     *
      * @covers ::__construct
-     * @covers ::parse
      * @covers ::getIDNAErrors
      * @covers ::isValidIpv6Hostname
      */

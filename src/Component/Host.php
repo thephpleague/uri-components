@@ -91,6 +91,19 @@ final class Host extends Component implements HostInterface
         )+
     $/ix';
 
+    /**
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * Domain name regular expression
+     */
+    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
+        (?<unreserved> [a-z0-9_~\-])
+        (?<sub_delims> [!$&\'()*+,;=])
+        (?<encoded> %[A-F0-9]{2})
+        (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
+    )
+    ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
+
     private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
 
     private const ADDRESS_BLOCK = "\xfe\x80";
@@ -113,7 +126,7 @@ final class Host extends Component implements HostInterface
     /**
      * @var bool
      */
-    private $is_domain_name = false;
+    private $is_domain = false;
 
     /**
      * {@inheritdoc}
@@ -173,31 +186,21 @@ final class Host extends Component implements HostInterface
     public function __construct($host = null)
     {
         $host = $this->filterComponent($host);
-        $this->parse($host);
-    }
-
-    /**
-     * Validates the submitted data.
-     *
-     * @throws MalformedUriComponent If the host is invalid
-     */
-    private function parse(string $host = null): void
-    {
-        $this->ip_version = null;
         $this->host = $host;
         if (null === $host || '' === $host) {
+            $this->is_domain = true;
             return;
         }
 
         if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $this->ip_version = '4';
-
             return;
         }
 
         if ('[' === $host[0] && ']' === substr($host, -1)) {
             $ip_host = substr($host, 1, -1);
             if ($this->isValidIpv6Hostname($ip_host)) {
+                $this->host = $host;
                 $this->ip_version = '6';
                 $this->has_zone_identifier = false !== strpos($ip_host, '%');
 
@@ -206,7 +209,6 @@ final class Host extends Component implements HostInterface
 
             if (preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
                 $this->ip_version = $matches['version'];
-
                 return;
             }
 
@@ -214,17 +216,19 @@ final class Host extends Component implements HostInterface
         }
 
         $domain_name = rawurldecode($host);
+        $is_ascii = false;
         if (!preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name)) {
             $domain_name = strtolower($domain_name);
+            $is_ascii = true;
         }
 
-        $this->host = $domain_name;
         if (preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
-            $this->is_domain_name = true;
+            $this->host = $domain_name;
+            $this->is_domain = (bool) preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
             return;
         }
 
-        if (!preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name) || preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
+        if ($is_ascii || preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : the host contains invalid characters', $host));
         }
 
@@ -240,7 +244,7 @@ final class Host extends Component implements HostInterface
         }
 
         $this->host = $domain_name;
-        $this->is_domain_name = (bool) preg_match(self::REGEXP_REGISTERED_NAME, $domain_name);
+        $this->is_domain = (bool) preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
     }
 
     /**
@@ -370,7 +374,7 @@ final class Host extends Component implements HostInterface
      */
     public function isDomain(): bool
     {
-        return $this->is_domain_name;
+        return $this->is_domain;
     }
 
     /**
