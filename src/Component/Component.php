@@ -151,7 +151,7 @@ abstract class Component implements ComponentInterface
      */
     public function getUriComponent(): string
     {
-        return $this->__toString();
+        return (string) $this->getContent();
     }
 
     /**

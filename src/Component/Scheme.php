@@ -82,12 +82,7 @@ final class Scheme extends Component
      */
     public function getUriComponent(): string
     {
-        $str = $this->__toString();
-        if (null === $this->scheme) {
-            return $str;
-        }
-
-        return $str.':';
+        return $this->getContent().(null === $this->scheme ? '' : ':');
     }
 
     /**

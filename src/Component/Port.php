@@ -85,12 +85,7 @@ final class Port extends Component
      */
     public function getUriComponent(): string
     {
-        $str = $this->__toString();
-        if (null === $this->port) {
-            return $str;
-        }
-
-        return ':'.$str;
+        return (null === $this->port ? '' : ':').$this->getContent();
     }
 
     /**

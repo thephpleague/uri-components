@@ -79,12 +79,7 @@ final class UserInfo extends Component
      */
     public function getUriComponent(): string
     {
-        $str = $this->__toString();
-        if (null === $this->user) {
-            return $str;
-        }
-
-        return $str.'@';
+        return $this->getContent().(null === $this->user ? '' : '@');
     }
 
     /**

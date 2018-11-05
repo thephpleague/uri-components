@@ -110,7 +110,7 @@ final class Authority extends Component
         $matches += ['port' => ''];
         $components['host'] = $matches['host'];
         $components['port'] = '' === $matches['port'] ? null : $matches['port'];
-    
+
         return $components;
     }
 
@@ -129,7 +129,7 @@ final class Authority extends Component
         if (null === $userInfo) {
             return $auth;
         }
-        
+
         return $userInfo.'@'.$auth;
     }
 
@@ -138,12 +138,7 @@ final class Authority extends Component
      */
     public function getUriComponent(): string
     {
-        $str = $this->__toString();
-        if (null === $this->host->getContent()) {
-            return $str;
-        }
-
-        return '//'.$str;
+        return (null === $this->host->getContent() ? '' : '//').$this->getContent();
     }
 
     /**

@@ -61,12 +61,7 @@ final class Fragment extends Component
      */
     public function getUriComponent(): string
     {
-        $str = $this->__toString();
-        if (null === $this->fragment) {
-            return $str;
-        }
-
-        return '#'.$str;
+        return (null === $this->fragment ? '' : '#').$this->getContent();
     }
 
     /**
