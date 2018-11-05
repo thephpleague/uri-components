@@ -178,12 +178,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function getUriComponent(): string
     {
-        $str = $this->__toString();
-        if ([] === $this->pairs) {
-            return $str;
-        }
-
-        return '?'.$str;
+        return ([] === $this->pairs ? '' : '?').$this->getContent();
     }
 
     /**
