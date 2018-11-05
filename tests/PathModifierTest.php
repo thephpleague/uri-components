@@ -66,7 +66,6 @@ class PathModifierTest extends TestCase
      * @covers \League\Uri\normalize_path
      *
      * @dataProvider fileProvider
-     *
      */
     public function testToBinary(Data $binary, Data $ascii): void
     {
