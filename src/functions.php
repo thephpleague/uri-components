@@ -1,13 +1,13 @@
 <?php
 
 /**
- * League.Uri (https://uri.thephpleague.com/components/).
+ * League.Uri (http://uri.thephpleague.com/components).
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
  * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
  * @license    https://github.com/thephpleague/uri-components/blob/master/LICENSE (MIT License)
- * @version    1.8.2
+ * @version    2.0.0
  * @link       https://github.com/thephpleague/uri-components
  *
  * For the full copyright and license information, please view the LICENSE
@@ -18,78 +18,432 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use Traversable;
+use League\Uri\Component\DataPath;
+use League\Uri\Component\Domain;
+use League\Uri\Component\HierarchicalPath;
+use League\Uri\Component\Host;
+use League\Uri\Component\Path;
+use League\Uri\Component\Query;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use TypeError;
+use function count;
+use function range;
+use function strpos;
+use function substr;
 
 /**
- * Build a query string from an associative array.
+ * Filter the URI object.
  *
- * @see QueryBuilder::build
+ * To be valid an URI MUST implement at least one of the following interface:
+ *     - Psr\Http\Message\UriInterface
+ *     - League\Uri\Interfaces\Uri
  *
- * @param array|Traversable $pairs     The query pairs
- * @param string            $separator The query string separator
- * @param int               $enc_type  The query encoding type
  *
+ * @throws TypeError if the URI object does not implements the supported interfaces.
+ *
+ * @return Psr7UriInterface|UriInterface
  */
-function build_query($pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): string
+function filter_uri($uri)
 {
-    static $builder;
+    if ($uri instanceof Psr7UriInterface || $uri instanceof UriInterface) {
+        return $uri;
+    }
 
-    $builder = $builder ?? new QueryBuilder();
-
-    return $builder->build($pairs, $separator, $enc_type);
+    throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', gettype($uri)));
 }
 
 /**
- * Parse a query string into an associative array of key/value pairs.
+ * Add a new basepath to the URI path.
  *
- * @see QueryParser::parse
  *
- * @param string $query     The query string to parse
- * @param string $separator The query string separator
- * @param int    $enc_type  The query encoding algorithm
- *
+ * @return Psr7UriInterface|UriInterface
  */
-function parse_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
+function add_basepath($uri, $path)
 {
-    static $parser;
+    filter_uri($uri);
 
-    $parser = $parser ?? new QueryParser();
+    $currentpath = $uri->getPath();
+    if ('' !== $currentpath && '/' !== $currentpath[0]) {
+        $currentpath = '/'.$currentpath;
+    }
 
-    return $parser->parse($query, $separator, $enc_type);
+    $path = (new HierarchicalPath($path))->withLeadingSlash();
+    if (0 === strpos($currentpath, (string) $path)) {
+        return $uri->withPath($currentpath);
+    }
+
+    return $uri->withPath((string) $path->append($currentpath));
 }
 
 /**
- * Parse the query string like parse_str without mangling the results.
+ * Add a leading slash to the URI path.
  *
- * @see QueryParser::extract
- *
- * @param string $query     The query string to parse
- * @param string $separator The query string separator
- * @param int    $enc_type  The query encoding algorithm
- *
+ * @return Psr7UriInterface|UriInterface
  */
-function extract_query(string $query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
+function add_leading_slash($uri)
 {
-    static $parser;
+    $path = filter_uri($uri)->getPath();
+    if ('/' !== ($path[0] ?? '')) {
+        $path = '/'.$path;
+    }
 
-    $parser = $parser ?? new QueryParser();
-
-    return $parser->extract($query, $separator, $enc_type);
+    return normalize_path($uri, $path);
 }
 
 /**
- * Convert a Collection of key/value pairs into PHP variables.
+ * Add the root label to the URI.
  *
- * @see QueryParser::convert
- *
- * @param Traversable|array $pairs The collection of key/value pairs
- *
+ * @return Psr7UriInterface|UriInterface
  */
-function pairs_to_params($pairs): array
+function add_root_label($uri)
 {
-    static $parser;
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withRootLabel());
+}
 
-    $parser = $parser ?? new QueryParser();
+/**
+ * Add a trailing slash to the URI path.
+ *
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function add_trailing_slash($uri)
+{
+    $path = filter_uri($uri)->getPath();
+    if ('/' !== substr($path, -1)) {
+        $path .= '/';
+    }
 
-    return $parser->convert($pairs);
+    return normalize_path($uri, $path);
+}
+
+/**
+ * Append a label or a host to the current URI host.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function append_host($uri, $host)
+{
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->append($host));
+}
+
+/**
+ * Append an new segment or a new path to the URI path.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function append_path($uri, string $path)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->append($path));
+}
+
+/**
+ * Add the new query data to the existing URI query.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function append_query($uri, $query)
+{
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->append($query));
+}
+
+/**
+ * Convert the URI host part to its ascii value.
+ *
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function host_to_ascii($uri)
+{
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost())));
+}
+
+/**
+ * Convert the URI host part to its unicode value.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function host_to_unicode($uri)
+{
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->toUnicode());
+}
+
+/**
+ * Convert the Data URI path to its ascii form.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function datapath_to_ascii($uri)
+{
+    return $uri->withPath((string) (new DataPath(filter_uri($uri)->getPath()))->toAscii());
+}
+
+/**
+ * Convert the Data URI path to its binary (base64encoded) form.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function datapath_to_binary($uri)
+{
+    return $uri->withPath((string) (new DataPath(filter_uri($uri)->getPath()))->toBinary());
+}
+
+/**
+ * Prepend a label or a host to the current URI host.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function prepend_host($uri, $host)
+{
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->prepend($host));
+}
+
+/**
+ * Prepend an new segment or a new path to the URI path.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function prepend_path($uri, $path)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->prepend($path));
+}
+
+/**
+ * Remove a basepath from the URI path.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_basepath($uri, $path)
+{
+    $uri = normalize_path($uri);
+    $basepath = (new HierarchicalPath($path))->withLeadingSlash();
+    if ('/' === (string) $basepath) {
+        return $uri;
+    }
+
+    $currentpath = $uri->getPath();
+    if (0 !== strpos($currentpath, (string) $basepath)) {
+        return $uri;
+    }
+
+    return $uri->withPath(
+        (string) (new HierarchicalPath($currentpath))->withoutSegment(...range(0, count($basepath) - 1))
+    );
+}
+
+/**
+ * Remove dot segments from the URI path.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_dot_segments($uri)
+{
+    return normalize_path($uri, (string) (new Path(filter_uri($uri)->getPath()))->withoutDotSegments());
+}
+
+/**
+ * Merge a new query with the existing URI query.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function merge_query($uri, $query)
+{
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->merge($query));
+}
+
+/**
+ * Normalize a URI path.
+ *
+ * Make sure the path always has a leading slash if an authority is present
+ * and the path is not the empty string.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function normalize_path($uri, string $path = null)
+{
+    filter_uri($uri);
+
+    $path = $path ?? $uri->getPath();
+    if ('' != $uri->getAuthority() && '' != $path && '/' != $path[0]) {
+        return $uri->withPath('/'.$path);
+    }
+
+    return $uri->withPath($path);
+}
+
+/**
+ * Remove empty segments from the URI path.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_empty_segments($uri)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withoutEmptySegments());
+}
+
+/**
+ * Remove host labels according to their offset.
+ *
+ * @param int[] $keys
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_labels($uri, array $keys)
+{
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withoutLabel(...$keys));
+}
+
+/**
+ * Remove the leading slash from the URI path.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_leading_slash($uri)
+{
+    $path = filter_uri($uri)->getPath();
+    if ('' !== $path && '/' === $path[0]) {
+        $path = substr($path, 1);
+    }
+
+    return normalize_path($uri, $path);
+}
+
+/**
+ * Remove query data according to their key name.
+ *
+ * @param string[] $keys
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_params($uri, array $keys)
+{
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutParam(...$keys));
+}
+
+/**
+ * Remove query data according to their key name.
+ *
+ * @param string[] $keys
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_pairs($uri, array $keys)
+{
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->withoutPair(...$keys));
+}
+
+/**
+ * Remove the root label to the URI.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_root_label($uri)
+{
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withoutRootLabel());
+}
+
+/**
+ * Remove the trailing slash from the URI path.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_trailing_slash($uri)
+{
+    $path = filter_uri($uri)->getPath();
+    if ('' !== $path && '/' === substr($path, -1)) {
+        $path = substr($path, 0, -1);
+    }
+
+    return normalize_path($uri, $path);
+}
+
+/**
+ * Remove path segments from the URI path according to their offsets.
+ *
+ * @param int[] $keys
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_segments($uri, array $keys)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withoutSegment(...$keys));
+}
+
+/**
+ * Remove the host zone identifier.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function remove_zone_id($uri)
+{
+    return $uri->withHost((string) (new Host(filter_uri($uri)->getHost()))->withoutZoneIdentifier());
+}
+
+/**
+ * Replace the URI path basename.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function replace_basename($uri, $path)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withBasename($path));
+}
+
+/**
+ * Replace the data URI path parameters.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function replace_data_uri_parameters($uri, string $parameters)
+{
+    return normalize_path($uri, (string) (new DataPath(filter_uri($uri)->getPath()))->withParameters($parameters));
+}
+
+/**
+ * Replace the URI path dirname.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function replace_dirname($uri, $path)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withDirname($path));
+}
+
+/**
+ * Replace the URI path basename extension.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function replace_extension($uri, $extension)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withExtension($extension));
+}
+
+/**
+ * Replace a label of the current URI host.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function replace_label($uri, int $offset, $host)
+{
+    return $uri->withHost((string) (new Domain(filter_uri($uri)->getHost()))->withLabel($offset, $host));
+}
+
+/**
+ * Replace a segment from the URI path according its offset.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function replace_segment($uri, int $offset, $path)
+{
+    return normalize_path($uri, (string) (new HierarchicalPath(filter_uri($uri)->getPath()))->withSegment($offset, $path));
+}
+
+/**
+ * Sort the URI query by keys.
+ *
+ * @return Psr7UriInterface|UriInterface
+ */
+function sort_query($uri)
+{
+    return $uri->withQuery((string) (new Query(filter_uri($uri)->getQuery()))->sort());
 }
