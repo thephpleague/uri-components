@@ -23,6 +23,7 @@ use Iterator;
 use IteratorAggregate;
 use League\Uri\ComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Parser\QueryParser;
 use Traversable;
 use TypeError;
 use function array_column;
@@ -40,9 +41,6 @@ use function is_array;
 use function is_object;
 use function is_scalar;
 use function iterator_to_array;
-use function League\Uri\query_build;
-use function League\Uri\query_extract;
-use function League\Uri\query_parse;
 use function method_exists;
 use function preg_match;
 use function preg_quote;
@@ -62,11 +60,6 @@ final class Query extends Component implements Countable, IteratorAggregate
      * @var string
      */
     private $separator;
-
-    /**
-     * @var array
-     */
-    private $params;
 
     /**
      * Returns a new instance from the result of PHP's parse_str.
@@ -109,7 +102,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns a new instance from the result of query_parse.
+     * Returns a new instance from the result of QueryParser::parse.
      */
     public static function createFromPairs(iterable $pairs, string $separator = '&'): self
     {
@@ -117,7 +110,7 @@ final class Query extends Component implements Countable, IteratorAggregate
             return $pairs->withSeparator($separator);
         }
 
-        return new self(query_build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
+        return new self(QueryParser::build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
     }
 
     /**
@@ -140,7 +133,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     public function __construct($query = null, int $enc_type = PHP_QUERY_RFC3986, string $separator = '&')
     {
         $this->separator = $this->filterSeparator($separator);
-        $this->pairs = query_parse($query, $separator, $enc_type);
+        $this->pairs = QueryParser::parse($query, $separator, $enc_type);
     }
 
     /**
@@ -170,7 +163,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function getContent(): ?string
     {
-        return query_build($this->pairs, $this->separator, PHP_QUERY_RFC3986);
+        return QueryParser::build($this->pairs, $this->separator, PHP_QUERY_RFC3986);
     }
 
     /**
@@ -186,7 +179,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function toRFC1738(): ?string
     {
-        return query_build($this->pairs, $this->separator, PHP_QUERY_RFC1738);
+        return QueryParser::build($this->pairs, $this->separator, PHP_QUERY_RFC1738);
     }
 
     /**
@@ -307,7 +300,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function toParams(): array
     {
-        return query_extract($this->getContent(), $this->separator, PHP_QUERY_RFC3986);
+        return QueryParser::convert($this->pairs);
     }
 
     /**
@@ -546,7 +539,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     public function merge($query): self
     {
         $pairs = $this->pairs;
-        foreach (query_parse($this->filterComponent($query), $this->separator, PHP_QUERY_RFC3986) as $pair) {
+        foreach (QueryParser::parse($this->filterComponent($query), $this->separator, PHP_QUERY_RFC3986) as $pair) {
             $pairs = $this->addPair($pairs, $pair);
         }
 
@@ -641,7 +634,7 @@ final class Query extends Component implements Countable, IteratorAggregate
             $query = $query->getContent();
         }
 
-        $pairs = array_merge($this->pairs, query_parse($query, $this->separator, PHP_QUERY_RFC3986));
+        $pairs = array_merge($this->pairs, QueryParser::parse($query, $this->separator, PHP_QUERY_RFC3986));
         if ($pairs === $this->pairs) {
             return $this;
         }
