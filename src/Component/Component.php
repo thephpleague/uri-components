@@ -88,7 +88,7 @@ abstract class Component implements ComponentInterface
         }
 
         $component = (string) $component;
-        if (!preg_match(self::REGEXP_INVALID_URI_CHARS, $component)) {
+        if (1 !== preg_match(self::REGEXP_INVALID_URI_CHARS, $component)) {
             return $component;
         }
 
@@ -109,7 +109,7 @@ abstract class Component implements ComponentInterface
      */
     protected function decodeMatches(array $matches): string
     {
-        if (preg_match(static::REGEXP_PREVENTS_DECODING, $matches[0])) {
+        if (1 === preg_match(static::REGEXP_PREVENTS_DECODING, $matches[0])) {
             return strtoupper($matches[0]);
         }
 
@@ -123,7 +123,7 @@ abstract class Component implements ComponentInterface
      */
     protected function encodeComponent($str, int $enc_type, string $regexp): ?string
     {
-        if (self::NO_ENCODING === $enc_type || null === $str || !preg_match(self::REGEXP_NO_ENCODING, $str)) {
+        if (self::NO_ENCODING === $enc_type || null === $str || 1 !== preg_match(self::REGEXP_NO_ENCODING, $str)) {
             return $str;
         }
 

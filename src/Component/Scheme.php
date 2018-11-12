@@ -62,7 +62,7 @@ final class Scheme extends Component
             return $scheme;
         }
 
-        if (preg_match(self::REGEXP_SCHEME, $scheme)) {
+        if (1 === preg_match(self::REGEXP_SCHEME, $scheme)) {
             return strtolower($scheme);
         }
 

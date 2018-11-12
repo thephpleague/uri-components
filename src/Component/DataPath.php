@@ -157,11 +157,11 @@ final class DataPath extends Component implements PathInterface
             return 'text/plain;charset=us-ascii,';
         }
 
-        if (preg_match(self::REGEXP_DATAPATH, $path)) {
+        if (1 === preg_match(self::REGEXP_DATAPATH, $path)) {
             $path = substr($path, 0, -1).'charset=us-ascii,';
         }
 
-        if (preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
+        if (1 === preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
             throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
@@ -179,7 +179,7 @@ final class DataPath extends Component implements PathInterface
             return static::DEFAULT_MIMETYPE;
         }
 
-        if (preg_match(static::REGEXP_MIMETYPE, $mimetype)) {
+        if (1 === preg_match(static::REGEXP_MIMETYPE, $mimetype)) {
             return $mimetype;
         }
 
@@ -201,7 +201,7 @@ final class DataPath extends Component implements PathInterface
             return [static::DEFAULT_PARAMETER];
         }
 
-        if (preg_match(',(;|^)'.static::BINARY_PARAMETER.'$,', $parameters, $matches)) {
+        if (1 === preg_match(',(;|^)'.static::BINARY_PARAMETER.'$,', $parameters, $matches)) {
             $parameters = substr($parameters, 0, - strlen($matches[0]));
             $is_binary_data = true;
         }
