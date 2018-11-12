@@ -671,7 +671,7 @@ final class Query extends Component implements Countable, IteratorAggregate
 
         $regexp = ',^('.implode('|', array_map($mapper, $offsets)).')?$,';
         $filter = static function (array $pair) use ($regexp): bool {
-            return !preg_match($regexp, $pair[0]);
+            return 1 !== preg_match($regexp, $pair[0]);
         };
 
         $pairs = array_filter($this->pairs, $filter);

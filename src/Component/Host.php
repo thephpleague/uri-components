@@ -207,7 +207,7 @@ final class Host extends Component implements HostInterface
                 return;
             }
 
-            if (preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
+            if (1 === preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
                 $this->ip_version = $matches['version'];
                 return;
             }
@@ -217,18 +217,18 @@ final class Host extends Component implements HostInterface
 
         $domain_name = rawurldecode($host);
         $is_ascii = false;
-        if (!preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name)) {
+        if (1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name)) {
             $domain_name = strtolower($domain_name);
             $is_ascii = true;
         }
 
-        if (preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
+        if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
             $this->host = $domain_name;
             $this->is_domain = (bool) preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
             return;
         }
 
-        if ($is_ascii || preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
+        if ($is_ascii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : the host contains invalid characters', $host));
         }
 
@@ -244,7 +244,7 @@ final class Host extends Component implements HostInterface
         }
 
         $this->host = $domain_name;
-        $this->is_domain = (bool) preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
+        $this->is_domain = 1 === preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
     }
 
     /**
@@ -298,8 +298,8 @@ final class Host extends Component implements HostInterface
 
         $scope = rawurldecode('%'.$scope);
 
-        return !preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope)
-            && !preg_match(self::REGEXP_GEN_DELIMS, $scope)
+        return 1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope)
+            && 1 !== preg_match(self::REGEXP_GEN_DELIMS, $scope)
             && filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
             && 0 === strpos((string) inet_pton((string) $ipv6), self::ADDRESS_BLOCK);
     }
