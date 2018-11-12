@@ -18,16 +18,14 @@ namespace LeagueTest\Uri;
 
 use League\Uri\Component\Query;
 use League\Uri\Http;
+use League\Uri\Resolution;
 use PHPUnit\Framework\TestCase;
-use function League\Uri\append_query;
 use function League\Uri\create;
-use function League\Uri\merge_query;
-use function League\Uri\remove_pairs;
-use function League\Uri\remove_params;
-use function League\Uri\sort_query;
 
 /**
  * @group query
+ * @group resolution
+ * @coversDefaultClass \League\Uri\Resolution
  */
 class QueryModifierTest extends TestCase
 {
@@ -44,14 +42,14 @@ class QueryModifierTest extends TestCase
     }
 
     /**
-     * @covers \League\Uri\merge_query
+     * @covers ::mergeQuery
      *
      * @dataProvider validMergeQueryProvider
      *
      */
     public function testMergeQuery(string $query, string $expected): void
     {
-        self::assertSame($expected, merge_query($this->uri, $query)->getQuery());
+        self::assertSame($expected, Resolution::mergeQuery($this->uri, $query)->getQuery());
     }
 
     public function validMergeQueryProvider(): array
@@ -63,14 +61,14 @@ class QueryModifierTest extends TestCase
     }
 
     /**
-     * @covers \League\Uri\append_query
+     * @covers ::appendQuery
      *
      * @dataProvider validAppendQueryProvider
      *
      */
     public function testAppendQuery(string $query, string $expected): void
     {
-        self::assertSame($expected, append_query($this->uri, $query)->getQuery());
+        self::assertSame($expected, Resolution::appendQuery($this->uri, $query)->getQuery());
     }
 
     public function validAppendQueryProvider(): array
@@ -82,23 +80,23 @@ class QueryModifierTest extends TestCase
     }
 
     /**
-     * @covers \League\Uri\sort_query
+     * @covers ::sortQuery
      */
     public function testKsortQuery(): void
     {
         $uri = Http::createFromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
-        self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', sort_query($uri)->getQuery());
+        self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', Resolution::sortQuery($uri)->getQuery());
     }
 
     /**
      * @dataProvider validWithoutQueryValuesProvider
      *
-     * @covers \League\Uri\remove_pairs
+     * @covers ::removePairs
      *
      */
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
-        self::assertSame($expected, remove_pairs($this->uri, $input)->getQuery());
+        self::assertSame($expected, Resolution::removePairs($this->uri, ...$input)->getQuery());
     }
 
     public function validWithoutQueryValuesProvider(): array
@@ -112,11 +110,11 @@ class QueryModifierTest extends TestCase
     /**
      * @dataProvider removeParamsProvider
      *
-     * @covers \League\Uri\remove_params
+     * @covers ::removeParams
      */
     public function testWithoutQueryParams(string $uri, array $input, string $expected): void
     {
-        self::assertSame($expected, remove_params(create($uri), $input)->getQuery());
+        self::assertSame($expected, Resolution::removeParams(create($uri), ...$input)->getQuery());
     }
 
     public function removeParamsProvider(): array
