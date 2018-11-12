@@ -27,6 +27,7 @@ use League\Uri\Component\Query;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function count;
+use function get_class;
 use function gettype;
 use function range;
 use function sprintf;
@@ -39,8 +40,8 @@ final class Resolution
      * Filter the URI object.
      *
      * To be valid an URI MUST implement at least one of the following interface:
+     *     - League\Uri\UriInterface
      *     - Psr\Http\Message\UriInterface
-     *     - League\Uri\Interfaces\Uri
      *
      *
      * @throws TypeError if the URI object does not implements the supported interfaces.
@@ -53,7 +54,7 @@ final class Resolution
             return $uri;
         }
 
-        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', gettype($uri)));
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
     }
 
     /*********************************
