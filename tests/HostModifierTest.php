@@ -17,22 +17,16 @@
 namespace LeagueTest\Uri;
 
 use League\Uri\Component\Host;
+use League\Uri\Exception\InvalidKey;
 use League\Uri\Http;
+use League\Uri\Resolution;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 use Zend\Diactoros\Uri as ZendUri;
-use function League\Uri\add_root_label;
-use function League\Uri\append_host;
-use function League\Uri\host_to_ascii;
-use function League\Uri\host_to_unicode;
-use function League\Uri\prepend_host;
-use function League\Uri\remove_labels;
-use function League\Uri\remove_root_label;
-use function League\Uri\remove_zone_id;
-use function League\Uri\replace_label;
 
 /**
  * @group host
+ * @group resolution
+ * @coversDefaultClass \League\Uri\Resolution
  */
 class HostModifierTest extends TestCase
 {
@@ -51,34 +45,32 @@ class HostModifierTest extends TestCase
     /**
      * @dataProvider validHostProvider
      *
-     * @covers \League\Uri\prepend_host
-     *
+     * @covers ::prependHost
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($prepend, prepend_host($this->uri, $label)->getHost());
+        self::assertSame($prepend, Resolution::prependHost($this->uri, $label)->getHost());
     }
 
     /**
      * @dataProvider validHostProvider
      *
-     * @covers \League\Uri\append_host
-     *
+     * @covers ::appendHost
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($append, append_host($this->uri, $label)->getHost());
+        self::assertSame($append, Resolution::appendHost($this->uri, $label)->getHost());
     }
 
     /**
      * @dataProvider validHostProvider
      *
-     * @covers \League\Uri\replace_label
+     * @covers ::replaceLabel
      *
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($replace, replace_label($this->uri, $key, $label)->getHost());
+        self::assertSame($replace, Resolution::replaceLabel($this->uri, $key, $label)->getHost());
     }
 
     public function validHostProvider(): array
@@ -90,48 +82,47 @@ class HostModifierTest extends TestCase
     }
 
     /**
-     * @covers \League\Uri\host_to_ascii
+     * @covers ::hostToAscii
      */
     public function testHostToAsciiProcess(): void
     {
         $uri = Http::createFromString('http://مثال.إختبار/where/to/go');
         self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
-            (string) host_to_ascii($uri)
+            (string)  Resolution::hostToAscii($uri)
         );
     }
 
     /**
-     * @covers \League\Uri\host_to_unicode
+     * @covers ::hostToUnicode
      */
     public function testHostToUnicodeProcess(): void
     {
         $uri = new ZendUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
         $expected = 'http://مثال.إختبار/where/to/go';
-        self::assertSame($expected, (string) host_to_unicode($uri));
+        self::assertSame($expected, (string) Resolution::hostToUnicode($uri));
     }
 
     /**
-     * @covers \League\Uri\remove_zone_id
+     * @covers ::removeZoneId
      */
     public function testWithoutZoneIdentifierProcess(): void
     {
         $uri = Http::createFromString('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
         self::assertSame(
             'http://[fe80::1234]/path/to/the/sky.php',
-            (string) remove_zone_id($uri)
+            (string) Resolution::removeZoneId($uri)
         );
     }
 
     /**
-     * @covers \League\Uri\remove_labels
-     *
      * @dataProvider validwithoutLabelProvider
      *
+     * @covers ::removeLabels
      */
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
-        self::assertSame($expected, remove_labels($this->uri, $keys)->getHost());
+        self::assertSame($expected, Resolution::removeLabels($this->uri, ...$keys)->getHost());
     }
 
     public function validwithoutLabelProvider(): array
@@ -142,45 +133,44 @@ class HostModifierTest extends TestCase
     }
 
     /**
-     * @covers \League\Uri\remove_labels
+     * @covers ::removeLabels
      */
     public function testRemoveLabels(): void
     {
-        self::assertSame('example.com', remove_labels($this->uri, [2])->getHost());
+        self::assertSame('example.com', Resolution::removeLabels($this->uri, 2)->getHost());
     }
 
     /**
-     * @covers \League\Uri\remove_labels
-     *
      * @dataProvider invalidRemoveLabelsParameters
      *
+     * @covers ::removeLabels
      */
     public function testRemoveLabelsFailedConstructor(array $params): void
     {
-        self::expectException(TypeError::class);
-        remove_labels($this->uri, $params);
+        self::expectException(InvalidKey::class);
+        Resolution::removeLabels($this->uri, ...$params);
     }
 
     public function invalidRemoveLabelsParameters(): array
     {
         return [
-            'array contains float' => [[1, 2, '3.1']],
+            'array contains float' => [[1, 2, 3.1]],
         ];
     }
 
     /**
-     * @covers \League\Uri\add_root_label
+     * @covers ::addRootLabel
      */
     public function testAddRootLabel(): void
     {
-        self::assertSame('www.example.com.', add_root_label($this->uri)->getHost());
+        self::assertSame('www.example.com.', Resolution::addRootLabel($this->uri)->getHost());
     }
 
     /**
-     * @covers \League\Uri\remove_root_label
+     * @covers ::removeRootLabel
      */
     public function testRemoveRootLabel(): void
     {
-        self::assertSame('www.example.com', remove_root_label($this->uri)->getHost());
+        self::assertSame('www.example.com', Resolution::removeRootLabel($this->uri)->getHost());
     }
 }
