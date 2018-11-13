@@ -21,7 +21,6 @@ namespace League\Uri\Component;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\InvalidPathSegment;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use League\Uri\PathInterface;
@@ -74,8 +73,8 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      *
      * @param int $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws UnknownType        If the type is not recognized
-     * @throws InvalidPathSegment If the segments are malformed
+     * @throws UnknownType If the type is not recognized
+     * @throws TypeError   If the segments are malformed
      */
     public static function createFromSegments(iterable $segments, int $type = self::IS_RELATIVE): self
     {
@@ -92,7 +91,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
         $pathSegments = [];
         foreach ($segments as $value) {
             if (!is_scalar($value) && !method_exists($value, '__toString')) {
-                throw new InvalidPathSegment('The submitted segments are invalid');
+                throw new TypeError('The submitted segments are invalid');
             }
             $pathSegments[] = (string) $value;
         }

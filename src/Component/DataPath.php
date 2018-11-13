@@ -95,22 +95,23 @@ final class DataPath extends Component implements PathInterface
      * @param null|resource $context
      *
      * @throws PathNotFound If the File is not readable
-     *
      */
     public static function createFromPath(string $path, $context = null): self
     {
-        $args = [$path, false];
+        $file_args = [$path, false];
+        $mime_args = [$path, FILEINFO_MIME];
         if (null !== $context) {
-            $args[] = $context;
+            $file_args[] = $context;
+            $mime_args[] = $context;
         }
 
-        $content = @file_get_contents(...$args);
+        $content = @file_get_contents(...$file_args);
         if (false === $content) {
             throw new PathNotFound(sprintf('`%s` failed to open stream: No such file or directory', $path));
         }
 
         return new self(
-            str_replace(' ', '', (new finfo(FILEINFO_MIME))->file($path))
+            str_replace(' ', '', (new finfo(FILEINFO_MIME))->file(...$mime_args))
             .';base64,'.base64_encode($content)
         );
     }

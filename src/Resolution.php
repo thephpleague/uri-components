@@ -24,12 +24,15 @@ use League\Uri\Component\HierarchicalPath;
 use League\Uri\Component\Host;
 use League\Uri\Component\Path;
 use League\Uri\Component\Query;
+use League\Uri\Exception\MalformedUriComponent;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function count;
 use function get_class;
 use function gettype;
+use function ltrim;
 use function range;
+use function rtrim;
 use function sprintf;
 use function strpos;
 use function substr;
@@ -132,11 +135,24 @@ final class Resolution
     /**
      * Append a label or a host to the current URI host.
      *
+     * @throws MalformedUriComponent If the host can not be appended
+     *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function appendHost($uri, $host)
+    public static function appendLabel($uri, $label)
     {
-        return $uri->withHost((string) (new Domain(self::filterUri($uri)->getHost()))->append($host));
+        $host = new Host(self::filterUri($uri)->getHost());
+        if ($host->isDomain()) {
+            return $uri->withHost((string) (new Domain($host))->append($label));
+        }
+
+        if ($host->isIpv4()) {
+            $label = ltrim((string) new Host($label), '.');
+
+            return $uri->withHost((string) $host->withContent($host->getContent().'.'.$label));
+        }
+
+        throw new MalformedUriComponent(sprintf('The URI host %s can not be appended', (string) $host));
     }
 
     /**
@@ -163,11 +179,24 @@ final class Resolution
     /**
      * Prepend a label or a host to the current URI host.
      *
+     * @throws MalformedUriComponent If the host can not be prepended
+     *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function prependHost($uri, $host)
+    public static function prependLabel($uri, $label)
     {
-        return $uri->withHost((string) (new Domain(self::filterUri($uri)->getHost()))->prepend($host));
+        $host = new Host(self::filterUri($uri)->getHost());
+        if ($host->isDomain()) {
+            return $uri->withHost((string) (new Domain($host))->prepend($label));
+        }
+
+        if ($host->isIpv4()) {
+            $label = rtrim((string) new Host($label), '.');
+
+            return $uri->withHost((string) $host->withContent($label.'.'.$host->getContent()));
+        }
+
+        throw new MalformedUriComponent(sprintf('The URI host %s can not be prepended', (string) $host));
     }
 
     /**
@@ -298,11 +327,11 @@ final class Resolution
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function appendPath($uri, string $path)
+    public static function appendSegment($uri, string $segment)
     {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, (new HierarchicalPath($uri->getPath()))->append($path));
+        return self::normalizePath($uri, (new HierarchicalPath($uri->getPath()))->append($segment));
     }
 
     /**
@@ -330,11 +359,11 @@ final class Resolution
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function prependPath($uri, $path)
+    public static function prependSegment($uri, $segment)
     {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, (new HierarchicalPath($uri->getPath()))->prepend($path));
+        return self::normalizePath($uri, (new HierarchicalPath($uri->getPath()))->prepend($segment));
     }
 
     /**
@@ -483,10 +512,10 @@ final class Resolution
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function replaceSegment($uri, int $offset, $path)
+    public static function replaceSegment($uri, int $offset, $segment)
     {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, (new HierarchicalPath($uri->getPath()))->withSegment($offset, $path));
+        return self::normalizePath($uri, (new HierarchicalPath($uri->getPath()))->withSegment($offset, $segment));
     }
 }

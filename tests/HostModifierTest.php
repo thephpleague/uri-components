@@ -18,6 +18,7 @@ namespace LeagueTest\Uri;
 
 use League\Uri\Component\Host;
 use League\Uri\Exception\InvalidKey;
+use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Http;
 use League\Uri\Resolution;
 use PHPUnit\Framework\TestCase;
@@ -45,21 +46,21 @@ class HostModifierTest extends TestCase
     /**
      * @dataProvider validHostProvider
      *
-     * @covers ::prependHost
+     * @covers ::prependLabel
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($prepend, Resolution::prependHost($this->uri, $label)->getHost());
+        self::assertSame($prepend, Resolution::prependLabel($this->uri, $label)->getHost());
     }
 
     /**
      * @dataProvider validHostProvider
      *
-     * @covers ::appendHost
+     * @covers ::appendLabel
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($append, Resolution::appendHost($this->uri, $label)->getHost());
+        self::assertSame($append, Resolution::appendLabel($this->uri, $label)->getHost());
     }
 
     /**
@@ -79,6 +80,32 @@ class HostModifierTest extends TestCase
             ['toto', 2, 'toto.www.example.com', 'www.example.com.toto', 'toto.example.com'],
             ['123', 1, '123.www.example.com', 'www.example.com.123', 'www.123.com'],
         ];
+    }
+
+    public function testAppendLabelWithIpv4Host(): void
+    {
+        $uri = Http::createFromString('http://127.0.0.1/foo/bar');
+        self::assertSame('127.0.0.1.localhost', Resolution::appendLabel($uri, '.localhost')->getHost());
+    }
+
+    public function testAppendLabelThrowsWithOtherIpHost(): void
+    {
+        self::expectException(MalformedUriComponent::class);
+        $uri = Http::createFromString('http://[::1]/foo/bar');
+        Resolution::appendLabel($uri, '.localhost');
+    }
+
+    public function testPrependLabelWithIpv4Host(): void
+    {
+        $uri = Http::createFromString('http://127.0.0.1/foo/bar');
+        self::assertSame('localhost.127.0.0.1', Resolution::prependLabel($uri, 'localhost.')->getHost());
+    }
+
+    public function testPrependLabelThrowsWithOtherIpHost(): void
+    {
+        self::expectException(MalformedUriComponent::class);
+        $uri = Http::createFromString('http://[::1]/foo/bar');
+        Resolution::prependLabel($uri, '.localhost');
     }
 
     /**
