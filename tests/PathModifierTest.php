@@ -105,26 +105,26 @@ class PathModifierTest extends TestCase
      *
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::appendPath
+     * @covers ::appendSegment
      */
     public function testAppendProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
-        self::assertSame($append, Resolution::appendPath($this->uri, $segment)->getPath());
+        self::assertSame($append, Resolution::appendSegment($this->uri, $segment)->getPath());
     }
 
     /**
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::appendPath
+     * @covers ::appendSegment
      *
-     * @dataProvider validAppendPathProvider
+     * @dataProvider validappendSegmentProvider
      */
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
-        self::assertSame($expected, (string) Resolution::appendPath(Http::createFromString($uri), $segment));
+        self::assertSame($expected, (string) Resolution::appendSegment(Http::createFromString($uri), $segment));
     }
 
-    public function validAppendPathProvider(): array
+    public function validappendSegmentProvider(): array
     {
         return [
             'uri with trailing slash' => [
@@ -221,14 +221,14 @@ class PathModifierTest extends TestCase
     /**
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::prependPath
+     * @covers ::prependSegment
      *
      * @dataProvider validPathProvider
      *
      */
     public function testPrependProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
-        self::assertSame($prepend, Resolution::prependPath($this->uri, $segment)->getPath());
+        self::assertSame($prepend, Resolution::prependSegment($this->uri, $segment)->getPath());
     }
 
     /**

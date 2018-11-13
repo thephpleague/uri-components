@@ -248,7 +248,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromSegmentsFailed(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(TypeError::class);
         Path::createFromSegments([date_create()], Path::IS_RELATIVE);
     }
 
