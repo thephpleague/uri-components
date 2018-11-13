@@ -24,7 +24,6 @@ use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\UnknownType;
 use League\Uri\PathInterface;
-use Traversable;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -37,7 +36,6 @@ use function end;
 use function explode;
 use function implode;
 use function is_scalar;
-use function iterator_to_array;
 use function ltrim;
 use function method_exists;
 use function rtrim;
@@ -69,7 +67,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     private $segments;
 
     /**
-     * Returns a new instance from an array or a traversable object.
+     * Returns a new instance from an iterable structure.
      *
      * @param int $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
@@ -82,10 +80,6 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
 
         if (!isset($type_list[$type])) {
             throw new UnknownType(sprintf('"%s" is an invalid or unsupported %s type', $type, self::class));
-        }
-
-        if ($segments instanceof Traversable) {
-            $segments = iterator_to_array($segments, false);
         }
 
         $pathSegments = [];
