@@ -21,6 +21,7 @@ namespace League\Uri\Component;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\HostInterface;
+use UnexpectedValueException;
 use function defined;
 use function explode;
 use function filter_var;
@@ -225,6 +226,7 @@ final class Host extends Component implements HostInterface
         if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
             $this->host = $domain_name;
             $this->is_domain = (bool) preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
+            $this->toUnicode();
             return;
         }
 
@@ -235,9 +237,15 @@ final class Host extends Component implements HostInterface
         self::supportIdnHost();
 
         $domain_name = idn_to_ascii($domain_name, 0, INTL_IDNA_VARIANT_UTS46, $arr);
-        if (false === $domain_name || 0 !== $arr['errors']) {
+        if (0 !== $arr['errors']) {
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
         }
+
+        // @codeCoverageIgnoreStart
+        if (false === $domain_name) {
+            throw new UnexpectedValueException(sprintf('The Intl extension is misconfigured for %s, please correct this issue before proceeding.', PHP_OS));
+        }
+        // @codeCoverageIgnoreEnd
 
         if (false !== strpos($domain_name, '%')) {
             throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
@@ -332,7 +340,19 @@ final class Host extends Component implements HostInterface
             return $this->host;
         }
 
-        return (string) idn_to_utf8($this->host, 0, INTL_IDNA_VARIANT_UTS46);
+        $host = idn_to_utf8($this->host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+        if (0 !== $arr['errors']) {
+            $message = $this->getIDNAErrors($arr['errors']);
+            throw new MalformedUriComponent(sprintf('The host `%s` is invalid : %s', $this->host, $message));
+        }
+
+        // @codeCoverageIgnoreStart
+        if (false === $host) {
+            throw new UnexpectedValueException(sprintf('The Intl extension is misconfigured for %s, please correct this issue before proceeding.', PHP_OS));
+        }
+        // @codeCoverageIgnoreEnd
+
+        return $host;
     }
 
     /**
