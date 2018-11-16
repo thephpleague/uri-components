@@ -2,6 +2,36 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 2.x.x - TBD
+
+### Added
+
+- Components classes are now defined under the `League\Uri\Component` namespace
+- Components classes are made `final`
+- `League\Uri\Resolution` to ease manipulating `League\Uri\UriInterface` and Psr7 `UriInterface` objects.
+
+### Fixed
+
+- The `Query` component class follow more closely the [URLSearchParasm](https://url.spec.whatwg.org/#interface-urlsearchparams) specifications from the WHATWG group
+- `League\Uri\Component\Host` now throws `UnexpectedValueException` on misconfigured Intl extension presence.
+
+### Deprecated
+
+- None
+
+### Remove
+
+- support for PHP7.0
+- support for Public Suffix List resolution
+- support for query parser/building
+- `League\Uri\parse_query`
+- `League\Uri\build_query`
+- `League\Uri\extract_query`
+- `League\Uri\pairs_to_params`
+- `League\Uri\QueryBuilder`
+- `League\Uri\QueryParser`
+- `League\Uri\Components` namespace
+
 ## 1.8.2 - 2018-10-24
 
 ### Added
