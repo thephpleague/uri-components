@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com/components).
+ * League.Uri (http://uri.thephpleague.com/components)
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -20,14 +20,14 @@ use League\Uri\Component\Host;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Http;
-use League\Uri\Resolution;
+use League\Uri\Modifier;
 use PHPUnit\Framework\TestCase;
 use Zend\Diactoros\Uri as ZendUri;
 
 /**
  * @group host
  * @group resolution
- * @coversDefaultClass \League\Uri\Resolution
+ * @coversDefaultClass \League\Uri\Modifier
  */
 class HostModifierTest extends TestCase
 {
@@ -50,7 +50,7 @@ class HostModifierTest extends TestCase
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($prepend, Resolution::prependLabel($this->uri, $label)->getHost());
+        self::assertSame($prepend, Modifier::prependLabel($this->uri, $label)->getHost());
     }
 
     /**
@@ -60,7 +60,7 @@ class HostModifierTest extends TestCase
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($append, Resolution::appendLabel($this->uri, $label)->getHost());
+        self::assertSame($append, Modifier::appendLabel($this->uri, $label)->getHost());
     }
 
     /**
@@ -71,7 +71,7 @@ class HostModifierTest extends TestCase
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($replace, Resolution::replaceLabel($this->uri, $key, $label)->getHost());
+        self::assertSame($replace, Modifier::replaceLabel($this->uri, $key, $label)->getHost());
     }
 
     public function validHostProvider(): array
@@ -85,27 +85,27 @@ class HostModifierTest extends TestCase
     public function testAppendLabelWithIpv4Host(): void
     {
         $uri = Http::createFromString('http://127.0.0.1/foo/bar');
-        self::assertSame('127.0.0.1.localhost', Resolution::appendLabel($uri, '.localhost')->getHost());
+        self::assertSame('127.0.0.1.localhost', Modifier::appendLabel($uri, '.localhost')->getHost());
     }
 
     public function testAppendLabelThrowsWithOtherIpHost(): void
     {
         self::expectException(MalformedUriComponent::class);
         $uri = Http::createFromString('http://[::1]/foo/bar');
-        Resolution::appendLabel($uri, '.localhost');
+        Modifier::appendLabel($uri, '.localhost');
     }
 
     public function testPrependLabelWithIpv4Host(): void
     {
         $uri = Http::createFromString('http://127.0.0.1/foo/bar');
-        self::assertSame('localhost.127.0.0.1', Resolution::prependLabel($uri, 'localhost.')->getHost());
+        self::assertSame('localhost.127.0.0.1', Modifier::prependLabel($uri, 'localhost.')->getHost());
     }
 
     public function testPrependLabelThrowsWithOtherIpHost(): void
     {
         self::expectException(MalformedUriComponent::class);
         $uri = Http::createFromString('http://[::1]/foo/bar');
-        Resolution::prependLabel($uri, '.localhost');
+        Modifier::prependLabel($uri, '.localhost');
     }
 
     /**
@@ -116,7 +116,7 @@ class HostModifierTest extends TestCase
         $uri = Http::createFromString('http://مثال.إختبار/where/to/go');
         self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
-            (string)  Resolution::hostToAscii($uri)
+            (string)  Modifier::hostToAscii($uri)
         );
     }
 
@@ -127,7 +127,7 @@ class HostModifierTest extends TestCase
     {
         $uri = new ZendUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
         $expected = 'http://مثال.إختبار/where/to/go';
-        self::assertSame($expected, (string) Resolution::hostToUnicode($uri));
+        self::assertSame($expected, (string) Modifier::hostToUnicode($uri));
     }
 
     /**
@@ -138,7 +138,7 @@ class HostModifierTest extends TestCase
         $uri = Http::createFromString('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
         self::assertSame(
             'http://[fe80::1234]/path/to/the/sky.php',
-            (string) Resolution::removeZoneId($uri)
+            (string) Modifier::removeZoneId($uri)
         );
     }
 
@@ -149,7 +149,7 @@ class HostModifierTest extends TestCase
      */
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
-        self::assertSame($expected, Resolution::removeLabels($this->uri, ...$keys)->getHost());
+        self::assertSame($expected, Modifier::removeLabels($this->uri, ...$keys)->getHost());
     }
 
     public function validwithoutLabelProvider(): array
@@ -164,7 +164,7 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveLabels(): void
     {
-        self::assertSame('example.com', Resolution::removeLabels($this->uri, 2)->getHost());
+        self::assertSame('example.com', Modifier::removeLabels($this->uri, 2)->getHost());
     }
 
     /**
@@ -175,7 +175,7 @@ class HostModifierTest extends TestCase
     public function testRemoveLabelsFailedConstructor(array $params): void
     {
         self::expectException(InvalidKey::class);
-        Resolution::removeLabels($this->uri, ...$params);
+        Modifier::removeLabels($this->uri, ...$params);
     }
 
     public function invalidRemoveLabelsParameters(): array
@@ -190,7 +190,7 @@ class HostModifierTest extends TestCase
      */
     public function testAddRootLabel(): void
     {
-        self::assertSame('www.example.com.', Resolution::addRootLabel($this->uri)->getHost());
+        self::assertSame('www.example.com.', Modifier::addRootLabel($this->uri)->getHost());
     }
 
     /**
@@ -198,6 +198,6 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveRootLabel(): void
     {
-        self::assertSame('www.example.com', Resolution::removeRootLabel($this->uri)->getHost());
+        self::assertSame('www.example.com', Modifier::removeRootLabel($this->uri)->getHost());
     }
 }
