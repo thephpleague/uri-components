@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com/components).
+ * League.Uri (http://uri.thephpleague.com/components)
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -18,14 +18,14 @@ namespace LeagueTest\Uri;
 
 use League\Uri\Component\Query;
 use League\Uri\Http;
-use League\Uri\Resolution;
+use League\Uri\Modifier;
 use PHPUnit\Framework\TestCase;
 use function League\Uri\create;
 
 /**
  * @group query
  * @group resolution
- * @coversDefaultClass \League\Uri\Resolution
+ * @coversDefaultClass \League\Uri\Modifier
  */
 class QueryModifierTest extends TestCase
 {
@@ -49,7 +49,7 @@ class QueryModifierTest extends TestCase
      */
     public function testMergeQuery(string $query, string $expected): void
     {
-        self::assertSame($expected, Resolution::mergeQuery($this->uri, $query)->getQuery());
+        self::assertSame($expected, Modifier::mergeQuery($this->uri, $query)->getQuery());
     }
 
     public function validMergeQueryProvider(): array
@@ -68,7 +68,7 @@ class QueryModifierTest extends TestCase
      */
     public function testAppendQuery(string $query, string $expected): void
     {
-        self::assertSame($expected, Resolution::appendQuery($this->uri, $query)->getQuery());
+        self::assertSame($expected, Modifier::appendQuery($this->uri, $query)->getQuery());
     }
 
     public function validAppendQueryProvider(): array
@@ -85,7 +85,7 @@ class QueryModifierTest extends TestCase
     public function testKsortQuery(): void
     {
         $uri = Http::createFromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
-        self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', Resolution::sortQuery($uri)->getQuery());
+        self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', Modifier::sortQuery($uri)->getQuery());
     }
 
     /**
@@ -96,7 +96,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
-        self::assertSame($expected, Resolution::removePairs($this->uri, ...$input)->getQuery());
+        self::assertSame($expected, Modifier::removePairs($this->uri, ...$input)->getQuery());
     }
 
     public function validWithoutQueryValuesProvider(): array
@@ -114,7 +114,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, string $expected): void
     {
-        self::assertSame($expected, Resolution::removeParams(create($uri), ...$input)->getQuery());
+        self::assertSame($expected, Modifier::removeParams(create($uri), ...$input)->getQuery());
     }
 
     public function removeParamsProvider(): array

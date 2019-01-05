@@ -1,7 +1,7 @@
 <?php
 
 /**
- * League.Uri (http://uri.thephpleague.com/components).
+ * League.Uri (http://uri.thephpleague.com/components)
  *
  * @package    League\Uri
  * @subpackage League\Uri\Components
@@ -37,7 +37,7 @@ use function sprintf;
 use function strpos;
 use function substr;
 
-final class Resolution
+final class Modifier
 {
     /**
      * Filter the URI object.
