@@ -21,7 +21,7 @@ namespace League\Uri\Component;
 use Countable;
 use Iterator;
 use IteratorAggregate;
-use League\Uri\ComponentInterface;
+use League\Uri\Contract\ComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Parser\QueryString;
 use Traversable;

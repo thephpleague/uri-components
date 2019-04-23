@@ -19,10 +19,10 @@ namespace LeagueTest\Uri;
 use GuzzleHttp\Psr7;
 use League\Uri\Component\DataPath;
 use League\Uri\Component\Path;
-use League\Uri\Data;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Http;
 use League\Uri\Modifier;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -52,7 +52,7 @@ class PathModifierTest extends TestCase
      *
      * @dataProvider fileProvider
      */
-    public function testToBinary(Data $binary, Data $ascii): void
+    public function testToBinary(Uri $binary, Uri $ascii): void
     {
         self::assertSame((string) $binary, (string) Modifier::datapathToBinary($ascii));
     }
@@ -64,7 +64,7 @@ class PathModifierTest extends TestCase
      * @dataProvider fileProvider
      *
      */
-    public function testToAscii(Data $binary, Data $ascii): void
+    public function testToAscii(Uri $binary, Uri $ascii): void
     {
         self::assertSame((string) $ascii, (string) Modifier::datapathToAscii($binary));
     }
@@ -74,11 +74,11 @@ class PathModifierTest extends TestCase
         $textPath = new DataPath('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $binPath = DataPath::createFromPath(__DIR__.'/Component/data/red-nose.gif');
 
-        $ascii = Data::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-        $binary = Data::createFromString('data:'.$textPath->toBinary());
+        $ascii = Uri::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $binary = Uri::createFromString('data:'.$textPath->toBinary());
 
-        $pathBin = Data::createFromPath(__DIR__.'/Component/data/red-nose.gif');
-        $pathAscii = Data::createFromString('data:'.$binPath->toAscii());
+        $pathBin = Uri::createFromDataPath(__DIR__.'/Component/data/red-nose.gif');
+        $pathAscii = Uri::createFromString('data:'.$binPath->toAscii());
 
         return [
             [$pathBin, $pathAscii],
@@ -93,7 +93,7 @@ class PathModifierTest extends TestCase
      */
     public function testDataUriWithParameters(): void
     {
-        $uri = Data::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde!');
+        $uri = Uri::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde!');
         self::assertSame(
             'text/plain;coco=chanel,Bonjour%20le%20monde!',
             Modifier::replaceDataUriParameters($uri, 'coco=chanel')->getPath()

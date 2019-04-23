@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use League\Uri\PathInterface;
+use League\Uri\Contract\PathInterface;
 use TypeError;
 use function array_pop;
 use function array_reduce;

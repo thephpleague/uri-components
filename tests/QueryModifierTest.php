@@ -20,7 +20,6 @@ use League\Uri\Component\Query;
 use League\Uri\Http;
 use League\Uri\Modifier;
 use PHPUnit\Framework\TestCase;
-use function League\Uri\create;
 
 /**
  * @group query
@@ -114,7 +113,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, string $expected): void
     {
-        self::assertSame($expected, Modifier::removeParams(create($uri), ...$input)->getQuery());
+        self::assertSame($expected, Modifier::removeParams(Http::createFromString($uri), ...$input)->getQuery());
     }
 
     public function removeParamsProvider(): array

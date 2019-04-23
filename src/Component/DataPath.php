@@ -19,9 +19,9 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use finfo;
+use League\Uri\Contract\PathInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\PathNotFound;
-use League\Uri\PathInterface;
 use SplFileObject;
 use function base64_decode;
 use function base64_encode;
