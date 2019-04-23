@@ -20,9 +20,9 @@ namespace League\Uri\Component;
 
 use Countable;
 use IteratorAggregate;
+use League\Uri\Contract\HostInterface;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\HostInterface;
 use TypeError;
 use function array_count_values;
 use function array_filter;

@@ -24,6 +24,7 @@ use League\Uri\Component\HierarchicalPath;
 use League\Uri\Component\Host;
 use League\Uri\Component\Path;
 use League\Uri\Component\Query;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
@@ -299,7 +300,12 @@ final class Modifier
         }
 
         $path = $path ?? $uri->getPath();
-        if ('' != $uri->getAuthority() && '' != $path && '/' != $path[0]) {
+        $path = (string) $path;
+        if (null !== $uri->getAuthority()
+            && '' !== $uri->getAuthority()
+            && '' !== $path
+            && '/' != ($path[0] ?? '')
+        ) {
             return $uri->withPath('/'.$path);
         }
 

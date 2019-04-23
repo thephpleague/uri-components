@@ -18,8 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\Contract\HostInterface;
 use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\HostInterface;
 use function explode;
 use function preg_match;
 

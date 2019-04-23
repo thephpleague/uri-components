@@ -18,9 +18,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\Contract\HostInterface;
 use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\HostInterface;
 use UnexpectedValueException;
 use function defined;
 use function explode;

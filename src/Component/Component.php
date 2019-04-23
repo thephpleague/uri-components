@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use League\Uri\ComponentInterface;
+use League\Uri\Contract\ComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use TypeError;
 use function gettype;
