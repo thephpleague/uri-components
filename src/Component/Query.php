@@ -23,7 +23,7 @@ use Iterator;
 use IteratorAggregate;
 use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\Parser\QueryString;
+use League\Uri\QueryString;
 use Traversable;
 use TypeError;
 use function array_column;
