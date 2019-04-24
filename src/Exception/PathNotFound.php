@@ -18,6 +18,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Exception;
 
-class PathNotFound extends InvalidUriComponent
+class PathNotFound extends MalformedUriComponent
 {
 }

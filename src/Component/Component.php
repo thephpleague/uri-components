@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use League\Uri\Contract\ComponentInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use TypeError;
 use function gettype;
@@ -32,7 +32,7 @@ use function sprintf;
 use function strtoupper;
 use const PHP_QUERY_RFC3986;
 
-abstract class Component implements ComponentInterface
+abstract class Component implements UriComponentInterface
 {
     protected const RFC3986_ENCODING = PHP_QUERY_RFC3986;
 
@@ -75,7 +75,7 @@ abstract class Component implements ComponentInterface
      */
     protected static function filterComponent($component): ?string
     {
-        if ($component instanceof ComponentInterface) {
+        if ($component instanceof UriComponentInterface) {
             return $component->getContent();
         }
 

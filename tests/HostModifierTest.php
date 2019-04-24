@@ -20,14 +20,14 @@ use League\Uri\Component\Host;
 use League\Uri\Exception\InvalidKey;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Http;
-use League\Uri\Modifier;
+use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
 use Zend\Diactoros\Uri as ZendUri;
 
 /**
  * @group host
  * @group resolution
- * @coversDefaultClass \League\Uri\Modifier
+ * @coversDefaultClass \League\Uri\UriModifier
  */
 class HostModifierTest extends TestCase
 {
@@ -50,7 +50,7 @@ class HostModifierTest extends TestCase
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($prepend, Modifier::prependLabel($this->uri, $label)->getHost());
+        self::assertSame($prepend, UriModifier::prependLabel($this->uri, $label)->getHost());
     }
 
     /**
@@ -60,7 +60,7 @@ class HostModifierTest extends TestCase
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($append, Modifier::appendLabel($this->uri, $label)->getHost());
+        self::assertSame($append, UriModifier::appendLabel($this->uri, $label)->getHost());
     }
 
     /**
@@ -71,7 +71,7 @@ class HostModifierTest extends TestCase
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($replace, Modifier::replaceLabel($this->uri, $key, $label)->getHost());
+        self::assertSame($replace, UriModifier::replaceLabel($this->uri, $key, $label)->getHost());
     }
 
     public function validHostProvider(): array
@@ -85,27 +85,27 @@ class HostModifierTest extends TestCase
     public function testAppendLabelWithIpv4Host(): void
     {
         $uri = Http::createFromString('http://127.0.0.1/foo/bar');
-        self::assertSame('127.0.0.1.localhost', Modifier::appendLabel($uri, '.localhost')->getHost());
+        self::assertSame('127.0.0.1.localhost', UriModifier::appendLabel($uri, '.localhost')->getHost());
     }
 
     public function testAppendLabelThrowsWithOtherIpHost(): void
     {
         self::expectException(MalformedUriComponent::class);
         $uri = Http::createFromString('http://[::1]/foo/bar');
-        Modifier::appendLabel($uri, '.localhost');
+        UriModifier::appendLabel($uri, '.localhost');
     }
 
     public function testPrependLabelWithIpv4Host(): void
     {
         $uri = Http::createFromString('http://127.0.0.1/foo/bar');
-        self::assertSame('localhost.127.0.0.1', Modifier::prependLabel($uri, 'localhost.')->getHost());
+        self::assertSame('localhost.127.0.0.1', UriModifier::prependLabel($uri, 'localhost.')->getHost());
     }
 
     public function testPrependLabelThrowsWithOtherIpHost(): void
     {
         self::expectException(MalformedUriComponent::class);
         $uri = Http::createFromString('http://[::1]/foo/bar');
-        Modifier::prependLabel($uri, '.localhost');
+        UriModifier::prependLabel($uri, '.localhost');
     }
 
     /**
@@ -116,7 +116,7 @@ class HostModifierTest extends TestCase
         $uri = Http::createFromString('http://مثال.إختبار/where/to/go');
         self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
-            (string)  Modifier::hostToAscii($uri)
+            (string)  UriModifier::hostToAscii($uri)
         );
     }
 
@@ -127,7 +127,7 @@ class HostModifierTest extends TestCase
     {
         $uri = new ZendUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
         $expected = 'http://مثال.إختبار/where/to/go';
-        self::assertSame($expected, (string) Modifier::hostToUnicode($uri));
+        self::assertSame($expected, (string) UriModifier::hostToUnicode($uri));
     }
 
     /**
@@ -138,7 +138,7 @@ class HostModifierTest extends TestCase
         $uri = Http::createFromString('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
         self::assertSame(
             'http://[fe80::1234]/path/to/the/sky.php',
-            (string) Modifier::removeZoneId($uri)
+            (string) UriModifier::removeZoneId($uri)
         );
     }
 
@@ -149,7 +149,7 @@ class HostModifierTest extends TestCase
      */
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
-        self::assertSame($expected, Modifier::removeLabels($this->uri, ...$keys)->getHost());
+        self::assertSame($expected, UriModifier::removeLabels($this->uri, ...$keys)->getHost());
     }
 
     public function validwithoutLabelProvider(): array
@@ -164,7 +164,7 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveLabels(): void
     {
-        self::assertSame('example.com', Modifier::removeLabels($this->uri, 2)->getHost());
+        self::assertSame('example.com', UriModifier::removeLabels($this->uri, 2)->getHost());
     }
 
     /**
@@ -175,7 +175,7 @@ class HostModifierTest extends TestCase
     public function testRemoveLabelsFailedConstructor(array $params): void
     {
         self::expectException(InvalidKey::class);
-        Modifier::removeLabels($this->uri, ...$params);
+        UriModifier::removeLabels($this->uri, ...$params);
     }
 
     public function invalidRemoveLabelsParameters(): array
@@ -190,7 +190,7 @@ class HostModifierTest extends TestCase
      */
     public function testAddRootLabel(): void
     {
-        self::assertSame('www.example.com.', Modifier::addRootLabel($this->uri)->getHost());
+        self::assertSame('www.example.com.', UriModifier::addRootLabel($this->uri)->getHost());
     }
 
     /**
@@ -198,6 +198,6 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveRootLabel(): void
     {
-        self::assertSame('www.example.com', Modifier::removeRootLabel($this->uri)->getHost());
+        self::assertSame('www.example.com', UriModifier::removeRootLabel($this->uri)->getHost());
     }
 }

@@ -19,7 +19,7 @@ namespace LeagueTest\Uri\Component;
 use ArrayIterator;
 use League\Uri\Component\HierarchicalPath as Path;
 use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -239,7 +239,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromSegmentsFailedWithInvalidType(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         Path::createFromSegments(['all', 'is', 'good'], 23);
     }
 
@@ -547,7 +547,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithExtensionWithInvalidExtension(?string $extension): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         (new Path())->withExtension($extension);
     }
 
@@ -719,7 +719,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithBasenameThrowException(?string $path): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         (new Path('foo/bar'))->withBasename($path);
     }
 

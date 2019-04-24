@@ -19,8 +19,8 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\HostInterface;
-use League\Uri\Exception\InvalidUriComponent;
 use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\MissingIdnSupport;
 use UnexpectedValueException;
 use function defined;
 use function explode;
@@ -145,7 +145,7 @@ final class Host extends Component implements HostInterface
         static $idn_support = null;
         $idn_support = $idn_support ?? function_exists('\idn_to_ascii') && defined('\INTL_IDNA_VARIANT_UTS46');
         if (!$idn_support) {
-            throw new InvalidUriComponent('IDN host can not be processed. Verify that ext/intl is installed for IDN support and that ICU is at least version 4.6.');
+            throw new MissingIdnSupport('IDN host can not be processed. Verify that ext/intl is installed for IDN support and that ICU is at least version 4.6.');
         }
     }
 
