@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Authority;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -121,7 +121,7 @@ class AuthorityTest extends TestCase
      */
     public function testConstructorFails(string $authority): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         $authority = new Authority($authority);
     }
 
@@ -174,7 +174,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithHostFails(?string $host): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         $authority = (new Authority('foo:bar@example.com:443'))->withHost($host);
     }
 
@@ -202,7 +202,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithPortFails(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         $authority = (new Authority('foo:bar@example.com:443'))->withPort(-1);
     }
 
@@ -222,7 +222,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithUserInfoFails(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         $authority = (new Authority('foo:bar@example.com:443'))->withUserInfo("\0foo", 'bar');
     }
 

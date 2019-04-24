@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Host;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -164,7 +164,7 @@ class HostTest extends TestCase
      */
     public function testInvalidHost(string $invalid): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         new Host($invalid);
     }
 

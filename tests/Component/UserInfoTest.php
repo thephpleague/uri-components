@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\UserInfo;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -269,7 +269,7 @@ class UserInfoTest extends TestCase
 
     public function testConstructorThrowsException(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         new UserInfo("\0");
     }
 }

@@ -39,7 +39,7 @@ use function sprintf;
 use function strpos;
 use function substr;
 
-final class Modifier
+final class UriModifier
 {
     /**
      * Filter the URI object.

@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Path;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -139,7 +139,7 @@ class PathTest extends TestCase
 
     public function testConstructorThrowsExceptionWithInvalidData(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         new Path("\0");
     }
 

@@ -18,7 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
 use League\Uri\Component\Query;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\InvalidQueryPair;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -58,7 +59,7 @@ class QueryTest extends TestCase
      */
     public function testInvalidSeparator(string $separator): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         new Query('foo=bar', PHP_QUERY_RFC3986, $separator);
     }
 
@@ -159,7 +160,7 @@ class QueryTest extends TestCase
         $unreserved = 'a-zA-Z0-9.-_~!$&\'()*+,;=:@';
 
         return [
-            'bug fix issue 84' => ['fào=?%25bar&q=v%61lue', 'f%C3%A0o=?%25bar&q=v%61lue'],
+            'bug fix issue 84' => ['fào=?%25bar&q=v%61lue', 'f%C3%A0o=?%25bar&q=value'],
             'string' => ['kingkong=toto', 'kingkong=toto'],
             'query object' => [new Query('kingkong=toto'), 'kingkong=toto'],
             'empty string' => ['', ''],
@@ -178,7 +179,7 @@ class QueryTest extends TestCase
             'Percent encode invalid percent encodings' => ['q=va%2-lue', 'q=va%2-lue'],
             "Don't encode path segments" => ['q=va/lue', 'q=va/lue'],
             "Don't encode unreserved chars or sub-delimiters" => [$unreserved, $unreserved],
-            'Encoded unreserved chars are not decoded' => ['q=v%61lue', 'q=v%61lue'],
+            'Encoded unreserved chars are not decoded' => ['q=v%61lue', 'q=value'],
         ];
     }
 
@@ -206,7 +207,7 @@ class QueryTest extends TestCase
      */
     public function testCreateFromPairsFailedWithBadIterable(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(InvalidQueryPair::class);
         Query::createFromPairs([['toto' => ['foo' => [(object) []]]]]);
     }
 

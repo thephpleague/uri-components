@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Port;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -95,7 +95,7 @@ class PortTest extends TestCase
 
     public function testFailedPortException(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         new Port(-1);
     }
 

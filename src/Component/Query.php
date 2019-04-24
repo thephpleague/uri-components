@@ -21,7 +21,7 @@ namespace League\Uri\Component;
 use Countable;
 use Iterator;
 use IteratorAggregate;
-use League\Uri\Contract\ComponentInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Parser\QueryString;
 use Traversable;
@@ -566,7 +566,7 @@ final class Query extends Component implements Countable, IteratorAggregate
             return $value;
         }
 
-        if ($value instanceof ComponentInterface) {
+        if ($value instanceof UriComponentInterface) {
             return $value->getContent();
         }
 
@@ -630,7 +630,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      */
     public function append($query): self
     {
-        if ($query instanceof ComponentInterface) {
+        if ($query instanceof UriComponentInterface) {
             $query = $query->getContent();
         }
 

@@ -19,7 +19,7 @@ namespace LeagueTest\Uri\Component;
 use ArrayIterator;
 use League\Uri\Component\Domain;
 use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\InvalidUriComponent;
+use League\Uri\Exception\MalformedUriComponent;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -139,7 +139,7 @@ class DomainTest extends TestCase
      */
     public function testInvalidDomain(string $invalid): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         new Domain($invalid);
     }
 
@@ -385,7 +385,7 @@ class DomainTest extends TestCase
      */
     public function testPrependIpFailed(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         (new Domain('secure.example.com'))->prepend(new Domain('master.'));
     }
 
@@ -423,7 +423,7 @@ class DomainTest extends TestCase
      */
     public function testAppendIpFailed(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         (new Domain('secure.example.com.'))->append('master');
     }
 
@@ -466,7 +466,7 @@ class DomainTest extends TestCase
      */
     public function testReplaceIpMustFailed(): void
     {
-        self::expectException(InvalidUriComponent::class);
+        self::expectException(MalformedUriComponent::class);
         (new Domain('secure.example.com'))->withLabel(2, '[::1]');
     }
 
