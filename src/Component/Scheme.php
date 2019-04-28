@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use function preg_match;
 use function sprintf;
 use function strtolower;
@@ -53,7 +53,7 @@ final class Scheme extends Component
     /**
      * Validate a scheme.
      *
-     * @throws MalformedUriComponent if the scheme is invalid
+     * @throws SyntaxError if the scheme is invalid
      */
     private function validate($scheme): ?string
     {
@@ -66,7 +66,7 @@ final class Scheme extends Component
             return strtolower($scheme);
         }
 
-        throw new MalformedUriComponent(sprintf("The scheme '%s' is invalid", $scheme));
+        throw new SyntaxError(sprintf("The scheme '%s' is invalid", $scheme));
     }
 
     /**

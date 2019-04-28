@@ -22,7 +22,7 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use League\Uri\Contract\UriComponentInterface;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use League\Uri\QueryString;
 use Traversable;
 use TypeError;
@@ -139,7 +139,7 @@ final class Query extends Component implements Countable, IteratorAggregate
     /**
      * Filter the incoming separator.
      *
-     * @throws MalformedUriComponent if the separator is invalid
+     * @throws SyntaxError if the separator is invalid
      */
     private function filterSeparator(string $separator): string
     {
@@ -147,7 +147,7 @@ final class Query extends Component implements Countable, IteratorAggregate
             return $separator;
         }
 
-        throw new MalformedUriComponent(sprintf('Invalid separator character `%s`', $separator));
+        throw new SyntaxError(sprintf('Invalid separator character `%s`', $separator));
     }
 
     /**

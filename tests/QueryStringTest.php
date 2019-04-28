@@ -17,9 +17,8 @@
 namespace LeagueTest\Uri;
 
 use ArrayIterator;
-use League\Uri\Exception\InvalidQueryPair;
-use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\Exception\UnknownEncoding;
+use League\Uri\Exception\SyntaxError;
+use League\Uri\Exception\UnsupportedEncoding;
 use League\Uri\QueryString;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -31,25 +30,25 @@ class QueryStringTest extends TestCase
 {
     public function testEncodingThrowsExceptionWithQueryParser(): void
     {
-        self::expectException(UnknownEncoding::class);
+        self::expectException(UnsupportedEncoding::class);
         QueryString::parse('foo=bar', '&', 42);
     }
 
-    public function testMalformedUriComponentThrowsExceptionWithQueryParser(): void
+    public function testSyntaxErrorThrowsExceptionWithQueryParser(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         QueryString::parse("foo=bar\0");
     }
 
     public function testEncodingThrowsExceptionWithQueryBuilder(): void
     {
-        self::expectException(UnknownEncoding::class);
+        self::expectException(UnsupportedEncoding::class);
         QueryString::build([['foo', 'bar']], '&', 42);
     }
 
     public function testBuildThrowsExceptionWithQueryBuilder(): void
     {
-        self::expectException(InvalidQueryPair::class);
+        self::expectException(SyntaxError::class);
         QueryString::build([['foo', 'boo' => 'bar']]);
     }
 
@@ -403,7 +402,7 @@ class QueryStringTest extends TestCase
      */
     public function testBuildQueryThrowsException(iterable $pairs, int $enc_type): void
     {
-        self::expectException(InvalidQueryPair::class);
+        self::expectException(SyntaxError::class);
         QueryString::build($pairs, '&', $enc_type);
     }
 

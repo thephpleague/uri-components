@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\HostInterface;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use function explode;
 use function preg_match;
 
@@ -61,7 +61,7 @@ final class Authority extends Component
      *
      * @param null|mixed $authority
      *
-     * @throws MalformedUriComponent If the component contains invalid HostInterface part.
+     * @throws SyntaxError If the component contains invalid HostInterface part.
      */
     public function __construct($authority = null)
     {
@@ -75,12 +75,12 @@ final class Authority extends Component
     /**
      * Check the authority validity against RFC3986 rules.
      *
-     * @throws MalformedUriComponent if the host is the only null component.
+     * @throws SyntaxError if the host is the only null component.
      */
     private function validate()
     {
         if (null === $this->host->getContent() && null !== $this->getContent()) {
-            throw new MalformedUriComponent('A non-empty authority must contains a non null host.');
+            throw new SyntaxError('A non-empty authority must contains a non null host.');
         }
     }
 

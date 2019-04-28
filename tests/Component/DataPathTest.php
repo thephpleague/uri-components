@@ -17,8 +17,8 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\DataPath as Path;
-use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\PathNotFound;
+use League\Uri\Exception\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use function base64_encode;
 use function file_get_contents;
@@ -54,7 +54,7 @@ class DataPathTest extends TestCase
      */
     public function testWithLeadingSlash(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         (new Path(';,Bonjour%20le%20monde%21'))->withLeadingSlash();
     }
 
@@ -73,7 +73,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailedWithNullValue(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Path(null);
     }
 
@@ -82,7 +82,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailedMalformePath(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Path('€');
     }
 
@@ -104,7 +104,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailed($path): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Path($path);
     }
 
@@ -251,7 +251,7 @@ class DataPathTest extends TestCase
      */
     public function testWithParametersFailedWithInvalidParameters($path, $parameters): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         Path::createFromPath($path)->withParameters($parameters);
     }
 
@@ -310,7 +310,7 @@ class DataPathTest extends TestCase
      */
     public function testUpdateParametersFailed($parameters): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
@@ -387,7 +387,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidBase64Encoded(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
@@ -401,7 +401,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidComponent(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
@@ -415,7 +415,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidString(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Path('text/plain;boulook€');
     }
 
@@ -429,7 +429,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidMimetype(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Path('data:toto\\bar;foo=bar,');
     }
 }

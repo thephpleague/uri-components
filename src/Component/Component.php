@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\UriComponentInterface;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use TypeError;
 use function gettype;
 use function is_scalar;
@@ -71,7 +71,7 @@ abstract class Component implements UriComponentInterface
     /**
      * Filter the input component.
      *
-     * @throws MalformedUriComponent If the component can not be converted to a string or null
+     * @throws SyntaxError If the component can not be converted to a string or null
      */
     protected static function filterComponent($component): ?string
     {
@@ -92,7 +92,7 @@ abstract class Component implements UriComponentInterface
             return $component;
         }
 
-        throw new MalformedUriComponent(sprintf('Invalid component string: %s', $component));
+        throw new SyntaxError(sprintf('Invalid component string: %s', $component));
     }
 
     /**

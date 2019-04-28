@@ -26,7 +26,7 @@ use League\Uri\Component\Path;
 use League\Uri\Component\Query;
 use League\Uri\Contract\PathInterface;
 use League\Uri\Contract\UriInterface;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function count;
@@ -137,7 +137,7 @@ final class UriModifier
     /**
      * Append a label or a host to the current URI host.
      *
-     * @throws MalformedUriComponent If the host can not be appended
+     * @throws SyntaxError If the host can not be appended
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -154,7 +154,7 @@ final class UriModifier
             return $uri->withHost((string) $host->withContent($host->getContent().'.'.$label));
         }
 
-        throw new MalformedUriComponent(sprintf('The URI host %s can not be appended', (string) $host));
+        throw new SyntaxError(sprintf('The URI host %s can not be appended', (string) $host));
     }
 
     /**
@@ -181,7 +181,7 @@ final class UriModifier
     /**
      * Prepend a label or a host to the current URI host.
      *
-     * @throws MalformedUriComponent If the host can not be prepended
+     * @throws SyntaxError If the host can not be prepended
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -198,7 +198,7 @@ final class UriModifier
             return $uri->withHost((string) $host->withContent($label.'.'.$host->getContent()));
         }
 
-        throw new MalformedUriComponent(sprintf('The URI host %s can not be prepended', (string) $host));
+        throw new SyntaxError(sprintf('The URI host %s can not be prepended', (string) $host));
     }
 
     /**

@@ -17,8 +17,8 @@
 namespace LeagueTest\Uri;
 
 use League\Uri\Component\Host;
-use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\OffsetOutOfBounds;
+use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
@@ -90,7 +90,7 @@ class HostModifierTest extends TestCase
 
     public function testAppendLabelThrowsWithOtherIpHost(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         $uri = Http::createFromString('http://[::1]/foo/bar');
         UriModifier::appendLabel($uri, '.localhost');
     }
@@ -103,7 +103,7 @@ class HostModifierTest extends TestCase
 
     public function testPrependLabelThrowsWithOtherIpHost(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         $uri = Http::createFromString('http://[::1]/foo/bar');
         UriModifier::prependLabel($uri, '.localhost');
     }
@@ -174,7 +174,7 @@ class HostModifierTest extends TestCase
      */
     public function testRemoveLabelsFailedConstructor(array $params): void
     {
-        self::expectException(InvalidKey::class);
+        self::expectException(OffsetOutOfBounds::class);
         UriModifier::removeLabels($this->uri, ...$params);
     }
 

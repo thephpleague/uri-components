@@ -19,7 +19,7 @@ namespace LeagueTest\Uri;
 use GuzzleHttp\Psr7;
 use League\Uri\Component\DataPath;
 use League\Uri\Component\Path;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use League\Uri\UriModifier;
@@ -191,7 +191,7 @@ class PathModifierTest extends TestCase
      */
     public function testBasenameThrowException(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         UriModifier::replaceBasename(Psr7\uri_for('http://example.com'), 'foo/baz');
     }
 
@@ -437,7 +437,7 @@ class PathModifierTest extends TestCase
      */
     public function testReplaceSegmentConstructorFailed2(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         UriModifier::replaceSegment($this->uri, 2, "whyno\0t");
     }
 
@@ -448,7 +448,7 @@ class PathModifierTest extends TestCase
      */
     public function testExtensionProcessFailed(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         UriModifier::replaceExtension($this->uri, 'to/to');
     }
 }

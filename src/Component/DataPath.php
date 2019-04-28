@@ -20,8 +20,8 @@ namespace League\Uri\Component;
 
 use finfo;
 use League\Uri\Contract\PathInterface;
-use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\PathNotFound;
+use League\Uri\Exception\SyntaxError;
 use SplFileObject;
 use function base64_decode;
 use function base64_encode;
@@ -145,13 +145,13 @@ final class DataPath extends Component implements PathInterface
      *
      * @param ?string $path
      *
-     * @throws MalformedUriComponent If the path is null
-     * @throws MalformedUriComponent If the path is not valid according to RFC2937
+     * @throws SyntaxError If the path is null
+     * @throws SyntaxError If the path is not valid according to RFC2937
      */
     private function filterPath(?string $path): string
     {
         if (null === $path) {
-            throw new MalformedUriComponent('The path can not be null');
+            throw new SyntaxError('The path can not be null');
         }
 
         if ('' === $path || ',' === $path) {
@@ -163,7 +163,7 @@ final class DataPath extends Component implements PathInterface
         }
 
         if (1 === preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
-            throw new MalformedUriComponent(sprintf('The path `%s` is invalid according to RFC2937', $path));
+            throw new SyntaxError(sprintf('The path `%s` is invalid according to RFC2937', $path));
         }
 
         return $path;
@@ -172,7 +172,7 @@ final class DataPath extends Component implements PathInterface
     /**
      * Filter the mimeType property.
      *
-     * @throws MalformedUriComponent If the mimetype is invalid
+     * @throws SyntaxError If the mimetype is invalid
      */
     private function filterMimeType(string $mimetype): string
     {
@@ -184,7 +184,7 @@ final class DataPath extends Component implements PathInterface
             return $mimetype;
         }
 
-        throw new MalformedUriComponent(sprintf('invalid mimeType, `%s`', $mimetype));
+        throw new SyntaxError(sprintf('invalid mimeType, `%s`', $mimetype));
     }
 
     /**
@@ -192,7 +192,7 @@ final class DataPath extends Component implements PathInterface
      *
      * @param bool $is_binary_data the binary flag to set
      *
-     * @throws MalformedUriComponent If the mediatype parameters contain invalid data
+     * @throws SyntaxError If the mediatype parameters contain invalid data
      *
      * @return string[]
      */
@@ -209,7 +209,7 @@ final class DataPath extends Component implements PathInterface
 
         $params = array_filter(explode(';', $parameters));
         if ([] !== array_filter($params, [$this, 'validateParameter'])) {
-            throw new MalformedUriComponent(sprintf('invalid mediatype parameters, `%s`', $parameters));
+            throw new SyntaxError(sprintf('invalid mediatype parameters, `%s`', $parameters));
         }
 
         return $params;
@@ -228,7 +228,7 @@ final class DataPath extends Component implements PathInterface
     /**
      * Validate the path document string representation.
      *
-     * @throws MalformedUriComponent If the data is invalid
+     * @throws SyntaxError If the data is invalid
      */
     private function validateDocument(): void
     {
@@ -238,7 +238,7 @@ final class DataPath extends Component implements PathInterface
 
         $res = base64_decode($this->document, true);
         if (false === $res || $this->document !== base64_encode($res)) {
-            throw new MalformedUriComponent(sprintf('invalid document, `%s`', $this->document));
+            throw new SyntaxError(sprintf('invalid document, `%s`', $this->document));
         }
     }
 
@@ -410,7 +410,7 @@ final class DataPath extends Component implements PathInterface
      */
     public function withLeadingSlash(): self
     {
-        throw new MalformedUriComponent(sprintf('A %s can not have a leading slash', self::class));
+        throw new SyntaxError(sprintf('A %s can not have a leading slash', self::class));
     }
 
     /**
