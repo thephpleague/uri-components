@@ -19,8 +19,8 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\HostInterface;
-use League\Uri\Exception\MalformedUriComponent;
 use League\Uri\Exception\MissingIdnSupport;
+use League\Uri\Exception\SyntaxError;
 use UnexpectedValueException;
 use function defined;
 use function explode;
@@ -152,7 +152,7 @@ final class Host extends Component implements HostInterface
     /**
      * Returns a host from an IP address.
      *
-     * @throws MalformedUriComponent If the $ip can not be converted into a Host
+     * @throws SyntaxError If the $ip can not be converted into a Host
      *
      * @return static
      */
@@ -176,7 +176,7 @@ final class Host extends Component implements HostInterface
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        throw new MalformedUriComponent(sprintf('`%s` is an invalid IP Host', $ip));
+        throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));
     }
 
     /**
@@ -213,7 +213,7 @@ final class Host extends Component implements HostInterface
                 return;
             }
 
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid IP literal format', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid IP literal format', $host));
         }
 
         $domain_name = rawurldecode($host);
@@ -231,14 +231,14 @@ final class Host extends Component implements HostInterface
         }
 
         if ($is_ascii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : the host contains invalid characters', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters', $host));
         }
 
         self::supportIdnHost();
 
         $domain_name = idn_to_ascii($domain_name, 0, INTL_IDNA_VARIANT_UTS46, $arr);
         if (0 !== $arr['errors']) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
         }
 
         // @codeCoverageIgnoreStart
@@ -248,7 +248,7 @@ final class Host extends Component implements HostInterface
         // @codeCoverageIgnoreEnd
 
         if (false !== strpos($domain_name, '%')) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name', $host));
         }
 
         $this->host = $domain_name;
@@ -343,7 +343,7 @@ final class Host extends Component implements HostInterface
         $host = idn_to_utf8($this->host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
         if (0 !== $arr['errors']) {
             $message = $this->getIDNAErrors($arr['errors']);
-            throw new MalformedUriComponent(sprintf('The host `%s` is invalid : %s', $this->host, $message));
+            throw new SyntaxError(sprintf('The host `%s` is invalid : %s', $this->host, $message));
         }
 
         // @codeCoverageIgnoreStart

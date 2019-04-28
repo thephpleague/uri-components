@@ -18,8 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
 use League\Uri\Component\HierarchicalPath as Path;
-use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\OffsetOutOfBounds;
+use League\Uri\Exception\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -239,7 +239,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromSegmentsFailedWithInvalidType(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         Path::createFromSegments(['all', 'is', 'good'], 23);
     }
 
@@ -372,7 +372,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithSegmentThrowsException(): void
     {
-        self::expectException(InvalidKey::class);
+        self::expectException(OffsetOutOfBounds::class);
         (new Path('/test/'))->withSegment(23, 'bar');
     }
 
@@ -406,7 +406,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithoutSegmentThrowsException(): void
     {
-        self::expectException(InvalidKey::class);
+        self::expectException(OffsetOutOfBounds::class);
         (new Path('/test/'))->withoutSegment(23);
     }
 
@@ -547,7 +547,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithExtensionWithInvalidExtension(?string $extension): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         (new Path())->withExtension($extension);
     }
 
@@ -719,7 +719,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithBasenameThrowException(?string $path): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         (new Path('foo/bar'))->withBasename($path);
     }
 

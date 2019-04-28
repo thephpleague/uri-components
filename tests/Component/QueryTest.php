@@ -18,8 +18,7 @@ namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
 use League\Uri\Component\Query;
-use League\Uri\Exception\InvalidQueryPair;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -59,7 +58,7 @@ class QueryTest extends TestCase
      */
     public function testInvalidSeparator(string $separator): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Query('foo=bar', PHP_QUERY_RFC3986, $separator);
     }
 
@@ -207,7 +206,7 @@ class QueryTest extends TestCase
      */
     public function testCreateFromPairsFailedWithBadIterable(): void
     {
-        self::expectException(InvalidQueryPair::class);
+        self::expectException(SyntaxError::class);
         Query::createFromPairs([['toto' => ['foo' => [(object) []]]]]);
     }
 

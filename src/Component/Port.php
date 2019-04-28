@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use function filter_var;
 use function sprintf;
 use const FILTER_VALIDATE_INT;
@@ -51,7 +51,7 @@ final class Port extends Component
     /**
      * Validate a port.
      *
-     * @throws MalformedUriComponent if the port is invalid
+     * @throws SyntaxError if the port is invalid
      */
     private function validate($port): ?int
     {
@@ -65,7 +65,7 @@ final class Port extends Component
             return $fport;
         }
 
-        throw new MalformedUriComponent(sprintf('Expected port to be a positive integer or 0; received %s', $port));
+        throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s', $port));
     }
 
     /**

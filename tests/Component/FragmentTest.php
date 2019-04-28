@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Fragment;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -133,7 +133,7 @@ class FragmentTest extends TestCase
      */
     public function testFailedFragmentException(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Fragment("\0");
     }
 

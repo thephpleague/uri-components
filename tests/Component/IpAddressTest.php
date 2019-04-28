@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Host;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\SyntaxError;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -183,7 +183,7 @@ class IpAddressTest extends TestCase
      */
     public function testCreateFromIpFailed(string $input): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         Host::createFromIp($input);
     }
 

@@ -18,8 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
 use League\Uri\Component\Domain;
-use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\OffsetOutOfBounds;
+use League\Uri\Exception\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -139,7 +139,7 @@ class DomainTest extends TestCase
      */
     public function testInvalidDomain(string $invalid): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         new Domain($invalid);
     }
 
@@ -357,7 +357,7 @@ class DomainTest extends TestCase
      */
     public function testWithoutTriggersException(): void
     {
-        self::expectException(InvalidKey::class);
+        self::expectException(OffsetOutOfBounds::class);
         (new Domain('bébé.be'))->withoutLabel(-23);
     }
 
@@ -385,7 +385,7 @@ class DomainTest extends TestCase
      */
     public function testPrependIpFailed(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         (new Domain('secure.example.com'))->prepend(new Domain('master.'));
     }
 
@@ -423,7 +423,7 @@ class DomainTest extends TestCase
      */
     public function testAppendIpFailed(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         (new Domain('secure.example.com.'))->append('master');
     }
 
@@ -466,7 +466,7 @@ class DomainTest extends TestCase
      */
     public function testReplaceIpMustFailed(): void
     {
-        self::expectException(MalformedUriComponent::class);
+        self::expectException(SyntaxError::class);
         (new Domain('secure.example.com'))->withLabel(2, '[::1]');
     }
 
@@ -475,7 +475,7 @@ class DomainTest extends TestCase
      */
     public function testReplaceMustFailed(): void
     {
-        self::expectException(InvalidKey::class);
+        self::expectException(OffsetOutOfBounds::class);
         (new Domain('secure.example.com'))->withLabel(23, 'foo');
     }
 

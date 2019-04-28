@@ -21,8 +21,8 @@ namespace League\Uri\Component;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Contract\HostInterface;
-use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\MalformedUriComponent;
+use League\Uri\Exception\OffsetOutOfBounds;
+use League\Uri\Exception\SyntaxError;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -88,7 +88,7 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
 
         $this->host = $host;
         if (!$this->host->isDomain()) {
-            throw new MalformedUriComponent(sprintf('`%s` is an invalid domain name', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name', $host));
         }
 
         $content = $this->host->getContent();
@@ -287,13 +287,13 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
      * If $key is non-negative, the added label will be the label at $key position from the start.
      * If $key is negative, the added label will be the label at $key position from the end.
      *
-     * @throws InvalidKey If the key is invalid
+     * @throws OffsetOutOfBounds If the key is invalid
      */
     public function withLabel(int $key, $label): self
     {
         $nb_labels = count($this->labels);
         if ($key < - $nb_labels - 1 || $key > $nb_labels) {
-            throw new InvalidKey(sprintf('no label can be added with the submitted key : `%s`', $key));
+            throw new OffsetOutOfBounds(sprintf('no label can be added with the submitted key : `%s`', $key));
         }
 
         if (0 > $key) {
@@ -334,7 +334,7 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
      *
      * @param int ...$keys
      *
-     * @throws InvalidKey If the key is invalid
+     * @throws OffsetOutOfBounds If the key is invalid
      */
     public function withoutLabel(int $key, int ...$keys): self
     {
@@ -342,7 +342,7 @@ final class Domain extends Component implements Countable, HostInterface, Iterat
         $nb_labels = count($this->labels);
         foreach ($keys as &$key) {
             if (- $nb_labels > $key || $nb_labels - 1 < $key) {
-                throw new InvalidKey(sprintf('no label can be removed with the submitted key : `%s`', $key));
+                throw new OffsetOutOfBounds(sprintf('no label can be removed with the submitted key : `%s`', $key));
             }
 
             if (0 > $key) {

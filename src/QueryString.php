@@ -18,9 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Exception\InvalidQueryPair;
-use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\Exception\UnknownEncoding;
+use League\Uri\Exception\SyntaxError;
+use League\Uri\Exception\UnsupportedEncoding;
 use TypeError;
 use function array_key_exists;
 use function array_keys;
@@ -121,14 +120,14 @@ final class QueryString
      *
      * @param null|mixed $query
      *
-     * @throws MalformedUriComponent If the query string is invalid
-     * @throws TypeError             If the query is not stringable or the null value
-     * @throws UnknownEncoding       If the encoding type is invalid
+     * @throws SyntaxError         If the query string is invalid
+     * @throws TypeError           If the query is not stringable or the null value
+     * @throws UnsupportedEncoding If the encoding type is invalid
      */
     private static function prepareQuery($query, int $enc_type): ?string
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new UnknownEncoding(sprintf('Unknown Encoding: %s', $enc_type));
+            throw new UnsupportedEncoding(sprintf('Unknown Encoding: %s', $enc_type));
         }
 
         if (null === $query) {
@@ -149,7 +148,7 @@ final class QueryString
         }
 
         if (1 === preg_match(self::REGEXP_INVALID_CHARS, $query)) {
-            throw new MalformedUriComponent(sprintf('Invalid query string: %s', $query));
+            throw new SyntaxError(sprintf('Invalid query string: %s', $query));
         }
 
         if (PHP_QUERY_RFC1738 === $enc_type) {
@@ -210,13 +209,13 @@ final class QueryString
      * a valid query string. This method differs from PHP http_build_query as
      * it does not modify parameters keys.
      *
-     * @throws UnknownEncoding  If the encoding type is invalid
-     * @throws InvalidQueryPair If a pair is invalid
+     * @throws UnsupportedEncoding If the encoding type is invalid
+     * @throws SyntaxError         If a pair is invalid
      */
     public static function build(iterable $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): ?string
     {
         if (null === (self::ENCODING_LIST[$enc_type] ?? null)) {
-            throw new UnknownEncoding(sprintf('Unknown Encoding: %s', $enc_type));
+            throw new UnsupportedEncoding(sprintf('Unknown Encoding: %s', $enc_type));
         }
 
         self::$regexpValue = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote(
@@ -257,17 +256,17 @@ final class QueryString
     /**
      * Build a RFC3986 query key/value pair association.
      *
-     * @throws InvalidQueryPair If the pair is invalid
+     * @throws SyntaxError If the pair is invalid
      */
     private static function buildPair(array $pair): string
     {
         if ([0, 1] !== array_keys($pair)) {
-            throw new InvalidQueryPair('A pair must be a sequential array starting at `0` and containing two elements.');
+            throw new SyntaxError('A pair must be a sequential array starting at `0` and containing two elements.');
         }
 
         [$name, $value] = $pair;
         if (!is_scalar($name)) {
-            throw new InvalidQueryPair(sprintf('A pair key must be a scalar value `%s` given.', gettype($name)));
+            throw new SyntaxError(sprintf('A pair key must be a scalar value `%s` given.', gettype($name)));
         }
 
         if (is_bool($name)) {
@@ -298,7 +297,7 @@ final class QueryString
             return (string) $name;
         }
 
-        throw new InvalidQueryPair(sprintf('A pair value must be a scalar value or the null value, `%s` given.', gettype($value)));
+        throw new SyntaxError(sprintf('A pair value must be a scalar value or the null value, `%s` given.', gettype($value)));
     }
 
     /**

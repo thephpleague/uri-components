@@ -21,9 +21,9 @@ namespace League\Uri\Component;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Contract\PathInterface;
-use League\Uri\Exception\InvalidKey;
-use League\Uri\Exception\MalformedUriComponent;
-use League\Uri\Exception\UnknownType;
+use League\Uri\Exception\OffsetOutOfBounds;
+use League\Uri\Exception\SyntaxError;
+use League\Uri\Exception\UnsupportedType;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -71,15 +71,15 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      *
      * @param int $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws UnknownType If the type is not recognized
-     * @throws TypeError   If the segments are malformed
+     * @throws UnsupportedType If the type is not recognized
+     * @throws TypeError       If the segments are malformed
      */
     public static function createFromSegments(iterable $segments, int $type = self::IS_RELATIVE): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
         if (!isset($type_list[$type])) {
-            throw new UnknownType(sprintf('"%s" is an invalid or unsupported %s type', $type, self::class));
+            throw new UnsupportedType(sprintf('"%s" is an invalid or unsupported %s type', $type, self::class));
         }
 
         $pathSegments = [];
@@ -322,13 +322,13 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      * If $key is non-negative, the added segment will be the segment at $key position from the start.
      * If $key is negative, the added segment will be the segment at $key position from the end.
      *
-     * @throws InvalidKey If the key is invalid
+     * @throws OffsetOutOfBounds If the key is invalid
      */
     public function withSegment(int $key, $segment): self
     {
         $nb_segments = count($this->segments);
         if ($key < - $nb_segments - 1 || $key > $nb_segments) {
-            throw new InvalidKey(sprintf('the given key `%s` is invalid', $key));
+            throw new OffsetOutOfBounds(sprintf('the given key `%s` is invalid', $key));
         }
 
         if (0 > $key) {
@@ -385,7 +385,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      * @param int $key     required key to remove
      * @param int ...$keys remaining keys to remove
      *
-     * @throws InvalidKey If the key is invalid
+     * @throws OffsetOutOfBounds If the key is invalid
      */
     public function withoutSegment(int $key, int ...$keys): self
     {
@@ -395,7 +395,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
         $deleted_keys = [];
         foreach ($keys as $key) {
             if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
-                throw new InvalidKey(sprintf('the key `%s` is invalid', $key));
+                throw new OffsetOutOfBounds(sprintf('the key `%s` is invalid', $key));
             }
 
             if ($offset < 0) {
@@ -450,11 +450,11 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     {
         $basename = $this->validateComponent($basename);
         if (null === $basename) {
-            throw new MalformedUriComponent('a basename sequence can not be null');
+            throw new SyntaxError('a basename sequence can not be null');
         }
 
         if (false !== strpos($basename, self::SEPARATOR)) {
-            throw new MalformedUriComponent('The basename can not contain the path separator');
+            throw new SyntaxError('The basename can not contain the path separator');
         }
 
         return $this->withSegment(count($this->segments) - 1, $basename);
@@ -470,15 +470,15 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     {
         $extension = $this->validateComponent($extension);
         if (null === $extension) {
-            throw new MalformedUriComponent('an extension sequence can not be null');
+            throw new SyntaxError('an extension sequence can not be null');
         }
 
         if (false !== strpos($extension, self::SEPARATOR)) {
-            throw new MalformedUriComponent('an extension sequence can not contain a path delimiter');
+            throw new SyntaxError('an extension sequence can not contain a path delimiter');
         }
 
         if (0 === strpos($extension, '.')) {
-            throw new MalformedUriComponent('an extension sequence can not contain a leading `.` character');
+            throw new SyntaxError('an extension sequence can not contain a leading `.` character');
         }
 
         $basename = end($this->segments);
