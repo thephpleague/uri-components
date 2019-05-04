@@ -20,7 +20,6 @@ namespace League\Uri\Component;
 
 use finfo;
 use League\Uri\Contract\DataPathInterface;
-use League\Uri\Exception\PathNotFound;
 use League\Uri\Exception\SyntaxError;
 use SplFileObject;
 use function base64_decode;
@@ -94,7 +93,7 @@ final class DataPath extends Component implements DataPathInterface
      *
      * @param null|resource $context
      *
-     * @throws PathNotFound If the File is not readable
+     * @throws SyntaxError If the File is not readable
      */
     public static function createFromPath(string $path, $context = null): self
     {
@@ -107,7 +106,7 @@ final class DataPath extends Component implements DataPathInterface
 
         $content = @file_get_contents(...$file_args);
         if (false === $content) {
-            throw new PathNotFound(sprintf('`%s` failed to open stream: No such file or directory', $path));
+            throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory', $path));
         }
 
         return new self(

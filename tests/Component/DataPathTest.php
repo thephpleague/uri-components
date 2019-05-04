@@ -17,7 +17,6 @@
 namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\DataPath as Path;
-use League\Uri\Exception\PathNotFound;
 use League\Uri\Exception\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use function base64_encode;
@@ -93,7 +92,7 @@ class DataPathTest extends TestCase
      */
     public function testCreateFromPathFailed($path): void
     {
-        self::expectException(PathNotFound::class);
+        self::expectException(SyntaxError::class);
         Path::createFromPath($path);
     }
 
