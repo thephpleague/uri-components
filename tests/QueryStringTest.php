@@ -17,8 +17,8 @@
 namespace LeagueTest\Uri;
 
 use ArrayIterator;
+use League\Uri\Exception\EncodingNotFound;
 use League\Uri\Exception\SyntaxError;
-use League\Uri\Exception\UnsupportedEncoding;
 use League\Uri\QueryString;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -30,7 +30,7 @@ class QueryStringTest extends TestCase
 {
     public function testEncodingThrowsExceptionWithQueryParser(): void
     {
-        self::expectException(UnsupportedEncoding::class);
+        self::expectException(EncodingNotFound::class);
         QueryString::parse('foo=bar', '&', 42);
     }
 
@@ -42,7 +42,7 @@ class QueryStringTest extends TestCase
 
     public function testEncodingThrowsExceptionWithQueryBuilder(): void
     {
-        self::expectException(UnsupportedEncoding::class);
+        self::expectException(EncodingNotFound::class);
         QueryString::build([['foo', 'bar']], '&', 42);
     }
 

@@ -18,12 +18,13 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\Contract\PortInterface;
 use League\Uri\Exception\SyntaxError;
 use function filter_var;
 use function sprintf;
 use const FILTER_VALIDATE_INT;
 
-final class Port extends Component
+final class Port extends Component implements PortInterface
 {
     /**
      * @var int|null
@@ -89,7 +90,7 @@ final class Port extends Component
     }
 
     /**
-     * Returns the integer representation of the Port.
+     * {@inheritdoc}
      */
     public function toInt(): ?int
     {

@@ -18,9 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use Countable;
 use Iterator;
-use IteratorAggregate;
+use League\Uri\Contract\QueryInterface;
 use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\QueryString;
@@ -49,7 +48,7 @@ use function sprintf;
 use const PHP_QUERY_RFC1738;
 use const PHP_QUERY_RFC3986;
 
-final class Query extends Component implements Countable, IteratorAggregate
+final class Query extends Component implements QueryInterface
 {
     /**
      * @var array
@@ -236,7 +235,7 @@ final class Query extends Component implements Countable, IteratorAggregate
      *
      * @return Iterator
      */
-    public function pairs()
+    public function pairs(): iterable
     {
         foreach ($this->pairs as $pair) {
             yield $pair[0] => $pair[1];

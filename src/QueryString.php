@@ -18,8 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use League\Uri\Exception\EncodingNotFound;
 use League\Uri\Exception\SyntaxError;
-use League\Uri\Exception\UnsupportedEncoding;
 use TypeError;
 use function array_key_exists;
 use function array_keys;
@@ -120,14 +120,14 @@ final class QueryString
      *
      * @param null|mixed $query
      *
-     * @throws SyntaxError         If the query string is invalid
-     * @throws TypeError           If the query is not stringable or the null value
-     * @throws UnsupportedEncoding If the encoding type is invalid
+     * @throws SyntaxError      If the query string is invalid
+     * @throws TypeError        If the query is not stringable or the null value
+     * @throws EncodingNotFound If the encoding type is invalid
      */
     private static function prepareQuery($query, int $enc_type): ?string
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new UnsupportedEncoding(sprintf('Unknown Encoding: %s', $enc_type));
+            throw new EncodingNotFound(sprintf('Unknown Encoding: %s', $enc_type));
         }
 
         if (null === $query) {
@@ -209,13 +209,13 @@ final class QueryString
      * a valid query string. This method differs from PHP http_build_query as
      * it does not modify parameters keys.
      *
-     * @throws UnsupportedEncoding If the encoding type is invalid
-     * @throws SyntaxError         If a pair is invalid
+     * @throws EncodingNotFound If the encoding type is invalid
+     * @throws SyntaxError      If a pair is invalid
      */
     public static function build(iterable $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): ?string
     {
         if (null === (self::ENCODING_LIST[$enc_type] ?? null)) {
-            throw new UnsupportedEncoding(sprintf('Unknown Encoding: %s', $enc_type));
+            throw new EncodingNotFound(sprintf('Unknown Encoding: %s', $enc_type));
         }
 
         self::$regexpValue = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote(

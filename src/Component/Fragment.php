@@ -18,7 +18,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-final class Fragment extends Component
+use League\Uri\Contract\FragmentInterface;
+
+final class Fragment extends Component implements FragmentInterface
 {
     private const REGEXP_FRAGMENT_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@\?]+|

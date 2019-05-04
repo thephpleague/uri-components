@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use finfo;
-use League\Uri\Contract\PathInterface;
+use League\Uri\Contract\DataPathInterface;
 use League\Uri\Exception\PathNotFound;
 use League\Uri\Exception\SyntaxError;
 use SplFileObject;
@@ -39,7 +39,7 @@ use function strlen;
 use function strtolower;
 use const FILEINFO_MIME;
 
-final class DataPath extends Component implements PathInterface
+final class DataPath extends Component implements DataPathInterface
 {
     private const DEFAULT_MIMETYPE = 'text/plain';
 
@@ -251,10 +251,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Retrieves the data string.
-     *
-     * Retrieves the data part of the path. If no data part is provided return
-     * a empty string
+     * {@inheritdoc}
      */
     public function getData(): string
     {
@@ -262,7 +259,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Tells whether the data is binary safe encoded.
+     * {@inheritdoc}
      */
     public function isBinaryData(): bool
     {
@@ -270,13 +267,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Retrieve the data mime type associated to the URI.
-     *
-     * If no mimetype is present, this method MUST return the default mimetype 'text/plain'.
-     *
-     * @see http://tools.ietf.org/html/rfc2397#section-2
-     *
-     * @return string The URI scheme.
+     * {@inheritdoc}
      */
     public function getMimeType(): string
     {
@@ -284,13 +275,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Retrieve the parameters associated with the Mime Type of the URI.
-     *
-     * If no parameters is present, this method MUST return the default parameter 'charset=US-ASCII'.
-     *
-     * @see http://tools.ietf.org/html/rfc2397#section-2
-     *
-     * @return string The URI scheme.
+     * {@inheritdoc}
      */
     public function getParameters(): string
     {
@@ -298,13 +283,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Retrieve the mediatype associated with the URI.
-     *
-     * If no mediatype is present, this method MUST return the default parameter 'text/plain;charset=US-ASCII'.
-     *
-     * @see http://tools.ietf.org/html/rfc2397#section-3
-     *
-     * @return string The URI scheme.
+     * {@inheritdoc}
      */
     public function getMediaType(): string
     {
@@ -320,8 +299,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Save the data to a specific file.
-     *
+     * {@inheritdoc}
      */
     public function save(string $path, string $mode = 'w'): SplFileObject
     {
@@ -333,11 +311,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Returns an instance where the data part is base64 encoded.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance where the data part is base64 encoded
-     *
+     * {@inheritdoc}
      */
     public function toBinary(): self
     {
@@ -376,12 +350,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Returns an instance where the data part is url encoded following RFC3986 rules.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance where the data part is url encoded
-     *
-     * @return static
+     * {@inheritdoc}
      */
     public function toAscii(): self
     {
@@ -435,14 +404,7 @@ final class DataPath extends Component implements PathInterface
     }
 
     /**
-     * Return an instance with the specified mediatype parameters.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the specified mediatype parameters.
-     *
-     * Users must provide encoded characters.
-     *
-     * An empty parameters value is equivalent to removing the parameter.
+     * {@inheritdoc}
      */
     public function withParameters(string $parameters): self
     {

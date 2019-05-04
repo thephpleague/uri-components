@@ -18,8 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use Countable;
-use IteratorAggregate;
+use League\Uri\Contract\DomainInterface;
 use League\Uri\Contract\HostInterface;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\SyntaxError;
@@ -36,7 +35,7 @@ use function implode;
 use function reset;
 use function sprintf;
 
-final class Domain extends Component implements Countable, HostInterface, IteratorAggregate
+final class Domain extends Component implements DomainInterface
 {
     private const SEPARATOR = '.';
 
