@@ -21,7 +21,6 @@ namespace League\Uri\Component;
 use League\Uri\Contract\HostInterface;
 use League\Uri\Exception\IdnSupportMissing;
 use League\Uri\Exception\SyntaxError;
-use UnexpectedValueException;
 use function defined;
 use function explode;
 use function filter_var;
@@ -243,7 +242,7 @@ final class Host extends Component implements HostInterface
 
         // @codeCoverageIgnoreStart
         if (false === $domain_name) {
-            throw new UnexpectedValueException(sprintf('The Intl extension is misconfigured for %s, please correct this issue before proceeding.', PHP_OS));
+            throw new IdnSupportMissing(sprintf('The Intl extension is misconfigured for %s, please correct this issue before proceeding.', PHP_OS));
         }
         // @codeCoverageIgnoreEnd
 
@@ -348,7 +347,7 @@ final class Host extends Component implements HostInterface
 
         // @codeCoverageIgnoreStart
         if (false === $host) {
-            throw new UnexpectedValueException(sprintf('The Intl extension is misconfigured for %s, please correct this issue before proceeding.', PHP_OS));
+            throw new IdnSupportMissing(sprintf('The Intl extension is misconfigured for %s, please correct this issue before proceeding.', PHP_OS));
         }
         // @codeCoverageIgnoreEnd
 
