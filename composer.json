@@ -34,7 +34,7 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3",
         "guzzlehttp/psr7": "^1.4",
-        "league/uri-schemes": "dev-develop",
+        "league/uri-schemes": "dev-master",
         "phpunit/phpunit" : "^7.0 | ^8.0",
         "phpstan/phpstan": "^0.11.1",
         "phpstan/phpstan-strict-rules": "^0.11.0",
