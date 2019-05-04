@@ -18,12 +18,11 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use Countable;
-use IteratorAggregate;
 use League\Uri\Contract\PathInterface;
+use League\Uri\Contract\SegmentedPathInterface;
 use League\Uri\Exception\OffsetOutOfBounds;
+use League\Uri\Exception\PathTypeNotFound;
 use League\Uri\Exception\SyntaxError;
-use League\Uri\Exception\UnsupportedType;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -48,14 +47,8 @@ use const ARRAY_FILTER_USE_KEY;
 use const FILTER_VALIDATE_INT;
 use const PATHINFO_EXTENSION;
 
-final class HierarchicalPath extends Component implements Countable, IteratorAggregate, PathInterface
+final class HierarchicalPath extends Component implements SegmentedPathInterface
 {
-    public const IS_ABSOLUTE = 1;
-
-    public const IS_RELATIVE = 0;
-
-    private const SEPARATOR = '/';
-
     /**
      * @var PathInterface
      */
@@ -71,15 +64,15 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
      *
      * @param int $type one of the constant IS_ABSOLUTE or IS_RELATIVE
      *
-     * @throws UnsupportedType If the type is not recognized
-     * @throws TypeError       If the segments are malformed
+     * @throws PathTypeNotFound If the type is not recognized
+     * @throws TypeError        If the segments are malformed
      */
     public static function createFromSegments(iterable $segments, int $type = self::IS_RELATIVE): self
     {
         static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
 
         if (!isset($type_list[$type])) {
-            throw new UnsupportedType(sprintf('"%s" is an invalid or unsupported %s type', $type, self::class));
+            throw new PathTypeNotFound(sprintf('"%s" is an invalid or unsupported %s type', $type, self::class));
         }
 
         $pathSegments = [];
@@ -163,7 +156,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns parent directory's path.
+     * {@inheritdoc}
      */
     public function getDirname(): string
     {
@@ -177,7 +170,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns the path basename.
+     * {@inheritdoc}
      */
     public function getBasename(): string
     {
@@ -187,7 +180,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns the basename extension.
+     * {@inheritdoc}
      */
     public function getExtension(): string
     {
@@ -197,11 +190,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Retrieves a single path segment.
-     *
-     * Retrieves a single path segment.
-     *
-     * If the segment offset has not been set, returns null.
+     * {@inheritdoc}
      */
     public function get(int $offset): ?string
     {
@@ -213,10 +202,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns the associated key for a specific segment.
-     *
-     * If a value is specified only the keys associated with
-     * the given value will be returned
+     * {@inheritdoc}
      */
     public function keys(string $segment): array
     {
@@ -276,7 +262,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Appends a segment to the path.
+     * {@inheritdoc}
      *
      * @see ::withSegment
      */
@@ -295,7 +281,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Prepends a segment to the path.
+     * {@inheritdoc}
      *
      * @see ::withSegment
      */
@@ -314,15 +300,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns an instance with the modified segment.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the new segment
-     *
-     * If $key is non-negative, the added segment will be the segment at $key position from the start.
-     * If $key is negative, the added segment will be the segment at $key position from the end.
-     *
-     * @throws OffsetOutOfBounds If the key is invalid
+     * {@inheritdoc}
      */
     public function withSegment(int $key, $segment): self
     {
@@ -362,11 +340,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns an instance without duplicate delimiters.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the path component normalized by removing
-     * multiple consecutive empty segment
+     * {@inheritdoc}
      */
     public function withoutEmptySegments(): self
     {
@@ -374,18 +348,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns an instance without the specified segment.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
-     *
-     * If $key is non-negative, the removed segment will be the segment at $key position from the start.
-     * If $key is negative, the removed segment will be the segment at $key position from the end.
-     *
-     * @param int $key     required key to remove
-     * @param int ...$keys remaining keys to remove
-     *
-     * @throws OffsetOutOfBounds If the key is invalid
+     * {@inheritdoc}
      */
     public function withoutSegment(int $key, int ...$keys): self
     {
@@ -418,10 +381,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns an instance with the specified parent directory's path.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the extension basename modified.
+     * {@inheritdoc}
      */
     public function withDirname($path): self
     {
@@ -441,10 +401,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns an instance with the specified basename.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the extension basename modified.
+     * {@inheritdoc}
      */
     public function withBasename($basename): self
     {
@@ -461,10 +418,7 @@ final class HierarchicalPath extends Component implements Countable, IteratorAgg
     }
 
     /**
-     * Returns an instance with the specified basename extension.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the extension basename modified.
+     * {@inheritdoc}
      */
     public function withExtension($extension): self
     {

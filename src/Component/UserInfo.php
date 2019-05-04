@@ -18,9 +18,10 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\Contract\UserInfoInterface;
 use function explode;
 
-final class UserInfo extends Component
+final class UserInfo extends Component implements UserInfoInterface
 {
     private const REGEXP_USERINFO_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
 

@@ -18,12 +18,13 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\Contract\AuthorityInterface;
 use League\Uri\Contract\HostInterface;
 use League\Uri\Exception\SyntaxError;
 use function explode;
 use function preg_match;
 
-final class Authority extends Component
+final class Authority extends Component implements AuthorityInterface
 {
     private const REGEXP_HOST_PORT = ',^(?<host>\[.*\]|[^:]*)(:(?<port>.*))?$,';
 
@@ -142,7 +143,7 @@ final class Authority extends Component
     }
 
     /**
-     * Retrieve the user component of the URI User Info part.
+     * {@inheritDoc}
      */
     public function getHost(): ?string
     {
@@ -150,7 +151,7 @@ final class Authority extends Component
     }
 
     /**
-     * Retrieve the pass component of the URI User Info part.
+     * {@inheritDoc}
      */
     public function getPort(): ?int
     {
@@ -158,7 +159,7 @@ final class Authority extends Component
     }
 
     /**
-     * Retrieve the pass component of the URI User Info part.
+     * {@inheritDoc}
      */
     public function getUserInfo(): ?string
     {
@@ -179,14 +180,7 @@ final class Authority extends Component
     }
 
     /**
-     * Return an instance with the specified host.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the specified host.
-     *
-     * A null host value is equivalent to removing the host.
-     *
-     * @param null|mixed $host
+     * {@inheritdoc}
      */
     public function withHost($host): self
     {
@@ -206,14 +200,7 @@ final class Authority extends Component
     }
 
     /**
-     * Return an instance with the specified port.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the specified port.
-     *
-     * A null port value is equivalent to removing the port.
-     *
-     * @param null|mixed $port
+     * {@inheritDoc}
      */
     public function withPort($port): self
     {
@@ -233,16 +220,7 @@ final class Authority extends Component
     }
 
     /**
-     * Return an instance with the specified user information.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the specified user information.
-     *
-     * Password is optional, but the user information MUST include the
-     * user; a null string for the user is equivalent to removing user
-     * information.
-     *
-     * @param null|mixed $pass
+     * {@inheritDoc}
      */
     public function withUserInfo($user, $pass = null): self
     {
