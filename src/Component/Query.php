@@ -170,7 +170,11 @@ final class Query extends Component implements QueryInterface
      */
     public function getUriComponent(): string
     {
-        return ([] === $this->pairs ? '' : '?').$this->getContent();
+        if ([] === $this->pairs) {
+            return '';
+        }
+
+        return '?'.$this->getContent();
     }
 
     /**
