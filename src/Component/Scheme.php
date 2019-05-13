@@ -35,14 +35,6 @@ final class Scheme extends Component
     private $scheme;
 
     /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['scheme']);
-    }
-
-    /**
      * New instance.
      *
      * @param mixed|null $scheme
@@ -72,6 +64,14 @@ final class Scheme extends Component
         }
 
         throw new SyntaxError(sprintf("The scheme '%s' is invalid", $scheme));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['scheme']);
     }
 
     /**

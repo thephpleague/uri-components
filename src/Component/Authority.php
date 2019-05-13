@@ -45,20 +45,6 @@ final class Authority extends Component implements AuthorityInterface
     private $port;
 
     /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        $auth = new self();
-        $auth->host = $properties['host'];
-        $auth->port = $properties['port'];
-        $auth->userInfo = $properties['userInfo'];
-        $auth->validate();
-
-        return $auth;
-    }
-
-    /**
      * New instance.
      *
      * @param mixed|null $authority
@@ -72,18 +58,6 @@ final class Authority extends Component implements AuthorityInterface
         $this->port = new Port($components['port']);
         $this->userInfo = new UserInfo($components['user'], $components['pass']);
         $this->validate();
-    }
-
-    /**
-     * Check the authority validity against RFC3986 rules.
-     *
-     * @throws SyntaxError if the host is the only null component.
-     */
-    private function validate(): void
-    {
-        if (null === $this->host->getContent() && null !== $this->getContent()) {
-            throw new SyntaxError('A non-empty authority must contains a non null host.');
-        }
     }
 
     /**
@@ -114,6 +88,32 @@ final class Authority extends Component implements AuthorityInterface
         $components['port'] = '' === $matches['port'] ? null : $matches['port'];
 
         return $components;
+    }
+
+    /**
+     * Check the authority validity against RFC3986 rules.
+     *
+     * @throws SyntaxError if the host is the only null component.
+     */
+    private function validate(): void
+    {
+        if (null === $this->host->getContent() && null !== $this->getContent()) {
+            throw new SyntaxError('A non-empty authority must contains a non null host.');
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        $auth = new self();
+        $auth->host = $properties['host'];
+        $auth->port = $properties['port'];
+        $auth->userInfo = $properties['userInfo'];
+        $auth->validate();
+
+        return $auth;
     }
 
     /**

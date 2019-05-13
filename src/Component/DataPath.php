@@ -91,43 +91,6 @@ final class DataPath extends Component implements DataPathInterface
     private $document;
 
     /**
-     * Create a new instance from a file path.
-     *
-     * @param null|resource $context
-     *
-     * @throws SyntaxError If the File is not readable
-     */
-    public static function createFromPath(string $path, $context = null): self
-    {
-        $file_args = [$path, false];
-        $mime_args = [$path, FILEINFO_MIME];
-        if (null !== $context) {
-            $file_args[] = $context;
-            $mime_args[] = $context;
-        }
-
-        $content = @file_get_contents(...$file_args);
-        if (false === $content) {
-            throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory', $path));
-        }
-
-        $mimetype = (string) (new finfo(FILEINFO_MIME))->file(...$mime_args);
-
-        return new self(
-            str_replace(' ', '', $mimetype)
-            .';base64,'.base64_encode($content)
-        );
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['path']);
-    }
-
-    /**
      * New instance.
      *
      * @param mixed|string $path
@@ -245,6 +208,43 @@ final class DataPath extends Component implements DataPathInterface
         if (false === $res || $this->document !== base64_encode($res)) {
             throw new SyntaxError(sprintf('invalid document, `%s`', $this->document));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['path']);
+    }
+
+    /**
+     * Create a new instance from a file path.
+     *
+     * @param null|resource $context
+     *
+     * @throws SyntaxError If the File is not readable
+     */
+    public static function createFromPath(string $path, $context = null): self
+    {
+        $file_args = [$path, false];
+        $mime_args = [$path, FILEINFO_MIME];
+        if (null !== $context) {
+            $file_args[] = $context;
+            $mime_args[] = $context;
+        }
+
+        $content = @file_get_contents(...$file_args);
+        if (false === $content) {
+            throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory', $path));
+        }
+
+        $mimetype = (string) (new finfo(FILEINFO_MIME))->file(...$mime_args);
+
+        return new self(
+            str_replace(' ', '', $mimetype)
+            .';base64,'.base64_encode($content)
+        );
     }
 
     /**

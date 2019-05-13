@@ -37,14 +37,6 @@ final class UserInfo extends Component implements UserInfoInterface
     private $pass;
 
     /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['user'], $properties['pass']);
-    }
-
-    /**
      * New instance.
      *
      * @param mixed|null $user
@@ -57,6 +49,14 @@ final class UserInfo extends Component implements UserInfoInterface
         if (null === $this->user || '' === $this->user) {
             $this->pass = null;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['user'], $properties['pass']);
     }
 
     /**
