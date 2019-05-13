@@ -184,10 +184,9 @@ class UserInfoTest extends TestCase
         ?string $expected_pass,
         string $expected_str
     ): void {
-        $conn = new UserInfo($str);
-        self::assertSame($expected_user, $conn->getUser());
-        self::assertSame($expected_pass, $conn->getPass());
+        $conn = (new UserInfo($user))->withContent($str);
         self::assertSame($expected_str, (string) $conn);
+        self::assertSame((new UserInfo($expected_user, $expected_pass))->getContent(), $conn->getContent());
     }
 
     public function createFromStringProvider(): array

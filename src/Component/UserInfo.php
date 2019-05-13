@@ -131,7 +131,9 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self();
         }
 
-        return new self(...explode(':', $content, 2) + [1 => null]);
+        $params = explode(':', $content, 2) + [1 => null];
+
+        return new self(...$params);
     }
 
     /**

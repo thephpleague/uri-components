@@ -107,7 +107,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     /**
      * New instance.
-     * 
+     *
      * @param mixed|string $path
      */
     public function __construct($path = '')
@@ -305,7 +305,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     /**
      * @inheritDoc
-     * 
+     *
      * @param mixed|string $segment
      */
     public function withSegment(int $key, $segment): SegmentedPathInterface
@@ -388,7 +388,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     /**
      * @inheritDoc
-     * 
+     *
      * @param mixed|string $path
      */
     public function withDirname($path): SegmentedPathInterface
