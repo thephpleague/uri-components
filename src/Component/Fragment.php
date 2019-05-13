@@ -34,14 +34,6 @@ final class Fragment extends Component implements FragmentInterface
     private $fragment;
 
     /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['fragment']);
-    }
-
-    /**
      * New instance.
      *
      * @param mixed|null $fragment
@@ -49,6 +41,14 @@ final class Fragment extends Component implements FragmentInterface
     public function __construct($fragment = null)
     {
         $this->fragment = $this->validateComponent($fragment);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['fragment']);
     }
 
     /**

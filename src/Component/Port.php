@@ -33,14 +33,6 @@ final class Port extends Component implements PortInterface
     private $port;
 
     /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['port']);
-    }
-
-    /**
      * New instance.
      *
      * @param mixed|null $port
@@ -70,6 +62,14 @@ final class Port extends Component implements PortInterface
         }
 
         throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s', $port));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['port']);
     }
 
     /**

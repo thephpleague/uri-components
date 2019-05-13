@@ -150,36 +150,6 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * Returns a host from an IP address.
-     *
-     * @throws SyntaxError If the $ip can not be converted into a Host
-     *
-     * @return static
-     */
-    public static function createFromIp(string $ip, string $version = ''): self
-    {
-        if ('' !== $version) {
-            return new self('[v'.$version.'.'.$ip.']');
-        }
-
-        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return new self($ip);
-        }
-
-        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            return new self('['.$ip.']');
-        }
-
-        if (false !== strpos($ip, '%')) {
-            [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
-
-            return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
-        }
-
-        throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));
-    }
-
-    /**
      * New instance.
      *
      * @param mixed|null $host
@@ -253,6 +223,36 @@ final class Host extends Component implements HostInterface
 
         $this->host = $domain_name;
         $this->is_domain = 1 === preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
+    }
+
+    /**
+     * Returns a host from an IP address.
+     *
+     * @throws SyntaxError If the $ip can not be converted into a Host
+     *
+     * @return static
+     */
+    public static function createFromIp(string $ip, string $version = ''): self
+    {
+        if ('' !== $version) {
+            return new self('[v'.$version.'.'.$ip.']');
+        }
+
+        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return new self($ip);
+        }
+
+        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return new self('['.$ip.']');
+        }
+
+        if (false !== strpos($ip, '%')) {
+            [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
+
+            return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
+        }
+
+        throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));
     }
 
     /**

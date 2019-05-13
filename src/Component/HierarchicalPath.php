@@ -62,6 +62,34 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     private $segments;
 
     /**
+     * New instance.
+     *
+     * @param mixed|string $path
+     */
+    public function __construct($path = '')
+    {
+        if (!$path instanceof PathInterface) {
+            $path = new Path($path);
+        }
+
+        $this->path = $path;
+        $segments = (string) $this->decodeComponent($path->__toString());
+        if ($this->path->isAbsolute()) {
+            $segments = substr($segments, 1);
+        }
+
+        $this->segments = explode(self::SEPARATOR, $segments);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['path']);
+    }
+
+    /**
      * Returns a new instance from an iterable structure.
      *
      * @param int $type one of the constant IS_ABSOLUTE or IS_RELATIVE
@@ -95,34 +123,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         return new self($path);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['path']);
-    }
-
-    /**
-     * New instance.
-     *
-     * @param mixed|string $path
-     */
-    public function __construct($path = '')
-    {
-        if (!$path instanceof PathInterface) {
-            $path = new Path($path);
-        }
-
-        $this->path = $path;
-        $segments = (string) $this->decodeComponent($path->__toString());
-        if ($this->path->isAbsolute()) {
-            $segments = substr($segments, 1);
-        }
-
-        $this->segments = explode(self::SEPARATOR, $segments);
     }
 
     /**
