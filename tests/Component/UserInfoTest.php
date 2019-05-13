@@ -184,7 +184,7 @@ class UserInfoTest extends TestCase
         ?string $expected_pass,
         string $expected_str
     ): void {
-        $conn = (new UserInfo($user))->withContent($str);
+        $conn = new UserInfo($str);
         self::assertSame($expected_user, $conn->getUser());
         self::assertSame($expected_pass, $conn->getPass());
         self::assertSame($expected_str, (string) $conn);

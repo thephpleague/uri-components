@@ -94,7 +94,7 @@ final class QueryString
     /**
      * Parses a query string into a collection of key/value pairs.
      *
-     * @param null|mixed $query
+     * @param mixed|null $query
      */
     public static function parse($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
     {
@@ -118,7 +118,7 @@ final class QueryString
     /**
      * Prepare and normalize query before processing.
      *
-     * @param null|mixed $query
+     * @param mixed|null $query
      *
      * @throws SyntaxError      If the query string is invalid
      * @throws TypeError        If the query is not stringable or the null value
@@ -322,7 +322,7 @@ final class QueryString
      * @see http://php.net/parse_str
      * @see https://wiki.php.net/rfc/on_demand_name_mangling
      *
-     * @param null|mixed $query
+     * @param mixed|null $query
      */
     public static function extract($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
     {

@@ -18,8 +18,10 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use Iterator;
 use League\Uri\Contract\DomainInterface;
 use League\Uri\Contract\HostInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\SyntaxError;
 use TypeError;
@@ -50,34 +52,11 @@ final class Domain extends Component implements DomainInterface
     private $labels = [];
 
     /**
-     * Returns a new instance from an iterable structure.
+     * @inheritDoc
      *
-     * @throws TypeError If a label is the null value
-     */
-    public static function createFromLabels(iterable $labels): self
-    {
-        $hostLabels = [];
-        foreach ($labels as $label) {
-            $label = self::filterComponent($label);
-            if (null === $label) {
-                throw new TypeError('a label can not be null');
-            }
-            $hostLabels[] = $label;
-        }
-
-        return new self(implode(self::SEPARATOR, array_reverse($hostLabels)));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['host']);
-    }
-
-    /**
-     * {@inheritdoc}
+     * @param mixed|null $host
+     *
+     * @throws SyntaxError
      */
     public function __construct($host = null)
     {
@@ -104,7 +83,34 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['host']);
+    }
+
+    /**
+     * Returns a new instance from an iterable structure.
+     *
+     * @throws TypeError If a label is the null value
+     */
+    public static function createFromLabels(iterable $labels): self
+    {
+        $hostLabels = [];
+        foreach ($labels as $label) {
+            $label = self::filterComponent($label);
+            if (null === $label) {
+                throw new TypeError('a label can not be null');
+            }
+            $hostLabels[] = $label;
+        }
+
+        return new self(implode(self::SEPARATOR, array_reverse($hostLabels)));
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -112,7 +118,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function toAscii(): ?string
     {
@@ -120,7 +126,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function toUnicode(): ?string
     {
@@ -128,7 +134,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isIp(): bool
     {
@@ -136,7 +142,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isDomain(): bool
     {
@@ -144,7 +150,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getIpVersion(): ?string
     {
@@ -152,7 +158,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getIp(): ?string
     {
@@ -160,7 +166,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function count(): int
     {
@@ -168,9 +174,9 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function getIterator(): iterable
+    public function getIterator(): Iterator
     {
         foreach ($this->labels as $label) {
             yield $label;
@@ -178,9 +184,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Retrieves a single host label.
-     *
-     * If the label offset has not been set, returns the null value.
+     * {@inheritDoc}
      */
     public function get(int $offset): ?string
     {
@@ -192,7 +196,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Returns the associated key for a specific label.
+     * {@inheritDoc}
      */
     public function keys(string $label): array
     {
@@ -200,7 +204,7 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Tells whether the domain is absolute.
+     * {@inheritDoc}
      */
     public function isAbsolute(): bool
     {
@@ -208,11 +212,13 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Prepends a label to the host.
+     * @inheritDoc
+     *
+     * @param mixed|null $label
      */
-    public function prepend($label): self
+    public function prepend($label): DomainInterface
     {
-        $label = $this->filterComponent($label);
+        $label = self::filterComponent($label);
         if (null === $label) {
             return $this;
         }
@@ -221,11 +227,13 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Appends a label to the host.
+     * @inheritDoc
+     *
+     * @param mixed|null $label
      */
-    public function append($label): self
+    public function append($label): DomainInterface
     {
-        $label = $this->filterComponent($label);
+        $label = self::filterComponent($label);
         if (null === $label) {
             return $this;
         }
@@ -234,11 +242,11 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->host->getContent()) {
             return $this;
         }
@@ -247,11 +255,9 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Returns an instance with its Root label.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     * {@inheritDoc}
      */
-    public function withRootLabel(): self
+    public function withRootLabel(): DomainInterface
     {
         if ('' === reset($this->labels)) {
             return $this;
@@ -261,11 +267,9 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Returns an instance without its Root label.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     * {@inheritDoc}
      */
-    public function withoutRootLabel(): self
+    public function withoutRootLabel(): DomainInterface
     {
         if ('' !== reset($this->labels)) {
             return $this;
@@ -278,17 +282,13 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Returns an instance with the modified label.
+     * @inheritDoc
      *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the new label
+     * @param mixed|null $label
      *
-     * If $key is non-negative, the added label will be the label at $key position from the start.
-     * If $key is negative, the added label will be the label at $key position from the end.
-     *
-     * @throws OffsetOutOfBounds If the key is invalid
+     * @throws OffsetOutOfBounds
      */
-    public function withLabel(int $key, $label): self
+    public function withLabel(int $key, $label): DomainInterface
     {
         $nb_labels = count($this->labels);
         if ($key < - $nb_labels - 1 || $key > $nb_labels) {
@@ -323,32 +323,22 @@ final class Domain extends Component implements DomainInterface
     }
 
     /**
-     * Returns an instance without the specified label.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
-     *
-     * If $key is non-negative, the removed label will be the label at $key position from the start.
-     * If $key is negative, the removed label will be the label at $key position from the end.
-     *
-     * @param int ...$keys
-     *
-     * @throws OffsetOutOfBounds If the key is invalid
+     * {@inheritDoc}
      */
-    public function withoutLabel(int $key, int ...$keys): self
+    public function withoutLabel(int $key, int ...$keys): DomainInterface
     {
         array_unshift($keys, $key);
         $nb_labels = count($this->labels);
-        foreach ($keys as &$key) {
-            if (- $nb_labels > $key || $nb_labels - 1 < $key) {
-                throw new OffsetOutOfBounds(sprintf('no label can be removed with the submitted key : `%s`', $key));
+        foreach ($keys as &$offset) {
+            if (- $nb_labels > $offset || $nb_labels - 1 < $offset) {
+                throw new OffsetOutOfBounds(sprintf('no label can be removed with the submitted key : `%s`', $offset));
             }
 
-            if (0 > $key) {
-                $key += $nb_labels;
+            if (0 > $offset) {
+                $offset += $nb_labels;
             }
         }
-        unset($key);
+        unset($offset);
 
         $deleted_keys = array_keys(array_count_values($keys));
         $filter = static function ($key) use ($deleted_keys): bool {

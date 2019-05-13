@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\FragmentInterface;
+use League\Uri\Contract\UriComponentInterface;
 
 final class Fragment extends Component implements FragmentInterface
 {
@@ -33,7 +34,7 @@ final class Fragment extends Component implements FragmentInterface
     private $fragment;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -43,7 +44,7 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * New instance.
      *
-     * @param null|mixed $fragment
+     * @param mixed|null $fragment
      */
     public function __construct($fragment = null)
     {
@@ -51,7 +52,7 @@ final class Fragment extends Component implements FragmentInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -59,7 +60,7 @@ final class Fragment extends Component implements FragmentInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getUriComponent(): string
     {
@@ -75,11 +76,11 @@ final class Fragment extends Component implements FragmentInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->getContent()) {
             return $this;
         }

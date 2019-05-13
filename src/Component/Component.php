@@ -57,10 +57,12 @@ abstract class Component implements UriComponentInterface
 
     /**
      * Validate the component content.
+     *
+     * @param mixed|null $component
      */
     protected function validateComponent($component): ?string
     {
-        $component = $this->filterComponent($component);
+        $component = self::filterComponent($component);
         if (null === $component) {
             return $component;
         }
@@ -71,7 +73,10 @@ abstract class Component implements UriComponentInterface
     /**
      * Filter the input component.
      *
+     * @param mixed|null $component
+     *
      * @throws SyntaxError If the component can not be converted to a string or null
+     * @throws TypeError   If the component type is not supported
      */
     protected static function filterComponent($component): ?string
     {
@@ -139,7 +144,7 @@ abstract class Component implements UriComponentInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function jsonSerialize(): ?string
     {
@@ -147,7 +152,7 @@ abstract class Component implements UriComponentInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getUriComponent(): string
     {
@@ -155,12 +160,12 @@ abstract class Component implements UriComponentInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     abstract public function getContent(): ?string;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function __toString(): string
     {
@@ -168,7 +173,9 @@ abstract class Component implements UriComponentInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
+     *
+     * @return static
      */
-    abstract public function withContent($content);
+    abstract public function withContent($content): UriComponentInterface;
 }

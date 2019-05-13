@@ -43,7 +43,7 @@
     },
     "suggest": {
         "ext-intl": "to handle IDN host",
-        "jeremykendall/php-domain-parser": "Domain parsing implemented in PHP",
+        "jeremykendall/php-domain-parser": "Public Suffix Domain parsing implemented in PHP",
         "league/uri-schemes": "to allow manipulating various URI objects",
         "psr/http-message-implementation": "to allow manipulating PSR-7 Uri objects"
     },

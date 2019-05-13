@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
-use Iterator;
 use League\Uri\Contract\QueryInterface;
 use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\SyntaxError;
@@ -61,73 +60,9 @@ final class Query extends Component implements QueryInterface
     private $separator;
 
     /**
-     * Returns a new instance from the result of PHP's parse_str.
-     */
-    public static function createFromParams($params, string $separator = '&'): self
-    {
-        if ($params instanceof self) {
-            return new self(
-                http_build_query($params->toParams(), '', $separator, PHP_QUERY_RFC3986),
-                PHP_QUERY_RFC3986,
-                $separator
-            );
-        }
-
-        if ($params instanceof Traversable) {
-            $params = iterator_to_array($params, true);
-        }
-
-        if (is_object($params)) {
-            return new self(
-                http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
-                PHP_QUERY_RFC3986,
-                $separator
-            );
-        }
-
-        if ([] === $params) {
-            return new self(null, PHP_QUERY_RFC3986, $separator);
-        }
-
-        if (is_array($params)) {
-            return new self(
-                http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
-                PHP_QUERY_RFC3986,
-                $separator
-            );
-        }
-
-        throw new TypeError(sprintf('The parameter is expected to be iterable or an Object `%s` given', gettype($params)));
-    }
-
-    /**
-     * Returns a new instance from the result of QueryString::parse.
-     */
-    public static function createFromPairs(iterable $pairs, string $separator = '&'): self
-    {
-        if ($pairs instanceof self) {
-            return $pairs->withSeparator($separator);
-        }
-
-        return new self(QueryString::build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        $instance = new self();
-        $instance->pairs = $properties['pairs'];
-        $instance->separator = $properties['separator'];
-
-        return $instance;
-    }
-
-    /**
      * Returns a new instance.
      *
-     * @param null|mixed $query
+     * @param mixed|null $query
      */
     public function __construct($query = null, int $enc_type = PHP_QUERY_RFC3986, string $separator = '&')
     {
@@ -150,7 +85,61 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns the query separator.
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        $instance = new self();
+        $instance->pairs = $properties['pairs'];
+        $instance->separator = $properties['separator'];
+
+        return $instance;
+    }
+
+    /**
+     * Returns a new instance from the result of PHP's parse_str.
+     *
+     * @param mixed|iterable $params
+     */
+    public static function createFromParams($params, string $separator = '&'): self
+    {
+        if ($params instanceof self) {
+            return new self(
+                http_build_query($params->toParams(), '', $separator, PHP_QUERY_RFC3986),
+                PHP_QUERY_RFC3986,
+                $separator
+            );
+        }
+
+        if ($params instanceof Traversable) {
+            $params = iterator_to_array($params, true);
+        }
+
+        if ([] === $params) {
+            return new self(null, PHP_QUERY_RFC3986, $separator);
+        }
+
+        if (!is_array($params) && !is_object($params)) {
+            throw new TypeError(sprintf('The parameter is expected to be iterable or an Object `%s` given', gettype($params)));
+        }
+
+        return new self(
+            http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
+            PHP_QUERY_RFC3986,
+            $separator
+        );
+    }
+
+    /**
+     * Returns a new instance from the result of QueryString::parse.
+     */
+    public static function createFromPairs(iterable $pairs, string $separator = '&'): self
+    {
+        return new self(QueryString::build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public function getSeparator(): string
     {
@@ -158,7 +147,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns the RFC3986 encoded query.
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -166,7 +155,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getUriComponent(): string
     {
@@ -178,7 +167,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns the RFC1738 encoded query.
+     * {@inheritDoc}
      */
     public function toRFC1738(): ?string
     {
@@ -186,9 +175,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns the RFC3986 encoded query.
-     *
-     * @see ::getContent
+     * {@inheritDoc}
      */
     public function toRFC3986(): ?string
     {
@@ -196,7 +183,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function jsonSerialize(): ?string
     {
@@ -204,7 +191,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns the number of key/value pairs present in the object.
+     * {@inheritDoc}
      */
     public function count(): int
     {
@@ -212,15 +199,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an iterator allowing to go through all key/value pairs contained in this object.
-     *
-     * The pair is represented as an array where the first value is the pair key
-     * and the second value the pair value.
-     *
-     * The key of each pair is a string
-     * The value of each pair is a scalar or the null value
-     *
-     * @return Iterator
+     * {@inheritDoc}
      */
     public function getIterator(): iterable
     {
@@ -230,14 +209,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an iterator allowing to go through all key/value pairs contained in this object.
-     *
-     * The return type is as a Iterator where its offset is the pair key and its value the pair value.
-     *
-     * The key of each pair is a string
-     * The value of each pair is a scalar or the null value
-     *
-     * @return Iterator
+     * {@inheritDoc}
      */
     public function pairs(): iterable
     {
@@ -247,9 +219,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Tell whether a parameter with a specific name exists.
-     *
-     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-has
+     * {@inheritDoc}
      */
     public function has(string $key): bool
     {
@@ -257,13 +227,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns the first value associated to the given parameter.
-     *
-     * If no value is found null is returned
-     *
-     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-get
+     * {@inheritDoc}
      */
-    public function get(string $key)
+    public function get(string $key): ?string
     {
         foreach ($this->pairs as $pair) {
             if ($key === $pair[0]) {
@@ -275,12 +241,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns all the values associated to the given parameter as an array or all
-     * the instance pairs.
-     *
-     * If no value is found an empty array is returned
-     *
-     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-getall
+     * {@inheritDoc}
      */
     public function getAll(string $key): array
     {
@@ -292,14 +253,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns the store PHP variables as elements of an array.
-     *
-     * The result is similar as PHP parse_str when used with its
-     * second argument with the difference that variable names are
-     * not mangled.
-     *
-     * @see http://php.net/parse_str
-     * @see https://wiki.php.net/rfc/on_demand_name_mangling
+     * {@inheritDoc}
      */
     public function toParams(): array
     {
@@ -307,12 +261,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance with a different separator.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the query component with a different separator
+     * {@inheritDoc}
      */
-    public function withSeparator(string $separator): self
+    public function withSeparator(string $separator): QueryInterface
     {
         if ($separator === $this->separator) {
             return $this;
@@ -325,11 +276,11 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->getContent()) {
             return $this;
         }
@@ -338,14 +289,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Sort the query string by offset, maintaining offset to data correlations.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-sort
+     * {@inheritDoc}
      */
-    public function sort(): self
+    public function sort(): QueryInterface
     {
         if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
             return $this;
@@ -374,13 +320,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance without duplicate key/value pair.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the query component normalized by removing
-     * duplicate pairs whose key/value are the same.
+     * {@inheritDoc}
      */
-    public function withoutDuplicates(): self
+    public function withoutDuplicates(): QueryInterface
     {
         if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
             return $this;
@@ -410,15 +352,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance without empty key/value where the value is the null value.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the query component normalized by removing
-     * empty pairs.
-     *
-     * A pair is considered empty if its value is equal to the null value
+     * {@inheritDoc}
      */
-    public function withoutEmptyPairs(): self
+    public function withoutEmptyPairs(): QueryInterface
     {
         $pairs = array_filter($this->pairs, [$this, 'filterEmptyPair']);
         if ($pairs === $this->pairs) {
@@ -440,15 +376,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance where numeric indices associated to PHP's array like key are removed.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the query component normalized so that numeric indexes
-     * are removed from the pair key value.
-     *
-     * ie.: toto[3]=bar[3]&foo=bar becomes toto[]=bar[3]&foo=bar
+     * {@inheritDoc}
      */
-    public function withoutNumericIndices(): self
+    public function withoutNumericIndices(): QueryInterface
     {
         $pairs = array_map([$this, 'encodeNumericIndices'], $this->pairs);
         if ($pairs === $this->pairs) {
@@ -474,16 +404,11 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance with the a new key/value pair added to it.
+     * @inheritDoc
      *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * If the pair already exists the value will replace the existing value.
-     *
-     * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
+     * @param mixed|null $value
      */
-    public function withPair(string $key, $value): self
+    public function withPair(string $key, $value): QueryInterface
     {
         $pairs = $this->addPair($this->pairs, [$key, $this->filterPair($value)]);
         if ($pairs === $this->pairs) {
@@ -532,17 +457,14 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance with the new pairs set to it.
+     * @inheritDoc
      *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * @see ::withPair
+     * @param mixed|null $query
      */
-    public function merge($query): self
+    public function merge($query): QueryInterface
     {
         $pairs = $this->pairs;
-        foreach (QueryString::parse($this->filterComponent($query), $this->separator, PHP_QUERY_RFC3986) as $pair) {
+        foreach (QueryString::parse(self::filterComponent($query), $this->separator, PHP_QUERY_RFC3986) as $pair) {
             $pairs = $this->addPair($pairs, $pair);
         }
 
@@ -561,19 +483,25 @@ final class Query extends Component implements QueryInterface
      *
      * To be valid the pair must be the null value, a scalar or a collection of scalar and null values.
      *
+     * @param mixed|null $value
+     *
      * @throws TypeError if the value type is invalid
      */
-    private function filterPair($value)
+    private function filterPair($value): ?string
     {
-        if (null === $value || is_scalar($value)) {
-            return $value;
-        }
-
         if ($value instanceof UriComponentInterface) {
             return $value->getContent();
         }
 
-        if (method_exists($value, '__toString')) {
+        if (null === $value) {
+            return $value;
+        }
+
+        if (is_bool($value)) {
+            return true === $value ? 'true' : 'false';
+        }
+
+        if (is_scalar($value) || method_exists($value, '__toString')) {
             return (string) $value;
         }
 
@@ -581,15 +509,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance without the specified keys.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component
-     *
-     * @param string $key     the first key to remove
-     * @param string ...$keys the list of remaining keys to remove
+     * {@inheritDoc}
      */
-    public function withoutPair(string $key, string ...$keys): self
+    public function withoutPair(string $key, string ...$keys): QueryInterface
     {
         $keys[] = $key;
         $keys_to_remove = array_intersect($keys, array_column($this->pairs, 0));
@@ -608,14 +530,11 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns a new instance with a specified key/value pair appended as a new pair.
+     * {@inheritDoc}
      *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * @param mixed $value must be a scalar or the null value
+     * @param mixed|null $value
      */
-    public function appendTo(string $key, $value): self
+    public function appendTo(string $key, $value): QueryInterface
     {
         $clone = clone $this;
         $clone->pairs[] = [$key, $this->filterPair($value)];
@@ -624,14 +543,11 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance with the new pairs appended to it.
+     * @inheritDoc
      *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified query
-     *
-     * If the pair already exists the value will be added to it.
+     * @param mixed|null $query
      */
-    public function append($query): self
+    public function append($query): QueryInterface
     {
         if ($query instanceof UriComponentInterface) {
             $query = $query->getContent();
@@ -657,15 +573,9 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns an instance without the specified params.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the modified component without PHP's value.
-     * PHP's mangled is not taken into account.
-     *
-     * @param string ...$offsets
+     * {@inheritDoc}
      */
-    public function withoutParam(string $offset, string ...$offsets): self
+    public function withoutParam(string $offset, string ...$offsets): QueryInterface
     {
         $offsets[] = $offset;
         $mapper = static function (string $offset): string {
