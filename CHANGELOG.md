@@ -14,7 +14,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- The `Query` component class follow more closely the [URLSearchParasm](https://url.spec.whatwg.org/#interface-urlsearchparams) specifications from the WHATWG group
+- The `Query` component class follow more closely the [URLSearchParams](https://url.spec.whatwg.org/#interface-urlsearchparams) specifications from the WHATWG group
 - `League\Uri\Component\Host` now throws `League\Uri\Exception\IdnSupportMissing` on misconfigured Intl extension presence.
 
 ### Deprecated
