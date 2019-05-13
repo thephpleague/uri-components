@@ -20,6 +20,7 @@ namespace League\Uri\Component;
 
 use League\Uri\Contract\AuthorityInterface;
 use League\Uri\Contract\HostInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\SyntaxError;
 use function explode;
 use function preg_match;
@@ -44,7 +45,7 @@ final class Authority extends Component implements AuthorityInterface
     private $port;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -60,13 +61,13 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * New instance.
      *
-     * @param null|mixed $authority
+     * @param mixed|null $authority
      *
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
     public function __construct($authority = null)
     {
-        $components = $this->parse($this->filterComponent($authority));
+        $components = $this->parse(self::filterComponent($authority));
         $this->host = new Host($components['host']);
         $this->port = new Port($components['port']);
         $this->userInfo = new UserInfo($components['user'], $components['pass']);
@@ -78,7 +79,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * @throws SyntaxError if the host is the only null component.
      */
-    private function validate()
+    private function validate(): void
     {
         if (null === $this->host->getContent() && null !== $this->getContent()) {
             throw new SyntaxError('A non-empty authority must contains a non null host.');
@@ -116,7 +117,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -135,7 +136,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getUriComponent(): string
     {
@@ -167,11 +168,13 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
+     *
+     * @return static
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->getContent()) {
             return $this;
         }
@@ -180,9 +183,11 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
+     * 
+     * @param mixed|null $host
      */
-    public function withHost($host): self
+    public function withHost($host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
             $host = new Host($host);
@@ -200,9 +205,11 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
+     * 
+     * @param mixed|null $port
      */
-    public function withPort($port): self
+    public function withPort($port): AuthorityInterface
     {
         if (!$port instanceof Port) {
             $port = new Port($port);
@@ -220,9 +227,12 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
+     * 
+     * @param mixed|null $user
+     * @param mixed|null $pass
      */
-    public function withUserInfo($user, $pass = null): self
+    public function withUserInfo($user, $pass = null): AuthorityInterface
     {
         $userInfo = new UserInfo($user, $pass);
         if ($userInfo->getContent() === $this->userInfo->getContent()) {

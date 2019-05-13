@@ -48,7 +48,6 @@ final class UriModifier
      *     - League\Uri\UriInterface
      *     - Psr\Http\Message\UriInterface
      *
-     *
      * @throws TypeError if the URI object does not implements the supported interfaces.
      *
      * @return Psr7UriInterface|UriInterface
@@ -260,12 +259,12 @@ final class UriModifier
             $currentpath = '/'.$currentpath;
         }
 
-        $path = (new HierarchicalPath($path))->withLeadingSlash();
+        $path = (new Path($path))->withLeadingSlash();
         if (0 === strpos($currentpath, (string) $path)) {
             return $uri->withPath($currentpath);
         }
 
-        return $uri->withPath((string) $path->append($currentpath));
+        return $uri->withPath((new HierarchicalPath($path))->append($currentpath)->__toString());
     }
 
     /**
@@ -381,7 +380,7 @@ final class UriModifier
     public static function removeBasepath($uri, $path)
     {
         $uri = self::normalizePath(self::filterUri($uri));
-        $basepath = (new HierarchicalPath($path))->withLeadingSlash();
+        $basepath = (new Path($path))->withLeadingSlash();
         if ('/' === (string) $basepath) {
             return $uri;
         }
@@ -390,6 +389,8 @@ final class UriModifier
         if (0 !== strpos($currentpath, (string) $basepath)) {
             return $uri;
         }
+
+        $basepath = new HierarchicalPath($basepath);
 
         return $uri->withPath(
             (string) (new HierarchicalPath($currentpath))->withoutSegment(...range(0, count($basepath) - 1))

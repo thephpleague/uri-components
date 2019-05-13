@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\PortInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\SyntaxError;
 use function filter_var;
 use function sprintf;
@@ -32,7 +33,7 @@ final class Port extends Component implements PortInterface
     private $port;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -42,7 +43,7 @@ final class Port extends Component implements PortInterface
     /**
      * New instance.
      *
-     * @param null|mixed $port
+     * @param mixed|null $port
      */
     public function __construct($port = null)
     {
@@ -52,11 +53,13 @@ final class Port extends Component implements PortInterface
     /**
      * Validate a port.
      *
+     * @param mixed|null $port
+     *
      * @throws SyntaxError if the port is invalid
      */
     private function validate($port): ?int
     {
-        $port = $this->filterComponent($port);
+        $port = self::filterComponent($port);
         if (null === $port) {
             return null;
         }
@@ -70,7 +73,7 @@ final class Port extends Component implements PortInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -82,7 +85,7 @@ final class Port extends Component implements PortInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getUriComponent(): string
     {
@@ -90,7 +93,7 @@ final class Port extends Component implements PortInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function toInt(): ?int
     {
@@ -98,11 +101,11 @@ final class Port extends Component implements PortInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->validate($this->filterComponent($content));
+        $content = $this->validate(self::filterComponent($content));
         if ($content === $this->port) {
             return $this;
         }

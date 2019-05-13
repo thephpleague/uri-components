@@ -346,7 +346,7 @@ class QueryTest extends TestCase
     {
         $query = (new Query())->appendTo('first', 1);
         self::assertTrue($query->has('first'));
-        self::assertSame(1, $query->get('first'));
+        self::assertSame('1', $query->get('first'));
         $query = $query->withoutPair('first');
         self::assertFalse($query->has('first'));
         $query = $query
@@ -668,7 +668,7 @@ class QueryTest extends TestCase
                 'foo=bar',
                 'foo',
                 false,
-                [false],
+                ['false'],
             ],
         ];
     }
@@ -751,7 +751,7 @@ class QueryTest extends TestCase
         self::assertSame('1', $query->get('a'));
 
         $query = $query->withPair('a', 4);
-        self::assertSame(4, $query->get('a'));
+        self::assertSame('4', $query->get('a'));
 
         $query = $query->withPair('q', $query);
         self::assertSame('a=4&first=4', $query->get('q'));
@@ -868,13 +868,13 @@ class QueryTest extends TestCase
         ;
         self::assertSame('first=1&second=2&third=&first=10', (string) $query);
         self::assertTrue($query->has('first'));
-        self::assertSame(1, $query->get('first'));
-        self::assertSame(2, $query->get('second'));
+        self::assertSame('1', $query->get('first'));
+        self::assertSame('2', $query->get('second'));
         self::assertSame('', $query->get('third'));
 
         $newQuery = $query->appendTo('first', 10);
         self::assertSame('first=1&second=2&third=&first=10&first=10', (string) $newQuery);
-        self::assertSame(1, $newQuery->get('first'));
+        self::assertSame('1', $newQuery->get('first'));
     }
 
     /**

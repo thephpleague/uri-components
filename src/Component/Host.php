@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\HostInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\IdnSupportMissing;
 use League\Uri\Exception\SyntaxError;
 use function defined;
@@ -129,7 +130,7 @@ final class Host extends Component implements HostInterface
     private $is_domain = false;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -155,17 +156,17 @@ final class Host extends Component implements HostInterface
      *
      * @return static
      */
-    public static function createFromIp(string $ip, string $version = '')
+    public static function createFromIp(string $ip, string $version = ''): self
     {
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
         }
 
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return new self($ip);
         }
 
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             return new self('['.$ip.']');
         }
 
@@ -181,18 +182,18 @@ final class Host extends Component implements HostInterface
     /**
      * New instance.
      *
-     * @param null|mixed $host
+     * @param mixed|null $host
      */
     public function __construct($host = null)
     {
-        $host = $this->filterComponent($host);
+        $host = self::filterComponent($host);
         $this->host = $host;
         if (null === $host || '' === $host) {
             $this->is_domain = true;
             return;
         }
 
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        if (false !== filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $this->ip_version = '4';
             return;
         }
@@ -282,7 +283,7 @@ final class Host extends Component implements HostInterface
 
         $res = [];
         foreach ($idn_errors as $error => $reason) {
-            if ($error_byte & $error) {
+            if ($error === ($error_byte & $error)) {
                 $res[] = $reason;
             }
         }
@@ -307,12 +308,12 @@ final class Host extends Component implements HostInterface
 
         return 1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope)
             && 1 !== preg_match(self::REGEXP_GEN_DELIMS, $scope)
-            && filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+            && false !== filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
             && 0 === strpos((string) inet_pton((string) $ipv6), self::ADDRESS_BLOCK);
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -320,7 +321,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function toAscii(): ?string
     {
@@ -328,7 +329,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function toUnicode(): ?string
     {
@@ -355,7 +356,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getIpVersion(): ?string
     {
@@ -363,7 +364,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getIp(): ?string
     {
@@ -377,7 +378,7 @@ final class Host extends Component implements HostInterface
 
         $ip = substr((string) $this->host, 1, -1);
         if ('6' !== $this->ip_version) {
-            return substr($ip, strpos($ip, '.') + 1);
+            return substr($ip, (int) strpos($ip, '.') + 1);
         }
 
         $pos = strpos($ip, '%');
@@ -389,7 +390,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isDomain(): bool
     {
@@ -397,7 +398,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isIp(): bool
     {
@@ -448,7 +449,7 @@ final class Host extends Component implements HostInterface
      *
      * @return static
      */
-    public function withoutZoneIdentifier(): self
+    public function withoutZoneIdentifier(): HostInterface
     {
         if (!$this->has_zone_identifier) {
             return $this;
@@ -460,11 +461,11 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->getContent()) {
             return $this;
         }

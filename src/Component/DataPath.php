@@ -20,6 +20,8 @@ namespace League\Uri\Component;
 
 use finfo;
 use League\Uri\Contract\DataPathInterface;
+use League\Uri\Contract\PathInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\SyntaxError;
 use SplFileObject;
 use function base64_decode;
@@ -109,14 +111,16 @@ final class DataPath extends Component implements DataPathInterface
             throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory', $path));
         }
 
+        $mimetype = (string) (new finfo(FILEINFO_MIME))->file(...$mime_args);
+
         return new self(
-            str_replace(' ', '', (new finfo(FILEINFO_MIME))->file(...$mime_args))
+            str_replace(' ', '', $mimetype)
             .';base64,'.base64_encode($content)
         );
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -124,11 +128,13 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * New instance.
+     *
+     * @param mixed|string $path
      */
     public function __construct($path = '')
     {
-        $this->path = new Path($this->filterPath($this->filterComponent($path)));
+        $this->path = new Path($this->filterPath(self::filterComponent($path)));
         $str = $this->path->__toString();
         $is_binary_data = false;
         [$mediatype, $this->document] = explode(',', $str, 2) + [1 => ''];
@@ -242,7 +248,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -250,7 +256,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getData(): string
     {
@@ -258,7 +264,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isBinaryData(): bool
     {
@@ -266,7 +272,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getMimeType(): string
     {
@@ -274,7 +280,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getParameters(): string
     {
@@ -282,7 +288,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getMediaType(): string
     {
@@ -290,7 +296,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isAbsolute(): bool
     {
@@ -298,21 +304,21 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function save(string $path, string $mode = 'w'): SplFileObject
     {
         $file = new SplFileObject($path, $mode);
-        $data = $this->is_binary_data ? base64_decode($this->document) : rawurldecode($this->document);
+        $data = $this->is_binary_data ? base64_decode($this->document, true) : rawurldecode($this->document);
         $file->fwrite((string) $data);
 
         return $file;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function toBinary(): self
+    public function toBinary(): DataPathInterface
     {
         if ($this->is_binary_data) {
             return $this;
@@ -349,9 +355,9 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function toAscii(): self
+    public function toAscii(): DataPathInterface
     {
         if (false === $this->is_binary_data) {
             return $this;
@@ -361,40 +367,40 @@ final class DataPath extends Component implements DataPathInterface
             $this->mimetype,
             $this->getParameters(),
             false,
-            rawurlencode((string) base64_decode($this->document))
+            rawurlencode((string) base64_decode($this->document, true))
         ));
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutDotSegments(): self
+    public function withoutDotSegments(): PathInterface
     {
         return $this;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withLeadingSlash(): self
+    public function withLeadingSlash(): PathInterface
     {
         throw new SyntaxError(sprintf('A %s can not have a leading slash', self::class));
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutLeadingSlash(): self
+    public function withoutLeadingSlash(): PathInterface
     {
         return $this;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->path->getContent()) {
             return $this;
         }
@@ -403,9 +409,9 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withParameters(string $parameters): self
+    public function withParameters(string $parameters): DataPathInterface
     {
         if ($parameters === $this->getParameters()) {
             return $this;

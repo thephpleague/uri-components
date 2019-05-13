@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\PathInterface;
+use League\Uri\Contract\UriComponentInterface;
 use TypeError;
 use function array_pop;
 use function array_reduce;
@@ -45,7 +46,7 @@ final class Path extends Component implements PathInterface
     private $path;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -54,6 +55,8 @@ final class Path extends Component implements PathInterface
 
     /**
      * New instance.
+     *
+     * @param mixed|string $path
      */
     public function __construct($path = '')
     {
@@ -62,6 +65,8 @@ final class Path extends Component implements PathInterface
 
     /**
      * Validate the component content.
+     *
+     * @param mixed|string $path
      *
      * @throws TypeError if the component is no valid
      */
@@ -76,7 +81,7 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -92,7 +97,7 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isAbsolute(): bool
     {
@@ -110,11 +115,11 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->getContent()) {
             return $this;
         }
@@ -123,9 +128,9 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutDotSegments(): self
+    public function withoutDotSegments(): PathInterface
     {
         $current = $this->__toString();
         if (false === strpos($current, '.')) {
@@ -170,7 +175,7 @@ final class Path extends Component implements PathInterface
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component with a trailing slash
      */
-    public function withTrailingSlash(): self
+    public function withTrailingSlash(): PathInterface
     {
         return $this->hasTrailingSlash() ? $this : new self($this->__toString().self::SEPARATOR);
     }
@@ -181,23 +186,23 @@ final class Path extends Component implements PathInterface
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the path component without a trailing slash
      */
-    public function withoutTrailingSlash(): self
+    public function withoutTrailingSlash(): PathInterface
     {
         return !$this->hasTrailingSlash() ? $this : new self(substr($this->__toString(), 0, -1));
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withLeadingSlash(): self
+    public function withLeadingSlash(): PathInterface
     {
         return $this->isAbsolute() ? $this : new self(self::SEPARATOR.$this->__toString());
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutLeadingSlash(): self
+    public function withoutLeadingSlash(): PathInterface
     {
         return !$this->isAbsolute() ? $this : new self(substr($this->__toString(), 1));
     }

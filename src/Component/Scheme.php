@@ -18,7 +18,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\SyntaxError;
+use TypeError;
 use function preg_match;
 use function sprintf;
 use function strtolower;
@@ -33,7 +35,7 @@ final class Scheme extends Component
     private $scheme;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -43,7 +45,7 @@ final class Scheme extends Component
     /**
      * New instance.
      *
-     * @param null|mixed $scheme
+     * @param mixed|null $scheme
      */
     public function __construct($scheme = null)
     {
@@ -53,11 +55,14 @@ final class Scheme extends Component
     /**
      * Validate a scheme.
      *
+     * @param mixed|null $scheme
+     *
      * @throws SyntaxError if the scheme is invalid
+     * @throws TypeError   if the scheme type is not supported
      */
     private function validate($scheme): ?string
     {
-        $scheme = $this->filterComponent($scheme);
+        $scheme = self::filterComponent($scheme);
         if (null === $scheme) {
             return $scheme;
         }
@@ -70,7 +75,7 @@ final class Scheme extends Component
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -78,7 +83,7 @@ final class Scheme extends Component
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getUriComponent(): string
     {
@@ -86,11 +91,11 @@ final class Scheme extends Component
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->validate($this->filterComponent($content));
+        $content = $this->validate(self::filterComponent($content));
         if ($content === $this->scheme) {
             return $this;
         }

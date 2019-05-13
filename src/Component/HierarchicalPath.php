@@ -18,8 +18,10 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use Iterator;
 use League\Uri\Contract\PathInterface;
 use League\Uri\Contract\SegmentedPathInterface;
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\PathTypeNotFound;
 use League\Uri\Exception\SyntaxError;
@@ -96,7 +98,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -105,6 +107,8 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     /**
      * New instance.
+     * 
+     * @param mixed|string $path
      */
     public function __construct($path = '')
     {
@@ -122,7 +126,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function count(): int
     {
@@ -130,9 +134,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function getIterator(): iterable
+    public function getIterator(): Iterator
     {
         foreach ($this->segments as $segment) {
             yield $segment;
@@ -140,7 +144,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isAbsolute(): bool
     {
@@ -148,7 +152,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -156,7 +160,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getDirname(): string
     {
@@ -170,7 +174,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getBasename(): string
     {
@@ -180,7 +184,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getExtension(): string
     {
@@ -190,7 +194,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function get(int $offset): ?string
     {
@@ -202,7 +206,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function keys(string $segment): array
     {
@@ -210,9 +214,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutDotSegments(): self
+    public function withoutDotSegments(): PathInterface
     {
         $path = $this->path->withoutDotSegments();
         if ($path !== $this->path) {
@@ -223,9 +227,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withLeadingSlash(): self
+    public function withLeadingSlash(): PathInterface
     {
         $path = $this->path->withLeadingSlash();
         if ($path !== $this->path) {
@@ -236,9 +240,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutLeadingSlash(): self
+    public function withoutLeadingSlash(): PathInterface
     {
         $path = $this->path->withoutLeadingSlash();
         if ($path !== $this->path) {
@@ -249,11 +253,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->path->getContent()) {
             return $this;
         }
@@ -262,13 +266,13 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      *
-     * @see ::withSegment
+     * @param mixed|string $segment
      */
-    public function append($segment): self
+    public function append($segment): SegmentedPathInterface
     {
-        $segment = $this->filterComponent($segment);
+        $segment = self::filterComponent($segment);
         if (null === $segment) {
             throw new TypeError('The appended path can not be null');
         }
@@ -281,13 +285,13 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      *
-     * @see ::withSegment
+     * @param mixed|string $segment
      */
-    public function prepend($segment): self
+    public function prepend($segment): SegmentedPathInterface
     {
-        $segment = $this->filterComponent($segment);
+        $segment = self::filterComponent($segment);
         if (null === $segment) {
             throw new TypeError('The prepended path can not be null');
         }
@@ -300,9 +304,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
+     * 
+     * @param mixed|string $segment
      */
-    public function withSegment(int $key, $segment): self
+    public function withSegment(int $key, $segment): SegmentedPathInterface
     {
         $nb_segments = count($this->segments);
         if ($key < - $nb_segments - 1 || $key > $nb_segments) {
@@ -340,25 +346,25 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutEmptySegments(): self
+    public function withoutEmptySegments(): SegmentedPathInterface
     {
         return new self(preg_replace(',/+,', self::SEPARATOR, $this->__toString()));
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withoutSegment(int $key, int ...$keys): self
+    public function withoutSegment(int $key, int ...$keys): SegmentedPathInterface
     {
         $keys[] = $key;
         $nb_segments = count($this->segments);
         $options = ['options' => ['min_range' => - $nb_segments, 'max_range' => $nb_segments - 1]];
         $deleted_keys = [];
-        foreach ($keys as $key) {
-            if (false === ($offset = filter_var($key, FILTER_VALIDATE_INT, $options))) {
-                throw new OffsetOutOfBounds(sprintf('the key `%s` is invalid', $key));
+        foreach ($keys as $value) {
+            if (false === ($offset = filter_var($value, FILTER_VALIDATE_INT, $options))) {
+                throw new OffsetOutOfBounds(sprintf('the key `%s` is invalid', $value));
             }
 
             if ($offset < 0) {
@@ -381,9 +387,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
+     * 
+     * @param mixed|string $path
      */
-    public function withDirname($path): self
+    public function withDirname($path): SegmentedPathInterface
     {
         if (!$path instanceof PathInterface) {
             $path = new Path($path);
@@ -401,9 +409,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withBasename($basename): self
+    public function withBasename($basename): SegmentedPathInterface
     {
         $basename = $this->validateComponent($basename);
         if (null === $basename) {
@@ -418,9 +426,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withExtension($extension): self
+    public function withExtension($extension): SegmentedPathInterface
     {
         $extension = $this->validateComponent($extension);
         if (null === $extension) {

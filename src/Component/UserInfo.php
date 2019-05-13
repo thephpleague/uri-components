@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Component;
 
+use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Contract\UserInfoInterface;
 use function explode;
 
@@ -36,7 +37,7 @@ final class UserInfo extends Component implements UserInfoInterface
     private $pass;
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public static function __set_state(array $properties): self
     {
@@ -46,8 +47,8 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * New instance.
      *
-     * @param null|mixed $user
-     * @param null|mixed $pass
+     * @param mixed|null $user
+     * @param mixed|null $pass
      */
     public function __construct($user = null, $pass = null)
     {
@@ -59,7 +60,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getContent(): ?string
     {
@@ -76,7 +77,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getUriComponent(): string
     {
@@ -84,7 +85,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * Returns the decoded component.
+     * {@inheritDoc}
      */
     public function decoded(): ?string
     {
@@ -101,7 +102,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * Retrieve the user component of the URI User Info part.
+     * {@inheritDoc}
      */
     public function getUser(): ?string
     {
@@ -109,7 +110,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * Retrieve the pass component of the URI User Info part.
+     * {@inheritDoc}
      */
     public function getPass(): ?string
     {
@@ -117,11 +118,11 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function withContent($content): self
+    public function withContent($content): UriComponentInterface
     {
-        $content = $this->filterComponent($content);
+        $content = self::filterComponent($content);
         if ($content === $this->getContent()) {
             return $this;
         }
@@ -134,15 +135,9 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * Return an instance with the specified user.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the specified user.
-     *
-     * An empty user is equivalent to removing the user information.
-     * @param null|mixed $pass
+     * {@inheritDoc}
      */
-    public function withUserInfo($user, $pass = null): self
+    public function withUserInfo($user, $pass = null): UserInfoInterface
     {
         $user = $this->validateComponent($user);
         $pass = $this->validateComponent($pass);
