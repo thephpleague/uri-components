@@ -23,7 +23,6 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Remove
 
-- support for PHP7.0
 - support for Public Suffix List resolution
 - `League\Uri\parse_query`
 - `League\Uri\build_query`
@@ -32,6 +31,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `League\Uri\QueryBuilder`
 - `League\Uri\QueryParser`
 - `League\Uri\Components` namespace
+- support for `PHP7.0`
+- support for `PHP7.1`
 
 ## 1.8.2 - 2018-10-24
 
