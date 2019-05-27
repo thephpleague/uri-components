@@ -20,6 +20,8 @@ use ArrayIterator;
 use League\Uri\Component\HierarchicalPath as Path;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -732,5 +734,49 @@ class HierarchicalPathTest extends TestCase
             ['foo/bar'],
             [null],
         ];
+    }
+
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $path = Path::createFromUri($uri);
+
+        self::assertSame($expected, $path->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://example.com/path'),
+                'expected' => '/path',
+            ],
+            'PSR-7 URI object with no path' => [
+                'uri' => Http::createFromString('toto://example.com'),
+                'expected' => '',
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://example.com/path'),
+                'expected' => '/path',
+            ],
+            'League URI object with no path' => [
+                'uri' => Uri::createFromString('toto://example.com'),
+                'expected' => '',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Path::createFromUri('http://example.com:80');
     }
 }

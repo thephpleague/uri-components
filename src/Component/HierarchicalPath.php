@@ -22,9 +22,11 @@ use Iterator;
 use League\Uri\Contract\PathInterface;
 use League\Uri\Contract\SegmentedPathInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\PathTypeNotFound;
 use League\Uri\Exception\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -35,7 +37,10 @@ use function count;
 use function dirname;
 use function end;
 use function explode;
+use function get_class;
+use function gettype;
 use function implode;
+use function is_object;
 use function is_scalar;
 use function ltrim;
 use function method_exists;
@@ -123,6 +128,22 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         return new self($path);
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
+            return new self($uri->getPath());
+        }
+
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
     }
 
     /**

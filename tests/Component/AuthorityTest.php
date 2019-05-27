@@ -18,6 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Authority;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -284,5 +286,57 @@ class AuthorityTest extends TestCase
                 'uriComponent' => '//foo:bar@xn--mgbh0fb.xn--kgbechtv:443',
             ],
         ];
+    }
+
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $authority = Authority::createFromUri($uri);
+
+        self::assertSame($expected, $authority->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://foo:bar@example.com?foo=bar'),
+                'expected' => 'foo:bar@example.com',
+            ],
+            'PSR-7 URI object with no authority' => [
+                'uri' => Http::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'PSR-7 URI object with empty string authority' => [
+                'uri' => Http::createFromString('file:///path/to/the/sky'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://foo:bar@example.com?foo=bar'),
+                'expected' => 'foo:bar@example.com',
+            ],
+            'League URI object with no authority' => [
+                'uri' => Uri::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'League URI object with empty string authority' => [
+                'uri' => Uri::createFromString('file:///path/to/the/sky'),
+                'expected' => '',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Authority::createFromUri('http://example.com#foobar');
     }
 }

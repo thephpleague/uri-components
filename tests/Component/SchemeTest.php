@@ -18,6 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Scheme;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -126,5 +128,49 @@ class SchemeTest extends TestCase
     {
         self::expectException(TypeError::class);
         new Scheme(date_create());
+    }
+
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $scheme = Scheme::createFromUri($uri);
+
+        self::assertSame($expected, $scheme->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://example.com?foo=bar'),
+                'expected' => 'http',
+            ],
+            'PSR-7 URI object with no scheme' => [
+                'uri' => Http::createFromString('//example.com/path'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://example.com?foo=bar'),
+                'expected' => 'http',
+            ],
+            'League URI object with no scheme' => [
+                'uri' => Uri::createFromString('//example.com/path'),
+                'expected' => null,
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Scheme::createFromUri('http://example.com#foobar');
     }
 }

@@ -22,8 +22,10 @@ use Iterator;
 use League\Uri\Contract\DomainInterface;
 use League\Uri\Contract\HostInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -33,7 +35,10 @@ use function array_shift;
 use function array_unshift;
 use function count;
 use function explode;
+use function get_class;
+use function gettype;
 use function implode;
+use function is_object;
 use function reset;
 use function sprintf;
 
@@ -49,7 +54,7 @@ final class Domain extends Component implements DomainInterface
     /**
      * @var string[]
      */
-    private $labels = [];
+    private $labels;
 
     /**
      * @inheritDoc
@@ -64,22 +69,29 @@ final class Domain extends Component implements DomainInterface
             $host = new Host($host);
         }
 
-        $this->host = $host;
-        if (!$this->host->isDomain()) {
+        if (!$host->isDomain()) {
             throw new SyntaxError(sprintf('`%s` is an invalid domain name', $host));
         }
 
-        $content = $this->host->getContent();
-        if (null === $content) {
-            return;
+        $this->host = $host;
+        $this->labels = $this->setLabels();
+    }
+
+    /**
+     * Sets the domain labels.
+     */
+    private function setLabels(): array
+    {
+        $host = $this->host->getContent();
+        if (null === $host) {
+            return [];
         }
 
-        if ('' === $content) {
-            $this->labels = [''];
-            return;
+        if ('' === $host) {
+            return [''];
         }
 
-        $this->labels = array_reverse(explode(self::SEPARATOR, $content));
+        return array_reverse(explode(self::SEPARATOR, $host));
     }
 
     /**
@@ -107,6 +119,31 @@ final class Domain extends Component implements DomainInterface
         }
 
         return new self(implode(self::SEPARATOR, array_reverse($hostLabels)));
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface) {
+            return new self($uri->getHost());
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
+            $component = $uri->getHost();
+            if ('' === $component) {
+                $component = null;
+            }
+
+            return new self($component);
+        }
+
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
     }
 
     /**

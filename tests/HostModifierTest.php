@@ -16,13 +16,12 @@
 
 namespace LeagueTest\Uri;
 
-use League\Uri\Component\Host;
+use GuzzleHttp\Psr7\Uri as GuzzleUri;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
-use Zend\Diactoros\Uri as ZendUri;
 
 /**
  * @group host
@@ -125,8 +124,9 @@ class HostModifierTest extends TestCase
      */
     public function testHostToUnicodeProcess(): void
     {
-        $uri = new ZendUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
+        $uri = new GuzzleUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
         $expected = 'http://مثال.إختبار/where/to/go';
+
         self::assertSame($expected, (string) UriModifier::hostToUnicode($uri));
     }
 

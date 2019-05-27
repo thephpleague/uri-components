@@ -18,6 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Port;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -107,5 +109,48 @@ class PortTest extends TestCase
         $port = new Port(23);
         self::assertSame($port, $port->withContent('23'));
         self::assertNotSame($port, $port->withContent('42'));
+    }
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $port = Port::createFromUri($uri);
+
+        self::assertSame($expected, $port->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://example.com:443'),
+                'expected' => '443',
+            ],
+            'PSR-7 URI object with no fragment' => [
+                'uri' => Http::createFromString('toto://example.com'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://example.com:443'),
+                'expected' => '443',
+            ],
+            'League URI object with no fragment' => [
+                'uri' => Uri::createFromString('toto://example.com'),
+                'expected' => null,
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Port::createFromUri('http://example.com:80');
     }
 }

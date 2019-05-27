@@ -18,7 +18,6 @@ namespace LeagueTest\Uri;
 
 use GuzzleHttp\Psr7;
 use League\Uri\Component\DataPath;
-use League\Uri\Component\Path;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -48,25 +47,25 @@ class PathModifierTest extends TestCase
     /**
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::datapathToBinary
+     * @covers ::dataPathToBinary
      *
      * @dataProvider fileProvider
      */
     public function testToBinary(Uri $binary, Uri $ascii): void
     {
-        self::assertSame((string) $binary, (string) UriModifier::datapathToBinary($ascii));
+        self::assertSame((string) $binary, (string) UriModifier::dataPathToBinary($ascii));
     }
 
     /**
      * @covers ::normalizePath
-     * @covers ::datapathToAscii
+     * @covers ::dataPathToAscii
      *
      * @dataProvider fileProvider
      *
      */
     public function testToAscii(Uri $binary, Uri $ascii): void
     {
-        self::assertSame((string) $ascii, (string) UriModifier::datapathToAscii($binary));
+        self::assertSame((string) $ascii, (string) UriModifier::dataPathToAscii($binary));
     }
 
     public function fileProvider(): array
@@ -255,13 +254,13 @@ class PathModifierTest extends TestCase
     /**
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::addBasepath
+     * @covers ::addBasePath
      *
      * @dataProvider addBasepathProvider
      */
     public function testaddBasepath(string $basepath, string $expected): void
     {
-        self::assertSame($expected, UriModifier::addBasepath($this->uri, $basepath)->getPath());
+        self::assertSame($expected, UriModifier::addBasePath($this->uri, $basepath)->getPath());
     }
 
     public function addBasepathProvider(): array
@@ -277,24 +276,24 @@ class PathModifierTest extends TestCase
     /**
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::addBasepath
+     * @covers ::addBasePath
      */
     public function testaddBasepathWithRelativePath(): void
     {
         $uri = Http::createFromString('base/path');
-        self::assertSame('/base/path', UriModifier::addBasepath($uri, '/base/path')->getPath());
+        self::assertSame('/base/path', UriModifier::addBasePath($uri, '/base/path')->getPath());
     }
 
     /**
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::removeBasepath
+     * @covers ::removeBasePath
      *
      * @dataProvider removeBasePathProvider
      */
     public function testRemoveBasePath(string $basepath, string $expected): void
     {
-        self::assertSame($expected, UriModifier::removeBasepath($this->uri, $basepath)->getPath());
+        self::assertSame($expected, UriModifier::removeBasePath($this->uri, $basepath)->getPath());
     }
 
     public function removeBasePathProvider(): array
@@ -310,12 +309,12 @@ class PathModifierTest extends TestCase
     /**
      * @covers ::filterUri
      * @covers ::normalizePath
-     * @covers ::removeBasepath
+     * @covers ::removeBasePath
      */
     public function testRemoveBasePathWithRelativePath(): void
     {
         $uri = Http::createFromString('base/path');
-        self::assertSame('base/path', UriModifier::removeBasepath($uri, '/base/path')->getPath());
+        self::assertSame('base/path', UriModifier::removeBasePath($uri, '/base/path')->getPath());
     }
 
     /**

@@ -18,6 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Fragment;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -196,5 +198,56 @@ class FragmentTest extends TestCase
         $fragment = new Fragment('coucou');
         self::assertSame($fragment, $fragment->withContent('coucou'));
         self::assertNotSame($fragment, $fragment->withContent('Coucou'));
+    }
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $fragment = Fragment::createFromUri($uri);
+
+        self::assertSame($expected, $fragment->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://example.com#foobar'),
+                'expected' => 'foobar',
+            ],
+            'PSR-7 URI object with no fragment' => [
+                'uri' => Http::createFromString('http://example.com'),
+                'expected' => null,
+            ],
+            'PSR-7 URI object with empty string fragment' => [
+                'uri' => Http::createFromString('http://example.com#'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://example.com#foobar'),
+                'expected' => 'foobar',
+            ],
+            'League URI object with no fragment' => [
+                'uri' => Uri::createFromString('http://example.com'),
+                'expected' => null,
+            ],
+            'League URI object with empty string fragment' => [
+                'uri' => Uri::createFromString('http://example.com#'),
+                'expected' => '',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Fragment::createFromUri('http://example.com#foobar');
     }
 }

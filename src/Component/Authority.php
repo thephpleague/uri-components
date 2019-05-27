@@ -21,9 +21,16 @@ namespace League\Uri\Component;
 use League\Uri\Contract\AuthorityInterface;
 use League\Uri\Contract\HostInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use TypeError;
 use function explode;
+use function get_class;
+use function gettype;
+use function is_object;
 use function preg_match;
+use function sprintf;
 
 final class Authority extends Component implements AuthorityInterface
 {
@@ -114,6 +121,31 @@ final class Authority extends Component implements AuthorityInterface
         $auth->validate();
 
         return $auth;
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface) {
+            return new self($uri->getAuthority());
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
+            $authority = $uri->getAuthority();
+            if ('' === $authority) {
+                $authority = null;
+            }
+
+            return new self($authority);
+        }
+
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
     }
 
     /**
