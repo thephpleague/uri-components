@@ -19,6 +19,8 @@ namespace LeagueTest\Uri\Component;
 use ArrayIterator;
 use League\Uri\Component\Query;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -885,5 +887,56 @@ class QueryTest extends TestCase
     {
         self::expectException(TypeError::class);
         (new Query())->appendTo('foo', ['bar']);
+    }
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $query = Query::createFromUri($uri);
+
+        self::assertSame($expected, $query->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://example.com?foo=bar'),
+                'expected' => 'foo=bar',
+            ],
+            'PSR-7 URI object with no query' => [
+                'uri' => Http::createFromString('http://example.com'),
+                'expected' => null,
+            ],
+            'PSR-7 URI object with empty string query' => [
+                'uri' => Http::createFromString('http://example.com?'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://example.com?foo=bar'),
+                'expected' => 'foo=bar',
+            ],
+            'League URI object with no query' => [
+                'uri' => Uri::createFromString('http://example.com'),
+                'expected' => null,
+            ],
+            'League URI object with empty string query' => [
+                'uri' => Uri::createFromString('http://example.com?'),
+                'expected' => '',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Query::createFromUri('http://example.com#foobar');
     }
 }

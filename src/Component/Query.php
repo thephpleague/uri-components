@@ -20,8 +20,10 @@ namespace League\Uri\Component;
 
 use League\Uri\Contract\QueryInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\QueryString;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Traversable;
 use TypeError;
 use function array_column;
@@ -33,6 +35,8 @@ use function array_map;
 use function array_merge;
 use function array_values;
 use function count;
+use function get_class;
+use function gettype;
 use function http_build_query;
 use function implode;
 use function is_array;
@@ -136,6 +140,31 @@ final class Query extends Component implements QueryInterface
     public static function createFromPairs(iterable $pairs, string $separator = '&'): self
     {
         return new self(QueryString::build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface) {
+            return new self($uri->getQuery());
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
+            $component = $uri->getQuery();
+            if ('' === $component) {
+                $component = null;
+            }
+
+            return new self($component);
+        }
+
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
     }
 
     /**

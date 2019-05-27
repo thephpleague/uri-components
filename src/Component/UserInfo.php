@@ -19,8 +19,15 @@ declare(strict_types=1);
 namespace League\Uri\Component;
 
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Contract\UserInfoInterface;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use TypeError;
 use function explode;
+use function get_class;
+use function gettype;
+use function is_object;
+use function sprintf;
 
 final class UserInfo extends Component implements UserInfoInterface
 {
@@ -57,6 +64,40 @@ final class UserInfo extends Component implements UserInfoInterface
     public static function __set_state(array $properties): self
     {
         return new self($properties['user'], $properties['pass']);
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface) {
+            $component = $uri->getUserInfo();
+            if (null === $component) {
+                return new self();
+            }
+
+            $params = explode(':', $component, 2) + [1 => null];
+
+            return new self(...$params);
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
+            $component = $uri->getUserInfo();
+            if ('' === $component) {
+                return new self();
+            }
+
+            $params = explode(':', $component, 2) + [1 => null];
+
+            return new self(...$params);
+        }
+
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
     }
 
     /**

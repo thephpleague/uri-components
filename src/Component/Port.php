@@ -20,8 +20,14 @@ namespace League\Uri\Component;
 
 use League\Uri\Contract\PortInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use TypeError;
 use function filter_var;
+use function get_class;
+use function gettype;
+use function is_object;
 use function sprintf;
 use const FILTER_VALIDATE_INT;
 
@@ -70,6 +76,22 @@ final class Port extends Component implements PortInterface
     public static function __set_state(array $properties): self
     {
         return new self($properties['port']);
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
+            return new self($uri->getPort());
+        }
+
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
     }
 
     /**

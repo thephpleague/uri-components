@@ -20,19 +20,26 @@ namespace League\Uri\Component;
 
 use League\Uri\Contract\HostInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\IdnSupportMissing;
 use League\Uri\Exception\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use TypeError;
 use function defined;
 use function explode;
 use function filter_var;
 use function function_exists;
+use function get_class;
+use function gettype;
 use function idn_to_ascii;
 use function idn_to_utf8;
 use function implode;
 use function in_array;
 use function inet_pton;
+use function is_object;
 use function preg_match;
 use function rawurldecode;
+use function rawurlencode;
 use function sprintf;
 use function strpos;
 use function strtolower;
@@ -40,6 +47,8 @@ use function substr;
 use const FILTER_FLAG_IPV4;
 use const FILTER_FLAG_IPV6;
 use const FILTER_VALIDATE_IP;
+use const IDNA_CHECK_BIDI;
+use const IDNA_CHECK_CONTEXTJ;
 use const IDNA_ERROR_BIDI;
 use const IDNA_ERROR_CONTEXTJ;
 use const IDNA_ERROR_DISALLOWED;
@@ -53,6 +62,7 @@ use const IDNA_ERROR_LEADING_COMBINING_MARK;
 use const IDNA_ERROR_LEADING_HYPHEN;
 use const IDNA_ERROR_PUNYCODE;
 use const IDNA_ERROR_TRAILING_HYPHEN;
+use const IDNA_NONTRANSITIONAL_TO_UNICODE;
 use const INTL_IDNA_VARIANT_UTS46;
 
 final class Host extends Component implements HostInterface
@@ -206,7 +216,12 @@ final class Host extends Component implements HostInterface
 
         self::supportIdnHost();
 
-        $domain_name = idn_to_ascii($domain_name, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+        $domain_name = idn_to_ascii(
+            $domain_name,
+            IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_NONTRANSITIONAL_TO_UNICODE,
+            INTL_IDNA_VARIANT_UTS46,
+            $arr
+        );
         if (0 !== $arr['errors']) {
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
         }
@@ -223,36 +238,6 @@ final class Host extends Component implements HostInterface
 
         $this->host = $domain_name;
         $this->is_domain = 1 === preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
-    }
-
-    /**
-     * Returns a host from an IP address.
-     *
-     * @throws SyntaxError If the $ip can not be converted into a Host
-     *
-     * @return static
-     */
-    public static function createFromIp(string $ip, string $version = ''): self
-    {
-        if ('' !== $version) {
-            return new self('[v'.$version.'.'.$ip.']');
-        }
-
-        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return new self($ip);
-        }
-
-        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            return new self('['.$ip.']');
-        }
-
-        if (false !== strpos($ip, '%')) {
-            [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
-
-            return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
-        }
-
-        throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));
     }
 
     /**
@@ -313,6 +298,61 @@ final class Host extends Component implements HostInterface
     }
 
     /**
+     * Returns a host from an IP address.
+     *
+     * @throws SyntaxError If the $ip can not be converted into a Host
+     *
+     * @return static
+     */
+    public static function createFromIp(string $ip, string $version = ''): self
+    {
+        if ('' !== $version) {
+            return new self('[v'.$version.'.'.$ip.']');
+        }
+
+        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return new self($ip);
+        }
+
+        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return new self('['.$ip.']');
+        }
+
+        if (false !== strpos($ip, '%')) {
+            [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
+
+            return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
+        }
+
+        throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface) {
+            return new self($uri->getHost());
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
+            $component = $uri->getHost();
+            if ('' === $component) {
+                $component = null;
+            }
+
+            return new self($component);
+        }
+
+        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getContent(): ?string
@@ -340,7 +380,12 @@ final class Host extends Component implements HostInterface
             return $this->host;
         }
 
-        $host = idn_to_utf8($this->host, 0, INTL_IDNA_VARIANT_UTS46, $arr);
+        $host = idn_to_utf8(
+            $this->host,
+            IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_NONTRANSITIONAL_TO_UNICODE,
+            INTL_IDNA_VARIANT_UTS46,
+            $arr
+        );
         if (0 !== $arr['errors']) {
             $message = $this->getIDNAErrors($arr['errors']);
             throw new SyntaxError(sprintf('The host `%s` is invalid : %s', $this->host, $message));

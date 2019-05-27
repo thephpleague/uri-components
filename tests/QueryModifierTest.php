@@ -16,7 +16,6 @@
 
 namespace LeagueTest\Uri;
 
-use League\Uri\Component\Query;
 use League\Uri\Http;
 use League\Uri\Uri;
 use League\Uri\UriModifier;
