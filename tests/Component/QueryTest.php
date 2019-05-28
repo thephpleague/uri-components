@@ -67,7 +67,7 @@ class QueryTest extends TestCase
     public function invalidSeparatorProvider(): array
     {
         return [
-            'separator can not be `=`' => ['='],
+            'separator can not be `=`' => [''],
         ];
     }
 
