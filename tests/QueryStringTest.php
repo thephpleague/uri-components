@@ -40,6 +40,12 @@ class QueryStringTest extends TestCase
         QueryString::parse("foo=bar\0");
     }
 
+    public function testSyntaxErrorThrowsExceptionWithQueryParserAndAnEmptySeparator(): void
+    {
+        self::expectException(SyntaxError::class);
+        QueryString::parse('foo=bar', '');
+    }
+
     public function testEncodingThrowsExceptionWithQueryBuilder(): void
     {
         self::expectException(EncodingNotFound::class);
@@ -162,12 +168,6 @@ class QueryStringTest extends TestCase
     public function parserProvider(): array
     {
         return [
-            'empty separator' => [
-                'foo',
-                '',
-                [['f', null], ['o', null], ['o', null]],
-                PHP_QUERY_RFC3986,
-            ],
             'stringable object' => [
                 new class() {
                     public function __toString()
