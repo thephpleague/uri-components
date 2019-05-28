@@ -20,12 +20,15 @@ namespace League\Uri\Component;
 
 use League\Uri\Contract\PathInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function array_pop;
 use function array_reduce;
 use function end;
 use function explode;
 use function implode;
+use function sprintf;
 use function strpos;
 use function substr;
 
@@ -78,6 +81,22 @@ final class Path extends Component implements PathInterface
         }
 
         throw new TypeError('The path can not be null');
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
+            return new self($uri->getPath());
+        }
+
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**

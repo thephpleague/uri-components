@@ -22,8 +22,11 @@ use finfo;
 use League\Uri\Contract\DataPathInterface;
 use League\Uri\Contract\PathInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
+use TypeError;
 use function base64_decode;
 use function base64_encode;
 use function count;
@@ -245,6 +248,22 @@ final class DataPath extends Component implements DataPathInterface
             str_replace(' ', '', $mimetype)
             .';base64,'.base64_encode($content)
         );
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
+            return new self($uri->getPath());
+        }
+
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**

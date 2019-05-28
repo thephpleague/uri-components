@@ -18,7 +18,10 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\DataPath as Path;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 use function base64_encode;
 use function file_get_contents;
 use function var_export;
@@ -430,5 +433,49 @@ class DataPathTest extends TestCase
     {
         self::expectException(SyntaxError::class);
         new Path('data:toto\\bar;foo=bar,');
+    }
+
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $path = Path::createFromUri($uri);
+
+        self::assertSame($expected, $path->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21'),
+                'expected' => 'text/plain;charset=us-ascii,Bonjour%20le%20monde%21',
+            ],
+            'PSR-7 URI object with no path' => [
+                'uri' => Http::createFromString(),
+                'expected' => 'text/plain;charset=us-ascii,',
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21'),
+                'expected' => 'text/plain;charset=us-ascii,Bonjour%20le%20monde%21',
+            ],
+            'League URI object with no path' => [
+                'uri' => Uri::createFromString(),
+                'expected' => 'text/plain;charset=us-ascii,',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Path::createFromUri('http://example.com:80');
     }
 }

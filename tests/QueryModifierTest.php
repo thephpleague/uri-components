@@ -16,7 +16,6 @@
 
 namespace LeagueTest\Uri;
 
-use League\Uri\Component\Query;
 use League\Uri\Http;
 use League\Uri\Uri;
 use League\Uri\UriModifier;
@@ -45,7 +44,6 @@ class QueryModifierTest extends TestCase
      * @covers ::mergeQuery
      *
      * @dataProvider validMergeQueryProvider
-     *
      */
     public function testMergeQuery(string $query, string $expected): void
     {
@@ -64,7 +62,6 @@ class QueryModifierTest extends TestCase
      * @covers ::appendQuery
      *
      * @dataProvider validAppendQueryProvider
-     *
      */
     public function testAppendQuery(string $query, string $expected): void
     {
@@ -92,7 +89,6 @@ class QueryModifierTest extends TestCase
      * @dataProvider validWithoutQueryValuesProvider
      *
      * @covers ::removePairs
-     *
      */
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {

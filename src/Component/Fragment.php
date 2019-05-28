@@ -20,6 +20,10 @@ namespace League\Uri\Component;
 
 use League\Uri\Contract\FragmentInterface;
 use League\Uri\Contract\UriComponentInterface;
+use League\Uri\Contract\UriInterface;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use TypeError;
+use function sprintf;
 
 final class Fragment extends Component implements FragmentInterface
 {
@@ -49,6 +53,31 @@ final class Fragment extends Component implements FragmentInterface
     public static function __set_state(array $properties): self
     {
         return new self($properties['fragment']);
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
+     *
+     * @throws TypeError If the URI object is not supported
+     */
+    public static function createFromUri($uri): self
+    {
+        if ($uri instanceof UriInterface) {
+            return new self($uri->getFragment());
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
+            $component = $uri->getFragment();
+            if ('' === $component) {
+                $component = null;
+            }
+
+            return new self($component);
+        }
+
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**

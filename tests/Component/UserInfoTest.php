@@ -18,6 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\UserInfo;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -270,5 +272,56 @@ class UserInfoTest extends TestCase
     {
         self::expectException(SyntaxError::class);
         new UserInfo("\0");
+    }
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $userInfo = UserInfo::createFromUri($uri);
+
+        self::assertSame($expected, $userInfo->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://foo:bar@example.com?foo=bar'),
+                'expected' => 'foo:bar',
+            ],
+            'PSR-7 URI object with no user info' => [
+                'uri' => Http::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'PSR-7 URI object with empty string user info' => [
+                'uri' => Http::createFromString('http://@example.com?foo=bar'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://foo:bar@example.com?foo=bar'),
+                'expected' => 'foo:bar',
+            ],
+            'League URI object with no user info' => [
+                'uri' => Uri::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'League URI object with empty string user info' => [
+                'uri' => Uri::createFromString('http://@example.com?foo=bar'),
+                'expected' => '',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        UserInfo::createFromUri('http://example.com#foobar');
     }
 }

@@ -18,8 +18,11 @@ namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
 use League\Uri\Component\Domain;
+use League\Uri\Component\Host;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -68,7 +71,9 @@ class DomainTest extends TestCase
     /**
      * Test valid Domain.
      * @dataProvider validDomainProvider
+     *
      * @covers ::__construct
+     * @covers ::setLabels
      * @covers ::getContent
      * @covers ::toUnicode
      * @param ?string $host
@@ -497,5 +502,56 @@ class DomainTest extends TestCase
             ['example.com', 'example.com.', 'example.com'],
             ['example.com.', 'example.com.', 'example.com'],
         ];
+    }
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $domain = Domain::createFromUri($uri);
+
+        self::assertSame($expected, $domain->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://example.com?foo=bar'),
+                'expected' => 'example.com',
+            ],
+            'PSR-7 URI object with no host' => [
+                'uri' => Http::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'PSR-7 URI object with empty string host' => [
+                'uri' => Http::createFromString('file:///path/to/you'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://example.com?foo=bar'),
+                'expected' => 'example.com',
+            ],
+            'League URI object with no host' => [
+                'uri' => Uri::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'League URI object with empty string query' => [
+                'uri' => Uri::createFromString('file:///path/to/you'),
+                'expected' => '',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Domain::createFromUri('http://example.com#foobar');
     }
 }

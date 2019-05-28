@@ -18,6 +18,8 @@ namespace LeagueTest\Uri\Component;
 
 use League\Uri\Component\Host;
 use League\Uri\Exception\SyntaxError;
+use League\Uri\Http;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
@@ -241,5 +243,57 @@ class HostTest extends TestCase
             ['[::1]', '[::1]'],
             ['127.0.0.1', '127.0.0.1'],
         ];
+    }
+
+
+    /**
+     * @dataProvider getURIProvider
+     * @covers ::createFromUri
+     *
+     * @param mixed   $uri      an URI object
+     * @param ?string $expected
+     */
+    public function testCreateFromUri($uri, ?string $expected): void
+    {
+        $host = Host::createFromUri($uri);
+
+        self::assertSame($expected, $host->getContent());
+    }
+
+    public function getURIProvider(): iterable
+    {
+        return [
+            'PSR-7 URI object' => [
+                'uri' => Http::createFromString('http://example.com?foo=bar'),
+                'expected' => 'example.com',
+            ],
+            'PSR-7 URI object with no host' => [
+                'uri' => Http::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'PSR-7 URI object with empty string host' => [
+                'uri' => Http::createFromString('file:///path/to/you'),
+                'expected' => null,
+            ],
+            'League URI object' => [
+                'uri' => Uri::createFromString('http://example.com?foo=bar'),
+                'expected' => 'example.com',
+            ],
+            'League URI object with no host' => [
+                'uri' => Uri::createFromString('path/to/the/sky?foo'),
+                'expected' => null,
+            ],
+            'League URI object with empty string query' => [
+                'uri' => Uri::createFromString('file:///path/to/you'),
+                'expected' => '',
+            ],
+        ];
+    }
+
+    public function testCreateFromUriThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Host::createFromUri('http://example.com#foobar');
     }
 }
