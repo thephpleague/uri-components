@@ -137,14 +137,6 @@ final class Host extends Component implements HostInterface
     private $is_domain = false;
 
     /**
-     * {@inheritDoc}
-     */
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['host']);
-    }
-
-    /**
      * @codeCoverageIgnore
      */
     private static function supportIdnHost(): void
@@ -292,6 +284,14 @@ final class Host extends Component implements HostInterface
             && 1 !== preg_match(self::REGEXP_GEN_DELIMS, $scope)
             && false !== filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
             && 0 === strpos((string) inet_pton((string) $ipv6), self::ADDRESS_BLOCK);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['host']);
     }
 
     /**
