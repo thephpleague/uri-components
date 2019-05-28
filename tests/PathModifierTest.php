@@ -45,7 +45,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::dataPathToBinary
      *
@@ -61,7 +60,6 @@ class PathModifierTest extends TestCase
      * @covers ::dataPathToAscii
      *
      * @dataProvider fileProvider
-     *
      */
     public function testToAscii(Uri $binary, Uri $ascii): void
     {
@@ -86,7 +84,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceDataUriParameters
      */
@@ -102,7 +99,6 @@ class PathModifierTest extends TestCase
     /**
      * @dataProvider validPathProvider
      *
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::appendSegment
      */
@@ -112,7 +108,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::appendSegment
      *
@@ -150,12 +145,10 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceBasename
      *
      * @dataProvider validBasenameProvider
-     *
      */
     public function testBasename(string $path, string $uri, string $expected): void
     {
@@ -173,7 +166,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceBasename
      */
@@ -184,7 +176,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceBasename
      */
@@ -195,12 +186,10 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceDirname
      *
      * @dataProvider validDirnameProvider
-     *
      */
     public function testDirname(string $path, string $uri, string $expected): void
     {
@@ -218,12 +207,10 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::prependSegment
      *
      * @dataProvider validPathProvider
-     *
      */
     public function testPrependProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
@@ -231,12 +218,10 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceSegment
      *
      * @dataProvider validPathProvider
-     *
      */
     public function testReplaceSegmentProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
@@ -252,7 +237,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::addBasePath
      *
@@ -274,7 +258,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::addBasePath
      */
@@ -285,7 +268,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::removeBasePath
      *
@@ -307,7 +289,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::removeBasePath
      */
@@ -318,12 +299,10 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::removeSegments
      *
      * @dataProvider validwithoutSegmentProvider
-     *
      */
     public function testwithoutSegment(array $keys, string $expected): void
     {
@@ -338,7 +317,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::removeDotSegments
      */
@@ -351,7 +329,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::removeEmptySegments
      */
@@ -364,7 +341,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::removeTrailingSlash
      */
@@ -375,12 +351,10 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceExtension
      *
      * @dataProvider validExtensionProvider
-     *
      */
     public function testExtensionProcess(string $extension, string $expected): void
     {
@@ -396,7 +370,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::addTrailingSlash
      */
@@ -406,7 +379,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::removeLeadingSlash
      */
@@ -418,7 +390,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::addLeadingSlash
      */
@@ -430,7 +401,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceSegment
      */
@@ -441,7 +411,6 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::filterUri
      * @covers ::normalizePath
      * @covers ::replaceExtension
      */

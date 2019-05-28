@@ -66,7 +66,6 @@ class HostModifierTest extends TestCase
      * @dataProvider validHostProvider
      *
      * @covers ::replaceLabel
-     *
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
@@ -112,7 +111,7 @@ class HostModifierTest extends TestCase
      */
     public function testHostToAsciiProcess(): void
     {
-        $uri = Http::createFromString('http://مثال.إختبار/where/to/go');
+        $uri = new GuzzleUri('http://مثال.إختبار/where/to/go');
         self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
             (string)  UriModifier::hostToAscii($uri)

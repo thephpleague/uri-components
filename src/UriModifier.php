@@ -28,13 +28,11 @@ use League\Uri\Contract\PathInterface;
 use League\Uri\Contract\UriInterface;
 use League\Uri\Exception\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
 use function count;
 use function range;
 use function rtrim;
 use function sprintf;
 use function strpos;
-use function substr;
 
 final class UriModifier
 {
@@ -45,65 +43,63 @@ final class UriModifier
     /**
      * Add the new query data to the existing URI query.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function appendQuery($uri, $query)
     {
-        $newQuery = Query::createFromUri($uri)->append($query);
-
-        return self::filterUri($uri)->withQuery($newQuery->__toString());
+        return $uri->withQuery(Query::createFromUri($uri)->append($query)->__toString());
     }
 
     /**
      * Merge a new query with the existing URI query.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function mergeQuery($uri, $query)
     {
-        $newQuery = Query::createFromUri($uri)->merge($query);
-
-        return self::filterUri($uri)->withQuery($newQuery->__toString());
+        return $uri->withQuery(Query::createFromUri($uri)->merge($query)->__toString());
     }
 
     /**
      * Remove query data according to their key name.
      *
-     * @param string... $keys
+     * @param Psr7UriInterface|UriInterface $uri
+     * @param string...                     $keys
      *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removePairs($uri, string $key, string ...$keys)
     {
-        $newQuery = Query::createFromUri($uri)->withoutPair($key, ...$keys);
-
-        return self::filterUri($uri)->withQuery($newQuery->__toString());
+        return $uri->withQuery(Query::createFromUri($uri)->withoutPair($key, ...$keys)->__toString());
     }
 
     /**
      * Remove query data according to their key name.
      *
-     * @param string... $keys
+     * @param Psr7UriInterface|UriInterface $uri
+     * @param string...                     $keys
      *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removeParams($uri, string $key, string ...$keys)
     {
-        $newQuery = Query::createFromUri($uri)->withoutParam($key, ...$keys);
-
-        return self::filterUri($uri)->withQuery($newQuery->__toString());
+        return $uri->withQuery(Query::createFromUri($uri)->withoutParam($key, ...$keys)->__toString());
     }
 
     /**
      * Sort the URI query by keys.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function sortQuery($uri)
     {
-        $newQuery = Query::createFromUri($uri)->sort();
-
-        return self::filterUri($uri)->withQuery($newQuery->__toString());
+        return $uri->withQuery(Query::createFromUri($uri)->sort()->__toString());
     }
 
     /*********************************
@@ -113,17 +109,19 @@ final class UriModifier
     /**
      * Add the root label to the URI.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function addRootLabel($uri)
     {
-        $newHost = Domain::createFromUri($uri)->withRootLabel();
-
-        return self::filterUri($uri)->withHost($newHost->__toString());
+        return $uri->withHost(Domain::createFromUri($uri)->withRootLabel()->__toString());
     }
 
     /**
      * Append a label or a host to the current URI host.
+     *
+     * @param Psr7UriInterface|UriInterface $uri
      *
      * @throws SyntaxError If the host can not be appended
      *
@@ -133,14 +131,14 @@ final class UriModifier
     {
         $host = Host::createFromUri($uri);
         if ($host->isDomain()) {
-            return self::filterUri($uri)->withHost((new Domain($host))->append($label)->__toString());
+            return $uri->withHost((new Domain($host))->append($label)->__toString());
         }
 
         if ($host->isIpv4()) {
             $label = ltrim((string) new Host($label), '.');
             $newHost = $host->withContent($host->getContent().'.'.$label);
 
-            return self::filterUri($uri)->withHost($newHost->__toString());
+            return $uri->withHost($newHost->__toString());
         }
 
         throw new SyntaxError(sprintf('The URI host %s can not be appended', $host->__toString()));
@@ -149,25 +147,31 @@ final class UriModifier
     /**
      * Convert the URI host part to its ascii value.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function hostToAscii($uri)
     {
-        return self::filterUri($uri)->withHost(Host::createFromUri($uri)->__toString());
+        return $uri->withHost(Host::createFromUri($uri)->__toString());
     }
 
     /**
      * Convert the URI host part to its unicode value.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function hostToUnicode($uri)
     {
-        return self::filterUri($uri)->withHost((string) Host::createFromUri($uri)->toUnicode());
+        return $uri->withHost((string) Host::createFromUri($uri)->toUnicode());
     }
 
     /**
      * Prepend a label or a host to the current URI host.
+     *
+     * @param Psr7UriInterface|UriInterface $uri
      *
      * @throws SyntaxError If the host can not be prepended
      *
@@ -177,14 +181,14 @@ final class UriModifier
     {
         $host = Host::createFromUri($uri);
         if ($host->isDomain()) {
-            return self::filterUri($uri)->withHost((new Domain($host))->prepend($label)->__toString());
+            return $uri->withHost((new Domain($host))->prepend($label)->__toString());
         }
 
         if ($host->isIpv4()) {
             $label = rtrim((string) new Host($label), '.');
             $newHost = $host->withContent($label.'.'.$host->getContent());
 
-            return self::filterUri($uri)->withHost($newHost->__toString());
+            return $uri->withHost($newHost->__toString());
         }
 
         throw new SyntaxError(sprintf('The URI host %s can not be prepended', (string) $host));
@@ -193,51 +197,50 @@ final class UriModifier
     /**
      * Remove host labels according to their offset.
      *
-     * @param int... $keys
+     * @param Psr7UriInterface|UriInterface $uri
+     * @param int...                        $keys
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function removeLabels($uri, int $key, int ... $keys)
+    public static function removeLabels($uri, int $key, int ...$keys)
     {
-        $host = Domain::createFromUri($uri)->withoutLabel($key, ...$keys);
-
-        return self::filterUri($uri)->withHost($host->__toString());
+        return $uri->withHost(Domain::createFromUri($uri)->withoutLabel($key, ...$keys)->__toString());
     }
 
     /**
      * Remove the root label to the URI.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removeRootLabel($uri)
     {
-        $host = Domain::createFromUri($uri)->withoutRootLabel();
-
-        return self::filterUri($uri)->withHost($host->__toString());
+        return $uri->withHost(Domain::createFromUri($uri)->withoutRootLabel()->__toString());
     }
 
     /**
      * Remove the host zone identifier.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removeZoneId($uri)
     {
-        $host = Host::createFromUri($uri)->withoutZoneIdentifier();
-
-        return self::filterUri($uri)->withHost($host->__toString());
+        return $uri->withHost(Host::createFromUri($uri)->withoutZoneIdentifier()->__toString());
     }
 
     /**
      * Replace a label of the current URI host.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function replaceLabel($uri, int $offset, $label)
     {
-        $host = Domain::createFromUri($uri)->withLabel($offset, $label);
-
-        return self::filterUri($uri)->withHost($host->__toString());
+        return $uri->withHost(Domain::createFromUri($uri)->withLabel($offset, $label)->__toString());
     }
 
     /*********************************
@@ -247,22 +250,21 @@ final class UriModifier
     /**
      * Add a new basepath to the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function addBasePath($uri, $path)
     {
-        $uri = self::filterUri($uri);
-        $currentPath = $uri->getPath();
-        if ('' !== $currentPath && '/' !== $currentPath[0]) {
-            $currentPath = '/'.$currentPath;
-        }
+        /** @var HierarchicalPath $path */
+        $path = (new HierarchicalPath($path))->withLeadingSlash();
+        $currentPath = Path::createFromUri($uri)->withLeadingSlash()->__toString();
 
-        $path = (new Path($path))->withLeadingSlash();
         if (0 === strpos($currentPath, (string) $path)) {
             return $uri->withPath($currentPath);
         }
 
-        return $uri->withPath((new HierarchicalPath($path))->append($currentPath)->__toString());
+        return $uri->withPath($path->append($currentPath)->__toString());
     }
 
     /**
@@ -272,12 +274,7 @@ final class UriModifier
      */
     public static function addLeadingSlash($uri)
     {
-        $path = self::filterUri($uri)->getPath();
-        if ('/' !== ($path[0] ?? '')) {
-            $path = '/'.$path;
-        }
-
-        return self::normalizePath($uri, $path);
+        return self::normalizePath($uri, Path::createFromUri($uri)->withLeadingSlash());
     }
 
     /**
@@ -287,12 +284,7 @@ final class UriModifier
      */
     public static function addTrailingSlash($uri)
     {
-        $path = self::filterUri($uri)->getPath();
-        if ('/' !== substr($path, -1)) {
-            $path .= '/';
-        }
-
-        return self::normalizePath($uri, $path);
+        return self::normalizePath($uri, Path::createFromUri($uri)->withTrailingSlash());
     }
 
     /**
@@ -308,21 +300,25 @@ final class UriModifier
     /**
      * Convert the Data URI path to its ascii form.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function dataPathToAscii($uri)
     {
-        return self::filterUri($uri)->withPath(DataPath::createFromUri($uri)->toAscii()->__toString());
+        return $uri->withPath(DataPath::createFromUri($uri)->toAscii()->__toString());
     }
 
     /**
      * Convert the Data URI path to its binary (base64encoded) form.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function dataPathToBinary($uri)
     {
-        return self::filterUri($uri)->withPath(DataPath::createFromUri($uri)->toBinary()->__toString());
+        return $uri->withPath(DataPath::createFromUri($uri)->toBinary()->__toString());
     }
 
     /**
@@ -332,7 +328,7 @@ final class UriModifier
      */
     public static function prependSegment($uri, $segment)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->prepend($segment)->__toString());
+        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->prepend($segment));
     }
 
     /**
@@ -342,6 +338,7 @@ final class UriModifier
      */
     public static function removeBasePath($uri, $path)
     {
+        $currentPath = HierarchicalPath::createFromUri($uri);
         $uri = self::normalizePath($uri);
 
         /** @var  HierarchicalPath $basePath */
@@ -350,14 +347,11 @@ final class UriModifier
             return $uri;
         }
 
-        $currentPath = HierarchicalPath::createFromUri($uri);
         if (0 !== strpos((string) $currentPath, (string) $basePath)) {
             return $uri;
         }
 
-        return $uri->withPath(
-            $currentPath->withoutSegment(...range(0, count($basePath) - 1))->__toString()
-        );
+        return $uri->withPath($currentPath->withoutSegment(...range(0, count($basePath) - 1))->__toString());
     }
 
     /**
@@ -463,44 +457,23 @@ final class UriModifier
     }
 
     /**
-     * Filter the URI object.
-     *
-     * To be valid an URI MUST implement at least one of the following interface:
-     *     - League\Uri\UriInterface
-     *     - Psr\Http\Message\UriInterface
-     *
-     * @throws TypeError if the URI object does not implements the supported interfaces.
-     *
-     * @return Psr7UriInterface|UriInterface
-     */
-    private static function filterUri($uri)
-    {
-        if ($uri instanceof Psr7UriInterface || $uri instanceof UriInterface) {
-            return $uri;
-        }
-
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
-    }
-
-    /**
      * Normalize a URI path.
      *
      * Make sure the path always has a leading slash if an authority is present
      * and the path is not the empty string.
      *
-     * @param null|string|PathInterface $path
+     * @param Psr7UriInterface|UriInterface $uri
+     * @param ?PathInterface                $path
      *
      * @return Psr7UriInterface|UriInterface
      */
-    private static function normalizePath($uri, $path = null)
+    private static function normalizePath($uri, ?PathInterface $path = null)
     {
-        $uri = self::filterUri($uri);
-
-        if ($path instanceof PathInterface) {
-            $path = $path->getContent();
+        if (!$path instanceof PathInterface) {
+            $path = $uri->getPath();
         }
-        $path = $path ?? $uri->getPath();
 
+        $path = (string) $path;
         if (null !== $uri->getAuthority()
             && '' !== $uri->getAuthority()
             && '' !== $path
