@@ -35,7 +35,6 @@ use function array_map;
 use function array_merge;
 use function array_values;
 use function count;
-use function get_class;
 use function gettype;
 use function http_build_query;
 use function implode;
@@ -164,7 +163,7 @@ final class Query extends Component implements QueryInterface
             return new self($component);
         }
 
-        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**

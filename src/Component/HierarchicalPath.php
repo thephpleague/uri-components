@@ -37,10 +37,7 @@ use function count;
 use function dirname;
 use function end;
 use function explode;
-use function get_class;
-use function gettype;
 use function implode;
-use function is_object;
 use function is_scalar;
 use function ltrim;
 use function method_exists;
@@ -143,7 +140,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
             return new self($uri->getPath());
         }
 
-        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**

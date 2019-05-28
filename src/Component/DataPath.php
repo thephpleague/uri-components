@@ -32,10 +32,7 @@ use function base64_encode;
 use function count;
 use function explode;
 use function file_get_contents;
-use function get_class;
-use function gettype;
 use function implode;
-use function is_object;
 use function preg_match;
 use function preg_replace_callback;
 use function rawurldecode;
@@ -266,7 +263,7 @@ final class DataPath extends Component implements DataPathInterface
             return new self($uri->getPath());
         }
 
-        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**

@@ -23,9 +23,6 @@ use League\Uri\Contract\UriComponentInterface;
 use League\Uri\Contract\UriInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
-use function get_class;
-use function gettype;
-use function is_object;
 use function sprintf;
 
 final class Fragment extends Component implements FragmentInterface
@@ -80,7 +77,7 @@ final class Fragment extends Component implements FragmentInterface
             return new self($component);
         }
 
-        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**
