@@ -24,9 +24,6 @@ use League\Uri\Contract\UserInfoInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function explode;
-use function get_class;
-use function gettype;
-use function is_object;
 use function sprintf;
 
 final class UserInfo extends Component implements UserInfoInterface
@@ -97,7 +94,7 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self(...$params);
         }
 
-        throw new TypeError(sprintf('The uri must be a valid URI object received `%s`', is_object($uri) ? get_class($uri) : gettype($uri)));
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**
