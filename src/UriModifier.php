@@ -136,9 +136,8 @@ final class UriModifier
 
         if ($host->isIpv4()) {
             $label = ltrim((string) new Host($label), '.');
-            $newHost = $host->withContent($host->getContent().'.'.$label);
 
-            return $uri->withHost($newHost->__toString());
+            return $uri->withHost((new Host($host->getContent().'.'.$label))->__toString());
         }
 
         throw new SyntaxError(sprintf('The URI host %s can not be appended', $host->__toString()));
@@ -401,7 +400,7 @@ final class UriModifier
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function removeSegments($uri, int $key, int ... $keys)
+    public static function removeSegments($uri, int $key, int ...$keys)
     {
         return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withoutSegment($key, ...$keys));
     }
@@ -474,11 +473,7 @@ final class UriModifier
         }
 
         $path = (string) $path;
-        if (null !== $uri->getAuthority()
-            && '' !== $uri->getAuthority()
-            && '' !== $path
-            && '/' != ($path[0] ?? '')
-        ) {
+        if (!in_array($uri->getAuthority(), [null, ''], true) && '' !== $path && '/' != ($path[0] ?? '')) {
             return $uri->withPath('/'.$path);
         }
 
