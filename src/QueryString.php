@@ -220,7 +220,7 @@ final class QueryString
         if ('' === $separator) {
             throw new SyntaxError('The separator character can not be the empty string.');
         }
-""
+
         if (null === (self::ENCODING_LIST[$enc_type] ?? null)) {
             throw new EncodingNotFound(sprintf('Unknown Encoding: %s', $enc_type));
         }

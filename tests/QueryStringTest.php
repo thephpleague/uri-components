@@ -400,10 +400,10 @@ class QueryStringTest extends TestCase
     /**
      * @dataProvider failedBuilderProvider
      */
-    public function testBuildQueryThrowsException(iterable $pairs, int $enc_type): void
+    public function testBuildQueryThrowsException(iterable $pairs, string $separator, int $enc_type): void
     {
         self::expectException(SyntaxError::class);
-        QueryString::build($pairs, '&', $enc_type);
+        QueryString::build($pairs, $separator, $enc_type);
     }
 
     public function failedBuilderProvider(): array
@@ -411,23 +411,33 @@ class QueryStringTest extends TestCase
         return [
             'The collection can not contain empty pair' => [
                 [[]],
+                '&',
                 PHP_QUERY_RFC1738,
             ],
             'The pair key must be stringable' => [
                 [[date_create(), 'bar']],
+                '&',
                 PHP_QUERY_RFC1738,
             ],
             'The pair value must be stringable or null - rfc3986/rfc1738' => [
                 [['foo', date_create()]],
+                '&',
                 PHP_QUERY_RFC3986,
             ],
             'identical keys with associative array' => [
                 new ArrayIterator([['key' => 'a', 'value' => true] , ['key' => 'a', 'value' => '2']]),
+                '&',
                 PHP_QUERY_RFC3986,
             ],
             'Object' => [
                 [['a[]', (object) '1']],
+                '&',
                 PHP_QUERY_RFC1738,
+            ],
+            'the separator can not be the empty string' => [
+                [['foo', 'bar']],
+                '',
+                PHP_QUERY_RFC3986,
             ],
         ];
     }
