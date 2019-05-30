@@ -80,11 +80,11 @@ final class Query extends Component implements QueryInterface
      */
     private function filterSeparator(string $separator): string
     {
-        if ('=' !== $separator) {
-            return $separator;
+        if ('' === $separator) {
+            throw new SyntaxError('The separator character can not be the empty string.');
         }
 
-        throw new SyntaxError(sprintf('Invalid separator character `%s`', $separator));
+        return $separator;
     }
 
     /**

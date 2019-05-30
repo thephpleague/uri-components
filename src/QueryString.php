@@ -39,7 +39,6 @@ use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
 use function str_replace;
-use function str_split;
 use function strpos;
 use function substr;
 use const PHP_QUERY_RFC1738;
@@ -56,8 +55,6 @@ final class QueryString
 
     private const REGEXP_ENCODED_PATTERN = ',%[A-Fa-f0-9]{2},';
 
-    private const REGEXP_DECODED_PATTERN = ',%2[D|E]|3[0-9]|4[1-9|A-F]|5[0-9|A|F]|6[1-9|A-F]|7[0-9|E],i';
-
     private const REGEXP_UNRESERVED_CHAR = '/[^A-Za-z0-9_\-\.~]/';
 
     private const ENCODING_LIST = [
@@ -72,6 +69,7 @@ final class QueryString
     ];
 
     private const DECODE_PAIR_VALUE = 1;
+
     private const PRESERVE_PAIR_VALUE = 2;
 
     /**
@@ -95,9 +93,15 @@ final class QueryString
      * Parses a query string into a collection of key/value pairs.
      *
      * @param mixed|null $query
+     *
+     * @throws SyntaxError
      */
     public static function parse($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
     {
+        if ('' === $separator) {
+            throw new SyntaxError('The separator character can not be the empty string.');
+        }
+
         $query = self::prepareQuery($query, $enc_type);
         if (null === $query) {
             return [];
@@ -160,15 +164,14 @@ final class QueryString
 
     private static function getPairs(string $query, string $separator): array
     {
-        if ('' === $separator) {
-            return str_split($query);
-        }
-
         if (false === strpos($query, $separator)) {
             return [$query];
         }
 
-        return (array) explode($separator, $query);
+        /** @var array $pairs */
+        $pairs = explode($separator, $query);
+
+        return $pairs;
     }
 
     /**
@@ -214,6 +217,10 @@ final class QueryString
      */
     public static function build(iterable $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): ?string
     {
+        if ('' === $separator) {
+            throw new SyntaxError('The separator character can not be the empty string.');
+        }
+
         if (null === (self::ENCODING_LIST[$enc_type] ?? null)) {
             throw new EncodingNotFound(sprintf('Unknown Encoding: %s', $enc_type));
         }
