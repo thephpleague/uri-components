@@ -217,6 +217,10 @@ final class QueryString
      */
     public static function build(iterable $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): ?string
     {
+        if ('' === $separator) {
+            throw new SyntaxError('The separator character can not be the empty string.');
+        }
+""
         if (null === (self::ENCODING_LIST[$enc_type] ?? null)) {
             throw new EncodingNotFound(sprintf('Unknown Encoding: %s', $enc_type));
         }
