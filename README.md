@@ -9,9 +9,9 @@ This package contains concrete URI components object represented as immutable va
 System Requirements
 -------
 
-You need **PHP >= 7.2** but the latest stable version of PHP is recommended
+You need **PHP >= 7.2** but the latest stable version of PHP is recommended.
 
-In order to handle IDN host you should also install the `intl` extension otherwise and Exception will be thrown when attempting to validate such host.
+In order to handle IDN host you should also install the `intl` extension otherwise an exception will be thrown when attempting to validate such host.
 
 Installation
 --------
