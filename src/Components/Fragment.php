@@ -85,7 +85,7 @@ final class Fragment extends Component implements FragmentInterface
      */
     public function getContent(): ?string
     {
-        return $this->encodeComponent($this->fragment, self::RFC3986_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
+        return $this->encodeComponent($this->fragment, self::REGEXP_FRAGMENT_ENCODING);
     }
 
     /**
@@ -97,11 +97,11 @@ final class Fragment extends Component implements FragmentInterface
     }
 
     /**
-     * Returns the decoded query.
+     * Returns the decoded fragment.
      */
     public function decoded(): ?string
     {
-        return $this->encodeComponent($this->fragment, self::NO_ENCODING, self::REGEXP_FRAGMENT_ENCODING);
+        return $this->fragment;
     }
 
     /**

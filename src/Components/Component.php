@@ -30,14 +30,9 @@ use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
 use function strtoupper;
-use const PHP_QUERY_RFC3986;
 
 abstract class Component implements UriComponentInterface
 {
-    protected const RFC3986_ENCODING = PHP_QUERY_RFC3986;
-
-    protected const NO_ENCODING = 0;
-
     protected const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
 
     protected const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
@@ -122,17 +117,17 @@ abstract class Component implements UriComponentInterface
     }
 
     /**
-     * Returns the component as converted for RFC3986 or RFC1738.
+     * Returns the component as converted for RFC3986.
      *
-     * @param null|string $str
+     * @param ?string $str
      */
-    protected function encodeComponent($str, int $enc_type, string $regexp): ?string
+    protected function encodeComponent(?string $str, string $regexp): ?string
     {
-        if (self::NO_ENCODING === $enc_type || null === $str || 1 !== preg_match(self::REGEXP_NO_ENCODING, $str)) {
-            return $str;
+        if (null !== $str && 1 === preg_match(self::REGEXP_NO_ENCODING, $str)) {
+            return preg_replace_callback($regexp, [$this, 'encodeMatches'], $str) ?? rawurlencode($str);
         }
 
-        return preg_replace_callback($regexp, [$this, 'encodeMatches'], $str) ?? rawurlencode($str);
+        return $str;
     }
 
     /**
