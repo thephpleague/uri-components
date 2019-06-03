@@ -106,12 +106,12 @@ final class UserInfo extends Component implements UserInfoInterface
             return null;
         }
 
-        $userInfo = $this->encodeComponent($this->user, self::RFC3986_ENCODING, self::REGEXP_USERINFO_ENCODING);
+        $userInfo = $this->encodeComponent($this->user, self::REGEXP_USERINFO_ENCODING);
         if (null === $this->pass) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$this->encodeComponent($this->pass, self::RFC3986_ENCODING, self::REGEXP_USERINFO_ENCODING);
+        return $userInfo.':'.$this->encodeComponent($this->pass, self::REGEXP_USERINFO_ENCODING);
     }
 
     /**
@@ -144,7 +144,7 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public function getUser(): ?string
     {
-        return $this->encodeComponent($this->user, self::NO_ENCODING, self::REGEXP_USERINFO_ENCODING);
+        return $this->user;
     }
 
     /**
@@ -152,7 +152,7 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public function getPass(): ?string
     {
-        return $this->encodeComponent($this->pass, self::NO_ENCODING, self::REGEXP_USERINFO_ENCODING);
+        return $this->pass;
     }
 
     /**

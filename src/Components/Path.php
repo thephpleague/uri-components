@@ -104,7 +104,7 @@ final class Path extends Component implements PathInterface
      */
     public function getContent(): ?string
     {
-        return $this->encodeComponent($this->path, self::RFC3986_ENCODING, self::REGEXP_PATH_ENCODING);
+        return $this->encodeComponent($this->path, self::REGEXP_PATH_ENCODING);
     }
 
     /**
@@ -112,7 +112,7 @@ final class Path extends Component implements PathInterface
      */
     public function decoded(): string
     {
-        return (string) $this->encodeComponent($this->path, self::NO_ENCODING, self::REGEXP_PATH_ENCODING);
+        return $this->path;
     }
 
     /**
