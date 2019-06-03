@@ -16,7 +16,7 @@
 
 namespace LeagueTest\Uri\Component;
 
-use League\Uri\Component\Fragment;
+use League\Uri\Components\Fragment;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -27,7 +27,7 @@ use function var_export;
 
 /**
  * @group fragment
- * @coversDefaultClass \League\Uri\Component\Fragment
+ * @coversDefaultClass \League\Uri\Components\Fragment
  */
 class FragmentTest extends TestCase
 {

@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
-use League\Uri\Component\Query;
+use League\Uri\Components\Query;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -31,7 +31,7 @@ use const PHP_QUERY_RFC3986;
 
 /**
  * @group query
- * @coversDefaultClass \League\Uri\Component\Query
+ * @coversDefaultClass \League\Uri\Components\Query
  */
 class QueryTest extends TestCase
 {

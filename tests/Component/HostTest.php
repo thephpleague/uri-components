@@ -16,7 +16,7 @@
 
 namespace LeagueTest\Uri\Component;
 
-use League\Uri\Component\Host;
+use League\Uri\Components\Host;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -27,7 +27,7 @@ use function var_export;
 
 /**
  * @group host
- * @coversDefaultClass \League\Uri\Component\Host
+ * @coversDefaultClass \League\Uri\Components\Host
  */
 class HostTest extends TestCase
 {

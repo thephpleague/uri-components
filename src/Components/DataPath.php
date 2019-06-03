@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Component;
+namespace League\Uri\Components;
 
 use finfo;
 use League\Uri\Contract\DataPathInterface;

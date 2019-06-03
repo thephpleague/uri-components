@@ -16,7 +16,7 @@
 
 namespace LeagueTest\Uri\Component;
 
-use League\Uri\Component\DataPath as Path;
+use League\Uri\Components\DataPath as Path;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -29,7 +29,7 @@ use function var_export;
 /**
  * @group path
  * @group datapath
- * @coversDefaultClass \League\Uri\Component\DataPath
+ * @coversDefaultClass \League\Uri\Components\DataPath
  */
 class DataPathTest extends TestCase
 {

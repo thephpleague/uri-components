@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri;
 
 use GuzzleHttp\Psr7;
-use League\Uri\Component\DataPath;
+use League\Uri\Components\DataPath;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;

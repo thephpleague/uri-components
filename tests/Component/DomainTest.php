@@ -17,8 +17,8 @@
 namespace LeagueTest\Uri\Component;
 
 use ArrayIterator;
-use League\Uri\Component\Domain;
-use League\Uri\Component\Host;
+use League\Uri\Components\Domain;
+use League\Uri\Components\Host;
 use League\Uri\Exception\OffsetOutOfBounds;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
@@ -30,7 +30,7 @@ use function var_export;
 
 /**
  * @group host
- * @coversDefaultClass \League\Uri\Component\Domain
+ * @coversDefaultClass \League\Uri\Components\Domain
  */
 class DomainTest extends TestCase
 {
