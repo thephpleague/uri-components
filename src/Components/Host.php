@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Component;
+namespace League\Uri\Components;
 
 use League\Uri\Contract\HostInterface;
 use League\Uri\Contract\UriComponentInterface;

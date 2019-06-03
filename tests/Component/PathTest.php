@@ -16,7 +16,7 @@
 
 namespace LeagueTest\Uri\Component;
 
-use League\Uri\Component\Path;
+use League\Uri\Components\Path;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -28,7 +28,7 @@ use function var_export;
 /**
  * @group path
  * @group defaultpath
- * @coversDefaultClass \League\Uri\Component\Path
+ * @coversDefaultClass \League\Uri\Components\Path
  */
 class PathTest extends TestCase
 {

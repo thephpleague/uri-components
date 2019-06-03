@@ -16,7 +16,7 @@
 
 namespace LeagueTest\Uri\Component;
 
-use League\Uri\Component\Scheme;
+use League\Uri\Components\Scheme;
 use League\Uri\Exception\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -27,7 +27,7 @@ use function var_export;
 
 /**
  * @group scheme
- * @coversDefaultClass \League\Uri\Component\Scheme
+ * @coversDefaultClass \League\Uri\Components\Scheme
  */
 class SchemeTest extends TestCase
 {
