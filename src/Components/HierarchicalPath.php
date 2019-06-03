@@ -461,13 +461,14 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
             throw new SyntaxError('an extension sequence can not contain a leading `.` character');
         }
 
+        /** @var string $basename */
         $basename = end($this->segments);
         [$ext, $param] = explode(';', $basename, 2) + [1 => null];
         if ('' === $ext) {
             return $this;
         }
 
-        return $this->withBasename($this->buildBasename($extension, $ext, $param));
+        return $this->withBasename($this->buildBasename($extension, (string) $ext, $param));
     }
 
     /**

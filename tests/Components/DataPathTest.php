@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Component;
+namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\DataPath as Path;
 use League\Uri\Exception\SyntaxError;

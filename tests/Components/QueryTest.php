@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Component;
+namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Components\Query;
@@ -877,16 +877,6 @@ class QueryTest extends TestCase
         $newQuery = $query->appendTo('first', 10);
         self::assertSame('first=1&second=2&third=&first=10&first=10', (string) $newQuery);
         self::assertSame('1', $newQuery->get('first'));
-    }
-
-    /**
-     * @covers ::filterPair
-     * @covers ::appendTo
-     */
-    public function testAppendToThrowsException(): void
-    {
-        self::expectException(TypeError::class);
-        (new Query())->appendTo('foo', ['bar']);
     }
 
     /**
