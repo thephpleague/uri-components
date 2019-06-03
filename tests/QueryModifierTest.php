@@ -110,7 +110,7 @@ class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, string $expected): void
     {
-        self::assertSame($expected, UriModifier::removeParams(Uri::create($uri), ...$input)->getQuery());
+        self::assertSame($expected, UriModifier::removeParams(Uri::createFromBaseUri($uri), ...$input)->getQuery());
     }
 
     public function removeParamsProvider(): array

@@ -2,7 +2,5 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
 parameters:
     ignoreErrors:
-        - '#Parameter \#2 \$str of function explode expects string, string\|false given.#'
-        - '#Parameter \#2 \$ext of method League\\Uri\\Component\\HierarchicalPath::buildBasename\(\) expects string, string\|null given.#'
         - '#Method League\\Uri\\UriModifier::[A-Za-z0-9]+\(\) has parameter \$(uri|query|label|host|path|segment|extension) with no typehint specified.#'
     reportUnmatchedIgnoredErrors: true
