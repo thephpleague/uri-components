@@ -52,8 +52,6 @@ abstract class Component implements UriComponentInterface
 
     /**
      * Validate the component content.
-     *
-     * @param mixed|null $component
      */
     protected function validateComponent($component): ?string
     {
@@ -67,8 +65,6 @@ abstract class Component implements UriComponentInterface
 
     /**
      * Filter the input component.
-     *
-     * @param mixed|null $component
      *
      * @throws SyntaxError If the component can not be converted to a string or null
      * @throws TypeError   If the component type is not supported
@@ -97,7 +93,6 @@ abstract class Component implements UriComponentInterface
 
     /**
      * Filter the URI password component.
-     *
      */
     protected function decodeComponent(string $str): ?string
     {

@@ -1,7 +1,7 @@
 Uri Components
 =======
 
-[![Build Status](https://img.shields.io/travis/thephpleague/uri/master.svg?style=flat-square)](https://travis-ci.org/thephpleague/uri-components)
+[![Build Status](https://img.shields.io/travis/thephpleague/uri-components/master.svg?style=flat-square)](https://travis-ci.org/thephpleague/uri-components)
 [![Latest Version](https://img.shields.io/github/release/thephpleague/uri-components.svg?style=flat-square)](https://github.com/thephpleague/uri-components/releases)
 
 This package contains concrete URI components object represented as immutable value object.
