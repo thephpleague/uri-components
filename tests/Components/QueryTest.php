@@ -17,13 +17,13 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
+use DateInterval;
 use League\Uri\Components\Query;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
-use function date_create;
 use function is_array;
 use function json_encode;
 use function var_export;
@@ -541,10 +541,10 @@ class QueryTest extends TestCase
      */
     public function testCreateFromParamsWithObject(): void
     {
-        $query = Query::createFromParams(date_create());
-        self::assertTrue($query->has('timezone'));
-        self::assertTrue($query->has('timezone_type'));
-        self::assertTrue($query->has('date'));
+        $query = Query::createFromParams(new DateInterval('PT1H'));
+        self::assertTrue($query->has('f'));
+        self::assertTrue($query->has('days'));
+        self::assertTrue($query->has('y'));
     }
 
     /**
