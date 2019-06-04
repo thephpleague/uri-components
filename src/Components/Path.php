@@ -69,8 +69,6 @@ final class Path extends Component implements PathInterface
     /**
      * Validate the component content.
      *
-     * @param mixed|string $path
-     *
      * @throws TypeError if the component is no valid
      */
     private function validate($path): string
@@ -85,8 +83,6 @@ final class Path extends Component implements PathInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
      *
      * @throws TypeError If the URI object is not supported
      */
@@ -128,9 +124,7 @@ final class Path extends Component implements PathInterface
      */
     public function hasTrailingSlash(): bool
     {
-        $path = $this->__toString();
-
-        return '' !== $path && self::SEPARATOR === substr($path, -1);
+        return '' !== $this->path && self::SEPARATOR === substr($this->path, -1);
     }
 
     /**
@@ -170,8 +164,7 @@ final class Path extends Component implements PathInterface
      *
      * @see http://tools.ietf.org/html/rfc3986#section-5.2.4
      *
-     * @param array  $carry   Path segments
-     * @param string $segment a path segment
+     * @return string[]
      */
     private function filterDotSegments(array $carry, string $segment): array
     {
