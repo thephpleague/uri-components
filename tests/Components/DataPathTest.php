@@ -17,7 +17,7 @@
 namespace LeagueTest\Uri\Components;
 
 use League\Uri\Components\DataPath as Path;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
@@ -477,5 +477,33 @@ class DataPathTest extends TestCase
         self::expectException(TypeError::class);
 
         Path::createFromUri('http://example.com:80');
+    }
+
+    public function testHasTrailingSlash(): void
+    {
+        self::assertFalse((new Path('text/plain;charset=us-ascii,'))->hasTrailingSlash());
+    }
+
+    public function testWithTrailingSlash(): void
+    {
+        $path = (new Path('text/plain;charset=us-ascii,'))->withTrailingSlash();
+        self::assertSame('text/plain;charset=us-ascii,/', (string) $path);
+        self::assertSame($path, $path->withTrailingSlash());
+    }
+
+    public function testWithoutTrailingSlash(): void
+    {
+        $path = (new Path('text/plain;charset=us-ascii,/'))->withoutTrailingSlash();
+        self::assertSame('text/plain;charset=us-ascii,', (string) $path);
+        self::assertSame($path, $path->withoutTrailingSlash());
+    }
+
+    public function testDecoded(): void
+    {
+        $encodedPath = 'text/plain;charset=us-ascii,Bonjour%20le%20monde%21';
+        $decodedPath = 'text/plain;charset=us-ascii,Bonjour le monde%21';
+        $path = new Path($encodedPath);
+        self::assertSame($encodedPath, $path->getContent());
+        self::assertSame($decodedPath, $path->decoded());
     }
 }

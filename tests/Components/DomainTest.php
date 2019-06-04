@@ -18,9 +18,8 @@ namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Components\Domain;
-use League\Uri\Components\Host;
-use League\Uri\Exception\OffsetOutOfBounds;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Exceptions\OffsetOutOfBounds;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;

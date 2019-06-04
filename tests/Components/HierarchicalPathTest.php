@@ -18,8 +18,8 @@ namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Components\HierarchicalPath as Path;
-use League\Uri\Exception\OffsetOutOfBounds;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Exceptions\OffsetOutOfBounds;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
@@ -408,7 +408,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithoutSegmentThrowsException(): void
     {
-        self::expectException(OffsetOutOfBounds::class);
+        self::expectException(\League\Uri\Exceptions\OffsetOutOfBounds::class);
         (new Path('/test/'))->withoutSegment(23);
     }
 
@@ -778,5 +778,142 @@ class HierarchicalPathTest extends TestCase
         self::expectException(TypeError::class);
 
         Path::createFromUri('http://example.com:80');
+    }
+
+
+    /**
+     * @dataProvider trailingSlashProvider
+     */
+    public function testHasTrailingSlash(string $path, bool $expected): void
+    {
+        self::assertSame($expected, (new Path($path))->hasTrailingSlash());
+    }
+
+    public function trailingSlashProvider(): array
+    {
+        return [
+            ['/path/to/my/', true],
+            ['/path/to/my', false],
+            ['path/to/my', false],
+            ['path/to/my/', true],
+            ['/', true],
+            ['', false],
+        ];
+    }
+
+    /**
+     * @dataProvider withTrailingSlashProvider
+     */
+    public function testWithTrailingSlash(string $path, string $expected): void
+    {
+        self::assertSame($expected, (string) (new Path($path))->withTrailingSlash());
+    }
+
+    public function withTrailingSlashProvider(): array
+    {
+        return [
+            'relative path without ending slash' => ['toto', 'toto/'],
+            'absolute path without ending slash' => ['/toto', '/toto/'],
+            'root path' => ['/', '/'],
+            'empty path' => ['', '/'],
+            'relative path with ending slash' => ['toto/', 'toto/'],
+            'absolute path with ending slash' => ['/toto/', '/toto/'],
+        ];
+    }
+
+    /**
+     * @dataProvider withoutTrailingSlashProvider
+     */
+    public function testWithoutTrailingSlash(string $path, string $expected): void
+    {
+        self::assertSame($expected, (string) (new Path($path))->withoutTrailingSlash());
+    }
+
+    public function withoutTrailingSlashProvider(): array
+    {
+        return [
+            'relative path without ending slash' => ['toto', 'toto'],
+            'absolute path without ending slash' => ['/toto', '/toto'],
+            'root path' => ['/', ''],
+            'empty path' => ['', ''],
+            'relative path with ending slash' => ['toto/', 'toto'],
+            'absolute path with ending slash' => ['/toto/', '/toto'],
+        ];
+    }
+
+    /**
+     * @dataProvider validPathEncoding
+     *
+     * @covers ::decoded
+     * @covers ::getContent
+     */
+    public function testGetUriComponent(string $decoded, string $encoded): void
+    {
+        $path = new Path($decoded);
+        self::assertSame($decoded, $path->decoded());
+        self::assertSame($encoded, $path->getContent());
+    }
+
+    public function validPathEncoding(): array
+    {
+        return [
+            [
+                'toto',
+                'toto',
+            ],
+            [
+                'bar---',
+                'bar---',
+            ],
+            [
+                '',
+                '',
+                '',
+            ],
+            [
+                '"bad"',
+                '%22bad%22',
+            ],
+            [
+                '<not good>',
+                '%3Cnot%20good%3E',
+            ],
+            [
+                '{broken}',
+                '%7Bbroken%7D',
+            ],
+            [
+                '`oops`',
+                '%60oops%60',
+            ],
+            [
+                '\\slashy',
+                '%5Cslashy',
+            ],
+            [
+                'foo^bar',
+                'foo%5Ebar',
+            ],
+            [
+                'foo^bar/baz',
+                'foo%5Ebar/baz',
+            ],
+            [
+                'foo%2Fbar',
+                'foo%2Fbar',
+            ],
+            [
+                '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/%7E:(first-name,last-name,email-address,picture-url)',
+            ],
+            [
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+                '/v1/people/~:(first-name,last-name,email-address,picture-url)',
+            ],
+            [
+                'foo%2520bar',
+                'foo%2520bar',
+            ],
+        ];
     }
 }

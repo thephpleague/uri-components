@@ -17,8 +17,8 @@
 namespace LeagueTest\Uri;
 
 use GuzzleHttp\Psr7\Uri as GuzzleUri;
-use League\Uri\Exception\OffsetOutOfBounds;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Exceptions\OffsetOutOfBounds;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
