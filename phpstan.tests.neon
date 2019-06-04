@@ -10,6 +10,6 @@ parameters:
         - '#Parameter \#1 \$content of method League\\Uri\\Components\\UserInfo::withContent\(\) expects string\|null, DateTime\|false given\.#'
         - '#Parameter \#2 \$value of method League\\Uri\\Components\\Query::appendTo\(\) expects string\|null, int given\.#'
         - '#Parameter \#2 \$value of method League\\Uri\\Components\\Query::appendTo\(\) expects string\|null, array<int, string> given\.#'
-        - '#Parameter \#2 \$value of method League\\Uri\\Contract\\QueryInterface::appendTo\(\) expects string\|null, int given\.#'
-        - '#Parameter \#2 \$value of method League\\Uri\\Contract\\QueryInterface::withPair\(\) expects string, int given\.#'
+        - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::appendTo\(\) expects string\|null, int given\.#'
+        - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::withPair\(\) expects string, int given\.#'
     reportUnmatchedIgnoredErrors: false

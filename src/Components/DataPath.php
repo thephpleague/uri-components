@@ -19,11 +19,11 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use finfo;
-use League\Uri\Contract\DataPathInterface;
-use League\Uri\Contract\PathInterface;
-use League\Uri\Contract\UriComponentInterface;
-use League\Uri\Contract\UriInterface;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Contracts\DataPathInterface;
+use League\Uri\Contracts\PathInterface;
+use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
 use TypeError;
@@ -319,7 +319,23 @@ final class DataPath extends Component implements DataPathInterface
      */
     public function isAbsolute(): bool
     {
-        return false;
+        return $this->path->isAbsolute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasTrailingSlash(): bool
+    {
+        return $this->path->hasTrailingSlash();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function decoded(): string
+    {
+        return $this->path->decoded();
     }
 
     /**
@@ -403,7 +419,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public function withLeadingSlash(): PathInterface
     {
-        throw new SyntaxError(sprintf('A %s can not have a leading slash', self::class));
+        return new self($this->path->withLeadingSlash());
     }
 
     /**
@@ -412,6 +428,32 @@ final class DataPath extends Component implements DataPathInterface
     public function withoutLeadingSlash(): PathInterface
     {
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withoutTrailingSlash(): PathInterface
+    {
+        $path = $this->path->withoutTrailingSlash();
+        if ($path === $this->path) {
+            return $this;
+        }
+
+        return new self($path);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withTrailingSlash(): PathInterface
+    {
+        $path = $this->path->withTrailingSlash();
+        if ($path === $this->path) {
+            return $this;
+        }
+
+        return new self($path);
     }
 
     /**

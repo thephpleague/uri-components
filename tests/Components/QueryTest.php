@@ -18,7 +18,7 @@ namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Components\Query;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;

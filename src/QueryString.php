@@ -18,8 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Exception\EncodingNotFound;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Exceptions\EncodingNotFound;
+use League\Uri\Exceptions\SyntaxError;
 use TypeError;
 use function array_key_exists;
 use function array_keys;

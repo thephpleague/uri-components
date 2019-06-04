@@ -19,13 +19,13 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use Iterator;
-use League\Uri\Contract\PathInterface;
-use League\Uri\Contract\SegmentedPathInterface;
-use League\Uri\Contract\UriComponentInterface;
-use League\Uri\Contract\UriInterface;
-use League\Uri\Exception\OffsetOutOfBounds;
-use League\Uri\Exception\PathTypeNotFound;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Contracts\PathInterface;
+use League\Uri\Contracts\SegmentedPathInterface;
+use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\OffsetOutOfBounds;
+use League\Uri\Exceptions\PathTypeNotFound;
+use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function array_count_values;
@@ -172,11 +172,26 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * {@inheritDoc}
      */
+    public function hasTrailingSlash(): bool
+    {
+        return $this->path->hasTrailingSlash();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getContent(): ?string
     {
         return $this->path->getContent();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function decoded(): string
+    {
+        return $this->path->decoded();
+    }
     /**
      * {@inheritDoc}
      */
@@ -263,6 +278,32 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public function withoutLeadingSlash(): PathInterface
     {
         $path = $this->path->withoutLeadingSlash();
+        if ($path !== $this->path) {
+            return new self($path);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withoutTrailingSlash(): PathInterface
+    {
+        $path = $this->path->withoutTrailingSlash();
+        if ($path !== $this->path) {
+            return new self($path);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withTrailingSlash(): PathInterface
+    {
+        $path = $this->path->withTrailingSlash();
         if ($path !== $this->path) {
             return new self($path);
         }

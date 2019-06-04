@@ -17,8 +17,8 @@
 namespace LeagueTest\Uri;
 
 use ArrayIterator;
-use League\Uri\Exception\EncodingNotFound;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Exceptions\EncodingNotFound;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\QueryString;
 use PHPUnit\Framework\TestCase;
 use TypeError;

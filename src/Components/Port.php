@@ -18,10 +18,10 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Contract\PortInterface;
-use League\Uri\Contract\UriComponentInterface;
-use League\Uri\Contract\UriInterface;
-use League\Uri\Exception\SyntaxError;
+use League\Uri\Contracts\PortInterface;
+use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function filter_var;
