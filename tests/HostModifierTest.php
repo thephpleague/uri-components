@@ -20,6 +20,7 @@ use GuzzleHttp\Psr7\Uri as GuzzleUri;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
+use League\Uri\Uri;
 use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
 
@@ -99,11 +100,23 @@ class HostModifierTest extends TestCase
         self::assertSame('localhost.127.0.0.1', UriModifier::prependLabel($uri, 'localhost.')->getHost());
     }
 
+    public function testAppendNulLabel(): void
+    {
+        $uri = Uri::createFromString('http://127.0.0.1');
+        self::assertSame($uri, UriModifier::appendLabel($uri, null));
+    }
+
     public function testPrependLabelThrowsWithOtherIpHost(): void
     {
         self::expectException(SyntaxError::class);
         $uri = Http::createFromString('http://[::1]/foo/bar');
         UriModifier::prependLabel($uri, '.localhost');
+    }
+
+    public function testPrependNullLabel(): void
+    {
+        $uri = Uri::createFromString('http://127.0.0.1');
+        self::assertSame($uri, UriModifier::prependLabel($uri, null));
     }
 
     /**

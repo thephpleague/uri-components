@@ -123,6 +123,8 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Create a new instance from a URI object.
      *
+     * @param mixed $uri an URI object
+     *
      * @throws TypeError If the URI object is not supported
      */
     public static function createFromUri($uri): self
