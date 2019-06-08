@@ -28,7 +28,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use function count;
+use function ltrim;
 use function range;
 use function rtrim;
 use function sprintf;
@@ -130,14 +130,17 @@ final class UriModifier
     public static function appendLabel($uri, $label)
     {
         $host = Host::createFromUri($uri);
+        $label = new Host($label);
+        if (null === $label->getContent()) {
+            return $uri;
+        }
+
         if ($host->isDomain()) {
             return $uri->withHost((new Domain($host))->append($label)->__toString());
         }
 
         if ($host->isIpv4()) {
-            $label = ltrim((string) new Host($label), '.');
-
-            return $uri->withHost((new Host($host->getContent().'.'.$label))->__toString());
+            return $uri->withHost($host->getContent().'.'.ltrim($label->getContent(), '.'));
         }
 
         throw new SyntaxError(sprintf('The URI host %s can not be appended', $host->__toString()));
@@ -179,15 +182,17 @@ final class UriModifier
     public static function prependLabel($uri, $label)
     {
         $host = Host::createFromUri($uri);
+        $label = new Host($label);
+        if (null === $label->getContent()) {
+            return $uri;
+        }
+
         if ($host->isDomain()) {
             return $uri->withHost((new Domain($host))->prepend($label)->__toString());
         }
 
         if ($host->isIpv4()) {
-            $label = rtrim((string) new Host($label), '.');
-            $newHost = $host->withContent($label.'.'.$host->getContent());
-
-            return $uri->withHost($newHost->__toString());
+            return $uri->withHost(rtrim($label->getContent(), '.').'.'.$host->getContent());
         }
 
         throw new SyntaxError(sprintf('The URI host %s can not be prepended', (string) $host));
@@ -257,13 +262,13 @@ final class UriModifier
     {
         /** @var HierarchicalPath $path */
         $path = (new HierarchicalPath($path))->withLeadingSlash();
-        $currentPath = Path::createFromUri($uri)->withLeadingSlash()->__toString();
+        $currentPath = Path::createFromUri($uri)->withLeadingSlash();
 
-        if (0 === strpos($currentPath, (string) $path)) {
-            return $uri->withPath($currentPath);
+        if (0 === strpos($currentPath->__toString(), $path->__toString())) {
+            return self::normalizePath($uri, $currentPath);
         }
 
-        return $uri->withPath($path->append($currentPath)->__toString());
+        return self::normalizePath($uri, $path->append($currentPath));
     }
 
     /**
@@ -338,7 +343,7 @@ final class UriModifier
     public static function removeBasePath($uri, $path)
     {
         $currentPath = HierarchicalPath::createFromUri($uri);
-        $uri = self::normalizePath($uri);
+        $uri = self::normalizePath($uri, $currentPath);
 
         /** @var  HierarchicalPath $basePath */
         $basePath = (new HierarchicalPath($path))->withLeadingSlash();
@@ -350,7 +355,7 @@ final class UriModifier
             return $uri;
         }
 
-        return $uri->withPath($currentPath->withoutSegment(...range(0, count($basePath) - 1))->__toString());
+        return $uri->withPath($currentPath->withoutSegment(...range(0, $basePath->count() - 1))->__toString());
     }
 
     /**
@@ -462,21 +467,20 @@ final class UriModifier
      * and the path is not the empty string.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param ?PathInterface                $path
      *
      * @return Psr7UriInterface|UriInterface
      */
-    private static function normalizePath($uri, ?PathInterface $path = null)
+    private static function normalizePath($uri, PathInterface $path)
     {
-        if (!$path instanceof PathInterface) {
-            $path = $uri->getPath();
+        $authority = $uri->getAuthority();
+        if (null === $authority || '' === $authority) {
+            return $uri->withPath($path->__toString());
         }
 
-        $path = (string) $path;
-        if (!in_array($uri->getAuthority(), [null, ''], true) && '' !== $path && '/' != ($path[0] ?? '')) {
-            return $uri->withPath('/'.$path);
+        if ('' === $path->getContent() || $path->isAbsolute()) {
+            return $uri->withPath($path->__toString());
         }
 
-        return $uri->withPath($path);
+        return $uri->withPath($path->withLeadingSlash()->__toString());
     }
 }

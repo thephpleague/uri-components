@@ -69,6 +69,8 @@ final class Path extends Component implements PathInterface
     /**
      * Validate the component content.
      *
+     * @param mixed $path the path content
+     *
      * @throws TypeError if the component is no valid
      */
     private function validate($path): string
@@ -83,6 +85,8 @@ final class Path extends Component implements PathInterface
 
     /**
      * Create a new instance from a URI object.
+     *
+     * @param mixed $uri an URI object
      *
      * @throws TypeError If the URI object is not supported
      */
