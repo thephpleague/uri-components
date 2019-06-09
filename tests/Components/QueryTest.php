@@ -27,7 +27,6 @@ use TypeError;
 use function is_array;
 use function json_encode;
 use function var_export;
-use const PHP_QUERY_RFC3986;
 
 /**
  * @group query
@@ -42,7 +41,7 @@ class QueryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->query = new Query('kingkong=toto');
+        $this->query = Query::createFromRFC3986('kingkong=toto');
     }
 
     /**
@@ -61,7 +60,7 @@ class QueryTest extends TestCase
     public function testInvalidSeparator(string $separator): void
     {
         self::expectException(SyntaxError::class);
-        new Query('foo=bar', $separator, PHP_QUERY_RFC3986);
+        Query::createFromRFC3986('foo=bar', $separator);
     }
 
     public function invalidSeparatorProvider(): array
@@ -77,7 +76,7 @@ class QueryTest extends TestCase
      */
     public function testSeparator(): void
     {
-        $query = new Query('foo=bar&kingkong=toto');
+        $query = Query::createFromRFC3986('foo=bar&kingkong=toto');
         $new_query = $query->withSeparator('|');
         self::assertSame('&', $query->getSeparator());
         self::assertSame('|', $new_query->getSeparator());
@@ -99,7 +98,7 @@ class QueryTest extends TestCase
      */
     public function testIterator(): void
     {
-        $query = new Query('a=1&b=2&c=3&a=4');
+        $query = Query::createFromRFC3986('a=1&b=2&c=3&a=4');
 
         $keys = [];
         $values = [];
@@ -126,7 +125,7 @@ class QueryTest extends TestCase
      */
     public function testJsonEncode(): void
     {
-        $query = new Query('a=1&b=2&c=3&a=4&a=3%20d');
+        $query = Query::createFromRFC3986('a=1&b=2&c=3&a=4&a=3%20d');
         self::assertSame('"a=1&b=2&c=3&a=4&a=3+d"', json_encode($query));
     }
 
@@ -135,9 +134,9 @@ class QueryTest extends TestCase
      */
     public function testGetUriComponent(): void
     {
-        self::assertSame('', (new Query())->getUriComponent());
-        self::assertSame('?', (new Query(''))->getUriComponent());
-        self::assertSame('?foo=bar', (new Query('foo=bar'))->getUriComponent());
+        self::assertSame('', (Query::createFromRFC3986())->getUriComponent());
+        self::assertSame('?', (Query::createFromRFC3986(''))->getUriComponent());
+        self::assertSame('?foo=bar', (Query::createFromRFC3986('foo=bar'))->getUriComponent());
     }
 
     /**
@@ -151,7 +150,7 @@ class QueryTest extends TestCase
      */
     public function testStringRepresentationComponent($input, $expected): void
     {
-        $query = is_array($input) ? Query::createFromPairs($input) : new Query($input);
+        $query = is_array($input) ? Query::createFromPairs($input) : Query::createFromRFC3986($input);
 
         self::assertSame($expected, (string) $query);
     }
@@ -163,7 +162,7 @@ class QueryTest extends TestCase
         return [
             'bug fix issue 84' => ['fào=?%25bar&q=v%61lue', 'f%C3%A0o=?%25bar&q=value'],
             'string' => ['kingkong=toto', 'kingkong=toto'],
-            'query object' => [new Query('kingkong=toto'), 'kingkong=toto'],
+            'query object' => [Query::createFromRFC3986('kingkong=toto'), 'kingkong=toto'],
             'empty string' => ['', ''],
             'empty array' => [[], ''],
             'non empty array' => [[['', null]], ''],
@@ -199,7 +198,7 @@ class QueryTest extends TestCase
      */
     public function testcreateFromPairsWithQueryObject(): void
     {
-        $query = new Query('a=1&b=2');
+        $query = Query::createFromRFC3986('a=1&b=2');
         self::assertEquals($query, Query::createFromPairs($query));
     }
 
@@ -222,9 +221,9 @@ class QueryTest extends TestCase
      */
     public function testNormalization(): void
     {
-        self::assertSame('foo=bar', (new Query('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->toRFC3986());
-        self::assertNull((new Query('&=bar&='))->withoutEmptyPairs()->toRFC1738());
-        self::assertNull((new Query('&&&&&&&&&&&'))->withoutEmptyPairs()->toRFC1738());
+        self::assertSame('foo=bar', (Query::createFromRFC3986('foo=bar&&&=&&&&&&'))->withoutEmptyPairs()->toRFC3986());
+        self::assertNull((Query::createFromRFC3986('&=bar&='))->withoutEmptyPairs()->toRFC1738());
+        self::assertNull((Query::createFromRFC3986('&&&&&&&&&&&'))->withoutEmptyPairs()->toRFC1738());
         self::assertSame($this->query, $this->query->withoutEmptyPairs());
     }
 
@@ -242,7 +241,7 @@ class QueryTest extends TestCase
      */
     public function testAppend(?string $query, $append_data, ?string $expected): void
     {
-        $base = new Query($query);
+        $base = Query::createFromRFC3986($query);
         self::assertSame($expected, $base->append($append_data)->toRFC3986());
     }
 
@@ -256,7 +255,7 @@ class QueryTest extends TestCase
             ['', 'foo=bar', 'foo=bar'],
             ['', 'foo=', 'foo='],
             ['', 'foo', 'foo'],
-            ['foo=bar', new Query('foo=baz'), 'foo=bar&foo=baz'],
+            ['foo=bar', Query::createFromRFC3986('foo=baz'), 'foo=bar&foo=baz'],
             ['foo=bar', 'foo=baz', 'foo=bar&foo=baz'],
             ['foo=bar', 'foo=', 'foo=bar&foo='],
             ['foo=bar', 'foo', 'foo=bar&foo'],
@@ -279,7 +278,7 @@ class QueryTest extends TestCase
      */
     public function testGetParameter(): void
     {
-        $query = new Query('kingkong=toto&kingkong=barbaz&&=&=b');
+        $query = Query::createFromRFC3986('kingkong=toto&kingkong=barbaz&&=&=b');
         self::assertNull($query->get('togo'));
         self::assertSame([], $query->getAll('togo'));
         self::assertSame('toto', $query->get('kingkong'));
@@ -302,7 +301,7 @@ class QueryTest extends TestCase
      */
     public function testCountable(): void
     {
-        $query = new Query('kingkong=toto&kingkong=barbaz');
+        $query = Query::createFromRFC3986('kingkong=toto&kingkong=barbaz');
         self::assertCount(2, $query);
     }
 
@@ -311,7 +310,7 @@ class QueryTest extends TestCase
      */
     public function testStringWithoutContent(): void
     {
-        $query = new Query('foo&bar&baz');
+        $query = Query::createFromRFC3986('foo&bar&baz');
         self::assertNull($query->get('foo'));
         self::assertNull($query->get('bar'));
         self::assertNull($query->get('baz'));
@@ -325,7 +324,7 @@ class QueryTest extends TestCase
      */
     public function testwithoutPair(string $origin, array $without, string $result): void
     {
-        self::assertSame($result, (string) (new Query($origin))->withoutPair(...$without));
+        self::assertSame($result, (string) (Query::createFromRFC3986($origin))->withoutPair(...$without));
     }
 
     public function withoutPairProvider(): array
@@ -346,7 +345,7 @@ class QueryTest extends TestCase
      */
     public function testwithoutPairGetterMethod(): void
     {
-        $query = (new Query())->appendTo('first', 1);
+        $query = (Query::createFromRFC3986())->appendTo('first', 1);
         self::assertTrue($query->has('first'));
         self::assertSame('1', $query->get('first'));
         $query = $query->withoutPair('first');
@@ -455,7 +454,7 @@ class QueryTest extends TestCase
 
     public function testCreateFromParamsWithQueryObject(): void
     {
-        $query = new Query('a=1&b=2');
+        $query = Query::createFromRFC3986('a=1&b=2');
         self::assertEquals($query, Query::createFromParams($query));
     }
 
@@ -513,7 +512,7 @@ class QueryTest extends TestCase
      */
     public function testWithoutNumericIndicesReturnsAnother(): void
     {
-        $query = (new Query('foo[3]'))->withoutNumericIndices();
+        $query = (Query::createFromRFC3986('foo[3]'))->withoutNumericIndices();
         self::assertTrue($query->has('foo[]'));
         self::assertFalse($query->has('foo[3]'));
     }
@@ -595,7 +594,7 @@ class QueryTest extends TestCase
      */
     public function testSort(): void
     {
-        $query = (new Query())
+        $query = (Query::createFromRFC3986())
             ->appendTo('a', 3)
             ->appendTo('b', 2)
             ->appendTo('a', 1)
@@ -617,7 +616,7 @@ class QueryTest extends TestCase
      */
     public function testSortReturnSameInstance(?string $query): void
     {
-        $query = new Query($query);
+        $query = Query::createFromRFC3986($query);
         $sortedQuery = $query->sort();
         self::assertSame($sortedQuery, $query);
     }
@@ -642,7 +641,7 @@ class QueryTest extends TestCase
      */
     public function testWithPair(?string $query, string $key, $value, array $expected): void
     {
-        self::assertSame($expected, (new Query($query))->withPair($key, $value)->getAll($key));
+        self::assertSame($expected, (Query::createFromRFC3986($query))->withPair($key, $value)->getAll($key));
     }
 
     public function provideWithPairData(): array
@@ -682,9 +681,9 @@ class QueryTest extends TestCase
      */
     public function testWithPairBasic(): void
     {
-        self::assertSame('a=B&c=d', (string) (new Query('a=b&c=d'))->withPair('a', 'B'));
-        self::assertSame('a=B&c=d', (string) (new Query('a=b&c=d&a=e'))->withPair('a', 'B'));
-        self::assertSame('a=b&c=d&e=f', (string) (new Query('a=b&c=d'))->withPair('e', 'f'));
+        self::assertSame('a=B&c=d', (string) (Query::createFromRFC3986('a=b&c=d'))->withPair('a', 'B'));
+        self::assertSame('a=B&c=d', (string) (Query::createFromRFC3986('a=b&c=d&a=e'))->withPair('a', 'B'));
+        self::assertSame('a=b&c=d&e=f', (string) (Query::createFromRFC3986('a=b&c=d'))->withPair('e', 'f'));
     }
 
     /**
@@ -698,7 +697,7 @@ class QueryTest extends TestCase
      */
     public function testMergeBasic(string $src, $dest, string $expected): void
     {
-        self::assertSame($expected, (string) (new Query($src))->merge($dest));
+        self::assertSame($expected, (string) (Query::createFromRFC3986($src))->merge($dest));
     }
 
     public function mergeBasicProvider(): array
@@ -731,7 +730,7 @@ class QueryTest extends TestCase
             ],
             'merge can use ComponentInterface' => [
                 'src' => 'a=b&c=d',
-                'dest' => new Query(null),
+                'dest' => Query::createFromRFC3986(null),
                 'expected' => 'a=b&c=d',
             ],
         ];
@@ -746,7 +745,7 @@ class QueryTest extends TestCase
      */
     public function testWithPairGetterMethods(): void
     {
-        $query = new Query('a=1&a=2&a=3');
+        $query = Query::createFromRFC3986('a=1&a=2&a=3');
         self::assertSame('1', $query->get('a'));
 
         $query = $query->withPair('first', 4);
@@ -767,10 +766,10 @@ class QueryTest extends TestCase
      */
     public function testMergeGetterMethods(): void
     {
-        $query = new Query('a=1&a=2&a=3');
+        $query = Query::createFromRFC3986('a=1&a=2&a=3');
         self::assertSame('1', $query->get('a'));
 
-        $query = $query->merge(new Query('first=4'));
+        $query = $query->merge(Query::createFromRFC3986('first=4'));
         self::assertSame('1', $query->get('a'));
 
         $query = $query->merge('a=4');
@@ -787,7 +786,7 @@ class QueryTest extends TestCase
     public function testWithPairThrowsException(): void
     {
         self::expectException(TypeError::class);
-        (new Query(null))->withPair('foo', (object) ['data']);
+        (Query::createFromRFC3986(null))->withPair('foo', (object) ['data']);
     }
 
     /**
@@ -801,7 +800,7 @@ class QueryTest extends TestCase
      */
     public function testWithoutDuplicates(?string $query, ?string $expected): void
     {
-        $query = new Query($query);
+        $query = Query::createFromRFC3986($query);
         self::assertSame($expected, $query->withoutDuplicates()->getContent());
     }
 
@@ -821,7 +820,7 @@ class QueryTest extends TestCase
      */
     public function testAppendToSameName(): void
     {
-        $query = new Query(null);
+        $query = Query::createFromRFC3986(null);
         self::assertSame('a=b', (string) $query->appendTo('a', 'b'));
         self::assertSame('a=b&a=b', (string) $query->appendTo('a', 'b')->appendTo('a', 'b'));
         self::assertSame('a=b&a=b&a=c', (string) $query->appendTo('a', 'b')->appendTo('a', 'b')->appendTo('a', new class() {
@@ -838,7 +837,7 @@ class QueryTest extends TestCase
      */
     public function testAppendToWithEmptyString(): void
     {
-        $query = new Query(null);
+        $query = Query::createFromRFC3986(null);
         self::assertSame('', (string) $query->appendTo('', null));
         self::assertSame('=', (string) $query->appendTo('', ''));
         self::assertSame('a', (string) $query->appendTo('a', null));
@@ -862,7 +861,7 @@ class QueryTest extends TestCase
      */
     public function testAppendToWithGetter(): void
     {
-        $query = (new Query(null))
+        $query = (Query::createFromRFC3986(null))
             ->appendTo('first', 1)
             ->appendTo('second', 2)
             ->appendTo('third', '')
@@ -932,8 +931,7 @@ class QueryTest extends TestCase
 
     public function testCreateFromRFCSpecification(): void
     {
-        $query = new Query('foo=b%20ar|foo=baz', '|', PHP_QUERY_RFC3986);
+        $query = Query::createFromRFC3986('foo=b%20ar|foo=baz', '|');
         self::assertEquals($query, Query::createFromRFC1738('foo=b+ar|foo=baz', '|'));
-        self::assertEquals($query, Query::createFromRFC3986('foo=b%20ar|foo=baz', '|'));
     }
 }
