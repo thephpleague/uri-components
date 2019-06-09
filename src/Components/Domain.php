@@ -140,7 +140,7 @@ final class Domain extends Component implements DomainInterface
             return new self($component);
         }
 
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**
