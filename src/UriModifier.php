@@ -29,10 +29,8 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function ltrim;
-use function range;
 use function rtrim;
 use function sprintf;
-use function strpos;
 
 final class UriModifier
 {
@@ -262,13 +260,17 @@ final class UriModifier
     {
         /** @var HierarchicalPath $path */
         $path = (new HierarchicalPath($path))->withLeadingSlash();
-        $currentPath = Path::createFromUri($uri)->withLeadingSlash();
 
-        if (0 === strpos($currentPath->__toString(), $path->__toString())) {
-            return self::normalizePath($uri, $currentPath);
+        /** @var HierarchicalPath $currentPath */
+        $currentPath = HierarchicalPath::createFromUri($uri)->withLeadingSlash();
+
+        foreach ($path as $offset => $segment) {
+            if ($currentPath->get($offset) !== $segment) {
+                return self::normalizePath($uri, $path->append($currentPath));
+            }
         }
 
-        return self::normalizePath($uri, $path->append($currentPath));
+        return self::normalizePath($uri, $currentPath);
     }
 
     /**
@@ -351,11 +353,17 @@ final class UriModifier
             return $uri;
         }
 
-        if (0 !== strpos((string) $currentPath, (string) $basePath)) {
+        foreach ($basePath as $offset => $segment) {
+            if ($segment !== $currentPath->get($offset)) {
+                return $uri;
+            }
+        }
+
+        if (!$currentPath->isAbsolute()) {
             return $uri;
         }
 
-        return $uri->withPath($currentPath->withoutSegment(...range(0, $basePath->count() - 1))->__toString());
+        return self::normalizePath($uri, $currentPath->withoutSegment(...$basePath->keys()));
     }
 
     /**

@@ -335,6 +335,7 @@ class DomainTest extends TestCase
     {
         $host = new Domain('master.example.com');
         self::assertSame([2], $host->keys('master'));
+        self::assertSame([0, 1, 2], $host->keys());
     }
 
     /**

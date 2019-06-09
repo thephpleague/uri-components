@@ -241,8 +241,12 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * {@inheritDoc}
      */
-    public function keys(string $segment): array
+    public function keys(?string $segment = null): array
     {
+        if (null === $segment) {
+            return array_keys($this->segments);
+        }
+
         return array_keys($this->segments, $segment, true);
     }
 
