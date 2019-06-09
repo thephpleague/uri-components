@@ -344,11 +344,11 @@ final class UriModifier
      */
     public static function removeBasePath($uri, $path)
     {
+        /** @var  HierarchicalPath $basePath */
+        $basePath = (new HierarchicalPath($path))->withLeadingSlash();
         $currentPath = HierarchicalPath::createFromUri($uri);
         $uri = self::normalizePath($uri, $currentPath);
 
-        /** @var  HierarchicalPath $basePath */
-        $basePath = (new HierarchicalPath($path))->withLeadingSlash();
         if ('/' === (string) $basePath) {
             return $uri;
         }
@@ -481,6 +481,7 @@ final class UriModifier
     private static function normalizePath($uri, PathInterface $path)
     {
         $authority = $uri->getAuthority();
+
         if (null === $authority || '' === $authority) {
             return $uri->withPath($path->__toString());
         }
