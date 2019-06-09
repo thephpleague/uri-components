@@ -24,6 +24,7 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use Zend\Diactoros\Uri as ZendPsr7Uri;
 use function date_create;
 use function iterator_to_array;
 use function var_export;
@@ -207,51 +208,67 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
-     * @dataProvider createFromSegmentsValid
+     * @dataProvider createFromRelativeSegmentsValid
      *
-     * @covers ::createFromSegments
+     * @covers ::createRelativeFromSegments
      */
-    public function testCreateFromSegments(iterable $input, int $has_front_delimiter, string $expected): void
+    public function testCreateRelativeFromSegments(iterable $input, string $expected): void
     {
-        self::assertSame($expected, (string) Path::createFromSegments($input, $has_front_delimiter));
+        self::assertSame($expected, (string) Path::createRelativeFromSegments($input));
     }
 
-    public function createFromSegmentsValid(): array
+    public function createFromRelativeSegmentsValid(): array
     {
         return [
-            'array (1)' => [['www', 'example', 'com'], Path::IS_RELATIVE, 'www/example/com'],
-            'array (2)' => [['www', 'example', 'com'], Path::IS_ABSOLUTE, '/www/example/com'],
-            'iterator' => [new ArrayIterator(['www', 'example', 'com']), Path::IS_ABSOLUTE, '/www/example/com'],
-            'Path object' => [new Path('/foo/bar/baz'), Path::IS_ABSOLUTE, '/foo/bar/baz'],
-            'arbitrary cut 1' => [['foo', 'bar', 'baz'], Path::IS_ABSOLUTE, '/foo/bar/baz'],
-            'arbitrary cut 2' => [['foo/bar', 'baz'], Path::IS_ABSOLUTE, '/foo/bar/baz'],
-            'arbitrary cut 3' => [['foo/bar/baz'], Path::IS_ABSOLUTE, '/foo/bar/baz'],
-            'ending delimiter' => [['foo/bar/baz', ''], Path::IS_RELATIVE, 'foo/bar/baz/'],
-            'use reserved characters #' => [['all', 'i%23s', 'good'], Path::IS_ABSOLUTE, '/all/i%23s/good'],
-            'use reserved characters ?' => [['all', 'i%3fs', 'good'], Path::IS_RELATIVE,  'all/i%3Fs/good'],
-            'enforce path status (1)' => [['', 'toto', 'yeah', ''], Path::IS_RELATIVE, 'toto/yeah/'],
-            'enforce path status (2)' => [['', 'toto', 'yeah', ''], Path::IS_ABSOLUTE, '/toto/yeah/'],
-            'enforce path status (3)' => [['', '', 'toto', 'yeah', ''], Path::IS_RELATIVE, 'toto/yeah/'],
-            'enforce path status (4)' => [['', '', 'toto', 'yeah', ''], Path::IS_ABSOLUTE, '//toto/yeah/'],
+            'array (1)' => [['www', 'example', 'com'], 'www/example/com'],
+            'ending delimiter' => [['foo/bar/baz', ''], 'foo/bar/baz/'],
+            'use reserved characters ?' => [['all', 'i%3fs', 'good'], 'all/i%3Fs/good'],
+            'enforce path status (1)' => [['', 'toto', 'yeah', ''], 'toto/yeah/'],
+            'enforce path status (3)' => [['', '', 'toto', 'yeah', ''], 'toto/yeah/'],
         ];
     }
 
     /**
-     * @covers ::createFromSegments
+     * @dataProvider createFromAbsoluteSegmentsValid
+     *
+     * @covers ::createAbsoluteFromSegments
      */
-    public function testCreateFromSegmentsFailedWithInvalidType(): void
+    public function testCreateAbsoluteFromSegments(iterable $input, string $expected): void
     {
-        self::expectException(SyntaxError::class);
-        Path::createFromSegments(['all', 'is', 'good'], 23);
+        self::assertSame($expected, (string) Path::createAbsoluteFromSegments($input));
+    }
+
+    public function createFromAbsoluteSegmentsValid(): array
+    {
+        return [
+            'array (2)' => [['www', 'example', 'com'], '/www/example/com'],
+            'iterator' => [new ArrayIterator(['www', 'example', 'com']), '/www/example/com'],
+            'Path object' => [new Path('/foo/bar/baz'), '/foo/bar/baz'],
+            'arbitrary cut 1' => [['foo', 'bar', 'baz'], '/foo/bar/baz'],
+            'arbitrary cut 2' => [['foo/bar', 'baz'], '/foo/bar/baz'],
+            'arbitrary cut 3' => [['foo/bar/baz'], '/foo/bar/baz'],
+            'use reserved characters #' => [['all', 'i%23s', 'good'], '/all/i%23s/good'],
+            'enforce path status (2)' => [['', 'toto', 'yeah', ''], '/toto/yeah/'],
+            'enforce path status (4)' => [['', '', 'toto', 'yeah', ''], '//toto/yeah/'],
+        ];
     }
 
     /**
-     * @covers ::createFromSegments
+     * @covers ::createRelativeFromSegments
      */
-    public function testCreateFromSegmentsFailed(): void
+    public function testCreateRelativeFromSegmentsFailed(): void
     {
         self::expectException(TypeError::class);
-        Path::createFromSegments([date_create()], Path::IS_RELATIVE);
+        Path::createRelativeFromSegments([date_create()]);
+    }
+
+    /**
+     * @covers ::createAbsoluteFromSegments
+     */
+    public function testCreateAbsoluteFromSegmentsFailed(): void
+    {
+        self::expectException(TypeError::class);
+        Path::createAbsoluteFromSegments([date_create()]);
     }
 
     /**
@@ -408,7 +425,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithoutSegmentThrowsException(): void
     {
-        self::expectException(\League\Uri\Exceptions\OffsetOutOfBounds::class);
+        self::expectException(OffsetOutOfBounds::class);
         (new Path('/test/'))->withoutSegment(23);
     }
 
@@ -741,6 +758,7 @@ class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
+     * @covers \League\Uri\Components\Path::createFromUri
      *
      * @param mixed   $uri      an URI object
      * @param ?string $expected
@@ -763,6 +781,10 @@ class HierarchicalPathTest extends TestCase
                 'uri' => Http::createFromString('toto://example.com'),
                 'expected' => '',
             ],
+            'PSR-7 URI object with no authority' => [
+                'uri' => Http::createFromString('path/to/sky?toto'),
+                'expected' => 'path/to/sky',
+            ],
             'League URI object' => [
                 'uri' => Uri::createFromString('http://example.com/path'),
                 'expected' => '/path',
@@ -771,7 +793,24 @@ class HierarchicalPathTest extends TestCase
                 'uri' => Uri::createFromString('toto://example.com'),
                 'expected' => '',
             ],
+            'League URI object with no authority' => [
+                'uri' => Uri::createFromString('path/to/sky?toto'),
+                'expected' => 'path/to/sky',
+            ],
         ];
+    }
+
+    /**
+     * @covers ::createFromUri
+     * @covers \League\Uri\Components\Path::createFromUri
+     */
+    public function testCreateFromUriWithPSR7Implementation(): void
+    {
+        $uri = (new ZendPsr7Uri('http://example.com'))
+            ->withPath('path');
+
+        self::assertSame('path', $uri->getPath());
+        self::assertSame('/path', Path::createFromUri($uri)->__toString());
     }
 
     public function testCreateFromUriThrowsTypeError(): void

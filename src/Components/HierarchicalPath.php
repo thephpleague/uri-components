@@ -22,11 +22,8 @@ use Iterator;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\SegmentedPathInterface;
 use League\Uri\Contracts\UriComponentInterface;
-use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\OffsetOutOfBounds;
-use League\Uri\Exceptions\PathTypeNotFound;
 use League\Uri\Exceptions\SyntaxError;
-use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -53,6 +50,8 @@ use const PATHINFO_EXTENSION;
 
 final class HierarchicalPath extends Component implements SegmentedPathInterface
 {
+    private const SEPARATOR = '/';
+
     /**
      * @var PathInterface
      */
@@ -94,19 +93,10 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Returns a new instance from an iterable structure.
      *
-     * @param int $type one of the constant IS_ABSOLUTE or IS_RELATIVE
-     *
-     * @throws PathTypeNotFound If the type is not recognized
-     * @throws TypeError        If the segments are malformed
+     * @throws TypeError If the segments are malformed
      */
-    public static function createFromSegments(iterable $segments, int $type = self::IS_RELATIVE): self
+    public static function createRelativeFromSegments(iterable $segments): self
     {
-        static $type_list = [self::IS_ABSOLUTE => 1, self::IS_RELATIVE => 1];
-
-        if (!isset($type_list[$type])) {
-            throw new PathTypeNotFound(sprintf('"%s" is an invalid or unsupported %s type', $type, self::class));
-        }
-
         $pathSegments = [];
         foreach ($segments as $value) {
             if (!is_scalar($value) && !method_exists($value, '__toString')) {
@@ -116,10 +106,26 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         $path = implode(self::SEPARATOR, $pathSegments);
-        if (static::IS_ABSOLUTE !== $type) {
-            return new self(ltrim($path, self::SEPARATOR));
+
+        return new self(ltrim($path, self::SEPARATOR));
+    }
+
+    /**
+     * Returns a new instance from an iterable structure.
+     *
+     * @throws TypeError If the segments are malformed
+     */
+    public static function createAbsoluteFromSegments(iterable $segments): self
+    {
+        $pathSegments = [];
+        foreach ($segments as $value) {
+            if (!is_scalar($value) && !method_exists($value, '__toString')) {
+                throw new TypeError('The submitted segments are invalid');
+            }
+            $pathSegments[] = (string) $value;
         }
 
+        $path = implode(self::SEPARATOR, $pathSegments);
         if (self::SEPARATOR !== ($path[0] ?? '')) {
             return new self(self::SEPARATOR.$path);
         }
@@ -136,11 +142,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      */
     public static function createFromUri($uri): self
     {
-        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
-            return new self($uri->getPath());
-        }
-
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
+        return new self(Path::createFromUri($uri));
     }
 
     /**
