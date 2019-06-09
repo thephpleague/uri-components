@@ -422,6 +422,7 @@ class HierarchicalPathTest extends TestCase
         self::assertSame([0], $path->keys('bar'));
         self::assertCount(2, $path->keys('3'));
         self::assertSame([1, 3], $path->keys('3'));
+        self::assertSame([0, 1, 2, 3], $path->keys());
     }
 
     /**

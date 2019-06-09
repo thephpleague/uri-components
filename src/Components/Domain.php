@@ -232,8 +232,12 @@ final class Domain extends Component implements DomainInterface
     /**
      * {@inheritDoc}
      */
-    public function keys(string $label): array
+    public function keys(?string $label = null): array
     {
+        if (null === $label) {
+            return array_keys($this->labels);
+        }
+
         return array_keys($this->labels, $label, true);
     }
 
