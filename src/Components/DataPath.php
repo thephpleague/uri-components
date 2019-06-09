@@ -22,9 +22,7 @@ use finfo;
 use League\Uri\Contracts\DataPathInterface;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
-use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
 use TypeError;
 use function base64_decode;
@@ -259,11 +257,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function createFromUri($uri): self
     {
-        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
-            return new self($uri->getPath());
-        }
-
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
+        return new self(Path::createFromUri($uri)->__toString());
     }
 
     /**

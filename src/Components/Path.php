@@ -92,11 +92,22 @@ final class Path extends Component implements PathInterface
      */
     public static function createFromUri($uri): self
     {
-        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
-            return new self($uri->getPath());
+        if (!$uri instanceof UriInterface && !$uri instanceof Psr7UriInterface) {
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
         }
 
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s`', Psr7UriInterface::class, UriInterface::class));
+        $path = $uri->getPath();
+        $authority = $uri->getAuthority();
+
+        if (null === $authority || '' === $authority) {
+            return new self($path);
+        }
+
+        if ('' === $path || '/' === $path[0]) {
+            return new self($path);
+        }
+
+        return new self('/'.$path);
     }
 
     /**
