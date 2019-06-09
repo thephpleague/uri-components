@@ -61,7 +61,7 @@ class QueryTest extends TestCase
     public function testInvalidSeparator(string $separator): void
     {
         self::expectException(SyntaxError::class);
-        new Query('foo=bar', PHP_QUERY_RFC3986, $separator);
+        new Query('foo=bar', $separator, PHP_QUERY_RFC3986);
     }
 
     public function invalidSeparatorProvider(): array
@@ -928,5 +928,12 @@ class QueryTest extends TestCase
         self::expectException(TypeError::class);
 
         Query::createFromUri('http://example.com#foobar');
+    }
+
+    public function testCreateFromRFCSpecification(): void
+    {
+        $query = new Query('foo=b%20ar|foo=baz', '|', PHP_QUERY_RFC3986);
+        self::assertEquals($query, Query::createFromRFC1738('foo=b+ar|foo=baz', '|'));
+        self::assertEquals($query, Query::createFromRFC3986('foo=b%20ar|foo=baz', '|'));
     }
 }

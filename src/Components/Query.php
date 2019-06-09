@@ -67,7 +67,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param mixed|null $query
      */
-    public function __construct($query = null, int $enc_type = PHP_QUERY_RFC3986, string $separator = '&')
+    public function __construct($query = null, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986)
     {
         $this->separator = $this->filterSeparator($separator);
         $this->pairs = QueryString::parse($query, $separator, $enc_type);
@@ -109,8 +109,8 @@ final class Query extends Component implements QueryInterface
         if ($params instanceof self) {
             return new self(
                 http_build_query($params->toParams(), '', $separator, PHP_QUERY_RFC3986),
-                PHP_QUERY_RFC3986,
-                $separator
+                $separator,
+                PHP_QUERY_RFC3986
             );
         }
 
@@ -119,17 +119,17 @@ final class Query extends Component implements QueryInterface
         }
 
         if ([] === $params) {
-            return new self(null, PHP_QUERY_RFC3986, $separator);
+            return new self(null, $separator, PHP_QUERY_RFC3986);
         }
 
         if (!is_array($params) && !is_object($params)) {
-            throw new TypeError(sprintf('The parameter is expected to be iterable or an Object `%s` given', gettype($params)));
+            throw new TypeError(sprintf('The parameter is expected to be iterable or an object with public properties, `%s` given', gettype($params)));
         }
 
         return new self(
             http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
-            PHP_QUERY_RFC3986,
-            $separator
+            $separator,
+            PHP_QUERY_RFC3986
         );
     }
 
@@ -138,7 +138,7 @@ final class Query extends Component implements QueryInterface
      */
     public static function createFromPairs(iterable $pairs, string $separator = '&'): self
     {
-        return new self(QueryString::build($pairs, $separator, PHP_QUERY_RFC3986), PHP_QUERY_RFC3986, $separator);
+        return new self(QueryString::build($pairs, $separator, PHP_QUERY_RFC3986), $separator, PHP_QUERY_RFC3986);
     }
 
     /**
@@ -164,6 +164,26 @@ final class Query extends Component implements QueryInterface
         }
 
         throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+    }
+
+    /**
+     * Returns a new instance.
+     *
+     * @param mixed|null $query a query in RFC3986 form
+     */
+    public static function createFromRFC3986($query, string $separator = '&'): self
+    {
+        return new self($query, $separator, PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * Returns a new instance.
+     *
+     * @param mixed|null $query a query in RFC1738 form
+     */
+    public static function createFromRFC1738($query, string $separator = '&'): self
+    {
+        return new self($query, $separator, PHP_QUERY_RFC1738);
     }
 
     /**
