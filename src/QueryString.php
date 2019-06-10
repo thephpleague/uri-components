@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Exceptions\EncodingNotFound;
 use League\Uri\Exceptions\SyntaxError;
 use TypeError;
 use function array_key_exists;
@@ -124,14 +123,14 @@ final class QueryString
      *
      * @param mixed|null $query
      *
-     * @throws SyntaxError      If the query string is invalid
-     * @throws TypeError        If the query is not stringable or the null value
-     * @throws EncodingNotFound If the encoding type is invalid
+     * @throws SyntaxError If the encoding type is invalid
+     * @throws SyntaxError If the query string is invalid
+     * @throws TypeError   If the query is not stringable or the null value
      */
     private static function prepareQuery($query, int $enc_type): ?string
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new EncodingNotFound(sprintf('Unknown Encoding: %s', $enc_type));
+            throw new SyntaxError('Unknown or Unsupported encoding');
         }
 
         if (null === $query) {
@@ -212,8 +211,8 @@ final class QueryString
      * a valid query string. This method differs from PHP http_build_query as
      * it does not modify parameters keys.
      *
-     * @throws EncodingNotFound If the encoding type is invalid
-     * @throws SyntaxError      If a pair is invalid
+     * @throws SyntaxError If the encoding type is invalid
+     * @throws SyntaxError If a pair is invalid
      */
     public static function build(iterable $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): ?string
     {
@@ -221,8 +220,8 @@ final class QueryString
             throw new SyntaxError('The separator character can not be the empty string.');
         }
 
-        if (null === (self::ENCODING_LIST[$enc_type] ?? null)) {
-            throw new EncodingNotFound(sprintf('Unknown Encoding: %s', $enc_type));
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new SyntaxError('Unknown or Unsupported encoding');
         }
 
         self::$regexpValue = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote(
