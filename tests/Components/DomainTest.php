@@ -339,6 +339,18 @@ class DomainTest extends TestCase
     }
 
     /**
+     * @covers ::labels
+     */
+    public function testLabels(): void
+    {
+        $host = new Domain('master.example.com');
+        self::assertSame(['com', 'example', 'master'], $host->labels());
+        self::assertSame([], (new Domain(null))->labels());
+        self::assertSame([''], (new Domain(''))->labels());
+        self::assertSame(['', 'localhost'], (new Domain('localhost.'))->labels());
+    }
+
+    /**
      * @dataProvider withoutProvider
      * @covers ::withoutLabel
      */

@@ -443,6 +443,17 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
+     * @covers ::segments
+     */
+    public function testSegments(): void
+    {
+        $path = new Path('/bar/3/troll/3');
+        self::assertSame(['bar', '3', 'troll', '3'], $path->segments());
+        self::assertSame([''], (new Path())->segments());
+        self::assertSame([''], (new Path('/'))->segments());
+    }
+
+    /**
      * @dataProvider arrayProvider
      *
      * @covers ::count

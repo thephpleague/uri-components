@@ -6,16 +6,33 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- Components classes are now defined under the `League\Uri\Component` namespace
-- Components classes are made `final`
 - `League\Uri\UriModifier` to ease manipulating `League\Uri\UriInterface` and `Psr\Http\Message\UriInterface` implementing objects.
 - `League\Uri\QueryString` to parse, extract and build query string and parameters
-- `League\Uri\Component\Authority` to represent the URI authority component
+- All components classes implement the `League\Uri\Contracts\ComponentInterface` 
+- All components classes expose the `createFromUri` named constructor to instantiate a component object from a URI object
+- `League\Uri\Components\Authority` to represent the URI authority component
+- `League\Uri\Components\Fragment::decoded` to return the safely decoded fragment content
+- `League\Uri\Components\UserInfo::decoded` to return the safely decoded user info content
+- `League\Uri\Components\Port::toInt` to return the int representation of the Port or null
+- `League\Uri\Components\Domain` to better process domain host
+- `League\Uri\Components\HierarchicalPath::createAbsoluteFromSegments`
+- `League\Uri\Components\HierarchicalPath::createRelativeFromSegments`
+- `League\Uri\Components\HierarchicalPath::segments` to return the component segments
+- `League\Uri\Components\HierarchicalPath::get` to return a specific segment
+- `League\Uri\Components\Query` follows more closely the [URLSearchParams](https://url.spec.whatwg.org/#interface-urlsearchparams) specifications from the WHATWG group
+- `League\Uri\Components\Query::createFromRFC3986` to return a new object from a RFC3986 query string
+- `League\Uri\Components\Query::createFromRFC1738` to return a new object from a RFC1738 query string
+- `League\Uri\Components\Query::toRFC3986` to return a RFC3986 query string
+- `League\Uri\Components\Query::toRFC1738` to return a RFC1738 query string
 
 ### Fixed
 
-- The `Query` component class follow more closely the [URLSearchParams](https://url.spec.whatwg.org/#interface-urlsearchparams) specifications from the WHATWG group
-- `League\Uri\Component\Host` now throws `League\Uri\Exception\IdnSupportMissing` on misconfigured Intl extension presence.
+- Components classes are made `final`
+- `getContent` no-longer takes any parameter
+- `Host` objects throws `League\Uri\Exception\IdnSupportMissing` on mis-configured or absent Intl extension presence.
+- `UserInfo::__construct` expects two arguments the user and the pass instead of one.
+- `Query::__construct` is now private
+- Query parsing/building is fixed so that a round between parsing and building returns the original input.
 
 ### Deprecated
 
@@ -23,16 +40,41 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Remove
 
+- support for `PHP7.0`
+- support for `PHP7.1`
 - support for Public Suffix List resolution
+- `isEmpty` and `isNull` methods are removed
 - `League\Uri\parse_query`
 - `League\Uri\build_query`
 - `League\Uri\extract_query`
 - `League\Uri\pairs_to_params`
 - `League\Uri\QueryBuilder`
 - `League\Uri\QueryParser`
-- `League\Uri\Components` namespace
-- support for `PHP7.0`
-- support for `PHP7.1`
+- `League\Uri\Components\ComponentInterface`
+- `League\Uri\Components\HierarchicalPath::createFromSegments`
+- `League\Uri\Components\HierarchicalPath::getSegments`
+- `League\Uri\Components\HierarchicalPath::getSegment`
+- `League\Uri\Components\HierarchicalPath::IS_ABSOLUTE`
+- `League\Uri\Components\HierarchicalPath::IS_RELATIVE`
+- The following methods are transferred to the new `League\Uri\Components\Domain` class
+- `League\Uri\Components\Host::isAbsolute`
+- `League\Uri\Components\Host::getLabels`
+- `League\Uri\Components\Host::getLabel`
+- `League\Uri\Components\Host::keys`
+- `League\Uri\Components\Host::count`
+- `League\Uri\Components\Host::getIterator`
+- `League\Uri\Components\Host::append`
+- `League\Uri\Components\Host::prepend`
+- `League\Uri\Components\Host::replaceLabel`
+- `League\Uri\Components\Host::withoutLabels`
+- `League\Uri\Components\Host::withRootLabel`
+- `League\Uri\Components\Host::withoutRootLabel`
+- `League\Uri\Components\Query::ksort`
+- `League\Uri\Components\Query::getParams`
+- `League\Uri\Components\Query::getParam`
+- `League\Uri\Components\Query::getPairs`
+- `League\Uri\Components\Query::getPair`
+- `League\Uri\Components\Query::hasPair`
 
 ## 1.8.2 - 2018-10-24
 

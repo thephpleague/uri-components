@@ -244,6 +244,14 @@ final class Domain extends Component implements DomainInterface
     /**
      * {@inheritDoc}
      */
+    public function labels(): array
+    {
+        return $this->labels;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function isAbsolute(): bool
     {
         return count($this->labels) > 1 && '' === reset($this->labels);
