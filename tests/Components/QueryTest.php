@@ -54,23 +54,6 @@ class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::filterSeparator
-     * @dataProvider invalidSeparatorProvider
-     */
-    public function testInvalidSeparator(string $separator): void
-    {
-        self::expectException(SyntaxError::class);
-        Query::createFromRFC3986('foo=bar', $separator);
-    }
-
-    public function invalidSeparatorProvider(): array
-    {
-        return [
-            'separator can not be `=`' => [''],
-        ];
-    }
-
-    /**
      * @covers ::getSeparator
      * @covers ::withSeparator
      */
@@ -81,6 +64,9 @@ class QueryTest extends TestCase
         self::assertSame('&', $query->getSeparator());
         self::assertSame('|', $new_query->getSeparator());
         self::assertSame('foo=bar|kingkong=toto', $new_query->getContent());
+
+        self::expectException(SyntaxError::class);
+        $new_query->withSeparator('');
     }
 
     /**

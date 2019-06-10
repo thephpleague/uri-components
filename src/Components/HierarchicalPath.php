@@ -255,6 +255,14 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * {@inheritDoc}
      */
+    public function segments(): array
+    {
+        return $this->segments;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function withoutDotSegments(): PathInterface
     {
         $path = $this->path->withoutDotSegments();

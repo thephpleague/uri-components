@@ -69,22 +69,8 @@ final class Query extends Component implements QueryInterface
      */
     private function __construct($query = null, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986)
     {
-        $this->separator = $this->filterSeparator($separator);
         $this->pairs = QueryString::parse($query, $separator, $enc_type);
-    }
-
-    /**
-     * Filter the incoming separator.
-     *
-     * @throws SyntaxError if the separator is invalid
-     */
-    private function filterSeparator(string $separator): string
-    {
-        if ('' === $separator) {
-            throw new SyntaxError('The separator character can not be the empty string.');
-        }
-
-        return $separator;
+        $this->separator = $separator;
     }
 
     /**
@@ -154,16 +140,16 @@ final class Query extends Component implements QueryInterface
             return new self($uri->getQuery());
         }
 
-        if ($uri instanceof Psr7UriInterface) {
-            $component = $uri->getQuery();
-            if ('' === $component) {
-                $component = null;
-            }
-
-            return new self($component);
+        if (!$uri instanceof Psr7UriInterface) {
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
         }
 
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+        $component = $uri->getQuery();
+        if ('' === $component) {
+            $component = null;
+        }
+
+        return new self($component);
     }
 
     /**
@@ -317,8 +303,12 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
+        if ('' === $separator) {
+            throw new SyntaxError('The separator character can not be the empty string.');
+        }
+
         $clone = clone $this;
-        $clone->separator = $this->filterSeparator($separator);
+        $clone->separator = $separator;
 
         return $clone;
     }
