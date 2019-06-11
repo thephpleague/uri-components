@@ -23,7 +23,6 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * @group path
@@ -97,21 +96,29 @@ class PathModifierTest extends TestCase
     }
 
     /**
-     * @dataProvider validPathProvider
+     * @dataProvider appendSegmentProvider
      *
      * @covers ::normalizePath
      * @covers ::appendSegment
      */
-    public function testAppendProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
+    public function testAppendProcess(string $segment, string $append): void
     {
         self::assertSame($append, UriModifier::appendSegment($this->uri, $segment)->getPath());
     }
 
+    public function appendSegmentProvider(): array
+    {
+        return [
+            ['toto', '/path/to/the/sky.php/toto'],
+            ['le blanc', '/path/to/the/sky.php/le%20blanc'],
+        ];
+    }
+
     /**
+     * @dataProvider validappendSegmentProvider
+     *
      * @covers ::normalizePath
      * @covers ::appendSegment
-     *
-     * @dataProvider validappendSegmentProvider
      */
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
@@ -169,16 +176,6 @@ class PathModifierTest extends TestCase
      * @covers ::normalizePath
      * @covers ::replaceBasename
      */
-    public function testBasenameThrowTypeError(): void
-    {
-        self::expectException(TypeError::class);
-        UriModifier::replaceBasename('http://example.com', 'foo/baz');
-    }
-
-    /**
-     * @covers ::normalizePath
-     * @covers ::replaceBasename
-     */
     public function testBasenameThrowException(): void
     {
         self::expectException(SyntaxError::class);
@@ -210,25 +207,52 @@ class PathModifierTest extends TestCase
      * @covers ::normalizePath
      * @covers ::prependSegment
      *
-     * @dataProvider validPathProvider
+     * @dataProvider prependSegmentProvider
      */
-    public function testPrependProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
+    public function testPrependProcess(string $uri, string $segment, string $prepend): void
     {
-        self::assertSame($prepend, UriModifier::prependSegment($this->uri, $segment)->getPath());
+        $uri = Uri::createFromString($uri);
+        self::assertSame($prepend, UriModifier::prependSegment($uri, $segment)->getPath());
+    }
+
+    public function prependSegmentProvider(): array
+    {
+        return [
+            [
+                'uri' => 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar+baz#doc3',
+                'segment' => 'toto',
+                'expectedPath' => '/toto/path/to/the/sky.php',
+            ],
+            [
+                'uri' => 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar+baz#doc3',
+                'segment' => 'le blanc',
+                'expectedPath' => '/le%20blanc/path/to/the/sky.php',
+            ],
+            [
+                'uri' => 'http://example.com/',
+                'segment' => 'toto',
+                'expectedPath' => '/toto/',
+            ],
+            [
+                'uri' => 'http://example.com',
+                'segment' => '/toto',
+                'expectedPath' => '/toto/',
+            ],
+        ];
     }
 
     /**
      * @covers ::normalizePath
      * @covers ::replaceSegment
      *
-     * @dataProvider validPathProvider
+     * @dataProvider replaceSegmentProvider
      */
     public function testReplaceSegmentProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
         self::assertSame($replace, UriModifier::replaceSegment($this->uri, $key, $segment)->getPath());
     }
 
-    public function validPathProvider(): array
+    public function replaceSegmentProvider(): array
     {
         return [
             ['toto', 2, '/path/to/the/sky.php/toto', '/toto/path/to/the/sky.php', '/path/to/toto/sky.php'],

@@ -2,5 +2,5 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
 parameters:
     ignoreErrors:
-        - '#Method League\\Uri\\UriModifier::[A-Za-z0-9]+\(\) has parameter \$(uri|query|label|host|path|segment|extension) with no typehint specified.#'
+        - '#Method League\\Uri\\UriModifier::[A-Za-z0-9]+\(\) has parameter \$(uri|query|label|host|path|segment|extension|dirname|basename|parameters) with no typehint specified.#'
     reportUnmatchedIgnoredErrors: true

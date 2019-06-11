@@ -271,6 +271,12 @@ class DataPathTest extends TestCase
         ];
     }
 
+    public function testWithParametersFailsWithWrongType(): void
+    {
+        self::expectException(TypeError::class);
+        Path::createFromPath(__DIR__.'/data/red-nose.gif')->withParameters([]);
+    }
+
     /**
      * @dataProvider fileProvider
      * @param Path $uri
