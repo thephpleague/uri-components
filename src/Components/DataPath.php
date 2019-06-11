@@ -30,7 +30,10 @@ use function base64_encode;
 use function count;
 use function explode;
 use function file_get_contents;
+use function gettype;
 use function implode;
+use function is_scalar;
+use function method_exists;
 use function preg_match;
 use function preg_replace_callback;
 use function rawurldecode;
@@ -464,10 +467,17 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
+     *
+     * @param mixed|string $parameters
      */
-    public function withParameters(string $parameters): DataPathInterface
+    public function withParameters($parameters): DataPathInterface
     {
+        if (!is_scalar($parameters) && !method_exists($parameters, '__toString')) {
+            throw new TypeError(sprintf('Expected parameter to be stringable; received %s', gettype($parameters)));
+        }
+
+        $parameters = (string) $parameters;
         if ($parameters === $this->getParameters()) {
             return $this;
         }

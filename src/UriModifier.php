@@ -266,41 +266,49 @@ final class UriModifier
 
         foreach ($path as $offset => $segment) {
             if ($currentPath->get($offset) !== $segment) {
-                return self::normalizePath($uri, $path->append($currentPath));
+                return $uri->withPath($path->append($currentPath)->__toString());
             }
         }
 
-        return self::normalizePath($uri, $currentPath);
+        return $uri->withPath($currentPath->__toString());
     }
 
     /**
      * Add a leading slash to the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function addLeadingSlash($uri)
     {
-        return self::normalizePath($uri, Path::createFromUri($uri)->withLeadingSlash());
+        return $uri->withPath(Path::createFromUri($uri)->withLeadingSlash()->__toString());
     }
 
     /**
      * Add a trailing slash to the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function addTrailingSlash($uri)
     {
-        return self::normalizePath($uri, Path::createFromUri($uri)->withTrailingSlash());
+        return $uri->withPath(Path::createFromUri($uri)->withTrailingSlash()->__toString());
     }
 
     /**
      * Append an new segment or a new path to the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function appendSegment($uri, string $segment)
+    public static function appendSegment($uri, $segment)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->append($segment));
+        $path = HierarchicalPath::createFromUri($uri)->append($segment)->__toString();
+
+        return $uri->withPath($path);
     }
 
     /**
@@ -330,6 +338,8 @@ final class UriModifier
     /**
      * Prepend an new segment or a new path to the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function prependSegment($uri, $segment)
@@ -339,6 +349,8 @@ final class UriModifier
 
     /**
      * Remove a basepath from the URI path.
+     *
+     * @param Psr7UriInterface|UriInterface $uri
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -361,31 +373,37 @@ final class UriModifier
             return $uri;
         }
 
-        return self::normalizePath($uri, $currentPath->withoutSegment(...$basePath->keys()));
+        return $uri->withPath($currentPath->withoutSegment(...$basePath->keys())->__toString());
     }
 
     /**
      * Remove dot segments from the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removeDotSegments($uri)
     {
-        return self::normalizePath($uri, Path::createFromUri($uri)->withoutDotSegments());
+        return $uri->withPath(Path::createFromUri($uri)->withoutDotSegments()->__toString());
     }
 
     /**
      * Remove empty segments from the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removeEmptySegments($uri)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withoutEmptySegments());
+        return $uri->withPath(HierarchicalPath::createFromUri($uri)->withoutEmptySegments()->__toString());
     }
 
     /**
      * Remove the leading slash from the URI path.
+     *
+     * @param Psr7UriInterface|UriInterface $uri
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -397,73 +415,98 @@ final class UriModifier
     /**
      * Remove the trailing slash from the URI path.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removeTrailingSlash($uri)
     {
-        return self::normalizePath($uri, Path::createFromUri($uri)->withoutTrailingSlash());
+        return $uri->withPath(Path::createFromUri($uri)->withoutTrailingSlash()->__toString());
     }
 
     /**
      * Remove path segments from the URI path according to their offsets.
      *
-     * @param int... $keys
+     * @param Psr7UriInterface|UriInterface $uri
+     * @param int...                        $keys
      *
      * @return Psr7UriInterface|UriInterface
      */
     public static function removeSegments($uri, int $key, int ...$keys)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withoutSegment($key, ...$keys));
+        $path = HierarchicalPath::createFromUri($uri)->withoutSegment($key, ...$keys)->__toString();
+
+        return $uri->withPath($path);
     }
 
     /**
      * Replace the URI path basename.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function replaceBasename($uri, $path)
+    public static function replaceBasename($uri, $basename)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withBasename($path));
+        $path = HierarchicalPath::createFromUri($uri)->withBasename($basename)->__toString();
+
+        return $uri->withPath($path);
     }
 
     /**
      * Replace the data URI path parameters.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function replaceDataUriParameters($uri, string $parameters)
+    public static function replaceDataUriParameters($uri, $parameters)
     {
-        return self::normalizePath($uri, DataPath::createFromUri($uri)->withParameters($parameters));
+        $path = DataPath::createFromUri($uri)->withParameters($parameters)->__toString();
+
+        return $uri->withPath($path);
     }
 
     /**
      * Replace the URI path dirname.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function replaceDirname($uri, $path)
+    public static function replaceDirname($uri, $dirname)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withDirname($path));
+        $path = HierarchicalPath::createFromUri($uri)->withDirname($dirname)->__toString();
+
+        return $uri->withPath($path);
     }
 
     /**
      * Replace the URI path basename extension.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function replaceExtension($uri, $extension)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withExtension($extension));
+        $path = HierarchicalPath::createFromUri($uri)->withExtension($extension)->__toString();
+
+        return $uri->withPath($path);
     }
 
     /**
      * Replace a segment from the URI path according its offset.
      *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
      * @return Psr7UriInterface|UriInterface
      */
     public static function replaceSegment($uri, int $offset, $segment)
     {
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withSegment($offset, $segment));
+        $path = HierarchicalPath::createFromUri($uri)->withSegment($offset, $segment)->__toString();
+
+        return $uri->withPath($path);
     }
 
     /**
