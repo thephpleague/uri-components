@@ -16,6 +16,8 @@
 
 namespace LeagueTest\Uri\Components;
 
+use http\Client\Curl\User;
+use League\Uri\Components\Authority;
 use League\Uri\Components\UserInfo;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -309,5 +311,21 @@ class UserInfoTest extends TestCase
         self::expectException(TypeError::class);
 
         UserInfo::createFromUri('http://example.com#foobar');
+    }
+
+    public function testCreateFromAuthorityWithoutUserInfoComponent(): void
+    {
+        $uri = Uri::createFromString('http://example.com:443');
+        $auth = Authority::createFromUri($uri);
+
+        self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));
+    }
+
+    public function testCreateFromAuthorityWithActualUserInfoComponent(): void
+    {
+        $uri = Uri::createFromString('http://user:pass@example.com:443');
+        $auth = Authority::createFromUri($uri);
+
+        self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));
     }
 }

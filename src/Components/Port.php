@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\PortInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
@@ -89,6 +90,14 @@ final class Port extends Component implements PortInterface
         }
 
         throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+    }
+
+    /**
+     * Create a new instance from a Authority object.
+     */
+    public static function createFromAuthority(AuthorityInterface $authority): self
+    {
+        return new self($authority->getPort());
     }
 
     /**

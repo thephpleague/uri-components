@@ -16,6 +16,7 @@
 
 namespace LeagueTest\Uri\Components;
 
+use League\Uri\Components\Authority;
 use League\Uri\Components\Port;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -152,5 +153,13 @@ class PortTest extends TestCase
         self::expectException(TypeError::class);
 
         Port::createFromUri('http://example.com:80');
+    }
+
+    public function testCreateFromAuthority(): void
+    {
+        $uri = Uri::createFromString('http://example.com:443');
+        $auth = Authority::createFromUri($uri);
+
+        self::assertEquals(Port::createFromUri($uri), Port::createFromAuthority($auth));
     }
 }

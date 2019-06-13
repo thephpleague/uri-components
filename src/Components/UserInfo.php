@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
@@ -95,6 +96,21 @@ final class UserInfo extends Component implements UserInfoInterface
         $params = explode(':', $component, 2) + [1 => null];
 
         return new self(...$params);
+    }
+
+    /**
+     * Create a new instance from a Authority object.
+     */
+    public static function createFromAuthority(AuthorityInterface $authority): self
+    {
+        $userInfo = $authority->getUserInfo();
+        if (null === $userInfo) {
+            return new self();
+        }
+
+        [$user, $pass] = explode(':', $userInfo, 2) + [1 => null];
+
+        return new self($user, $pass);
     }
 
     /**

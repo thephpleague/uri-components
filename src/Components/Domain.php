@@ -19,7 +19,8 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use Iterator;
-use League\Uri\Contracts\DomainInterface;
+use League\Uri\Contracts\AuthorityInterface;
+use League\Uri\Contracts\DomainHostInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\OffsetOutOfBounds;
@@ -37,7 +38,7 @@ use function implode;
 use function reset;
 use function sprintf;
 
-final class Domain extends Component implements DomainInterface
+final class Domain extends Component implements DomainHostInterface
 {
     private const SEPARATOR = '.';
 
@@ -126,6 +127,14 @@ final class Domain extends Component implements DomainInterface
     public static function createFromUri($uri): self
     {
         return new self(Host::createFromUri($uri));
+    }
+
+    /**
+     * Create a new instance from a Authority object.
+     */
+    public static function createFromAuthority(AuthorityInterface $authority): self
+    {
+        return new self(Host::createFromAuthority($authority));
     }
 
     /**
@@ -247,7 +256,7 @@ final class Domain extends Component implements DomainInterface
      *
      * @param mixed|null $label
      */
-    public function prepend($label): DomainInterface
+    public function prepend($label): DomainHostInterface
     {
         $label = self::filterComponent($label);
         if (null === $label) {
@@ -267,7 +276,7 @@ final class Domain extends Component implements DomainInterface
      *
      * @param mixed|null $label
      */
-    public function append($label): DomainInterface
+    public function append($label): DomainHostInterface
     {
         $label = self::filterComponent($label);
         if (null === $label) {
@@ -298,7 +307,7 @@ final class Domain extends Component implements DomainInterface
     /**
      * {@inheritDoc}
      */
-    public function withRootLabel(): DomainInterface
+    public function withRootLabel(): DomainHostInterface
     {
         if ('' === reset($this->labels)) {
             return $this;
@@ -310,7 +319,7 @@ final class Domain extends Component implements DomainInterface
     /**
      * {@inheritDoc}
      */
-    public function withoutRootLabel(): DomainInterface
+    public function withoutRootLabel(): DomainHostInterface
     {
         if ('' !== reset($this->labels)) {
             return $this;
@@ -329,7 +338,7 @@ final class Domain extends Component implements DomainInterface
      *
      * @throws OffsetOutOfBounds
      */
-    public function withLabel(int $key, $label): DomainInterface
+    public function withLabel(int $key, $label): DomainHostInterface
     {
         $nb_labels = count($this->labels);
         if ($key < - $nb_labels - 1 || $key > $nb_labels) {
@@ -366,7 +375,7 @@ final class Domain extends Component implements DomainInterface
     /**
      * {@inheritDoc}
      */
-    public function withoutLabel(int $key, int ...$keys): DomainInterface
+    public function withoutLabel(int $key, int ...$keys): DomainHostInterface
     {
         array_unshift($keys, $key);
         $nb_labels = count($this->labels);
