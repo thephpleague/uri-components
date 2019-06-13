@@ -63,7 +63,7 @@ final class Query extends Component implements QueryInterface
     private $separator;
 
     /**
-     * @var array
+     * @var array|null
      */
     private $params;
 
@@ -381,10 +381,11 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = $pairs;
+        $new = new self();
+        $new->pairs = $pairs;
+        $new->separator = $this->separator;
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -409,10 +410,11 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = $pairs;
+        $new = new self();
+        $new->pairs = $pairs;
+        $new->separator = $this->separator;
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -433,10 +435,11 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = $pairs;
+        $new = new self();
+        $new->pairs = $pairs;
+        $new->separator = $this->separator;
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -463,10 +466,11 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = $pairs;
+        $new = new self();
+        $new->pairs = $pairs;
+        $new->separator = $this->separator;
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -520,10 +524,11 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = $pairs;
+        $new = new self();
+        $new->pairs = $pairs;
+        $new->separator = $this->separator;
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -571,10 +576,11 @@ final class Query extends Component implements QueryInterface
             return !in_array($pair[0], $keys_to_remove, true);
         };
 
-        $clone = clone $this;
-        $clone->pairs = array_filter($this->pairs, $filter);
+        $new = new self();
+        $new->pairs = array_filter($this->pairs, $filter);
+        $new->separator = $this->separator;
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -584,10 +590,13 @@ final class Query extends Component implements QueryInterface
      */
     public function appendTo(string $key, $value): QueryInterface
     {
-        $clone = clone $this;
-        $clone->pairs[] = [$key, $this->filterPair($value)];
+        $pair = [$key, $this->filterPair($value)];
+        $new = new self();
+        $new->pairs = $this->pairs;
+        $new->pairs[] = $pair;
+        $new->separator = $this->separator;
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -606,10 +615,11 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = array_filter($pairs, [$this, 'filterEmptyValue']);
+        $new = new self();
+        $new->separator = $this->separator;
+        $new->pairs = array_filter($pairs, [$this, 'filterEmptyValue']);
 
-        return $clone;
+        return $new;
     }
 
     /**
@@ -640,9 +650,10 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = $pairs;
+        $new = new self();
+        $new->separator = $this->separator;
+        $new->pairs = $pairs;
 
-        return $clone;
+        return $new;
     }
 }
