@@ -18,7 +18,8 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Contracts\HostInterface;
+use League\Uri\Contracts\AuthorityInterface;
+use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnSupportMissing;
@@ -62,7 +63,7 @@ use const IDNA_ERROR_TRAILING_HYPHEN;
 use const IDNA_NONTRANSITIONAL_TO_UNICODE;
 use const INTL_IDNA_VARIANT_UTS46;
 
-final class Host extends Component implements HostInterface
+final class Host extends Component implements IpHostInterface
 {
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
@@ -350,6 +351,14 @@ final class Host extends Component implements HostInterface
     }
 
     /**
+     * Create a new instance from a Authority object.
+     */
+    public static function createFromAuthority(AuthorityInterface $authority): self
+    {
+        return new self($authority->getHost());
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getContent(): ?string
@@ -448,7 +457,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * Returns whether or not the host is an IPv4 address.
+     * {@inheritDoc}
      */
     public function isIpv4(): bool
     {
@@ -456,7 +465,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address.
+     * {@inheritDoc}
      */
     public function isIpv6(): bool
     {
@@ -464,7 +473,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * Returns whether or not the host is an IPv6 address.
+     * {@inheritDoc}
      */
     public function isIpFuture(): bool
     {
@@ -472,9 +481,7 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * Returns whether or not the host has a ZoneIdentifier.
-     *
-     * @see http://tools.ietf.org/html/rfc6874#section-4
+     * {@inheritDoc}
      */
     public function hasZoneIdentifier(): bool
     {
@@ -482,16 +489,9 @@ final class Host extends Component implements HostInterface
     }
 
     /**
-     * Returns an host without its zone identifier according to RFC6874.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance without the host zone identifier according to RFC6874
-     *
-     * @see http://tools.ietf.org/html/rfc6874#section-4
-     *
-     * @return static
+     * {@inheritDoc}
      */
-    public function withoutZoneIdentifier(): HostInterface
+    public function withoutZoneIdentifier(): IpHostInterface
     {
         if (!$this->has_zone_identifier) {
             return $this;

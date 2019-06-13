@@ -17,6 +17,7 @@
 namespace LeagueTest\Uri\Components;
 
 use ArrayIterator;
+use League\Uri\Components\Authority;
 use League\Uri\Components\Domain;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
@@ -571,5 +572,13 @@ class DomainTest extends TestCase
         self::expectException(TypeError::class);
 
         Domain::createFromUri('http://example.com#foobar');
+    }
+
+    public function testCreateFromAuthority(): void
+    {
+        $uri = Uri::createFromString('http://example.com:443');
+        $auth = Authority::createFromUri($uri);
+
+        self::assertEquals(Domain::createFromUri($uri), Domain::createFromAuthority($auth));
     }
 }
