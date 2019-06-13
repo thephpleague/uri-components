@@ -83,18 +83,18 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self(...$params);
         }
 
-        if ($uri instanceof Psr7UriInterface) {
-            $component = $uri->getUserInfo();
-            if ('' === $component) {
-                return new self();
-            }
-
-            $params = explode(':', $component, 2) + [1 => null];
-
-            return new self(...$params);
+        if (!$uri instanceof Psr7UriInterface) {
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
         }
 
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+        $component = $uri->getUserInfo();
+        if ('' === $component) {
+            return new self();
+        }
+
+        $params = explode(':', $component, 2) + [1 => null];
+
+        return new self(...$params);
     }
 
     /**
@@ -120,23 +120,6 @@ final class UserInfo extends Component implements UserInfoInterface
     public function getUriComponent(): string
     {
         return $this->getContent().(null === $this->user ? '' : '@');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function decoded(): ?string
-    {
-        if (null === $this->user) {
-            return null;
-        }
-
-        $userInfo = $this->getUser();
-        if (null === $this->pass) {
-            return $userInfo;
-        }
-
-        return $userInfo.':'.$this->getPass();
     }
 
     /**
