@@ -350,12 +350,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
             throw new TypeError('The appended path can not be null');
         }
 
-        $path = $this->path->__toString();
-        if ('' === $path) {
-            return new self($segment);
-        }
-
-        return new self(rtrim($path, self::SEPARATOR).self::SEPARATOR.ltrim($segment, self::SEPARATOR));
+        return new self(
+            rtrim($this->path->__toString(), self::SEPARATOR)
+            .self::SEPARATOR
+            .ltrim($segment, self::SEPARATOR)
+        );
     }
 
     /**
@@ -370,12 +369,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
             throw new TypeError('The prepended path can not be null');
         }
 
-        $path = $this->path->__toString();
-        if ('' === $path) {
-            return new self($segment.self::SEPARATOR);
-        }
-
-        return new self(rtrim($segment, self::SEPARATOR).self::SEPARATOR.ltrim($path, self::SEPARATOR));
+        return new self(
+            rtrim($segment, self::SEPARATOR)
+            .self::SEPARATOR
+            .ltrim($this->path->__toString(), self::SEPARATOR)
+        );
     }
 
     /**
