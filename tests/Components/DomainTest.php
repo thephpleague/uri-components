@@ -382,8 +382,9 @@ class DomainTest extends TestCase
      * @dataProvider validPrepend
      *
      * @covers ::prepend
+     * @param ?string $raw
      */
-    public function testPrepend(string $raw, string $prepend, string $expected): void
+    public function testPrepend(?string $raw, string $prepend, string $expected): void
     {
         self::assertSame($expected, (string) (new Domain($raw))->prepend($prepend));
     }
@@ -394,6 +395,8 @@ class DomainTest extends TestCase
             ['secure.example.com', 'master', 'master.secure.example.com'],
             ['secure.example.com.', 'master', 'master.secure.example.com.'],
             ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
+            [null, 'toto', 'toto'],
+            ['', 'toto', 'toto.'],
         ];
     }
 
@@ -419,8 +422,9 @@ class DomainTest extends TestCase
      * @dataProvider validAppend
      *
      * @covers ::append
+     * @param ?string $raw
      */
-    public function testAppend(string $raw, string $append, string $expected): void
+    public function testAppend(?string $raw, string $append, string $expected): void
     {
         self::assertSame($expected, (string) (new Domain($raw))->append($append));
     }
@@ -432,6 +436,8 @@ class DomainTest extends TestCase
             ['secure.example.com', 'master.', 'secure.example.com.master.'],
             ['toto', '127.0.0.1', 'toto.127.0.0.1'],
             ['example.com', '', 'example.com.'],
+            [null, 'toto', 'toto'],
+            ['', 'toto', 'toto'],
         ];
     }
 

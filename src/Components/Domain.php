@@ -22,10 +22,8 @@ use Iterator;
 use League\Uri\Contracts\DomainInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriComponentInterface;
-use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
-use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -127,20 +125,7 @@ final class Domain extends Component implements DomainInterface
      */
     public static function createFromUri($uri): self
     {
-        if ($uri instanceof UriInterface) {
-            return new self($uri->getHost());
-        }
-
-        if ($uri instanceof Psr7UriInterface) {
-            $component = $uri->getHost();
-            if ('' === $component) {
-                $component = null;
-            }
-
-            return new self($component);
-        }
-
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+        return new self(Host::createFromUri($uri));
     }
 
     /**
@@ -269,7 +254,12 @@ final class Domain extends Component implements DomainInterface
             return $this;
         }
 
-        return new self($label.self::SEPARATOR.$this->getContent());
+        $host = $this->getContent();
+        if (null === $host) {
+            return new self($label);
+        }
+
+        return new self($label.self::SEPARATOR.$host);
     }
 
     /**
@@ -284,7 +274,12 @@ final class Domain extends Component implements DomainInterface
             return $this;
         }
 
-        return new self($this->getContent().self::SEPARATOR.$label);
+        $host = $this->getContent();
+        if (null === $host || '' === $host) {
+            return new self($label);
+        }
+
+        return new self($host.self::SEPARATOR.$label);
     }
 
     /**
