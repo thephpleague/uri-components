@@ -303,6 +303,17 @@ class QueryTest extends TestCase
     }
 
     /**
+     * @covers ::params
+     */
+    public function testParams(): void
+    {
+        $query = Query::createFromRFC3986('foo[]=bar&foo[]=baz');
+        self::assertCount(1, $query->params());
+        self::assertSame(['bar', 'baz'], $query->params('foo'));
+        self::assertNull($query->params('foo[]'));
+    }
+
+    /**
      * @dataProvider withoutPairProvider
      *
      * @covers ::withoutPair
@@ -404,7 +415,7 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutParam
      * @covers ::createFromParams
-     * @covers ::toParams
+     * @covers ::params
      */
     public function testwithoutParamDoesNotChangeParamsKey(): void
     {
@@ -419,12 +430,12 @@ class QueryTest extends TestCase
         self::assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->getContent());
         $new_query = $query->withoutParam('foo[0]');
         self::assertSame('foo%5B1%5D=baz', $new_query->getContent());
-        self::assertSame(['foo' => [1 => 'baz']], $new_query->toParams());
+        self::assertSame(['foo' => [1 => 'baz']], $new_query->params());
     }
 
     /**
      * @covers ::createFromParams
-     * @covers ::toParams
+     * @covers ::params
      */
     public function testCreateFromParamsWithTraversable(): void
     {
@@ -435,13 +446,13 @@ class QueryTest extends TestCase
             ],
         ];
         $query = Query::createFromParams(new ArrayIterator($data));
-        self::assertSame($data, $query->toParams());
+        self::assertSame($data, $query->params());
     }
 
     public function testCreateFromParamsWithQueryObject(): void
     {
         $query = Query::createFromRFC3986('a=1&b=2');
-        self::assertEquals($query, Query::createFromParams($query));
+        self::assertEquals($query->getContent(), Query::createFromParams($query)->getContent());
     }
 
     /**
@@ -478,11 +489,11 @@ class QueryTest extends TestCase
 
         $query = Query::createFromParams($data);
         self::assertSame($with_indices, $query->getContent());
-        self::assertSame($data, $query->toParams());
+        self::assertSame($data, $query->params());
 
         $new_query = $query->withoutNumericIndices();
         self::assertSame($without_indices, $new_query->getContent());
-        self::assertSame($data, $new_query->toParams());
+        self::assertSame($data, $new_query->params());
     }
 
     /**

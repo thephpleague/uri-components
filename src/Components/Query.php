@@ -63,6 +63,11 @@ final class Query extends Component implements QueryInterface
     private $separator;
 
     /**
+     * @var array
+     */
+    private $params;
+
+    /**
      * Returns a new instance.
      *
      * @param mixed|null $query
@@ -94,7 +99,7 @@ final class Query extends Component implements QueryInterface
     {
         if ($params instanceof self) {
             return new self(
-                http_build_query($params->toParams(), '', $separator, PHP_QUERY_RFC3986),
+                http_build_query($params->params(), '', $separator, PHP_QUERY_RFC3986),
                 $separator,
                 PHP_QUERY_RFC3986
             );
@@ -146,7 +151,7 @@ final class Query extends Component implements QueryInterface
 
         $component = $uri->getQuery();
         if ('' === $component) {
-            $component = null;
+            return new self();
         }
 
         return new self($component);
@@ -289,9 +294,14 @@ final class Query extends Component implements QueryInterface
     /**
      * {@inheritDoc}
      */
-    public function toParams(): array
+    public function params(?string $key = null)
     {
-        return QueryString::convert($this->pairs);
+        $this->params = $this->params ?? QueryString::convert($this->pairs);
+        if (null === $key) {
+            return $this->params;
+        }
+
+        return $this->params[$key] ?? null;
     }
 
     /**
