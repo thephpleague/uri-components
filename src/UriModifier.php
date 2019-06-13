@@ -306,9 +306,7 @@ final class UriModifier
      */
     public static function appendSegment($uri, $segment)
     {
-        $path = HierarchicalPath::createFromUri($uri)->append($segment)->__toString();
-
-        return $uri->withPath($path);
+        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->append($segment));
     }
 
     /**
