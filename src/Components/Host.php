@@ -337,16 +337,16 @@ final class Host extends Component implements HostInterface
             return new self($uri->getHost());
         }
 
-        if ($uri instanceof Psr7UriInterface) {
-            $component = $uri->getHost();
-            if ('' === $component) {
-                $component = null;
-            }
-
-            return new self($component);
+        if (!$uri instanceof Psr7UriInterface) {
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
         }
 
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+        $component = $uri->getHost();
+        if ('' === $component) {
+            return new self();
+        }
+
+        return new self($component);
     }
 
     /**

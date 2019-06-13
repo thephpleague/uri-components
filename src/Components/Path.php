@@ -98,7 +98,6 @@ final class Path extends Component implements PathInterface
 
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
-
         if (null === $authority || '' === $authority) {
             return new self($path);
         }
