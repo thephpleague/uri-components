@@ -95,7 +95,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param mixed|iterable $params
      */
-    public static function createFromParams($params, string $separator = '&'): self
+    public static function createFromParams($params = [], string $separator = '&'): self
     {
         if ($params instanceof self) {
             return new self(
@@ -127,7 +127,7 @@ final class Query extends Component implements QueryInterface
     /**
      * Returns a new instance from the result of QueryString::parse.
      */
-    public static function createFromPairs(iterable $pairs, string $separator = '&'): self
+    public static function createFromPairs(iterable $pairs = [], string $separator = '&'): self
     {
         return new self(QueryString::build($pairs, $separator, PHP_QUERY_RFC3986), $separator, PHP_QUERY_RFC3986);
     }
@@ -564,9 +564,12 @@ final class Query extends Component implements QueryInterface
     /**
      * {@inheritDoc}
      */
-    public function withoutPair(string $key, string ...$keys): QueryInterface
+    public function withoutPair(string ...$keys): QueryInterface
     {
-        $keys[] = $key;
+        if ([] === $keys) {
+            return $this;
+        }
+
         $keys_to_remove = array_intersect($keys, array_column($this->pairs, 0));
         if ([] === $keys_to_remove) {
             return $this;
@@ -633,14 +636,17 @@ final class Query extends Component implements QueryInterface
     /**
      * {@inheritDoc}
      */
-    public function withoutParam(string $offset, string ...$offsets): QueryInterface
+    public function withoutParam(string ...$keys): QueryInterface
     {
-        $offsets[] = $offset;
+        if ([] === $keys) {
+            return $this;
+        }
+
         $mapper = static function (string $offset): string {
             return preg_quote($offset, ',').'(\[.*\].*)?';
         };
 
-        $regexp = ',^('.implode('|', array_map($mapper, $offsets)).')?$,';
+        $regexp = ',^('.implode('|', array_map($mapper, $keys)).')?$,';
         $filter = static function (array $pair) use ($regexp): bool {
             return 1 !== preg_match($regexp, $pair[0]);
         };

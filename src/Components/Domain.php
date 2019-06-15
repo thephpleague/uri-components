@@ -31,7 +31,6 @@ use function array_filter;
 use function array_keys;
 use function array_reverse;
 use function array_shift;
-use function array_unshift;
 use function count;
 use function explode;
 use function implode;
@@ -375,9 +374,12 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * {@inheritDoc}
      */
-    public function withoutLabel(int $key, int ...$keys): DomainHostInterface
+    public function withoutLabel(int ...$keys): DomainHostInterface
     {
-        array_unshift($keys, $key);
+        if ([] === $keys) {
+            return $this;
+        }
+
         $nb_labels = count($this->labels);
         foreach ($keys as &$offset) {
             if (- $nb_labels > $offset || $nb_labels - 1 < $offset) {

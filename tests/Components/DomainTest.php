@@ -373,6 +373,16 @@ class DomainTest extends TestCase
     /**
      * @covers ::withoutLabel
      */
+    public function testWithoutLabelVariadicArgument(): void
+    {
+        $host = new Domain('www.example.com');
+
+        self::assertSame($host, $host->withoutLabel());
+    }
+
+    /**
+     * @covers ::withoutLabel
+     */
     public function testWithoutTriggersException(): void
     {
         self::expectException(OffsetOutOfBounds::class);

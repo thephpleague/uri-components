@@ -340,6 +340,16 @@ class QueryTest extends TestCase
     /**
      * @covers ::withoutPair
      */
+    public function testWithoutPairVariadicArgument(): void
+    {
+        $query = Query::createFromRFC3986('foo&bar=baz');
+
+        self::assertSame($query, $query->withoutPair());
+    }
+
+    /**
+     * @covers ::withoutPair
+     */
     public function testwithoutPairGetterMethod(): void
     {
         $query = (Query::createFromRFC3986())->appendTo('first', 1);
@@ -431,6 +441,16 @@ class QueryTest extends TestCase
         $new_query = $query->withoutParam('foo[0]');
         self::assertSame('foo%5B1%5D=baz', $new_query->getContent());
         self::assertSame(['foo' => [1 => 'baz']], $new_query->params());
+    }
+
+    /**
+     * @covers ::withoutParam
+     */
+    public function testWithoutParamVariadicArgument(): void
+    {
+        $query = Query::createFromRFC3986('foo&bar=baz');
+
+        self::assertSame($query, $query->withoutParam());
     }
 
     /**

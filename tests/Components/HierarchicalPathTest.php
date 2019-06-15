@@ -430,6 +430,16 @@ class HierarchicalPathTest extends TestCase
     }
 
     /**
+     * @covers ::withoutSegment
+     */
+    public function testWithoutSegmentVariadicArgument(): void
+    {
+        $path = new Path('www/example/com');
+
+        self::assertSame($path, $path->withoutSegment());
+    }
+
+    /**
      * @covers ::keys
      */
     public function testKeys(): void
