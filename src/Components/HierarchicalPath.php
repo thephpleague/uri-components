@@ -429,9 +429,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * {@inheritDoc}
      */
-    public function withoutSegment(int $key, int ...$keys): SegmentedPathInterface
+    public function withoutSegment(int ...$keys): SegmentedPathInterface
     {
-        $keys[] = $key;
+        if ([] === $keys) {
+            return $this;
+        }
         $nb_segments = count($this->segments);
         $options = ['options' => ['min_range' => - $nb_segments, 'max_range' => $nb_segments - 1]];
         $deleted_keys = [];

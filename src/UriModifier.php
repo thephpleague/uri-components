@@ -70,9 +70,9 @@ final class UriModifier
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function removePairs($uri, string $key, string ...$keys)
+    public static function removePairs($uri, string ...$keys)
     {
-        return $uri->withQuery(Query::createFromUri($uri)->withoutPair($key, ...$keys)->__toString());
+        return $uri->withQuery(Query::createFromUri($uri)->withoutPair(...$keys)->__toString());
     }
 
     /**
@@ -83,9 +83,9 @@ final class UriModifier
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function removeParams($uri, string $key, string ...$keys)
+    public static function removeParams($uri, string ...$keys)
     {
-        return $uri->withQuery(Query::createFromUri($uri)->withoutParam($key, ...$keys)->__toString());
+        return $uri->withQuery(Query::createFromUri($uri)->withoutParam(...$keys)->__toString());
     }
 
     /**
@@ -204,9 +204,9 @@ final class UriModifier
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function removeLabels($uri, int $key, int ...$keys)
+    public static function removeLabels($uri, int ...$keys)
     {
-        return $uri->withHost(Domain::createFromUri($uri)->withoutLabel($key, ...$keys)->__toString());
+        return $uri->withHost(Domain::createFromUri($uri)->withoutLabel(...$keys)->__toString());
     }
 
     /**
@@ -430,9 +430,9 @@ final class UriModifier
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function removeSegments($uri, int $key, int ...$keys)
+    public static function removeSegments($uri, int ...$keys)
     {
-        $path = HierarchicalPath::createFromUri($uri)->withoutSegment($key, ...$keys)->__toString();
+        $path = HierarchicalPath::createFromUri($uri)->withoutSegment(...$keys)->__toString();
 
         return $uri->withPath($path);
     }
