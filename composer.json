@@ -44,6 +44,7 @@
     },
     "suggest": {
         "ext-intl": "to handle IDN host",
+        "ext-gmp": "to improve handle IPV4 parsing",
         "jeremykendall/php-domain-parser": "Public Suffix and Top Level Domain parsing implemented in PHP",
         "league/uri": "to allow manipulating URI objects",
         "psr/http-message-implementation": "to allow manipulating PSR-7 Uri objects"
