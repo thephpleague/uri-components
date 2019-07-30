@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use League\Uri\Components\Host;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\Math;
@@ -25,17 +26,15 @@ use League\Uri\Maths\PHPMath;
 use RuntimeException;
 use function array_pop;
 use function count;
-use function decoct;
 use function end;
 use function explode;
 use function function_exists;
 use function ltrim;
-use function octdec;
 use function strpos;
 use function substr;
 use const PHP_INT_SIZE;
 
-final class IPV4String
+final class IPV4Normalizer
 {
     private const MAX_IPV4_NUMBER = 4294967295;
 
@@ -68,8 +67,8 @@ final class IPV4String
     }
 
     /**
-     * Normalize the host content to a IPv4 Host string representation.
-     * If the string can not be normalized null is returned.
+     * Normalizes the host content to a IPv4 Host string representation if possible
+     * otherwise returns the Host instance unchanged.
      *
      * @param ?Math $math
      */
@@ -117,10 +116,7 @@ final class IPV4String
             $ipv4 += $math->multiply($number, $math->pow(256, 3 - $offset));
         }
 
-        /** @var HostInterface $newHost */
-        $newHost = $host->withContent($math->long2Ip($ipv4));
-
-        return $newHost;
+        return Host::createFromIp($math->long2Ip($ipv4));
     }
 
     /**
@@ -149,7 +145,7 @@ final class IPV4String
                 return 0;
             }
 
-            if ($part !== decoct(octdec($part))) {
+            if (1 !== preg_match('/^[0-7]+$/', $part)) {
                 return null;
             }
 
