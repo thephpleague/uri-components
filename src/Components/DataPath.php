@@ -467,8 +467,6 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * @inheritDoc
-     *
      * @param mixed|string $parameters
      */
     public function withParameters($parameters): DataPathInterface

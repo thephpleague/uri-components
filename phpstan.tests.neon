@@ -12,4 +12,10 @@ parameters:
         - '#Parameter \#2 \$value of method League\\Uri\\Components\\Query::appendTo\(\) expects string\|null, array<int, string> given\.#'
         - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::appendTo\(\) expects string\|null, int given\.#'
         - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::withPair\(\) expects string, int given\.#'
+        - '#Parameter \#1 \$pairs of static method League\\Uri\\QueryString::build\(\) expects iterable<int, array<int, string\|null>>, array<int, array<int\|string, string>> given\.#'
+        - '#Parameter \#1 \$pairs of static method League\\Uri\\QueryString::build\(\) expects iterable<int, array<int, string\|null>>, iterable given\.#'
+        - '#League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable<int, array<int, string\|null>>, array<int, array<string, array<string, array<int, stdClass>>>> given\.#'
+        - '#League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable<int, array<int, string\|null>>, array given\.#'
+        - '#League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable<int, array<int, string\|null>>, ArrayIterator given\.#'
+        - '#League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable<int, array<int, string\|null>>, League\\Uri\\Components\\Query given\.#'
     reportUnmatchedIgnoredErrors: false

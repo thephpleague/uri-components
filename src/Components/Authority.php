@@ -197,7 +197,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param mixed|null $content
      *
      * @return static
      */
@@ -212,8 +212,6 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @inheritDoc
-     *
      * @param mixed|null $host
      */
     public function withHost($host): AuthorityInterface
@@ -234,8 +232,6 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @inheritDoc
-     *
      * @param mixed|null $port
      */
     public function withPort($port): AuthorityInterface
@@ -256,8 +252,6 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @inheritDoc
-     *
      * @param mixed|null $user
      * @param mixed|null $pass
      */

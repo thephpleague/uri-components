@@ -18,18 +18,19 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use League\Uri\Contracts\HostInterface;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\Math;
 use League\Uri\Maths\PHPMath;
+use RuntimeException;
 use function array_pop;
 use function count;
 use function decoct;
 use function end;
 use function explode;
-use function extension_loaded;
+use function function_exists;
 use function ltrim;
 use function octdec;
-use function preg_match;
 use function strpos;
 use function substr;
 use const PHP_INT_SIZE;
@@ -38,47 +39,53 @@ final class IPV4String
 {
     private const MAX_IPV4_NUMBER = 4294967295;
 
-    private static function math(): ?Math
+    /**
+     * Loads a Math implementation depending on the underlying OS settings.
+     *
+     * @throws RuntimeException If the underlying OS settings are invalid.
+     */
+    private static function math(): Math
     {
         static $math;
+
         if (null !== $math) {
             return $math;
         }
 
-        if (8 === PHP_INT_SIZE) {
+        if (8 > PHP_INT_SIZE) {
             $math = new PHPMath();
 
             return $math;
         }
 
-        if (extension_loaded('gmp')) {
+        if (!function_exists('gimp_init')) {
             $math = new GMPMath();
 
             return $math;
         }
 
-        return null;
+        throw new RuntimeException('To perform IPV4 host normalization you need the gmp extension or PHP running on a x.64 OS.');
     }
 
     /**
-     * Translates a IPv4 Host from a non decimal string representation.
-     *
-     * If the string can not be parsed it is returned as is.
+     * Normalize the host content to a IPv4 Host string representation.
+     * If the string can not be normalized null is returned.
      *
      * @param ?Math $math
      */
-    public static function parse(string $host, ?Math $math = null): string
+    public static function normalize(HostInterface $host, ?Math $math = null): HostInterface
     {
+        $hostString = $host->getContent();
+        if (null === $hostString || '' === $hostString) {
+            return $host;
+        }
+
         $math = $math ?? self::math();
-        if (null === $math) {
+        if (false !== strpos($hostString, '..')) {
             return $host;
         }
 
-        if ('' === $host || 1 === preg_match('/\.\./', $host)) {
-            return $host;
-        }
-
-        $parts = explode('.', $host);
+        $parts = explode('.', $hostString);
         if ('' === end($parts)) {
             array_pop($parts);
         }
@@ -110,7 +117,10 @@ final class IPV4String
             $ipv4 += $math->multiply($number, $math->pow(256, 3 - $offset));
         }
 
-        return $math->long2Ip($ipv4);
+        /** @var HostInterface $newHost */
+        $newHost = $host->withContent($math->long2Ip($ipv4));
+
+        return $newHost;
     }
 
     /**

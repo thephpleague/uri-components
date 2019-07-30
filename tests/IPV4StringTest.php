@@ -18,10 +18,12 @@ declare(strict_types=1);
 
 namespace LeagueTest\Uri;
 
+use League\Uri\Components\Host;
 use League\Uri\IPV4String;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\PHPMath;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use function extension_loaded;
 use const PHP_INT_SIZE;
 
@@ -32,11 +34,14 @@ final class IPV4StringTest extends TestCase
 {
     /**
      * @dataProvider providerHost
+     * @param ?string $input
+     * @param ?string $expected
      */
-    public function testParseWithoutGMPAndPHPMath(string $input, string $expected): void
+    public function testParseWithoutGMPAndPHPMath(?string $input, ?string $expected): void
     {
         if (8 !== PHP_INT_SIZE && !extension_loaded('gmp')) {
-            self::assertSame($input, IPV4String::parse($input));
+            self::expectException(RuntimeException::class);
+            IPV4String::normalize(new Host($input));
         }
 
         self::markTestSkipped('The PHP is compile for a x64 OS or loads the GMP extension.');
@@ -44,54 +49,57 @@ final class IPV4StringTest extends TestCase
 
     /**
      * @dataProvider providerHost
+     * @param ?string $input
+     * @param ?string $expected
      */
-    public function testParseWithAutoDefineMath(string $input, string $expected): void
+    public function testParseWithAutoDefineMath(?string $input, ?string $expected): void
     {
         if (!extension_loaded('gmp') && 8 > PHP_INT_SIZE) {
             self::markTestSkipped('The PHP is compile for a x64 OS or loads the GMP extension.');
         }
 
-        self::assertSame($expected, IPV4String::parse($input));
+        self::assertEquals(new Host($expected), IPV4String::normalize(new Host($input)));
     }
 
     /**
      * @dataProvider providerHost
+     * @param ?string $input
+     * @param ?string $expected
      */
-    public function testParseWithGMPMath(string $input, string $expected): void
+    public function testParseWithGMPMath(?string $input, ?string $expected): void
     {
         if (!extension_loaded('gmp')) {
             self::markTestSkipped('The GMP extension is needed to execute this test.');
         }
 
-        self::assertSame($expected, IPV4String::parse($input, new GMPMath()));
+        self::assertEquals(new Host($expected), IPV4String::normalize(new Host($input), new GMPMath()));
     }
 
     /**
      * @dataProvider providerHost
+     * @param ?string $input
+     * @param ?string $expected
      */
-    public function testParseWithPHPMath(string $input, string $expected): void
+    public function testParseWithPHPMath(?string $input, ?string $expected): void
     {
         if (8 > PHP_INT_SIZE) {
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
-        self::assertSame($expected, IPV4String::parse($input, new PHPMath()));
+        self::assertEquals(new Host($expected), IPV4String::normalize(new Host($input), new PHPMath()));
     }
 
     public function providerHost(): array
     {
         return [
+            'null host' => [null, null],
             'empty host' => ['', ''],
             '0 host' => ['0', '0.0.0.0'],
             'normal IP' => ['192.168.0.1', '192.168.0.1'],
-            'invalid host (9)' => ['0foobar', '0foobar'],
             'octal (1)' => ['030052000001', '192.168.0.1'],
             'octal (2)' => ['0300.0250.0000.0001', '192.168.0.1'],
-            'octal (3)' => ['0300.5200.0000.0001', '0300.5200.0000.0001'],
             'hexadecimal (1)' => ['0x', '0.0.0.0'],
             'hexadecimal (2)' => ['0xffffffff', '255.255.255.255'],
-            'hexadecimal (3)' => ['0xfoobar', '0xfoobar'],
-            'hexadecimal (4)' => ['0xffffffff1', '0xffffffff1'],
             'decimal (1)' => ['3232235521', '192.168.0.1'],
             'decimal (2)' => ['3232235521.', '192.168.0.1'],
             'decimal (3)' => ['999999999', '59.154.201.255'],
@@ -104,6 +112,10 @@ final class IPV4StringTest extends TestCase
             'invalid host (5)' => ['10000000000', '10000000000'],
             'invalid host (6)' => ['192.168.257.com', '192.168.257.com'],
             'invalid host (7)' => ['192..257', '192..257'],
+            'invalid host (8)' => ['0foobar', '0foobar'],
+            'invalid host (9)' => ['0xfoobar', '0xfoobar'],
+            'invalid host (10)' => ['0xffffffff1', '0xffffffff1'],
+            'invalid host (11)' => ['0300.5200.0000.0001', '0300.5200.0000.0001'],
         ];
     }
 }

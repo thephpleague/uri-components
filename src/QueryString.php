@@ -94,6 +94,8 @@ final class QueryString
      * @param mixed|null $query
      *
      * @throws SyntaxError
+     *
+     * @return array<int, array{0:string, 1:string|null}>
      */
     public static function parse($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
     {
@@ -111,8 +113,10 @@ final class QueryString
         }
 
         $retval = [];
-        foreach (self::getPairs($query, $separator) as $pair) {
-            $retval[] = self::parsePair((string) $pair, self::DECODE_PAIR_VALUE);
+        foreach (self::getPairs($query, $separator) as $pairString) {
+            /** @var array{0:string, 1:string|null} $pair */
+            $pair = self::parsePair((string) $pairString, self::DECODE_PAIR_VALUE);
+            $retval[] = $pair;
         }
 
         return $retval;
@@ -175,6 +179,8 @@ final class QueryString
 
     /**
      * Returns the key/value pair from a query string pair.
+     *
+     * array{0:string, 1:string|null}
      */
     private static function parsePair(string $pair, int $parseValue): array
     {
@@ -210,6 +216,8 @@ final class QueryString
      * The method expects the return value from Query::parse to build
      * a valid query string. This method differs from PHP http_build_query as
      * it does not modify parameters keys.
+     *
+     * @param array<int, array{0:string, 1:string|null}> $pairs
      *
      * @throws SyntaxError If the encoding type is invalid
      * @throws SyntaxError If a pair is invalid
@@ -261,6 +269,7 @@ final class QueryString
 
     /**
      * Build a RFC3986 query key/value pair association.
+     *
      *
      * @throws SyntaxError If the pair is invalid
      */
