@@ -34,7 +34,7 @@ use function strpos;
 use function substr;
 use const PHP_INT_SIZE;
 
-final class IPV4Normalizer
+final class IPv4Normalizer
 {
     private const MAX_IPV4_NUMBER = 4294967295;
 

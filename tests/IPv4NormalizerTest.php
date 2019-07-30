@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace LeagueTest\Uri;
 
 use League\Uri\Components\Host;
-use League\Uri\IPV4Normalizer;
+use League\Uri\IPv4Normalizer;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\PHPMath;
 use PHPUnit\Framework\TestCase;
@@ -28,9 +28,9 @@ use function extension_loaded;
 use const PHP_INT_SIZE;
 
 /**
- * @coversDefaultClass \League\Uri\IPV4Normalizer
+ * @coversDefaultClass \League\Uri\IPv4Normalizer
  */
-final class IPV4NormalizerTest extends TestCase
+final class IPv4NormalizerTest extends TestCase
 {
     /**
      * @dataProvider providerHost
@@ -41,7 +41,7 @@ final class IPV4NormalizerTest extends TestCase
     {
         if (8 !== PHP_INT_SIZE && !extension_loaded('gmp')) {
             self::expectException(RuntimeException::class);
-            IPV4Normalizer::normalize(new Host($input));
+            IPv4Normalizer::normalize(new Host($input));
         }
 
         self::markTestSkipped('The PHP is compile for a x64 OS or loads the GMP extension.');
@@ -58,7 +58,7 @@ final class IPV4NormalizerTest extends TestCase
             self::markTestSkipped('The PHP is compile for a x64 OS or loads the GMP extension.');
         }
 
-        self::assertEquals(new Host($expected), IPV4Normalizer::normalize(new Host($input)));
+        self::assertEquals(new Host($expected), IPv4Normalizer::normalize(new Host($input)));
     }
 
     /**
@@ -72,7 +72,7 @@ final class IPV4NormalizerTest extends TestCase
             self::markTestSkipped('The GMP extension is needed to execute this test.');
         }
 
-        self::assertEquals(new Host($expected), IPV4Normalizer::normalize(new Host($input), new GMPMath()));
+        self::assertEquals(new Host($expected), IPv4Normalizer::normalize(new Host($input), new GMPMath()));
     }
 
     /**
@@ -86,7 +86,7 @@ final class IPV4NormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
-        self::assertEquals(new Host($expected), IPV4Normalizer::normalize(new Host($input), new PHPMath()));
+        self::assertEquals(new Host($expected), IPv4Normalizer::normalize(new Host($input), new PHPMath()));
     }
 
     public function providerHost(): array
