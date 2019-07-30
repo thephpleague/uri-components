@@ -251,8 +251,6 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @inheritDoc
-     *
      * @param mixed|null $label
      */
     public function prepend($label): DomainHostInterface
@@ -271,8 +269,6 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @inheritDoc
-     *
      * @param mixed|null $label
      */
     public function append($label): DomainHostInterface
@@ -331,8 +327,6 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @inheritDoc
-     *
      * @param mixed|null $label
      *
      * @throws OffsetOutOfBounds

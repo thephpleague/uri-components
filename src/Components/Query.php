@@ -53,7 +53,7 @@ use const PHP_QUERY_RFC3986;
 final class Query extends Component implements QueryInterface
 {
     /**
-     * @var array
+     * @var array<int, array{0:string, 1:string|null}>
      */
     private $pairs;
 
@@ -126,6 +126,8 @@ final class Query extends Component implements QueryInterface
 
     /**
      * Returns a new instance from the result of QueryString::parse.
+     *
+     * @param array<int, array{0:string, 1:string|null}> $pairs
      */
     public static function createFromPairs(iterable $pairs = [], string $separator = '&'): self
     {
@@ -345,6 +347,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
+        /** @var array<int, array{0:string, 1:string|null}> $pairs */
         $pairs = array_merge(...array_values(array_reduce($this->pairs, [$this, 'reducePairs'], [])));
         if ($pairs === $this->pairs) {
             return $this;
@@ -444,20 +447,22 @@ final class Query extends Component implements QueryInterface
 
     /**
      * Remove numeric indices from pairs.
+     *
+     * @param array{0:string, 1:string|null} $pair
+     *
+     * @return array{0:string, 1:string|null}
      */
     private function encodeNumericIndices(array $pair): array
     {
         static $regexp = ',\[\d+\],';
 
-        $pair[0] = preg_replace($regexp, '[]', $pair[0]);
+        $pair[0] = (string) preg_replace($regexp, '[]', $pair[0]);
 
         return $pair;
     }
 
     /**
-     * @inheritDoc
-     *
-     * @param mixed|null $value
+     * @param mixed $value the pair value.
      */
     public function withPair(string $key, $value): QueryInterface
     {
@@ -509,9 +514,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * @inheritDoc
-     *
-     * @param mixed|null $query
+     * @param mixed $query the query to be merge with.
      */
     public function merge($query): QueryInterface
     {
@@ -603,9 +606,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * @inheritDoc
-     *
-     * @param mixed|null $query
+     * @param mixed $query the query to append
      */
     public function append($query): QueryInterface
     {

@@ -3,4 +3,5 @@ includes:
 parameters:
     ignoreErrors:
         - '#Method League\\Uri\\UriModifier::[A-Za-z0-9]+\(\) has parameter \$(uri|query|label|host|path|segment|extension|dirname|basename|parameters) with no typehint specified.#'
+        - '#Property League\\Uri\\Components\\Query::\$pairs \(array<int, array<int, string\|null>>\) does not accept array\.#'
     reportUnmatchedIgnoredErrors: true
