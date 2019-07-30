@@ -212,4 +212,15 @@ class HostModifierTest extends TestCase
     {
         self::assertSame('www.example.com', UriModifier::removeRootLabel($this->uri)->getHost());
     }
+
+    /**
+     * @covers ::normalizeHost
+     */
+    public function testIpv4NormalizeHost(): void
+    {
+        $uri = $this->uri->withHost('0');
+        self::assertSame('0.0.0.0', UriModifier::normalizeHost($uri)->getHost());
+
+        self::assertSame($this->uri->getHost(), UriModifier::normalizeHost($this->uri)->getHost());
+    }
 }
