@@ -23,7 +23,10 @@ use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnSupportMissing;
+use League\Uri\Exceptions\Ipv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\IPv4Normalizer;
+use League\Uri\Maths\Math;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function defined;
@@ -298,18 +301,16 @@ final class Host extends Component implements IpHostInterface
     /**
      * Returns a host from an IP address.
      *
-     * @throws SyntaxError If the $ip can not be converted into a Host
+     * @param ?Math $math
      *
+     * @throws SyntaxError           If the $ip can not be converted into a Host
+     * @throws Ipv4CalculatorMissing If detecting IPv4 is not possible
      * @return static
      */
-    public static function createFromIp(string $ip, string $version = ''): self
+    public static function createFromIp(string $ip, string $version = '', ?Math $math = null): self
     {
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
-        }
-
-        if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return new self($ip);
         }
 
         if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
@@ -320,6 +321,12 @@ final class Host extends Component implements IpHostInterface
             [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
 
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
+        }
+
+        /** @var Host $host */
+        $host = IPv4Normalizer::normalize(new Host($ip), $math);
+        if ($host->isIp()) {
+            return $host;
         }
 
         throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));

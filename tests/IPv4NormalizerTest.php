@@ -19,11 +19,11 @@ declare(strict_types=1);
 namespace LeagueTest\Uri;
 
 use League\Uri\Components\Host;
+use League\Uri\Exceptions\Ipv4CalculatorMissing;
 use League\Uri\IPv4Normalizer;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\PHPMath;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use function extension_loaded;
 use const PHP_INT_SIZE;
 
@@ -40,7 +40,7 @@ final class IPv4NormalizerTest extends TestCase
     public function testParseWithoutGMPAndPHPMath(?string $input, ?string $expected): void
     {
         if (8 !== PHP_INT_SIZE && !extension_loaded('gmp')) {
-            self::expectException(RuntimeException::class);
+            self::expectException(Ipv4CalculatorMissing::class);
             IPv4Normalizer::normalize(new Host($input));
         }
 
@@ -101,10 +101,9 @@ final class IPv4NormalizerTest extends TestCase
             'hexadecimal (1)' => ['0x', '0.0.0.0'],
             'hexadecimal (2)' => ['0xffffffff', '255.255.255.255'],
             'decimal (1)' => ['3232235521', '192.168.0.1'],
-            'decimal (2)' => ['3232235521.', '192.168.0.1'],
-            'decimal (3)' => ['999999999', '59.154.201.255'],
-            'decimal (4)' => ['256', '0.0.1.0'],
-            'decimal (5)' => ['192.168.257', '192.168.1.1'],
+            'decimal (2)' => ['999999999', '59.154.201.255'],
+            'decimal (3)' => ['256', '0.0.1.0'],
+            'decimal (4)' => ['192.168.257', '192.168.1.1'],
             'invalid host (0)' => ['256.256.256.256.256', '256.256.256.256.256'],
             'invalid host (1)' => ['256.256.256.256', '256.256.256.256'],
             'invalid host (3)' => ['256.256.256', '256.256.256'],

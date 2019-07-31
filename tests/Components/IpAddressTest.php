@@ -174,6 +174,7 @@ class IpAddressTest extends TestCase
             'ipv6 does care about the version string' => ['::1', '12', '[v12.::1]'],
             'ipv6 with scope' => ['fe80:1234::%1', '', '[fe80:1234::%251]'],
             'valid IpFuture' => ['csucj.$&+;::', 'AF', '[vAF.csucj.$&+;::]'],
+            'octal IP' => ['0300.0250.0000.0001', '', '192.168.0.1'],
         ];
     }
 
@@ -190,7 +191,7 @@ class IpAddressTest extends TestCase
     public function createFromIpFailed(): array
     {
         return [
-            'false ipv4' => ['127.0.0'],
+            'false ipv4' => ['127..1'],
             'hostname' => ['example.com'],
             'false ipfuture' => ['vAF.csucj.$&+;:/:'],
         ];

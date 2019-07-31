@@ -20,6 +20,7 @@ namespace League\Uri;
 
 use League\Uri\Components\Host;
 use League\Uri\Contracts\HostInterface;
+use League\Uri\Exceptions\Ipv4CalculatorMissing;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\Math;
 use League\Uri\Maths\PHPMath;
@@ -30,6 +31,7 @@ use function end;
 use function explode;
 use function function_exists;
 use function ltrim;
+use function sprintf;
 use function strpos;
 use function substr;
 use const PHP_INT_SIZE;
@@ -43,7 +45,7 @@ final class IPv4Normalizer
      *
      * @throws RuntimeException If the underlying OS settings are invalid.
      */
-    private static function math(): Math
+    private static function math(): ?Math
     {
         static $math;
 
@@ -63,7 +65,7 @@ final class IPv4Normalizer
             return $math;
         }
 
-        throw new RuntimeException('To perform IPV4 host normalization you need the gmp extension or PHP running on a x.64 OS.');
+        return null;
     }
 
     /**
@@ -71,15 +73,23 @@ final class IPv4Normalizer
      * otherwise returns the Host instance unchanged.
      *
      * @param ?Math $math
+     *
+     * @throws Ipv4CalculatorMissing
      */
     public static function normalize(HostInterface $host, ?Math $math = null): HostInterface
     {
+        $math = $math ?? self::math();
+        if (null === $math) {
+            throw new Ipv4CalculatorMissing(sprintf(
+                'No %s was provided or detected for your platform. Please run you script on a x.64 PHP build or install the GMP extension to enable autodetection.',
+                Math::class
+            ));
+        }
         $hostString = $host->getContent();
         if (null === $hostString || '' === $hostString) {
             return $host;
         }
 
-        $math = $math ?? self::math();
         if (false !== strpos($hostString, '..')) {
             return $host;
         }
@@ -116,7 +126,10 @@ final class IPv4Normalizer
             $ipv4 += $math->multiply($number, $math->pow(256, 3 - $offset));
         }
 
-        return Host::createFromIp($math->long2Ip($ipv4));
+        /** @var HostInterface $newHost */
+        $newHost = $host->withContent($math->long2Ip($ipv4));
+
+        return $newHost;
     }
 
     /**
