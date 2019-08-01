@@ -19,9 +19,11 @@ declare(strict_types=1);
 namespace League\Uri\Maths;
 
 use function gmp_cmp;
+use function gmp_div_q;
 use function gmp_init;
 use function gmp_mul;
 use function gmp_pow;
+use const GMP_ROUND_MINUSINF;
 
 final class GMPMath implements Math
 {
@@ -65,11 +67,11 @@ final class GMPMath implements Math
         $output = '';
         $n = $ipAddress;
         for ($i = 0; $i < 4; $i++) {
-            $output = intval($n % 256, 10).$output;
+            $output = ($n % 256).$output;
             if ($i < 3) {
                 $output = '.'.$output;
             }
-            $n = floor($n / 256);
+            $n = gmp_div_q($n, 256, GMP_ROUND_MINUSINF);
         }
 
         return $output;
