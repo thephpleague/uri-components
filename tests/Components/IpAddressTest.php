@@ -159,6 +159,7 @@ class IpAddressTest extends TestCase
     /**
      * @dataProvider createFromIpValid
      * @covers ::createFromIp
+     * @covers \League\Uri\IPv4Normalizer
      */
     public function testCreateFromIp(string $input, string $version, string $expected): void
     {

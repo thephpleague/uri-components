@@ -19,7 +19,6 @@ declare(strict_types=1);
 namespace LeagueTest\Uri;
 
 use League\Uri\Components\Host;
-use League\Uri\Exceptions\Ipv4CalculatorMissing;
 use League\Uri\IPv4Normalizer;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\PHPMath;
@@ -37,24 +36,9 @@ final class IPv4NormalizerTest extends TestCase
      * @param ?string $input
      * @param ?string $expected
      */
-    public function testParseWithoutGMPAndPHPMath(?string $input, ?string $expected): void
-    {
-        if (8 !== PHP_INT_SIZE && !extension_loaded('gmp')) {
-            self::expectException(Ipv4CalculatorMissing::class);
-            IPv4Normalizer::normalize(new Host($input));
-        }
-
-        self::markTestSkipped('The PHP is compile for a x64 OS or loads the GMP extension.');
-    }
-
-    /**
-     * @dataProvider providerHost
-     * @param ?string $input
-     * @param ?string $expected
-     */
     public function testParseWithAutoDefineMath(?string $input, ?string $expected): void
     {
-        if (!extension_loaded('gmp') && 8 > PHP_INT_SIZE) {
+        if (!extension_loaded('gmp') && 4 >= PHP_INT_SIZE) {
             self::markTestSkipped('The PHP is compile for a x64 OS or loads the GMP extension.');
         }
 
@@ -82,7 +66,7 @@ final class IPv4NormalizerTest extends TestCase
      */
     public function testParseWithPHPMath(?string $input, ?string $expected): void
     {
-        if (8 > PHP_INT_SIZE) {
+        if (4 > PHP_INT_SIZE) {
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
@@ -93,9 +77,11 @@ final class IPv4NormalizerTest extends TestCase
     {
         return [
             'null host' => [null, null],
+            'non ip host' => ['ulb.ac.be', 'ulb.ac.be'],
             'empty host' => ['', ''],
             '0 host' => ['0', '0.0.0.0'],
             'normal IP' => ['192.168.0.1', '192.168.0.1'],
+            'normal IP ending with a dot' => ['192.168.0.1.', '192.168.0.1'],
             'octal (1)' => ['030052000001', '192.168.0.1'],
             'octal (2)' => ['0300.0250.0000.0001', '192.168.0.1'],
             'hexadecimal (1)' => ['0x', '0.0.0.0'],
@@ -115,6 +101,8 @@ final class IPv4NormalizerTest extends TestCase
             'invalid host (9)' => ['0xfoobar', '0xfoobar'],
             'invalid host (10)' => ['0xffffffff1', '0xffffffff1'],
             'invalid host (11)' => ['0300.5200.0000.0001', '0300.5200.0000.0001'],
+            'invalid host (12)' => ['255.255.256.255', '255.255.256.255'],
+            'invalid host (13)' => ['0ffaed', '0ffaed'],
         ];
     }
 }
