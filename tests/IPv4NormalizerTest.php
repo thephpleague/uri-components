@@ -103,6 +103,7 @@ final class IPv4NormalizerTest extends TestCase
             'invalid host (11)' => ['0300.5200.0000.0001', '0300.5200.0000.0001'],
             'invalid host (12)' => ['255.255.256.255', '255.255.256.255'],
             'invalid host (13)' => ['0ffaed', '0ffaed'],
+            'invalid host (14)' => ['192.168.1.0x3000000', '192.168.1.0x3000000'],
         ];
     }
 }

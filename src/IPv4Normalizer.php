@@ -23,108 +23,69 @@ use League\Uri\Exceptions\Ipv4CalculatorMissing;
 use League\Uri\Maths\GMPMath;
 use League\Uri\Maths\Math;
 use League\Uri\Maths\PHPMath;
-use RuntimeException;
 use function array_pop;
 use function count;
-use function ctype_digit;
 use function end;
 use function explode;
-use function function_exists;
+use function extension_loaded;
 use function ltrim;
 use function preg_match;
 use function sprintf;
-use function strpos;
 use const PHP_INT_SIZE;
 
 final class IPv4Normalizer
 {
     private const MAX_IPV4_NUMBER = 4294967295;
-
-    private const REGEXP_OCTAL = '/^[0-7]+$/';
-
-    private const REGEXP_NUMBER = '/^(?<base>0x|0)?(?<number>[0-9a-f]*)$/';
-
-    /**
-     * Loads a Math implementation depending on the underlying OS settings.
-     *
-     * @throws RuntimeException If the underlying OS settings are invalid.
-     */
-    private static function math(): ?Math
-    {
-        static $math;
-
-        if (null !== $math) {
-            return $math;
-        }
-
-        if (4 < PHP_INT_SIZE) {
-            $math = new PHPMath();
-
-            return $math;
-        }
-
-        if (function_exists('gimp_init')) {
-            $math = new GMPMath();
-
-            return $math;
-        }
-
-        return null;
-    }
+    private const REGEXP_PATTERN_PER_BASE = [
+        '/^0x(?<number>[[:xdigit:]]*)$/' => 16,
+        '/^0(?<number>[0-7]*)$/' => 8,
+        '/^(?<number>\d*)$/' => 10,
+    ];
 
     /**
      * Normalizes the host content to a IPv4 Host string representation if possible
      * otherwise returns the Host instance unchanged.
      *
      * @param ?Math $math
-     *
-     * @throws Ipv4CalculatorMissing
      */
     public static function normalize(HostInterface $host, ?Math $math = null): HostInterface
     {
         $hostString = (string) $host;
-        if ($host->isIp() || '' === $hostString || false !== strpos($hostString, '..')) {
+        if (!$host->isDomain() || '' === $hostString) {
             return $host;
         }
 
-        $parts = explode('.', $hostString);
-        if ('' === end($parts)) {
-            array_pop($parts);
+        $labels = explode('.', $hostString);
+        if ('' === end($labels)) {
+            array_pop($labels);
         }
 
-        if (4 < count($parts)) {
+        if (4 < count($labels)) {
             return $host;
         }
 
         $math = $math ?? self::math();
-        if (null === $math) {
-            throw new Ipv4CalculatorMissing(sprintf(
-                'No %s was provided or detected for your platform. Please run you script on a x.64 PHP build or install the GMP extension to enable autodetection.',
-                Math::class
-            ));
-        }
-
-        $numbers = [];
-        foreach ($parts as $part) {
-            $number = self::filterIPV4Part($part, $math);
-            if (null === $number || $number < 0 || $number > self::MAX_IPV4_NUMBER) {
+        $parts = [];
+        foreach ($labels as $label) {
+            $part = self::labelToIpv4Part($label, $math);
+            if (null === $part) {
                 return $host;
             }
 
-            $numbers[] = $number;
+            $parts[] = $part;
         }
 
-        $ipv4 = array_pop($numbers);
-        $max = $math->pow(256, 6 - count($numbers));
+        $ipv4 = array_pop($parts);
+        $max = $math->pow(256, 6 - count($parts));
         if ($math->compare($ipv4, $max) > 0) {
             return $host;
         }
 
-        foreach ($numbers as $offset => $number) {
-            if ($number > 255) {
+        foreach ($parts as $offset => $part) {
+            if ($math->compare($part, 255) > 0) {
                 return $host;
             }
-            $ipv4 += $math->multiply($number, $math->pow(256, 3 - $offset));
+            $ipv4 += $math->multiply($part, $math->pow(256, 3 - $offset));
         }
 
         /** @var HostInterface $newHost */
@@ -134,39 +95,59 @@ final class IPv4Normalizer
     }
 
     /**
-     * Translates a IPv4 part from a non decimal representation to its integer representation.
+     * Loads a Math implementation depending on the underlying OS settings.
      *
-     * @return mixed Returns null if it can not correctly convert the part to the integer representation
+     * @throws Ipv4CalculatorMissing If no class is loaded
      */
-    private static function filterIPV4Part(string $part, Math $math)
+    private static function math(): Math
     {
-        if (1 !== preg_match(self::REGEXP_NUMBER, $part, $matches)) {
-            return null;
+        static $math;
+
+        if (null !== $math) {
+            return $math;
         }
 
-        $number = ltrim($matches['number'], '0');
-        if ('' === $number) {
-            return 0;
+        if (extension_loaded('gmp')) {
+            $math = new GMPMath();
+
+            return $math;
         }
 
-        if ('0x' === $matches['base']) {
-            if (ctype_xdigit($number)) {
-                return $math->baseConvert($number, 16);
+        if (4 < PHP_INT_SIZE) {
+            $math = new PHPMath();
+
+            return $math;
+        }
+
+        throw new Ipv4CalculatorMissing(sprintf(
+            'No %s was provided or detected for your platform. Please run you script on a x.64 PHP build or install the GMP extension to enable autodetection.',
+            Math::class
+        ));
+    }
+
+    /**
+     * Converts a domain label into a IPv4 integer part.
+     *
+     * @return mixed Returns null if it can not correctly convert the label
+     */
+    private static function labelToIpv4Part(string $part, Math $math)
+    {
+        foreach (self::REGEXP_PATTERN_PER_BASE as $regexp => $base) {
+            if (1 !== preg_match($regexp, $part, $matches)) {
+                continue;
+            }
+
+            $number = ltrim($matches['number'], '0');
+            if ('' === $number) {
+                return 0;
+            }
+
+            $number = $math->baseConvert($number, $base);
+            if (0 <= $math->compare($number, 0) && 0 >= $math->compare($number, self::MAX_IPV4_NUMBER)) {
+                return $number;
             }
 
             return null;
-        }
-
-        if ('0' === $matches['base']) {
-            if (1 === preg_match(self::REGEXP_OCTAL, $number)) {
-                return $math->baseConvert($number, 8);
-            }
-
-            return null;
-        }
-
-        if ('' === $matches['base'] && ctype_digit($number)) {
-            return $math->baseConvert($number, 10);
         }
 
         return null;

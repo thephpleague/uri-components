@@ -18,9 +18,11 @@ declare(strict_types=1);
 
 namespace League\Uri\Maths;
 
+use GMP;
 use function gmp_cmp;
 use function gmp_div_q;
 use function gmp_init;
+use function gmp_mod;
 use function gmp_mul;
 use function gmp_pow;
 use const GMP_ROUND_MINUSINF;
@@ -30,7 +32,7 @@ final class GMPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function pow($base, int $exp)
+    public function pow($base, int $exp): GMP
     {
         return gmp_pow($base, $exp);
     }
@@ -38,7 +40,7 @@ final class GMPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function baseConvert($var, int $base)
+    public function baseConvert($var, int $base): GMP
     {
         return gmp_init($var, $base);
     }
@@ -54,7 +56,7 @@ final class GMPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function multiply($value1, $value2)
+    public function multiply($value1, $value2): GMP
     {
         return gmp_mul($value1, $value2);
     }
@@ -65,13 +67,13 @@ final class GMPMath implements Math
     public function long2Ip($ipAddress): string
     {
         $output = '';
-        $n = $ipAddress;
-        for ($i = 0; $i < 4; $i++) {
-            $output = ($n % 256).$output;
-            if ($i < 3) {
+        $part = $ipAddress;
+        for ($offset = 0; $offset < 4; $offset++) {
+            $output = gmp_mod($part, 256).$output;
+            if ($offset < 3) {
                 $output = '.'.$output;
             }
-            $n = gmp_div_q($n, 256, GMP_ROUND_MINUSINF);
+            $part = gmp_div_q($part, 256, GMP_ROUND_MINUSINF);
         }
 
         return $output;
