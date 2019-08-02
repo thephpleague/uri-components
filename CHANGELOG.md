@@ -6,7 +6,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- `League\Uri\IPv4Normalizer` to ease IPV4 host string normalization. 
+- `League\Uri\IPv4HostNormalizer` to ease IPV4 host string normalization. 
 - `League\Uri\UriModifier` to ease manipulating `League\Uri\UriInterface` and `Psr\Http\Message\UriInterface` implementing objects.
 - `League\Uri\QueryString` to parse, extract and build query string and parameters
 - All components classes implement the `League\Uri\Contracts\ComponentInterface` 

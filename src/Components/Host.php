@@ -25,7 +25,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnSupportMissing;
 use League\Uri\Exceptions\Ipv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\IPv4Normalizer;
+use League\Uri\IPv4HostNormalizer;
 use League\Uri\Maths\Math;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
@@ -324,7 +324,7 @@ final class Host extends Component implements IpHostInterface
         }
 
         /** @var Host $host */
-        $host = IPv4Normalizer::normalize(new self($ip), $math);
+        $host = IPv4HostNormalizer::normalize(new self($ip), $math);
         if ($host->isIp()) {
             return $host;
         }

@@ -33,7 +33,7 @@ use function preg_match;
 use function sprintf;
 use const PHP_INT_SIZE;
 
-final class IPv4Normalizer
+final class IPv4HostNormalizer
 {
     private const MAX_IPV4_NUMBER = 4294967295;
     private const REGEXP_PATTERN_PER_BASE = [

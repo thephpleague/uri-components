@@ -257,7 +257,7 @@ final class UriModifier
      */
     public static function normalizeHost($uri, ?Math $math = null)
     {
-        return $uri->withHost(IPv4Normalizer::normalize(Host::createFromUri($uri), $math)->__toString());
+        return $uri->withHost(IPv4HostNormalizer::normalize(Host::createFromUri($uri), $math)->__toString());
     }
 
     /*********************************
