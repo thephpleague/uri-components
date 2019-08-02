@@ -33,7 +33,7 @@ final class PHPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function baseConvert($var, int $base)
+    public function baseConvert($var, int $base): int
     {
         return intval($var, $base);
     }
@@ -49,7 +49,7 @@ final class PHPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function multiply($value1, $value2)
+    public function multiply($value1, $value2): int
     {
         return $value1 * $value2;
     }
