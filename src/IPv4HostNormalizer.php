@@ -25,21 +25,30 @@ use League\Uri\Maths\Math;
 use League\Uri\Maths\PHPMath;
 use function array_pop;
 use function count;
-use function end;
 use function explode;
 use function extension_loaded;
 use function ltrim;
 use function preg_match;
 use function sprintf;
+use function substr;
 use const PHP_INT_SIZE;
 
 final class IPv4HostNormalizer
 {
     private const MAX_IPV4_NUMBER = 4294967295;
-    private const REGEXP_PATTERN_PER_BASE = [
+
+    private const REGEXP_IPV4_HOST = '/(?(DEFINE)
+        (?<hexadecimal>0x[[:xdigit:]]*)   # . is missing as it is used to separate labels
+        (?<octal>0[0-7]*)
+        (?<decimal>\d+)
+        (?<ipv4_part>(?:(?&hexadecimal)|(?&octal)|(?&decimal))*)
+    )
+    ^(?:(?&ipv4_part)\.){0,3}(?&ipv4_part)\.?$/ix';
+
+    private const REGEXP_IPV4_PART_PER_BASE = [
         '/^0x(?<number>[[:xdigit:]]*)$/' => 16,
         '/^0(?<number>[0-7]*)$/' => 8,
-        '/^(?<number>\d*)$/' => 10,
+        '/^(?<number>\d+)$/' => 10,
     ];
 
     /**
@@ -55,18 +64,17 @@ final class IPv4HostNormalizer
             return $host;
         }
 
-        $labels = explode('.', $hostString);
-        if ('' === end($labels)) {
-            array_pop($labels);
+        if (1 !== preg_match(self::REGEXP_IPV4_HOST, $hostString)) {
+            return $host;
         }
 
-        if (4 < count($labels)) {
-            return $host;
+        if ('.' === substr($hostString, -1, 1)) {
+            $hostString = substr($hostString, 0, -1);
         }
 
         $math = $math ?? self::math();
         $parts = [];
-        foreach ($labels as $label) {
+        foreach (explode('.', $hostString) as $label) {
             $part = self::labelToIpv4Part($label, $math);
             if (null === $part) {
                 return $host;
@@ -132,7 +140,7 @@ final class IPv4HostNormalizer
      */
     private static function labelToIpv4Part(string $part, Math $math)
     {
-        foreach (self::REGEXP_PATTERN_PER_BASE as $regexp => $base) {
+        foreach (self::REGEXP_IPV4_PART_PER_BASE as $regexp => $base) {
             if (1 !== preg_match($regexp, $part, $matches)) {
                 continue;
             }
@@ -146,8 +154,6 @@ final class IPv4HostNormalizer
             if (0 <= $math->compare($number, 0) && 0 >= $math->compare($number, self::MAX_IPV4_NUMBER)) {
                 return $number;
             }
-
-            return null;
         }
 
         return null;
