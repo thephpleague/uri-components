@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Iterator;
 use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
@@ -242,7 +243,7 @@ final class Query extends Component implements QueryInterface
     /**
      * {@inheritDoc}
      */
-    public function getIterator(): iterable
+    public function getIterator(): Iterator
     {
         foreach ($this->pairs as $pair) {
             yield $pair;
