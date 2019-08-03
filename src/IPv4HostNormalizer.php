@@ -37,15 +37,20 @@ final class IPv4HostNormalizer
 {
     private const MAX_IPV4_NUMBER = 4294967295;
 
-    private const REGEXP_IPV4_HOST = '/(?(DEFINE)
-        (?<hexadecimal>0x[[:xdigit:]]*)   # . is missing as it is used to separate labels
-        (?<octal>0[0-7]*)
-        (?<decimal>\d+)
-        (?<ipv4_part>(?:(?&hexadecimal)|(?&octal)|(?&decimal))*)
-    )
-    ^(?:(?&ipv4_part)\.){0,3}(?&ipv4_part)\.?$/ix';
+    private const REGEXP_IPV4_HOST = '/
+        (?(DEFINE) # . is missing as it is used to separate labels
+            (?<hexadecimal>0x[[:xdigit:]]*) 
+            (?<octal>0[0-7]*)
+            (?<decimal>\d+)
+            (?<ipv4_part>(?:(?&hexadecimal)|(?&octal)|(?&decimal))*)
+        )
+        ^
+            (?:(?&ipv4_part)\.){0,3}
+            (?&ipv4_part)\.?
+        $
+    /x';
 
-    private const REGEXP_IPV4_PART_PER_BASE = [
+    private const REGEXP_IPV4_NUMBER_PER_BASE = [
         '/^0x(?<number>[[:xdigit:]]*)$/' => 16,
         '/^0(?<number>[0-7]*)$/' => 8,
         '/^(?<number>\d+)$/' => 10,
@@ -55,16 +60,18 @@ final class IPv4HostNormalizer
      * Normalizes the host content to a IPv4 Host string representation if possible
      * otherwise returns the Host instance unchanged.
      *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     *
      * @param ?Math $math
      */
     public static function normalize(HostInterface $host, ?Math $math = null): HostInterface
     {
-        $hostString = (string) $host;
-        if (!$host->isDomain() || '' === $hostString) {
+        if (!$host->isDomain()) {
             return $host;
         }
 
-        if (1 !== preg_match(self::REGEXP_IPV4_HOST, $hostString)) {
+        $hostString = (string) $host;
+        if ('' === $hostString || 1 !== preg_match(self::REGEXP_IPV4_HOST, $hostString)) {
             return $host;
         }
 
@@ -73,27 +80,27 @@ final class IPv4HostNormalizer
         }
 
         $math = $math ?? self::math();
-        $parts = [];
+        $numbers = [];
         foreach (explode('.', $hostString) as $label) {
-            $part = self::labelToIpv4Part($label, $math);
-            if (null === $part) {
+            $number = self::labelToIpv4Number($label, $math);
+            if (null === $number) {
                 return $host;
             }
 
-            $parts[] = $part;
+            $numbers[] = $number;
         }
 
-        $ipv4 = array_pop($parts);
-        $max = $math->pow(256, 6 - count($parts));
+        $ipv4 = array_pop($numbers);
+        $max = $math->pow(256, 6 - count($numbers));
         if ($math->compare($ipv4, $max) > 0) {
             return $host;
         }
 
-        foreach ($parts as $offset => $part) {
-            if ($math->compare($part, 255) > 0) {
+        foreach ($numbers as $offset => $number) {
+            if ($math->compare($number, 255) > 0) {
                 return $host;
             }
-            $ipv4 += $math->multiply($part, $math->pow(256, 3 - $offset));
+            $ipv4 += $math->multiply($number, $math->pow(256, 3 - $offset));
         }
 
         /** @var HostInterface $newHost */
@@ -136,11 +143,13 @@ final class IPv4HostNormalizer
     /**
      * Converts a domain label into a IPv4 integer part.
      *
+     * @see https://url.spec.whatwg.org/#ipv4-number-parser
+     *
      * @return mixed Returns null if it can not correctly convert the label
      */
-    private static function labelToIpv4Part(string $part, Math $math)
+    private static function labelToIpv4Number(string $part, Math $math)
     {
-        foreach (self::REGEXP_IPV4_PART_PER_BASE as $regexp => $base) {
+        foreach (self::REGEXP_IPV4_NUMBER_PER_BASE as $regexp => $base) {
             if (1 !== preg_match($regexp, $part, $matches)) {
                 continue;
             }
