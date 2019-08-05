@@ -195,6 +195,7 @@ class IpAddressTest extends TestCase
             'false ipv4' => ['127..1'],
             'hostname' => ['example.com'],
             'false ipfuture' => ['vAF.csucj.$&+;:/:'],
+            'formatted ipv6' => ['[::1]'],
         ];
     }
 

@@ -325,7 +325,7 @@ final class Host extends Component implements IpHostInterface
 
         /** @var Host $host */
         $host = IPv4HostNormalizer::normalize(new self($ip), $math);
-        if ($host->isIp()) {
+        if ($host->isIpv4()) {
             return $host;
         }
 
