@@ -27,7 +27,6 @@ use League\Uri\Components\Query;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\IPv4Calculators\IPv4Calculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function ltrim;
 use function rtrim;
@@ -251,13 +250,15 @@ final class UriModifier
      * otherwise returns the Host instance unchanged.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param ?IPv4Calculator               $calculator
+     * @param ?IPv4HostNormalizer           $normalizer
      *
      * @return Psr7UriInterface|UriInterface
      */
-    public static function normalizeHost($uri, ?IPv4Calculator $calculator = null)
+    public static function normalizeHost($uri, ?IPv4HostNormalizer $normalizer = null)
     {
-        return $uri->withHost(IPv4HostNormalizer::normalize(Host::createFromUri($uri), $calculator)->__toString());
+        $normalizer = $normalizer ?? IPv4HostNormalizer::createFromServer();
+
+        return $uri->withHost($normalizer->normalize(Host::createFromUri($uri))->__toString());
     }
 
     /*********************************

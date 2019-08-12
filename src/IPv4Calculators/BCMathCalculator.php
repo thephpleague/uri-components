@@ -24,9 +24,9 @@ use function bcdiv;
 use function bcmod;
 use function bcmul;
 use function bcpow;
-use function strlen;
+use function str_split;
 
-final class BCMathCalculator extends Calculator
+final class BCMathCalculator implements IPv4Calculator
 {
     private const SCALE = 0;
 
@@ -40,21 +40,17 @@ final class BCMathCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function baseConvert($var, int $base): string
+    public function baseConvert($var, int $base): string
     {
-        $var =  (string) $var;
+        $var = (string) $var;
         if (10 === $base) {
             return $var;
         }
 
         $base = (string) $base;
         $decimal = '0';
-        for ($i = 0, $len = strlen($var); $i < $len; $i++) {
-            $decimal = bcadd(
-                bcmul($decimal, $base, self::SCALE),
-                self::CONVERSION_TABLE[$var[$i]],
-                self::SCALE
-            );
+        foreach (str_split($var) as $char) {
+            $decimal = bcadd($this->multiply($decimal, $base), self::CONVERSION_TABLE[$char], self::SCALE);
         }
 
         return $decimal;
@@ -63,7 +59,7 @@ final class BCMathCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function pow($base, int $exp): string
+    public function pow($base, int $exp): string
     {
         return bcpow((string) $base, (string) $exp, self::SCALE);
     }
@@ -71,7 +67,7 @@ final class BCMathCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function compare($value1, $value2): int
+    public function compare($value1, $value2): int
     {
         return bccomp((string) $value1, (string) $value2, self::SCALE);
     }
@@ -79,7 +75,7 @@ final class BCMathCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function multiply($value1, $value2): string
+    public function multiply($value1, $value2): string
     {
         return bcmul((string) $value1, (string) $value2, self::SCALE);
     }
@@ -87,18 +83,16 @@ final class BCMathCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function long2Ip($ipAddress): string
+    public function div($value, $base): string
     {
-        $output = '';
-        $part = $ipAddress;
-        for ($offset = 0; $offset < 4; $offset++) {
-            $output = bcmod((string) $part, '256', self::SCALE).$output;
-            if ($offset < 3) {
-                $output = '.'.$output;
-            }
-            $part = bcdiv((string) $part, '256', self::SCALE);
-        }
+        return bcdiv((string) $value, (string) $base, self::SCALE);
+    }
 
-        return $output;
+    /**
+     * {@inheritDoc}
+     */
+    public function mod($value, $base): string
+    {
+        return bcmod((string) $value, (string) $base, self::SCALE);
     }
 }
