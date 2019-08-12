@@ -19,9 +19,10 @@ declare(strict_types=1);
 namespace LeagueTest\Uri;
 
 use League\Uri\Components\Host;
+use League\Uri\IPv4Calculators\BCMathCalculator;
+use League\Uri\IPv4Calculators\GMPCalculator;
+use League\Uri\IPv4Calculators\NativeCalculator;
 use League\Uri\IPv4HostNormalizer;
-use League\Uri\Maths\GMPMath;
-use League\Uri\Maths\PHPMath;
 use PHPUnit\Framework\TestCase;
 use function extension_loaded;
 use const PHP_INT_SIZE;
@@ -36,10 +37,10 @@ final class IPv4HostNormalizerTest extends TestCase
      * @param ?string $input
      * @param ?string $expected
      */
-    public function testParseWithAutoDefineMath(?string $input, ?string $expected): void
+    public function testParseWithAutoDetectCalculator(?string $input, ?string $expected): void
     {
-        if (!extension_loaded('gmp') && 4 >= PHP_INT_SIZE) {
-            self::markTestSkipped('The PHP is compile for a x64 OS or loads the GMP extension.');
+        if (!extension_loaded('gmp') && !extension_loaded('bcmath') && 4 >= PHP_INT_SIZE) {
+            self::markTestSkipped('The PHP must be compile for a x64 OS or loads the GMP or the BCmath extension.');
         }
 
         self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input)));
@@ -50,13 +51,13 @@ final class IPv4HostNormalizerTest extends TestCase
      * @param ?string $input
      * @param ?string $expected
      */
-    public function testParseWithGMPMath(?string $input, ?string $expected): void
+    public function testParseWithGMPCalculator(?string $input, ?string $expected): void
     {
         if (!extension_loaded('gmp')) {
             self::markTestSkipped('The GMP extension is needed to execute this test.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new GMPMath()));
+        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new GMPCalculator()));
     }
 
     /**
@@ -64,13 +65,27 @@ final class IPv4HostNormalizerTest extends TestCase
      * @param ?string $input
      * @param ?string $expected
      */
-    public function testParseWithPHPMath(?string $input, ?string $expected): void
+    public function testParseWithNativeCalculator(?string $input, ?string $expected): void
     {
         if (4 > PHP_INT_SIZE) {
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new PHPMath()));
+        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new NativeCalculator()));
+    }
+
+    /**
+     * @dataProvider providerHost
+     * @param ?string $input
+     * @param ?string $expected
+     */
+    public function testParseWithBCMathCalculator(?string $input, ?string $expected): void
+    {
+        if (4 > PHP_INT_SIZE) {
+            self::markTestSkipped('The PHP must be compile for a x64 OS.');
+        }
+
+        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new BCMathCalculator()));
     }
 
     public function providerHost(): array

@@ -21,6 +21,6 @@ namespace League\Uri\Exceptions;
 use InvalidArgumentException;
 use League\Uri\Contracts\UriException;
 
-class Ipv4CalculatorMissing extends InvalidArgumentException implements UriException
+class IPv4CalculatorMissing extends InvalidArgumentException implements UriException
 {
 }

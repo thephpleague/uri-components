@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Maths;
+namespace League\Uri\IPv4Calculators;
 
 use GMP;
 use function gmp_cmp;
@@ -27,20 +27,12 @@ use function gmp_mul;
 use function gmp_pow;
 use const GMP_ROUND_MINUSINF;
 
-final class GMPMath implements Math
+final class GMPCalculator extends Calculator
 {
     /**
      * {@inheritDoc}
      */
-    public function pow($base, int $exp): GMP
-    {
-        return gmp_pow($base, $exp);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function baseConvert($var, int $base): GMP
+    protected function baseConvert($var, int $base): GMP
     {
         return gmp_init($var, $base);
     }
@@ -48,7 +40,15 @@ final class GMPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function compare($value1, $value2): int
+    protected function pow($base, int $exp): GMP
+    {
+        return gmp_pow($base, $exp);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function compare($value1, $value2): int
     {
         return gmp_cmp($value1, $value2);
     }
@@ -56,7 +56,7 @@ final class GMPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function multiply($value1, $value2): GMP
+    protected function multiply($value1, $value2): GMP
     {
         return gmp_mul($value1, $value2);
     }
@@ -64,7 +64,7 @@ final class GMPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function long2Ip($ipAddress): string
+    protected function long2Ip($ipAddress): string
     {
         $output = '';
         $part = $ipAddress;
