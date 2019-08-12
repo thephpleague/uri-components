@@ -16,24 +16,17 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Maths;
+namespace League\Uri\IPv4Calculators;
 
+use function intval;
 use function long2ip;
 
-final class PHPMath implements Math
+final class NativeCalculator extends Calculator
 {
     /**
      * {@inheritDoc}
      */
-    public function pow($base, int $exp)
-    {
-        return pow($base, $exp);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function baseConvert($var, int $base): int
+    protected function baseConvert($var, int $base): int
     {
         return intval($var, $base);
     }
@@ -41,7 +34,15 @@ final class PHPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function compare($value1, $value2): int
+    protected function pow($base, int $exp)
+    {
+        return pow($base, $exp);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function compare($value1, $value2): int
     {
         return $value1 <=> $value2;
     }
@@ -49,7 +50,7 @@ final class PHPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function multiply($value1, $value2): int
+    protected function multiply($value1, $value2): int
     {
         return $value1 * $value2;
     }
@@ -57,7 +58,7 @@ final class PHPMath implements Math
     /**
      * {@inheritDoc}
      */
-    public function long2Ip($ipAddress): string
+    protected function long2Ip($ipAddress): string
     {
         return long2ip($ipAddress);
     }
