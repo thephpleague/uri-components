@@ -18,31 +18,31 @@ declare(strict_types=1);
 
 namespace League\Uri\IPv4Calculators;
 
+use function floor;
 use function intval;
-use function long2ip;
 
-final class NativeCalculator extends Calculator
+final class NativeCalculator implements IPv4Calculator
 {
     /**
      * {@inheritDoc}
      */
-    protected function baseConvert($var, int $base): int
+    public function baseConvert($var, int $base): int
     {
-        return intval($var, $base);
+        return intval((string) $var, $base);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function pow($base, int $exp)
+    public function pow($base, int $exp)
     {
-        return pow($base, $exp);
+        return $base ** $exp;
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function compare($value1, $value2): int
+    public function compare($value1, $value2): int
     {
         return $value1 <=> $value2;
     }
@@ -50,7 +50,7 @@ final class NativeCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function multiply($value1, $value2): int
+    public function multiply($value1, $value2): int
     {
         return $value1 * $value2;
     }
@@ -58,8 +58,16 @@ final class NativeCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function long2Ip($ipAddress): string
+    public function div($value, $base): int
     {
-        return long2ip($ipAddress);
+        return (int) floor($value / $base);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function mod($value, $base): int
+    {
+        return $value % $base;
     }
 }

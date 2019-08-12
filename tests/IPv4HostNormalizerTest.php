@@ -19,9 +19,6 @@ declare(strict_types=1);
 namespace LeagueTest\Uri;
 
 use League\Uri\Components\Host;
-use League\Uri\IPv4Calculators\BCMathCalculator;
-use League\Uri\IPv4Calculators\GMPCalculator;
-use League\Uri\IPv4Calculators\NativeCalculator;
 use League\Uri\IPv4HostNormalizer;
 use PHPUnit\Framework\TestCase;
 use function extension_loaded;
@@ -43,7 +40,7 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS or loads the GMP or the BCmath extension.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input)));
+        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromServer()->normalize(new Host($input)));
     }
 
     /**
@@ -57,7 +54,7 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The GMP extension is needed to execute this test.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new GMPCalculator()));
+        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromGMP()->normalize(new Host($input)));
     }
 
     /**
@@ -71,7 +68,7 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new NativeCalculator()));
+        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromNative()->normalize(new Host($input)));
     }
 
     /**
@@ -81,11 +78,11 @@ final class IPv4HostNormalizerTest extends TestCase
      */
     public function testParseWithBCMathCalculator(?string $input, ?string $expected): void
     {
-        if (4 > PHP_INT_SIZE) {
-            self::markTestSkipped('The PHP must be compile for a x64 OS.');
+        if (!extension_loaded('bcmath')) {
+            self::markTestSkipped('The PHP must be compile with Bcmath extension enabled.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::normalize(new Host($input), new BCMathCalculator()));
+        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromBCMath()->normalize(new Host($input)));
     }
 
     public function providerHost(): array

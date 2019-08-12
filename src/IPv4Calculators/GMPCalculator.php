@@ -27,12 +27,12 @@ use function gmp_mul;
 use function gmp_pow;
 use const GMP_ROUND_MINUSINF;
 
-final class GMPCalculator extends Calculator
+final class GMPCalculator implements IPv4Calculator
 {
     /**
      * {@inheritDoc}
      */
-    protected function baseConvert($var, int $base): GMP
+    public function baseConvert($var, int $base): GMP
     {
         return gmp_init($var, $base);
     }
@@ -40,7 +40,7 @@ final class GMPCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function pow($base, int $exp): GMP
+    public function pow($base, int $exp): GMP
     {
         return gmp_pow($base, $exp);
     }
@@ -48,7 +48,7 @@ final class GMPCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function compare($value1, $value2): int
+    public function compare($value1, $value2): int
     {
         return gmp_cmp($value1, $value2);
     }
@@ -56,7 +56,7 @@ final class GMPCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function multiply($value1, $value2): GMP
+    public function multiply($value1, $value2): GMP
     {
         return gmp_mul($value1, $value2);
     }
@@ -64,18 +64,16 @@ final class GMPCalculator extends Calculator
     /**
      * {@inheritDoc}
      */
-    protected function long2Ip($ipAddress): string
+    public function div($value, $base): GMP
     {
-        $output = '';
-        $part = $ipAddress;
-        for ($offset = 0; $offset < 4; $offset++) {
-            $output = gmp_mod($part, 256).$output;
-            if ($offset < 3) {
-                $output = '.'.$output;
-            }
-            $part = gmp_div_q($part, 256, GMP_ROUND_MINUSINF);
-        }
+        return gmp_div_q($value, $base, GMP_ROUND_MINUSINF);
+    }
 
-        return $output;
+    /**
+     * {@inheritDoc}
+     */
+    public function mod($value, $base): GMP
+    {
+        return gmp_mod($value, $base);
     }
 }

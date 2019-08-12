@@ -21,20 +21,60 @@ namespace League\Uri\IPv4Calculators;
 interface IPv4Calculator
 {
     /**
-     * Converts a domain name into a IPv4 domain name.
+     * Get the decimal integer value of a variable.
      *
-     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     * @param mixed $var The scalar value being converted to an integer
      *
-     * If no conversion can be done null is returned.
+     * @return mixed the integer value
      */
-    public function convert(string $hostString): ?string;
+    public function baseConvert($var, int $base);
 
     /**
-     * Converts a domain label into a IPv4 integer part.
+     * Returns base raised to the power of exp.
      *
-     * @see https://url.spec.whatwg.org/#ipv4-number-parser
+     * @param mixed $base scalar, the base to use
      *
-     * @return mixed Returns null if it can not correctly convert the label
+     * @return mixed base raised to the power of exp.
      */
-    public function labelToNumber(string $label);
+    public function pow($base, int $exp);
+
+    /**
+     * Number comparison.
+     *
+     * @param mixed $value1 the first value
+     * @param mixed $value2 the second value
+     *
+     * @return int Returns < 0 if value1 is less than value2; > 0 if value1 is greater than value2, and 0 if they are equal.
+     */
+    public function compare($value1, $value2): int;
+
+    /**
+     * Multiply numbers.
+     *
+     * @param mixed $value1 a number that will be multiply by $value2
+     * @param mixed $value2 a number that will be multiply by $value1
+     *
+     * @return mixed the multiplication result
+     */
+    public function multiply($value1, $value2);
+
+    /**
+     * Returns the int point remainder (modulo) of the division of the arguments.
+     *
+     * @param mixed $value The dividend
+     * @param mixed $base  The divisor
+     *
+     * @return mixed The remainder
+     */
+    public function mod($value, $base);
+
+    /**
+     * Divide numbers.
+     *
+     * @param mixed $value The number being divided.
+     * @param mixed $base  The number that $value is being divided by.
+     *
+     * @return mixed The result of the division
+     */
+    public function div($value, $base);
 }
