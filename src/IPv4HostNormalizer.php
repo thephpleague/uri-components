@@ -136,6 +136,7 @@ final class IPv4HostNormalizer
         if ('.' === substr($hostString, -1, 1)) {
             $hostString = substr($hostString, 0, -1);
         }
+
         $ipv4host = $this->convert($hostString);
         if (null === $ipv4host) {
             return $host;
@@ -176,7 +177,11 @@ final class IPv4HostNormalizer
             if ($this->calculator->compare($number, 255) > 0) {
                 return null;
             }
-            $ipv4 += $this->calculator->multiply($number, $this->calculator->pow(256, 3 - $offset));
+
+            $ipv4 = $this->calculator->add($ipv4, $this->calculator->multiply(
+                $number,
+                $this->calculator->pow(256, 3 - $offset)
+            ));
         }
 
         return $this->long2Ip($ipv4);

@@ -95,4 +95,12 @@ final class BCMathCalculator implements IPv4Calculator
     {
         return bcmod((string) $value, (string) $base, self::SCALE);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function add($value1, $value2): string
+    {
+        return bcadd((string) $value1, (string) $value2, self::SCALE);
+    }
 }

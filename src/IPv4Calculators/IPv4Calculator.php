@@ -77,4 +77,14 @@ interface IPv4Calculator
      * @return mixed The result of the division
      */
     public function div($value, $base);
+
+    /**
+     * Add numbers.
+     *
+     * @param mixed $value1 a number that will be added to $value2
+     * @param mixed $value2 a number that will be added to $value1
+     *
+     * @return mixed the addition result
+     */
+    public function add($value1, $value2);
 }

@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace League\Uri\IPv4Calculators;
 
 use GMP;
+use function gmp_add;
 use function gmp_cmp;
 use function gmp_div_q;
 use function gmp_init;
@@ -75,5 +76,13 @@ final class GMPCalculator implements IPv4Calculator
     public function mod($value, $base): GMP
     {
         return gmp_mod($value, $base);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function add($value1, $value2): GMP
+    {
+        return gmp_add($value1, $value2);
     }
 }
