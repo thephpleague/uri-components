@@ -18,12 +18,16 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use League\Uri\Components\Host;
+use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\IPv4Calculators\BCMathCalculator;
 use League\Uri\IPv4Calculators\GMPCalculator;
 use League\Uri\IPv4Calculators\IPv4Calculator;
 use League\Uri\IPv4Calculators\NativeCalculator;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function array_pop;
 use function count;
 use function explode;
@@ -34,7 +38,7 @@ use function sprintf;
 use function substr;
 use const PHP_INT_SIZE;
 
-final class IPv4HostNormalizer
+final class IPv4Normalizer
 {
     private const REGEXP_IPV4_HOST = '/
         (?(DEFINE) # . is missing as it is used to separate labels
@@ -117,12 +121,54 @@ final class IPv4HostNormalizer
     }
 
     /**
+     * Normalizes the URI host content to a IPv4 dot-decimal notation if possible
+     * otherwise returns the uri instance unchanged.
+     *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     *
+     * @param UriInterface|Psr7UriInterface $uri
+     *
+     * @return UriInterface|Psr7UriInterface
+     */
+    public function normalizeUri($uri)
+    {
+        $host = Host::createFromUri($uri);
+        $hostContent = $this->normalizeHost($host)->getContent();
+        if ($hostContent === $host->getContent()) {
+            return $uri;
+        }
+
+        if ($uri instanceof UriInterface) {
+            return $uri->withHost($hostContent);
+        }
+
+        return $uri->withHost((string) $hostContent);
+    }
+
+    /**
+     * Normalizes the authority host content to a IPv4 dot-decimal notation if possible
+     * otherwise returns the uri instance unchanged.
+     *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     */
+    public function normalizeAuthority(AuthorityInterface $authority): AuthorityInterface
+    {
+        $hostContent = $authority->getHost();
+        $host = $this->normalizeHost(new Host($hostContent));
+        if ($hostContent === $host->getContent()) {
+            return $authority;
+        }
+
+        return $authority->withHost($host->getContent());
+    }
+
+    /**
      * Normalizes the host content to a IPv4 dot-decimal notation if possible
      * otherwise returns the Host instance unchanged.
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalize(HostInterface $host): HostInterface
+    public function normalizeHost(HostInterface $host): HostInterface
     {
         if (!$host->isDomain()) {
             return $host;
@@ -137,7 +183,7 @@ final class IPv4HostNormalizer
             $hostString = substr($hostString, 0, -1);
         }
 
-        $ipv4host = $this->convert($hostString);
+        $ipv4host = $this->convertHost($hostString);
         if (null === $ipv4host) {
             return $host;
         }
@@ -155,7 +201,7 @@ final class IPv4HostNormalizer
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    private function convert(string $hostString): ?string
+    private function convertHost(string $hostString): ?string
     {
         $numbers = [];
         foreach (explode('.', $hostString) as $label) {

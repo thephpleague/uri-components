@@ -25,7 +25,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnSupportMissing;
 use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\IPv4HostNormalizer;
+use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function defined;
@@ -300,13 +300,13 @@ final class Host extends Component implements IpHostInterface
     /**
      * Returns a host from an IP address.
      *
-     * @param ?IPv4HostNormalizer $normalizer
+     * @param ?IPv4Normalizer $normalizer
      *
      *@throws IPv4CalculatorMissing If detecting IPv4 is not possible
      * @throws SyntaxError If the $ip can not be converted into a Host
      * @return static
      */
-    public static function createFromIp(string $ip, string $version = '', ?IPv4HostNormalizer $normalizer = null): self
+    public static function createFromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
     {
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
@@ -322,9 +322,9 @@ final class Host extends Component implements IpHostInterface
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        $normalizer = $normalizer ?? IPv4HostNormalizer::createFromServer();
+        $normalizer = $normalizer ?? IPv4Normalizer::createFromServer();
         /** @var Host $host */
-        $host = $normalizer->normalize(new self($ip));
+        $host = $normalizer->normalizeHost(new self($ip));
         if ($host->isIpv4()) {
             return $host;
         }

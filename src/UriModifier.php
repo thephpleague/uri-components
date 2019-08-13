@@ -245,22 +245,6 @@ final class UriModifier
         return $uri->withHost(Domain::createFromUri($uri)->withLabel($offset, $label)->__toString());
     }
 
-    /**
-     * Normalizes the host content to a IPv4 Host string representation if possible
-     * otherwise returns the Host instance unchanged.
-     *
-     * @param Psr7UriInterface|UriInterface $uri
-     * @param ?IPv4HostNormalizer           $normalizer
-     *
-     * @return Psr7UriInterface|UriInterface
-     */
-    public static function normalizeHost($uri, ?IPv4HostNormalizer $normalizer = null)
-    {
-        $normalizer = $normalizer ?? IPv4HostNormalizer::createFromServer();
-
-        return $uri->withHost($normalizer->normalize(Host::createFromUri($uri))->__toString());
-    }
-
     /*********************************
      * Path resolution methods
      *********************************/

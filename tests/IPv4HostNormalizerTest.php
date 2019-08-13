@@ -18,14 +18,17 @@ declare(strict_types=1);
 
 namespace LeagueTest\Uri;
 
+use League\Uri\Components\Authority;
 use League\Uri\Components\Host;
-use League\Uri\IPv4HostNormalizer;
+use League\Uri\Http;
+use League\Uri\IPv4Normalizer;
+use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use function extension_loaded;
 use const PHP_INT_SIZE;
 
 /**
- * @coversDefaultClass \League\Uri\IPv4HostNormalizer
+ * @coversDefaultClass \League\Uri\IPv4Normalizer
  */
 final class IPv4HostNormalizerTest extends TestCase
 {
@@ -40,7 +43,7 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS or loads the GMP or the BCmath extension.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromServer()->normalize(new Host($input)));
+        self::assertEquals(new Host($expected), IPv4Normalizer::createFromServer()->normalizeHost(new Host($input)));
     }
 
     /**
@@ -54,7 +57,7 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The GMP extension is needed to execute this test.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromGMP()->normalize(new Host($input)));
+        self::assertEquals(new Host($expected), IPv4Normalizer::createFromGMP()->normalizeHost(new Host($input)));
     }
 
     /**
@@ -68,7 +71,7 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromNative()->normalize(new Host($input)));
+        self::assertEquals(new Host($expected), IPv4Normalizer::createFromNative()->normalizeHost(new Host($input)));
     }
 
     /**
@@ -82,7 +85,7 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile with Bcmath extension enabled.');
         }
 
-        self::assertEquals(new Host($expected), IPv4HostNormalizer::createFromBCMath()->normalize(new Host($input)));
+        self::assertEquals(new Host($expected), IPv4Normalizer::createFromBCMath()->normalizeHost(new Host($input)));
     }
 
     public function providerHost(): array
@@ -117,5 +120,47 @@ final class IPv4HostNormalizerTest extends TestCase
             'invalid host (13)' => ['0ffaed', '0ffaed'],
             'invalid host (14)' => ['192.168.1.0x3000000', '192.168.1.0x3000000'],
         ];
+    }
+
+    /**
+     * @covers ::normalizeUri
+     */
+    public function testIpv4NormalizeHostWithPsr7Uri(): void
+    {
+        $uri = Http::createFromString('http://0/test');
+        $newUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        self::assertSame('0.0.0.0', $newUri->getHost());
+
+        $uri = Http::createFromString('http://11.be/test');
+        $unchangedUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        self::assertSame($uri, $unchangedUri);
+    }
+
+    /**
+     * @covers ::normalizeUri
+     */
+    public function testIpv4NormalizeHostWithLeagueUri(): void
+    {
+        $uri = Uri::createFromString('http://0/test');
+        $newUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        self::assertSame('0.0.0.0', $newUri->getHost());
+
+        $uri = Http::createFromString('http://11.be/test');
+        $unchangedUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        self::assertSame($uri, $unchangedUri);
+    }
+
+    /**
+     * @covers ::normalizeAuthority
+     */
+    public function testIpv4NormalizeAuthority(): void
+    {
+        $authority = new Authority('hello:word@0:42');
+        $newAuthority = IPv4Normalizer::createFromServer()->normalizeAuthority($authority);
+        self::assertSame('0.0.0.0', $newAuthority->getHost());
+
+        $unChangedAuthority = new Authority('hello:word@11.be:42');
+        $newAuthority = IPv4Normalizer::createFromServer()->normalizeAuthority($unChangedAuthority);
+        self::assertSame($unChangedAuthority, $newAuthority);
     }
 }
