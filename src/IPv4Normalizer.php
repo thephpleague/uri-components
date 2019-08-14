@@ -137,16 +137,16 @@ final class IPv4Normalizer
     public function normalizeUri($uri)
     {
         $host = Host::createFromUri($uri);
-        $hostContent = $this->normalizeHost($host)->getContent();
-        if ($hostContent === $host->getContent()) {
+        $normalizedHost = $this->normalizeHost($host)->getContent();
+        if ($normalizedHost === $host->getContent()) {
             return $uri;
         }
 
         if ($uri instanceof UriInterface) {
-            return $uri->withHost($hostContent);
+            return $uri->withHost($normalizedHost);
         }
 
-        return $uri->withHost((string) $hostContent);
+        return $uri->withHost((string) $normalizedHost);
     }
 
     /**
@@ -157,13 +157,13 @@ final class IPv4Normalizer
      */
     public function normalizeAuthority(AuthorityInterface $authority): AuthorityInterface
     {
-        $hostContent = $authority->getHost();
-        $host = $this->normalizeHost(new Host($hostContent));
-        if ($hostContent === $host->getContent()) {
+        $host = Host::createFromAuthority($authority);
+        $normalizeHost = $this->normalizeHost($host)->getContent();
+        if ($normalizeHost === $host->getContent()) {
             return $authority;
         }
 
-        return $authority->withHost($host->getContent());
+        return $authority->withHost($normalizeHost);
     }
 
     /**
