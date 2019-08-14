@@ -26,6 +26,7 @@ use function gmp_init;
 use function gmp_mod;
 use function gmp_mul;
 use function gmp_pow;
+use function gmp_sub;
 use const GMP_ROUND_MINUSINF;
 
 final class GMPCalculator implements IPv4Calculator
@@ -84,5 +85,13 @@ final class GMPCalculator implements IPv4Calculator
     public function add($value1, $value2): GMP
     {
         return gmp_add($value1, $value2);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function sub($value1, $value2): GMP
+    {
+        return gmp_sub($value1, $value2);
     }
 }

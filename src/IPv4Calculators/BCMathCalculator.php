@@ -24,6 +24,7 @@ use function bcdiv;
 use function bcmod;
 use function bcmul;
 use function bcpow;
+use function bcsub;
 use function str_split;
 
 final class BCMathCalculator implements IPv4Calculator
@@ -102,5 +103,13 @@ final class BCMathCalculator implements IPv4Calculator
     public function add($value1, $value2): string
     {
         return bcadd((string) $value1, (string) $value2, self::SCALE);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function sub($value1, $value2): string
+    {
+        return bcsub((string) $value1, (string) $value2, self::SCALE);
     }
 }

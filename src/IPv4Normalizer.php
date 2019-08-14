@@ -59,16 +59,20 @@ final class IPv4Normalizer
         '/^(?<number>\d+)$/' => 10,
     ];
 
-    private const MAX_IPV4_NUMBER = 2 ** 32 - 1;
-
     /**
      * @var IPv4Calculator
      */
     private $calculator;
 
+    /**
+     * @var mixed the maximum IPV4 number.
+     */
+    private $maxIpv4Number;
+
     public function __construct(IPv4Calculator $calculator)
     {
         $this->calculator = $calculator;
+        $this->maxIpv4Number = $calculator->sub($calculator->pow(2, 32), 1);
     }
 
     /**
@@ -253,7 +257,7 @@ final class IPv4Normalizer
             }
 
             $number = $this->calculator->baseConvert($number, $base);
-            if (0 <= $this->calculator->compare($number, 0) && 0 >= $this->calculator->compare($number, self::MAX_IPV4_NUMBER)) {
+            if (0 <= $this->calculator->compare($number, 0) && 0 >= $this->calculator->compare($number, $this->maxIpv4Number)) {
                 return $number;
             }
         }
