@@ -64,7 +64,7 @@ interface IPv4Calculator
      * @param mixed $value The dividend
      * @param mixed $base  The divisor
      *
-     * @return mixed The remainder
+     * @return mixed the remainder
      */
     public function mod($value, $base);
 
@@ -74,7 +74,7 @@ interface IPv4Calculator
      * @param mixed $value The number being divided.
      * @param mixed $base  The number that $value is being divided by.
      *
-     * @return mixed The result of the division
+     * @return mixed the result of the division
      */
     public function div($value, $base);
 
@@ -87,4 +87,14 @@ interface IPv4Calculator
      * @return mixed the addition result
      */
     public function add($value1, $value2);
+
+    /**
+     * Add numbers.
+     *
+     * @param mixed $value1 a number that will be substracted of $value2
+     * @param mixed $value2 a number that will be substracted to $value1
+     *
+     * @return mixed the substraction result
+     */
+    public function sub($value1, $value2);
 }

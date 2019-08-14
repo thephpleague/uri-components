@@ -78,4 +78,12 @@ final class NativeCalculator implements IPv4Calculator
     {
         return $value1 + $value2;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function sub($value1, $value2): int
+    {
+        return $value1 - $value2;
+    }
 }
