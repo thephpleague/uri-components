@@ -119,7 +119,7 @@ final class IPv4Normalizer
         }
 
         throw new IPv4CalculatorMissing(sprintf(
-            'No %s was provided or detected for your platform. Please run you script on a x.64 PHP build or install the GMP or the BCMath extension to enable autodetection.',
+            'No %s found. Use a x.64 PHP build or install the GMP or the BCMath extension.',
             IPv4Calculator::class
         ));
     }
