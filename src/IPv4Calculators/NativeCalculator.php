@@ -26,17 +26,17 @@ final class NativeCalculator implements IPv4Calculator
     /**
      * {@inheritDoc}
      */
-    public function baseConvert($var, int $base): int
+    public function baseConvert($value, int $base): int
     {
-        return intval((string) $var, $base);
+        return intval((string) $value, $base);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function pow($base, int $exp)
+    public function pow($value, int $exponent)
     {
-        return $base ** $exp;
+        return $value ** $exponent;
     }
 
     /**

@@ -41,16 +41,16 @@ final class BCMathCalculator implements IPv4Calculator
     /**
      * {@inheritDoc}
      */
-    public function baseConvert($var, int $base): string
+    public function baseConvert($value, int $base): string
     {
-        $var = (string) $var;
+        $value = (string) $value;
         if (10 === $base) {
-            return $var;
+            return $value;
         }
 
         $base = (string) $base;
         $decimal = '0';
-        foreach (str_split($var) as $char) {
+        foreach (str_split($value) as $char) {
             $decimal = bcadd($this->multiply($decimal, $base), self::CONVERSION_TABLE[$char], self::SCALE);
         }
 
@@ -60,9 +60,9 @@ final class BCMathCalculator implements IPv4Calculator
     /**
      * {@inheritDoc}
      */
-    public function pow($base, int $exp): string
+    public function pow($value, int $exponent): string
     {
-        return bcpow((string) $base, (string) $exp, self::SCALE);
+        return bcpow((string) $value, (string) $exponent, self::SCALE);
     }
 
     /**

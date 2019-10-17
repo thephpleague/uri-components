@@ -102,6 +102,9 @@ final class IPv4Normalizer
     /**
      * Returns an instance using a detected calculator depending on the PHP environment.
      *
+     * @throws IPv4CalculatorMissing If no IPv4Calculator implementing object can be used
+     *                               on the platform
+     *
      * @codeCoverageIgnore
      */
     public static function createFromServer(): self
