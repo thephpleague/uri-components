@@ -21,32 +21,24 @@ namespace League\Uri\IPv4Calculators;
 interface IPv4Calculator
 {
     /**
-     * Get the decimal integer value of a variable.
+     * Add numbers.
      *
-     * @param mixed $var The scalar value being converted to an integer
+     * @param mixed $value1 a number that will be added to $value2
+     * @param mixed $value2 a number that will be added to $value1
      *
-     * @return mixed the integer value
+     * @return mixed the addition result
      */
-    public function baseConvert($var, int $base);
+    public function add($value1, $value2);
 
     /**
-     * Returns base raised to the power of exp.
+     * Subtract one number from another.
      *
-     * @param mixed $base scalar, the base to use
+     * @param mixed $value1 a number that will be substracted of $value2
+     * @param mixed $value2 a number that will be substracted to $value1
      *
-     * @return mixed base raised to the power of exp.
+     * @return mixed the subtraction result
      */
-    public function pow($base, int $exp);
-
-    /**
-     * Number comparison.
-     *
-     * @param mixed $value1 the first value
-     * @param mixed $value2 the second value
-     *
-     * @return int Returns < 0 if value1 is less than value2; > 0 if value1 is greater than value2, and 0 if they are equal.
-     */
-    public function compare($value1, $value2): int;
+    public function sub($value1, $value2);
 
     /**
      * Multiply numbers.
@@ -59,16 +51,6 @@ interface IPv4Calculator
     public function multiply($value1, $value2);
 
     /**
-     * Returns the int point remainder (modulo) of the division of the arguments.
-     *
-     * @param mixed $value The dividend
-     * @param mixed $base  The divisor
-     *
-     * @return mixed the remainder
-     */
-    public function mod($value, $base);
-
-    /**
      * Divide numbers.
      *
      * @param mixed $value The number being divided.
@@ -79,22 +61,40 @@ interface IPv4Calculator
     public function div($value, $base);
 
     /**
-     * Add numbers.
+     * Raise an number to the power of exponent.
      *
-     * @param mixed $value1 a number that will be added to $value2
-     * @param mixed $value2 a number that will be added to $value1
+     * @param mixed $value scalar, the base to use
      *
-     * @return mixed the addition result
+     * @return mixed the value raised to the power of exp.
      */
-    public function add($value1, $value2);
+    public function pow($value, int $exponent);
 
     /**
-     * Add numbers.
+     * Returns the int point remainder (modulo) of the division of the arguments.
      *
-     * @param mixed $value1 a number that will be substracted of $value2
-     * @param mixed $value2 a number that will be substracted to $value1
+     * @param mixed $value The dividend
+     * @param mixed $base  The divisor
      *
-     * @return mixed the substraction result
+     * @return mixed the remainder
      */
-    public function sub($value1, $value2);
+    public function mod($value, $base);
+
+    /**
+     * Number comparison.
+     *
+     * @param mixed $value1 the first value
+     * @param mixed $value2 the second value
+     *
+     * @return int Returns < 0 if value1 is less than value2; > 0 if value1 is greater than value2, and 0 if they are equal.
+     */
+    public function compare($value1, $value2): int;
+
+    /**
+     * Get the decimal integer value of a variable.
+     *
+     * @param mixed $value The scalar value being converted to an integer
+     *
+     * @return mixed the integer value
+     */
+    public function baseConvert($value, int $base);
 }

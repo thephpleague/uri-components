@@ -34,17 +34,17 @@ final class GMPCalculator implements IPv4Calculator
     /**
      * {@inheritDoc}
      */
-    public function baseConvert($var, int $base): GMP
+    public function baseConvert($value, int $base): GMP
     {
-        return gmp_init($var, $base);
+        return gmp_init($value, $base);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function pow($base, int $exp): GMP
+    public function pow($value, int $exponent): GMP
     {
-        return gmp_pow($base, $exp);
+        return gmp_pow($value, $exponent);
     }
 
     /**
