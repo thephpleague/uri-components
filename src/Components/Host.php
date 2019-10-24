@@ -108,12 +108,11 @@ final class Host extends Component implements IpHostInterface
      * Domain name regular expression
      */
     private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
-        (?<unreserved> [a-z0-9_~\-])
-        (?<sub_delims> [!$&\'()*+,;=])
-        (?<encoded> %[A-F0-9]{2})
-        (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
+        (?<ascii_digit> [a-z0-9])
+        (?<ascii_digit_hyphen> [a-z0-9-])
+        (?<label> (?:(?&ascii_digit)((?&ascii_digit_hyphen)*(?&ascii_digit))?){1,63})
     )
-    ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
+    ^(?:(?&label)\.){0,126}((?&label)\.?)?$/ix';
 
     private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
 

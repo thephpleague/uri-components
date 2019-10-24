@@ -22,7 +22,9 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function array_fill;
 use function date_create;
+use function implode;
 use function var_export;
 
 /**
@@ -52,8 +54,6 @@ class HostTest extends TestCase
         self::assertSame($host, $host->withContent('uri.thephpleague.com'));
         self::assertSame($host, $host->withContent($host));
         self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
-        self::assertTrue($host->isDomain());
-        self::assertFalse((new Host('[::1]'))->isDomain());
     }
 
     /**
@@ -295,5 +295,39 @@ class HostTest extends TestCase
         self::expectException(TypeError::class);
 
         Host::createFromUri('http://example.com#foobar');
+    }
+
+    /**
+     * @dataProvider getIsDomainProvider
+     * @covers ::isDomain
+     * @param ?string $host
+     */
+    public function test_host_is_domain(?string $host, bool $expectedIsDomain): void
+    {
+        $host = new Host($host);
+
+        self::assertSame($host->isDomain(), $expectedIsDomain);
+    }
+
+    public function getIsDomainProvider(): iterable
+    {
+        $tooLongHost = implode('.', array_fill(0, 128, 'baba'));
+        $maxLongHost = implode('.', array_fill(0, 127, 'baba'));
+        $tooLongLabel = implode('', array_fill(0, 64, 'baba'));
+
+        return [
+            'single label domain' => ['host' => 'localhost', 'expectedIsDomain' => true],
+            'single label domain with ending dot' => ['host' => 'localhost.', 'expectedIsDomain' => true],
+            'registered named' => ['host' => '-registered-.name', 'expectedIsDomain' => false],
+            'too long domain name' => ['host' => $tooLongHost, 'expectedIsDomain' => false],
+            'longest domain name' => ['host' => $maxLongHost, 'expectedIsDomain' => true],
+            'too long label' => ['host' => $tooLongLabel, 'expectedIsDomain' => false],
+            'empty string host' => ['host' => '', 'expectedIsDomain' => true],
+            'single dot' => ['host' => '.', 'expectedIsDomain' => false],
+            'null string host' => ['host' => null, 'expectedIsDomain' => true],
+            'ipv4 host' => ['host' => '127.0.0.1', 'expectedIsDomain' => false],
+            'ipv6 host' => ['host' => '[::1]', 'expectedIsDomain' => false],
+            'multiple domain with a dot ending' => ['host' => 'ulb.ac.be.', 'expectedIsDomain' => true],
+        ];
     }
 }
