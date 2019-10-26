@@ -311,9 +311,9 @@ class HostTest extends TestCase
 
     public function getIsDomainProvider(): iterable
     {
-        $tooLongHost = implode('.', array_fill(0, 128, 'baba'));
-        $maxLongHost = implode('.', array_fill(0, 127, 'baba'));
-        $tooLongLabel = implode('', array_fill(0, 64, 'baba'));
+        $tooLongHost = implode('.', array_fill(0, 128, 'b'));
+        $maxLongHost = implode('.', array_fill(0, 126, 'a')).'.';
+        $tooLongLabel = implode('', array_fill(0, 64, 'c')).'.a';
 
         return [
             'single label domain' => ['host' => 'localhost', 'expectedIsDomain' => true],
