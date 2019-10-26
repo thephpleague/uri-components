@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added 
+
+- None
+
+### Fixed
+
+- Improve Domain name detection according to RFC1132 see [issue #27](https://github.com/thephpleague/uri-components/pull/27)
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 2.0.0 - 2019-10-18
 
 ### Added
