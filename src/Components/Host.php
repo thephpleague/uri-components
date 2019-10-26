@@ -41,6 +41,7 @@ use function preg_match;
 use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
+use function strlen;
 use function strpos;
 use function strtolower;
 use function substr;
@@ -97,7 +98,8 @@ final class Host extends Component implements IpHostInterface
      */
     private const REGEXP_DOMAIN_NAME = '/^
         (([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])\.){0,126}
-         ([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])\.?
+        ([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])
+        \.?
     $/ix';
 
     /**
@@ -195,7 +197,7 @@ final class Host extends Component implements IpHostInterface
 
         if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
             $this->host = $domain_name;
-            $this->is_domain = (bool) preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
+            $this->is_domain = $this->isValidDomain($domain_name);
             $this->toUnicode();
             return;
         }
@@ -227,7 +229,23 @@ final class Host extends Component implements IpHostInterface
         }
 
         $this->host = $domain_name;
-        $this->is_domain = 1 === preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
+        $this->is_domain = $this->isValidDomain($domain_name);
+    }
+
+    /**
+     * Tells whether the registered name is a valid domain name according to RFC1123.
+     *
+     * @see http://man7.org/linux/man-pages/man7/hostname.7.html
+     * @see https://tools.ietf.org/html/rfc1123#section-2.1
+     */
+    private function isValidDomain(string $hostname): bool
+    {
+        if ('.' === substr($hostname, -1, 1)) {
+            $hostname = substr($hostname, 0, -1);
+        }
+
+        return 253 >= strlen($hostname) &&
+            1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
     }
 
     /**
