@@ -87,7 +87,18 @@ final class Host extends Component implements IpHostInterface
         (?<encoded>%[A-F0-9]{2})
         (?<reg_name>(?:(?&unreserved)|(?&sub_delims)|(?&encoded))*)
     )
-    ^(?:(?&reg_name)\.)*(?&reg_name)\.?$/ix';
+        ^(?:(?&reg_name)\.)*(?&reg_name)\.?$
+    /ix';
+
+    /**
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     *
+     * Domain name regular expression
+     */
+    private const REGEXP_DOMAIN_NAME = '/^
+        (([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])\.){0,126}
+         ([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])\.?
+    $/ix';
 
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
@@ -101,18 +112,6 @@ final class Host extends Component implements IpHostInterface
             (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
         )+
     $/ix';
-
-    /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * Domain name regular expression
-     */
-    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
-        (?<ascii_digit> [a-z0-9])
-        (?<ascii_digit_hyphen> [a-z0-9-])
-        (?<label> (?:(?&ascii_digit)((?&ascii_digit_hyphen)*(?&ascii_digit))?){1,63})
-    )
-    ^(?:(?&label)\.){0,126}((?&label)\.?)?$/ix';
 
     private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
 
