@@ -92,15 +92,22 @@ final class Host extends Component implements IpHostInterface
     /ix';
 
     /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     * @see https://tools.ietf.org/html/rfc1034#section-3.5
+     * @see https://tools.ietf.org/html/rfc1123#section-2.1
      *
      * Domain name regular expression
      */
-    private const REGEXP_DOMAIN_NAME = '/^
-        (([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])\.){0,126}
-        ([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])
-        \.?
-    $/ix';
+    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
+        (?<let_dig> [a-z0-9])
+        (?<let_dig_hyp> [a-z0-9-])
+        (?<ldh_str> (?&let_dig)(?&let_dig_hyp){0,61})
+        (?<label> (?:(?&let_dig)|(?&ldh_str)(?&let_dig)))
+        (?<domain> (?&label)(\.(?&label)){0,126})
+    )
+        ^(?&domain)\.?$
+    /ix';
+
+    private const DOMAIN_NAME_MAX_LENGTH = 253;
 
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
@@ -244,7 +251,7 @@ final class Host extends Component implements IpHostInterface
             $hostname = substr($hostname, 0, -1);
         }
 
-        return 253 >= strlen($hostname) &&
+        return self::DOMAIN_NAME_MAX_LENGTH >= strlen($hostname) &&
             1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
     }
 
