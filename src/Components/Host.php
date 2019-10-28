@@ -96,11 +96,7 @@ final class Host extends Component implements IpHostInterface
      *
      * Domain name regular expression
      */
-    private const REGEXP_DOMAIN_NAME = '/^
-        (?<label>[a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])
-        (\.(?&label)){0,126}
-        \.?
-    $/ix';
+    private const REGEXP_DOMAIN_NAME = '/^(?<label>[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\.(?&label)){0,126}\.?$/ix';
 
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
