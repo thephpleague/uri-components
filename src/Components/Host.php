@@ -41,7 +41,6 @@ use function preg_match;
 use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
-use function strlen;
 use function strpos;
 use function strtolower;
 use function substr;
@@ -98,8 +97,8 @@ final class Host extends Component implements IpHostInterface
      * Domain name regular expression
      */
     private const REGEXP_DOMAIN_NAME = '/^
-        ([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])
-        (\.([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])){0,126}
+        (?<label>[a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])
+        (\.(?&label)){0,126}
         \.?
     $/ix';
 
@@ -246,7 +245,7 @@ final class Host extends Component implements IpHostInterface
             $domainMaxLength = 254;
         }
 
-        return $domainMaxLength >= strlen($hostname)
+        return !isset($hostname[$domainMaxLength])
             && 1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
     }
 
