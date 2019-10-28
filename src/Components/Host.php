@@ -103,8 +103,6 @@ final class Host extends Component implements IpHostInterface
         \.?
     $/ix';
 
-    private const DOMAIN_NAME_MAX_LENGTH = 253;
-
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *
@@ -243,12 +241,13 @@ final class Host extends Component implements IpHostInterface
      */
     private function isValidDomain(string $hostname): bool
     {
+        $domainMaxLength = 253;
         if ('.' === substr($hostname, -1, 1)) {
-            $hostname = substr($hostname, 0, -1);
+            $domainMaxLength = 254;
         }
 
-        return self::DOMAIN_NAME_MAX_LENGTH >= strlen($hostname) &&
-            1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
+        return $domainMaxLength >= strlen($hostname)
+            && 1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
     }
 
     /**
