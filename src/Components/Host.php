@@ -100,7 +100,7 @@ final class Host extends Component implements IpHostInterface
         (?<let_dig> [a-z0-9])                         # alpha digit
         (?<let_dig_hyp> [a-z0-9-])                    # alpha digit and hyphen
         (?<ldh_str> (?&let_dig_hyp){0,61}(?&let_dig)) # inner domain label string
-        (?<label> (?&let_dig)((?&ldh_str))?)          # label string
+        (?<label> (?&let_dig)((?&ldh_str))?)          # domain label
         (?<domain> (?&label)(\.(?&label)){0,126}\.?)  # domain name
     )
         ^(?&domain)$
