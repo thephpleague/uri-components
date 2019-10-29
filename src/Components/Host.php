@@ -94,9 +94,17 @@ final class Host extends Component implements IpHostInterface
      * @see https://tools.ietf.org/html/rfc1034#section-3.5
      * @see https://tools.ietf.org/html/rfc1123#section-2.1
      *
-     * Domain name regular expression
+     * Domain name regular expression (everything but the domain name length is validated)
      */
-    private const REGEXP_DOMAIN_NAME = '/^(?<label>[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\.(?&label)){0,126}\.?$/ix';
+    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
+        (?<let_dig> [a-z0-9])                         # alpha digit
+        (?<let_dig_hyp> [a-z0-9-])                    # alpha digit and hyphen
+        (?<ldh_str> (?&let_dig_hyp){0,61}(?&let_dig)) # inner domain label string
+        (?<label> (?&let_dig)((?&ldh_str))?)          # label string
+        (?<domain> (?&label)(\.(?&label)){0,126}\.?)  # domain name
+    )
+        ^(?&domain)$
+    /ix';
 
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
