@@ -327,9 +327,9 @@ class HostTest extends TestCase
             'longest domain name' => ['host' => $maxLongHost, 'expectedIsDomain' => true],
             'longest domain name with ending dot' => ['host' => $maxLongHost.'.', 'expectedIsDomain' => true],
             'too long label' => ['host' => $tooLongLabel, 'expectedIsDomain' => false],
-            'empty string host' => ['host' => '', 'expectedIsDomain' => true],
+            'empty string host' => ['host' => '', 'expectedIsDomain' => false],
             'single dot' => ['host' => '.', 'expectedIsDomain' => false],
-            'null string host' => ['host' => null, 'expectedIsDomain' => true],
+            'null string host' => ['host' => null, 'expectedIsDomain' => false],
             'multiple domain with a dot ending' => ['host' => 'ulb.ac.be.', 'expectedIsDomain' => true],
         ];
     }

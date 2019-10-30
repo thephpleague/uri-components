@@ -165,7 +165,6 @@ final class Host extends Component implements IpHostInterface
         $host = self::filterComponent($host);
         $this->host = $host;
         if (null === $host || '' === $host) {
-            $this->is_domain = true;
             return;
         }
 
