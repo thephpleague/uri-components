@@ -77,11 +77,13 @@ final class Host extends Component implements IpHostInterface
     /ix';
 
     /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     * General registered name regular expression.
      *
-     * General registered name regular expression
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     * @see https://regex101.com/r/fptU8V/1
      */
-    private const REGEXP_REGISTERED_NAME = '/(?(DEFINE)
+    private const REGEXP_REGISTERED_NAME = '/
+    (?(DEFINE)
         (?<unreserved>[a-z0-9_~\-])   # . is missing as it is used to separate labels
         (?<sub_delims>[!$&\'()*+,;=])
         (?<encoded>%[A-F0-9]{2})
@@ -91,15 +93,19 @@ final class Host extends Component implements IpHostInterface
     /ix';
 
     /**
+     * Domain name regular expression.
+     *
+     * Everything but the domain name length is validated
+     *
      * @see https://tools.ietf.org/html/rfc1034#section-3.5
      * @see https://tools.ietf.org/html/rfc1123#section-2.1
-     *
-     * Domain name regular expression (everything but the domain name length is validated)
+     * @see https://regex101.com/r/71j6rt/1
      */
-    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
+    private const REGEXP_DOMAIN_NAME = '/
+    (?(DEFINE)
         (?<let_dig> [a-z0-9])                         # alpha digit
         (?<let_dig_hyp> [a-z0-9-])                    # alpha digit and hyphen
-        (?<ldh_str> (?&let_dig_hyp){0,61}(?&let_dig)) # inner domain label string
+        (?<ldh_str> (?&let_dig_hyp){0,61}(?&let_dig)) # domain label end
         (?<label> (?&let_dig)((?&ldh_str))?)          # domain label
         (?<domain> (?&label)(\.(?&label)){0,126}\.?)  # domain name
     )
