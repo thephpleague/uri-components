@@ -369,10 +369,8 @@ class DomainTest extends TestCase
     public function withoutProvider(): array
     {
         return [
-            //'remove unknown label' => ['secure.example.com', 34, 'secure.example.com'],
             'remove one string label' => ['secure.example.com', 0, 'secure.example'],
             'remove one string label negative offset' => ['secure.example.com', -1, 'example.com'],
-            //'remove simple label' => ['localhost', -1, ''],
         ];
     }
 
@@ -412,8 +410,6 @@ class DomainTest extends TestCase
             ['secure.example.com', 'master', 'master.secure.example.com'],
             ['secure.example.com.', 'master', 'master.secure.example.com.'],
             ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
-            //[null, 'toto', 'toto'],
-            //['', 'toto', 'toto.'],
         ];
     }
 
@@ -453,8 +449,6 @@ class DomainTest extends TestCase
             ['secure.example.com', 'master.', 'secure.example.com.master.'],
             ['toto', '127.0.0.1', 'toto.127.0.0.1'],
             ['example.com', '', 'example.com.'],
-            //[null, 'toto', 'toto'],
-            //['', 'toto', 'toto'],
         ];
     }
 
