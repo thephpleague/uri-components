@@ -77,14 +77,10 @@ final class Domain extends Component implements DomainHostInterface
      */
     private function setLabels(): array
     {
+        /**
+         * @var string $host
+         */
         $host = $this->host->getContent();
-        if (null === $host) {
-            return [];
-        }
-
-        if ('' === $host) {
-            return [''];
-        }
 
         return array_reverse(explode(self::SEPARATOR, $host));
     }

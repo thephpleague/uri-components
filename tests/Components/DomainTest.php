@@ -24,6 +24,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\UriInterface;
 use TypeError;
 use function date_create;
 use function var_export;
@@ -95,16 +96,6 @@ class DomainTest extends TestCase
                 'master.example.com',
                 'master.example.com',
             ],
-            'empty string' => [
-                '',
-                '',
-                '',
-            ],
-            'null' => [
-                null,
-                null,
-                null,
-            ],
             'dot ending' => [
                 'example.com.',
                 'example.com.',
@@ -141,8 +132,9 @@ class DomainTest extends TestCase
     /**
      * @dataProvider invalidDomainProvider
      * @covers ::__construct
+     * @param ?string $invalid
      */
-    public function testInvalidDomain(string $invalid): void
+    public function testInvalidDomain(?string $invalid): void
     {
         self::expectException(SyntaxError::class);
         new Domain($invalid);
@@ -151,6 +143,8 @@ class DomainTest extends TestCase
     public function invalidDomainProvider(): array
     {
         return [
+            'null' => [null],
+            'empty string' => [''],
             'ipv4' => ['127.0.0.1'],
             'ipv6' => ['::1'],
             'empty label' => ['tot.    .coucou.com'],
@@ -271,8 +265,6 @@ class DomainTest extends TestCase
         return [
             'string' => ['secure.example.com', 3, ['com', 'example', 'secure']],
             'numeric' => ['92.56.8', 3, ['8', '56', '92']],
-            'null' => [null, 0, []],
-            'empty string' => ['', 1, ['']],
         ];
     }
 
@@ -293,8 +285,6 @@ class DomainTest extends TestCase
             'array' => [['com', 'example', 'www'], 'www.example.com'],
             'iterator' => [new ArrayIterator(['com', 'example', 'www']), 'www.example.com'],
             'FQDN' => [['', 'com', 'example', 'www'], 'www.example.com.'],
-            'empty' => [[''], ''],
-            'null' => [[], ''],
             'another host object' => [new Domain('example.com.'), 'example.com.'],
         ];
     }
@@ -315,6 +305,24 @@ class DomainTest extends TestCase
     {
         self::expectException(TypeError::class);
         Domain::createFromLabels([null]);
+    }
+
+    /**
+     * @covers ::createFromLabels
+     */
+    public function testCreateFromLabelsFailedWithEmptyStringLabel(): void
+    {
+        self::expectException(SyntaxError::class);
+        Domain::createFromLabels(['']);
+    }
+
+    /**
+     * @covers ::createFromLabels
+     */
+    public function testCreateFromLabelsFailedWithEmptyLabel(): void
+    {
+        self::expectException(SyntaxError::class);
+        Domain::createFromLabels([]);
     }
 
     /**
@@ -346,8 +354,6 @@ class DomainTest extends TestCase
     {
         $host = new Domain('master.example.com');
         self::assertSame(['com', 'example', 'master'], $host->labels());
-        self::assertSame([], (new Domain(null))->labels());
-        self::assertSame([''], (new Domain(''))->labels());
         self::assertSame(['', 'localhost'], (new Domain('localhost.'))->labels());
     }
 
@@ -366,7 +372,7 @@ class DomainTest extends TestCase
             //'remove unknown label' => ['secure.example.com', 34, 'secure.example.com'],
             'remove one string label' => ['secure.example.com', 0, 'secure.example'],
             'remove one string label negative offset' => ['secure.example.com', -1, 'example.com'],
-            'remove simple label' => ['localhost', -1, ''],
+            //'remove simple label' => ['localhost', -1, ''],
         ];
     }
 
@@ -406,8 +412,8 @@ class DomainTest extends TestCase
             ['secure.example.com', 'master', 'master.secure.example.com'],
             ['secure.example.com.', 'master', 'master.secure.example.com.'],
             ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
-            [null, 'toto', 'toto'],
-            ['', 'toto', 'toto.'],
+            //[null, 'toto', 'toto'],
+            //['', 'toto', 'toto.'],
         ];
     }
 
@@ -447,8 +453,8 @@ class DomainTest extends TestCase
             ['secure.example.com', 'master.', 'secure.example.com.master.'],
             ['toto', '127.0.0.1', 'toto.127.0.0.1'],
             ['example.com', '', 'example.com.'],
-            [null, 'toto', 'toto'],
-            ['', 'toto', 'toto'],
+            //[null, 'toto', 'toto'],
+            //['', 'toto', 'toto'],
         ];
     }
 
@@ -554,25 +560,9 @@ class DomainTest extends TestCase
                 'uri' => Http::createFromString('http://example.com?foo=bar'),
                 'expected' => 'example.com',
             ],
-            'PSR-7 URI object with no host' => [
-                'uri' => Http::createFromString('path/to/the/sky?foo'),
-                'expected' => null,
-            ],
-            'PSR-7 URI object with empty string host' => [
-                'uri' => Http::createFromString('file:///path/to/you'),
-                'expected' => null,
-            ],
             'League URI object' => [
                 'uri' => Uri::createFromString('http://example.com?foo=bar'),
                 'expected' => 'example.com',
-            ],
-            'League URI object with no host' => [
-                'uri' => Uri::createFromString('path/to/the/sky?foo'),
-                'expected' => null,
-            ],
-            'League URI object with empty string query' => [
-                'uri' => Uri::createFromString('file:///path/to/you'),
-                'expected' => '',
             ],
         ];
     }
@@ -582,6 +572,24 @@ class DomainTest extends TestCase
         self::expectException(TypeError::class);
 
         Domain::createFromUri('http://example.com#foobar');
+    }
+
+    /**
+     * @dataProvider provideInvalidDomainName
+     */
+    public function testCreateFromUriThrowsSyntaxtError(UriInterface $uri): void
+    {
+        self::expectException(SyntaxError::class);
+
+        Domain::createFromUri($uri);
+    }
+
+    public function provideInvalidDomainName(): iterable
+    {
+        return [
+            'PSR-7 URI object with no host' => [Http::createFromString('path/to/the/sky?foo')],
+            'PSR-7 URI object with empty string host' => [Http::createFromString('file:///path/to/you')],
+        ];
     }
 
     public function testCreateFromAuthority(): void
