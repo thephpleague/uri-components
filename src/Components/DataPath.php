@@ -123,7 +123,7 @@ final class DataPath extends Component implements DataPathInterface
     private function filterPath(?string $path): string
     {
         if (null === $path) {
-            throw new SyntaxError('The path can not be null');
+            throw new SyntaxError('The path can not be null.');
         }
 
         if ('' === $path || ',' === $path) {
@@ -135,7 +135,7 @@ final class DataPath extends Component implements DataPathInterface
         }
 
         if (1 === preg_match(self::REGEXP_NON_ASCII_PATTERN, $path) && false === strpos($path, ',')) {
-            throw new SyntaxError(sprintf('The path `%s` is invalid according to RFC2937', $path));
+            throw new SyntaxError(sprintf('The path `%s` is invalid according to RFC2937.', $path));
         }
 
         return $path;
@@ -156,7 +156,7 @@ final class DataPath extends Component implements DataPathInterface
             return $mimetype;
         }
 
-        throw new SyntaxError(sprintf('invalid mimeType, `%s`', $mimetype));
+        throw new SyntaxError(sprintf('Invalid mimeType, `%s`.', $mimetype));
     }
 
     /**
@@ -181,7 +181,7 @@ final class DataPath extends Component implements DataPathInterface
 
         $params = array_filter(explode(';', $parameters));
         if ([] !== array_filter($params, [$this, 'validateParameter'])) {
-            throw new SyntaxError(sprintf('invalid mediatype parameters, `%s`', $parameters));
+            throw new SyntaxError(sprintf('Invalid mediatype parameters, `%s`.', $parameters));
         }
 
         return $params;
@@ -210,7 +210,7 @@ final class DataPath extends Component implements DataPathInterface
 
         $res = base64_decode($this->document, true);
         if (false === $res || $this->document !== base64_encode($res)) {
-            throw new SyntaxError(sprintf('invalid document, `%s`', $this->document));
+            throw new SyntaxError(sprintf('Invalid document, `%s`.', $this->document));
         }
     }
 
@@ -240,7 +240,7 @@ final class DataPath extends Component implements DataPathInterface
 
         $content = @file_get_contents(...$file_args);
         if (false === $content) {
-            throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory', $path));
+            throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory.', $path));
         }
 
         $mimetype = (string) (new finfo(FILEINFO_MIME))->file(...$mime_args);
@@ -472,7 +472,7 @@ final class DataPath extends Component implements DataPathInterface
     public function withParameters($parameters): DataPathInterface
     {
         if (!is_scalar($parameters) && !method_exists($parameters, '__toString')) {
-            throw new TypeError(sprintf('Expected parameter to be stringable; received %s', gettype($parameters)));
+            throw new TypeError(sprintf('Expected parameter to be stringable; received %s.', gettype($parameters)));
         }
 
         $parameters = (string) $parameters;

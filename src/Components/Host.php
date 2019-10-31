@@ -194,7 +194,7 @@ final class Host extends Component implements IpHostInterface
                 return;
             }
 
-            throw new SyntaxError(sprintf('`%s` is an invalid IP literal format', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid IP literal format.', $host));
         }
 
         $domain_name = rawurldecode($host);
@@ -212,7 +212,7 @@ final class Host extends Component implements IpHostInterface
         }
 
         if ($is_ascii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
         self::supportIdnHost();
@@ -224,7 +224,7 @@ final class Host extends Component implements IpHostInterface
             $arr
         );
         if (0 !== $arr['errors']) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s.', $host, $this->getIDNAErrors($arr['errors'])));
         }
 
         // @codeCoverageIgnoreStart
@@ -234,7 +234,7 @@ final class Host extends Component implements IpHostInterface
         // @codeCoverageIgnoreEnd
 
         if (false !== strpos($domain_name, '%')) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host));
         }
 
         $this->host = $domain_name;
@@ -355,7 +355,7 @@ final class Host extends Component implements IpHostInterface
             return $host;
         }
 
-        throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));
+        throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
     }
 
     /**
@@ -372,7 +372,7 @@ final class Host extends Component implements IpHostInterface
         }
 
         if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $component = $uri->getHost();
@@ -427,7 +427,7 @@ final class Host extends Component implements IpHostInterface
         );
         if (0 !== $arr['errors']) {
             $message = $this->getIDNAErrors($arr['errors']);
-            throw new SyntaxError(sprintf('The host `%s` is invalid : %s', $this->host, $message));
+            throw new SyntaxError(sprintf('The host `%s` is invalid : %s.', $this->host, $message));
         }
 
         // @codeCoverageIgnoreStart

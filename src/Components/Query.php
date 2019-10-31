@@ -115,7 +115,7 @@ final class Query extends Component implements QueryInterface
         }
 
         if (!is_array($params) && !is_object($params)) {
-            throw new TypeError(sprintf('The parameter is expected to be iterable or an object with public properties, `%s` given', gettype($params)));
+            throw new TypeError(sprintf('The parameter is expected to be iterable or an object with public properties, `%s` given.', gettype($params)));
         }
 
         return new self(
@@ -149,7 +149,7 @@ final class Query extends Component implements QueryInterface
         }
 
         if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $component = $uri->getQuery();

@@ -134,7 +134,7 @@ final class Authority extends Component implements AuthorityInterface
         }
 
         if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $authority = $uri->getAuthority();
