@@ -100,7 +100,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $pathSegments = [];
         foreach ($segments as $value) {
             if (!is_scalar($value) && !method_exists($value, '__toString')) {
-                throw new TypeError('The submitted segments are invalid');
+                throw new TypeError('The submitted segments are invalid.');
             }
             $pathSegments[] = (string) $value;
         }
@@ -120,7 +120,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $pathSegments = [];
         foreach ($segments as $value) {
             if (!is_scalar($value) && !method_exists($value, '__toString')) {
-                throw new TypeError('The submitted segments are invalid');
+                throw new TypeError('The submitted segments are invalid.');
             }
             $pathSegments[] = (string) $value;
         }
@@ -345,7 +345,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $segment = self::filterComponent($segment);
         if (null === $segment) {
-            throw new TypeError('The appended path can not be null');
+            throw new TypeError('The appended path can not be null.');
         }
 
         return new self(
@@ -362,7 +362,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $segment = self::filterComponent($segment);
         if (null === $segment) {
-            throw new TypeError('The prepended path can not be null');
+            throw new TypeError('The prepended path can not be null.');
         }
 
         return new self(
@@ -379,7 +379,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $nb_segments = count($this->segments);
         if ($key < - $nb_segments - 1 || $key > $nb_segments) {
-            throw new OffsetOutOfBounds(sprintf('the given key `%s` is invalid', $key));
+            throw new OffsetOutOfBounds(sprintf('The given key `%s` is invalid.', $key));
         }
 
         if (0 > $key) {
@@ -433,7 +433,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $deleted_keys = [];
         foreach ($keys as $value) {
             if (false === ($offset = filter_var($value, FILTER_VALIDATE_INT, $options))) {
-                throw new OffsetOutOfBounds(sprintf('the key `%s` is invalid', $value));
+                throw new OffsetOutOfBounds(sprintf('The key `%s` is invalid.', $value));
             }
 
             if ($offset < 0) {
@@ -482,11 +482,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $basename = $this->validateComponent($basename);
         if (null === $basename) {
-            throw new SyntaxError('a basename sequence can not be null');
+            throw new SyntaxError('A basename sequence can not be null.');
         }
 
         if (false !== strpos($basename, self::SEPARATOR)) {
-            throw new SyntaxError('The basename can not contain the path separator');
+            throw new SyntaxError('The basename can not contain the path separator.');
         }
 
         return $this->withSegment(count($this->segments) - 1, $basename);
@@ -499,15 +499,15 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $extension = $this->validateComponent($extension);
         if (null === $extension) {
-            throw new SyntaxError('an extension sequence can not be null');
+            throw new SyntaxError('An extension sequence can not be null.');
         }
 
         if (false !== strpos($extension, self::SEPARATOR)) {
-            throw new SyntaxError('an extension sequence can not contain a path delimiter');
+            throw new SyntaxError('An extension sequence can not contain a path delimiter.');
         }
 
         if (0 === strpos($extension, '.')) {
-            throw new SyntaxError('an extension sequence can not contain a leading `.` character');
+            throw new SyntaxError('An extension sequence can not contain a leading `.` character.');
         }
 
         /** @var string $basename */

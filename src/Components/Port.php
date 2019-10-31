@@ -65,7 +65,7 @@ final class Port extends Component implements PortInterface
             return $fport;
         }
 
-        throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s', $port));
+        throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s.', $port));
     }
 
     /**
@@ -89,7 +89,7 @@ final class Port extends Component implements PortInterface
             return new self($uri->getPort());
         }
 
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
     }
 
     /**
