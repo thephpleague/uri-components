@@ -54,18 +54,22 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * @inheritDoc
      *
-     * @param mixed|null $host
+     * @param mixed $host a Domain name can not be null
      *
      * @throws SyntaxError
      */
-    public function __construct($host = null)
+    public function __construct($host)
     {
         if (!$host instanceof HostInterface) {
             $host = new Host($host);
         }
 
+        if (null === $host->getContent()) {
+            throw new SyntaxError('A domain name can not be null.');
+        }
+
         if (!$host->isDomain()) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host->getContent()));
         }
 
         $this->host = $host;
@@ -77,14 +81,10 @@ final class Domain extends Component implements DomainHostInterface
      */
     private function setLabels(): array
     {
+        /**
+         * @var string $host
+         */
         $host = $this->host->getContent();
-        if (null === $host) {
-            return [];
-        }
-
-        if ('' === $host) {
-            return [''];
-        }
 
         return array_reverse(explode(self::SEPARATOR, $host));
     }
@@ -108,7 +108,7 @@ final class Domain extends Component implements DomainHostInterface
         foreach ($labels as $label) {
             $label = self::filterComponent($label);
             if (null === $label) {
-                throw new TypeError('a label can not be null');
+                throw new TypeError('A label can not be null.');
             }
             $hostLabels[] = $label;
         }
@@ -260,12 +260,7 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        $host = $this->getContent();
-        if (null === $host) {
-            return new self($label);
-        }
-
-        return new self($label.self::SEPARATOR.$host);
+        return new self($label.self::SEPARATOR.$this->getContent());
     }
 
     /**
@@ -278,12 +273,7 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        $host = $this->getContent();
-        if (null === $host || '' === $host) {
-            return new self($label);
-        }
-
-        return new self($host.self::SEPARATOR.$label);
+        return new self($this->getContent().self::SEPARATOR.$label);
     }
 
     /**
@@ -335,7 +325,7 @@ final class Domain extends Component implements DomainHostInterface
     {
         $nb_labels = count($this->labels);
         if ($key < - $nb_labels - 1 || $key > $nb_labels) {
-            throw new OffsetOutOfBounds(sprintf('no label can be added with the submitted key : `%s`', $key));
+            throw new OffsetOutOfBounds(sprintf('No label can be added with the submitted key : `%s`.', $key));
         }
 
         if (0 > $key) {
@@ -377,7 +367,7 @@ final class Domain extends Component implements DomainHostInterface
         $nb_labels = count($this->labels);
         foreach ($keys as &$offset) {
             if (- $nb_labels > $offset || $nb_labels - 1 < $offset) {
-                throw new OffsetOutOfBounds(sprintf('no label can be removed with the submitted key : `%s`', $offset));
+                throw new OffsetOutOfBounds(sprintf('No label can be removed with the submitted key : `%s`.', $offset));
             }
 
             if (0 > $offset) {

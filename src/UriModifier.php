@@ -141,7 +141,7 @@ final class UriModifier
             return $uri->withHost($host->getContent().'.'.ltrim($label->getContent(), '.'));
         }
 
-        throw new SyntaxError(sprintf('The URI host %s can not be appended', $host->__toString()));
+        throw new SyntaxError(sprintf('The URI host %s can not be appended.', $host->__toString()));
     }
 
     /**
@@ -193,7 +193,7 @@ final class UriModifier
             return $uri->withHost(rtrim($label->getContent(), '.').'.'.$host->getContent());
         }
 
-        throw new SyntaxError(sprintf('The URI host %s can not be prepended', (string) $host));
+        throw new SyntaxError(sprintf('The URI host %s can not be prepended.', (string) $host));
     }
 
     /**

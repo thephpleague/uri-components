@@ -47,10 +47,7 @@ final class IPv4Normalizer
             (?<decimal>\d+)
             (?<ipv4_part>(?:(?&hexadecimal)|(?&octal)|(?&decimal))*)
         )
-        ^
-            (?:(?&ipv4_part)\.){0,3}
-            (?&ipv4_part)\.?
-        $
+        ^(?:(?&ipv4_part)\.){0,3}(?&ipv4_part)\.?$
     /x';
 
     private const REGEXP_IPV4_NUMBER_PER_BASE = [

@@ -80,7 +80,7 @@ final class Path extends Component implements PathInterface
             return $path;
         }
 
-        throw new TypeError('The path can not be null');
+        throw new TypeError('The path can not be null.');
     }
 
     /**
@@ -93,7 +93,7 @@ final class Path extends Component implements PathInterface
     public static function createFromUri($uri): self
     {
         if (!$uri instanceof UriInterface && !$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $path = $uri->getPath();

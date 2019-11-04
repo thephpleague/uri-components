@@ -84,7 +84,7 @@ abstract class Component implements UriComponentInterface
         }
 
         if (!is_scalar($component) && !method_exists($component, '__toString')) {
-            throw new TypeError(sprintf('Expected component to be stringable; received %s', gettype($component)));
+            throw new TypeError(sprintf('Expected component to be stringable; received %s.', gettype($component)));
         }
 
         $component = (string) $component;
@@ -92,7 +92,7 @@ abstract class Component implements UriComponentInterface
             return $component;
         }
 
-        throw new SyntaxError(sprintf('Invalid component string: %s', $component));
+        throw new SyntaxError(sprintf('Invalid component string: %s.', $component));
     }
 
     /**

@@ -22,7 +22,9 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use function array_fill;
 use function date_create;
+use function implode;
 use function var_export;
 
 /**
@@ -52,8 +54,6 @@ class HostTest extends TestCase
         self::assertSame($host, $host->withContent('uri.thephpleague.com'));
         self::assertSame($host, $host->withContent($host));
         self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
-        self::assertTrue($host->isDomain());
-        self::assertFalse((new Host('[::1]'))->isDomain());
     }
 
     /**
@@ -295,5 +295,42 @@ class HostTest extends TestCase
         self::expectException(TypeError::class);
 
         Host::createFromUri('http://example.com#foobar');
+    }
+
+    /**
+     * @dataProvider getIsDomainProvider
+     * @covers ::isDomain
+     * @covers ::isValidDomain
+     *
+     * @param ?string $host
+     */
+    public function test_host_is_domain(?string $host, bool $expectedIsDomain): void
+    {
+        $host = new Host($host);
+
+        self::assertSame($host->isDomain(), $expectedIsDomain);
+    }
+
+    public function getIsDomainProvider(): iterable
+    {
+        $maxLongHost = implode('.', array_fill(0, 126, 'a')).'.a';
+        $tooLongHost = $maxLongHost.'b';
+        $tooLongLabel = implode('', array_fill(0, 64, 'c')).'.a';
+
+        return [
+            'registered named' => ['host' => '-registered-.name', 'expectedIsDomain' => false],
+            'ipv4 host' => ['host' => '127.0.0.1', 'expectedIsDomain' => false],
+            'ipv6 host' => ['host' => '[::1]', 'expectedIsDomain' => false],
+            'too long domain name' => ['host' => $tooLongHost, 'expectedIsDomain' => false],
+            'single label domain' => ['host' => 'localhost', 'expectedIsDomain' => true],
+            'single label domain with ending dot' => ['host' => 'localhost.', 'expectedIsDomain' => true],
+            'longest domain name' => ['host' => $maxLongHost, 'expectedIsDomain' => true],
+            'longest domain name with ending dot' => ['host' => $maxLongHost.'.', 'expectedIsDomain' => true],
+            'too long label' => ['host' => $tooLongLabel, 'expectedIsDomain' => false],
+            'empty string host' => ['host' => '', 'expectedIsDomain' => false],
+            'single dot' => ['host' => '.', 'expectedIsDomain' => false],
+            'null string host' => ['host' => null, 'expectedIsDomain' => false],
+            'multiple domain with a dot ending' => ['host' => 'ulb.ac.be.', 'expectedIsDomain' => true],
+        ];
     }
 }

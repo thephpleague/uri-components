@@ -77,17 +77,40 @@ final class Host extends Component implements IpHostInterface
     /ix';
 
     /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     * General registered name regular expression.
      *
-     * General registered name regular expression
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
+     * @see https://regex101.com/r/fptU8V/1
      */
-    private const REGEXP_REGISTERED_NAME = '/(?(DEFINE)
+    private const REGEXP_REGISTERED_NAME = '/
+    (?(DEFINE)
         (?<unreserved>[a-z0-9_~\-])   # . is missing as it is used to separate labels
         (?<sub_delims>[!$&\'()*+,;=])
         (?<encoded>%[A-F0-9]{2})
         (?<reg_name>(?:(?&unreserved)|(?&sub_delims)|(?&encoded))*)
     )
-    ^(?:(?&reg_name)\.)*(?&reg_name)\.?$/ix';
+        ^(?:(?&reg_name)\.)*(?&reg_name)\.?$
+    /ix';
+
+    /**
+     * Domain name regular expression.
+     *
+     * Everything but the domain name length is validated
+     *
+     * @see https://tools.ietf.org/html/rfc1034#section-3.5
+     * @see https://tools.ietf.org/html/rfc1123#section-2.1
+     * @see https://regex101.com/r/71j6rt/1
+     */
+    private const REGEXP_DOMAIN_NAME = '/
+    (?(DEFINE)
+        (?<let_dig> [a-z0-9])                         # alpha digit
+        (?<let_dig_hyp> [a-z0-9-])                    # alpha digit and hyphen
+        (?<ldh_str> (?&let_dig_hyp){0,61}(?&let_dig)) # domain label end
+        (?<label> (?&let_dig)((?&ldh_str))?)          # domain label
+        (?<domain> (?&label)(\.(?&label)){0,126}\.?)  # domain name
+    )
+        ^(?&domain)$
+    /ix';
 
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
@@ -101,19 +124,6 @@ final class Host extends Component implements IpHostInterface
             (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
         )+
     $/ix';
-
-    /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * Domain name regular expression
-     */
-    private const REGEXP_DOMAIN_NAME = '/(?(DEFINE)
-        (?<unreserved> [a-z0-9_~\-])
-        (?<sub_delims> [!$&\'()*+,;=])
-        (?<encoded> %[A-F0-9]{2})
-        (?<reg_name> (?:(?&unreserved)|(?&sub_delims)|(?&encoded)){1,63})
-    )
-    ^(?:(?&reg_name)\.){0,126}(?&reg_name)\.?$/ix';
 
     private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
 
@@ -161,7 +171,6 @@ final class Host extends Component implements IpHostInterface
         $host = self::filterComponent($host);
         $this->host = $host;
         if (null === $host || '' === $host) {
-            $this->is_domain = true;
             return;
         }
 
@@ -185,7 +194,7 @@ final class Host extends Component implements IpHostInterface
                 return;
             }
 
-            throw new SyntaxError(sprintf('`%s` is an invalid IP literal format', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid IP literal format.', $host));
         }
 
         $domain_name = rawurldecode($host);
@@ -197,13 +206,13 @@ final class Host extends Component implements IpHostInterface
 
         if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
             $this->host = $domain_name;
-            $this->is_domain = (bool) preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
+            $this->is_domain = $this->isValidDomain($domain_name);
             $this->toUnicode();
             return;
         }
 
         if ($is_ascii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
         self::supportIdnHost();
@@ -215,7 +224,7 @@ final class Host extends Component implements IpHostInterface
             $arr
         );
         if (0 !== $arr['errors']) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s', $host, $this->getIDNAErrors($arr['errors'])));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s.', $host, $this->getIDNAErrors($arr['errors'])));
         }
 
         // @codeCoverageIgnoreStart
@@ -225,11 +234,28 @@ final class Host extends Component implements IpHostInterface
         // @codeCoverageIgnoreEnd
 
         if (false !== strpos($domain_name, '%')) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name', $host));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host));
         }
 
         $this->host = $domain_name;
-        $this->is_domain = 1 === preg_match(self::REGEXP_DOMAIN_NAME, $domain_name);
+        $this->is_domain = $this->isValidDomain($domain_name);
+    }
+
+    /**
+     * Tells whether the registered name is a valid domain name according to RFC1123.
+     *
+     * @see http://man7.org/linux/man-pages/man7/hostname.7.html
+     * @see https://tools.ietf.org/html/rfc1123#section-2.1
+     */
+    private function isValidDomain(string $hostname): bool
+    {
+        $domainMaxLength = 253;
+        if ('.' === substr($hostname, -1, 1)) {
+            $domainMaxLength = 254;
+        }
+
+        return !isset($hostname[$domainMaxLength])
+            && 1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
     }
 
     /**
@@ -329,7 +355,7 @@ final class Host extends Component implements IpHostInterface
             return $host;
         }
 
-        throw new SyntaxError(sprintf('`%s` is an invalid IP Host', $ip));
+        throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
     }
 
     /**
@@ -346,7 +372,7 @@ final class Host extends Component implements IpHostInterface
         }
 
         if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface', Psr7UriInterface::class, UriInterface::class));
+            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $component = $uri->getHost();
@@ -401,7 +427,7 @@ final class Host extends Component implements IpHostInterface
         );
         if (0 !== $arr['errors']) {
             $message = $this->getIDNAErrors($arr['errors']);
-            throw new SyntaxError(sprintf('The host `%s` is invalid : %s', $this->host, $message));
+            throw new SyntaxError(sprintf('The host `%s` is invalid : %s.', $this->host, $message));
         }
 
         // @codeCoverageIgnoreStart
