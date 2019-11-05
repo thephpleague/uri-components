@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next - TBD
+## 2.0.1 - 2019-11-05
 
 ### Added 
 
@@ -10,7 +10,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- Improve Domain name detection according to RFC1132 see [issue #27](https://github.com/thephpleague/uri-components/pull/27)
+- Improved Domain name detection according to RFC1132 see [issue #27](https://github.com/thephpleague/uri-components/pull/27)
+- Normalized exception message formatting.
 
 ### Deprecated
 
