@@ -189,11 +189,11 @@ class UserInfoTest extends TestCase
             'no login but has password' => [null, ':pass', '', null, ''],
             'empty all' => [null, '', '', null, ''],
             'null content' => [null, null, null, null, ''],
-            'encoded chars' => [null, 'foo%40bar:bar%40foo', 'foo@bar', 'bar@foo', 'foo%40bar:bar%40foo'],
             'component interface' => [null, new UserInfo('user', 'pass'), 'user', 'pass', 'user:pass'],
             'reset object' => ['login', new UserInfo(null), null, null, ''],
-            'encoded char 2' => [null, "user:'O=+9zLZ%7D%25%7Bz+:tC", 'user', "'O=+9zLZ}%{z+:tC", "user:'O=+9zLZ%7D%25%7Bz+:tC"],
-
+            'encoded chars 1' => [null, 'foo%40bar:bar%40foo', 'foo@bar', 'bar@foo', 'foo%40bar:bar%40foo'],
+            'encoded chars 3' => [null, 'foo%a1bar:bar%40foo', 'foo%A1bar', 'bar@foo', 'foo%A1bar:bar%40foo'],
+            'encoded chars 2' => [null, "user:'O=+9zLZ%7d%25%7bz+:tC", 'user', "'O=+9zLZ}%{z+:tC", "user:'O=+9zLZ%7D%25%7Bz+:tC"],
         ];
     }
 
@@ -308,6 +308,10 @@ class UserInfoTest extends TestCase
             'League URI object with empty string user info' => [
                 'uri' => Uri::createFromString('http://@example.com?foo=bar'),
                 'expected' => '',
+            ],
+            'URI object with encoded user info string' => [
+                'uri' => Uri::createFromString('http://login%af:bar@example.com:81'),
+                'expected' => 'login%AF:bar',
             ],
         ];
     }
