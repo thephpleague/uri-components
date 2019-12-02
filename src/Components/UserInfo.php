@@ -25,11 +25,9 @@ use League\Uri\Contracts\UserInfoInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function explode;
-use function preg_match;
 use function preg_replace_callback;
 use function rawurldecode;
 use function sprintf;
-use function strtoupper;
 
 final class UserInfo extends Component implements UserInfoInterface
 {
@@ -37,7 +35,7 @@ final class UserInfo extends Component implements UserInfoInterface
 
     private const REGEXP_PASS_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:]+|%(?![A-Fa-f0-9]{2}))/x';
 
-    private const REGEXP_UNRESERVED_CHAR = ',%[A-Fa-f0-9]{2},';
+    private const REGEXP_ENCODED_CHAR = ',%[A-Fa-f0-9]{2},';
 
     /**
      * @var string|null
@@ -122,11 +120,11 @@ final class UserInfo extends Component implements UserInfoInterface
     {
         [$user, $pass] = explode(':', $userInfo, 2) + [1 => null];
         if (null !== $user) {
-            $user = self::decode($user, self::REGEXP_USER_ENCODING);
+            $user = self::decode($user);
         }
 
         if (null !== $pass) {
-            $pass = self::decode($pass, self::REGEXP_PASS_ENCODING);
+            $pass = self::decode($pass);
         }
 
         return new self($user, $pass);
@@ -135,17 +133,13 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Decodes an encoded string.
      */
-    private static function decode(string $str, string $regexp): ?string
+    private static function decode(string $str): ?string
     {
-        $decoder = function (array $matches) use ($regexp): string {
-            if (1 === preg_match($regexp, $matches[0])) {
-                return strtoupper($matches[0]);
-            }
-
+        $decoder = static function (array $matches): string {
             return rawurldecode($matches[0]);
         };
 
-        return preg_replace_callback(self::REGEXP_UNRESERVED_CHAR, $decoder, $str);
+        return preg_replace_callback(self::REGEXP_ENCODED_CHAR, $decoder, $str);
     }
 
     /**
