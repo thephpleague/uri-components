@@ -25,11 +25,19 @@ use League\Uri\Contracts\UserInfoInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function explode;
+use function preg_match;
+use function preg_replace_callback;
+use function rawurldecode;
 use function sprintf;
+use function strtoupper;
 
 final class UserInfo extends Component implements UserInfoInterface
 {
-    private const REGEXP_USERINFO_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
+    private const REGEXP_USER_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
+
+    private const REGEXP_PASS_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:]+|%(?![A-Fa-f0-9]{2}))/x';
+
+    private const REGEXP_UNRESERVED_CHAR = ',%[A-Fa-f0-9]{2},';
 
     /**
      * @var string|null
@@ -79,9 +87,7 @@ final class UserInfo extends Component implements UserInfoInterface
                 return new self();
             }
 
-            $params = explode(':', $component, 2) + [1 => null];
-
-            return new self(...$params);
+            return self::createFromComponent($component);
         }
 
         if (!$uri instanceof Psr7UriInterface) {
@@ -93,9 +99,7 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self();
         }
 
-        $params = explode(':', $component, 2) + [1 => null];
-
-        return new self(...$params);
+        return self::createFromComponent($component);
     }
 
     /**
@@ -108,9 +112,40 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self();
         }
 
+        return self::createFromComponent($userInfo);
+    }
+
+    /**
+     * Creates a new instance from a encoded string.
+     */
+    private static function createFromComponent(string $userInfo): self
+    {
         [$user, $pass] = explode(':', $userInfo, 2) + [1 => null];
+        if (null !== $user) {
+            $user = self::decode($user, self::REGEXP_USER_ENCODING);
+        }
+
+        if (null !== $pass) {
+            $pass = self::decode($pass, self::REGEXP_PASS_ENCODING);
+        }
 
         return new self($user, $pass);
+    }
+
+    /**
+     * Decodes an encoded string.
+     */
+    private static function decode(string $str, string $regexp): ?string
+    {
+        $decoder = function (array $matches) use ($regexp): string {
+            if (1 === preg_match($regexp, $matches[0])) {
+                return strtoupper($matches[0]);
+            }
+
+            return rawurldecode($matches[0]);
+        };
+
+        return preg_replace_callback(self::REGEXP_UNRESERVED_CHAR, $decoder, $str);
     }
 
     /**
@@ -122,12 +157,12 @@ final class UserInfo extends Component implements UserInfoInterface
             return null;
         }
 
-        $userInfo = $this->encodeComponent($this->user, self::REGEXP_USERINFO_ENCODING);
+        $userInfo = $this->encodeComponent($this->user, self::REGEXP_USER_ENCODING);
         if (null === $this->pass) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$this->encodeComponent($this->pass, self::REGEXP_USERINFO_ENCODING);
+        return $userInfo.':'.$this->encodeComponent($this->pass, self::REGEXP_PASS_ENCODING);
     }
 
     /**
@@ -168,9 +203,7 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self();
         }
 
-        $params = explode(':', $content, 2) + [1 => null];
-
-        return new self(...$params);
+        return self::createFromComponent($content);
     }
 
     /**
