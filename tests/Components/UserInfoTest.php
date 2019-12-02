@@ -160,6 +160,7 @@ class UserInfoTest extends TestCase
      * @covers ::withContent
      * @covers ::getUser
      * @covers ::getPass
+     * @covers ::decode
      * @covers ::decodeMatches
      *
      * @param mixed|null $str
@@ -191,11 +192,14 @@ class UserInfoTest extends TestCase
             'encoded chars' => [null, 'foo%40bar:bar%40foo', 'foo@bar', 'bar@foo', 'foo%40bar:bar%40foo'],
             'component interface' => [null, new UserInfo('user', 'pass'), 'user', 'pass', 'user:pass'],
             'reset object' => ['login', new UserInfo(null), null, null, ''],
+            'encoded char 2' => [null, "user:'O=+9zLZ%7D%25%7Bz+:tC", 'user', "'O=+9zLZ}%{z+:tC", "user:'O=+9zLZ%7D%25%7Bz+:tC"],
+
         ];
     }
 
     /**
      * @covers ::withContent
+     * @covers ::decode
      * @covers ::decodeMatches
      */
     public function testWithContentReturnSameInstance(): void
@@ -222,6 +226,7 @@ class UserInfoTest extends TestCase
      *
      * @covers ::withUserInfo
      * @covers ::decodeMatches
+     * @covers ::decode
      *
      * @param ?string $pass
      */
@@ -265,6 +270,7 @@ class UserInfoTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
+     * @covers ::decode
      *
      * @param mixed   $uri      an URI object
      * @param ?string $expected
