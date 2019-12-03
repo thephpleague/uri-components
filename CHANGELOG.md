@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 2.0.2 - TBD
+
+### Added 
+
+- None
+
+### Fixed
+
+- Improve UserInfo decoding [issue #28](https://github.com/thephpleague/uri-components/pull/28)
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 2.0.1 - 2019-11-05
 
 ### Added 
