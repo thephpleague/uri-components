@@ -82,6 +82,23 @@ final class UriModifier
     }
 
     /**
+     * Remove empty pairs from the URL query component.
+     *
+     * A pair is considered empty if it's name is the empty string
+     * and its value is either the empty string or the null value
+     *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
+     * @return Psr7UriInterface|UriInterface
+     */
+    public static function removeEmptyPairs($uri)
+    {
+        $query = Query::createFromUri($uri)->withoutEmptyPairs()->getContent();
+
+        return $uri->withQuery(self::normalizeComponent($query, $uri));
+    }
+
+    /**
      * Remove query data according to their key name.
      *
      * @param Psr7UriInterface|UriInterface $uri

@@ -134,4 +134,46 @@ class QueryModifierTest extends TestCase
             ],
         ];
     }
+
+    /**
+     * @dataProvider removeEmptyPairsProvider
+     *
+     * @covers ::removeEmptyPairs
+     * @param ?string $expected
+     */
+    public function testRemoveEmptyPairs(string $uri, ?string $expected): void
+    {
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Uri::createFromBaseUri($uri))->__toString());
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Http::createFromBaseUri($uri))->__toString());
+    }
+
+    public function removeEmptyPairsProvider(): iterable
+    {
+        return [
+            'null query component' => [
+                'uri' => 'http://example.com',
+                'expected' => 'http://example.com',
+            ],
+            'empty query component' => [
+                'uri' => 'http://example.com?',
+                'expected' => 'http://example.com',
+            ],
+            'no empty pair query component' => [
+                'uri' => 'http://example.com?foo=bar',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair as last pair' => [
+                'uri' => 'http://example.com?foo=bar&',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair as first pair' => [
+                'uri' => 'http://example.com?&foo=bar',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair inside the component' => [
+                'uri' => 'http://example.com?foo=bar&&&&bar=baz',
+                'expected' => 'http://example.com?foo=bar&bar=baz',
+            ],
+        ];
+    }
 }
