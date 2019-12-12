@@ -107,8 +107,9 @@ class QueryModifierTest extends TestCase
      * @dataProvider removeParamsProvider
      *
      * @covers ::removeParams
+     * @param ?string $expected
      */
-    public function testWithoutQueryParams(string $uri, array $input, string $expected): void
+    public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
     {
         self::assertSame($expected, UriModifier::removeParams(Uri::createFromBaseUri($uri), ...$input)->getQuery());
     }
@@ -119,7 +120,7 @@ class QueryModifierTest extends TestCase
             [
                 'uri' => 'http://example.com',
                 'input' => ['foo'],
-                'expected' => '',
+                'expected' => null,
             ],
             [
                 'uri' => 'http://example.com?foo=bar&bar=baz',
@@ -130,6 +131,48 @@ class QueryModifierTest extends TestCase
                 'uri' => 'http://example.com?fo.o=bar&fo_o=baz',
                 'input' => ['fo_o'],
                 'expected' => 'fo.o=bar',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider removeEmptyPairsProvider
+     *
+     * @covers ::removeEmptyPairs
+     * @param ?string $expected
+     */
+    public function testRemoveEmptyPairs(string $uri, ?string $expected): void
+    {
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Uri::createFromBaseUri($uri))->__toString());
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Http::createFromBaseUri($uri))->__toString());
+    }
+
+    public function removeEmptyPairsProvider(): iterable
+    {
+        return [
+            'null query component' => [
+                'uri' => 'http://example.com',
+                'expected' => 'http://example.com',
+            ],
+            'empty query component' => [
+                'uri' => 'http://example.com?',
+                'expected' => 'http://example.com',
+            ],
+            'no empty pair query component' => [
+                'uri' => 'http://example.com?foo=bar',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair as last pair' => [
+                'uri' => 'http://example.com?foo=bar&',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair as first pair' => [
+                'uri' => 'http://example.com?&foo=bar',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair inside the component' => [
+                'uri' => 'http://example.com?foo=bar&&&&bar=baz',
+                'expected' => 'http://example.com?foo=bar&bar=baz',
             ],
         ];
     }

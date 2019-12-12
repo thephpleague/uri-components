@@ -2,11 +2,11 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## 2.0.2 - TBD
+## 2.1.0 - TBD
 
 ### Added 
 
-- None
+- UriModifier::removeEmptyPairs - to remove empty pairs from the URL object.
 
 ### Fixed
 

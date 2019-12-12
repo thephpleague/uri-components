@@ -47,7 +47,9 @@ final class UriModifier
      */
     public static function appendQuery($uri, $query)
     {
-        return $uri->withQuery(Query::createFromUri($uri)->append($query)->__toString());
+        $query = Query::createFromUri($uri)->append($query)->getContent();
+
+        return $uri->withQuery(self::normalizeComponent($query, $uri));
     }
 
     /**
@@ -59,7 +61,9 @@ final class UriModifier
      */
     public static function mergeQuery($uri, $query)
     {
-        return $uri->withQuery(Query::createFromUri($uri)->merge($query)->__toString());
+        $query = Query::createFromUri($uri)->merge($query)->getContent();
+
+        return $uri->withQuery(self::normalizeComponent($query, $uri));
     }
 
     /**
@@ -72,7 +76,26 @@ final class UriModifier
      */
     public static function removePairs($uri, string ...$keys)
     {
-        return $uri->withQuery(Query::createFromUri($uri)->withoutPair(...$keys)->__toString());
+        $query = Query::createFromUri($uri)->withoutPair(...$keys)->getContent();
+
+        return $uri->withQuery(self::normalizeComponent($query, $uri));
+    }
+
+    /**
+     * Remove empty pairs from the URL query component.
+     *
+     * A pair is considered empty if it's name is the empty string
+     * and its value is either the empty string or the null value
+     *
+     * @param Psr7UriInterface|UriInterface $uri
+     *
+     * @return Psr7UriInterface|UriInterface
+     */
+    public static function removeEmptyPairs($uri)
+    {
+        $query = Query::createFromUri($uri)->withoutEmptyPairs()->getContent();
+
+        return $uri->withQuery(self::normalizeComponent($query, $uri));
     }
 
     /**
@@ -85,7 +108,9 @@ final class UriModifier
      */
     public static function removeParams($uri, string ...$keys)
     {
-        return $uri->withQuery(Query::createFromUri($uri)->withoutParam(...$keys)->__toString());
+        $query = Query::createFromUri($uri)->withoutParam(...$keys)->getContent();
+
+        return $uri->withQuery(self::normalizeComponent($query, $uri));
     }
 
     /**
@@ -97,7 +122,9 @@ final class UriModifier
      */
     public static function sortQuery($uri)
     {
-        return $uri->withQuery(Query::createFromUri($uri)->sort()->__toString());
+        $query = Query::createFromUri($uri)->sort()->getContent();
+
+        return $uri->withQuery(self::normalizeComponent($query, $uri));
     }
 
     /*********************************
@@ -113,7 +140,9 @@ final class UriModifier
      */
     public static function addRootLabel($uri)
     {
-        return $uri->withHost(Domain::createFromUri($uri)->withRootLabel()->__toString());
+        $component = Domain::createFromUri($uri)->withRootLabel()->getContent();
+
+        return $uri->withHost(self::normalizeComponent($component, $uri));
     }
 
     /**
@@ -134,7 +163,9 @@ final class UriModifier
         }
 
         if ($host->isDomain()) {
-            return $uri->withHost((new Domain($host))->append($label)->__toString());
+            $component = (new Domain($host))->append($label)->getContent();
+
+            return $uri->withHost(self::normalizeComponent($component, $uri));
         }
 
         if ($host->isIpv4()) {
@@ -153,7 +184,9 @@ final class UriModifier
      */
     public static function hostToAscii($uri)
     {
-        return $uri->withHost(Host::createFromUri($uri)->__toString());
+        $host = Host::createFromUri($uri)->getContent();
+
+        return $uri->withHost(self::normalizeComponent($host, $uri));
     }
 
     /**
@@ -165,7 +198,9 @@ final class UriModifier
      */
     public static function hostToUnicode($uri)
     {
-        return $uri->withHost((string) Host::createFromUri($uri)->toUnicode());
+        $host = Host::createFromUri($uri)->toUnicode();
+
+        return $uri->withHost(self::normalizeComponent($host, $uri));
     }
 
     /**
@@ -186,7 +221,9 @@ final class UriModifier
         }
 
         if ($host->isDomain()) {
-            return $uri->withHost((new Domain($host))->prepend($label)->__toString());
+            $component = (new Domain($host))->prepend($label)->getContent();
+
+            return $uri->withHost($component);
         }
 
         if ($host->isIpv4()) {
@@ -206,7 +243,9 @@ final class UriModifier
      */
     public static function removeLabels($uri, int ...$keys)
     {
-        return $uri->withHost(Domain::createFromUri($uri)->withoutLabel(...$keys)->__toString());
+        $host = Domain::createFromUri($uri)->withoutLabel(...$keys)->getContent();
+
+        return $uri->withHost(self::normalizeComponent($host, $uri));
     }
 
     /**
@@ -218,7 +257,9 @@ final class UriModifier
      */
     public static function removeRootLabel($uri)
     {
-        return $uri->withHost(Domain::createFromUri($uri)->withoutRootLabel()->__toString());
+        $host = Domain::createFromUri($uri)->withoutRootLabel()->getContent();
+
+        return $uri->withHost(self::normalizeComponent($host, $uri));
     }
 
     /**
@@ -230,7 +271,9 @@ final class UriModifier
      */
     public static function removeZoneId($uri)
     {
-        return $uri->withHost(Host::createFromUri($uri)->withoutZoneIdentifier()->__toString());
+        $host = Host::createFromUri($uri)->withoutZoneIdentifier()->getContent();
+
+        return $uri->withHost(self::normalizeComponent($host, $uri));
     }
 
     /**
@@ -242,7 +285,9 @@ final class UriModifier
      */
     public static function replaceLabel($uri, int $offset, $label)
     {
-        return $uri->withHost(Domain::createFromUri($uri)->withLabel($offset, $label)->__toString());
+        $host = Domain::createFromUri($uri)->withLabel($offset, $label)->getContent();
+
+        return $uri->withHost(self::normalizeComponent($host, $uri));
     }
 
     /*********************************
@@ -529,5 +574,22 @@ final class UriModifier
         }
 
         return $uri->withPath($path->withLeadingSlash()->__toString());
+    }
+
+    /**
+     * Normalize the URI component value depending on the subject interface.
+     *
+     * null value MUST be converted to the emptu string if a Psr7 UriInterface is being manipulated.
+     *
+     * @param Psr7UriInterface|UriInterface $uri
+     * @param ?string                       $component
+     */
+    private static function normalizeComponent(?string $component, $uri): ?string
+    {
+        if ($uri instanceof Psr7UriInterface) {
+            return (string) $component;
+        }
+
+        return $component;
     }
 }
