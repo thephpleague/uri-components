@@ -6,11 +6,12 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added 
 
-- UriModifier::removeEmptyPairs - to remove empty pairs from the URL object.
+- `League\Uri\UriModifier::removeEmptyPairs` - to remove empty pairs from the URL object.
 
 ### Fixed
 
 - Improve UserInfo decoding [issue #28](https://github.com/thephpleague/uri-components/pull/28)
+- Improve processing URI object with `League\Uri\UriModifier` with a better distinction between empty and undefined URI component.
 
 ### Deprecated
 
