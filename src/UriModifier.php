@@ -399,7 +399,7 @@ final class UriModifier
      */
     public static function removeBasePath($uri, $path)
     {
-        /** @var  HierarchicalPath $basePath */
+        /** @var HierarchicalPath $basePath */
         $basePath = (new HierarchicalPath($path))->withLeadingSlash();
         $currentPath = HierarchicalPath::createFromUri($uri);
         if ('/' === (string) $basePath) {

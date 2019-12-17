@@ -359,7 +359,7 @@ final class DataPath extends Component implements DataPathInterface
         return new self($this->formatComponent(
             $this->mimetype,
             $this->getParameters(),
-            !$this->is_binary_data,
+            true,
             base64_encode(rawurldecode($this->document))
         ));
     }
