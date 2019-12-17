@@ -328,9 +328,8 @@ final class Host extends Component implements IpHostInterface
      *
      * @param ?IPv4Normalizer $normalizer
      *
-     *@throws IPv4CalculatorMissing If detecting IPv4 is not possible
-     * @throws SyntaxError If the $ip can not be converted into a Host
-     * @return static
+     * @throws IPv4CalculatorMissing If detecting IPv4 is not possible
+     * @throws SyntaxError           If the $ip can not be converted into a Host
      */
     public static function createFromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
     {

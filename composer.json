@@ -36,9 +36,9 @@
         "friendsofphp/php-cs-fixer": "^2.3",
         "guzzlehttp/psr7": "^1.4",
         "league/uri": "^6.0",
-        "phpstan/phpstan": "^0.11.1",
-        "phpstan/phpstan-phpunit": "^0.11.0",
-        "phpstan/phpstan-strict-rules": "^0.11.0",
+        "phpstan/phpstan": "^0.12",
+        "phpstan/phpstan-phpunit": "^0.12",
+        "phpstan/phpstan-strict-rules": "^0.12",
         "phpunit/phpunit": "^7.0 | ^8.0",
         "zendframework/zend-diactoros": "^2.0"
     },

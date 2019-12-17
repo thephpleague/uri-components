@@ -173,10 +173,20 @@ class QueryTest extends TestCase
      * @covers ::createFromPairs
      * @covers ::filterPair
      */
-    public function testCreateFromPairsWithTraversable(): void
+    public function testCreateFromPairsWithIterable(): void
     {
-        $query = Query::createFromPairs(new ArrayIterator([['john', 'doe the john']]));
-        self::assertCount(1, $query);
+        /** @var iterable<int, array{0:string, 1:string|null}> $iterable */
+        $iterable = (function (): iterable {
+            $data = [['john', 'doe the john'], ['john', null]];
+
+            foreach ($data as $offset => $value) {
+                yield $offset => $value;
+            }
+        })();
+
+        $query = Query::createFromPairs($iterable);
+
+        self::assertCount(2, $query);
     }
 
     /**
