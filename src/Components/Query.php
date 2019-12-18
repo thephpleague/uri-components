@@ -128,11 +128,13 @@ final class Query extends Component implements QueryInterface
     /**
      * Returns a new instance from the result of QueryString::parse.
      *
-     * @param array<int, array{0:string, 1:string|null}> $pairs
+     * @param iterable<int, array{0:string, 1:string|null}> $pairs
      */
     public static function createFromPairs(iterable $pairs = [], string $separator = '&'): self
     {
-        return new self(QueryString::build($pairs, $separator, PHP_QUERY_RFC3986), $separator, PHP_QUERY_RFC3986);
+        $query = QueryString::build($pairs, $separator, PHP_QUERY_RFC3986);
+
+        return new self($query, $separator, PHP_QUERY_RFC3986);
     }
 
     /**

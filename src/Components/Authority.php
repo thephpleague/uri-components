@@ -198,8 +198,6 @@ final class Authority extends Component implements AuthorityInterface
 
     /**
      * @param mixed|null $content
-     *
-     * @return static
      */
     public function withContent($content): UriComponentInterface
     {
