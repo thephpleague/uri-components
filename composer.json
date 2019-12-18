@@ -29,7 +29,7 @@
         "php": "^7.2",
         "ext-fileinfo": "*",
         "ext-json": "*",
-        "league/uri-interfaces": "^2.0.1",
+        "league/uri-interfaces": "^2.0",
         "psr/http-message": "^1.0"
     },
     "require-dev": {
