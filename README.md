@@ -4,34 +4,20 @@ Uri Components
 [![Build Status](https://img.shields.io/travis/thephpleague/uri-components/master.svg?style=flat-square)](https://travis-ci.org/thephpleague/uri-components)
 [![Latest Version](https://img.shields.io/github/release/thephpleague/uri-components.svg?style=flat-square)](https://github.com/thephpleague/uri-components/releases)
 
-This package contains concrete URI components object represented as immutable value object.
+This package contains concrete URI components instances represented as immutable value objects.
 
 System Requirements
 -------
 
 You need **PHP >= 7.2** but the latest stable version of PHP is recommended.
 
-In order to handle IDN host you should also install the `intl` extension otherwise an exception will be thrown when attempting to validate such host.
-
-Documentation
-------
-
-Full documentation can be found at [uri.thephpleague.com][].
-
-System Requirements
--------
-
-You need **PHP >= 7.2** but the latest stable version of PHP is recommended
-
-In order to handle IDN host you are required to also install the `intl` extension otherwise an exception will be thrown when attempting to validate such host.
-
 Dependencies
 -------
 
-- [League URI Interfaces](https://github.com/thephpleague/uri-interfaces)
+- [League URI Interfaces][]
 - [PSR-7][]
 
-You should also require the **ext-intl** if you are dealing with i18n URI.
+In order to handle IDN host you should also require the `intl` extension otherwise an exception will be thrown when attempting to validate such host.
 
 Installation
 --------
@@ -88,3 +74,4 @@ The MIT License (MIT). Please see [License File](LICENSE) for more information.
 [RFC3986]: http://tools.ietf.org/html/rfc3986
 [RFC3987]: http://tools.ietf.org/html/rfc3987
 [uri.thephpleague.com]: http://uri.thephpleague.com
+[League URI Interfaces]: https://github.com/thephpleague/uri-interfaces
