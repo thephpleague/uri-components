@@ -432,7 +432,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $options = ['options' => ['min_range' => - $nb_segments, 'max_range' => $nb_segments - 1]];
         $deleted_keys = [];
         foreach ($keys as $value) {
-            if (false === ($offset = filter_var($value, FILTER_VALIDATE_INT, $options))) {
+            /** @var false|int $offset */
+            $offset = filter_var($value, FILTER_VALIDATE_INT, $options);
+            if (false === $offset) {
                 throw new OffsetOutOfBounds(sprintf('The key `%s` is invalid.', $value));
             }
 
