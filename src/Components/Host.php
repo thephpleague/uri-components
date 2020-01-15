@@ -221,10 +221,15 @@ final class Host extends Component implements IpHostInterface
             $domain_name,
             IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_NONTRANSITIONAL_TO_UNICODE,
             INTL_IDNA_VARIANT_UTS46,
-            $arr
+            $info
         );
-        if (0 !== $arr['errors']) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s.', $host, $this->getIDNAErrors($arr['errors'])));
+
+        if ([] === $info) {
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host));
+        }
+
+        if (0 !== $info['errors']) {
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s.', $host, $this->getIDNAErrors($info['errors'])));
         }
 
         // @codeCoverageIgnoreStart
@@ -422,11 +427,15 @@ final class Host extends Component implements IpHostInterface
             $this->host,
             IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_NONTRANSITIONAL_TO_UNICODE,
             INTL_IDNA_VARIANT_UTS46,
-            $arr
+            $info
         );
-        if (0 !== $arr['errors']) {
-            $message = $this->getIDNAErrors($arr['errors']);
-            throw new SyntaxError(sprintf('The host `%s` is invalid : %s.', $this->host, $message));
+
+        if ([] === $info) {
+            throw new SyntaxError(sprintf('The host `%s` is invalid.', $this->host));
+        }
+
+        if (0 !== $info['errors']) {
+            throw new SyntaxError(sprintf('The host `%s` is invalid : %s.', $this->host, $this->getIDNAErrors($info['errors'])));
         }
 
         // @codeCoverageIgnoreStart
