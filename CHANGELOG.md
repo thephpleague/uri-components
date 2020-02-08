@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 2.2.0 - 2020-02-08
+
+### Added 
+
+- None
+
+### Fixed
+
+- None
+
+### Deprecated
+
+- None
+
+### Remove
+
+- Hard dependencies on the `ext-fileinfo` PHP extensions see [#154](https://github.com/thephpleague/uri/pull/154) thanks [Nicolas Grekas](https://github.com/nicolas-grekas)
+
 ## 2.1.0 - 2019-12-19
 
 ### Added 

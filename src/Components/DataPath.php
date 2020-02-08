@@ -18,13 +18,11 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use finfo;
 use League\Uri\Contracts\DataPathInterface;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Exceptions\FileinfoSupportMissing;
 use League\Uri\Exceptions\SyntaxError;
-use SplFileObject;
-use TypeError;
 use function base64_decode;
 use function base64_encode;
 use function count;
@@ -231,6 +229,15 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function createFromPath(string $path, $context = null): self
     {
+        static $finfo_support = null;
+        $finfo_support = $finfo_support ?? class_exists(\finfo::class);
+
+        // @codeCoverageIgnoreStart
+        if (!$finfo_support) {
+            throw new FileinfoSupportMissing(sprintf('Please install ext/fileinfo to use the %s() method.', __METHOD__));
+        }
+        // @codeCoverageIgnoreEnd
+
         $file_args = [$path, false];
         $mime_args = [$path, FILEINFO_MIME];
         if (null !== $context) {
@@ -243,7 +250,7 @@ final class DataPath extends Component implements DataPathInterface
             throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory.', $path));
         }
 
-        $mimetype = (string) (new finfo(FILEINFO_MIME))->file(...$mime_args);
+        $mimetype = (string) (new \finfo(FILEINFO_MIME))->file(...$mime_args);
 
         return new self(
             str_replace(' ', '', $mimetype)
@@ -256,7 +263,7 @@ final class DataPath extends Component implements DataPathInterface
      *
      * @param mixed $uri an URI object
      *
-     * @throws TypeError If the URI object is not supported
+     * @throws \TypeError If the URI object is not supported
      */
     public static function createFromUri($uri): self
     {
@@ -338,9 +345,9 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * {@inheritDoc}
      */
-    public function save(string $path, string $mode = 'w'): SplFileObject
+    public function save(string $path, string $mode = 'w'): \SplFileObject
     {
-        $file = new SplFileObject($path, $mode);
+        $file = new \SplFileObject($path, $mode);
         $data = $this->is_binary_data ? base64_decode($this->document, true) : rawurldecode($this->document);
         $file->fwrite((string) $data);
 
@@ -472,7 +479,7 @@ final class DataPath extends Component implements DataPathInterface
     public function withParameters($parameters): DataPathInterface
     {
         if (!is_scalar($parameters) && !method_exists($parameters, '__toString')) {
-            throw new TypeError(sprintf('Expected parameter to be stringable; received %s.', gettype($parameters)));
+            throw new \TypeError(sprintf('Expected parameter to be stringable; received %s.', gettype($parameters)));
         }
 
         $parameters = (string) $parameters;
