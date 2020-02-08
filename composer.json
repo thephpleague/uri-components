@@ -27,7 +27,6 @@
     ],
     "require": {
         "php": "^7.2",
-        "ext-fileinfo": "*",
         "ext-json": "*",
         "league/uri-interfaces": "^2.1",
         "psr/http-message": "^1.0"
@@ -45,6 +44,7 @@
     "suggest": {
         "ext-intl": "to handle IDN host",
         "ext-gmp": "to improve handle IPV4 parsing",
+        "ext-fileinfo": "Needed to create Data URI from a filepath",
         "php-64bit": "to improve handle IPV4 parsing",
         "jeremykendall/php-domain-parser": "Public Suffix and Top Level Domain parsing implemented in PHP",
         "league/uri": "to allow manipulating URI objects",
