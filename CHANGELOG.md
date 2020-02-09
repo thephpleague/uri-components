@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## 2.2.1 - 2020-02-09
+
+### Added 
+
+- None
+
+### Fixed
+
+- back port improvement made to `DataUri` by [#154](https://github.com/thephpleague/uri/issues/154) thanks to [Nicolas Grekas](https://github.com/nicolas-grekas)
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 2.2.0 - 2020-02-08
 
 ### Added 
