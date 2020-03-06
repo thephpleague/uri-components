@@ -33,12 +33,12 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3",
-        "guzzlehttp/psr7": "^1.4",
+        "guzzlehttp/psr7": "^1.4.2",
         "league/uri": "^6.0",
         "phpstan/phpstan": "^0.12",
         "phpstan/phpstan-phpunit": "^0.12",
         "phpstan/phpstan-strict-rules": "^0.12",
-        "phpunit/phpunit": "^7.0 | ^8.0",
+        "phpunit/phpunit": "^8.0",
         "laminas/laminas-diactoros": "^2.0"
     },
     "suggest": {
