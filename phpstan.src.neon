@@ -4,5 +4,5 @@ parameters:
     checkMissingIterableValueType: false
     ignoreErrors:
         - '#Method League\\Uri\\UriModifier::[A-Za-z0-9]+\(\) has parameter \$(uri|query|label|host|path|segment|extension|dirname|basename|parameters) with no typehint specified.#'
-        - '#Property League\\Uri\\Components\\Query::\$pairs \(array<int, array<int, string\|null>>\) does not accept array\.#'
+        - '#Method League\\Uri\\Components\\[A-Za-z0-9]+::withContent\(\) should return static\(League\\Uri\\Components\\[A-Za-z0-9]+\) but returns League\\Uri\\Components\\[A-Za-z0-9]+.#'
     reportUnmatchedIgnoredErrors: true
