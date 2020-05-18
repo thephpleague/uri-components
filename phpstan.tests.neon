@@ -20,4 +20,6 @@ parameters:
         - '#League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable<int, array<int, string\|null>>, array given\.#'
         - '#League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable<int, array<int, string\|null>>, ArrayIterator given\.#'
         - '#League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable<int, array<int, string\|null>>, League\\Uri\\Components\\Query given\.#'
+        - '#Parameter \#1 \$pairs of static method League\\Uri\\QueryString::build\(\) expects .*#'
+        - '#Parameter \#1 \$pairs of static method League\\Uri\\Components\\Query::createFromPairs\(\) expects .*#'
     reportUnmatchedIgnoredErrors: false

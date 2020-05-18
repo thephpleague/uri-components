@@ -59,7 +59,7 @@ final class QueryString
     private const ENCODING_LIST = [
         PHP_QUERY_RFC1738 => [
             'suffixKey' => '*',
-            'suffixValue' => '*=&',
+            'suffixValue' => '*&',
         ],
         PHP_QUERY_RFC3986 => [
             'suffixKey' => "!$'()*+,;:@?/%",
