@@ -2,6 +2,33 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added
+
+- `Authority::createFromNull`
+- `Authority::createFromString`
+- `Authority::createFromComponents`
+- `DataPath::createFromFilePath`
+- `DataPath::createFromString`
+- `Domain::createFromString`
+- `Domain::createFromHost`
+- `HierarchicalPath::createFromPath`
+- `HierarchicalPath::createFromString`
+
+### Fixed
+
+- Fix RFC1738 encoding in `QueryString::build`
+- Improve `UriModifier` using the newly added named constructors.
+
+### Deprecated
+
+- `DataPath::createFromPath` replaced by `DataPath::createFromFilePath`
+
+### Remove
+
+- None
+
 ## 2.2.1 - 2020-02-09
 
 ### Added 
