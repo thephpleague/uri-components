@@ -23,7 +23,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Deprecated
 
+- `Authority::__construct` replaced by `Authority` named constructors
 - `DataPath::createFromPath` replaced by `DataPath::createFromFilePath`
+- `Domain::__construct` replaced by `Domain` named constructors
+- `HierarchicalPath::__construct` replaced by `HierarchicalPath` named constructors
 
 ### Remove
 

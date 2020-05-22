@@ -63,6 +63,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     private $segments;
 
     /**
+     * @deprecated 2.3.0
+     *
+     * @see ::createFromString
+     * @see ::createFromPath
+     *
      * New instance.
      *
      * @param mixed|string $path
