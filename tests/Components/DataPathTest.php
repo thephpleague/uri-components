@@ -16,7 +16,7 @@
 
 namespace LeagueTest\Uri\Components;
 
-use League\Uri\Components\DataPath as Path;
+use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -38,7 +38,8 @@ class DataPathTest extends TestCase
      */
     public function testIsAbsolute(): void
     {
-        $path = new Path(';,Bonjour%20le%20monde!');
+        $path = DataPath::createFromString(';,Bonjour%20le%20monde!');
+
         self::assertFalse($path->isAbsolute());
     }
 
@@ -47,7 +48,8 @@ class DataPathTest extends TestCase
      */
     public function testWithoutDotSegments(): void
     {
-        $path = new Path(';,Bonjour%20le%20monde%21');
+        $path = DataPath::createFromString(';,Bonjour%20le%20monde%21');
+
         self::assertEquals($path, $path->withoutDotSegments());
     }
 
@@ -57,7 +59,8 @@ class DataPathTest extends TestCase
     public function testWithLeadingSlash(): void
     {
         self::expectException(SyntaxError::class);
-        (new Path(';,Bonjour%20le%20monde%21'))->withLeadingSlash();
+
+        DataPath::createFromString(';,Bonjour%20le%20monde%21')->withLeadingSlash();
     }
 
     /**
@@ -65,7 +68,8 @@ class DataPathTest extends TestCase
      */
     public function testWithoutLeadingSlash(): void
     {
-        $path = new Path(';,Bonjour%20le%20monde%21');
+        $path = DataPath::createFromString(';,Bonjour%20le%20monde%21');
+
         self::assertEquals($path, $path->withoutLeadingSlash());
     }
 
@@ -76,7 +80,8 @@ class DataPathTest extends TestCase
     public function testConstructorFailedWithNullValue(): void
     {
         self::expectException(SyntaxError::class);
-        new Path(null);
+
+        new DataPath(null);
     }
 
     /**
@@ -85,18 +90,22 @@ class DataPathTest extends TestCase
     public function testConstructorFailedMalformePath(): void
     {
         self::expectException(SyntaxError::class);
-        new Path('€');
+
+        DataPath::createFromString('€');
     }
 
     /**
      * @dataProvider invalidDataUriPath
+     *
+     * @covers ::createFromFilePath
      * @covers ::createFromPath
-     * @param string $path
+     *
      */
-    public function testCreateFromPathFailed($path): void
+    public function testCreateFromPathFailed(string $path): void
     {
         self::expectException(SyntaxError::class);
-        Path::createFromPath($path);
+
+        DataPath::createFromPath($path);
     }
 
     /**
@@ -107,7 +116,8 @@ class DataPathTest extends TestCase
     public function testConstructorFailed($path): void
     {
         self::expectException(SyntaxError::class);
-        new Path($path);
+
+        DataPath::createFromString($path);
     }
 
     public function invalidDataUriPath(): array
@@ -126,8 +136,9 @@ class DataPathTest extends TestCase
      */
     public function testSetState(): void
     {
-        $component = new Path(';,Bonjour%20le%20monde%21');
+        $component = DataPath::createFromString(';,Bonjour%20le%20monde%21');
         $generateComponent = eval('return '.var_export($component, true).';');
+
         self::assertEquals($component, $generateComponent);
     }
 
@@ -140,22 +151,22 @@ class DataPathTest extends TestCase
      */
     public function testWithPath(): void
     {
-        $path = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $path = DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+
         self::assertSame($path, $path->withContent($path));
         self::assertNotSame($path, $path->withContent(''));
     }
 
     /**
      * @dataProvider validPathContent
-     * @param string $path
-     * @param string $expected
+     *
      * @covers ::filterPath
      * @covers ::getContent
      * @covers ::__toString
      */
-    public function testDefaultConstructor($path, $expected): void
+    public function testDefaultConstructor(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) (new Path($path)));
+        self::assertSame($expected, (string) DataPath::createFromString($path));
     }
 
     public function validPathContent(): array
@@ -178,9 +189,8 @@ class DataPathTest extends TestCase
 
     /**
      * @dataProvider validFilePath
-     * @param string $path
-     * @param string $mimetype
-     * @param string $mediatype
+     *
+     * @covers ::createFromFilePath
      * @covers ::createFromPath
      * @covers ::filterPath
      * @covers ::formatComponent
@@ -191,9 +201,10 @@ class DataPathTest extends TestCase
      * @covers ::validateParameter
      * @covers ::validateDocument
      */
-    public function testCreateFromPath($path, $mimetype, $mediatype): void
+    public function testCreateFromPath(string $path, string $mimetype, string $mediatype): void
     {
-        $uri = Path::createFromPath(__DIR__.'/data/'.$path);
+        $uri = DataPath::createFromPath(__DIR__.'/data/'.$path);
+
         self::assertSame($mimetype, $uri->getMimeType());
         self::assertSame($mediatype, $uri->getMediaType());
     }
@@ -216,8 +227,9 @@ class DataPathTest extends TestCase
      */
     public function testWithParameters(): void
     {
-        $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $uri = DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $newUri = $uri->withParameters('charset=us-ascii');
+
         self::assertSame($newUri, $uri);
     }
 
@@ -233,16 +245,15 @@ class DataPathTest extends TestCase
     public function testWithParametersOnBinaryData(): void
     {
         $expected = 'charset=binary;foo=bar';
-        $uri = Path::createFromPath(__DIR__.'/data/red-nose.gif');
+        $uri = DataPath::createFromPath(__DIR__.'/data/red-nose.gif');
         $newUri = $uri->withParameters($expected);
+
         self::assertSame($expected, $newUri->getParameters());
     }
 
     /**
      * @dataProvider invalidParametersString
      *
-     * @param string $path
-     * @param string $parameters
      * @covers ::withParameters
      * @covers ::filterPath
      * @covers ::filterMimeType
@@ -251,10 +262,11 @@ class DataPathTest extends TestCase
      * @covers ::validateDocument
      * @covers ::__construct
      */
-    public function testWithParametersFailedWithInvalidParameters($path, $parameters): void
+    public function testWithParametersFailedWithInvalidParameters(string $path, string $parameters): void
     {
         self::expectException(SyntaxError::class);
-        Path::createFromPath($path)->withParameters($parameters);
+
+        DataPath::createFromPath($path)->withParameters($parameters);
     }
 
     public function invalidParametersString(): array
@@ -274,29 +286,30 @@ class DataPathTest extends TestCase
     public function testWithParametersFailsWithWrongType(): void
     {
         self::expectException(TypeError::class);
-        Path::createFromPath(__DIR__.'/data/red-nose.gif')->withParameters([]);
+
+        DataPath::createFromFilePath(__DIR__.'/data/red-nose.gif')->withParameters([]);
     }
 
     /**
      * @dataProvider fileProvider
-     * @param Path $uri
+     *
      * @covers ::isBinaryData
      * @covers ::formatComponent
      * @covers ::toBinary
      */
-    public function testToBinary($uri): void
+    public function testToBinary(DataPath $uri): void
     {
         self::assertTrue($uri->toBinary()->isBinaryData());
     }
 
     /**
      * @dataProvider fileProvider
-     * @param Path $uri
+     *
      * @covers ::isBinaryData
      * @covers ::formatComponent
      * @covers ::toAscii
      */
-    public function testToAscii($uri): void
+    public function testToAscii(DataPath $uri): void
     {
         self::assertFalse($uri->toAscii()->isBinaryData());
     }
@@ -304,22 +317,22 @@ class DataPathTest extends TestCase
     public function fileProvider(): array
     {
         return [
-            'with a file' => [Path::createFromPath(__DIR__.'/data/red-nose.gif')],
-            'with a text' => [new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21')],
+            'with a file' => [DataPath::createFromPath(__DIR__.'/data/red-nose.gif')],
+            'with a text' => [DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21')],
         ];
     }
 
     /**
      * @dataProvider invalidParameters
-     * @param string $parameters
+     *
      * @covers ::formatComponent
      * @covers ::withParameters
      * @covers ::__construct
      */
-    public function testUpdateParametersFailed($parameters): void
+    public function testUpdateParametersFailed(string $parameters): void
     {
         self::expectException(SyntaxError::class);
-        $uri = new Path('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $uri = DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
 
@@ -337,17 +350,18 @@ class DataPathTest extends TestCase
     public function testBinarySave(): void
     {
         $newFilePath = __DIR__.'/data/temp.gif';
-        $uri = Path::createFromPath(__DIR__.'/data/red-nose.gif');
+        $uri = DataPath::createFromPath(__DIR__.'/data/red-nose.gif');
         $res = $uri->save($newFilePath);
-        $res = null;
-        self::assertSame((string) $uri, (string) Path::createFromPath($newFilePath));
+
+        self::assertSame((string) $uri, (string) DataPath::createFromPath($newFilePath));
 
         // Ensure file handle of \SplFileObject gets closed.
-        $res = null;
+        unset($res);
         unlink($newFilePath);
     }
 
     /**
+     * @covers ::createFromFilePath
      * @covers ::createFromPath
      * @covers ::save
      * @covers ::getData
@@ -362,14 +376,15 @@ class DataPathTest extends TestCase
         ]);
 
         $newFilePath = __DIR__.'/data/temp.txt';
-        $uri = Path::createFromPath(__DIR__.'/data/hello-world.txt', $context);
+        $uri = DataPath::createFromPath(__DIR__.'/data/hello-world.txt', $context);
+
         $res = $uri->save($newFilePath);
-        self::assertSame((string) $uri, (string) Path::createFromPath($newFilePath));
+        self::assertSame((string) $uri, (string) DataPath::createFromPath($newFilePath));
         $data = file_get_contents($newFilePath);
         self::assertSame(base64_encode((string) $data), $uri->getData());
 
         // Ensure file handle of \SplFileObject gets closed.
-        $res = null;
+        unset($res);
         unlink($newFilePath);
     }
 
@@ -382,7 +397,7 @@ class DataPathTest extends TestCase
      */
     public function testDataPathConstructor(): void
     {
-        self::assertSame('text/plain;charset=us-ascii,', (string) new Path());
+        self::assertSame('text/plain;charset=us-ascii,', (string) new DataPath());
     }
 
     /**
@@ -396,7 +411,8 @@ class DataPathTest extends TestCase
     public function testInvalidBase64Encoded(): void
     {
         self::expectException(SyntaxError::class);
-        new Path('text/plain;charset=us-ascii;base64,boulook%20at%20me');
+
+        DataPath::createFromString('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
     /**
@@ -410,7 +426,8 @@ class DataPathTest extends TestCase
     public function testInvalidComponent(): void
     {
         self::expectException(SyntaxError::class);
-        new Path("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
+
+        DataPath::createFromString("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
     /**
@@ -424,7 +441,8 @@ class DataPathTest extends TestCase
     public function testInvalidString(): void
     {
         self::expectException(SyntaxError::class);
-        new Path('text/plain;boulook€');
+
+        DataPath::createFromString('text/plain;boulook€');
     }
 
     /**
@@ -438,12 +456,14 @@ class DataPathTest extends TestCase
     public function testInvalidMimetype(): void
     {
         self::expectException(SyntaxError::class);
-        new Path('data:toto\\bar;foo=bar,');
+
+        DataPath::createFromString('data:toto\\bar;foo=bar,');
     }
 
 
     /**
      * @dataProvider getURIProvider
+     *
      * @covers ::createFromUri
      *
      * @param mixed   $uri      an URI object
@@ -451,7 +471,7 @@ class DataPathTest extends TestCase
      */
     public function testCreateFromUri($uri, ?string $expected): void
     {
-        $path = Path::createFromUri($uri);
+        $path = DataPath::createFromUri($uri);
 
         self::assertSame($expected, $path->getContent());
     }
@@ -482,24 +502,26 @@ class DataPathTest extends TestCase
     {
         self::expectException(TypeError::class);
 
-        Path::createFromUri('http://example.com:80');
+        DataPath::createFromUri('http://example.com:80');
     }
 
     public function testHasTrailingSlash(): void
     {
-        self::assertFalse((new Path('text/plain;charset=us-ascii,'))->hasTrailingSlash());
+        self::assertFalse(DataPath::createFromString('text/plain;charset=us-ascii,')->hasTrailingSlash());
     }
 
     public function testWithTrailingSlash(): void
     {
-        $path = (new Path('text/plain;charset=us-ascii,'))->withTrailingSlash();
+        $path = DataPath::createFromString('text/plain;charset=us-ascii,')->withTrailingSlash();
+
         self::assertSame('text/plain;charset=us-ascii,/', (string) $path);
         self::assertSame($path, $path->withTrailingSlash());
     }
 
     public function testWithoutTrailingSlash(): void
     {
-        $path = (new Path('text/plain;charset=us-ascii,/'))->withoutTrailingSlash();
+        $path = DataPath::createFromString('text/plain;charset=us-ascii,/')->withoutTrailingSlash();
+
         self::assertSame('text/plain;charset=us-ascii,', (string) $path);
         self::assertSame($path, $path->withoutTrailingSlash());
     }
@@ -508,7 +530,8 @@ class DataPathTest extends TestCase
     {
         $encodedPath = 'text/plain;charset=us-ascii,Bonjour%20le%20monde%21';
         $decodedPath = 'text/plain;charset=us-ascii,Bonjour le monde%21';
-        $path = new Path($encodedPath);
+        $path = DataPath::createFromString($encodedPath);
+
         self::assertSame($encodedPath, $path->getContent());
         self::assertSame($decodedPath, $path->decoded());
     }
