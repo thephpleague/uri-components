@@ -19,6 +19,8 @@ namespace LeagueTest\Uri\Components;
 use ArrayIterator;
 use League\Uri\Components\Authority;
 use League\Uri\Components\Domain;
+use League\Uri\Components\Host;
+use League\Uri\Contracts\UriException;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -40,8 +42,31 @@ class DomainTest extends TestCase
      */
     public function testSetState(): void
     {
-        $host = new Domain('uri.thephpleague.com');
+        $host = Domain::createFromString('uri.thephpleague.com');
+
         self::assertEquals($host, eval('return '.var_export($host, true).';'));
+    }
+
+    public function testItCanBeInstantiatedWithAHostInterfaceImplementingObject(): void
+    {
+        $host = new Host('uri.thephpleague.com');
+        $domain = Domain::createFromHost($host);
+
+        self::assertSame('uri.thephpleague.com', $domain->getContent());
+    }
+
+    public function testItFailsIfTheHostInterfaceImplementingObjectIsNotADomain(): void
+    {
+        self::expectException(UriException::class);
+
+        Domain::createFromHost(Host::createFromIp('127.0.0.1'));
+    }
+
+    public function testItFailsIfTheHostIsNotADomain(): void
+    {
+        self::expectException(UriException::class);
+
+        Domain::createFromHost(new Domain('127.0.0.1'));
     }
 
     /**
@@ -51,19 +76,21 @@ class DomainTest extends TestCase
      */
     public function testIterator(): void
     {
-        $host = new Domain('uri.thephpleague.com');
+        $host = Domain::createFromString('uri.thephpleague.com');
+
         self::assertEquals(['com', 'thephpleague', 'uri'], iterator_to_array($host));
         self::assertFalse($host->isIp());
         self::assertTrue($host->isDomain());
     }
 
     /**
-     * @covers ::__construct
+     * @covers ::createFromString
      * @covers ::withContent
      */
     public function testWithContent(): void
     {
-        $host = new Domain('uri.thephpleague.com');
+        $host = Domain::createFromString('uri.thephpleague.com');
+
         self::assertSame($host, $host->withContent('uri.thephpleague.com'));
         self::assertSame($host, $host->withContent($host));
         self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
@@ -73,17 +100,15 @@ class DomainTest extends TestCase
      * Test valid Domain.
      * @dataProvider validDomainProvider
      *
-     * @covers ::__construct
+     * @covers ::createFromString
      * @covers ::setLabels
      * @covers ::getContent
      * @covers ::toUnicode
-     * @param ?string $host
-     * @param ?string $uri
-     * @param ?string $iri
      */
-    public function testValidDomain(?string $host, ?string $uri, ?string $iri): void
+    public function testValidDomain(string $host, string $uri, string $iri): void
     {
-        $host = new Domain($host);
+        $host = Domain::createFromString($host);
+
         self::assertSame($uri, $host->getContent());
         self::assertSame($iri, $host->toUnicode());
     }
@@ -131,13 +156,14 @@ class DomainTest extends TestCase
 
     /**
      * @dataProvider invalidDomainProvider
-     * @covers ::__construct
+     * @covers ::createFromHost
      * @param ?string $invalid
      */
     public function testInvalidDomain(?string $invalid): void
     {
         self::expectException(SyntaxError::class);
-        new Domain($invalid);
+
+        Domain::createFromHost(new Host($invalid));
     }
 
     public function invalidDomainProvider(): array
@@ -170,21 +196,16 @@ class DomainTest extends TestCase
         ];
     }
 
-    public function testTypeErrorOnDomainConstruction(): void
-    {
-        self::expectException(TypeError::class);
-        new Domain(date_create());
-    }
-
     /**
-     * @param string $raw
-     * @param bool   $expected
+     * @param bool $expected
+     *
      * @dataProvider isAbsoluteProvider
+     *
      * @covers ::isAbsolute
      */
-    public function testIsAbsolute($raw, $expected): void
+    public function testIsAbsolute(string $raw, $expected): void
     {
-        self::assertSame($expected, (new Domain($raw))->isAbsolute());
+        self::assertSame($expected, Domain::createFromString($raw)->isAbsolute());
     }
 
     public function isAbsoluteProvider(): array
@@ -201,7 +222,8 @@ class DomainTest extends TestCase
      */
     public function testIpProperty(): void
     {
-        $host = new Domain('example.com');
+        $host = Domain::createFromString('example.com');
+
         self::assertNull($host->getIpVersion());
         self::assertNull($host->getIp());
     }
@@ -217,7 +239,8 @@ class DomainTest extends TestCase
      */
     public function testValidUnicodeDomain(string $unicode, string $ascii): void
     {
-        $host = new Domain($unicode);
+        $host = Domain::createFromString($unicode);
+
         self::assertSame($ascii, $host->toAscii());
         self::assertSame($unicode, $host->toUnicode());
     }
@@ -252,12 +275,12 @@ class DomainTest extends TestCase
      * Test Countable.
      *
      * @dataProvider countableProvider
+     *
      * @covers ::count
-     * @param ?string $host
      */
-    public function testCountable(?string $host, int $nblabels, array $array): void
+    public function testCountable(string $host, int $nblabels, array $array): void
     {
-        self::assertCount($nblabels, new Domain($host));
+        self::assertCount($nblabels, Domain::createFromString($host));
     }
 
     public function countableProvider(): array
@@ -330,7 +353,7 @@ class DomainTest extends TestCase
      */
     public function testGet(): void
     {
-        $host = new Domain('master.example.com');
+        $host = Domain::createFromString('master.example.com');
         self::assertSame('com', $host->get(0));
         self::assertSame('example', $host->get(1));
         self::assertSame('master', $host->get(-1));
@@ -342,7 +365,7 @@ class DomainTest extends TestCase
      */
     public function testOffsets(): void
     {
-        $host = new Domain('master.example.com');
+        $host = Domain::createFromString('master.example.com');
         self::assertSame([2], $host->keys('master'));
         self::assertSame([0, 1, 2], $host->keys());
     }
@@ -352,7 +375,7 @@ class DomainTest extends TestCase
      */
     public function testLabels(): void
     {
-        $host = new Domain('master.example.com');
+        $host = Domain::createFromString('master.example.com');
         self::assertSame(['com', 'example', 'master'], $host->labels());
         self::assertSame(['', 'localhost'], (new Domain('localhost.'))->labels());
     }
@@ -363,7 +386,7 @@ class DomainTest extends TestCase
      */
     public function testWithout(string $host, int $without, string $res): void
     {
-        self::assertSame($res, (string) (new Domain($host))->withoutLabel($without));
+        self::assertSame($res, (string) Domain::createFromString($host)->withoutLabel($without));
     }
 
     public function withoutProvider(): array
@@ -379,7 +402,7 @@ class DomainTest extends TestCase
      */
     public function testWithoutLabelVariadicArgument(): void
     {
-        $host = new Domain('www.example.com');
+        $host = Domain::createFromString('www.example.com');
 
         self::assertSame($host, $host->withoutLabel());
     }
@@ -390,18 +413,18 @@ class DomainTest extends TestCase
     public function testWithoutTriggersException(): void
     {
         self::expectException(OffsetOutOfBounds::class);
-        (new Domain('bébé.be'))->withoutLabel(-23);
+
+        Domain::createFromString('bébé.be')->withoutLabel(-23);
     }
 
     /**
      * @dataProvider validPrepend
      *
      * @covers ::prepend
-     * @param ?string $raw
      */
-    public function testPrepend(?string $raw, string $prepend, string $expected): void
+    public function testPrepend(string $raw, string $prepend, string $expected): void
     {
-        self::assertSame($expected, (string) (new Domain($raw))->prepend($prepend));
+        self::assertSame($expected, (string) Domain::createFromString($raw)->prepend($prepend));
     }
 
     public function validPrepend(): array
@@ -419,7 +442,8 @@ class DomainTest extends TestCase
     public function testPrependIpFailed(): void
     {
         self::expectException(SyntaxError::class);
-        (new Domain('secure.example.com'))->prepend(new Domain('master.'));
+
+        Domain::createFromString('secure.example.com')->prepend(new Domain('master.'));
     }
 
     /**
@@ -427,7 +451,8 @@ class DomainTest extends TestCase
      */
     public function testPrependNull(): void
     {
-        $domain = new Domain('secure.example.com');
+        $domain = Domain::createFromString('secure.example.com');
+
         self::assertSame($domain->prepend(null), $domain);
     }
 
@@ -435,11 +460,10 @@ class DomainTest extends TestCase
      * @dataProvider validAppend
      *
      * @covers ::append
-     * @param ?string $raw
      */
-    public function testAppend(?string $raw, string $append, string $expected): void
+    public function testAppend(string $raw, string $append, string $expected): void
     {
-        self::assertSame($expected, (string) (new Domain($raw))->append($append));
+        self::assertSame($expected, (string) Domain::createFromString($raw)->append($append));
     }
 
     public function validAppend(): array
@@ -458,7 +482,8 @@ class DomainTest extends TestCase
     public function testAppendIpFailed(): void
     {
         self::expectException(SyntaxError::class);
-        (new Domain('secure.example.com.'))->append('master');
+
+        Domain::createFromString('secure.example.com.')->append('master');
     }
 
     /**
@@ -466,7 +491,8 @@ class DomainTest extends TestCase
      */
     public function testAppendNull(): void
     {
-        $domain = new Domain('secure.example.com');
+        $domain = Domain::createFromString('secure.example.com');
+
         self::assertSame($domain->append(null), $domain);
     }
 
@@ -478,7 +504,7 @@ class DomainTest extends TestCase
      */
     public function testReplace(string $raw, string $input, int $offset, string $expected): void
     {
-        self::assertSame($expected, (string) (new Domain($raw))->withLabel($offset, $input));
+        self::assertSame($expected, (string) Domain::createFromString($raw)->withLabel($offset, $input));
     }
 
     public function replaceValid(): array
@@ -501,7 +527,8 @@ class DomainTest extends TestCase
     public function testReplaceIpMustFailed(): void
     {
         self::expectException(SyntaxError::class);
-        (new Domain('secure.example.com'))->withLabel(2, '[::1]');
+
+        Domain::createFromString('secure.example.com')->withLabel(2, '[::1]');
     }
 
     /**
@@ -510,7 +537,8 @@ class DomainTest extends TestCase
     public function testReplaceMustFailed(): void
     {
         self::expectException(OffsetOutOfBounds::class);
-        (new Domain('secure.example.com'))->withLabel(23, 'foo');
+
+        Domain::createFromString('secure.example.com')->withLabel(23, 'foo');
     }
 
     /**
@@ -520,7 +548,8 @@ class DomainTest extends TestCase
      */
     public function testWithRoot(string $host, string $expected_with_root, string $expected_without_root): void
     {
-        $host = new Domain($host);
+        $host = Domain::createFromString($host);
+
         self::assertSame($expected_with_root, (string) $host->withRootLabel());
         self::assertSame($expected_without_root, (string) $host->withoutRootLabel());
     }

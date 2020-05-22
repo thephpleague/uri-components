@@ -52,7 +52,7 @@ final class Domain extends Component implements DomainHostInterface
     private $labels;
 
     /**
-     * @inheritDoc
+     * @deprecated 2.3.0 use the appropriate named constructor
      *
      * @param mixed $host a Domain name can not be null
      *
@@ -64,12 +64,8 @@ final class Domain extends Component implements DomainHostInterface
             $host = new Host($host);
         }
 
-        if (null === $host->getContent()) {
-            throw new SyntaxError('A domain name can not be null.');
-        }
-
         if (!$host->isDomain()) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host->getContent()));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host->getContent() ?? 'null'));
         }
 
         $this->host = $host;
@@ -99,6 +95,14 @@ final class Domain extends Component implements DomainHostInterface
 
     /**
      * Returns a new instance from an iterable structure.
+     */
+    public static function createFromString(string $host): self
+    {
+        return self::createFromHost(new Host($host));
+    }
+
+    /**
+     * Returns a new instance from an iterable structure.
      *
      * @throws TypeError If a label is the null value
      */
@@ -113,7 +117,7 @@ final class Domain extends Component implements DomainHostInterface
             $hostLabels[] = $label;
         }
 
-        return new self(implode(self::SEPARATOR, array_reverse($hostLabels)));
+        return self::createFromString(implode(self::SEPARATOR, array_reverse($hostLabels)));
     }
 
     /**
@@ -125,7 +129,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function createFromUri($uri): self
     {
-        return new self(Host::createFromUri($uri));
+        return self::createFromHost(Host::createFromUri($uri));
     }
 
     /**
@@ -133,7 +137,15 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function createFromAuthority(AuthorityInterface $authority): self
     {
-        return new self(Host::createFromAuthority($authority));
+        return self::createFromHost(Host::createFromAuthority($authority));
+    }
+
+    /**
+     * Returns a new instance from an iterable structure.
+     */
+    public static function createFromHost(HostInterface $host): self
+    {
+        return new self($host);
     }
 
     /**
