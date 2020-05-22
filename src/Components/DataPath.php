@@ -229,13 +229,34 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * Create a new instance from a file path.
+     * @deprecated 2.3.0
+     *
+     * @see ::createFromFilePath
+     *
+     * Creates a new instance from a file path.
      *
      * @param null|resource $context
      *
      * @throws SyntaxError If the File is not readable
      */
     public static function createFromPath(string $path, $context = null): self
+    {
+        return self::createFromFilePath($path, $context);
+    }
+
+    public static function createFromString(string $path): self
+    {
+        return new self(new Path($path));
+    }
+
+    /**
+     * Creates a new instance from a file path.
+     *
+     * @param null|resource $context
+     *
+     * @throws SyntaxError If the File is not readable
+     */
+    public static function createFromFilePath(string $path, $context = null): self
     {
         static $finfo_support = null;
         $finfo_support = $finfo_support ?? class_exists(\finfo::class);
