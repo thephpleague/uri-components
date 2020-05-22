@@ -145,6 +145,48 @@ final class Authority extends Component implements AuthorityInterface
         return new self($authority);
     }
 
+    public static function createFromNull(): self
+    {
+        return new self();
+    }
+
+    public static function createFromString(string $authority): self
+    {
+        return new self($authority);
+    }
+
+    /**
+     * Create a new instance from a hash of parse_url parts.
+     *
+     * Create an new instance from a hash representation of the URI similar
+     * to PHP parse_url function result
+     *
+     * @param array<string,null|int|string> $components
+     */
+    public static function createFromComponents(array $components): self
+    {
+        $components += ['user' => null, 'pass' => null, 'host' => null, 'port' => null];
+
+        $authority = $components['host'];
+        if (null !== $components['port']) {
+            $authority .= ':'.$components['port'];
+        }
+
+        $userInfo = null;
+        if (null !== $components['user']) {
+            $userInfo = $components['user'];
+            if (null !== $components['pass']) {
+                $userInfo .= ':'.$components['pass'];
+            }
+        }
+
+        if (null !== $userInfo) {
+            $authority = $userInfo.'@'.$authority;
+        }
+
+        return new self($authority);
+    }
+
     /**
      * {@inheritDoc}
      */
