@@ -49,6 +49,8 @@ final class Authority extends Component implements AuthorityInterface
     private $port;
 
     /**
+     * @deprecated use a more appropriate named constructor.
+     *
      * New instance.
      *
      * @param mixed|null $authority
@@ -145,11 +147,17 @@ final class Authority extends Component implements AuthorityInterface
         return new self($authority);
     }
 
+    /**
+     * Create a new instance from null.
+     */
     public static function createFromNull(): self
     {
         return new self();
     }
 
+    /**
+     * Create a new instance from a string.
+     */
     public static function createFromString(string $authority): self
     {
         return new self($authority);
