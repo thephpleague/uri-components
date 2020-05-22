@@ -23,6 +23,7 @@ use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;
+use function parse_url;
 use function var_export;
 
 /**
@@ -31,14 +32,13 @@ use function var_export;
  */
 class AuthorityTest extends TestCase
 {
-
     /**
      * @covers ::__set_state
      * @covers ::validate
      */
     public function testSetState(): void
     {
-        $authority = new Authority('foo:bar@example.com:443');
+        $authority = Authority::createFromString('foo:bar@example.com:443');
         $generatedAuthority = eval('return '.var_export($authority, true).';');
         self::assertEquals($authority, $generatedAuthority);
     }
@@ -46,7 +46,8 @@ class AuthorityTest extends TestCase
     /**
      * @dataProvider validAuthorityDataProvider
      *
-     * @covers ::__construct
+     * @covers ::createFromNull
+     * @covers ::createFromString
      * @covers ::parse
      * @covers ::validate
      * @covers ::getHost
@@ -66,11 +67,16 @@ class AuthorityTest extends TestCase
         ?string $userInfo,
         ?string $component
     ): void {
-        $authority = new Authority($authority);
-        self::assertSame($host, $authority->getHost());
-        self::assertSame($port, $authority->getPort());
-        self::assertSame($userInfo, $authority->getUserInfo());
-        self::assertSame($component, $authority->getContent());
+        if (null === $authority) {
+            $instance = Authority::createFromNull();
+        } else {
+            $instance = Authority::createFromString($authority);
+        }
+
+        self::assertSame($host, $instance->getHost());
+        self::assertSame($port, $instance->getPort());
+        self::assertSame($userInfo, $instance->getUserInfo());
+        self::assertSame($component, $instance->getContent());
     }
 
     public function validAuthorityDataProvider(): array
@@ -124,7 +130,8 @@ class AuthorityTest extends TestCase
     public function testConstructorFails(string $authority): void
     {
         self::expectException(SyntaxError::class);
-        $authority = new Authority($authority);
+
+        Authority::createFromString($authority);
     }
 
     public function invalidAuthorityDataProvider(): array
@@ -142,6 +149,7 @@ class AuthorityTest extends TestCase
     public function testConstructorFailsWithWrongType(): void
     {
         self::expectException(TypeError::class);
+
         new Authority(date_create());
     }
 
@@ -151,7 +159,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithContent(): void
     {
-        $authority = new Authority('foo:bar@example.com:443');
+        $authority = Authority::createFromString('foo:bar@example.com:443');
         self::assertSame($authority, $authority->withContent('foo:bar@example.com:443'));
         self::assertNotEquals($authority, $authority->withContent('example.com:443'));
     }
@@ -162,7 +170,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithHost(): void
     {
-        $authority = new Authority('foo:bar@example.com:443');
+        $authority = Authority::createFromString('foo:bar@example.com:443');
         self::assertSame($authority, $authority->withHost('eXAmPle.CoM'));
         self::assertNotEquals($authority, $authority->withHost('[::1]'));
     }
@@ -177,7 +185,8 @@ class AuthorityTest extends TestCase
     public function testWithHostFails(?string $host): void
     {
         self::expectException(SyntaxError::class);
-        $authority = (new Authority('foo:bar@example.com:443'))->withHost($host);
+
+        Authority::createFromString('foo:bar@example.com:443')->withHost($host);
     }
 
     public function invalidHostDataProvider(): array
@@ -194,7 +203,8 @@ class AuthorityTest extends TestCase
      */
     public function testWithPort(): void
     {
-        $authority = new Authority('foo:bar@example.com:443');
+        $authority = Authority::createFromString('foo:bar@example.com:443');
+
         self::assertSame($authority, $authority->withPort(443));
         self::assertNotEquals($authority, $authority->withPort(80));
     }
@@ -205,7 +215,8 @@ class AuthorityTest extends TestCase
     public function testWithPortFails(): void
     {
         self::expectException(SyntaxError::class);
-        $authority = (new Authority('foo:bar@example.com:443'))->withPort(-1);
+
+        Authority::createFromString('foo:bar@example.com:443')->withPort(-1);
     }
 
     /**
@@ -214,7 +225,8 @@ class AuthorityTest extends TestCase
      */
     public function testWithUserInfo(): void
     {
-        $authority = new Authority('foo:bar@example.com:443');
+        $authority = Authority::createFromString('foo:bar@example.com:443');
+
         self::assertSame($authority, $authority->withUserInfo('foo', 'bar'));
         self::assertNotEquals($authority, $authority->withUserInfo('foo'));
     }
@@ -225,7 +237,8 @@ class AuthorityTest extends TestCase
     public function testWithUserInfoFails(): void
     {
         self::expectException(SyntaxError::class);
-        $authority = (new Authority('foo:bar@example.com:443'))->withUserInfo("\0foo", 'bar');
+
+        Authority::createFromString('foo:bar@example.com:443')->withUserInfo("\0foo", 'bar');
     }
 
     /**
@@ -247,11 +260,16 @@ class AuthorityTest extends TestCase
         ?string $content,
         string $uriComponent
     ): void {
-        $authority = new Authority($authority);
-        self::assertSame($string, (string) $authority);
-        self::assertSame($json, json_encode($authority));
-        self::assertSame($content, $authority->getContent());
-        self::assertSame($uriComponent, $authority->getUriComponent());
+        if (null === $authority) {
+            $instance = Authority::createFromNull();
+        } else {
+            $instance = Authority::createFromString($authority);
+        }
+
+        self::assertSame($string, (string) $instance);
+        self::assertSame($json, json_encode($instance));
+        self::assertSame($content, $instance->getContent());
+        self::assertSame($uriComponent, $instance->getUriComponent());
     }
 
     public function stringRepresentationDataProvider(): array
@@ -338,5 +356,19 @@ class AuthorityTest extends TestCase
         self::expectException(TypeError::class);
 
         Authority::createFromUri('http://example.com#foobar');
+    }
+
+    public function testCreateFromParseUrl(): void
+    {
+        $instance = Authority::createFromComponents(parse_url('http://user:pass@ExaMplE.CoM:42#foobar'));
+
+        self::assertSame('user:pass@example.com:42', $instance->__toString());
+    }
+
+    public function testCreateFromParseUrlWithoutAuthority(): void
+    {
+        $instance = Authority::createFromComponents(parse_url('/example.com:42#foobar'));
+
+        self::assertNull($instance->getContent());
     }
 }
