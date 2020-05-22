@@ -82,6 +82,16 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $this->segments = explode(self::SEPARATOR, $segments);
     }
 
+    public static function createFromString(string $path = ''): self
+    {
+        return self::createFromPath(new Path($path));
+    }
+
+    public static function createFromPath(PathInterface $path): self
+    {
+        return new self($path);
+    }
+
     /**
      * {@inheritDoc}
      */
