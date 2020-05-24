@@ -244,7 +244,7 @@ final class DataPath extends Component implements DataPathInterface
         return self::createFromFilePath($path, $context);
     }
 
-    public static function createFromString(string $path): self
+    public static function createFromString(string $path = ''): self
     {
         return new self(new Path($path));
     }

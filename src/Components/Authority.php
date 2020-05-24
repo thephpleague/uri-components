@@ -49,7 +49,7 @@ final class Authority extends Component implements AuthorityInterface
     private $port;
 
     /**
-     * @deprecated use a more appropriate named constructor.
+     * @deprecated since version 2.3.0 use a more appropriate named constructor.
      *
      * New instance.
      *
@@ -158,7 +158,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Create a new instance from a string.
      */
-    public static function createFromString(string $authority): self
+    public static function createFromString(string $authority = ''): self
     {
         return new self($authority);
     }

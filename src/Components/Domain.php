@@ -96,7 +96,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Returns a new instance from an iterable structure.
      */
-    public static function createFromString(string $host): self
+    public static function createFromString(string $host = ''): self
     {
         return self::createFromHost(new Host($host));
     }
