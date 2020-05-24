@@ -47,6 +47,7 @@ class HostModifierTest extends TestCase
      * @dataProvider validHostProvider
      *
      * @covers ::prependLabel
+     * @covers ::normalizeComponent
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
@@ -57,6 +58,7 @@ class HostModifierTest extends TestCase
      * @dataProvider validHostProvider
      *
      * @covers ::appendLabel
+     * @covers ::normalizeComponent
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
@@ -67,6 +69,7 @@ class HostModifierTest extends TestCase
      * @dataProvider validHostProvider
      *
      * @covers ::replaceLabel
+     * @covers ::normalizeComponent
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
@@ -84,12 +87,14 @@ class HostModifierTest extends TestCase
     public function testAppendLabelWithIpv4Host(): void
     {
         $uri = Http::createFromString('http://127.0.0.1/foo/bar');
+
         self::assertSame('127.0.0.1.localhost', UriModifier::appendLabel($uri, '.localhost')->getHost());
     }
 
     public function testAppendLabelThrowsWithOtherIpHost(): void
     {
         self::expectException(SyntaxError::class);
+
         $uri = Http::createFromString('http://[::1]/foo/bar');
         UriModifier::appendLabel($uri, '.localhost');
     }
@@ -121,6 +126,7 @@ class HostModifierTest extends TestCase
 
     /**
      * @covers ::hostToAscii
+     * @covers ::normalizeComponent
      */
     public function testHostToAsciiProcess(): void
     {
@@ -133,6 +139,7 @@ class HostModifierTest extends TestCase
 
     /**
      * @covers ::hostToUnicode
+     * @covers ::normalizeComponent
      */
     public function testHostToUnicodeProcess(): void
     {
@@ -144,6 +151,7 @@ class HostModifierTest extends TestCase
 
     /**
      * @covers ::removeZoneId
+     * @covers ::normalizeComponent
      */
     public function testWithoutZoneIdentifierProcess(): void
     {
@@ -158,6 +166,7 @@ class HostModifierTest extends TestCase
      * @dataProvider validwithoutLabelProvider
      *
      * @covers ::removeLabels
+     * @covers ::normalizeComponent
      */
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
@@ -173,6 +182,7 @@ class HostModifierTest extends TestCase
 
     /**
      * @covers ::removeLabels
+     * @covers ::normalizeComponent
      */
     public function testRemoveLabels(): void
     {
@@ -183,6 +193,7 @@ class HostModifierTest extends TestCase
      * @dataProvider invalidRemoveLabelsParameters
      *
      * @covers ::removeLabels
+     * @covers ::normalizeComponent
      */
     public function testRemoveLabelsFailedConstructor(array $params): void
     {

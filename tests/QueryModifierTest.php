@@ -42,6 +42,7 @@ class QueryModifierTest extends TestCase
 
     /**
      * @covers ::mergeQuery
+     * @covers ::normalizeComponent
      *
      * @dataProvider validMergeQueryProvider
      */
@@ -60,6 +61,7 @@ class QueryModifierTest extends TestCase
 
     /**
      * @covers ::appendQuery
+     * @covers ::normalizeComponent
      *
      * @dataProvider validAppendQueryProvider
      */
@@ -78,6 +80,7 @@ class QueryModifierTest extends TestCase
 
     /**
      * @covers ::sortQuery
+     * @covers ::normalizeComponent
      */
     public function testKsortQuery(): void
     {
@@ -89,6 +92,7 @@ class QueryModifierTest extends TestCase
      * @dataProvider validWithoutQueryValuesProvider
      *
      * @covers ::removePairs
+     * @covers ::normalizeComponent
      */
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
@@ -107,6 +111,8 @@ class QueryModifierTest extends TestCase
      * @dataProvider removeParamsProvider
      *
      * @covers ::removeParams
+     * @covers ::normalizeComponent
+     *
      * @param ?string $expected
      */
     public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
@@ -139,6 +145,8 @@ class QueryModifierTest extends TestCase
      * @dataProvider removeEmptyPairsProvider
      *
      * @covers ::removeEmptyPairs
+     * @covers ::normalizeComponent
+     *
      * @param ?string $expected
      */
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void

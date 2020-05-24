@@ -163,7 +163,7 @@ final class UriModifier
         }
 
         if ($host->isDomain()) {
-            $component = (new Domain($host))->append($label)->getContent();
+            $component = Domain::createFromHost($host)->append($label)->getContent();
 
             return $uri->withHost(self::normalizeComponent($component, $uri));
         }
@@ -221,7 +221,7 @@ final class UriModifier
         }
 
         if ($host->isDomain()) {
-            $component = (new Domain($host))->prepend($label)->getContent();
+            $component = Domain::createFromHost($host)->prepend($label)->getContent();
 
             return $uri->withHost($component);
         }
@@ -304,7 +304,7 @@ final class UriModifier
     public static function addBasePath($uri, $path)
     {
         /** @var HierarchicalPath $path */
-        $path = (new HierarchicalPath($path))->withLeadingSlash();
+        $path = HierarchicalPath::createFromPath(new Path($path))->withLeadingSlash();
 
         /** @var HierarchicalPath $currentPath */
         $currentPath = HierarchicalPath::createFromUri($uri)->withLeadingSlash();
@@ -400,7 +400,7 @@ final class UriModifier
     public static function removeBasePath($uri, $path)
     {
         /** @var HierarchicalPath $basePath */
-        $basePath = (new HierarchicalPath($path))->withLeadingSlash();
+        $basePath = HierarchicalPath::createFromPath(new Path($path))->withLeadingSlash();
         $currentPath = HierarchicalPath::createFromUri($uri);
         if ('/' === (string) $basePath) {
             return $uri;
