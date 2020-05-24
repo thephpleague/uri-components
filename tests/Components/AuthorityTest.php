@@ -371,4 +371,11 @@ class AuthorityTest extends TestCase
 
         self::assertNull($instance->getContent());
     }
+
+    public function testCreateFromStringThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Authority::createFromString(new \stdClass());
+    }
 }

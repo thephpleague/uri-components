@@ -858,6 +858,12 @@ class HierarchicalPathTest extends TestCase
         HierarchicalPath::createFromUri('http://example.com:80');
     }
 
+    public function testCreateFromStringThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        HierarchicalPath::createFromString(new \stdClass());
+    }
 
     /**
      * @dataProvider trailingSlashProvider

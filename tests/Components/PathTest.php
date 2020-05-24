@@ -44,7 +44,8 @@ class PathTest extends TestCase
      */
     public function testGetUriComponent(string $decoded, string $encoded): void
     {
-        $path = new Path($decoded);
+        $path = Path::createFromString($decoded);
+
         self::assertSame($decoded, $path->decoded());
         self::assertSame($encoded, $path->getContent());
     }
@@ -114,7 +115,8 @@ class PathTest extends TestCase
 
     public function testWithContent(): void
     {
-        $component = new Path('this is a normal path');
+        $component = Path::createFromString('this is a normal path');
+
         self::assertSame($component, $component->withContent($component));
         self::assertNotSame($component, $component->withContent('new/path'));
     }
@@ -142,12 +144,14 @@ class PathTest extends TestCase
     public function testConstructorThrowsExceptionWithInvalidData(): void
     {
         self::expectException(SyntaxError::class);
-        new Path("\0");
+
+        Path::createFromString("\0");
     }
 
     public function testSetState(): void
     {
-        $component = new Path(42);
+        $component = Path::createFromString('42');
+
         $generateComponent = eval('return '.var_export($component, true).';');
         self::assertEquals($component, $generateComponent);
     }
@@ -159,7 +163,7 @@ class PathTest extends TestCase
      */
     public function testWithoutDotSegments(string $path, string $expected): void
     {
-        self::assertSame($expected, (new Path($path))->withoutDotSegments()->__toString());
+        self::assertSame($expected, Path::createFromString($path)->withoutDotSegments()->__toString());
     }
 
     /**
@@ -181,7 +185,7 @@ class PathTest extends TestCase
      */
     public function testHasTrailingSlash(string $path, bool $expected): void
     {
-        self::assertSame($expected, (new Path($path))->hasTrailingSlash());
+        self::assertSame($expected, Path::createFromString($path)->hasTrailingSlash());
     }
 
     public function trailingSlashProvider(): array
@@ -201,7 +205,7 @@ class PathTest extends TestCase
      */
     public function testWithTrailingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) (new Path($path))->withTrailingSlash());
+        self::assertSame($expected, (string) Path::createFromString($path)->withTrailingSlash());
     }
 
     public function withTrailingSlashProvider(): array
@@ -221,7 +225,7 @@ class PathTest extends TestCase
      */
     public function testWithoutTrailingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) (new Path($path))->withoutTrailingSlash());
+        self::assertSame($expected, (string) Path::createFromString($path)->withoutTrailingSlash());
     }
 
     public function withoutTrailingSlashProvider(): array
@@ -241,7 +245,7 @@ class PathTest extends TestCase
      */
     public function testWithLeadingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) (new Path($path))->withLeadingSlash());
+        self::assertSame($expected, (string) Path::createFromString($path)->withLeadingSlash());
     }
 
     public function withLeadingSlashProvider(): array
@@ -261,7 +265,7 @@ class PathTest extends TestCase
      */
     public function testWithoutLeadingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) (new Path($path))->withoutLeadingSlash());
+        self::assertSame($expected, (string) Path::createFromString($path)->withoutLeadingSlash());
     }
 
     public function withoutLeadingSlashProvider(): array
@@ -316,5 +320,12 @@ class PathTest extends TestCase
         self::expectException(TypeError::class);
 
         Path::createFromUri('http://example.com:80');
+    }
+
+    public function testCreateFromStringThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Path::createFromString(new \stdClass());
     }
 }
