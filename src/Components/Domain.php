@@ -33,7 +33,10 @@ use function array_reverse;
 use function array_shift;
 use function count;
 use function explode;
+use function gettype;
 use function implode;
+use function is_string;
+use function method_exists;
 use function reset;
 use function sprintf;
 
@@ -94,11 +97,17 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * Returns a new instance from an iterable structure.
+     * Returns a new instance from an string or a stringable object.
+     *
+     * @param object|string $host
      */
-    public static function createFromString(string $host = ''): self
+    public static function createFromString($host = ''): self
     {
-        return self::createFromHost(new Host($host));
+        if (is_string($host) || method_exists($host, '__toString')) {
+            return self::createFromHost(new Host((string) $host));
+        }
+
+        throw new \TypeError(sprintf('The domain must be a string or a stringable object value, `%s` given', gettype($host)));
     }
 
     /**

@@ -27,7 +27,10 @@ use function array_pop;
 use function array_reduce;
 use function end;
 use function explode;
+use function gettype;
 use function implode;
+use function is_string;
+use function method_exists;
 use function sprintf;
 use function strpos;
 use function substr;
@@ -81,6 +84,20 @@ final class Path extends Component implements PathInterface
         }
 
         throw new TypeError('The path can not be null.');
+    }
+
+    /**
+     * Returns a new instance from an string or a stringable object.
+     *
+     * @param string|object $path
+     */
+    public static function createFromString($path = ''): self
+    {
+        if (is_string($path) || method_exists($path, '__toString')) {
+            return new self((string) $path);
+        }
+
+        throw new \TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
     }
 
     /**

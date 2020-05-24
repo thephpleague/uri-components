@@ -244,9 +244,18 @@ final class DataPath extends Component implements DataPathInterface
         return self::createFromFilePath($path, $context);
     }
 
-    public static function createFromString(string $path = ''): self
+    /**
+     * Returns a new instance from an string or a stringable object.
+     *
+     * @param string|object $path
+     */
+    public static function createFromString($path = ''): self
     {
-        return new self(new Path($path));
+        if (is_string($path) || method_exists($path, '__toString')) {
+            return new self((string) $path);
+        }
+
+        throw new \TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
     }
 
     /**
@@ -296,7 +305,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function createFromUri($uri): self
     {
-        return new self(Path::createFromUri($uri)->__toString());
+        return self::createFromString(Path::createFromUri($uri)->__toString());
     }
 
     /**

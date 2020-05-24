@@ -535,4 +535,11 @@ class DataPathTest extends TestCase
         self::assertSame($encodedPath, $path->getContent());
         self::assertSame($decodedPath, $path->decoded());
     }
+
+    public function testCreateFromStringThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        DataPath::createFromString(new \stdClass());
+    }
 }

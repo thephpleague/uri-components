@@ -622,4 +622,11 @@ class DomainTest extends TestCase
 
         self::assertEquals(Domain::createFromUri($uri), Domain::createFromAuthority($auth));
     }
+
+    public function testCreateFromStringThrowsTypeError(): void
+    {
+        self::expectException(TypeError::class);
+
+        Domain::createFromString(new \stdClass());
+    }
 }

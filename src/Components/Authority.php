@@ -26,6 +26,9 @@ use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function explode;
+use function gettype;
+use function is_string;
+use function method_exists;
 use function preg_match;
 use function sprintf;
 
@@ -156,11 +159,17 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * Create a new instance from a string.
+     * Returns a new instance from an string or a stringable object.
+     *
+     * @param object|string $authority
      */
-    public static function createFromString(string $authority = ''): self
+    public static function createFromString($authority = ''): self
     {
-        return new self($authority);
+        if (is_string($authority) || method_exists($authority, '__toString')) {
+            return new self((string) $authority);
+        }
+
+        throw new \TypeError(sprintf('The authority must be a string or a stringable object value, `%s` given', gettype($authority)));
     }
 
     /**
