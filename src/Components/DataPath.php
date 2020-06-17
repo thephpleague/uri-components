@@ -283,11 +283,13 @@ final class DataPath extends Component implements DataPathInterface
             $mime_args[] = $context;
         }
 
+        /** @phpstan-ignore-next-line */
         $content = @file_get_contents(...$file_args);
         if (false === $content) {
             throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory.', $path));
         }
 
+        /** @phpstan-ignore-next-line */
         $mimetype = (string) (new \finfo(FILEINFO_MIME))->file(...$mime_args);
 
         return new self(
