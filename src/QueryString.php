@@ -188,7 +188,7 @@ final class QueryString
         $key = (string) $key;
 
         if (1 === preg_match(self::REGEXP_ENCODED_PATTERN, $key)) {
-            $key = (string) preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $key);
+            $key = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $key);
         }
 
         if (null === $value) {
