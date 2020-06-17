@@ -191,6 +191,9 @@ final class QueryString
             $key = (string) preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $key);
         }
 
+        // Strip out invalid chars from the key.
+        $key = \preg_replace(self::REGEXP_INVALID_CHARS, '', $key);
+
         if (null === $value) {
             return [$key, $value];
         }
@@ -199,14 +202,10 @@ final class QueryString
             $value = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $value);
         }
 
-        return [
-            \preg_replace(
-                self::REGEXP_INVALID_CHARS,
-                '',
-                $key
-            ),
-            $value,
-        ];
+        // Strip out invalid chars from the value.
+        $value = \preg_replace(self::REGEXP_INVALID_CHARS, '', $value);
+
+        return [$key, $value];
     }
 
     /**

@@ -152,9 +152,9 @@ class QueryStringTest extends TestCase
                 ],
             ],
             [
-                'query' => 'a%00b=c',
+                'query' => 'a%00b=a%00b',
                 'expected' => [
-                    'ab' => 'c',
+                    'ab' => 'ab',
                 ],
             ],
         ];
