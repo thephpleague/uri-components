@@ -191,9 +191,6 @@ final class QueryString
             $key = (string) preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $key);
         }
 
-        // Strip out invalid chars from the key.
-        $key = \preg_replace(self::REGEXP_INVALID_CHARS, '', $key);
-
         if (null === $value) {
             return [$key, $value];
         }
@@ -201,9 +198,6 @@ final class QueryString
         if ($parseValue === self::DECODE_PAIR_VALUE && 1 === preg_match(self::REGEXP_ENCODED_PATTERN, $value)) {
             $value = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $value);
         }
-
-        // Strip out invalid chars from the value.
-        $value = \preg_replace(self::REGEXP_INVALID_CHARS, '', $value);
 
         return [$key, $value];
     }
@@ -410,6 +404,12 @@ final class QueryString
         if ('' === $name) {
             return $data;
         }
+
+        // Strip out invalid chars from the key.
+        $name = \preg_replace(self::REGEXP_INVALID_CHARS, '', $name);
+
+        // Strip out invalid chars from the value.
+        $value = \preg_replace(self::REGEXP_INVALID_CHARS, '', $value);
 
         $left_bracket_pos = strpos($name, '[');
         if (false === $left_bracket_pos) {
