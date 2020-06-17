@@ -406,10 +406,10 @@ final class QueryString
         }
 
         // Strip out invalid chars from the key.
-        $name = \preg_replace(self::REGEXP_INVALID_CHARS, '', $name);
+        $name = (string) \preg_replace(self::REGEXP_INVALID_CHARS, '', $name);
 
         // Strip out invalid chars from the value.
-        $value = \preg_replace(self::REGEXP_INVALID_CHARS, '', $value);
+        $value = (string) \preg_replace(self::REGEXP_INVALID_CHARS, '', $value);
 
         $left_bracket_pos = strpos($name, '[');
         if (false === $left_bracket_pos) {
