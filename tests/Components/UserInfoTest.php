@@ -16,7 +16,6 @@
 
 namespace LeagueTest\Uri\Components;
 
-use http\Client\Curl\User;
 use League\Uri\Components\Authority;
 use League\Uri\Components\UserInfo;
 use League\Uri\Exceptions\SyntaxError;
