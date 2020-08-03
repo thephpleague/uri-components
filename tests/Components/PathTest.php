@@ -64,7 +64,6 @@ class PathTest extends TestCase
             [
                 '',
                 '',
-                '',
             ],
             [
                 '"bad"',
