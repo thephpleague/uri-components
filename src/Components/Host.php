@@ -32,11 +32,15 @@ use function defined;
 use function explode;
 use function filter_var;
 use function function_exists;
+use function gettype;
 use function idn_to_ascii;
 use function idn_to_utf8;
 use function implode;
 use function in_array;
 use function inet_pton;
+use function is_object;
+use function is_string;
+use function method_exists;
 use function preg_match;
 use function rawurldecode;
 use function rawurlencode;
@@ -63,6 +67,7 @@ use const IDNA_ERROR_LEADING_HYPHEN;
 use const IDNA_ERROR_PUNYCODE;
 use const IDNA_ERROR_TRAILING_HYPHEN;
 use const IDNA_NONTRANSITIONAL_TO_UNICODE;
+use const IDNA_USE_STD3_RULES;
 use const INTL_IDNA_VARIANT_UTS46;
 
 final class Host extends Component implements IpHostInterface
@@ -219,14 +224,10 @@ final class Host extends Component implements IpHostInterface
 
         $domain_name = idn_to_ascii(
             $domain_name,
-            IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_NONTRANSITIONAL_TO_UNICODE,
+            IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_USE_STD3_RULES | IDNA_NONTRANSITIONAL_TO_UNICODE,
             INTL_IDNA_VARIANT_UTS46,
             $info
         );
-
-        if ([] === $info) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host));
-        }
 
         if (0 !== $info['errors']) {
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : %s.', $host, $this->getIDNAErrors($info['errors'])));
@@ -237,10 +238,6 @@ final class Host extends Component implements IpHostInterface
             throw new IdnSupportMissing(sprintf('The Intl extension is misconfigured for %s, please correct this issue before proceeding.', PHP_OS));
         }
         // @codeCoverageIgnoreEnd
-
-        if (false !== strpos($domain_name, '%')) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host));
-        }
 
         $this->host = $domain_name;
         $this->is_domain = $this->isValidDomain($domain_name);
@@ -326,6 +323,24 @@ final class Host extends Component implements IpHostInterface
     public static function __set_state(array $properties): self
     {
         return new self($properties['host']);
+    }
+
+    public static function createFromNull(): self
+    {
+        return new self(null);
+    }
+
+    public static function createFromString($host): self
+    {
+        if (is_object($host) && method_exists($host, '__toString')) {
+            $host = (string) $host;
+        }
+
+        if (!is_string($host)) {
+            throw new \TypeError(sprintf('The host must be a string or a stringable object value, `%s` given', gettype($host)));
+        }
+
+        return new self($host);
     }
 
     /**
@@ -416,16 +431,13 @@ final class Host extends Component implements IpHostInterface
      */
     public function toUnicode(): ?string
     {
-        if (null !== $this->ip_version
-            || null === $this->host
-            || false === strpos($this->host, 'xn--')
-        ) {
+        if (null !== $this->ip_version || null === $this->host || false === strpos($this->host, 'xn--')) {
             return $this->host;
         }
 
         $host = idn_to_utf8(
             $this->host,
-            IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_NONTRANSITIONAL_TO_UNICODE,
+            IDNA_CHECK_BIDI | IDNA_CHECK_CONTEXTJ | IDNA_USE_STD3_RULES | IDNA_NONTRANSITIONAL_TO_UNICODE,
             INTL_IDNA_VARIANT_UTS46,
             $info
         );
