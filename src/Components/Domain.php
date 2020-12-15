@@ -33,10 +33,7 @@ use function array_reverse;
 use function array_shift;
 use function count;
 use function explode;
-use function gettype;
 use function implode;
-use function is_string;
-use function method_exists;
 use function reset;
 use function sprintf;
 
@@ -103,11 +100,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function createFromString($host = ''): self
     {
-        if (is_string($host) || method_exists($host, '__toString')) {
-            return self::createFromHost(new Host((string) $host));
-        }
-
-        throw new \TypeError(sprintf('The domain must be a string or a stringable object value, `%s` given', gettype($host)));
+        return self::createFromHost(Host::createFromString($host));
     }
 
     /**
@@ -403,5 +396,29 @@ final class Domain extends Component implements DomainHostInterface
         };
 
         return self::createFromLabels(array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
+    }
+
+    public function clear(): self
+    {
+        return new self(Host::createFromNull());
+    }
+
+    public function slice(int $offset, int $length = null): self
+    {
+        $nbLabels = count($this->labels);
+        if ($offset < - $nbLabels || $offset > $nbLabels) {
+            throw new OffsetOutOfBounds(sprintf('No label can be removed with the submitted key : `%s`.', $offset));
+        }
+
+        $labels = array_slice($this->labels, $offset, $length, true);
+        if ($labels === $this->labels) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->labels = $labels;
+        $clone->host = [] === $labels ? Host::createFromNull() : Host::createFromString(implode('.', array_reverse($labels)));
+
+        return $clone;
     }
 }

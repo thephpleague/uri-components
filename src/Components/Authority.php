@@ -27,6 +27,7 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function explode;
 use function gettype;
+use function is_object;
 use function is_string;
 use function method_exists;
 use function preg_match;
@@ -165,11 +166,15 @@ final class Authority extends Component implements AuthorityInterface
      */
     public static function createFromString($authority = ''): self
     {
-        if (is_string($authority) || method_exists($authority, '__toString')) {
-            return new self((string) $authority);
+        if (is_object($authority) && method_exists($authority, '__toString')) {
+            $authority = (string) $authority;
         }
 
-        throw new \TypeError(sprintf('The authority must be a string or a stringable object value, `%s` given', gettype($authority)));
+        if (!is_string($authority)) {
+            throw new \TypeError(sprintf('The authority must be a string or a stringable object value, `%s` given', gettype($authority)));
+        }
+
+        return new self($authority);
     }
 
     /**

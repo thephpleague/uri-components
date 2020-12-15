@@ -34,10 +34,8 @@ use function count;
 use function dirname;
 use function end;
 use function explode;
-use function gettype;
 use function implode;
 use function is_scalar;
-use function is_string;
 use function ltrim;
 use function method_exists;
 use function rtrim;
@@ -96,11 +94,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      */
     public static function createFromString($path = ''): self
     {
-        if (is_string($path) || method_exists($path, '__toString')) {
-            return self::createFromPath(new Path($path));
-        }
-
-        throw new \TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
+        return self::createFromPath(Path::createFromString($path));
     }
 
     public static function createFromPath(PathInterface $path): self

@@ -40,6 +40,7 @@ use function gettype;
 use function http_build_query;
 use function implode;
 use function is_array;
+use function is_bool;
 use function is_object;
 use function is_scalar;
 use function iterator_to_array;
@@ -560,7 +561,11 @@ final class Query extends Component implements QueryInterface
             return true === $value ? 'true' : 'false';
         }
 
-        if (is_scalar($value) || method_exists($value, '__toString')) {
+        if (is_object($value) && method_exists($value, '__toString')) {
+            return (string) $value;
+        }
+
+        if (is_scalar($value)) {
             return (string) $value;
         }
 

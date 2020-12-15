@@ -129,7 +129,7 @@ class AuthorityTest extends TestCase
      */
     public function testConstructorFails(string $authority): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Authority::createFromString($authority);
     }
@@ -148,7 +148,7 @@ class AuthorityTest extends TestCase
      */
     public function testConstructorFailsWithWrongType(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         new Authority(date_create());
     }
@@ -184,7 +184,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithHostFails(?string $host): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Authority::createFromString('foo:bar@example.com:443')->withHost($host);
     }
@@ -214,7 +214,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithPortFails(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Authority::createFromString('foo:bar@example.com:443')->withPort(-1);
     }
@@ -236,7 +236,7 @@ class AuthorityTest extends TestCase
      */
     public function testWithUserInfoFails(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Authority::createFromString('foo:bar@example.com:443')->withUserInfo("\0foo", 'bar');
     }
@@ -353,7 +353,7 @@ class AuthorityTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Authority::createFromUri('http://example.com#foobar');
     }
@@ -374,7 +374,7 @@ class AuthorityTest extends TestCase
 
     public function testCreateFromStringThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Authority::createFromString(new \stdClass());
     }

@@ -29,37 +29,37 @@ class QueryStringTest extends TestCase
 {
     public function testEncodingThrowsExceptionWithQueryParser(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         QueryString::parse('foo=bar', '&', 42);
     }
 
     public function testSyntaxErrorThrowsExceptionWithQueryParser(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         QueryString::parse("foo=bar\0");
     }
 
     public function testSyntaxErrorThrowsExceptionWithQueryParserAndAnEmptySeparator(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         QueryString::parse('foo=bar', '');
     }
 
     public function testEncodingThrowsExceptionWithQueryBuilder(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         QueryString::build([['foo', 'bar']], '&', 42);
     }
 
     public function testBuildThrowsExceptionWithQueryBuilder(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         QueryString::build([['foo', 'boo' => 'bar']]);
     }
 
     public function testWrongTypeThrowExceptionParseQuery(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         QueryString::parse(['foo=bar'], '&', PHP_QUERY_RFC1738);
     }
 
@@ -406,7 +406,7 @@ class QueryStringTest extends TestCase
      */
     public function testBuildQueryThrowsException(iterable $pairs, string $separator, int $enc_type): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         QueryString::build($pairs, $separator, $enc_type);
     }
 

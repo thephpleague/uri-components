@@ -29,6 +29,7 @@ use function end;
 use function explode;
 use function gettype;
 use function implode;
+use function is_object;
 use function is_string;
 use function method_exists;
 use function sprintf;
@@ -93,11 +94,15 @@ final class Path extends Component implements PathInterface
      */
     public static function createFromString($path = ''): self
     {
-        if (is_string($path) || method_exists($path, '__toString')) {
+        if (is_object($path) && method_exists($path, '__toString')) {
             return new self((string) $path);
         }
 
-        throw new \TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
+        if (!is_string($path)) {
+            throw new \TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
+        }
+
+        return new self($path);
     }
 
     /**
