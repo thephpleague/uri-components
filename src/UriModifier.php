@@ -157,7 +157,7 @@ final class UriModifier
     public static function appendLabel($uri, $label)
     {
         $host = Host::createFromUri($uri);
-        $label = new Host($label);
+        $label = null === $label ? Host::createFromNull() : Host::createFromString($label);
         if (null === $label->getContent()) {
             return $uri;
         }
@@ -215,7 +215,7 @@ final class UriModifier
     public static function prependLabel($uri, $label)
     {
         $host = Host::createFromUri($uri);
-        $label = new Host($label);
+        $label = null === $label ? Host::createFromNull() : Host::createFromString($label);
         if (null === $label->getContent()) {
             return $uri;
         }
@@ -304,7 +304,7 @@ final class UriModifier
     public static function addBasePath($uri, $path)
     {
         /** @var HierarchicalPath $path */
-        $path = HierarchicalPath::createFromPath(new Path($path))->withLeadingSlash();
+        $path = HierarchicalPath::createFromPath(Path::createFromString($path))->withLeadingSlash();
 
         /** @var HierarchicalPath $currentPath */
         $currentPath = HierarchicalPath::createFromUri($uri)->withLeadingSlash();

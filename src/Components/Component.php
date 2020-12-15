@@ -22,6 +22,7 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use TypeError;
 use function gettype;
+use function is_object;
 use function is_scalar;
 use function method_exists;
 use function preg_match;
@@ -83,7 +84,11 @@ abstract class Component implements UriComponentInterface
             return $component;
         }
 
-        if (!is_scalar($component) && !method_exists($component, '__toString')) {
+        if (is_object($component) && method_exists($component, '__toString')) {
+            $component = (string) $component;
+        }
+
+        if (!is_scalar($component)) {
             throw new TypeError(sprintf('Expected component to be stringable; received %s.', gettype($component)));
         }
 

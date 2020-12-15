@@ -103,11 +103,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function createFromString($host = ''): self
     {
-        if (is_string($host) || method_exists($host, '__toString')) {
-            return self::createFromHost(new Host((string) $host));
-        }
-
-        throw new \TypeError(sprintf('The domain must be a string or a stringable object value, `%s` given', gettype($host)));
+        return self::createFromHost(Host::createFromString($host));
     }
 
     /**

@@ -30,6 +30,7 @@ use function explode;
 use function file_get_contents;
 use function gettype;
 use function implode;
+use function is_object;
 use function is_scalar;
 use function method_exists;
 use function preg_match;
@@ -107,7 +108,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public function __construct($path = '')
     {
-        $this->path = new Path($this->filterPath(self::filterComponent($path)));
+        $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
         $str = $this->path->__toString();
         $is_binary_data = false;
         [$mediatype, $this->document] = explode(',', $str, 2) + [1 => ''];
@@ -251,11 +252,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function createFromString($path = ''): self
     {
-        if (is_string($path) || method_exists($path, '__toString')) {
-            return new self((string) $path);
-        }
-
-        throw new \TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
+        return new self(Path::createFromString($path));
     }
 
     /**
@@ -516,7 +513,11 @@ final class DataPath extends Component implements DataPathInterface
      */
     public function withParameters($parameters): DataPathInterface
     {
-        if (!is_scalar($parameters) && !method_exists($parameters, '__toString')) {
+        if (is_object($parameters) && method_exists($parameters, '__toString')) {
+            $parameters = (string) $parameters;
+        }
+
+        if (!is_scalar($parameters)) {
             throw new \TypeError(sprintf('Expected parameter to be stringable; received %s.', gettype($parameters)));
         }
 
