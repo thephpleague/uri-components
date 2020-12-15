@@ -250,19 +250,19 @@ class UserInfoTest extends TestCase
      */
     public function testWithContentThrowsInvalidUriComponentException(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         (new UserInfo())->withContent(date_create());
     }
 
     public function testConstructorThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         new UserInfo(date_create());
     }
 
     public function testConstructorThrowsException(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         new UserInfo("\0");
     }
 
@@ -317,7 +317,7 @@ class UserInfoTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         UserInfo::createFromUri('http://example.com#foobar');
     }

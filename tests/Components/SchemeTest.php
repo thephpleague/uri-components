@@ -111,7 +111,7 @@ class SchemeTest extends TestCase
      */
     public function testInvalidScheme(string $scheme): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         new Scheme($scheme);
     }
 
@@ -126,7 +126,7 @@ class SchemeTest extends TestCase
 
     public function testInvalidSchemeType(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         new Scheme(date_create());
     }
 
@@ -169,7 +169,7 @@ class SchemeTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Scheme::createFromUri('http://example.com#foobar');
     }

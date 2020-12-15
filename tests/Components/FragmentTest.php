@@ -135,13 +135,13 @@ class FragmentTest extends TestCase
      */
     public function testFailedFragmentException(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         new Fragment("\0");
     }
 
     public function testFailedFragmentTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         new Fragment(date_create());
     }
 
@@ -246,7 +246,7 @@ class FragmentTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Fragment::createFromUri('http://example.com#foobar');
     }

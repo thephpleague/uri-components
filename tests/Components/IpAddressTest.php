@@ -185,7 +185,7 @@ class IpAddressTest extends TestCase
      */
     public function testCreateFromIpFailed(string $input): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         Host::createFromIp($input);
     }
 

@@ -58,7 +58,7 @@ class DataPathTest extends TestCase
      */
     public function testWithLeadingSlash(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromString(';,Bonjour%20le%20monde%21')->withLeadingSlash();
     }
@@ -79,7 +79,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailedWithNullValue(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         new DataPath(null);
     }
@@ -89,7 +89,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailedMalformePath(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromString('€');
     }
@@ -103,7 +103,7 @@ class DataPathTest extends TestCase
      */
     public function testCreateFromPathFailed(string $path): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromPath($path);
     }
@@ -115,7 +115,7 @@ class DataPathTest extends TestCase
      */
     public function testConstructorFailed($path): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromString($path);
     }
@@ -264,7 +264,7 @@ class DataPathTest extends TestCase
      */
     public function testWithParametersFailedWithInvalidParameters(string $path, string $parameters): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromPath($path)->withParameters($parameters);
     }
@@ -285,7 +285,7 @@ class DataPathTest extends TestCase
 
     public function testWithParametersFailsWithWrongType(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         DataPath::createFromFilePath(__DIR__.'/data/red-nose.gif')->withParameters([]);
     }
@@ -331,7 +331,7 @@ class DataPathTest extends TestCase
      */
     public function testUpdateParametersFailed(string $parameters): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         $uri = DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
@@ -410,7 +410,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidBase64Encoded(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromString('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
@@ -425,7 +425,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidComponent(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromString("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
@@ -440,7 +440,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidString(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromString('text/plain;boulook€');
     }
@@ -455,7 +455,7 @@ class DataPathTest extends TestCase
      */
     public function testInvalidMimetype(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         DataPath::createFromString('data:toto\\bar;foo=bar,');
     }
@@ -500,7 +500,7 @@ class DataPathTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         DataPath::createFromUri('http://example.com:80');
     }
@@ -538,7 +538,7 @@ class DataPathTest extends TestCase
 
     public function testCreateFromStringThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         DataPath::createFromString(new \stdClass());
     }

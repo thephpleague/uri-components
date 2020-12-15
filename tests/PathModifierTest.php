@@ -178,7 +178,7 @@ class PathModifierTest extends TestCase
      */
     public function testBasenameThrowException(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         UriModifier::replaceBasename(Psr7\uri_for('http://example.com'), 'foo/baz');
     }
 
@@ -430,7 +430,7 @@ class PathModifierTest extends TestCase
      */
     public function testReplaceSegmentConstructorFailed2(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         UriModifier::replaceSegment($this->uri, 2, "whyno\0t");
     }
 
@@ -440,7 +440,7 @@ class PathModifierTest extends TestCase
      */
     public function testExtensionProcessFailed(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         UriModifier::replaceExtension($this->uri, 'to/to');
     }
 }
