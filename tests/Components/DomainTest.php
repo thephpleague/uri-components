@@ -57,14 +57,14 @@ class DomainTest extends TestCase
 
     public function testItFailsIfTheHostInterfaceImplementingObjectIsNotADomain(): void
     {
-        self::expectException(UriException::class);
+        $this->expectException(UriException::class);
 
         Domain::createFromHost(Host::createFromIp('127.0.0.1'));
     }
 
     public function testItFailsIfTheHostIsNotADomain(): void
     {
-        self::expectException(UriException::class);
+        $this->expectException(UriException::class);
 
         Domain::createFromHost(new Domain('127.0.0.1'));
     }
@@ -161,7 +161,7 @@ class DomainTest extends TestCase
      */
     public function testInvalidDomain(?string $invalid): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Domain::createFromHost(new Host($invalid));
     }
@@ -317,7 +317,7 @@ class DomainTest extends TestCase
      */
     public function testCreateFromLabelsFailedWithInvalidArrayInput(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         Domain::createFromLabels([date_create()]);
     }
 
@@ -326,7 +326,7 @@ class DomainTest extends TestCase
      */
     public function testCreateFromLabelsFailedWithNullLabel(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         Domain::createFromLabels([null]);
     }
 
@@ -335,7 +335,7 @@ class DomainTest extends TestCase
      */
     public function testCreateFromLabelsFailedWithEmptyStringLabel(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         Domain::createFromLabels(['']);
     }
 
@@ -344,7 +344,7 @@ class DomainTest extends TestCase
      */
     public function testCreateFromLabelsFailedWithEmptyLabel(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         Domain::createFromLabels([]);
     }
 
@@ -412,7 +412,7 @@ class DomainTest extends TestCase
      */
     public function testWithoutTriggersException(): void
     {
-        self::expectException(OffsetOutOfBounds::class);
+        $this->expectException(OffsetOutOfBounds::class);
 
         Domain::createFromString('bébé.be')->withoutLabel(-23);
     }
@@ -441,7 +441,7 @@ class DomainTest extends TestCase
      */
     public function testPrependIpFailed(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Domain::createFromString('secure.example.com')->prepend(new Domain('master.'));
     }
@@ -481,7 +481,7 @@ class DomainTest extends TestCase
      */
     public function testAppendIpFailed(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Domain::createFromString('secure.example.com.')->append('master');
     }
@@ -526,7 +526,7 @@ class DomainTest extends TestCase
      */
     public function testReplaceIpMustFailed(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Domain::createFromString('secure.example.com')->withLabel(2, '[::1]');
     }
@@ -536,7 +536,7 @@ class DomainTest extends TestCase
      */
     public function testReplaceMustFailed(): void
     {
-        self::expectException(OffsetOutOfBounds::class);
+        $this->expectException(OffsetOutOfBounds::class);
 
         Domain::createFromString('secure.example.com')->withLabel(23, 'foo');
     }
@@ -592,7 +592,7 @@ class DomainTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Domain::createFromUri('http://example.com#foobar');
     }
@@ -602,7 +602,7 @@ class DomainTest extends TestCase
      */
     public function testCreateFromUriThrowsSyntaxtError(UriInterface $uri): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Domain::createFromUri($uri);
     }
@@ -625,8 +625,27 @@ class DomainTest extends TestCase
 
     public function testCreateFromStringThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Domain::createFromString(new \stdClass());
+    }
+
+    public function testSlice(): void
+    {
+        $domain = Domain::createFromString('ulb.ac.be');
+
+        self::assertSame($domain->getContent(), $domain->slice(-3)->getContent());
+        self::assertSame($domain->getContent(), $domain->slice(0)->getContent());
+
+        self::assertSame('ulb.ac', $domain->slice(1)->getContent());
+        self::assertSame('ulb', $domain->slice(-1)->getContent());
+        self::assertSame('be', $domain->slice(-3, 1)->getContent());
+    }
+
+    public function testSliceThrowsOnOverFlow(): void
+    {
+        $this->expectException(OffsetOutOfBounds::class);
+
+        Domain::createFromString('ulb.ac.be')->slice(5);
     }
 }

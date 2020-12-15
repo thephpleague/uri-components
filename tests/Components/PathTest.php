@@ -127,7 +127,7 @@ class PathTest extends TestCase
      */
     public function testConstructorThrowsWithInvalidData($path): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         new Path($path);
     }
 
@@ -142,7 +142,7 @@ class PathTest extends TestCase
 
     public function testConstructorThrowsExceptionWithInvalidData(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         Path::createFromString("\0");
     }
@@ -316,14 +316,14 @@ class PathTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Path::createFromUri('http://example.com:80');
     }
 
     public function testCreateFromStringThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Path::createFromString(new \stdClass());
     }

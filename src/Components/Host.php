@@ -330,6 +330,9 @@ final class Host extends Component implements IpHostInterface
         return new self(null);
     }
 
+    /**
+     * @param object|string $host The host value when it is an object it should expose the __toString method
+     */
     public static function createFromString($host): self
     {
         if (is_object($host) && method_exists($host, '__toString')) {

@@ -264,7 +264,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateRelativeFromSegmentsFailed(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         HierarchicalPath::createRelativeFromSegments([date_create()]);
     }
 
@@ -273,7 +273,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testCreateAbsoluteFromSegmentsFailed(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         HierarchicalPath::createAbsoluteFromSegments([date_create()]);
     }
 
@@ -302,7 +302,7 @@ class HierarchicalPathTest extends TestCase
 
     public function testPrependThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         HierarchicalPath::createFromString('')->prepend(null);
     }
@@ -334,7 +334,7 @@ class HierarchicalPathTest extends TestCase
 
     public function testAppendThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         HierarchicalPath::createFromString('')->append(null);
     }
@@ -400,7 +400,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithSegmentThrowsException(): void
     {
-        self::expectException(OffsetOutOfBounds::class);
+        $this->expectException(OffsetOutOfBounds::class);
 
         HierarchicalPath::createFromString('/test/')->withSegment(23, 'bar');
     }
@@ -435,7 +435,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithoutSegmentThrowsException(): void
     {
-        self::expectException(OffsetOutOfBounds::class);
+        $this->expectException(OffsetOutOfBounds::class);
 
         HierarchicalPath::createFromString('/test/')->withoutSegment(23);
     }
@@ -605,7 +605,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithExtensionWithInvalidExtension(?string $extension): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         HierarchicalPath::createFromString()->withExtension($extension);
     }
@@ -777,7 +777,7 @@ class HierarchicalPathTest extends TestCase
      */
     public function testWithBasenameThrowException(?string $path): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
 
         HierarchicalPath::createFromString('foo/bar')->withBasename($path);
     }
@@ -853,14 +853,14 @@ class HierarchicalPathTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         HierarchicalPath::createFromUri('http://example.com:80');
     }
 
     public function testCreateFromStringThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         HierarchicalPath::createFromString(new \stdClass());
     }

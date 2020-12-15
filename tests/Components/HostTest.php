@@ -166,7 +166,7 @@ class HostTest extends TestCase
      */
     public function testInvalidHost(string $invalid): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         new Host($invalid);
     }
 
@@ -197,7 +197,7 @@ class HostTest extends TestCase
 
     public function testTypeErrorOnHostConstruction(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         new Host(date_create());
     }
 
@@ -292,7 +292,7 @@ class HostTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Host::createFromUri('http://example.com#foobar');
     }

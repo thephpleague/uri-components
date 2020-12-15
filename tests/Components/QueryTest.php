@@ -65,7 +65,7 @@ class QueryTest extends TestCase
         self::assertSame('|', $new_query->getSeparator());
         self::assertSame('foo=bar|kingkong=toto', $new_query->getContent());
 
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         $new_query->withSeparator('');
     }
 
@@ -203,7 +203,7 @@ class QueryTest extends TestCase
      */
     public function testCreateFromPairsFailedWithBadIterable(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         Query::createFromPairs([['toto' => ['foo' => [(object) []]]]]);
     }
 
@@ -490,7 +490,7 @@ class QueryTest extends TestCase
      */
     public function testCreateFromParamsThrowsException(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         Query::createFromParams('foo=bar');
     }
 
@@ -812,7 +812,7 @@ class QueryTest extends TestCase
      */
     public function testWithPairThrowsException(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         (Query::createFromRFC3986(null))->withPair('foo', (object) ['data']);
     }
 
@@ -951,7 +951,7 @@ class QueryTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Query::createFromUri('http://example.com#foobar');
     }

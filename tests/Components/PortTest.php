@@ -92,13 +92,13 @@ class PortTest extends TestCase
 
     public function testFailedPortTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
         new Port(date_create());
     }
 
     public function testFailedPortException(): void
     {
-        self::expectException(SyntaxError::class);
+        $this->expectException(SyntaxError::class);
         new Port(-1);
     }
 
@@ -150,7 +150,7 @@ class PortTest extends TestCase
 
     public function testCreateFromUriThrowsTypeError(): void
     {
-        self::expectException(TypeError::class);
+        $this->expectException(TypeError::class);
 
         Port::createFromUri('http://example.com:80');
     }
