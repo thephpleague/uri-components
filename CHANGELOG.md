@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next - TBD
+## 2.3.0 - 2021-01-26
 
 ### Added
 
@@ -16,7 +16,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `HierarchicalPath::createFromPath`
 - `HierarchicalPath::createFromString`
 - `Path::createFromString`
-- Support for PHP8.0
+- Support for `PHP8.0`
 
 ### Fixed
 
@@ -32,7 +32,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Remove
 
-- None
+- Support for `PHP7.2`
 
 ## 2.2.1 - 2020-02-09
 
