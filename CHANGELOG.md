@@ -16,6 +16,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `HierarchicalPath::createFromPath`
 - `HierarchicalPath::createFromString`
 - `Path::createFromString`
+- Support for PHP8.0
 
 ### Fixed
 

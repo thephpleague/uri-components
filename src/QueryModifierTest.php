@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri;
+namespace League\Uri;
 
 use League\Uri\Http;
 use League\Uri\Uri;

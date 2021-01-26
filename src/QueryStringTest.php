@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri;
+namespace League\Uri;
 
 use ArrayIterator;
 use League\Uri\Exceptions\SyntaxError;
@@ -25,7 +25,7 @@ use function date_create;
 use const PHP_QUERY_RFC1738;
 use const PHP_QUERY_RFC3986;
 
-class QueryStringTest extends TestCase
+final class QueryStringTest extends TestCase
 {
     public function testEncodingThrowsExceptionWithQueryParser(): void
     {

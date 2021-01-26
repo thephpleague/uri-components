@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri;
+namespace League\Uri;
 
 use GuzzleHttp\Psr7;
 use League\Uri\Components\DataPath;
@@ -23,6 +23,7 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
+use function dirname;
 
 /**
  * @group path
@@ -67,13 +68,15 @@ class PathModifierTest extends TestCase
 
     public function fileProvider(): array
     {
+        $rootPath = dirname(__DIR__).'/test_data';
+
         $textPath = new DataPath('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-        $binPath = DataPath::createFromPath(__DIR__.'/Components/data/red-nose.gif');
+        $binPath = DataPath::createFromPath($rootPath.'/red-nose.gif');
 
         $ascii = Uri::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $binary = Uri::createFromString('data:'.$textPath->toBinary());
 
-        $pathBin = Uri::createFromDataPath(__DIR__.'/Components/data/red-nose.gif');
+        $pathBin = Uri::createFromDataPath($rootPath.'/red-nose.gif');
         $pathAscii = Uri::createFromString('data:'.$binPath->toAscii());
 
         return [
