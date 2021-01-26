@@ -20,9 +20,6 @@ namespace League\Uri;
 
 use League\Uri\Components\Authority;
 use League\Uri\Components\Host;
-use League\Uri\Http;
-use League\Uri\IPv4Normalizer;
-use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use function extension_loaded;
 use const PHP_INT_SIZE;

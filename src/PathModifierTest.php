@@ -19,9 +19,6 @@ namespace League\Uri;
 use GuzzleHttp\Psr7;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Http;
-use League\Uri\Uri;
-use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
 use function dirname;
 
@@ -30,7 +27,7 @@ use function dirname;
  * @group resolution
  * @coversDefaultClass \League\Uri\UriModifier
  */
-class PathModifierTest extends TestCase
+final class PathModifierTest extends TestCase
 {
     /**
      * @var Http

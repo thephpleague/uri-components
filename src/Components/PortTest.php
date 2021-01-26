@@ -16,8 +16,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\Authority;
-use League\Uri\Components\Port;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -30,7 +28,7 @@ use function var_export;
  * @group port
  * @coversDefaultClass \League\Uri\Components\Port
  */
-class PortTest extends TestCase
+final class PortTest extends TestCase
 {
     /**
      * @covers ::__toString

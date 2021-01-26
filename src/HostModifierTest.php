@@ -19,9 +19,6 @@ namespace League\Uri;
 use GuzzleHttp\Psr7\Uri as GuzzleUri;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Http;
-use League\Uri\Uri;
-use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,7 +26,7 @@ use PHPUnit\Framework\TestCase;
  * @group resolution
  * @coversDefaultClass \League\Uri\UriModifier
  */
-class HostModifierTest extends TestCase
+final class HostModifierTest extends TestCase
 {
     /**
      * @var Http

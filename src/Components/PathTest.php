@@ -16,7 +16,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\Path;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -30,7 +29,7 @@ use function var_export;
  * @group defaultpath
  * @coversDefaultClass \League\Uri\Components\Path
  */
-class PathTest extends TestCase
+final class PathTest extends TestCase
 {
     /**
      * @dataProvider validPathEncoding

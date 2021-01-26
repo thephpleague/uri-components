@@ -17,8 +17,6 @@
 namespace League\Uri\Components;
 
 use ArrayIterator;
-use League\Uri\Components\HierarchicalPath;
-use League\Uri\Components\Path;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -35,7 +33,7 @@ use function var_export;
  * @group hierarchicalpath
  * @coversDefaultClass \League\Uri\Components\HierarchicalPath
  */
-class HierarchicalPathTest extends TestCase
+final class HierarchicalPathTest extends TestCase
 {
     public function testSetState(): void
     {

@@ -18,7 +18,6 @@ namespace League\Uri\Components;
 
 use ArrayIterator;
 use DateInterval;
-use League\Uri\Components\Query;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -32,7 +31,7 @@ use function var_export;
  * @group query
  * @coversDefaultClass \League\Uri\Components\Query
  */
-class QueryTest extends TestCase
+final class QueryTest extends TestCase
 {
     /**
      * @var Query
