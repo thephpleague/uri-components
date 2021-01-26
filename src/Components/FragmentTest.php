@@ -16,7 +16,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\Fragment;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -29,7 +28,7 @@ use function var_export;
  * @group fragment
  * @coversDefaultClass \League\Uri\Components\Fragment
  */
-class FragmentTest extends TestCase
+final class FragmentTest extends TestCase
 {
     /**
      * @dataProvider getUriComponentProvider

@@ -18,7 +18,6 @@ namespace League\Uri;
 
 use ArrayIterator;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\QueryString;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use function date_create;

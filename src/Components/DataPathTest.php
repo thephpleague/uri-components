@@ -16,7 +16,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -32,7 +31,7 @@ use function var_export;
  * @group datapath
  * @coversDefaultClass \League\Uri\Components\DataPath
  */
-class DataPathTest extends TestCase
+final class DataPathTest extends TestCase
 {
     /** @var string */
     private $rootPath;
@@ -362,7 +361,6 @@ class DataPathTest extends TestCase
      */
     public function testBinarySave(): void
     {
-
         $newFilePath = $this->rootPath.'/temp.gif';
         $uri = DataPath::createFromPath($this->rootPath.'/red-nose.gif');
         $res = $uri->save($newFilePath);

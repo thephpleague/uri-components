@@ -16,8 +16,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\Authority;
-use League\Uri\Components\UserInfo;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -30,7 +28,7 @@ use function var_export;
  * @group userinfo
  * @coversDefaultClass \League\Uri\Components\UserInfo
  */
-class UserInfoTest extends TestCase
+final class UserInfoTest extends TestCase
 {
     /**
      * @dataProvider userInfoProvider
