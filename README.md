@@ -12,7 +12,7 @@ This package contains concrete URI components instances represented as immutable
 System Requirements
 -------
 
-You need **PHP >= 7.2** but the latest stable version of PHP is recommended.
+You need **PHP >= 7.3** but the latest stable version of PHP is recommended.
 
 Dependencies
 -------
