@@ -1,7 +1,7 @@
 Uri Components
 =======
 
-[![Quality Assurance](https://github.com/thephpleague/uri-components/workflows/Quality%20Assurance/badge.svg)](https://github.com/thephpleague/uri-components/actions?query=workflow%3A%22Quality+Assurance%22)
+[![Build](https://github.com/thephpleague/uri-components/workflows/build/badge.svg)](https://github.com/thephpleague/uri-components/actions?query=workflow%3A%22build%22)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![Latest Version](https://img.shields.io/github/release/thephpleague/uri-components.svg?style=flat-square)](https://github.com/thephpleague/uri-components/releases)
 [![Total Downloads](https://img.shields.io/packagist/dt/league/uri-components.svg?style=flat-square)](https://packagist.org/packages/league/uri-components)
