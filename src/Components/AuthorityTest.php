@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri\Components;
+namespace League\Uri\Components;
 
 use League\Uri\Components\Authority;
 use League\Uri\Exceptions\SyntaxError;

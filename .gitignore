@@ -1,7 +1,8 @@
-vendor
-build
-docs
-composer.lock
 .idea
 .php_cs.cache
 .phpunit.result.cache
+vendor
+build
+docs/_site
+composer.lock
+/nbproject/private/
