@@ -16,7 +16,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\Host;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 
@@ -24,7 +23,7 @@ use PHPUnit\Framework\TestCase;
  * @group host
  * @coversDefaultClass \League\Uri\Components\Host
  */
-class IpAddressTest extends TestCase
+final class IpAddressTest extends TestCase
 {
     /**
      * @covers ::__construct

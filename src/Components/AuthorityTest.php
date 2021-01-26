@@ -16,7 +16,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\Authority;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -30,7 +29,7 @@ use function var_export;
  * @group userinfo
  * @coversDefaultClass \League\Uri\Components\Authority
  */
-class AuthorityTest extends TestCase
+final class AuthorityTest extends TestCase
 {
     /**
      * @covers ::__set_state

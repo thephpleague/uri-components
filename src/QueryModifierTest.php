@@ -16,9 +16,6 @@
 
 namespace League\Uri;
 
-use League\Uri\Http;
-use League\Uri\Uri;
-use League\Uri\UriModifier;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -26,7 +23,7 @@ use PHPUnit\Framework\TestCase;
  * @group resolution
  * @coversDefaultClass \League\Uri\UriModifier
  */
-class QueryModifierTest extends TestCase
+final class QueryModifierTest extends TestCase
 {
     /**
      * @var Http
