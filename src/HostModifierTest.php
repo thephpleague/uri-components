@@ -14,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LeagueTest\Uri;
+namespace League\Uri;
 
 use GuzzleHttp\Psr7\Uri as GuzzleUri;
 use League\Uri\Exceptions\OffsetOutOfBounds;

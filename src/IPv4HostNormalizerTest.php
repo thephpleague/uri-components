@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace LeagueTest\Uri;
+namespace League\Uri;
 
 use League\Uri\Components\Authority;
 use League\Uri\Components\Host;

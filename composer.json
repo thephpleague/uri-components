@@ -32,7 +32,7 @@
         "psr/http-message": "^1.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.3",
+        "friendsofphp/php-cs-fixer": "^2.18",
         "guzzlehttp/psr7": "^1.4.2",
         "league/uri": "^6.0",
         "phpstan/phpstan": "^0.12",
@@ -62,25 +62,17 @@
     },
     "scripts": {
         "phpcs": "php-cs-fixer fix -v --diff --dry-run --allow-risky=yes --ansi",
-        "phpstan-src": "phpstan analyse -l max -c phpstan.src.neon src --ansi",
-        "phpstan-tests": "phpstan analyse -l max -c phpstan.tests.neon tests --ansi",
-        "phpstan": [
-            "@phpstan-src",
-            "@phpstan-tests"
-        ],
+        "phpstan": "phpstan analyse -l max -c phpstan.neon src --memory-limit=256M --ansi",
         "phpunit": "phpunit --coverage-text",
         "test": [
-            "@phpcs",
-            "@phpstan-src",
-            "@phpstan-tests",
-            "@phpunit"
+            "@phpunit",
+            "@phpstan",
+            "@phpcs"
         ]
     },
     "scripts-descriptions": {
         "phpcs": "Runs coding style test suite",
         "phpstan": "Runs complete codebase static analysis",
-        "phpstan-src": "Runs source code static analysis",
-        "phpstan-test": "Runs test suite static analysis",
         "phpunit": "Runs unit and functional testing",
         "test": "Runs full test suite"
     },
