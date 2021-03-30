@@ -62,6 +62,7 @@
     },
     "scripts": {
         "phpcs": "php-cs-fixer fix -v --diff --dry-run --allow-risky=yes --ansi",
+        "phpcs:fix": "php-cs-fixer fix -vvv --allow-risky=yes --ansi",
         "phpstan": "phpstan analyse -l max -c phpstan.neon src --memory-limit=256M --ansi",
         "phpunit": "phpunit --coverage-text",
         "test": [
@@ -72,6 +73,7 @@
     },
     "scripts-descriptions": {
         "phpcs": "Runs coding style test suite",
+        "phpcs:fix": "Fix coding style",
         "phpstan": "Runs complete codebase static analysis",
         "phpunit": "Runs unit and functional testing",
         "test": "Runs full test suite"
