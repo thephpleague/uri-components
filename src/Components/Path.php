@@ -140,6 +140,14 @@ final class Path extends Component implements PathInterface
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function getUriComponent(): string
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
      * Returns the decoded path.
      */
     public function decoded(): string

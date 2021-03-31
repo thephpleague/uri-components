@@ -424,6 +424,14 @@ final class Host extends Component implements IpHostInterface
     /**
      * {@inheritDoc}
      */
+    public function getUriComponent(): string
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function toAscii(): ?string
     {
         return $this->getContent();

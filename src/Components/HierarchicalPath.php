@@ -210,6 +210,14 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * {@inheritDoc}
      */
+    public function getUriComponent(): string
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function decoded(): string
     {
         return $this->path->decoded();

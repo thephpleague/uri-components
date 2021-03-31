@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added
+
+- `Component::toString`
+
+### Fixed
+
+- None
+
+### Deprecated
+
+- None
+
+### Remove
+
+- None
+
 ## 2.3.0 - 2021-01-26
 
 ### Added

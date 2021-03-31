@@ -316,6 +316,14 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * {@inheritDoc}
      */
+    public function getUriComponent(): string
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getData(): string
     {
         return $this->document;
