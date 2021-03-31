@@ -161,6 +161,14 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * {@inheritDoc}
      */
+    public function getUriComponent(): string
+    {
+        return (string) $this->getContent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function toAscii(): ?string
     {
         return $this->host->toAscii();

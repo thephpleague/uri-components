@@ -153,10 +153,7 @@ abstract class Component implements UriComponentInterface
     /**
      * {@inheritDoc}
      */
-    public function getUriComponent(): string
-    {
-        return (string) $this->getContent();
-    }
+    abstract public function getUriComponent(): string;
 
     /**
      * {@inheritDoc}
@@ -166,9 +163,17 @@ abstract class Component implements UriComponentInterface
     /**
      * {@inheritDoc}
      */
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->getContent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function __toString(): string
+    {
+        return $this->toString();
     }
 
     /**
