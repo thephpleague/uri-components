@@ -157,7 +157,6 @@ final class HostTest extends TestCase
      * @dataProvider invalidHostProvider
      *
      * @covers ::__construct
-     * @covers ::getIDNAErrors
      * @covers ::isValidIpv6Hostname
      * @covers ::toUnicode
      */
