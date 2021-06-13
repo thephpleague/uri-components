@@ -19,6 +19,7 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
@@ -356,7 +357,11 @@ final class Host extends Component implements IpHostInterface
             return $this->host;
         }
 
-        return Idna::toUnicode($this->host, Idna::IDNA2008_UNICODE)->result();
+        try {
+            return Idna::toUnicode($this->host, Idna::IDNA2008_UNICODE)->result();
+        } catch (UriException $exception) {
+            return $this->host;
+        }
     }
 
     /**
