@@ -23,7 +23,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnaConversionFailed;
 use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Idna;
+use League\Uri\Idna\Idna;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
