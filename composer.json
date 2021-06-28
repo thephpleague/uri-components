@@ -28,7 +28,7 @@
     "require": {
         "php": "^7.3 || ^8.0",
         "ext-json": "*",
-        "league/uri-interfaces": "2.x-dev",
+        "league/uri-interfaces": "^2.3",
         "psr/http-message": "^1.0"
     },
     "require-dev": {
