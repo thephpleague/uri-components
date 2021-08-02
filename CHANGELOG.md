@@ -2,15 +2,16 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next - TBD
+## 2.4.0 - 2021-08-02
 
 ### Added
 
 - `Component::toString`
+- `IDNA` conversion in now normalize using the `Uri-Interface` package classes
 
 ### Fixed
 
-- None
+- conversion host component from ASCII to unicode no longer throw
 
 ### Deprecated
 

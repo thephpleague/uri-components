@@ -163,6 +163,10 @@ final class QueryString
         return $query;
     }
 
+    /**
+     * @param  non-empty-string   $separator
+     * @return array<string|null>
+     */
     private static function getPairs(string $query, string $separator): array
     {
         if (false === strpos($query, $separator)) {
@@ -339,6 +343,10 @@ final class QueryString
      */
     public static function extract($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
     {
+        if ('' === $separator) {
+            throw new SyntaxError('The separator character can not be the empty string.');
+        }
+
         $query = self::prepareQuery($query, $enc_type);
         if (null === $query || '' === $query) {
             return [];
