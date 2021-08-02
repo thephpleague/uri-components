@@ -35,11 +35,11 @@
         "friendsofphp/php-cs-fixer": "^2.19",
         "guzzlehttp/psr7": "^1.4.2",
         "league/uri": "^6.0",
-        "phpstan/phpstan": "^0.12.90",
-        "phpstan/phpstan-phpunit": "^0.12.20",
-        "phpstan/phpstan-strict-rules": "^0.12.9",
-        "phpunit/phpunit": "^9.0",
-        "laminas/laminas-diactoros": "^2.0"
+        "phpstan/phpstan": "^0.12.94",
+        "phpstan/phpstan-phpunit": "^0.12.21",
+        "phpstan/phpstan-strict-rules": "^0.12.10",
+        "phpunit/phpunit": "^9.5.8",
+        "laminas/laminas-diactoros": "^2.6.0"
     },
     "suggest": {
         "ext-intl": "to handle IDN host",
