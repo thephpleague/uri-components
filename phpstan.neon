@@ -3,12 +3,15 @@ includes:
     - vendor/phpstan/phpstan-phpunit/extension.neon
     - vendor/phpstan/phpstan-phpunit/rules.neon
 parameters:
+    treatPhpDocTypesAsCertain: false
     checkMissingIterableValueType: false
     ignoreErrors:
-        - '#Method League\\Uri\\UriModifier::[A-Za-z0-9]+\(\) has parameter \$(uri|query|label|host|path|segment|extension|dirname|basename|parameters) with no typehint specified.#'
         - '#Parameter \#1 \$content of method League\\Uri\\Components\\UserInfo::withContent\(\) expects string\|null, DateTime\|false given\.#'
         - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::appendTo\(\) expects string\|null, int given\.#'
         - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::withPair\(\) expects string\|null, int given\.#'
         - '#Parameter \#1 \$pairs of static method League\\Uri\\QueryString::build\(\) expects .*#'
         - '#Parameter \#1 \$pairs of static method League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable.*#'
+        - '#Cannot cast mixed to string.#'
+        - '#function gmp_(.*)? expects (GMP|int)#'
+        - '#Strict comparison using === between array\{\} and array<int\|string, (int|string)> will always evaluate to false.#'
     reportUnmatchedIgnoredErrors: true
