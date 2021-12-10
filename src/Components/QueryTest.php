@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 
 use ArrayIterator;
 use DateInterval;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -31,10 +32,7 @@ use function var_export;
  */
 final class QueryTest extends TestCase
 {
-    /**
-     * @var Query
-     */
-    protected $query;
+    protected Query $query;
 
     protected function setUp(): void
     {
@@ -228,9 +226,9 @@ final class QueryTest extends TestCase
      * @covers ::getContent
      * @covers ::filterEmptyValue
      *
-     * @param ?string    $query
-     * @param mixed|null $append_data
-     * @param ?string    $expected
+     * @param ?string                           $query
+     * @param object|string|int|float|bool|null $append_data
+     * @param ?string                           $expected
      */
     public function testAppend(?string $query, $append_data, ?string $expected): void
     {
@@ -315,7 +313,9 @@ final class QueryTest extends TestCase
     public function testParams(): void
     {
         $query = Query::createFromRFC3986('foo[]=bar&foo[]=baz');
-        self::assertCount(1, $query->params());
+        /** @var array $params */
+        $params = $query->params();
+        self::assertCount(1, $params);
         self::assertSame(['bar', 'baz'], $query->params('foo'));
         self::assertNull($query->params('foo[]'));
     }
@@ -480,15 +480,6 @@ final class QueryTest extends TestCase
     {
         $query = Query::createFromRFC3986('a=1&b=2');
         self::assertEquals($query->getContent(), Query::createFromParams($query)->getContent());
-    }
-
-    /**
-     * @covers ::createFromParams
-     */
-    public function testCreateFromParamsThrowsException(): void
-    {
-        $this->expectException(TypeError::class);
-        Query::createFromParams('foo=bar');
     }
 
     /**
@@ -717,7 +708,7 @@ final class QueryTest extends TestCase
      * @covers ::addPair
      * @covers ::filterPair
      *
-     * @param mixed|null $dest
+     * @param UriComponentInterface|object|float|int|string|bool|null $dest
      */
     public function testMergeBasic(string $src, $dest, string $expected): void
     {

@@ -14,6 +14,7 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -42,10 +43,10 @@ final class UserInfoTest extends TestCase
      * @covers ::encodeComponent
      * @covers ::getUriComponent
      *
-     * @param mixed|null $user
-     * @param mixed|null $pass
-     * @param ?string    $expected_user
-     * @param ?string    $expected_pass
+     * @param object|float|int|string|bool|null $user
+     * @param object|float|int|string|bool|null $pass
+     * @param ?string                           $expected_user
+     * @param ?string                           $expected_pass
      */
     public function testConstructor(
         $user,
@@ -158,10 +159,10 @@ final class UserInfoTest extends TestCase
      * @covers ::decode
      * @covers ::decodeMatches
      *
-     * @param mixed|null $str
-     * @param ?string    $expected_user
-     * @param ?string    $expected_pass
-     * @param ?string    $user
+     * @param UriComponentInterface|string|null $str
+     * @param ?string                           $user
+     * @param ?string                           $expected_user
+     * @param ?string                           $expected_pass
      */
     public function testWithContent(
         ?string $user,

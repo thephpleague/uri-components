@@ -35,21 +35,14 @@ final class UserInfo extends Component implements UserInfoInterface
 
     private const REGEXP_ENCODED_CHAR = ',%[A-Fa-f0-9]{2},';
 
-    /**
-     * @var string|null
-     */
-    private $user;
-
-    /**
-     * @var string|null
-     */
-    private $pass;
+    private ?string $user;
+    private ?string $pass;
 
     /**
      * New instance.
      *
-     * @param mixed|null $user
-     * @param mixed|null $pass
+     * @param object|float|int|string|bool|null $user
+     * @param object|float|int|string|bool|null $pass
      */
     public function __construct($user = null, $pass = null)
     {

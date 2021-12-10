@@ -35,27 +35,16 @@ final class Authority extends Component implements AuthorityInterface
 {
     private const REGEXP_HOST_PORT = ',^(?<host>\[.*\]|[^:]*)(:(?<port>.*))?$,';
 
-    /**
-     * @var UserInfo
-     */
-    private $userInfo;
-
-    /**
-     * @var HostInterface
-     */
-    private $host;
-
-    /**
-     * @var Port
-     */
-    private $port;
+    private UserInfo $userInfo;
+    private HostInterface $host;
+    private Port $port;
 
     /**
      * @deprecated since version 2.3.0 use a more appropriate named constructor.
      *
      * New instance.
      *
-     * @param mixed|null $authority
+     * @param object|float|int|string|bool|null $authority
      *
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
@@ -169,7 +158,7 @@ final class Authority extends Component implements AuthorityInterface
         }
 
         if (!is_string($authority)) {
-            throw new \TypeError(sprintf('The authority must be a string or a stringable object value, `%s` given', gettype($authority)));
+            throw new TypeError(sprintf('The authority must be a string or a stringable object value, `%s` given', gettype($authority)));
         }
 
         return new self($authority);
@@ -259,7 +248,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param mixed|null $content
+     * @param UriComponentInterface|object|float|int|string|bool|null $content
      */
     public function withContent($content): UriComponentInterface
     {
@@ -272,7 +261,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param mixed|null $host
+     * @param UriComponentInterface|object|float|int|string|bool|null $host
      */
     public function withHost($host): AuthorityInterface
     {
@@ -292,7 +281,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param mixed|null $port
+     * @param UriComponentInterface|object|float|int|string|bool|null $port
      */
     public function withPort($port): AuthorityInterface
     {
@@ -312,8 +301,8 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param mixed|null $user
-     * @param mixed|null $pass
+     * @param object|float|int|string|bool|null $user
+     * @param object|float|int|string|bool|null $pass
      */
     public function withUserInfo($user, $pass = null): AuthorityInterface
     {

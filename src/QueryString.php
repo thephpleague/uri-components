@@ -89,7 +89,7 @@ final class QueryString
     /**
      * Parses a query string into a collection of key/value pairs.
      *
-     * @param mixed|null $query
+     * @param object|float|int|string|bool|null $query
      *
      * @throws SyntaxError
      *
@@ -123,7 +123,7 @@ final class QueryString
     /**
      * Prepare and normalize query before processing.
      *
-     * @param mixed|null $query
+     * @param object|float|int|string|bool|null $query
      *
      * @throws SyntaxError If the encoding type is invalid
      * @throws SyntaxError If the query string is invalid
@@ -339,7 +339,7 @@ final class QueryString
      * @see http://php.net/parse_str
      * @see https://wiki.php.net/rfc/on_demand_name_mangling
      *
-     * @param mixed|null $query
+     * @param object|float|int|string|bool|null $query
      */
     public static function extract($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
     {

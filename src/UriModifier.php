@@ -23,6 +23,7 @@ use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
 use League\Uri\Contracts\PathInterface;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -39,7 +40,8 @@ final class UriModifier
     /**
      * Add the new query data to the existing URI query.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface     $uri
+     * @param bool|float|int|object|string|null $query
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -53,7 +55,8 @@ final class UriModifier
     /**
      * Merge a new query with the existing URI query.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                           $uri
+     * @param UriComponentInterface|object|float|int|string|bool|null $query
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -68,7 +71,7 @@ final class UriModifier
      * Remove query data according to their key name.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param string...                     $keys
+     * @param string                        ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -100,7 +103,7 @@ final class UriModifier
      * Remove query data according to their key name.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param string...                     $keys
+     * @param string                        ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -147,6 +150,7 @@ final class UriModifier
      * Append a label or a host to the current URI host.
      *
      * @param Psr7UriInterface|UriInterface $uri
+     * @param object|string|null            $label
      *
      * @throws SyntaxError If the host can not be appended
      *
@@ -205,6 +209,7 @@ final class UriModifier
      * Prepend a label or a host to the current URI host.
      *
      * @param Psr7UriInterface|UriInterface $uri
+     * @param object|string|null            $label
      *
      * @throws SyntaxError If the host can not be prepended
      *
@@ -235,7 +240,7 @@ final class UriModifier
      * Remove host labels according to their offset.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param int...                        $keys
+     * @param int                           ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -277,7 +282,8 @@ final class UriModifier
     /**
      * Replace a label of the current URI host.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                           $uri
+     * @param UriComponentInterface|object|float|int|string|bool|null $label
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -296,6 +302,7 @@ final class UriModifier
      * Add a new basepath to the URI path.
      *
      * @param Psr7UriInterface|UriInterface $uri
+     * @param object|string                 $path
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -307,6 +314,10 @@ final class UriModifier
         /** @var HierarchicalPath $currentPath */
         $currentPath = HierarchicalPath::createFromUri($uri)->withLeadingSlash();
 
+        /**
+         * @var int    $offset
+         * @var string $segment
+         */
         foreach ($path as $offset => $segment) {
             if ($currentPath->get($offset) !== $segment) {
                 return $uri->withPath($path->append($currentPath)->__toString());
@@ -343,7 +354,8 @@ final class UriModifier
     /**
      * Append an new segment or a new path to the URI path.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                      $uri
+     * @param UriComponentInterface|object|float|int|string|bool $segment
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -379,7 +391,8 @@ final class UriModifier
     /**
      * Prepend an new segment or a new path to the URI path.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                      $uri
+     * @param UriComponentInterface|object|float|int|string|bool $segment
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -391,7 +404,8 @@ final class UriModifier
     /**
      * Remove a basepath from the URI path.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                      $uri
+     * @param UriComponentInterface|object|float|int|string|bool $path
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -404,6 +418,10 @@ final class UriModifier
             return $uri;
         }
 
+        /**
+         * @var int    $offset
+         * @var string $segment
+         */
         foreach ($basePath as $offset => $segment) {
             if ($segment !== $currentPath->get($offset)) {
                 return $uri;
@@ -469,7 +487,7 @@ final class UriModifier
      * Remove path segments from the URI path according to their offsets.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param int...                        $keys
+     * @param int                           ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -483,21 +501,21 @@ final class UriModifier
     /**
      * Replace the URI path basename.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                           $uri
+     * @param UriComponentInterface|object|float|bool|int|null|string $basename
      *
      * @return Psr7UriInterface|UriInterface
      */
     public static function replaceBasename($uri, $basename)
     {
-        $path = HierarchicalPath::createFromUri($uri)->withBasename($basename)->__toString();
-
-        return $uri->withPath($path);
+        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withBasename($basename));
     }
 
     /**
      * Replace the data URI path parameters.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                      $uri
+     * @param UriComponentInterface|object|float|int|string|bool $parameters
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -511,21 +529,21 @@ final class UriModifier
     /**
      * Replace the URI path dirname.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                      $uri
+     * @param UriComponentInterface|object|float|int|string|bool $dirname
      *
      * @return Psr7UriInterface|UriInterface
      */
     public static function replaceDirname($uri, $dirname)
     {
-        $path = HierarchicalPath::createFromUri($uri)->withDirname($dirname)->__toString();
-
-        return $uri->withPath($path);
+        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withDirname($dirname));
     }
 
     /**
      * Replace the URI path basename extension.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                           $uri
+     * @param UriComponentInterface|object|float|bool|int|null|string $extension
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -539,7 +557,8 @@ final class UriModifier
     /**
      * Replace a segment from the URI path according its offset.
      *
-     * @param Psr7UriInterface|UriInterface $uri
+     * @param Psr7UriInterface|UriInterface                      $uri
+     * @param UriComponentInterface|object|float|int|string|bool $segment
      *
      * @return Psr7UriInterface|UriInterface
      */

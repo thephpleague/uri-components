@@ -15,13 +15,14 @@
 namespace League\Uri\Components;
 
 use ArrayIterator;
+use GuzzleHttp\Psr7\Utils;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use TypeError;
-use Zend\Diactoros\Uri as ZendPsr7Uri;
 use function date_create;
 use function iterator_to_array;
 use function var_export;
@@ -296,13 +297,6 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    public function testPrependThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        HierarchicalPath::createFromString('')->prepend(null);
-    }
-
     /**
      * @dataProvider appendData
      *
@@ -326,13 +320,6 @@ final class HierarchicalPathTest extends TestCase
             ['test',   '/',        'test/'],
             ['/',      'test',     '/test'],
         ];
-    }
-
-    public function testAppendThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        HierarchicalPath::createFromString('')->append(null);
     }
 
     /**
@@ -840,10 +827,10 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testCreateFromUriWithPSR7Implementation(): void
     {
-        $uri = (new ZendPsr7Uri('http://example.com'))
-            ->withPath('path');
+        $uri = Utils::uriFor('http://example.com')
+            ->withPath('/path');
 
-        self::assertSame('path', $uri->getPath());
+        self::assertSame('/path', $uri->getPath());
         self::assertSame('/path', HierarchicalPath::createFromUri($uri)->__toString());
     }
 
@@ -858,7 +845,7 @@ final class HierarchicalPathTest extends TestCase
     {
         $this->expectException(TypeError::class);
 
-        HierarchicalPath::createFromString(new \stdClass());
+        HierarchicalPath::createFromString(new stdClass());
     }
 
     /**
