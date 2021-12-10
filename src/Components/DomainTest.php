@@ -22,6 +22,7 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
+use stdClass;
 use TypeError;
 use function date_create;
 use function var_export;
@@ -622,7 +623,7 @@ final class DomainTest extends TestCase
     {
         $this->expectException(TypeError::class);
 
-        Domain::createFromString(new \stdClass());
+        Domain::createFromString(new stdClass());
     }
 
     public function testSlice(): void

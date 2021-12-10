@@ -14,6 +14,8 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -55,9 +57,9 @@ final class PortTest extends TestCase
      * @covers ::getUriComponent
      * @covers ::validate
      *
-     * @param mixed|null $input
-     * @param ?int       $expected
-     * @param ?string    $string_expected
+     * @param UriComponentInterface|object|float|int|string|bool|null $input
+     * @param ?int                                                    $expected
+     * @param ?string                                                 $string_expected
      */
     public function testToInt(
         $input,
@@ -112,8 +114,8 @@ final class PortTest extends TestCase
      * @dataProvider getURIProvider
      * @covers ::createFromUri
      *
-     * @param mixed   $uri      an URI object
-     * @param ?string $expected
+     * @param UriInterface|\Psr\Http\Message\UriInterface $uri      an URI object
+     * @param ?string                                     $expected
      */
     public function testCreateFromUri($uri, ?string $expected): void
     {

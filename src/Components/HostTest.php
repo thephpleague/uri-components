@@ -14,6 +14,7 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -65,9 +66,9 @@ final class HostTest extends TestCase
      * @covers ::toAscii
      * @covers ::toUnicode
      *
-     * @param mixed|null $host
-     * @param string     $uri
-     * @param string     $iri
+     * @param UriComponentInterface|object|float|int|string|bool|null $host
+     * @param ?string                                                 $uri
+     * @param ?string                                                 $iri
      */
     public function testValidHost($host, ?string $uri, ?string $iri): void
     {

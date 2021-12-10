@@ -157,7 +157,7 @@ final class PathModifierTest extends TestCase
      */
     public function testBasename(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) UriModifier::replaceBasename(Psr7\uri_for($uri), $path));
+        self::assertSame($expected, (string) UriModifier::replaceBasename(Psr7\Utils::uriFor($uri), $path));
     }
 
     public function validBasenameProvider(): array
@@ -177,7 +177,7 @@ final class PathModifierTest extends TestCase
     public function testBasenameThrowException(): void
     {
         $this->expectException(SyntaxError::class);
-        UriModifier::replaceBasename(Psr7\uri_for('http://example.com'), 'foo/baz');
+        UriModifier::replaceBasename(Psr7\Utils::uriFor('http://example.com'), 'foo/baz');
     }
 
     /**
@@ -188,7 +188,7 @@ final class PathModifierTest extends TestCase
      */
     public function testDirname(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) UriModifier::replaceDirname(Psr7\uri_for($uri), $path));
+        self::assertSame($expected, (string) UriModifier::replaceDirname(Psr7\Utils::uriFor($uri), $path));
     }
 
     public function validDirnameProvider(): array

@@ -105,35 +105,18 @@ final class Host extends Component implements IpHostInterface
             (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
         )+
     $/ix';
-
     private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
-
     private const ADDRESS_BLOCK = "\xfe\x80";
 
-    /**
-     * @var string|null
-     */
-    private $host;
-
-    /**
-     * @var string|null
-     */
-    private $ip_version;
-
-    /**
-     * @var bool
-     */
-    private $has_zone_identifier = false;
-
-    /**
-     * @var bool
-     */
-    private $is_domain = false;
+    private ?string $host;
+    private ?string $ip_version = null;
+    private bool $has_zone_identifier = false;
+    private bool $is_domain = false;
 
     /**
      * New instance.
      *
-     * @param mixed|null $host
+     * @param UriComponentInterface|object|float|int|string|bool|null $host
      */
     public function __construct($host = null)
     {
@@ -254,7 +237,7 @@ final class Host extends Component implements IpHostInterface
         }
 
         if (!is_string($host)) {
-            throw new \TypeError(sprintf('The host must be a string or a stringable object value, `%s` given', gettype($host)));
+            throw new TypeError(sprintf('The host must be a string or a stringable object value, `%s` given', gettype($host)));
         }
 
         return new self($host);

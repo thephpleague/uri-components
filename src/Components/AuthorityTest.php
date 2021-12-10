@@ -18,6 +18,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use TypeError;
 use function date_create;
 use function parse_url;
@@ -373,6 +374,6 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(TypeError::class);
 
-        Authority::createFromString(new \stdClass());
+        Authority::createFromString(new stdClass());
     }
 }

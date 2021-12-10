@@ -30,15 +30,12 @@ final class Fragment extends Component implements FragmentInterface
         %(?![A-Fa-f0-9]{2}))
     /x';
 
-    /**
-     * @var string|null
-     */
-    private $fragment;
+    private ?string $fragment;
 
     /**
      * New instance.
      *
-     * @param mixed|null $fragment
+     * @param object|float|int|string|bool|null $fragment
      */
     public function __construct($fragment = null)
     {

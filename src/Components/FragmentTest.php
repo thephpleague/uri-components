@@ -76,8 +76,8 @@ final class FragmentTest extends TestCase
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      *
-     * @param null|mixed $str
-     * @param ?string    $expected
+     * @param object|float|int|string|bool|null $str
+     * @param ?string                           $expected
      */
     public function testGetValue($str, ?string $expected): void
     {
