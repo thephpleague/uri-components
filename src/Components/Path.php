@@ -45,10 +45,17 @@ final class Path extends Component implements PathInterface
         %(?![A-Fa-f0-9]{2}))
     /x';
 
+    private string $path;
+
     /**
-     * @var string
+     * New instance.
+     *
+     * @param object|float|int|string|bool|null $path
      */
-    private $path;
+    public function __construct($path = '')
+    {
+        $this->path = $this->validate($path);
+    }
 
     /**
      * {@inheritDoc}
@@ -59,19 +66,9 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * New instance.
-     *
-     * @param mixed|string $path
-     */
-    public function __construct($path = '')
-    {
-        $this->path = $this->validate($path);
-    }
-
-    /**
      * Validate the component content.
      *
-     * @param mixed $path the path content
+     * @param object|float|int|string|bool|null $path the path content
      *
      * @throws TypeError if the component is no valid
      */
@@ -97,7 +94,7 @@ final class Path extends Component implements PathInterface
         }
 
         if (!is_string($path)) {
-            throw new \TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
+            throw new TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
         }
 
         return new self($path);

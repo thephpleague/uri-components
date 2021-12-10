@@ -18,6 +18,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use TypeError;
 use function date_create;
 use function var_export;
@@ -120,7 +121,7 @@ final class PathTest extends TestCase
     /**
      * @dataProvider invalidPath
      *
-     * @param mixed|null $path
+     * @param object|float|int|string|bool|null $path
      */
     public function testConstructorThrowsWithInvalidData($path): void
     {
@@ -322,6 +323,6 @@ final class PathTest extends TestCase
     {
         $this->expectException(TypeError::class);
 
-        Path::createFromString(new \stdClass());
+        Path::createFromString(new stdClass());
     }
 }

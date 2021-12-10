@@ -14,6 +14,7 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 
@@ -41,9 +42,9 @@ final class IpAddressTest extends TestCase
      *
      * @dataProvider validIpAddressProvider
      *
-     * @param mixed|null $host
-     * @param string     $ip
-     * @param ?string    $ipVersion
+     * @param UriComponentInterface|object|float|int|string|bool|null $host
+     * @param ?string                                                 $ipVersion
+     * @param ?string                                                 $ip
      *
      * @covers ::__construct
      * @covers ::isValidIpv6Hostname

@@ -18,6 +18,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use TypeError;
 use function base64_encode;
 use function dirname;
@@ -31,8 +32,7 @@ use function var_export;
  */
 final class DataPathTest extends TestCase
 {
-    /** @var string */
-    private $rootPath;
+    private string $rootPath;
 
     public function setUp(): void
     {
@@ -550,6 +550,6 @@ final class DataPathTest extends TestCase
     {
         $this->expectException(TypeError::class);
 
-        DataPath::createFromString(new \stdClass());
+        DataPath::createFromString(new stdClass());
     }
 }

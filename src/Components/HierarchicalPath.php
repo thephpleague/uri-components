@@ -50,15 +50,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 {
     private const SEPARATOR = '/';
 
-    /**
-     * @var PathInterface
-     */
-    private $path;
-
-    /**
-     * @var string[]
-     */
-    private $segments;
+    private PathInterface $path;
+    /** @var string[] */
+    private array $segments;
 
     /**
      * @deprecated 2.3.0
@@ -68,7 +62,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * New instance.
      *
-     * @param mixed|string $path
+     * @param object|float|int|string|bool|null $path
      */
     public function __construct($path = '')
     {
@@ -365,7 +359,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param mixed|string $segment
+     * @param object|float|int|string|bool|null $segment
      */
     public function append($segment): SegmentedPathInterface
     {
@@ -382,7 +376,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param mixed|string $segment
+     * @param object|float|int|string|bool|null $segment
      */
     public function prepend($segment): SegmentedPathInterface
     {
@@ -399,7 +393,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param mixed|string $segment
+     * @param object|float|int|string|bool|null $segment
      */
     public function withSegment(int $key, $segment): SegmentedPathInterface
     {
@@ -484,7 +478,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param mixed|string $path
+     * @param object|float|int|string|bool|null $path
      */
     public function withDirname($path): SegmentedPathInterface
     {
@@ -504,7 +498,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param UriComponentInterface|object|float|bool|int|null|string $basename
      */
     public function withBasename($basename): SegmentedPathInterface
     {
@@ -521,7 +515,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param UriComponentInterface|object|float|bool|int|null|string $extension
      */
     public function withExtension($extension): SegmentedPathInterface
     {

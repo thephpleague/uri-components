@@ -29,15 +29,12 @@ use const FILTER_VALIDATE_INT;
 
 final class Port extends Component implements PortInterface
 {
-    /**
-     * @var int|null
-     */
-    private $port;
+    private ?int $port;
 
     /**
      * New instance.
      *
-     * @param mixed|null $port
+     * @param UriComponentInterface|object|float|int|string|bool|null $port
      */
     public function __construct($port = null)
     {
@@ -59,7 +56,7 @@ final class Port extends Component implements PortInterface
     /**
      * Validate a port.
      *
-     * @param mixed|null $port
+     * @param UriComponentInterface|object|float|int|string|bool|null $port
      *
      * @throws SyntaxError if the port is invalid
      */

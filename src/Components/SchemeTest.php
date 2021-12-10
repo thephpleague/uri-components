@@ -14,6 +14,7 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
@@ -72,7 +73,7 @@ final class SchemeTest extends TestCase
      * @covers ::__toString
      * @covers ::getUriComponent
      *
-     * @param null|mixed $scheme
+     * @param UriComponentInterface|object|float|int|string|bool|null $scheme
      *
      */
     public function testValidScheme($scheme, string $toString, string $uriComponent): void

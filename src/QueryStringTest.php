@@ -17,7 +17,6 @@ namespace League\Uri;
 use ArrayIterator;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 use function date_create;
 use const PHP_QUERY_RFC1738;
 use const PHP_QUERY_RFC3986;
@@ -54,16 +53,10 @@ final class QueryStringTest extends TestCase
         QueryString::build([['foo', 'boo' => 'bar']]);
     }
 
-    public function testWrongTypeThrowExceptionParseQuery(): void
-    {
-        $this->expectException(TypeError::class);
-        QueryString::parse(['foo=bar'], '&', PHP_QUERY_RFC1738);
-    }
-
     /**
      * @dataProvider extractQueryProvider
      *
-     * @param bool|string $query
+     * @param object|string|float|int|null|bool $query
      */
     public function testExtractQuery($query, array $expectedData): void
     {
@@ -154,7 +147,7 @@ final class QueryStringTest extends TestCase
     /**
      * @dataProvider parserProvider
      *
-     * @param mixed $query scalar or stringable object
+     * @param object|string|float|int|null|bool $query
      */
     public function testParse($query, string $separator, array $expected, int $encoding): void
     {

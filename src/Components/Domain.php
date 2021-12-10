@@ -39,20 +39,14 @@ final class Domain extends Component implements DomainHostInterface
 {
     private const SEPARATOR = '.';
 
-    /**
-     * @var HostInterface
-     */
-    private $host;
-
-    /**
-     * @var string[]
-     */
-    private $labels;
+    private HostInterface $host;
+    /** @var string[] */
+    private array $labels;
 
     /**
      * @deprecated 2.3.0 use the appropriate named constructor
      *
-     * @param mixed $host a Domain name can not be null
+     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $host a Domain name can not be null
      *
      * @throws SyntaxError
      */
@@ -271,7 +265,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param mixed|null $label
+     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $label
      */
     public function prepend($label): DomainHostInterface
     {
@@ -284,7 +278,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param mixed|null $label
+     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $label
      */
     public function append($label): DomainHostInterface
     {
@@ -337,7 +331,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param mixed|null $label
+     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $label
      *
      * @throws OffsetOutOfBounds
      */
