@@ -66,7 +66,7 @@ final class PathModifierTest extends TestCase
         $rootPath = dirname(__DIR__).'/test_data';
 
         $textPath = new DataPath('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-        $binPath = DataPath::createFromPath($rootPath.'/red-nose.gif');
+        $binPath = DataPath::createFromFilePath($rootPath.'/red-nose.gif');
 
         $ascii = Uri::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $binary = Uri::createFromString('data:'.$textPath->toBinary());

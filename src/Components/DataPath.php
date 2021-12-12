@@ -207,7 +207,7 @@ final class DataPath extends Component implements DataPathInterface
 
     /**
      * @deprecated 2.3.0
-     *
+     * @codeCoverageIgnore
      * @see ::createFromFilePath
      *
      * Creates a new instance from a file path.
