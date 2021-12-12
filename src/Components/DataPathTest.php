@@ -104,14 +104,12 @@ final class DataPathTest extends TestCase
      * @dataProvider invalidDataUriPath
      *
      * @covers ::createFromFilePath
-     * @covers ::createFromPath
-     *
      */
     public function testCreateFromPathFailed(string $path): void
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::createFromPath($path);
+        DataPath::createFromFilePath($path);
     }
 
     /**
@@ -197,7 +195,6 @@ final class DataPathTest extends TestCase
      * @dataProvider validFilePath
      *
      * @covers ::createFromFilePath
-     * @covers ::createFromPath
      * @covers ::filterPath
      * @covers ::formatComponent
      * @covers ::getMimeType
@@ -209,7 +206,7 @@ final class DataPathTest extends TestCase
      */
     public function testCreateFromPath(string $path, string $mimetype, string $mediatype): void
     {
-        $uri = DataPath::createFromPath($path);
+        $uri = DataPath::createFromFilePath($path);
 
         self::assertSame($mimetype, $uri->getMimeType());
         self::assertSame($mediatype, $uri->getMediaType());
@@ -253,7 +250,7 @@ final class DataPathTest extends TestCase
     public function testWithParametersOnBinaryData(): void
     {
         $expected = 'charset=binary;foo=bar';
-        $uri = DataPath::createFromPath($this->rootPath.'/red-nose.gif');
+        $uri = DataPath::createFromFilePath($this->rootPath.'/red-nose.gif');
         $newUri = $uri->withParameters($expected);
 
         self::assertSame($expected, $newUri->getParameters());
@@ -274,7 +271,7 @@ final class DataPathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::createFromPath($path)->withParameters($parameters);
+        DataPath::createFromFilePath($path)->withParameters($parameters);
     }
 
     public function invalidParametersString(): array
@@ -327,7 +324,7 @@ final class DataPathTest extends TestCase
         $rootPath = dirname(__DIR__, 2).'/test_data';
 
         return [
-            'with a file' => [DataPath::createFromPath($rootPath.'/red-nose.gif')],
+            'with a file' => [DataPath::createFromFilePath($rootPath.'/red-nose.gif')],
             'with a text' => [DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21')],
         ];
     }
@@ -360,10 +357,10 @@ final class DataPathTest extends TestCase
     public function testBinarySave(): void
     {
         $newFilePath = $this->rootPath.'/temp.gif';
-        $uri = DataPath::createFromPath($this->rootPath.'/red-nose.gif');
+        $uri = DataPath::createFromFilePath($this->rootPath.'/red-nose.gif');
         $res = $uri->save($newFilePath);
 
-        self::assertSame((string) $uri, (string) DataPath::createFromPath($newFilePath));
+        self::assertSame((string) $uri, (string) DataPath::createFromFilePath($newFilePath));
 
         // Ensure file handle of \SplFileObject gets closed.
         unset($res);
@@ -372,7 +369,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @covers ::createFromFilePath
-     * @covers ::createFromPath
      * @covers ::save
      * @covers ::getData
      */
@@ -386,10 +382,10 @@ final class DataPathTest extends TestCase
         ]);
 
         $newFilePath = $this->rootPath.'/temp.txt';
-        $uri = DataPath::createFromPath($this->rootPath.'/hello-world.txt', $context);
+        $uri = DataPath::createFromFilePath($this->rootPath.'/hello-world.txt', $context);
 
         $res = $uri->save($newFilePath);
-        self::assertSame((string) $uri, (string) DataPath::createFromPath($newFilePath));
+        self::assertSame((string) $uri, (string) DataPath::createFromFilePath($newFilePath));
         $data = file_get_contents($newFilePath);
         self::assertSame(base64_encode((string) $data), $uri->getData());
 
