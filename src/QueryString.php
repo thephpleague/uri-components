@@ -205,6 +205,22 @@ final class QueryString
     }
 
     /**
+     * @param int|string|float|null $name
+     */
+    public static function formatStringValue(string $value, $name): string
+    {
+        if (1 === preg_match('/[\x00-\x1f\x7f]/', $value)) {
+            return $name.'='.rawurlencode($value);
+        }
+
+        if (1 !== preg_match(self::$regexpValue, $value)) {
+            return $name.'='.$value;
+        }
+
+        return $name.'='.preg_replace_callback(self::$regexpValue, [self::class, 'encodeMatches'], $value);
+    }
+
+    /**
      * Decodes a match string.
      */
     private static function decodeMatch(array $matches): string
@@ -295,11 +311,7 @@ final class QueryString
         }
 
         if (is_string($value)) {
-            if (1 !== preg_match(self::$regexpValue, $value)) {
-                return $name.'='.$value;
-            }
-
-            return $name.'='.preg_replace_callback(self::$regexpValue, [self::class, 'encodeMatches'], $value);
+            return self::formatStringValue($value, $name);
         }
 
         if (is_numeric($value)) {
