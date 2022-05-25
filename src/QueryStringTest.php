@@ -50,7 +50,7 @@ final class QueryStringTest extends TestCase
     public function testBuildThrowsExceptionWithQueryBuilder(): void
     {
         $this->expectException(SyntaxError::class);
-        QueryString::build([['foo', 'boo' => 'bar']]);
+        QueryString::build([['foo', 'boo' => 'bar']]); /* @phpstan-ignore-line */
     }
 
     /**

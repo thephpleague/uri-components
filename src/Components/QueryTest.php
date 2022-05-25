@@ -766,7 +766,7 @@ final class QueryTest extends TestCase
         $query = $query->withPair('first', 4);
         self::assertSame('1', $query->get('a'));
 
-        $query = $query->withPair('a', 4);
+        $query = $query->withPair('a', 4); /* @phpstan-ignore-line */
         self::assertSame('4', $query->get('a'));
 
         $query = $query->withPair('q', $query);

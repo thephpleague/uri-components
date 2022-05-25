@@ -248,7 +248,7 @@ final class UserInfoTest extends TestCase
     public function testWithContentThrowsInvalidUriComponentException(): void
     {
         $this->expectException(TypeError::class);
-        (new UserInfo())->withContent(date_create());
+        (new UserInfo())->withContent(date_create()); /* @phpstan-ignore-line */
     }
 
     public function testConstructorThrowsTypeError(): void

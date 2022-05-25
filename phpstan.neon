@@ -7,11 +7,13 @@ parameters:
     treatPhpDocTypesAsCertain: false
     checkMissingIterableValueType: false
     ignoreErrors:
-        - '#Parameter \#1 \$content of method League\\Uri\\Components\\UserInfo::withContent\(\) expects string\|null, DateTime\|false given\.#'
-        - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::appendTo\(\) expects string\|null, int given\.#'
-        - '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::withPair\(\) expects string\|null, int given\.#'
-        - '#Parameter \#1 \$pairs of static method League\\Uri\\QueryString::build\(\) expects .*#'
+        - message: '#Parameter \#2 \$value of method League\\Uri\\Contracts\\QueryInterface::appendTo\(\) expects string\|null, int given\.#'
+          path: src/Components/QueryTest.php
         - '#Parameter \#1 \$pairs of static method League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable.*#'
-        - '#Cannot cast mixed to string.#'
-        - '#function gmp_(.*)? expects (GMP|int)#'
+        - message: '#Cannot cast mixed to string.#'
+          path: src/IPv4Calculators/BCMathCalculator.php
+        - message: '#Cannot cast mixed to string.#'
+          path: src/IPv4Calculators/NativeCalculator.php
+        - message: '#function gmp_(.*)? expects (GMP|int)#'
+          path: src/IPv4Calculators/GMPCalculator.php
     reportUnmatchedIgnoredErrors: true
