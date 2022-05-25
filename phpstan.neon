@@ -14,5 +14,4 @@ parameters:
         - '#Parameter \#1 \$pairs of static method League\\Uri\\Components\\Query::createFromPairs\(\) expects iterable.*#'
         - '#Cannot cast mixed to string.#'
         - '#function gmp_(.*)? expects (GMP|int)#'
-        - '#Strict comparison using === between array\{\} and array<int\|string, (int|string)> will always evaluate to false.#'
     reportUnmatchedIgnoredErrors: true
