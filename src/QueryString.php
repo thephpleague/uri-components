@@ -220,6 +220,20 @@ final class QueryString
         return $name.'='.preg_replace_callback(self::$regexpValue, [self::class, 'encodeMatches'], $value);
     }
 
+    public static function formatStringName(string $name): string
+    {
+        if (1 === preg_match('/[\x00-\x1f\x7f]/', $name)) {
+            return rawurlencode($name);
+        }
+
+        if (1 === preg_match(self::$regexpKey, $name)) {
+            /** @var string $name */
+            $name = preg_replace_callback(self::$regexpKey, [self::class, 'encodeMatches'], $name);
+        }
+
+        return $name;
+    }
+
     /**
      * Decodes a match string.
      */
@@ -306,8 +320,8 @@ final class QueryString
             $name = (int) $name;
         }
 
-        if (is_string($name) && 1 === preg_match(self::$regexpKey, $name)) {
-            $name = preg_replace_callback(self::$regexpKey, [self::class, 'encodeMatches'], $name);
+        if (is_string($name)) {
+            $name = self::formatStringName($name);
         }
 
         if (is_string($value)) {
