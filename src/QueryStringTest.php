@@ -383,6 +383,11 @@ final class QueryStringTest extends TestCase
                 'expected_rfc1738' => 'toto=foo%2Bbar',
                 'expected_rfc3986' => 'toto=foo+bar',
             ],
+            'utf-8 characters' => [
+                'pairs' => [['foo', "\v\xED"]],
+                'expected_rfc1738' => 'foo=%0B%ED',
+                'expected_rfc3986' => 'foo=%0B%ED',
+            ],
             'uri in value' => [
                 'pairs' => [['url', 'https://uri.thephpleague.com/components/2.0/?module=home#what-you-will-be-able-to-do with space']],
                 'expected_rfc1738' => 'url=https%3A%2F%2Furi.thephpleague.com%2Fcomponents%2F2.0%2F%3Fmodule%3Dhome%23what-you-will-be-able-to-do+with+space',
