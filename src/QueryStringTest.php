@@ -50,7 +50,7 @@ final class QueryStringTest extends TestCase
     public function testBuildThrowsExceptionWithQueryBuilder(): void
     {
         $this->expectException(SyntaxError::class);
-        QueryString::build([['foo', 'boo' => 'bar']]);
+        QueryString::build([['foo', 'boo' => 'bar']]); /* @phpstan-ignore-line */
     }
 
     /**
@@ -382,6 +382,11 @@ final class QueryStringTest extends TestCase
                 'pairs' => [['toto', 'foo+bar']],
                 'expected_rfc1738' => 'toto=foo%2Bbar',
                 'expected_rfc3986' => 'toto=foo+bar',
+            ],
+            'utf-8 characters' => [
+                'pairs' => [["\v\xED", "\v\xED"]],
+                'expected_rfc1738' => '%0B%ED=%0B%ED',
+                'expected_rfc3986' => '%0B%ED=%0B%ED',
             ],
             'uri in value' => [
                 'pairs' => [['url', 'https://uri.thephpleague.com/components/2.0/?module=home#what-you-will-be-able-to-do with space']],

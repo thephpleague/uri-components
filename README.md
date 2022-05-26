@@ -12,7 +12,14 @@ This package contains concrete URI components instances represented as immutable
 System Requirements
 -------
 
-You need **PHP >= 7.3** but the latest stable version of PHP is recommended.
+The latest stable version of PHP is recommended.
+
+Please find below the PHP support for `URI` version 2.
+
+| Min. Library Version | Min. PHP Version | Max. Supported PHP Version |
+|----------------------|------------------|----------------------------|
+| 2.4.0                | PHP 7.4          | PHP 8.1.x                  |
+| 2.0.0                | PHP 7.3          | PHP 8.0.x                  |
 
 Dependencies
 -------

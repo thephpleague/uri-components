@@ -15,7 +15,6 @@
 namespace League\Uri;
 
 use GuzzleHttp\Psr7\Uri as GuzzleUri;
-use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 
@@ -182,25 +181,6 @@ final class HostModifierTest extends TestCase
     public function testRemoveLabels(): void
     {
         self::assertSame('example.com', UriModifier::removeLabels($this->uri, 2)->getHost());
-    }
-
-    /**
-     * @dataProvider invalidRemoveLabelsParameters
-     *
-     * @covers ::removeLabels
-     * @covers ::normalizeComponent
-     */
-    public function testRemoveLabelsFailedConstructor(array $params): void
-    {
-        $this->expectException(OffsetOutOfBounds::class);
-        UriModifier::removeLabels($this->uri, ...$params);
-    }
-
-    public function invalidRemoveLabelsParameters(): array
-    {
-        return [
-            'array contains float' => [[1, 2, 3.1]],
-        ];
     }
 
     /**

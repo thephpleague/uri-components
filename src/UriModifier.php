@@ -71,7 +71,6 @@ final class UriModifier
      * Remove query data according to their key name.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param string                        ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -103,7 +102,6 @@ final class UriModifier
      * Remove query data according to their key name.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param string                        ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -240,7 +238,6 @@ final class UriModifier
      * Remove host labels according to their offset.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param int                           ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */
@@ -487,7 +484,6 @@ final class UriModifier
      * Remove path segments from the URI path according to their offsets.
      *
      * @param Psr7UriInterface|UriInterface $uri
-     * @param int                           ...$keys
      *
      * @return Psr7UriInterface|UriInterface
      */

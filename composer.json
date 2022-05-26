@@ -32,15 +32,15 @@
         "psr/http-message": "^1.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^v3.3.2",
-        "guzzlehttp/psr7": "^2.0",
+        "friendsofphp/php-cs-fixer": "^v3.8.0",
+        "guzzlehttp/psr7": "^2.2",
         "league/uri": "^6.0",
-        "phpstan/phpstan": "^1.2",
-        "phpstan/phpstan-phpunit": "^1.0",
-        "phpstan/phpstan-strict-rules": "^1.0",
+        "phpstan/phpstan": "^1.7",
+        "phpstan/phpstan-phpunit": "^1.1",
+        "phpstan/phpstan-strict-rules": "^1.2",
         "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpunit/phpunit": "^9.5.8",
-        "laminas/laminas-diactoros": "^2.6.0"
+        "phpunit/phpunit": "^9.5.20",
+        "laminas/laminas-diactoros": "^2.11.0"
     },
     "suggest": {
         "ext-intl": "to handle IDN host",

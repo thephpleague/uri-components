@@ -62,7 +62,7 @@ final class IPv4HostNormalizerTest extends TestCase
      */
     public function testParseWithNativeCalculator(?string $input, ?string $expected): void
     {
-        if (4 > PHP_INT_SIZE) {
+        if (4 > PHP_INT_SIZE) {  /* @phpstan-ignore-line */
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
