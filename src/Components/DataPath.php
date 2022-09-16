@@ -21,20 +21,18 @@ use League\Uri\Contracts\DataPathInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\FileinfoSupportMissing;
 use League\Uri\Exceptions\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
-use TypeError;
+use Stringable;
 use function base64_decode;
 use function base64_encode;
 use function count;
 use function explode;
 use function file_get_contents;
-use function gettype;
 use function implode;
-use function is_object;
-use function is_scalar;
-use function method_exists;
 use function preg_match;
 use function preg_replace_callback;
 use function rawurldecode;
@@ -47,28 +45,19 @@ use const FILEINFO_MIME;
 
 final class DataPath extends Component implements DataPathInterface
 {
-    private const DEFAULT_MIMETYPE = 'text/plain';
-
-    private const DEFAULT_PARAMETER = 'charset=us-ascii';
-
+    /**
+     * All ASCII letters sorted by typical frequency of occurrence.
+     */
+    private const ASCII = "\x20\x65\x69\x61\x73\x6E\x74\x72\x6F\x6C\x75\x64\x5D\x5B\x63\x6D\x70\x27\x0A\x67\x7C\x68\x76\x2E\x66\x62\x2C\x3A\x3D\x2D\x71\x31\x30\x43\x32\x2A\x79\x78\x29\x28\x4C\x39\x41\x53\x2F\x50\x22\x45\x6A\x4D\x49\x6B\x33\x3E\x35\x54\x3C\x44\x34\x7D\x42\x7B\x38\x46\x77\x52\x36\x37\x55\x47\x4E\x3B\x4A\x7A\x56\x23\x48\x4F\x57\x5F\x26\x21\x4B\x3F\x58\x51\x25\x59\x5C\x09\x5A\x2B\x7E\x5E\x24\x40\x60\x7F\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F";
     private const BINARY_PARAMETER = 'base64';
-
+    private const DEFAULT_MIMETYPE = 'text/plain';
+    private const DEFAULT_PARAMETER = 'charset=us-ascii';
     private const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
-
+    private const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
     private const REGEXP_DATAPATH_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+
         |%(?![A-Fa-f0-9]{2}))
     /x';
-
-    private const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
-
-
-    /**
-     * All ASCII letters sorted by typical frequency of occurrence.
-     *
-     * @var string
-     */
-    private const ASCII = "\x20\x65\x69\x61\x73\x6E\x74\x72\x6F\x6C\x75\x64\x5D\x5B\x63\x6D\x70\x27\x0A\x67\x7C\x68\x76\x2E\x66\x62\x2C\x3A\x3D\x2D\x71\x31\x30\x43\x32\x2A\x79\x78\x29\x28\x4C\x39\x41\x53\x2F\x50\x22\x45\x6A\x4D\x49\x6B\x33\x3E\x35\x54\x3C\x44\x34\x7D\x42\x7B\x38\x46\x77\x52\x36\x37\x55\x47\x4E\x3B\x4A\x7A\x56\x23\x48\x4F\x57\x5F\x26\x21\x4B\x3F\x58\x51\x25\x59\x5C\x09\x5A\x2B\x7E\x5E\x24\x40\x60\x7F\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F";
 
     private Path $path;
     private string $mimetype;
@@ -79,10 +68,8 @@ final class DataPath extends Component implements DataPathInterface
 
     /**
      * New instance.
-     *
-     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $path
      */
-    public function __construct($path = '')
+    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool $path = '')
     {
         $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
         $str = $this->path->__toString();
@@ -98,8 +85,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Filter the data path.
      *
-     * @param ?string $path
-     *
+     * @param  ?string     $path
      * @throws SyntaxError If the path is null
      * @throws SyntaxError If the path is not valid according to RFC2937
      */
@@ -117,7 +103,7 @@ final class DataPath extends Component implements DataPathInterface
             $path = substr($path, 0, -1).'charset=us-ascii,';
         }
 
-        if (strlen($path) !== strspn($path, self::ASCII) || false === strpos($path, ',')) {
+        if (strlen($path) !== strspn($path, self::ASCII) || !str_contains($path, ',')) {
             throw new SyntaxError(sprintf('The path `%s` is invalid according to RFC2937.', $path));
         }
 
@@ -163,7 +149,7 @@ final class DataPath extends Component implements DataPathInterface
         }
 
         $params = array_filter(explode(';', $parameters));
-        if ([] !== array_filter($params, [$this, 'validateParameter'])) {
+        if ([] !== array_filter($params, $this->validateParameter(...))) {
             throw new SyntaxError(sprintf('Invalid mediatype parameters, `%s`.', $parameters));
         }
 
@@ -197,9 +183,6 @@ final class DataPath extends Component implements DataPathInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['path']);
@@ -223,10 +206,8 @@ final class DataPath extends Component implements DataPathInterface
 
     /**
      * Returns a new instance from an string or a stringable object.
-     *
-     * @param string|object $path
      */
-    public static function createFromString($path = ''): self
+    public static function createFromString(Stringable|string $path = ''): self
     {
         return new self(Path::createFromString($path));
     }
@@ -271,99 +252,62 @@ final class DataPath extends Component implements DataPathInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::createFromString(Path::createFromUri($uri)->__toString());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         return $this->path->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return (string) $this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getData(): string
     {
         return $this->document;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isBinaryData(): bool
     {
         return $this->is_binary_data;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getMimeType(): string
     {
         return $this->mimetype;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getParameters(): string
     {
         return implode(';', $this->parameters);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getMediaType(): string
     {
         return $this->getMimeType().';'.$this->getParameters();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isAbsolute(): bool
     {
         return $this->path->isAbsolute();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function hasTrailingSlash(): bool
     {
         return $this->path->hasTrailingSlash();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function decoded(): string
     {
         return $this->path->decoded();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function save(string $path, string $mode = 'w'): SplFileObject
     {
         $file = new SplFileObject($path, $mode);
@@ -373,9 +317,6 @@ final class DataPath extends Component implements DataPathInterface
         return $file;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function toBinary(): DataPathInterface
     {
         if ($this->is_binary_data) {
@@ -409,12 +350,9 @@ final class DataPath extends Component implements DataPathInterface
 
         $path = $mimetype.$parameters.','.$data;
 
-        return preg_replace_callback(self::REGEXP_DATAPATH_ENCODING, [$this, 'encodeMatches'], $path) ?? $path;
+        return preg_replace_callback(self::REGEXP_DATAPATH_ENCODING, $this->encodeMatches(...), $path) ?? $path;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function toAscii(): DataPathInterface
     {
         if (false === $this->is_binary_data) {
@@ -429,33 +367,21 @@ final class DataPath extends Component implements DataPathInterface
         ));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutDotSegments(): PathInterface
     {
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withLeadingSlash(): PathInterface
     {
         return new self($this->path->withLeadingSlash());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutLeadingSlash(): PathInterface
     {
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutTrailingSlash(): PathInterface
     {
         $path = $this->path->withoutTrailingSlash();
@@ -466,9 +392,6 @@ final class DataPath extends Component implements DataPathInterface
         return new self($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withTrailingSlash(): PathInterface
     {
         $path = $this->path->withTrailingSlash();
@@ -479,12 +402,13 @@ final class DataPath extends Component implements DataPathInterface
         return new self($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
+        if (null === $content) {
+            throw new SyntaxError('The path conten can not be null.');
+        }
+
         if ($content === $this->path->getContent()) {
             return $this;
         }
@@ -492,19 +416,8 @@ final class DataPath extends Component implements DataPathInterface
         return new self($content);
     }
 
-    /**
-     * @param mixed|string $parameters
-     */
-    public function withParameters($parameters): DataPathInterface
+    public function withParameters(Stringable|string|float|bool|int $parameters): DataPathInterface
     {
-        if (is_object($parameters) && method_exists($parameters, '__toString')) {
-            $parameters = (string) $parameters;
-        }
-
-        if (!is_scalar($parameters)) {
-            throw new TypeError(sprintf('Expected parameter to be stringable; received %s.', gettype($parameters)));
-        }
-
         $parameters = (string) $parameters;
         if ($parameters === $this->getParameters()) {
             return $this;

@@ -12,4 +12,8 @@
 /phpunit.xml        export-ignore
 /CONDUCT.md         export-ignore
 /README.md          export-ignore
+/phpbench.json      export-ignore
+/phpstan.neon       export-ignore
+/phpunit.xml        export-ignore
+/**/*Bench.php      export-ignore
 /**/*Test.php       export-ignore

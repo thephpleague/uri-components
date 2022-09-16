@@ -22,21 +22,19 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
+use Stringable;
 use function filter_var;
 use function sprintf;
 use const FILTER_VALIDATE_INT;
 
 final class Port extends Component implements PortInterface
 {
-    private ?int $port;
+    private readonly ?int $port;
 
     /**
      * New instance.
-     *
-     * @param UriComponentInterface|object|float|int|string|bool|null $port
      */
-    public function __construct($port = null)
+    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $port = null)
     {
         $this->port = $this->validate($port);
     }
@@ -47,20 +45,15 @@ final class Port extends Component implements PortInterface
             throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s.', $port));
         }
 
-        $instance = new self();
-        $instance->port = $port;
-
-        return $instance;
+        return new self($port);
     }
 
     /**
      * Validate a port.
      *
-     * @param UriComponentInterface|object|float|int|string|bool|null $port
-     *
      * @throws SyntaxError if the port is invalid
      */
-    private function validate($port): ?int
+    private function validate(UriComponentInterface|Stringable|float|int|string|bool|null $port): ?int
     {
         $port = self::filterComponent($port);
         if (null === $port) {
@@ -75,9 +68,6 @@ final class Port extends Component implements PortInterface
         throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s.', $port));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['port']);
@@ -85,18 +75,10 @@ final class Port extends Component implements PortInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        if ($uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
-            return new self($uri->getPort());
-        }
-
-        throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
+        return new self($uri->getPort());
     }
 
     /**
@@ -107,9 +89,6 @@ final class Port extends Component implements PortInterface
         return new self($authority->getPort());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         if (null === $this->port) {
@@ -119,25 +98,16 @@ final class Port extends Component implements PortInterface
         return (string) $this->port;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return (null === $this->port ? '' : ':').$this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function toInt(): ?int
     {
         return $this->port;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = $this->validate(self::filterComponent($content));

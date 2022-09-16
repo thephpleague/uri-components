@@ -15,12 +15,13 @@
 namespace League\Uri\Components;
 
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use TypeError;
-use function date_create;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use function var_export;
 
 /**
@@ -42,15 +43,12 @@ final class UserInfoTest extends TestCase
      * @covers ::getUser
      * @covers ::encodeComponent
      * @covers ::getUriComponent
-     *
-     * @param object|float|int|string|bool|null $user
-     * @param object|float|int|string|bool|null $pass
-     * @param ?string                           $expected_user
-     * @param ?string                           $expected_pass
+     * @param ?string $expected_user
+     * @param ?string $expected_pass
      */
     public function testConstructor(
-        $user,
-        $pass,
+        Stringable|float|int|string|bool|null $user,
+        Stringable|float|int|string|bool|null $pass,
         ?string $expected_user,
         ?string $expected_pass,
         string $expected_str,
@@ -158,15 +156,13 @@ final class UserInfoTest extends TestCase
      * @covers ::getPass
      * @covers ::decode
      * @covers ::decodeMatches
-     *
-     * @param UriComponentInterface|string|null $str
-     * @param ?string                           $user
-     * @param ?string                           $expected_user
-     * @param ?string                           $expected_pass
+     * @param ?string $user
+     * @param ?string $expected_user
+     * @param ?string $expected_pass
      */
     public function testWithContent(
         ?string $user,
-        $str,
+        UriComponentInterface|string|null $str,
         ?string $expected_user,
         ?string $expected_pass,
         string $expected_str
@@ -223,7 +219,6 @@ final class UserInfoTest extends TestCase
      * @covers ::withUserInfo
      * @covers ::decodeMatches
      * @covers ::decode
-     *
      * @param ?string $pass
      */
     public function testWithUserInfo(string $user, ?string $pass, string $expected): void
@@ -242,24 +237,10 @@ final class UserInfoTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withContent
-     */
-    public function testWithContentThrowsInvalidUriComponentException(): void
-    {
-        $this->expectException(TypeError::class);
-        (new UserInfo())->withContent(date_create()); /* @phpstan-ignore-line */
-    }
-
-    public function testConstructorThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-        new UserInfo(date_create());
-    }
-
     public function testConstructorThrowsException(): void
     {
         $this->expectException(SyntaxError::class);
+
         new UserInfo("\0");
     }
 
@@ -267,11 +248,9 @@ final class UserInfoTest extends TestCase
      * @dataProvider getURIProvider
      * @covers ::createFromUri
      * @covers ::decode
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
         $userInfo = UserInfo::createFromUri($uri);
 
@@ -310,13 +289,6 @@ final class UserInfoTest extends TestCase
                 'expected' => 'login%AF:bar',
             ],
         ];
-    }
-
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        UserInfo::createFromUri('http://example.com#foobar');
     }
 
     public function testCreateFromAuthorityWithoutUserInfoComponent(): void

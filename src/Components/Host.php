@@ -26,6 +26,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use TypeError;
 use function explode;
 use function filter_var;
@@ -115,10 +116,8 @@ final class Host extends Component implements IpHostInterface
 
     /**
      * New instance.
-     *
-     * @param UriComponentInterface|object|float|int|string|bool|null $host
      */
-    public function __construct($host = null)
+    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $host = null)
     {
         $host = self::filterComponent($host);
         $this->host = $host;
@@ -136,7 +135,7 @@ final class Host extends Component implements IpHostInterface
             if ($this->isValidIpv6Hostname($ip_host)) {
                 $this->host = $host;
                 $this->ip_version = '6';
-                $this->has_zone_identifier = false !== strpos($ip_host, '%');
+                $this->has_zone_identifier = str_contains($ip_host, '%');
 
                 return;
             }
@@ -211,12 +210,9 @@ final class Host extends Component implements IpHostInterface
         return 1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope)
             && 1 !== preg_match(self::REGEXP_GEN_DELIMS, $scope)
             && false !== filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
-            && 0 === strpos((string) inet_pton((string) $ipv6), self::ADDRESS_BLOCK);
+            && str_starts_with((string)inet_pton((string)$ipv6), self::ADDRESS_BLOCK);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['host']);
@@ -261,7 +257,7 @@ final class Host extends Component implements IpHostInterface
             return new self('['.$ip.']');
         }
 
-        if (false !== strpos($ip, '%')) {
+        if (str_contains($ip, '%')) {
             [$ipv6, $zoneId] = explode('%', rawurldecode($ip), 2) + [1 => ''];
 
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
@@ -310,53 +306,35 @@ final class Host extends Component implements IpHostInterface
         return new self($authority->getHost());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         return $this->host;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return (string) $this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function toAscii(): ?string
     {
         return $this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function toUnicode(): ?string
     {
-        if (null !== $this->ip_version || null === $this->host || false === strpos($this->host, 'xn--')) {
+        if (null !== $this->ip_version || null === $this->host || !str_contains($this->host, 'xn--')) {
             return $this->host;
         }
 
         return Idna::toUnicode($this->host, Idna::IDNA2008_UNICODE)->result();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getIpVersion(): ?string
     {
         return $this->ip_version;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getIp(): ?string
     {
         if (null === $this->ip_version) {
@@ -380,71 +358,47 @@ final class Host extends Component implements IpHostInterface
         return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isDomain(): bool
     {
         return $this->is_domain;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isIp(): bool
     {
         return null !== $this->ip_version;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isIpv4(): bool
     {
         return '4' === $this->ip_version;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isIpv6(): bool
     {
         return '6' === $this->ip_version;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isIpFuture(): bool
     {
         return !in_array($this->ip_version, [null, '4', '6'], true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function hasZoneIdentifier(): bool
     {
         return $this->has_zone_identifier;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutZoneIdentifier(): IpHostInterface
     {
         if (!$this->has_zone_identifier) {
             return $this;
         }
 
-        [$ipv6, ] = explode('%', substr((string) $this->host, 1, -1));
+        [$ipv6] = explode('%', substr((string) $this->host, 1, -1));
 
         return static::createFromIp($ipv6);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);

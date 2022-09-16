@@ -20,8 +20,8 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use TypeError;
-use function date_create;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use function var_export;
 
 /**
@@ -56,13 +56,11 @@ final class PortTest extends TestCase
      * @covers ::getContent
      * @covers ::getUriComponent
      * @covers ::validate
-     *
-     * @param UriComponentInterface|object|float|int|string|bool|null $input
-     * @param ?int                                                    $expected
-     * @param ?string                                                 $string_expected
+     * @param ?int    $expected
+     * @param ?string $string_expected
      */
     public function testToInt(
-        $input,
+        UriComponentInterface|Stringable|float|int|string|bool|null $input,
         ?int $expected,
         ?string $string_expected,
         string $uri_expected
@@ -88,15 +86,10 @@ final class PortTest extends TestCase
         ];
     }
 
-    public function testFailedPortTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-        new Port(date_create());
-    }
-
     public function testFailedPortException(): void
     {
         $this->expectException(SyntaxError::class);
+
         new Port(-1);
     }
 
@@ -113,11 +106,9 @@ final class PortTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param UriInterface|\Psr\Http\Message\UriInterface $uri      an URI object
-     * @param ?string                                     $expected
+     * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
         $port = Port::createFromUri($uri);
 
@@ -144,13 +135,6 @@ final class PortTest extends TestCase
                 'expected' => null,
             ],
         ];
-    }
-
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Port::createFromUri('http://example.com:80');
     }
 
     public function testCreateFromAuthority(): void

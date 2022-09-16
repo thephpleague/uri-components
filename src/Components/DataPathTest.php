@@ -14,12 +14,12 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use TypeError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function base64_encode;
 use function dirname;
 use function file_get_contents;
@@ -80,17 +80,6 @@ final class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::filterPath
-     * @covers ::__construct
-     */
-    public function testConstructorFailedWithNullValue(): void
-    {
-        $this->expectException(SyntaxError::class);
-
-        new DataPath(null);
-    }
-
-    /**
      * @covers ::__construct
      */
     public function testConstructorFailedMalformePath(): void
@@ -114,10 +103,9 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidDataUriPath
-     * @param string $path
      * @covers ::__construct
      */
-    public function testConstructorFailed($path): void
+    public function testConstructorFailed(string $path): void
     {
         $this->expectException(SyntaxError::class);
 
@@ -286,13 +274,6 @@ final class DataPathTest extends TestCase
                 'parameters' => 'charset=binary;base64;foo=bar',
             ],
         ];
-    }
-
-    public function testWithParametersFailsWithWrongType(): void
-    {
-        $this->expectException(TypeError::class);
-
-        DataPath::createFromFilePath($this->rootPath.'/red-nose.gif')->withParameters([]);
     }
 
     /**
@@ -471,11 +452,9 @@ final class DataPathTest extends TestCase
      * @dataProvider getURIProvider
      *
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $path = DataPath::createFromUri($uri);
 
@@ -502,13 +481,6 @@ final class DataPathTest extends TestCase
                 'expected' => 'text/plain;charset=us-ascii,',
             ],
         ];
-    }
-
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        DataPath::createFromUri('http://example.com:80');
     }
 
     public function testHasTrailingSlash(): void
@@ -540,12 +512,5 @@ final class DataPathTest extends TestCase
 
         self::assertSame($encodedPath, $path->getContent());
         self::assertSame($decodedPath, $path->decoded());
-    }
-
-    public function testCreateFromStringThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        DataPath::createFromString(new stdClass());
     }
 }

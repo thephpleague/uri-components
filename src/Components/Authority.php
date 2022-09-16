@@ -22,14 +22,9 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
+use Stringable;
 use function explode;
-use function gettype;
-use function is_object;
-use function is_string;
-use function method_exists;
 use function preg_match;
-use function sprintf;
 
 final class Authority extends Component implements AuthorityInterface
 {
@@ -42,13 +37,9 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * @deprecated since version 2.3.0 use a more appropriate named constructor.
      *
-     * New instance.
-     *
-     * @param object|float|int|string|bool|null $authority
-     *
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    public function __construct($authority = null)
+    public function __construct(Stringable|float|int|string|bool|null $authority = null)
     {
         $components = $this->parse(self::filterComponent($authority));
         $this->host = new Host($components['host']);
@@ -60,7 +51,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Extracts the authority parts from a given string.
      *
-     * @param ?string $authority
+     * @return array{user:string|null, pass:string|null, host:string|null, port:string|null}
      */
     private function parse(?string $authority): array
     {
@@ -99,9 +90,6 @@ final class Authority extends Component implements AuthorityInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         $auth = new self();
@@ -115,19 +103,11 @@ final class Authority extends Component implements AuthorityInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(UriInterface|Psr7UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getAuthority());
-        }
-
-        if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $authority = $uri->getAuthority();
@@ -147,27 +127,17 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * Returns a new instance from an string or a stringable object.
-     *
-     * @param object|string $authority
+     * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString($authority = ''): self
+    public static function createFromString(Stringable|string $authority = ''): self
     {
-        if (is_object($authority) && method_exists($authority, '__toString')) {
-            $authority = (string) $authority;
-        }
-
-        if (!is_string($authority)) {
-            throw new TypeError(sprintf('The authority must be a string or a stringable object value, `%s` given', gettype($authority)));
-        }
-
-        return new self($authority);
+        return new self((string) $authority);
     }
 
     /**
      * Create a new instance from a hash of parse_url parts.
      *
-     * Create an new instance from a hash representation of the URI similar
+     * Create a new instance from a hash representation of the URI similar
      * to PHP parse_url function result
      *
      * @param array<string,null|int|string> $components
@@ -196,9 +166,6 @@ final class Authority extends Component implements AuthorityInterface
         return new self($authority);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         $auth = $this->host->getContent();
@@ -215,40 +182,28 @@ final class Authority extends Component implements AuthorityInterface
         return $userInfo.'@'.$auth;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return (null === $this->host->getContent() ? '' : '//').$this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getHost(): ?string
     {
         return $this->host->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getPort(): ?int
     {
         return $this->port->toInt();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUserInfo(): ?string
     {
         return $this->userInfo->getContent();
     }
 
     /**
-     * @param UriComponentInterface|object|float|int|string|bool|null $content
+     * @param UriComponentInterface|Stringable|float|int|string|bool|null $content
      */
     public function withContent($content): UriComponentInterface
     {
@@ -261,7 +216,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param UriComponentInterface|object|float|int|string|bool|null $host
+     * @param UriComponentInterface|Stringable|float|int|string|bool|null $host
      */
     public function withHost($host): AuthorityInterface
     {
@@ -281,7 +236,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param UriComponentInterface|object|float|int|string|bool|null $port
+     * @param UriComponentInterface|Stringable|float|int|string|bool|null $port
      */
     public function withPort($port): AuthorityInterface
     {
@@ -301,12 +256,12 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param object|float|int|string|bool|null $user
-     * @param object|float|int|string|bool|null $pass
+     * @param Stringable|float|int|string|bool|null $user
+     * @param Stringable|float|int|string|bool|null $password
      */
-    public function withUserInfo($user, $pass = null): AuthorityInterface
+    public function withUserInfo($user, $password = null): AuthorityInterface
     {
-        $userInfo = new UserInfo($user, $pass);
+        $userInfo = new UserInfo($user, $password);
         if ($userInfo->getContent() === $this->userInfo->getContent()) {
             return $this;
         }

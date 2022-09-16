@@ -17,6 +17,7 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
+use Stringable;
 
 /**
  * @group host
@@ -32,6 +33,7 @@ final class IpAddressTest extends TestCase
     public function testWithContent(): void
     {
         $host = new Host('127.0.0.1');
+
         self::assertSame($host, $host->withContent('127.0.0.1'));
         self::assertSame($host, $host->withContent($host));
         self::assertNotSame($host, $host->withContent('[::1]'));
@@ -42,10 +44,6 @@ final class IpAddressTest extends TestCase
      *
      * @dataProvider validIpAddressProvider
      *
-     * @param UriComponentInterface|object|float|int|string|bool|null $host
-     * @param ?string                                                 $ipVersion
-     * @param ?string                                                 $ip
-     *
      * @covers ::__construct
      * @covers ::isValidIpv6Hostname
      * @covers ::isIp
@@ -54,9 +52,11 @@ final class IpAddressTest extends TestCase
      * @covers ::isIpFuture
      * @covers ::getIp
      * @covers ::getIpVersion
+     * @param ?string $ipVersion
+     * @param ?string $ip
      */
     public function testValidIpAddress(
-        $host,
+        UriComponentInterface|Stringable|float|int|string|bool|null $host,
         bool $isDomain,
         bool $isIp,
         bool $isIpv4,
@@ -68,6 +68,7 @@ final class IpAddressTest extends TestCase
         string $iri
     ): void {
         $host = new Host($host);
+
         self::assertSame($isIp, $host->isIp());
         self::assertSame($isIpv4, $host->isIpv4());
         self::assertSame($isIpv6, $host->isIpv6());

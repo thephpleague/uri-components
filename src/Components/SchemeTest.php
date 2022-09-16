@@ -15,12 +15,13 @@
 namespace League\Uri\Components;
 
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use TypeError;
-use function date_create;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use function var_export;
 
 /**
@@ -72,12 +73,12 @@ final class SchemeTest extends TestCase
      * @covers ::validate
      * @covers ::__toString
      * @covers ::getUriComponent
-     *
-     * @param UriComponentInterface|object|float|int|string|bool|null $scheme
-     *
      */
-    public function testValidScheme($scheme, string $toString, string $uriComponent): void
-    {
+    public function testValidScheme(
+        UriComponentInterface|Stringable|float|int|string|bool|null $scheme,
+        string $toString,
+        string $uriComponent
+    ): void {
         $scheme = new Scheme($scheme);
         self::assertSame($toString, (string) $scheme);
         self::assertSame($uriComponent, $scheme->getUriComponent());
@@ -122,21 +123,12 @@ final class SchemeTest extends TestCase
         ];
     }
 
-    public function testInvalidSchemeType(): void
-    {
-        $this->expectException(TypeError::class);
-        new Scheme(date_create());
-    }
-
-
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
         $scheme = Scheme::createFromUri($uri);
 
@@ -163,12 +155,5 @@ final class SchemeTest extends TestCase
                 'expected' => null,
             ],
         ];
-    }
-
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Scheme::createFromUri('http://example.com#foobar');
     }
 }
