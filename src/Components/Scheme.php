@@ -20,7 +20,7 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
+use Stringable;
 use function preg_match;
 use function sprintf;
 use function strtolower;
@@ -29,14 +29,12 @@ final class Scheme extends Component
 {
     private const REGEXP_SCHEME = ',^[a-z]([-a-z0-9+.]+)?$,i';
 
-    private ?string $scheme;
+    private readonly ?string $scheme;
 
     /**
      * New instance.
-     *
-     * @param float|int|object|string|bool|null $scheme
      */
-    public function __construct($scheme = null)
+    public function __construct(float|int|Stringable|string|bool|null $scheme = null)
     {
         $this->scheme = $this->validate($scheme);
     }
@@ -44,12 +42,9 @@ final class Scheme extends Component
     /**
      * Validate a scheme.
      *
-     * @param float|int|object|string|bool|null $scheme
-     *
      * @throws SyntaxError if the scheme is invalid
-     * @throws TypeError   if the scheme type is not supported
      */
-    private function validate($scheme): ?string
+    private function validate(float|int|Stringable|string|bool|null $scheme): ?string
     {
         $scheme = self::filterComponent($scheme);
         if (null === $scheme) {
@@ -63,9 +58,6 @@ final class Scheme extends Component
         throw new SyntaxError(sprintf("The scheme '%s' is invalid.", $scheme));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['scheme']);
@@ -73,19 +65,11 @@ final class Scheme extends Component
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getScheme());
-        }
-
-        if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $component = $uri->getScheme();
@@ -96,25 +80,16 @@ final class Scheme extends Component
         return new self($component);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         return $this->scheme;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return $this->getContent().(null === $this->scheme ? '' : ':');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = $this->validate(self::filterComponent($content));

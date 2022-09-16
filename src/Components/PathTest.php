@@ -14,13 +14,12 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use TypeError;
-use function date_create;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function var_export;
 
 /**
@@ -116,26 +115,6 @@ final class PathTest extends TestCase
 
         self::assertSame($component, $component->withContent($component));
         self::assertNotSame($component, $component->withContent('new/path'));
-    }
-
-    /**
-     * @dataProvider invalidPath
-     *
-     * @param object|float|int|string|bool|null $path
-     */
-    public function testConstructorThrowsWithInvalidData($path): void
-    {
-        $this->expectException(TypeError::class);
-        new Path($path);
-    }
-
-    public function invalidPath(): array
-    {
-        return [
-            [date_create()],
-            [[]],
-            [null],
-        ];
     }
 
     public function testConstructorThrowsExceptionWithInvalidData(): void
@@ -279,11 +258,9 @@ final class PathTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $path = Path::createFromUri($uri);
 
@@ -310,19 +287,5 @@ final class PathTest extends TestCase
                 'expected' => '',
             ],
         ];
-    }
-
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Path::createFromUri('http://example.com:80');
-    }
-
-    public function testCreateFromStringThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Path::createFromString(new stdClass());
     }
 }

@@ -20,8 +20,7 @@ use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
-use function sprintf;
+use Stringable;
 
 final class Fragment extends Component implements FragmentInterface
 {
@@ -30,21 +29,16 @@ final class Fragment extends Component implements FragmentInterface
         %(?![A-Fa-f0-9]{2}))
     /x';
 
-    private ?string $fragment;
+    private readonly ?string $fragment;
 
     /**
      * New instance.
-     *
-     * @param object|float|int|string|bool|null $fragment
      */
-    public function __construct($fragment = null)
+    public function __construct(Stringable|float|int|string|bool|null $fragment = null)
     {
         $this->fragment = $this->validateComponent($fragment);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['fragment']);
@@ -52,19 +46,11 @@ final class Fragment extends Component implements FragmentInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getFragment());
-        }
-
-        if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $component = $uri->getFragment();
@@ -75,17 +61,11 @@ final class Fragment extends Component implements FragmentInterface
         return new self($component);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         return $this->encodeComponent($this->fragment, self::REGEXP_FRAGMENT_ENCODING);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return (null === $this->fragment ? '' : '#').$this->getContent();
@@ -99,9 +79,6 @@ final class Fragment extends Component implements FragmentInterface
         return $this->fragment;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);

@@ -29,65 +29,41 @@ use const GMP_ROUND_MINUSINF;
 
 final class GMPCalculator implements IPv4Calculator
 {
-    /**
-     * {@inheritDoc}
-     */
     public function baseConvert($value, int $base): GMP
     {
         return gmp_init($value, $base);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function pow($value, int $exponent): GMP
     {
         return gmp_pow($value, $exponent);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function compare($value1, $value2): int
     {
         return gmp_cmp($value1, $value2);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function multiply($value1, $value2): GMP
     {
         return gmp_mul($value1, $value2);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function div($value, $base): GMP
     {
         return gmp_div_q($value, $base, GMP_ROUND_MINUSINF);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function mod($value, $base): GMP
     {
         return gmp_mod($value, $base);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function add($value1, $value2): GMP
     {
         return gmp_add($value1, $value2);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function sub($value1, $value2): GMP
     {
         return gmp_sub($value1, $value2);

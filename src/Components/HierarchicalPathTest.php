@@ -16,12 +16,13 @@ namespace League\Uri\Components;
 
 use ArrayIterator;
 use GuzzleHttp\Psr7\Utils;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use stdClass;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function date_create;
 use function iterator_to_array;
@@ -128,10 +129,9 @@ final class HierarchicalPathTest extends TestCase
      * @dataProvider getProvider
      *
      * @covers ::get
-     *
-     * @param string|null $expected
+     * @param ?string $expected
      */
-    public function testget(string $raw, int $key, $expected): void
+    public function testget(string $raw, int $key, ?string $expected): void
     {
         self::assertSame($expected, HierarchicalPath::createFromString($raw)->get($key));
     }
@@ -780,11 +780,9 @@ final class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $path = HierarchicalPath::createFromUri($uri);
 
@@ -832,20 +830,6 @@ final class HierarchicalPathTest extends TestCase
 
         self::assertSame('/path', $uri->getPath());
         self::assertSame('/path', HierarchicalPath::createFromUri($uri)->__toString());
-    }
-
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        HierarchicalPath::createFromUri('http://example.com:80');
-    }
-
-    public function testCreateFromStringThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        HierarchicalPath::createFromString(new stdClass());
     }
 
     /**

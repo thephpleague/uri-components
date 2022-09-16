@@ -17,8 +17,8 @@
             <directory suffix=".php">src</directory>
         </include>
         <exclude>
+            <directory suffix="Bench.php">src</directory>
             <directory suffix="Test.php">src</directory>
-            <directory suffix="_include.php">src</directory>
         </exclude>
         <report>
             <clover outputFile="build/clover.xml"/>

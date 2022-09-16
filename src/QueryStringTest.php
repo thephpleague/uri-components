@@ -17,6 +17,7 @@ namespace League\Uri;
 use ArrayIterator;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
+use Stringable;
 use function date_create;
 use const PHP_QUERY_RFC1738;
 use const PHP_QUERY_RFC3986;
@@ -55,10 +56,8 @@ final class QueryStringTest extends TestCase
 
     /**
      * @dataProvider extractQueryProvider
-     *
-     * @param object|string|float|int|null|bool $query
      */
-    public function testExtractQuery($query, array $expectedData): void
+    public function testExtractQuery(Stringable|string|float|int|null|bool $query, array $expectedData): void
     {
         self::assertSame($expectedData, QueryString::extract($query));
     }
@@ -146,10 +145,8 @@ final class QueryStringTest extends TestCase
 
     /**
      * @dataProvider parserProvider
-     *
-     * @param object|string|float|int|null|bool $query
      */
-    public function testParse($query, string $separator, array $expected, int $encoding): void
+    public function testParse(Stringable|string|float|int|null|bool $query, string $separator, array $expected, int $encoding): void
     {
         self::assertSame($expected, QueryString::parse($query, $separator, $encoding));
     }

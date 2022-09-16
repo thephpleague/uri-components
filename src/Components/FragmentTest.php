@@ -14,12 +14,13 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use TypeError;
-use function date_create;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use function var_export;
 
 /**
@@ -75,11 +76,9 @@ final class FragmentTest extends TestCase
      * @covers ::encodeComponent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
-     *
-     * @param object|float|int|string|bool|null $str
-     * @param ?string                           $expected
+     * @param ?string $expected
      */
-    public function testGetValue($str, ?string $expected): void
+    public function testGetValue(Stringable|float|int|string|bool|null $str, ?string $expected): void
     {
         self::assertSame($expected, (new Fragment($str))->decoded());
     }
@@ -134,12 +133,6 @@ final class FragmentTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
         new Fragment("\0");
-    }
-
-    public function testFailedFragmentTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-        new Fragment(date_create());
     }
 
     /**
@@ -200,11 +193,9 @@ final class FragmentTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $fragment = Fragment::createFromUri($uri);
 
@@ -239,12 +230,5 @@ final class FragmentTest extends TestCase
                 'expected' => '',
             ],
         ];
-    }
-
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Fragment::createFromUri('http://example.com#foobar');
     }
 }
