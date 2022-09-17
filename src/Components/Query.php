@@ -90,7 +90,7 @@ final class Query extends Component implements QueryInterface
         }
 
         if ($params instanceof Traversable) {
-            $params = iterator_to_array($params, true);
+            $params = iterator_to_array($params);
         }
 
         if ([] === $params) {
@@ -111,9 +111,7 @@ final class Query extends Component implements QueryInterface
      */
     public static function createFromPairs(iterable $pairs = [], string $separator = '&'): self
     {
-        $query = QueryString::build($pairs, $separator, PHP_QUERY_RFC3986);
-
-        return new self($query, $separator, PHP_QUERY_RFC3986);
+        return new self(QueryString::build($pairs, $separator), $separator, PHP_QUERY_RFC3986);
     }
 
     /**
@@ -156,7 +154,7 @@ final class Query extends Component implements QueryInterface
 
     public function getContent(): ?string
     {
-        return QueryString::build($this->pairs, $this->separator, PHP_QUERY_RFC3986);
+        return QueryString::build($this->pairs, $this->separator);
     }
 
     public function getUriComponent(): string
@@ -190,9 +188,7 @@ final class Query extends Component implements QueryInterface
 
     public function getIterator(): Iterator
     {
-        foreach ($this->pairs as $pair) {
-            yield $pair;
-        }
+        yield from $this->pairs;
     }
 
     public function pairs(): iterable

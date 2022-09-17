@@ -25,17 +25,13 @@ use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
 use League\Uri\IPv4Normalizer;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use TypeError;
 use function explode;
 use function filter_var;
-use function gettype;
 use function in_array;
 use function inet_pton;
-use function is_object;
-use function is_string;
-use function method_exists;
 use function preg_match;
 use function rawurldecode;
 use function rawurlencode;
@@ -133,7 +129,6 @@ final class Host extends Component implements IpHostInterface
         if ('[' === $host[0] && ']' === substr($host, -1)) {
             $ip_host = substr($host, 1, -1);
             if ($this->isValidIpv6Hostname($ip_host)) {
-                $this->host = $host;
                 $this->ip_version = '6';
                 $this->has_zone_identifier = str_contains($ip_host, '%');
 
@@ -183,10 +178,7 @@ final class Host extends Component implements IpHostInterface
      */
     private function isValidDomain(string $hostname): bool
     {
-        $domainMaxLength = 253;
-        if ('.' === substr($hostname, -1, 1)) {
-            $domainMaxLength = 254;
-        }
+        $domainMaxLength = str_ends_with($hostname, '.') ? 254 : 253;
 
         return !isset($hostname[$domainMaxLength])
             && 1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
@@ -223,26 +215,13 @@ final class Host extends Component implements IpHostInterface
         return new self(null);
     }
 
-    /**
-     * @param object|string $host The host value when it is an object it should expose the __toString method
-     */
-    public static function createFromString($host): self
+    public static function createFromString(Stringable|string $host): self
     {
-        if (is_object($host) && method_exists($host, '__toString')) {
-            $host = (string) $host;
-        }
-
-        if (!is_string($host)) {
-            throw new TypeError(sprintf('The host must be a string or a stringable object value, `%s` given', gettype($host)));
-        }
-
-        return new self($host);
+        return new self((string) $host);
     }
 
     /**
      * Returns a host from an IP address.
-     *
-     * @param ?IPv4Normalizer $normalizer
      *
      * @throws IPv4CalculatorMissing If detecting IPv4 is not possible
      * @throws SyntaxError           If the $ip can not be converted into a Host
@@ -275,19 +254,11 @@ final class Host extends Component implements IpHostInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getHost());
-        }
-
-        if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $component = $uri->getHost();

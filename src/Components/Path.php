@@ -58,10 +58,7 @@ final class Path extends Component implements PathInterface
      */
     private function validate(Stringable|float|int|string|bool $path): string
     {
-        /** @var string $path */
-        $path = $this->validateComponent($path);
-
-        return $path;
+        return (string) $this->validateComponent($path);
     }
 
     /**
@@ -79,11 +76,7 @@ final class Path extends Component implements PathInterface
     {
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
-        if (null === $authority || '' === $authority) {
-            return new self($path);
-        }
-
-        if ('' === $path || '/' === $path[0]) {
+        if (null === $authority || '' === $authority || '' === $path || '/' === $path[0]) {
             return new self($path);
         }
 
@@ -100,9 +93,6 @@ final class Path extends Component implements PathInterface
         return (string) $this->getContent();
     }
 
-    /**
-     * Returns the decoded path.
-     */
     public function decoded(): string
     {
         return $this->path;
@@ -113,9 +103,6 @@ final class Path extends Component implements PathInterface
         return self::SEPARATOR === ($this->path[0] ?? '');
     }
 
-    /**
-     * Returns whether the path has a trailing delimiter.
-     */
     public function hasTrailingSlash(): bool
     {
         return '' !== $this->path && self::SEPARATOR === substr($this->path, -1);
@@ -184,12 +171,6 @@ final class Path extends Component implements PathInterface
         return $this->hasTrailingSlash() ? $this : new self($this->__toString().self::SEPARATOR);
     }
 
-    /**
-     * Returns an instance without a trailing slash.
-     *
-     * This method MUST retain the state of the current instance, and return
-     * an instance that contains the path component without a trailing slash
-     */
     public function withoutTrailingSlash(): PathInterface
     {
         return !$this->hasTrailingSlash() ? $this : new self(substr($this->__toString(), 0, -1));

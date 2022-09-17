@@ -156,9 +156,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     public function getIterator(): Iterator
     {
-        foreach ($this->segments as $segment) {
-            yield $segment;
-        }
+        yield from $this->segments;
     }
 
     public function isAbsolute(): bool

@@ -18,7 +18,6 @@ namespace League\Uri;
 
 use League\Uri\Exceptions\SyntaxError;
 use Stringable;
-use TypeError;
 use function array_key_exists;
 use function array_keys;
 use function explode;
@@ -48,12 +47,6 @@ use const PHP_QUERY_RFC3986;
  */
 final class QueryString
 {
-    private const REGEXP_INVALID_CHARS = '/[\x00-\x1f\x7f]/';
-
-    private const REGEXP_ENCODED_PATTERN = ',%[A-Fa-f0-9]{2},';
-
-    private const REGEXP_UNRESERVED_CHAR = '/[^A-Za-z0-9_\-\.~]/';
-
     private const ENCODING_LIST = [
         PHP_QUERY_RFC1738 => [
             'suffixKey' => '*',
@@ -64,13 +57,13 @@ final class QueryString
             'suffixValue' => "!$'()*+,;=:@?/&%",
         ],
     ];
-
     private const DECODE_PAIR_VALUE = 1;
-
     private const PRESERVE_PAIR_VALUE = 2;
+    private const REGEXP_ENCODED_PATTERN = ',%[A-Fa-f0-9]{2},';
+    private const REGEXP_INVALID_CHARS = '/[\x00-\x1f\x7f]/';
+    private const REGEXP_UNRESERVED_CHAR = '/[^A-Za-z0-9_\-.~]/';
 
     private static string $regexpKey;
-
     private static string $regexpValue;
 
     /**
@@ -105,14 +98,14 @@ final class QueryString
             return [['', null]];
         }
 
-        $retval = [];
+        $returnedValue = [];
         foreach (self::getPairs($query, $separator) as $pairString) {
             /** @var array{0:string, 1:string|null} $pair */
             $pair = self::parsePair((string) $pairString, self::DECODE_PAIR_VALUE);
-            $retval[] = $pair;
+            $returnedValue[] = $pair;
         }
 
-        return $retval;
+        return $returnedValue;
     }
 
     /**
@@ -120,7 +113,6 @@ final class QueryString
      *
      * @throws SyntaxError If the encoding type is invalid
      * @throws SyntaxError If the query string is invalid
-     * @throws TypeError   If the query is not stringable or the null value
      */
     private static function prepareQuery(Stringable|float|int|string|bool|null $query, int $enc_type): ?string
     {
@@ -129,7 +121,7 @@ final class QueryString
         }
 
         if (null === $query) {
-            return $query;
+            return null;
         }
 
         if (is_bool($query)) {
@@ -137,19 +129,13 @@ final class QueryString
         }
 
         $query = (string) $query;
-        if ('' === $query) {
-            return $query;
-        }
 
-        if (1 === preg_match(self::REGEXP_INVALID_CHARS, $query)) {
-            throw new SyntaxError(sprintf('Invalid query string: %s', $query));
-        }
-
-        if (PHP_QUERY_RFC1738 === $enc_type) {
-            return str_replace('+', ' ', $query);
-        }
-
-        return $query;
+        return match (true) {
+            '' === $query => '',
+            1 === preg_match(self::REGEXP_INVALID_CHARS, $query) => throw new SyntaxError(sprintf('Invalid query string: %s', $query)),
+            PHP_QUERY_RFC1738 === $enc_type => str_replace('+', ' ', $query),
+            default => $query,
+        };
     }
 
     /**
@@ -158,14 +144,7 @@ final class QueryString
      */
     private static function getPairs(string $query, string $separator): array
     {
-        if (!str_contains($query, $separator)) {
-            return [$query];
-        }
-
-        /** @var array $pairs */
-        $pairs = explode($separator, $query);
-
-        return $pairs;
+        return str_contains($query, $separator) ? explode($separator, $query) : [$query];
     }
 
     /**
@@ -196,29 +175,20 @@ final class QueryString
 
     private static function formatStringValue(string $value, int|string|float|null $name): string
     {
-        if (1 === preg_match('/[\x00-\x1f\x7f]/', $value)) {
-            return $name.'='.rawurlencode($value);
-        }
-
-        if (1 !== preg_match(self::$regexpValue, $value)) {
-            return $name.'='.$value;
-        }
-
-        return $name.'='.preg_replace_callback(self::$regexpValue, self::encodeMatches(...), $value);
+        return match (true) {
+            1 === preg_match('/[\x00-\x1f\x7f]/', $value) => $name.'='.rawurlencode($value),
+            1 !== preg_match(self::$regexpValue, $value) => $name.'='.$value,
+            default => $name.'='.preg_replace_callback(self::$regexpValue, self::encodeMatches(...), $value),
+        };
     }
 
     private static function formatStringName(string $name): string
     {
-        if (1 === preg_match('/[\x00-\x1f\x7f]/', $name)) {
-            return rawurlencode($name);
-        }
-
-        if (1 === preg_match(self::$regexpKey, $name)) {
-            /** @var string $name */
-            $name = preg_replace_callback(self::$regexpKey, self::encodeMatches(...), $name);
-        }
-
-        return $name;
+        return match (true) {
+            1 === preg_match('/[\x00-\x1f\x7f]/', $name) => rawurlencode($name),
+            1 === preg_match(self::$regexpKey, $name) => (string) preg_replace_callback(self::$regexpKey, self::encodeMatches(...), $name),
+            default => $name,
+        };
     }
 
     /**
@@ -310,23 +280,13 @@ final class QueryString
             $name = self::formatStringName($name);
         }
 
-        if (is_string($value)) {
-            return self::formatStringValue($value, $name);
-        }
-
-        if (is_numeric($value)) {
-            return $name.'='.$value;
-        }
-
-        if (is_bool($value)) {
-            return $name.'='.(int) $value;
-        }
-
-        if (null === $value) {
-            return (string) $name;
-        }
-
-        throw new SyntaxError(sprintf('A pair value must be a scalar value or the null value, `%s` given.', gettype($value)));
+        return match (true) {
+            is_string($value) => self::formatStringValue($value, $name),
+            is_numeric($value) => $name.'='.$value,
+            is_bool($value) => $name.'='.(int) $value,
+            null === $value => (string) $name,
+            default => throw new SyntaxError(sprintf('A pair value must be a scalar value or the null value, `%s` given.', gettype($value))),
+        };
     }
 
     /**
@@ -350,6 +310,8 @@ final class QueryString
      *
      * @see http://php.net/parse_str
      * @see https://wiki.php.net/rfc/on_demand_name_mangling
+     *
+     * @param non-empty-string $separator
      */
     public static function extract(
         Stringable|float|int|string|bool|null $query,
@@ -365,12 +327,12 @@ final class QueryString
             return [];
         }
 
-        $retval = [];
+        $returnedValue = [];
         foreach (self::getPairs($query, $separator) as $pair) {
-            $retval[] = self::parsePair((string) $pair, self::PRESERVE_PAIR_VALUE);
+            $returnedValue[] = self::parsePair((string) $pair, self::PRESERVE_PAIR_VALUE);
         }
 
-        return self::convert($retval);
+        return self::convert($returnedValue);
     }
 
     /**
@@ -379,12 +341,12 @@ final class QueryString
      */
     public static function convert(iterable $pairs): array
     {
-        $retval = [];
+        $returnedValue = [];
         foreach ($pairs as $pair) {
-            $retval = self::extractPhpVariable($retval, $pair);
+            $returnedValue = self::extractPhpVariable($returnedValue, $pair);
         }
 
-        return $retval;
+        return $returnedValue;
     }
 
     /**

@@ -179,9 +179,7 @@ final class Domain extends Component implements DomainHostInterface
 
     public function getIterator(): Iterator
     {
-        foreach ($this->labels as $label) {
-            yield $label;
-        }
+        yield from $this->labels;
     }
 
     public function get(int $offset): ?string
