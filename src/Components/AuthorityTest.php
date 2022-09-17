@@ -18,6 +18,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use League\Uri\UriString;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function parse_url;
@@ -344,7 +345,7 @@ final class AuthorityTest extends TestCase
 
     public function testCreateFromParseUrlWithoutAuthority(): void
     {
-        $instance = Authority::createFromComponents(parse_url('/example.com:42#foobar'));
+        $instance = Authority::createFromComponents(UriString::parse('/example.com:42#foobar'));
 
         self::assertNull($instance->getContent());
     }
