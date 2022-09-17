@@ -17,10 +17,13 @@ namespace League\Uri\Components;
 use ArrayIterator;
 use DateInterval;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use TypeError;
 use function is_array;
 use function json_encode;
@@ -225,14 +228,13 @@ final class QueryTest extends TestCase
      * @covers ::toRFC3986
      * @covers ::getContent
      * @covers ::filterEmptyValue
-     *
-     * @param ?string                           $query
-     * @param object|string|int|float|bool|null $append_data
-     * @param ?string                           $expected
+     * @param ?string $query
+     * @param ?string $expected
      */
-    public function testAppend(?string $query, $append_data, ?string $expected): void
+    public function testAppend(?string $query, Stringable|string|int|float|bool|null $append_data, ?string $expected): void
     {
         $base = Query::createFromRFC3986($query);
+
         self::assertSame($expected, $base->append($append_data)->toRFC3986());
     }
 
@@ -707,10 +709,8 @@ final class QueryTest extends TestCase
      * @covers ::merge
      * @covers ::addPair
      * @covers ::filterPair
-     *
-     * @param UriComponentInterface|object|float|int|string|bool|null $dest
      */
-    public function testMergeBasic(string $src, $dest, string $expected): void
+    public function testMergeBasic(string $src, UriComponentInterface|Stringable|float|int|string|bool|null $dest, string $expected): void
     {
         self::assertSame($expected, (string) (Query::createFromRFC3986($src))->merge($dest));
     }
@@ -896,11 +896,9 @@ final class QueryTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $query = Query::createFromUri($uri);
 
@@ -937,16 +935,10 @@ final class QueryTest extends TestCase
         ];
     }
 
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Query::createFromUri('http://example.com#foobar');
-    }
-
     public function testCreateFromRFCSpecification(): void
     {
         $query = Query::createFromRFC3986('foo=b%20ar|foo=baz', '|');
+
         self::assertEquals($query, Query::createFromRFC1738('foo=b+ar|foo=baz', '|'));
     }
 }

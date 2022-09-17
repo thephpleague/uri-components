@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace League\Uri;
 
 use League\Uri\Exceptions\SyntaxError;
+use Stringable;
 use TypeError;
 use function array_key_exists;
 use function array_keys;
@@ -28,7 +29,6 @@ use function is_bool;
 use function is_numeric;
 use function is_scalar;
 use function is_string;
-use function method_exists;
 use function preg_match;
 use function preg_quote;
 use function preg_replace_callback;
@@ -69,15 +69,9 @@ final class QueryString
 
     private const PRESERVE_PAIR_VALUE = 2;
 
-    /**
-     * @var string
-     */
-    private static $regexpKey;
+    private static string $regexpKey;
 
-    /**
-     * @var string
-     */
-    private static $regexpValue;
+    private static string $regexpValue;
 
     /**
      * @codeCoverageIgnore
@@ -89,14 +83,15 @@ final class QueryString
     /**
      * Parses a query string into a collection of key/value pairs.
      *
-     * @param object|float|int|string|bool|null $query
-     *
      * @throws SyntaxError
      *
      * @return array<int, array{0:string, 1:string|null}>
      */
-    public static function parse($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
-    {
+    public static function parse(
+        Stringable|float|int|string|bool|null $query,
+        string $separator = '&',
+        int $enc_type = PHP_QUERY_RFC3986
+    ): array {
         if ('' === $separator) {
             throw new SyntaxError('The separator character can not be the empty string.');
         }
@@ -123,13 +118,11 @@ final class QueryString
     /**
      * Prepare and normalize query before processing.
      *
-     * @param object|float|int|string|bool|null $query
-     *
      * @throws SyntaxError If the encoding type is invalid
      * @throws SyntaxError If the query string is invalid
      * @throws TypeError   If the query is not stringable or the null value
      */
-    private static function prepareQuery($query, int $enc_type): ?string
+    private static function prepareQuery(Stringable|float|int|string|bool|null $query, int $enc_type): ?string
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
             throw new SyntaxError('Unknown or Unsupported encoding');
@@ -141,10 +134,6 @@ final class QueryString
 
         if (is_bool($query)) {
             return true === $query ? '1' : '0';
-        }
-
-        if (!is_scalar($query) && !method_exists($query, '__toString')) {
-            throw new TypeError(sprintf('The query must be a scalar, a stringable object or the `null` value, `%s` given', gettype($query)));
         }
 
         $query = (string) $query;
@@ -169,7 +158,7 @@ final class QueryString
      */
     private static function getPairs(string $query, string $separator): array
     {
-        if (false === strpos($query, $separator)) {
+        if (!str_contains($query, $separator)) {
             return [$query];
         }
 
@@ -182,7 +171,7 @@ final class QueryString
     /**
      * Returns the key/value pair from a query string pair.
      *
-     * array{0:string, 1:string|null}
+     * @return array{0:string, 1:string|null}
      */
     private static function parsePair(string $pair, int $parseValue): array
     {
@@ -190,7 +179,8 @@ final class QueryString
         $key = (string) $key;
 
         if (1 === preg_match(self::REGEXP_ENCODED_PATTERN, $key)) {
-            $key = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $key);
+            /** @var string $key */
+            $key = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, self::decodeMatch(...), $key);
         }
 
         if (null === $value) {
@@ -198,16 +188,13 @@ final class QueryString
         }
 
         if (self::DECODE_PAIR_VALUE === $parseValue && 1 === preg_match(self::REGEXP_ENCODED_PATTERN, $value)) {
-            $value = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, [self::class, 'decodeMatch'], $value);
+            $value = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, self::decodeMatch(...), $value);
         }
 
         return [$key, $value];
     }
 
-    /**
-     * @param int|string|float|null $name
-     */
-    public static function formatStringValue(string $value, $name): string
+    private static function formatStringValue(string $value, int|string|float|null $name): string
     {
         if (1 === preg_match('/[\x00-\x1f\x7f]/', $value)) {
             return $name.'='.rawurlencode($value);
@@ -217,10 +204,10 @@ final class QueryString
             return $name.'='.$value;
         }
 
-        return $name.'='.preg_replace_callback(self::$regexpValue, [self::class, 'encodeMatches'], $value);
+        return $name.'='.preg_replace_callback(self::$regexpValue, self::encodeMatches(...), $value);
     }
 
-    public static function formatStringName(string $name): string
+    private static function formatStringName(string $name): string
     {
         if (1 === preg_match('/[\x00-\x1f\x7f]/', $name)) {
             return rawurlencode($name);
@@ -228,7 +215,7 @@ final class QueryString
 
         if (1 === preg_match(self::$regexpKey, $name)) {
             /** @var string $name */
-            $name = preg_replace_callback(self::$regexpKey, [self::class, 'encodeMatches'], $name);
+            $name = preg_replace_callback(self::$regexpKey, self::encodeMatches(...), $name);
         }
 
         return $name;
@@ -249,7 +236,7 @@ final class QueryString
      * a valid query string. This method differs from PHP http_build_query as
      * it does not modify parameters keys.
      *
-     * @param array<int, array{0:string, 1:string|null}> $pairs
+     * @param array<array{0:string, 1:string|float|int|bool|null}> $pairs
      *
      * @throws SyntaxError If the encoding type is invalid
      * @throws SyntaxError If a pair is invalid
@@ -301,7 +288,6 @@ final class QueryString
 
     /**
      * Build a RFC3986 query key/value pair association.
-     *
      *
      * @throws SyntaxError If the pair is invalid
      */
@@ -364,11 +350,12 @@ final class QueryString
      *
      * @see http://php.net/parse_str
      * @see https://wiki.php.net/rfc/on_demand_name_mangling
-     *
-     * @param object|float|int|string|bool|null $query
      */
-    public static function extract($query, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): array
-    {
+    public static function extract(
+        Stringable|float|int|string|bool|null $query,
+        string $separator = '&',
+        int $enc_type = PHP_QUERY_RFC3986
+    ): array {
         if ('' === $separator) {
             throw new SyntaxError('The separator character can not be the empty string.');
         }
@@ -405,8 +392,7 @@ final class QueryString
      *
      * <ul>
      * <li>empty name are not saved</li>
-     * <li>If the value from name is duplicated its corresponding value will
-     * be overwritten</li>
+     * <li>If the value from name is duplicated its corresponding value will be overwritten</li>
      * <li>if no "[" is detected the value is added to the return array with the name as index</li>
      * <li>if no "]" is detected after detecting a "[" the value is added to the return array with the name as index</li>
      * <li>if there's a mismatch in bracket usage the remaining part is dropped</li>
@@ -426,7 +412,7 @@ final class QueryString
      * @param array|string $name  the pair key
      * @param string       $value the pair value
      */
-    private static function extractPhpVariable(array $data, $name, string $value = ''): array
+    private static function extractPhpVariable(array $data, array|string $name, string $value = ''): array
     {
         if (is_array($name)) {
             [$name, $value] = $name;
@@ -464,7 +450,7 @@ final class QueryString
         }
 
         $remaining = substr($name, $right_bracket_pos + 1);
-        if ('[' !== substr($remaining, 0, 1) || false === strpos($remaining, ']', 1)) {
+        if (!str_starts_with($remaining, '[') || false === strpos($remaining, ']', 1)) {
             $remaining = '';
         }
 

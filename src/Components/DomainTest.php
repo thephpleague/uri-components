@@ -16,13 +16,13 @@ namespace League\Uri\Components;
 
 use ArrayIterator;
 use League\Uri\Contracts\UriException;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\UriInterface;
-use stdClass;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function date_create;
 use function var_export;
@@ -561,11 +561,9 @@ final class DomainTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $domain = Domain::createFromUri($uri);
 
@@ -586,17 +584,10 @@ final class DomainTest extends TestCase
         ];
     }
 
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Domain::createFromUri('http://example.com#foobar');
-    }
-
     /**
      * @dataProvider provideInvalidDomainName
      */
-    public function testCreateFromUriThrowsSyntaxtError(UriInterface $uri): void
+    public function testCreateFromUriThrowsSyntaxtError(Psr7UriInterface $uri): void
     {
         $this->expectException(SyntaxError::class);
 
@@ -617,13 +608,6 @@ final class DomainTest extends TestCase
         $auth = Authority::createFromUri($uri);
 
         self::assertEquals(Domain::createFromUri($uri), Domain::createFromAuthority($auth));
-    }
-
-    public function testCreateFromStringThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Domain::createFromString(new stdClass());
     }
 
     public function testSlice(): void

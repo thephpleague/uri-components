@@ -19,47 +19,35 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
+use Stringable;
 use function array_pop;
 use function array_reduce;
 use function end;
 use function explode;
-use function gettype;
 use function implode;
-use function is_object;
-use function is_string;
-use function method_exists;
-use function sprintf;
-use function strpos;
 use function substr;
 
 final class Path extends Component implements PathInterface
 {
-    private const SEPARATOR = '/';
-
     private const DOT_SEGMENTS = ['.' => 1, '..' => 1];
-
     private const REGEXP_PATH_ENCODING = '/
         (?:[^A-Za-z0-9_\-\.\!\$&\'\(\)\*\+,;\=%\:\/@]+|
         %(?![A-Fa-f0-9]{2}))
     /x';
+    private const SEPARATOR = '/';
 
-    private string $path;
+    private readonly string $path;
 
     /**
      * New instance.
-     *
-     * @param object|float|int|string|bool|null $path
      */
-    public function __construct($path = '')
+    public function __construct(Stringable|float|int|string|bool $path = '')
     {
         $this->path = $this->validate($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['path']);
@@ -67,52 +55,28 @@ final class Path extends Component implements PathInterface
 
     /**
      * Validate the component content.
-     *
-     * @param object|float|int|string|bool|null $path the path content
-     *
-     * @throws TypeError if the component is no valid
      */
-    private function validate($path): string
+    private function validate(Stringable|float|int|string|bool $path): string
     {
+        /** @var string $path */
         $path = $this->validateComponent($path);
-        if (null !== $path) {
-            return $path;
-        }
 
-        throw new TypeError('The path can not be null.');
+        return $path;
     }
 
     /**
      * Returns a new instance from an string or a stringable object.
-     *
-     * @param string|object $path
      */
-    public static function createFromString($path = ''): self
+    public static function createFromString(Stringable|string $path = ''): self
     {
-        if (is_object($path) && method_exists($path, '__toString')) {
-            return new self((string) $path);
-        }
-
-        if (!is_string($path)) {
-            throw new TypeError(sprintf('The path must be a string or a stringable object value, `%s` given', gettype($path)));
-        }
-
-        return new self($path);
+        return new self((string) $path);
     }
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        if (!$uri instanceof UriInterface && !$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
-        }
-
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
         if (null === $authority || '' === $authority) {
@@ -126,17 +90,11 @@ final class Path extends Component implements PathInterface
         return new self('/'.$path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         return $this->encodeComponent($this->path, self::REGEXP_PATH_ENCODING);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return (string) $this->getContent();
@@ -150,28 +108,26 @@ final class Path extends Component implements PathInterface
         return $this->path;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isAbsolute(): bool
     {
         return self::SEPARATOR === ($this->path[0] ?? '');
     }
 
     /**
-     * Returns whether or not the path has a trailing delimiter.
+     * Returns whether the path has a trailing delimiter.
      */
     public function hasTrailingSlash(): bool
     {
         return '' !== $this->path && self::SEPARATOR === substr($this->path, -1);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
+        if (null === $content) {
+            throw new SyntaxError('The path component can not be `null`.');
+        }
+
         if ($content === $this->getContent()) {
             return $this;
         }
@@ -179,18 +135,15 @@ final class Path extends Component implements PathInterface
         return new self($content);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutDotSegments(): PathInterface
     {
         $current = $this->__toString();
-        if (false === strpos($current, '.')) {
+        if (!str_contains($current, '.')) {
             return $this;
         }
 
         $input = explode(self::SEPARATOR, $current);
-        $new = implode(self::SEPARATOR, array_reduce($input, [$this, 'filterDotSegments'], []));
+        $new = implode(self::SEPARATOR, array_reduce($input, $this->filterDotSegments(...), []));
         if (isset(self::DOT_SEGMENTS[end($input)])) {
             $new .= self::SEPARATOR ;
         }
@@ -242,17 +195,11 @@ final class Path extends Component implements PathInterface
         return !$this->hasTrailingSlash() ? $this : new self(substr($this->__toString(), 0, -1));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withLeadingSlash(): PathInterface
     {
         return $this->isAbsolute() ? $this : new self(self::SEPARATOR.$this->__toString());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutLeadingSlash(): PathInterface
     {
         return !$this->isAbsolute() ? $this : new self(substr($this->__toString(), 1));

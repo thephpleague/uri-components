@@ -21,18 +21,16 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
+use SensitiveParameter;
+use Stringable;
 use function explode;
 use function preg_replace_callback;
 use function rawurldecode;
-use function sprintf;
 
 final class UserInfo extends Component implements UserInfoInterface
 {
-    private const REGEXP_USER_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%]+|%(?![A-Fa-f0-9]{2}))/x';
-
-    private const REGEXP_PASS_ENCODING = '/(?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:]+|%(?![A-Fa-f0-9]{2}))/x';
-
+    private const REGEXP_USER_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%]+|%(?![A-Fa-f0-9]{2})/x';
+    private const REGEXP_PASS_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:]+|%(?![A-Fa-f0-9]{2})/x';
     private const REGEXP_ENCODED_CHAR = ',%[A-Fa-f0-9]{2},';
 
     private ?string $user;
@@ -40,12 +38,11 @@ final class UserInfo extends Component implements UserInfoInterface
 
     /**
      * New instance.
-     *
-     * @param object|float|int|string|bool|null $user
-     * @param object|float|int|string|bool|null $pass
      */
-    public function __construct($user = null, $pass = null)
-    {
+    public function __construct(
+        Stringable|float|int|string|bool|null $user = null,
+        #[SensitiveParameter] Stringable|float|int|string|bool|null $pass = null
+    ) {
         $this->user = $this->validateComponent($user);
         $this->pass = $this->validateComponent($pass);
         if (null === $this->user || '' === $this->user) {
@@ -53,9 +50,6 @@ final class UserInfo extends Component implements UserInfoInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['user'], $properties['pass']);
@@ -63,12 +57,8 @@ final class UserInfo extends Component implements UserInfoInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             $component = $uri->getUserInfo();
@@ -77,10 +67,6 @@ final class UserInfo extends Component implements UserInfoInterface
             }
 
             return self::createFromComponent($component);
-        }
-
-        if (!$uri instanceof Psr7UriInterface) {
-            throw new TypeError(sprintf('The object must implement the `%s` or the `%s` interface.', Psr7UriInterface::class, UriInterface::class));
         }
 
         $component = $uri->getUserInfo();
@@ -92,7 +78,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * Create a new instance from a Authority object.
+     * Create a new instance from an Authority object.
      */
     public static function createFromAuthority(AuthorityInterface $authority): self
     {
@@ -105,7 +91,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * Creates a new instance from a encoded string.
+     * Creates a new instance from an encoded string.
      */
     private static function createFromComponent(string $userInfo): self
     {
@@ -126,16 +112,13 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     private static function decode(string $str): ?string
     {
-        $decoder = static function (array $matches): string {
-            return rawurldecode($matches[0]);
-        };
-
-        return preg_replace_callback(self::REGEXP_ENCODED_CHAR, $decoder, $str);
+        return preg_replace_callback(
+            self::REGEXP_ENCODED_CHAR,
+            static fn (array $matches): string => rawurldecode($matches[0]),
+            $str
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         if (null === $this->user) {
@@ -150,33 +133,21 @@ final class UserInfo extends Component implements UserInfoInterface
         return $userInfo.':'.$this->encodeComponent($this->pass, self::REGEXP_PASS_ENCODING);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return $this->getContent().(null === $this->user ? '' : '@');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUser(): ?string
     {
         return $this->user;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getPass(): ?string
     {
         return $this->pass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
@@ -191,10 +162,7 @@ final class UserInfo extends Component implements UserInfoInterface
         return self::createFromComponent($content);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function withUserInfo($user, $pass = null): UserInfoInterface
+    public function withUserInfo($user, #[SensitiveParameter] $pass = null): UserInfoInterface
     {
         $user = $this->validateComponent($user);
         $pass = $this->validateComponent($pass);

@@ -28,7 +28,6 @@ use function str_split;
 final class BCMathCalculator implements IPv4Calculator
 {
     private const SCALE = 0;
-
     private const CONVERSION_TABLE = [
         '0' => '0', '1' => '1', '2' => '2', '3' => '3',
         '4' => '4', '5' => '5', '6' => '6', '7' => '7',
@@ -36,9 +35,6 @@ final class BCMathCalculator implements IPv4Calculator
         'c' => '12', 'd' => '13', 'e' => '14', 'f' => '15',
     ];
 
-    /**
-     * {@inheritDoc}
-     */
     public function baseConvert($value, int $base): string
     {
         $value = (string) $value;
@@ -49,79 +45,42 @@ final class BCMathCalculator implements IPv4Calculator
         $base = (string) $base;
         $decimal = '0';
         foreach (str_split($value) as $char) {
-            /** @var string $decimal */
             $decimal = bcadd($this->multiply($decimal, $base), self::CONVERSION_TABLE[$char], self::SCALE);
         }
 
         return $decimal;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function pow($value, int $exponent): string
     {
-        /** @var string $retval */
-        $retval = bcpow((string) $value, (string) $exponent, self::SCALE);
-
-        return $retval;
+        return bcpow((string) $value, (string) $exponent, self::SCALE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function compare($value1, $value2): int
     {
-        /** @var int $retval */
-        $retval = bccomp((string) $value1, (string) $value2, self::SCALE);
-
-        return $retval;
+        return bccomp((string) $value1, (string) $value2, self::SCALE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function multiply($value1, $value2): string
     {
-        /** @var string $retval */
-        $retval = bcmul((string) $value1, (string) $value2, self::SCALE);
-
-        return $retval;
+        return bcmul((string) $value1, (string) $value2, self::SCALE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function div($value, $base): string
     {
-        /** @var string $retval */
-        $retval = bcdiv((string) $value, (string) $base, self::SCALE);
-
-        return $retval;
+        return bcdiv((string) $value, (string) $base, self::SCALE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function mod($value, $base): string
     {
-        /** @var string $retval */
-        $retval = bcmod((string) $value, (string) $base, self::SCALE);
-
-        return $retval;
+        return bcmod((string) $value, (string) $base, self::SCALE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function add($value1, $value2): string
     {
         return bcadd((string) $value1, (string) $value2, self::SCALE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function sub($value1, $value2): string
     {
         return bcsub((string) $value1, (string) $value2, self::SCALE);

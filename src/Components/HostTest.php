@@ -15,13 +15,14 @@
 namespace League\Uri\Components;
 
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
-use TypeError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use function array_fill;
-use function date_create;
 use function implode;
 use function var_export;
 
@@ -37,6 +38,7 @@ final class HostTest extends TestCase
     public function testSetState(): void
     {
         $host = new Host('uri.thephpleague.com');
+
         self::assertEquals($host, eval('return '.var_export($host, true).';'));
     }
 
@@ -49,6 +51,7 @@ final class HostTest extends TestCase
     public function testWithContent(): void
     {
         $host = new Host('uri.thephpleague.com');
+
         self::assertSame($host, $host->withContent('uri.thephpleague.com'));
         self::assertSame($host, $host->withContent($host));
         self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
@@ -65,14 +68,13 @@ final class HostTest extends TestCase
      * @covers ::getUriComponent
      * @covers ::toAscii
      * @covers ::toUnicode
-     *
-     * @param UriComponentInterface|object|float|int|string|bool|null $host
-     * @param ?string                                                 $uri
-     * @param ?string                                                 $iri
+     * @param ?string $uri
+     * @param ?string $iri
      */
-    public function testValidHost($host, ?string $uri, ?string $iri): void
+    public function testValidHost(UriComponentInterface|Stringable|float|int|string|bool|null $host, ?string $uri, ?string $iri): void
     {
         $host = new Host($host);
+
         self::assertSame($uri, $host->toAscii());
         self::assertSame($host->__toString(), $host->getUriComponent());
         self::assertSame($iri, $host->toUnicode());
@@ -164,6 +166,7 @@ final class HostTest extends TestCase
     public function testInvalidHost(string $invalid): void
     {
         $this->expectException(SyntaxError::class);
+
         new Host($invalid);
     }
 
@@ -192,17 +195,9 @@ final class HostTest extends TestCase
         ];
     }
 
-    public function testTypeErrorOnHostConstruction(): void
-    {
-        $this->expectException(TypeError::class);
-        new Host(date_create());
-    }
-
     /**
      * Test Punycode support.
      *
-     * @param string $unicode Unicode Hostname
-     * @param string $ascii   Ascii Hostname
      * @dataProvider hostnamesProvider
      * @covers ::toAscii
      * @covers ::toUnicode
@@ -210,6 +205,7 @@ final class HostTest extends TestCase
     public function testValidUnicodeHost(string $unicode, string $ascii): void
     {
         $host = new Host($unicode);
+
         self::assertSame($ascii, $host->toAscii());
         self::assertSame($unicode, $host->toUnicode());
     }
@@ -246,11 +242,9 @@ final class HostTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $host = Host::createFromUri($uri);
 
@@ -287,18 +281,10 @@ final class HostTest extends TestCase
         ];
     }
 
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Host::createFromUri('http://example.com#foobar');
-    }
-
     /**
      * @dataProvider getIsDomainProvider
      * @covers ::isDomain
      * @covers ::isValidDomain
-     *
      * @param ?string $host
      */
     public function test_host_is_domain(?string $host, bool $expectedIsDomain): void

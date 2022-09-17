@@ -21,8 +21,11 @@ use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\DomainHostInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -46,11 +49,9 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * @deprecated 2.3.0 use the appropriate named constructor
      *
-     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $host a Domain name can not be null
-     *
      * @throws SyntaxError
      */
-    public function __construct($host)
+    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $host)
     {
         if (!$host instanceof HostInterface) {
             $host = new Host($host);
@@ -69,17 +70,12 @@ final class Domain extends Component implements DomainHostInterface
      */
     private function setLabels(): array
     {
-        /**
-         * @var string $host
-         */
+        /** @var string $host */
         $host = $this->host->getContent();
 
         return array_reverse(explode(self::SEPARATOR, $host));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static function __set_state(array $properties): self
     {
         return new self($properties['host']);
@@ -87,10 +83,8 @@ final class Domain extends Component implements DomainHostInterface
 
     /**
      * Returns a new instance from an string or a stringable object.
-     *
-     * @param object|string $host
      */
-    public static function createFromString($host = ''): self
+    public static function createFromString(Stringable|string $host = ''): self
     {
         return self::createFromHost(Host::createFromString($host));
     }
@@ -116,12 +110,8 @@ final class Domain extends Component implements DomainHostInterface
 
     /**
      * Create a new instance from a URI object.
-     *
-     * @param mixed $uri an URI object
-     *
-     * @throws TypeError If the URI object is not supported
      */
-    public static function createFromUri($uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::createFromHost(Host::createFromUri($uri));
     }
@@ -142,81 +132,51 @@ final class Domain extends Component implements DomainHostInterface
         return new self($host);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getContent(): ?string
     {
         return $this->host->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUriComponent(): string
     {
         return (string) $this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function toAscii(): ?string
     {
         return $this->host->toAscii();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function toUnicode(): ?string
     {
         return $this->host->toUnicode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isIp(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isDomain(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getIpVersion(): ?string
     {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getIp(): ?string
     {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function count(): int
     {
         return count($this->labels);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getIterator(): Iterator
     {
         foreach ($this->labels as $label) {
@@ -224,9 +184,6 @@ final class Domain extends Component implements DomainHostInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function get(int $offset): ?string
     {
         if ($offset < 0) {
@@ -236,9 +193,6 @@ final class Domain extends Component implements DomainHostInterface
         return $this->labels[$offset] ?? null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function keys(?string $label = null): array
     {
         if (null === $label) {
@@ -248,24 +202,18 @@ final class Domain extends Component implements DomainHostInterface
         return array_keys($this->labels, $label, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function labels(): array
     {
         return $this->labels;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isAbsolute(): bool
     {
         return count($this->labels) > 1 && '' === reset($this->labels);
     }
 
     /**
-     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $label
+     * @param UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $label
      */
     public function prepend($label): DomainHostInterface
     {
@@ -278,7 +226,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $label
+     * @param UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $label
      */
     public function append($label): DomainHostInterface
     {
@@ -290,9 +238,6 @@ final class Domain extends Component implements DomainHostInterface
         return new self($this->getContent().self::SEPARATOR.$label);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
@@ -303,9 +248,6 @@ final class Domain extends Component implements DomainHostInterface
         return new self($content);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withRootLabel(): DomainHostInterface
     {
         if ('' === reset($this->labels)) {
@@ -315,9 +257,6 @@ final class Domain extends Component implements DomainHostInterface
         return $this->append('');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutRootLabel(): DomainHostInterface
     {
         if ('' !== reset($this->labels)) {
@@ -331,7 +270,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param UriComponentInterface|HostInterface|object|float|int|string|bool|null $label
+     * @param UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $label
      *
      * @throws OffsetOutOfBounds
      */
@@ -369,9 +308,6 @@ final class Domain extends Component implements DomainHostInterface
         return new self(implode(self::SEPARATOR, array_reverse($labels)));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function withoutLabel(int ...$keys): DomainHostInterface
     {
         if ([] === $keys) {
@@ -391,9 +327,7 @@ final class Domain extends Component implements DomainHostInterface
         unset($offset);
 
         $deleted_keys = array_keys(array_count_values($keys));
-        $filter = static function ($key) use ($deleted_keys): bool {
-            return !in_array($key, $deleted_keys, true);
-        };
+        $filter = static fn ($key): bool => !in_array($key, $deleted_keys, true);
 
         return self::createFromLabels(array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
     }

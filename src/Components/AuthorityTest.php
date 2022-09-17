@@ -14,13 +14,13 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use League\Uri\UriString;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use TypeError;
-use function date_create;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function parse_url;
 use function var_export;
 
@@ -142,16 +142,6 @@ final class AuthorityTest extends TestCase
     }
 
     /**
-     * @covers ::__construct
-     */
-    public function testConstructorFailsWithWrongType(): void
-    {
-        $this->expectException(TypeError::class);
-
-        new Authority(date_create());
-    }
-
-    /**
      * @covers ::withContent
      * @covers ::validate
      */
@@ -246,10 +236,9 @@ final class AuthorityTest extends TestCase
      * @covers ::__toString
      * @covers ::getContent
      * @covers ::getUriComponent
-     *
-     * @param ?string $authority
-     * @param ?string $json
-     * @param ?string $content
+    * @param ?string $authority
+    * @param ?string $json
+    * @param ?string $content
     */
     public function testAuthorityStringRepresentation(
         ?string $authority,
@@ -308,11 +297,9 @@ final class AuthorityTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     *
-     * @param mixed   $uri      an URI object
      * @param ?string $expected
      */
-    public function testCreateFromUri($uri, ?string $expected): void
+    public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
         $authority = Authority::createFromUri($uri);
 
@@ -349,13 +336,6 @@ final class AuthorityTest extends TestCase
         ];
     }
 
-    public function testCreateFromUriThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Authority::createFromUri('http://example.com#foobar');
-    }
-
     public function testCreateFromParseUrl(): void
     {
         $instance = Authority::createFromComponents(parse_url('http://user:pass@ExaMplE.CoM:42#foobar'));
@@ -365,15 +345,8 @@ final class AuthorityTest extends TestCase
 
     public function testCreateFromParseUrlWithoutAuthority(): void
     {
-        $instance = Authority::createFromComponents(parse_url('/example.com:42#foobar'));
+        $instance = Authority::createFromComponents(UriString::parse('/example.com:42#foobar'));
 
         self::assertNull($instance->getContent());
-    }
-
-    public function testCreateFromStringThrowsTypeError(): void
-    {
-        $this->expectException(TypeError::class);
-
-        Authority::createFromString(new stdClass());
     }
 }

@@ -18,11 +18,7 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
-use TypeError;
-use function gettype;
-use function is_object;
-use function is_scalar;
-use function method_exists;
+use Stringable;
 use function preg_match;
 use function preg_replace_callback;
 use function rawurldecode;
@@ -32,10 +28,10 @@ use function strtoupper;
 
 abstract class Component implements UriComponentInterface
 {
-    protected const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
-
     protected const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
-
+    protected const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
+    protected const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-\.~]/';
+    protected const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
     protected const REGEXP_PREVENTS_DECODING = ',%
      	2[A-F|1-2|4-9]|
         3[0-9|B|D]|
@@ -45,16 +41,10 @@ abstract class Component implements UriComponentInterface
         7[0-9|E]
     ,ix';
 
-    protected const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-\.~]/';
-
-    protected const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
-
     /**
      * Validate the component content.
-     *
-     * @param object|float|int|string|bool|null $component an URI component
      */
-    protected function validateComponent($component): ?string
+    protected function validateComponent(Stringable|float|int|string|bool|null $component): ?string
     {
         $component = self::filterComponent($component);
         if (null === $component) {
@@ -67,12 +57,9 @@ abstract class Component implements UriComponentInterface
     /**
      * Filter the input component.
      *
-     * @param object|float|int|string|bool|null $component an URI component
-     *
      * @throws SyntaxError If the component can not be converted to a string or null
-     * @throws TypeError   If the component type is not supported
      */
-    protected static function filterComponent($component): ?string
+    protected static function filterComponent(Stringable|float|int|string|bool|null $component): ?string
     {
         if ($component instanceof UriComponentInterface) {
             return $component->getContent();
@@ -80,14 +67,6 @@ abstract class Component implements UriComponentInterface
 
         if (null === $component) {
             return $component;
-        }
-
-        if (is_object($component) && method_exists($component, '__toString')) {
-            $component = (string) $component;
-        }
-
-        if (!is_scalar($component)) {
-            throw new TypeError(sprintf('Expected component to be stringable; received %s.', gettype($component)));
         }
 
         $component = (string) $component;
@@ -103,7 +82,7 @@ abstract class Component implements UriComponentInterface
      */
     protected function decodeComponent(string $str): ?string
     {
-        return preg_replace_callback(self::REGEXP_ENCODED_CHARS, [$this, 'decodeMatches'], $str);
+        return preg_replace_callback(self::REGEXP_ENCODED_CHARS, $this->decodeMatches(...), $str);
     }
 
     /**
@@ -120,13 +99,11 @@ abstract class Component implements UriComponentInterface
 
     /**
      * Returns the component as converted for RFC3986.
-     *
-     * @param ?string $str
      */
     protected function encodeComponent(?string $str, string $regexp): ?string
     {
         if (null !== $str && 1 === preg_match(self::REGEXP_NO_ENCODING, $str)) {
-            return preg_replace_callback($regexp, [$this, 'encodeMatches'], $str) ?? rawurlencode($str);
+            return preg_replace_callback($regexp, $this->encodeMatches(...), $str) ?? rawurlencode($str);
         }
 
         return $str;
@@ -140,44 +117,24 @@ abstract class Component implements UriComponentInterface
         return rawurlencode($matches[0]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function jsonSerialize(): ?string
     {
         return $this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     abstract public function getUriComponent(): string;
 
-    /**
-     * {@inheritDoc}
-     */
     abstract public function getContent(): ?string;
 
-    /**
-     * {@inheritDoc}
-     */
     public function toString(): string
     {
         return (string) $this->getContent();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function __toString(): string
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return static
-     */
     abstract public function withContent($content): UriComponentInterface;
 }

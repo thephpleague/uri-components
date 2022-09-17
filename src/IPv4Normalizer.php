@@ -40,7 +40,7 @@ final class IPv4Normalizer
 {
     private const REGEXP_IPV4_HOST = '/
         (?(DEFINE) # . is missing as it is used to separate labels
-            (?<hexadecimal>0x[[:xdigit:]]*) 
+            (?<hexadecimal>0x[[:xdigit:]]*)
             (?<octal>0[0-7]*)
             (?<decimal>\d+)
             (?<ipv4_part>(?:(?&hexadecimal)|(?&octal)|(?&decimal))*)
@@ -54,19 +54,10 @@ final class IPv4Normalizer
         '/^(?<number>\d+)$/' => 10,
     ];
 
-    /**
-     * @var IPv4Calculator
-     */
-    private $calculator;
+    private mixed $maxIpv4Number;
 
-    /**
-     * @var mixed the maximum IPV4 number.
-     */
-    private $maxIpv4Number;
-
-    public function __construct(IPv4Calculator $calculator)
+    public function __construct(private IPv4Calculator $calculator)
     {
-        $this->calculator = $calculator;
         $this->maxIpv4Number = $calculator->sub($calculator->pow(2, 32), 1);
     }
 
@@ -127,24 +118,17 @@ final class IPv4Normalizer
      * otherwise returns the uri instance unchanged.
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
-     *
-     * @param UriInterface|Psr7UriInterface $uri
-     *
-     * @return UriInterface|Psr7UriInterface
      */
-    public function normalizeUri($uri)
+    public function normalizeUri(UriInterface|Psr7UriInterface $uri): UriInterface|Psr7UriInterface
     {
         $host = Host::createFromUri($uri);
         $normalizedHost = $this->normalizeHost($host)->getContent();
-        if ($normalizedHost === $host->getContent()) {
-            return $uri;
-        }
 
-        if ($uri instanceof UriInterface) {
-            return $uri->withHost($normalizedHost);
-        }
-
-        return $uri->withHost((string) $normalizedHost);
+        return match (true) {
+            $normalizedHost === $host->getContent() => $uri,
+            $uri instanceof UriInterface => $uri->withHost($normalizedHost),
+            default => $uri->withHost((string) $normalizedHost),
+        };
     }
 
     /**
@@ -181,7 +165,7 @@ final class IPv4Normalizer
             return $host;
         }
 
-        if ('.' === substr($hostString, -1, 1)) {
+        if (str_ends_with($hostString, '.')) {
             $hostString = substr($hostString, 0, -1);
         }
 
@@ -242,7 +226,7 @@ final class IPv4Normalizer
      *
      * @return mixed Returns null if it can not correctly convert the label
      */
-    private function labelToNumber(string $label)
+    private function labelToNumber(string $label): mixed
     {
         foreach (self::REGEXP_IPV4_NUMBER_PER_BASE as $regexp => $base) {
             if (1 !== preg_match($regexp, $label, $matches)) {
@@ -269,10 +253,8 @@ final class IPv4Normalizer
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      *
      * @param mixed $ipAddress the number representation of the IPV4address
-     *
-     * @return string the string representation of the IPV4address
      */
-    private function long2Ip($ipAddress): string
+    private function long2Ip(mixed $ipAddress): string
     {
         $output = '';
         for ($offset = 0; $offset < 4; $offset++) {
