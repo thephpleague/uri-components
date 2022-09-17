@@ -76,7 +76,7 @@ final class Query extends Component implements QueryInterface
     /**
      * Returns a new instance from the result of PHP's parse_str.
      */
-    public static function createFromParams(iterable|object $params = [], string $separator = '&'): self
+    public static function createFromParams(array|object $params = [], string $separator = '&'): self
     {
         if ($params instanceof QueryInterface) {
             /** @var array $queryParams */
