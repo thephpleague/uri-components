@@ -31,9 +31,6 @@ final class Scheme extends Component
 
     private readonly ?string $scheme;
 
-    /**
-     * New instance.
-     */
     public function __construct(float|int|Stringable|string|bool|null $scheme = null)
     {
         $this->scheme = $this->validate($scheme);
@@ -48,14 +45,23 @@ final class Scheme extends Component
     {
         $scheme = self::filterComponent($scheme);
         if (null === $scheme) {
-            return $scheme;
+            return null;
         }
 
-        if (1 === preg_match(self::REGEXP_SCHEME, $scheme)) {
-            return strtolower($scheme);
+        static $inMemoryCache = [];
+        if (isset($inMemoryCache[$scheme])) {
+            return $inMemoryCache[$scheme];
         }
 
-        throw new SyntaxError(sprintf("The scheme '%s' is invalid.", $scheme));
+        if (1 !== preg_match(self::REGEXP_SCHEME, $scheme)) {
+            throw new SyntaxError(sprintf("The scheme '%s' is invalid.", $scheme));
+        }
+
+        if (100 > count($inMemoryCache)) {
+            unset($inMemoryCache[array_key_first($inMemoryCache)]);
+        }
+
+        return $inMemoryCache[$scheme] = strtolower($scheme);
     }
 
     public static function __set_state(array $properties): self

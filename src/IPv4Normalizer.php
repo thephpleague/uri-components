@@ -47,7 +47,6 @@ final class IPv4Normalizer
         )
         ^(?:(?&ipv4_part)\.){0,3}(?&ipv4_part)\.?$
     /x';
-
     private const REGEXP_IPV4_NUMBER_PER_BASE = [
         '/^0x(?<number>[[:xdigit:]]*)$/' => 16,
         '/^0(?<number>[0-7]*)$/' => 8,
@@ -95,22 +94,15 @@ final class IPv4Normalizer
      */
     public static function createFromServer(): self
     {
-        if (extension_loaded('gmp')) {
-            return self::createFromGMP();
-        }
-
-        if (extension_loaded('bcmath')) {
-            return self::createFromBCMath();
-        }
-
-        if (4 < PHP_INT_SIZE) {
-            return self::createFromNative();
-        }
-
-        throw new IPv4CalculatorMissing(sprintf(
-            'No %s found. Use a x.64 PHP build or install the GMP or the BCMath extension.',
-            IPv4Calculator::class
-        ));
+        return match (true) {
+            extension_loaded('gmp') => self::createFromGMP(),
+            extension_loaded('bcmath') => self::createFromBCMath(),
+            4 < PHP_INT_SIZE => self::createFromNative(),
+            default => throw new IPv4CalculatorMissing(sprintf(
+                'No %s found. Use a x.64 PHP build or install the GMP or the BCMath extension.',
+                IPv4Calculator::class
+            ))
+        };
     }
 
     /**
@@ -141,6 +133,7 @@ final class IPv4Normalizer
     {
         $host = Host::createFromAuthority($authority);
         $normalizeHost = $this->normalizeHost($host)->getContent();
+
         if ($normalizeHost === $host->getContent()) {
             return $authority;
         }

@@ -54,10 +54,7 @@ final class DataPath extends Component implements DataPathInterface
     private const DEFAULT_PARAMETER = 'charset=us-ascii';
     private const REGEXP_MIMETYPE = ',^\w+/[-.\w]+(?:\+[-.\w]+)?$,';
     private const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
-    private const REGEXP_DATAPATH_ENCODING = '/
-        (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@]+
-        |%(?![A-Fa-f0-9]{2}))
-    /x';
+    private const REGEXP_DATAPATH_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:\/@]+|%(?![A-Fa-f0-9]{2})/x';
 
     private Path $path;
     private string $mimetype;
@@ -72,10 +69,9 @@ final class DataPath extends Component implements DataPathInterface
     public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool $path = '')
     {
         $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
-        $str = $this->path->__toString();
         $is_binary_data = false;
-        [$mediatype, $this->document] = explode(',', $str, 2) + [1 => ''];
-        [$mimetype, $parameters] = explode(';', $mediatype, 2) + [1 => ''];
+        [$mediaType, $this->document] = explode(',', $this->path->__toString(), 2) + [1 => ''];
+        [$mimetype, $parameters] = explode(';', $mediaType, 2) + [1 => ''];
         $this->mimetype = $this->filterMimeType($mimetype);
         $this->parameters = $this->filterParameters($parameters, $is_binary_data);
         $this->is_binary_data = $is_binary_data;
@@ -85,7 +81,6 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Filter the data path.
      *
-     * @param  ?string     $path
      * @throws SyntaxError If the path is null
      * @throws SyntaxError If the path is not valid according to RFC2937
      */
