@@ -25,9 +25,9 @@ use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
 use League\Uri\IPv4Normalizer;
-use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use function compact;
 use function explode;
 use function filter_var;
 use function in_array;
@@ -106,38 +106,62 @@ final class Host extends Component implements IpHostInterface
     private const ADDRESS_BLOCK = "\xfe\x80";
 
     private ?string $host;
-    private ?string $ip_version = null;
-    private bool $has_zone_identifier = false;
-    private bool $is_domain = false;
+    private bool $is_domain;
+    private ?string $ip_version;
+    private bool $has_zone_identifier;
 
-    /**
-     * New instance.
-     */
     public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $host = null)
     {
+        [
+            'host' => $this->host,
+            'is_domain' => $this->is_domain,
+            'ip_version' => $this->ip_version,
+            'has_zone_identifier' => $this->has_zone_identifier,
+        ] = $this->parse($host);
+    }
+
+    /**
+     *
+     * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
+     */
+    private function parse(float|UriComponentInterface|Stringable|bool|int|string|null $host): array
+    {
         $host = self::filterComponent($host);
-        $this->host = $host;
+        $is_domain = false;
+        $ip_version = null;
+        $has_zone_identifier = false;
         if (null === $host || '' === $host) {
-            return;
+            return compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
+        }
+
+        static $inMemoryCache = [];
+        if (isset($inMemoryCache[$host])) {
+            return $inMemoryCache[$host];
+        }
+
+        if (100 < count($inMemoryCache)) {
+            unset($inMemoryCache[array_key_first($inMemoryCache)]);
         }
 
         if (false !== filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            $this->ip_version = '4';
-            return;
+            $ip_version = '4';
+
+            return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
         }
 
-        if ('[' === $host[0] && ']' === substr($host, -1)) {
+        if ('[' === $host[0] && str_ends_with($host, ']')) {
             $ip_host = substr($host, 1, -1);
             if ($this->isValidIpv6Hostname($ip_host)) {
-                $this->ip_version = '6';
-                $this->has_zone_identifier = str_contains($ip_host, '%');
+                $ip_version = '6';
+                $has_zone_identifier = str_contains($ip_host, '%');
 
-                return;
+                return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
             }
 
             if (1 === preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
-                $this->ip_version = $matches['version'];
-                return;
+                $ip_version = $matches['version'];
+
+                return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
             }
 
             throw new SyntaxError(sprintf('`%s` is an invalid IP literal format.', $host));
@@ -151,10 +175,13 @@ final class Host extends Component implements IpHostInterface
         }
 
         if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
-            $this->host = $domain_name;
-            $this->is_domain = $this->isValidDomain($domain_name);
-            $this->toUnicode();
-            return;
+            $host = $domain_name;
+            $is_domain = $this->isValidDomain($domain_name);
+            if (str_contains($host, 'xn--')) {
+                Idna::toUnicode($host, Idna::IDNA2008_UNICODE)->result();
+            }
+
+            return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
         }
 
         if ($is_ascii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
@@ -166,8 +193,11 @@ final class Host extends Component implements IpHostInterface
             throw IdnaConversionFailed::dueToIDNAError($domain_name, $info);
         }
 
-        $this->host = $info->result();
-        $this->is_domain = $this->isValidDomain($this->host);
+        $unicodeHost = $host;
+        $host = $info->result();
+        $is_domain = $this->isValidDomain($host);
+
+        return $inMemoryCache[$unicodeHost] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
     }
 
     /**
@@ -270,7 +300,7 @@ final class Host extends Component implements IpHostInterface
     }
 
     /**
-     * Create a new instance from a Authority object.
+     * Create a new instance from an Authority object.
      */
     public static function createFromAuthority(AuthorityInterface $authority): self
     {
@@ -367,7 +397,7 @@ final class Host extends Component implements IpHostInterface
 
         [$ipv6] = explode('%', substr((string) $this->host, 1, -1));
 
-        return static::createFromIp($ipv6);
+        return self::createFromIp($ipv6);
     }
 
     public function withContent($content): UriComponentInterface

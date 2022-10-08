@@ -57,7 +57,7 @@ final class Scheme extends Component
             throw new SyntaxError(sprintf("The scheme '%s' is invalid.", $scheme));
         }
 
-        if (100 > count($inMemoryCache)) {
+        if (100 < count($inMemoryCache)) {
             unset($inMemoryCache[array_key_first($inMemoryCache)]);
         }
 
