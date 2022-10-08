@@ -4,7 +4,7 @@
 /.gitattributes     export-ignore
 /.github            export-ignore
 /.gitignore         export-ignore
-/.php_cs            export-ignore
+/.php-cs-fixer.php  export-ignore
 /benchmark          export-ignore
 /build              export-ignore
 /test_data          export-ignore
