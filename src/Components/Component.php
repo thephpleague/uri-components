@@ -141,5 +141,13 @@ abstract class Component implements UriComponentInterface
         return $this->toString();
     }
 
-    abstract public function withContent($content): UriComponentInterface;
+    public function withContent($content): UriComponentInterface
+    {
+        $content = static::filterComponent($content);
+        if ($content === $this->value()) {
+            return $this;
+        }
+
+        return new static($content);
+    }
 }

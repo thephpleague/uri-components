@@ -108,15 +108,12 @@ final class Path extends Component implements PathInterface
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
-        if (null === $content) {
-            throw new SyntaxError('The path component can not be `null`.');
-        }
 
-        if ($content === $this->value()) {
-            return $this;
-        }
-
-        return new self($content);
+        return match (true) {
+            null === $content => throw new SyntaxError('The path can not be null.'),
+            $content === $this->value() => $this,
+            default => new self($content),
+        };
     }
 
     public function withoutDotSegments(): PathInterface

@@ -107,14 +107,4 @@ final class Port extends Component implements PortInterface
     {
         return $this->port;
     }
-
-    public function withContent($content): UriComponentInterface
-    {
-        $content = $this->validate(self::filterComponent($content));
-        if ($content === $this->port) {
-            return $this;
-        }
-
-        return new self($content);
-    }
 }

@@ -75,14 +75,4 @@ final class Fragment extends Component implements FragmentInterface
     {
         return $this->fragment;
     }
-
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-        if ($content === $this->getContent()) {
-            return $this;
-        }
-
-        return new self($content);
-    }
 }

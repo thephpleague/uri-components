@@ -399,14 +399,4 @@ final class Host extends Component implements IpHostInterface
 
         return self::createFromIp($ipv6);
     }
-
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-        if ($content === $this->value()) {
-            return $this;
-        }
-
-        return new self($content);
-    }
 }
