@@ -284,7 +284,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
         return match (true) {
             null === $content => throw new SyntaxError('The path can not be null.'),
-            $content === $this->path->getContent() => $this,
+            $content === $this->value() => $this,
             default => new self($content),
         };
     }

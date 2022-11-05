@@ -235,16 +235,6 @@ final class Domain extends Component implements DomainHostInterface
         return new self($this->value().self::SEPARATOR.$label);
     }
 
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-        if ($content === $this->host->value()) {
-            return $this;
-        }
-
-        return new self($content);
-    }
-
     public function withRootLabel(): DomainHostInterface
     {
         $key = array_key_first($this->labels);

@@ -400,15 +400,12 @@ final class DataPath extends Component implements DataPathInterface
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
-        if (null === $content) {
-            throw new SyntaxError('The path conten can not be null.');
-        }
 
-        if ($content === $this->path->value()) {
-            return $this;
-        }
-
-        return new self($content);
+        return match (true) {
+            null === $content => throw new SyntaxError('The path can not be null.'),
+            $content === $this->value() => $this,
+            default => new self($content),
+        };
     }
 
     public function withParameters(Stringable|string|float|bool|int $parameters): DataPathInterface

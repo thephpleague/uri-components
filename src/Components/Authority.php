@@ -207,19 +207,6 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     /**
-     * @param UriComponentInterface|Stringable|float|int|string|bool|null $content
-     */
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-        if ($content === $this->value()) {
-            return $this;
-        }
-
-        return new self($content);
-    }
-
-    /**
      * @param UriComponentInterface|Stringable|float|int|string|bool|null $host
      */
     public function withHost($host): AuthorityInterface
