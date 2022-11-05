@@ -33,8 +33,8 @@ final class UserInfo extends Component implements UserInfoInterface
     private const REGEXP_PASS_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:]+|%(?![A-Fa-f0-9]{2})/x';
     private const REGEXP_ENCODED_CHAR = ',%[A-Fa-f0-9]{2},';
 
-    private ?string $user;
-    private ?string $pass;
+    private readonly ?string $user;
+    private readonly ?string $pass;
 
     /**
      * New instance.
@@ -44,10 +44,12 @@ final class UserInfo extends Component implements UserInfoInterface
         #[SensitiveParameter] Stringable|float|int|string|bool|null $pass = null
     ) {
         $this->user = $this->validateComponent($user);
-        $this->pass = $this->validateComponent($pass);
+        $pass = $this->validateComponent($pass);
         if (null === $this->user || '' === $this->user) {
-            $this->pass = null;
+            $pass = null;
         }
+
+        $this->pass = $pass;
     }
 
     public static function __set_state(array $properties): self
@@ -174,10 +176,6 @@ final class UserInfo extends Component implements UserInfoInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->user = $user;
-        $clone->pass = $pass;
-
-        return $clone;
+        return new self($user, $pass);
     }
 }

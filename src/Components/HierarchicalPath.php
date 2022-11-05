@@ -34,7 +34,6 @@ use function array_pop;
 use function array_unshift;
 use function count;
 use function dirname;
-use function end;
 use function explode;
 use function implode;
 use function ltrim;
@@ -54,9 +53,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     private const SEPARATOR = '/';
     private const IS_ABSOLUTE = 1;
     private const IS_RELATIVE = 0;
-    private PathInterface $path;
+    private readonly PathInterface $path;
     /** @var string[] */
-    private array $segments;
+    private readonly array $segments;
 
     /**
      * @deprecated 2.3.0
@@ -419,10 +418,12 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
             return $this;
         }
 
+        $segments = $this->segments;
+
         return new self(
             rtrim($path->__toString(), self::SEPARATOR)
             .self::SEPARATOR
-            .array_pop($this->segments)
+            .array_pop($segments)
         );
     }
 
@@ -462,7 +463,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         /** @var string $basename */
-        $basename = end($this->segments);
+        $basename = $this->segments[array_key_last($this->segments)];
         [$ext, $param] = explode(';', $basename, 2) + [1 => null];
         if ('' === $ext) {
             return $this;
