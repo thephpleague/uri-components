@@ -46,7 +46,7 @@ final class UriModifier
         UriComponentInterface|Stringable|float|int|string|bool|null $query
     ): Psr7UriInterface|UriInterface {
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->append($query)->getContent(), $uri)
+            self::normalizeComponent(Query::createFromUri($uri)->append($query)->value(), $uri)
         );
     }
 
@@ -58,7 +58,7 @@ final class UriModifier
         UriComponentInterface|Stringable|float|int|string|bool|null $query
     ): Psr7UriInterface|UriInterface {
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->merge($query)->getContent(), $uri)
+            self::normalizeComponent(Query::createFromUri($uri)->merge($query)->value(), $uri)
         );
     }
 
@@ -68,7 +68,7 @@ final class UriModifier
     public static function removePairs(Psr7UriInterface|UriInterface $uri, string ...$keys): Psr7UriInterface|UriInterface
     {
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->withoutPair(...$keys)->getContent(), $uri)
+            self::normalizeComponent(Query::createFromUri($uri)->withoutPair(...$keys)->value(), $uri)
         );
     }
 
@@ -81,7 +81,7 @@ final class UriModifier
     public static function removeEmptyPairs(Psr7UriInterface|UriInterface $uri): Psr7UriInterface|UriInterface
     {
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->withoutEmptyPairs()->getContent(), $uri)
+            self::normalizeComponent(Query::createFromUri($uri)->withoutEmptyPairs()->value(), $uri)
         );
     }
 
@@ -91,7 +91,7 @@ final class UriModifier
     public static function removeParams(Psr7UriInterface|UriInterface $uri, string ...$keys): Psr7UriInterface|UriInterface
     {
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->withoutParam(...$keys)->getContent(), $uri)
+            self::normalizeComponent(Query::createFromUri($uri)->withoutParam(...$keys)->value(), $uri)
         );
     }
 
@@ -100,7 +100,7 @@ final class UriModifier
      */
     public static function sortQuery(Psr7UriInterface|UriInterface $uri): Psr7UriInterface|UriInterface
     {
-        return $uri->withQuery(self::normalizeComponent(Query::createFromUri($uri)->sort()->getContent(), $uri));
+        return $uri->withQuery(self::normalizeComponent(Query::createFromUri($uri)->sort()->value(), $uri));
     }
 
     /*********************************
@@ -112,7 +112,7 @@ final class UriModifier
      */
     public static function addRootLabel(Psr7UriInterface|UriInterface $uri): Psr7UriInterface|UriInterface
     {
-        return $uri->withHost(self::normalizeComponent(Domain::createFromUri($uri)->withRootLabel()->getContent(), $uri));
+        return $uri->withHost(self::normalizeComponent(Domain::createFromUri($uri)->withRootLabel()->value(), $uri));
     }
 
     /**
@@ -124,18 +124,18 @@ final class UriModifier
     {
         $host = Host::createFromUri($uri);
         $label = null === $label ? Host::createFromNull() : Host::createFromString($label);
-        if (null === $label->getContent()) {
+        if (null === $label->value()) {
             return $uri;
         }
 
         if ($host->isDomain()) {
-            $component = Domain::createFromHost($host)->append($label)->getContent();
+            $component = Domain::createFromHost($host)->append($label)->value();
 
             return $uri->withHost(self::normalizeComponent($component, $uri));
         }
 
         if ($host->isIpv4()) {
-            return $uri->withHost($host->getContent().'.'.ltrim($label->getContent(), '.'));
+            return $uri->withHost($host->value().'.'.ltrim($label->value(), '.'));
         }
 
         throw new SyntaxError(sprintf('The URI host %s can not be appended.', $host->__toString()));
@@ -146,7 +146,7 @@ final class UriModifier
      */
     public static function hostToAscii(Psr7UriInterface|UriInterface $uri): Psr7UriInterface|UriInterface
     {
-        $host = Host::createFromUri($uri)->getContent();
+        $host = Host::createFromUri($uri)->value();
 
         return $uri->withHost(self::normalizeComponent($host, $uri));
     }
@@ -170,18 +170,18 @@ final class UriModifier
     {
         $host = Host::createFromUri($uri);
         $label = null === $label ? Host::createFromNull() : Host::createFromString($label);
-        if (null === $label->getContent()) {
+        if (null === $label->value()) {
             return $uri;
         }
 
         if ($host->isDomain()) {
-            $component = Domain::createFromHost($host)->prepend($label)->getContent();
+            $component = Domain::createFromHost($host)->prepend($label)->value();
 
             return $uri->withHost($component);
         }
 
         if ($host->isIpv4()) {
-            return $uri->withHost(rtrim($label->getContent(), '.').'.'.$host->getContent());
+            return $uri->withHost(rtrim($label->value(), '.').'.'.$host->value());
         }
 
         throw new SyntaxError(sprintf('The URI host %s can not be prepended.', (string) $host));
@@ -193,7 +193,7 @@ final class UriModifier
     public static function removeLabels(Psr7UriInterface|UriInterface $uri, int ...$keys): Psr7UriInterface|UriInterface
     {
         return $uri->withHost(
-            self::normalizeComponent(Domain::createFromUri($uri)->withoutLabel(...$keys)->getContent(), $uri)
+            self::normalizeComponent(Domain::createFromUri($uri)->withoutLabel(...$keys)->value(), $uri)
         );
     }
 
@@ -203,7 +203,7 @@ final class UriModifier
     public static function removeRootLabel(Psr7UriInterface|UriInterface $uri): Psr7UriInterface|UriInterface
     {
         return $uri->withHost(
-            self::normalizeComponent(Domain::createFromUri($uri)->withoutRootLabel()->getContent(), $uri)
+            self::normalizeComponent(Domain::createFromUri($uri)->withoutRootLabel()->value(), $uri)
         );
     }
 
@@ -213,7 +213,7 @@ final class UriModifier
     public static function removeZoneId(Psr7UriInterface|UriInterface $uri): Psr7UriInterface|UriInterface
     {
         return $uri->withHost(
-            self::normalizeComponent(Host::createFromUri($uri)->withoutZoneIdentifier()->getContent(), $uri)
+            self::normalizeComponent(Host::createFromUri($uri)->withoutZoneIdentifier()->value(), $uri)
         );
     }
 
@@ -225,7 +225,7 @@ final class UriModifier
         int $offset,
         UriComponentInterface|Stringable|float|int|string|bool|null $label
     ): Psr7UriInterface|UriInterface {
-        $host = Domain::createFromUri($uri)->withLabel($offset, $label)->getContent();
+        $host = Domain::createFromUri($uri)->withLabel($offset, $label)->value();
 
         return $uri->withHost(self::normalizeComponent($host, $uri));
     }

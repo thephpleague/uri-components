@@ -35,7 +35,7 @@ final class UserInfoTest extends TestCase
      *
      * @covers ::__construct
      * @covers ::validateComponent
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::__toString
      * @covers ::decodeMatches
      * @covers ::encodeMatches
@@ -169,7 +169,7 @@ final class UserInfoTest extends TestCase
     ): void {
         $conn = (new UserInfo($user))->withContent($str);
         self::assertSame($expected_str, (string) $conn);
-        self::assertSame((new UserInfo($expected_user, $expected_pass))->getContent(), $conn->getContent());
+        self::assertSame((new UserInfo($expected_user, $expected_pass))->value(), $conn->value());
     }
 
     public function createFromStringProvider(): array
@@ -254,7 +254,7 @@ final class UserInfoTest extends TestCase
     {
         $userInfo = UserInfo::createFromUri($uri);
 
-        self::assertSame($expected, $userInfo->getContent());
+        self::assertSame($expected, $userInfo->value());
     }
 
     public function getURIProvider(): iterable

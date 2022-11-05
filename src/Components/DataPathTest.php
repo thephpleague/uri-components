@@ -153,7 +153,7 @@ final class DataPathTest extends TestCase
      * @dataProvider validPathContent
      *
      * @covers ::filterPath
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::__toString
      */
     public function testDefaultConstructor(string $path, string $expected): void
@@ -458,7 +458,7 @@ final class DataPathTest extends TestCase
     {
         $path = DataPath::createFromUri($uri);
 
-        self::assertSame($expected, $path->getContent());
+        self::assertSame($expected, $path->value());
     }
 
     public function getURIProvider(): iterable
@@ -510,7 +510,7 @@ final class DataPathTest extends TestCase
         $decodedPath = 'text/plain;charset=us-ascii,Bonjour le monde%21';
         $path = DataPath::createFromString($encodedPath);
 
-        self::assertSame($encodedPath, $path->getContent());
+        self::assertSame($encodedPath, $path->value());
         self::assertSame($decodedPath, $path->decoded());
     }
 }

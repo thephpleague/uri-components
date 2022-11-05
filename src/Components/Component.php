@@ -62,7 +62,7 @@ abstract class Component implements UriComponentInterface
     protected static function filterComponent(Stringable|float|int|string|bool|null $component): ?string
     {
         if ($component instanceof UriComponentInterface) {
-            return $component->getContent();
+            return $component->value();
         }
 
         if (null === $component) {
@@ -119,16 +119,21 @@ abstract class Component implements UriComponentInterface
 
     public function jsonSerialize(): ?string
     {
-        return $this->getContent();
+        return $this->value();
     }
+
+    abstract public function value(): ?string;
 
     abstract public function getUriComponent(): string;
 
-    abstract public function getContent(): ?string;
+    public function getContent(): ?string
+    {
+        return $this->value();
+    }
 
     public function toString(): string
     {
-        return (string) $this->getContent();
+        return (string) $this->value();
     }
 
     public function __toString(): string

@@ -165,14 +165,14 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->path->hasTrailingSlash();
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
-        return $this->path->getContent();
+        return $this->path->value();
     }
 
     public function getUriComponent(): string
     {
-        return (string) $this->getContent();
+        return (string) $this->value();
     }
 
     public function decoded(): string
@@ -414,7 +414,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
             $path = new Path($path);
         }
 
-        if ($path->getContent() === $this->getDirname()) {
+        if ($path->value() === $this->getDirname()) {
             return $this;
         }
 

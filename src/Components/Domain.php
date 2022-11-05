@@ -57,7 +57,7 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         if (!$host->isDomain()) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host->getContent() ?? 'null'));
+            throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host->value() ?? 'null'));
         }
 
         $this->host = $host;
@@ -70,7 +70,7 @@ final class Domain extends Component implements DomainHostInterface
     private function setLabels(): array
     {
         /** @var string $host */
-        $host = $this->host->getContent();
+        $host = $this->host->value();
 
         return array_reverse(explode(self::SEPARATOR, $host));
     }
@@ -131,14 +131,14 @@ final class Domain extends Component implements DomainHostInterface
         return new self($host);
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
-        return $this->host->getContent();
+        return $this->host->value();
     }
 
     public function getUriComponent(): string
     {
-        return (string) $this->getContent();
+        return (string) $this->value();
     }
 
     public function toAscii(): ?string
@@ -219,7 +219,7 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        return new self($label.self::SEPARATOR.$this->getContent());
+        return new self($label.self::SEPARATOR.$this->value());
     }
 
     /**
@@ -232,13 +232,13 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        return new self($this->getContent().self::SEPARATOR.$label);
+        return new self($this->value().self::SEPARATOR.$label);
     }
 
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
-        if ($content === $this->host->getContent()) {
+        if ($content === $this->host->value()) {
             return $this;
         }
 
@@ -296,7 +296,7 @@ final class Domain extends Component implements DomainHostInterface
             $label = new Host($label);
         }
 
-        $label = $label->getContent();
+        $label = $label->value();
         if ($label === $this->labels[$key]) {
             return $this;
         }

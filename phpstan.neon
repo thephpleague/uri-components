@@ -16,4 +16,5 @@ parameters:
           path: src/IPv4Calculators/NativeCalculator.php
         - message: '#function gmp_(.*)? expects (GMP|int)#'
           path: src/IPv4Calculators/GMPCalculator.php
+        - '#^Call to deprecated method withContent\(\) of#'
     reportUnmatchedIgnoredErrors: true
