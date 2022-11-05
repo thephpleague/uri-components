@@ -51,9 +51,9 @@ use const PHP_QUERY_RFC3986;
 final class Query extends Component implements QueryInterface
 {
     /** @var array<int, array{0:string, 1:string|null}> */
-    private array $pairs;
-    private string $separator;
-    private ?array $params;
+    private readonly array $pairs;
+    private readonly string $separator;
+    private readonly ?array $params;
 
     /**
      * Returns a new instance.
@@ -61,16 +61,13 @@ final class Query extends Component implements QueryInterface
     private function __construct(Stringable|string|float|int|null|bool $query = null, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986)
     {
         $this->pairs = QueryString::parse($query, $separator, $enc_type);
+        $this->params = QueryString::convert($this->pairs);
         $this->separator = $separator;
     }
 
     public static function __set_state(array $properties): self
     {
-        $instance = new self();
-        $instance->pairs = $properties['pairs'];
-        $instance->separator = $properties['separator'];
-
-        return $instance;
+        return self::createFromPairs($properties['pairs'], $properties['separator']);
     }
 
     /**
@@ -223,7 +220,6 @@ final class Query extends Component implements QueryInterface
 
     public function params(?string $key = null)
     {
-        $this->params = $this->params ?? QueryString::convert($this->pairs);
         if (null === $key) {
             return $this->params;
         }
@@ -241,10 +237,7 @@ final class Query extends Component implements QueryInterface
             throw new SyntaxError('The separator character can not be the empty string.');
         }
 
-        $clone = clone $this;
-        $clone->separator = $separator;
-
-        return $clone;
+        return self::createFromPairs($this->pairs, $separator);
     }
 
     public function withContent($content): UriComponentInterface
@@ -269,10 +262,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->pairs = $pairs;
-
-        return $clone;
+        return self::createFromPairs($pairs);
     }
 
     /**
@@ -297,11 +287,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->pairs = $pairs;
-        $new->separator = $this->separator;
-
-        return $new;
+        return self::createFromPairs($pairs, $this->separator);
     }
 
     /**
@@ -323,11 +309,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->pairs = $pairs;
-        $new->separator = $this->separator;
-
-        return $new;
+        return self::createFromPairs($pairs);
     }
 
     /**
@@ -345,11 +327,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->pairs = $pairs;
-        $new->separator = $this->separator;
-
-        return $new;
+        return self::createFromPairs($pairs, $this->separator);
     }
 
     /**
@@ -378,11 +356,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->pairs = $pairs;
-        $new->separator = $this->separator;
-
-        return $new;
+        return self::createFromPairs($pairs, $this->separator);
     }
 
     /**
@@ -434,11 +408,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->pairs = $pairs;
-        $new->separator = $this->separator;
-
-        return $new;
+        return self::createFromPairs($pairs, $this->separator);
     }
 
     /**
@@ -484,22 +454,15 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->pairs = array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keys_to_remove, true));
-        $new->separator = $this->separator;
-
-        return $new;
+        return self::createFromPairs(
+            array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keys_to_remove, true)),
+            $this->separator
+        );
     }
 
     public function appendTo(string $key, Stringable|string|float|int|bool|null $value): QueryInterface
     {
-        $pair = [$key, $this->filterPair($value)];
-        $new = new self();
-        $new->pairs = $this->pairs;
-        $new->pairs[] = $pair;
-        $new->separator = $this->separator;
-
-        return $new;
+        return self::createFromPairs([...$this->pairs, [$key, $this->filterPair($value)]], $this->separator);
     }
 
     /**
@@ -516,11 +479,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->separator = $this->separator;
-        $new->pairs = array_filter($pairs, $this->filterEmptyValue(...));
-
-        return $new;
+        return self::createFromPairs(array_filter($pairs, $this->filterEmptyValue(...)), $this->separator);
     }
 
     /**
@@ -546,10 +505,6 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $new = new self();
-        $new->separator = $this->separator;
-        $new->pairs = $pairs;
-
-        return $new;
+        return self::createFromPairs($pairs, $this->separator);
     }
 }

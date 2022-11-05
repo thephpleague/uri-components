@@ -105,10 +105,10 @@ final class Host extends Component implements IpHostInterface
     private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
     private const ADDRESS_BLOCK = "\xfe\x80";
 
-    private ?string $host;
-    private bool $is_domain;
-    private ?string $ip_version;
-    private bool $has_zone_identifier;
+    private readonly ?string $host;
+    private readonly bool $is_domain;
+    private readonly ?string $ip_version;
+    private readonly bool $has_zone_identifier;
 
     public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $host = null)
     {

@@ -35,16 +35,15 @@ use function array_shift;
 use function count;
 use function explode;
 use function implode;
-use function reset;
 use function sprintf;
 
 final class Domain extends Component implements DomainHostInterface
 {
     private const SEPARATOR = '.';
 
-    private HostInterface $host;
+    private readonly HostInterface $host;
     /** @var string[] */
-    private array $labels;
+    private readonly array $labels;
 
     /**
      * @deprecated 2.3.0 use the appropriate named constructor
@@ -207,7 +206,7 @@ final class Domain extends Component implements DomainHostInterface
 
     public function isAbsolute(): bool
     {
-        return count($this->labels) > 1 && '' === reset($this->labels);
+        return count($this->labels) > 1 && '' === $this->labels[array_key_first($this->labels)];
     }
 
     /**
@@ -248,7 +247,8 @@ final class Domain extends Component implements DomainHostInterface
 
     public function withRootLabel(): DomainHostInterface
     {
-        if ('' === reset($this->labels)) {
+        $key = array_key_first($this->labels);
+        if ('' === $this->labels[$key]) {
             return $this;
         }
 
@@ -257,7 +257,8 @@ final class Domain extends Component implements DomainHostInterface
 
     public function withoutRootLabel(): DomainHostInterface
     {
-        if ('' !== reset($this->labels)) {
+        $key = array_key_first($this->labels);
+        if ('' !== $this->labels[$key]) {
             return $this;
         }
 
@@ -347,10 +348,6 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->labels = $labels;
-        $clone->host = [] === $labels ? Host::createFromNull() : Host::createFromString(implode('.', array_reverse($labels)));
-
-        return $clone;
+        return new self([] === $labels ? Host::createFromNull() : Host::createFromString(implode('.', array_reverse($labels))));
     }
 }

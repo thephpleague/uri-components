@@ -18,8 +18,10 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
+use League\Uri\Contracts\PortInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -30,9 +32,9 @@ final class Authority extends Component implements AuthorityInterface
 {
     private const REGEXP_HOST_PORT = ',^(?<host>\[.*\]|[^:]*)(:(?<port>.*))?$,';
 
-    private UserInfo $userInfo;
-    private HostInterface $host;
-    private Port $port;
+    private readonly UserInfoInterface $userInfo;
+    private readonly HostInterface $host;
+    private readonly PortInterface $port;
 
     /**
      * @deprecated since version 2.3.0 use a more appropriate named constructor.
@@ -92,13 +94,7 @@ final class Authority extends Component implements AuthorityInterface
 
     public static function __set_state(array $properties): self
     {
-        $auth = new self();
-        $auth->host = $properties['host'];
-        $auth->port = $properties['port'];
-        $auth->userInfo = $properties['userInfo'];
-        $auth->validate();
-
-        return $auth;
+        return new self(self::getAuthorityValue($properties['userInfo'], $properties['host'], $properties['port']));
     }
 
     /**
@@ -168,13 +164,21 @@ final class Authority extends Component implements AuthorityInterface
 
     public function getContent(): ?string
     {
-        $auth = $this->host->getContent();
-        $port = $this->port->getContent();
+        return self::getAuthorityValue($this->userInfo, $this->host, $this->port);
+    }
+
+    private static function getAuthorityValue(
+        UserInfoInterface $userInfo,
+        HostInterface $host,
+        PortInterface $port
+    ): ?string {
+        $auth = $host->getContent();
+        $port = $port->getContent();
         if (null !== $port) {
             $auth .= ':'.$port;
         }
 
-        $userInfo = $this->userInfo->getContent();
+        $userInfo = $userInfo->getContent();
         if (null === $userInfo) {
             return $auth;
         }
@@ -228,11 +232,7 @@ final class Authority extends Component implements AuthorityInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->host = $host;
-        $clone->validate();
-
-        return $clone;
+        return $this->newInstance($this->userInfo, $host, $this->port);
     }
 
     /**
@@ -248,11 +248,7 @@ final class Authority extends Component implements AuthorityInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->port = $port;
-        $clone->validate();
-
-        return $clone;
+        return $this->newInstance($this->userInfo, $this->host, $port);
     }
 
     /**
@@ -266,10 +262,16 @@ final class Authority extends Component implements AuthorityInterface
             return $this;
         }
 
-        $clone = clone $this;
-        $clone->userInfo = $userInfo;
-        $clone->validate();
+        return $this->newInstance($userInfo, $this->host, $this->port);
+    }
 
-        return $clone;
+    private function newInstance(UserInfoInterface $userInfo, HostInterface $host, PortInterface $port): self
+    {
+        $value = self::getAuthorityValue($userInfo, $host, $port);
+        if (null === $host->getContent() && null !== $value) {
+            throw new SyntaxError('A non-empty authority must contains a non null host.');
+        }
+
+        return new self($value);
     }
 }
