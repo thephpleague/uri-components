@@ -30,7 +30,7 @@ abstract class Component implements UriComponentInterface
 {
     protected const REGEXP_ENCODED_CHARS = ',%[A-Fa-f0-9]{2},';
     protected const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
-    protected const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-\.~]/';
+    protected const REGEXP_NO_ENCODING = '/[^A-Za-z0-9_\-.~]/';
     protected const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
     protected const REGEXP_PREVENTS_DECODING = ',%
      	2[A-F|1-2|4-9]|
@@ -48,7 +48,7 @@ abstract class Component implements UriComponentInterface
     {
         $component = self::filterComponent($component);
         if (null === $component) {
-            return $component;
+            return null;
         }
 
         return $this->decodeComponent($component);
@@ -66,7 +66,7 @@ abstract class Component implements UriComponentInterface
         }
 
         if (null === $component) {
-            return $component;
+            return null;
         }
 
         $component = (string) $component;

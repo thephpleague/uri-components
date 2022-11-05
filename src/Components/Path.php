@@ -32,10 +32,7 @@ use function substr;
 final class Path extends Component implements PathInterface
 {
     private const DOT_SEGMENTS = ['.' => 1, '..' => 1];
-    private const REGEXP_PATH_ENCODING = '/
-        (?:[^A-Za-z0-9_\-\.\!\$&\'\(\)\*\+,;\=%\:\/@]+|
-        %(?![A-Fa-f0-9]{2}))
-    /x';
+    private const REGEXP_PATH_ENCODING = '/[^A-Za-z0-9_\-.!$&\'()*+,;=%:\/@]+|%(?![A-Fa-f0-9]{2})/';
     private const SEPARATOR = '/';
 
     private readonly string $path;
@@ -62,7 +59,7 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * Returns a new instance from an string or a stringable object.
+     * Returns a new instance from a string or a stringable object.
      */
     public static function createFromString(Stringable|string $path = ''): self
     {

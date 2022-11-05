@@ -43,8 +43,6 @@ final class UserInfoTest extends TestCase
      * @covers ::getUser
      * @covers ::encodeComponent
      * @covers ::getUriComponent
-     * @param ?string $expected_user
-     * @param ?string $expected_pass
      */
     public function testConstructor(
         Stringable|float|int|string|bool|null $user,
@@ -156,9 +154,6 @@ final class UserInfoTest extends TestCase
      * @covers ::getPass
      * @covers ::decode
      * @covers ::decodeMatches
-     * @param ?string $user
-     * @param ?string $expected_user
-     * @param ?string $expected_pass
      */
     public function testWithContent(
         ?string $user,
@@ -219,7 +214,6 @@ final class UserInfoTest extends TestCase
      * @covers ::withUserInfo
      * @covers ::decodeMatches
      * @covers ::decode
-     * @param ?string $pass
      */
     public function testWithUserInfo(string $user, ?string $pass, string $expected): void
     {
@@ -248,7 +242,6 @@ final class UserInfoTest extends TestCase
      * @dataProvider getURIProvider
      * @covers ::createFromUri
      * @covers ::decode
-     * @param ?string $expected
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

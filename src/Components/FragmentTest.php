@@ -36,8 +36,6 @@ final class FragmentTest extends TestCase
      * @covers ::validateComponent
      * @covers ::filterComponent
      * @covers ::__toString
-     *
-     * @param ?string $str
      */
     public function testStringRepresentation(?string $str, string $encoded): void
     {
@@ -76,7 +74,6 @@ final class FragmentTest extends TestCase
      * @covers ::encodeComponent
      * @covers ::encodeMatches
      * @covers ::decodeMatches
-     * @param ?string $expected
      */
     public function testGetValue(Stringable|float|int|string|bool|null $str, ?string $expected): void
     {
@@ -193,7 +190,6 @@ final class FragmentTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {

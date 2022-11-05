@@ -52,8 +52,6 @@ final class IpAddressTest extends TestCase
      * @covers ::isIpFuture
      * @covers ::getIp
      * @covers ::getIpVersion
-     * @param ?string $ipVersion
-     * @param ?string $ip
      */
     public function testValidIpAddress(
         UriComponentInterface|Stringable|float|int|string|bool|null $host,

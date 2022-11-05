@@ -82,7 +82,7 @@ final class Port extends Component implements PortInterface
     }
 
     /**
-     * Create a new instance from a Authority object.
+     * Create a new instance from an Authority object.
      */
     public static function createFromAuthority(AuthorityInterface $authority): self
     {

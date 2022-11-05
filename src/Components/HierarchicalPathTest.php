@@ -129,7 +129,6 @@ final class HierarchicalPathTest extends TestCase
      * @dataProvider getProvider
      *
      * @covers ::get
-     * @param ?string $expected
      */
     public function testget(string $raw, int $key, ?string $expected): void
     {
@@ -780,7 +779,6 @@ final class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {

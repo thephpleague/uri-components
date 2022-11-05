@@ -56,8 +56,6 @@ final class PortTest extends TestCase
      * @covers ::value
      * @covers ::getUriComponent
      * @covers ::validate
-     * @param ?int    $expected
-     * @param ?string $string_expected
      */
     public function testToInt(
         UriComponentInterface|Stringable|float|int|string|bool|null $input,
@@ -106,7 +104,6 @@ final class PortTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

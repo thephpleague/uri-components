@@ -81,7 +81,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * Returns a new instance from an string or a stringable object.
+     * Returns a new instance from a string or a stringable object.
      */
     public static function createFromString(Stringable|string $host = ''): self
     {
@@ -116,7 +116,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * Create a new instance from a Authority object.
+     * Create a new instance from an Authority object.
      */
     public static function createFromAuthority(AuthorityInterface $authority): self
     {
