@@ -83,14 +83,14 @@ final class Path extends Component implements PathInterface
         return new self('/'.$path);
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
         return $this->encodeComponent($this->path, self::REGEXP_PATH_ENCODING);
     }
 
     public function getUriComponent(): string
     {
-        return (string) $this->getContent();
+        return (string) $this->value();
     }
 
     public function decoded(): string
@@ -115,7 +115,7 @@ final class Path extends Component implements PathInterface
             throw new SyntaxError('The path component can not be `null`.');
         }
 
-        if ($content === $this->getContent()) {
+        if ($content === $this->value()) {
             return $this;
         }
 

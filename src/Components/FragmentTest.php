@@ -108,13 +108,13 @@ final class FragmentTest extends TestCase
      * @covers ::__construct
      * @covers ::validateComponent
      * @covers ::filterComponent
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      */
     public function testGetContent(string $input, string $expected): void
     {
-        self::assertSame($expected, (new Fragment($input))->getContent());
+        self::assertSame($expected, (new Fragment($input))->value());
     }
 
     public function getContentProvider(): array
@@ -174,7 +174,7 @@ final class FragmentTest extends TestCase
         $fragment = new Fragment();
         $altFragment = $fragment->withContent(null);
         self::assertSame($fragment, $altFragment);
-        self::assertNull($altFragment->getContent());
+        self::assertNull($altFragment->value());
         self::assertSame('', $altFragment->__toString());
     }
 
@@ -199,7 +199,7 @@ final class FragmentTest extends TestCase
     {
         $fragment = Fragment::createFromUri($uri);
 
-        self::assertSame($expected, $fragment->getContent());
+        self::assertSame($expected, $fragment->value());
     }
 
     public function getURIProvider(): iterable

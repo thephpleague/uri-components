@@ -253,14 +253,14 @@ final class DataPath extends Component implements DataPathInterface
         return self::createFromString(Path::createFromUri($uri)->__toString());
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
-        return $this->path->getContent();
+        return $this->path->value();
     }
 
     public function getUriComponent(): string
     {
-        return (string) $this->getContent();
+        return (string) $this->value();
     }
 
     public function getData(): string
@@ -404,7 +404,7 @@ final class DataPath extends Component implements DataPathInterface
             throw new SyntaxError('The path conten can not be null.');
         }
 
-        if ($content === $this->path->getContent()) {
+        if ($content === $this->path->value()) {
             return $this;
         }
 

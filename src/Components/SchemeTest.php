@@ -43,7 +43,7 @@ final class SchemeTest extends TestCase
 
     /**
      * @covers ::withContent
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::__toString
      * @covers ::validate
      */
@@ -51,7 +51,7 @@ final class SchemeTest extends TestCase
     {
         $scheme = new Scheme('ftp');
         $http_scheme = $scheme->withContent('HTTP');
-        self::assertSame('http', $http_scheme->getContent());
+        self::assertSame('http', $http_scheme->value());
         self::assertSame('http', (string) $http_scheme);
     }
 
@@ -132,7 +132,7 @@ final class SchemeTest extends TestCase
     {
         $scheme = Scheme::createFromUri($uri);
 
-        self::assertSame($expected, $scheme->getContent());
+        self::assertSame($expected, $scheme->value());
     }
 
     public function getURIProvider(): iterable

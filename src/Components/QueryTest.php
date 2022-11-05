@@ -61,7 +61,7 @@ final class QueryTest extends TestCase
         $new_query = $query->withSeparator('|');
         self::assertSame('&', $query->getSeparator());
         self::assertSame('|', $new_query->getSeparator());
-        self::assertSame('foo=bar|kingkong=toto', $new_query->getContent());
+        self::assertSame('foo=bar|kingkong=toto', $new_query->value());
 
         $this->expectException(SyntaxError::class);
         $new_query->withSeparator('');
@@ -211,7 +211,7 @@ final class QueryTest extends TestCase
      * @covers ::filterEmptyPair
      * @covers ::toRFC3986
      * @covers ::toRFC1738
-     * @covers ::getContent
+     * @covers ::value
      */
     public function testNormalization(): void
     {
@@ -226,7 +226,7 @@ final class QueryTest extends TestCase
      *
      * @covers ::append
      * @covers ::toRFC3986
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::filterEmptyValue
      * @param ?string $query
      * @param ?string $expected
@@ -446,9 +446,9 @@ final class QueryTest extends TestCase
         ];
 
         $query = Query::createFromParams($data);
-        self::assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->getContent());
+        self::assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->value());
         $new_query = $query->withoutParam('foo[0]');
-        self::assertSame('foo%5B1%5D=baz', $new_query->getContent());
+        self::assertSame('foo%5B1%5D=baz', $new_query->value());
         self::assertSame(['foo' => [1 => 'baz']], $new_query->params());
     }
 
@@ -481,7 +481,7 @@ final class QueryTest extends TestCase
     public function testCreateFromParamsWithQueryObject(): void
     {
         $query = Query::createFromRFC3986('a=1&b=2');
-        self::assertEquals($query->getContent(), Query::createFromParams($query)->getContent());
+        self::assertEquals($query->value(), Query::createFromParams($query)->value());
     }
 
     /**
@@ -508,11 +508,11 @@ final class QueryTest extends TestCase
         $without_indices = 'filter%5Bfoo%5D%5B%5D=bar&filter%5Bfoo%5D%5B%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar';
 
         $query = Query::createFromParams($data);
-        self::assertSame($with_indices, $query->getContent());
+        self::assertSame($with_indices, $query->value());
         self::assertSame($data, $query->params());
 
         $new_query = $query->withoutNumericIndices();
-        self::assertSame($without_indices, $new_query->getContent());
+        self::assertSame($without_indices, $new_query->value());
         self::assertSame($data, $new_query->params());
     }
 
@@ -564,19 +564,19 @@ final class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::getContent
+     * @covers ::value
      */
     public function testGetContentOnEmptyContent(): void
     {
-        self::assertNull(Query::createFromParams([])->getContent());
+        self::assertNull(Query::createFromParams([])->value());
     }
 
     /**
-     * @covers ::getContent
+     * @covers ::value
      */
     public function testGetContentOnHavingContent(): void
     {
-        self::assertSame('foo=bar', Query::createFromParams(['foo' => 'bar'])->getContent());
+        self::assertSame('foo=bar', Query::createFromParams(['foo' => 'bar'])->value());
     }
 
     /**
@@ -790,7 +790,7 @@ final class QueryTest extends TestCase
         $query = $query->merge('a=4');
         self::assertSame('4', $query->get('a'));
 
-        $query = $query->merge(Query::createFromPairs([['q', $query->getContent()]]));
+        $query = $query->merge(Query::createFromPairs([['q', $query->value()]]));
         self::assertSame('a=4&first=4', $query->get('q'));
     }
 
@@ -816,7 +816,7 @@ final class QueryTest extends TestCase
     public function testWithoutDuplicates(?string $query, ?string $expected): void
     {
         $query = Query::createFromRFC3986($query);
-        self::assertSame($expected, $query->withoutDuplicates()->getContent());
+        self::assertSame($expected, $query->withoutDuplicates()->value());
     }
 
     public function provideWithoutDuplicatesData(): array
@@ -902,7 +902,7 @@ final class QueryTest extends TestCase
     {
         $query = Query::createFromUri($uri);
 
-        self::assertSame($expected, $query->getContent());
+        self::assertSame($expected, $query->value());
     }
 
     public function getURIProvider(): iterable

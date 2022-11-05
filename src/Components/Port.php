@@ -89,7 +89,7 @@ final class Port extends Component implements PortInterface
         return new self($authority->getPort());
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
         if (null === $this->port) {
             return $this->port;
@@ -100,7 +100,7 @@ final class Port extends Component implements PortInterface
 
     public function getUriComponent(): string
     {
-        return (null === $this->port ? '' : ':').$this->getContent();
+        return (null === $this->port ? '' : ':').$this->value();
     }
 
     public function toInt(): ?int

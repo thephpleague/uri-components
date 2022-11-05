@@ -61,14 +61,14 @@ final class Fragment extends Component implements FragmentInterface
         return new self($component);
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
         return $this->encodeComponent($this->fragment, self::REGEXP_FRAGMENT_ENCODING);
     }
 
     public function getUriComponent(): string
     {
-        return (null === $this->fragment ? '' : '#').$this->getContent();
+        return (null === $this->fragment ? '' : '#').$this->value();
     }
 
     /**

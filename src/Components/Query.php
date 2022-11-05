@@ -38,10 +38,8 @@ use function count;
 use function http_build_query;
 use function implode;
 use function is_bool;
-use function is_object;
 use function is_scalar;
 use function iterator_to_array;
-use function method_exists;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
@@ -149,7 +147,7 @@ final class Query extends Component implements QueryInterface
         return $this->separator;
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
         return QueryString::build($this->pairs, $this->separator);
     }
@@ -160,7 +158,7 @@ final class Query extends Component implements QueryInterface
             return '';
         }
 
-        return '?'.$this->getContent();
+        return '?'.$this->value();
     }
 
     public function toRFC1738(): ?string
@@ -170,7 +168,7 @@ final class Query extends Component implements QueryInterface
 
     public function toRFC3986(): ?string
     {
-        return $this->getContent();
+        return $this->value();
     }
 
     public function jsonSerialize(): ?string
@@ -243,7 +241,7 @@ final class Query extends Component implements QueryInterface
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
-        if ($content === $this->getContent()) {
+        if ($content === $this->value()) {
             return $this;
         }
 
@@ -421,7 +419,7 @@ final class Query extends Component implements QueryInterface
     private function filterPair(mixed $value): ?string
     {
         if ($value instanceof UriComponentInterface) {
-            return $value->getContent();
+            return $value->value();
         }
 
         if (null === $value) {
@@ -432,7 +430,7 @@ final class Query extends Component implements QueryInterface
             return true === $value ? 'true' : 'false';
         }
 
-        if (is_object($value) && method_exists($value, '__toString')) {
+        if ($value instanceof Stringable) {
             return (string) $value;
         }
 
@@ -471,7 +469,7 @@ final class Query extends Component implements QueryInterface
     public function append($query): QueryInterface
     {
         if ($query instanceof UriComponentInterface) {
-            $query = $query->getContent();
+            $query = $query->value();
         }
 
         $pairs = array_merge($this->pairs, QueryString::parse($query, $this->separator, PHP_QUERY_RFC3986));

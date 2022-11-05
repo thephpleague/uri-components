@@ -86,14 +86,14 @@ final class Scheme extends Component
         return new self($component);
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
         return $this->scheme;
     }
 
     public function getUriComponent(): string
     {
-        return $this->getContent().(null === $this->scheme ? '' : ':');
+        return $this->value().(null === $this->scheme ? '' : ':');
     }
 
     public function withContent($content): UriComponentInterface

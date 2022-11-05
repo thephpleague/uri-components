@@ -114,10 +114,10 @@ final class IPv4Normalizer
     public function normalizeUri(UriInterface|Psr7UriInterface $uri): UriInterface|Psr7UriInterface
     {
         $host = Host::createFromUri($uri);
-        $normalizedHost = $this->normalizeHost($host)->getContent();
+        $normalizedHost = $this->normalizeHost($host)->value();
 
         return match (true) {
-            $normalizedHost === $host->getContent() => $uri,
+            $normalizedHost === $host->value() => $uri,
             $uri instanceof UriInterface => $uri->withHost($normalizedHost),
             default => $uri->withHost((string) $normalizedHost),
         };
@@ -132,9 +132,9 @@ final class IPv4Normalizer
     public function normalizeAuthority(AuthorityInterface $authority): AuthorityInterface
     {
         $host = Host::createFromAuthority($authority);
-        $normalizeHost = $this->normalizeHost($host)->getContent();
+        $normalizeHost = $this->normalizeHost($host)->value();
 
-        if ($normalizeHost === $host->getContent()) {
+        if ($normalizeHost === $host->value()) {
             return $authority;
         }
 
@@ -167,10 +167,7 @@ final class IPv4Normalizer
             return $host;
         }
 
-        /** @var HostInterface $newHost */
-        $newHost = $host->withContent($ipv4host);
-
-        return $newHost;
+        return new Host($ipv4host);
     }
 
     /**

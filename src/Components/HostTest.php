@@ -64,7 +64,7 @@ final class HostTest extends TestCase
      *
      * @covers ::__construct
      * @covers ::isValidIpv6Hostname
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::getUriComponent
      * @covers ::toAscii
      * @covers ::toUnicode
@@ -248,7 +248,7 @@ final class HostTest extends TestCase
     {
         $host = Host::createFromUri($uri);
 
-        self::assertSame($expected, $host->getContent());
+        self::assertSame($expected, $host->value());
     }
 
     public function getURIProvider(): iterable

@@ -121,7 +121,7 @@ final class UserInfo extends Component implements UserInfoInterface
         );
     }
 
-    public function getContent(): ?string
+    public function value(): ?string
     {
         if (null === $this->user) {
             return null;
@@ -137,7 +137,7 @@ final class UserInfo extends Component implements UserInfoInterface
 
     public function getUriComponent(): string
     {
-        return $this->getContent().(null === $this->user ? '' : '@');
+        return $this->value().(null === $this->user ? '' : '@');
     }
 
     public function getUser(): ?string
@@ -153,7 +153,7 @@ final class UserInfo extends Component implements UserInfoInterface
     public function withContent($content): UriComponentInterface
     {
         $content = self::filterComponent($content);
-        if ($content === $this->getContent()) {
+        if ($content === $this->value()) {
             return $this;
         }
 

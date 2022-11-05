@@ -51,7 +51,7 @@ final class AuthorityTest extends TestCase
      * @covers ::getHost
      * @covers ::getPort
      * @covers ::getUserInfo
-     * @covers ::getContent
+     * @covers ::value
      * @param ?string $authority
      * @param ?string $host
      * @param ?int    $port
@@ -74,7 +74,7 @@ final class AuthorityTest extends TestCase
         self::assertSame($host, $instance->getHost());
         self::assertSame($port, $instance->getPort());
         self::assertSame($userInfo, $instance->getUserInfo());
-        self::assertSame($component, $instance->getContent());
+        self::assertSame($component, $instance->value());
     }
 
     public function validAuthorityDataProvider(): array
@@ -234,7 +234,7 @@ final class AuthorityTest extends TestCase
      *
      * @covers ::jsonSerialize
      * @covers ::__toString
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::getUriComponent
     * @param ?string $authority
     * @param ?string $json
@@ -255,7 +255,7 @@ final class AuthorityTest extends TestCase
 
         self::assertSame($string, (string) $instance);
         self::assertSame($json, json_encode($instance));
-        self::assertSame($content, $instance->getContent());
+        self::assertSame($content, $instance->value());
         self::assertSame($uriComponent, $instance->getUriComponent());
     }
 
@@ -303,7 +303,7 @@ final class AuthorityTest extends TestCase
     {
         $authority = Authority::createFromUri($uri);
 
-        self::assertSame($expected, $authority->getContent());
+        self::assertSame($expected, $authority->value());
     }
 
     public function getURIProvider(): iterable
@@ -347,6 +347,6 @@ final class AuthorityTest extends TestCase
     {
         $instance = Authority::createFromComponents(UriString::parse('/example.com:42#foobar'));
 
-        self::assertNull($instance->getContent());
+        self::assertNull($instance->value());
     }
 }

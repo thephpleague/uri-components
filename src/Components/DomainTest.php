@@ -48,7 +48,7 @@ final class DomainTest extends TestCase
         $host = new Host('uri.thephpleague.com');
         $domain = Domain::createFromHost($host);
 
-        self::assertSame('uri.thephpleague.com', $domain->getContent());
+        self::assertSame('uri.thephpleague.com', $domain->value());
     }
 
     public function testItFailsIfTheHostInterfaceImplementingObjectIsNotADomain(): void
@@ -98,14 +98,14 @@ final class DomainTest extends TestCase
      *
      * @covers ::createFromString
      * @covers ::setLabels
-     * @covers ::getContent
+     * @covers ::value
      * @covers ::toUnicode
      */
     public function testValidDomain(string $host, string $uri, string $iri): void
     {
         $host = Domain::createFromString($host);
 
-        self::assertSame($uri, $host->getContent());
+        self::assertSame($uri, $host->value());
         self::assertSame($iri, $host->toUnicode());
     }
 
@@ -567,7 +567,7 @@ final class DomainTest extends TestCase
     {
         $domain = Domain::createFromUri($uri);
 
-        self::assertSame($expected, $domain->getContent());
+        self::assertSame($expected, $domain->value());
     }
 
     public function getURIProvider(): iterable
@@ -614,12 +614,12 @@ final class DomainTest extends TestCase
     {
         $domain = Domain::createFromString('ulb.ac.be');
 
-        self::assertSame($domain->getContent(), $domain->slice(-3)->getContent());
-        self::assertSame($domain->getContent(), $domain->slice(0)->getContent());
+        self::assertSame($domain->value(), $domain->slice(-3)->value());
+        self::assertSame($domain->value(), $domain->slice(0)->value());
 
-        self::assertSame('ulb.ac', $domain->slice(1)->getContent());
-        self::assertSame('ulb', $domain->slice(-1)->getContent());
-        self::assertSame('be', $domain->slice(-3, 1)->getContent());
+        self::assertSame('ulb.ac', $domain->slice(1)->value());
+        self::assertSame('ulb', $domain->slice(-1)->value());
+        self::assertSame('be', $domain->slice(-3, 1)->value());
     }
 
     public function testSliceThrowsOnOverFlow(): void
