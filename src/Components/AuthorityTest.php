@@ -236,9 +236,6 @@ final class AuthorityTest extends TestCase
      * @covers ::__toString
      * @covers ::value
      * @covers ::getUriComponent
-    * @param ?string $authority
-    * @param ?string $json
-    * @param ?string $content
     */
     public function testAuthorityStringRepresentation(
         ?string $authority,
@@ -297,7 +294,6 @@ final class AuthorityTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

@@ -24,10 +24,7 @@ use Stringable;
 
 final class Fragment extends Component implements FragmentInterface
 {
-    private const REGEXP_FRAGMENT_ENCODING = '/
-        (?:[^A-Za-z0-9_\-\.~\!\$&\'\(\)\*\+,;\=%\:\/@\?]+|
-        %(?![A-Fa-f0-9]{2}))
-    /x';
+    private const REGEXP_FRAGMENT_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:\/@?]+|%(?![A-Fa-f0-9]{2})/';
 
     private readonly ?string $fragment;
 

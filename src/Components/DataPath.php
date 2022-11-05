@@ -113,10 +113,10 @@ final class DataPath extends Component implements DataPathInterface
     private function filterMimeType(string $mimetype): string
     {
         if ('' == $mimetype) {
-            return static::DEFAULT_MIMETYPE;
+            return self::DEFAULT_MIMETYPE;
         }
 
-        if (1 === preg_match(static::REGEXP_MIMETYPE, $mimetype)) {
+        if (1 === preg_match(self::REGEXP_MIMETYPE, $mimetype)) {
             return $mimetype;
         }
 
@@ -200,7 +200,7 @@ final class DataPath extends Component implements DataPathInterface
     }
 
     /**
-     * Returns a new instance from an string or a stringable object.
+     * Returns a new instance from a string or a stringable object.
      */
     public static function createFromString(Stringable|string $path = ''): self
     {

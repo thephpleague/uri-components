@@ -393,12 +393,12 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * @param UriComponentInterface|Stringable|float|int|string|bool|null $query the query to be merge with.
+     * @param UriComponentInterface|Stringable|float|int|string|bool|null $query the query to be merged with.
      */
     public function merge($query): QueryInterface
     {
         $pairs = $this->pairs;
-        foreach (QueryString::parse(self::filterComponent($query), $this->separator, PHP_QUERY_RFC3986) as $pair) {
+        foreach (QueryString::parse(self::filterComponent($query), $this->separator) as $pair) {
             $pairs = $this->addPair($pairs, $pair);
         }
 
@@ -423,7 +423,7 @@ final class Query extends Component implements QueryInterface
         }
 
         if (null === $value) {
-            return $value;
+            return null;
         }
 
         if (is_bool($value)) {
@@ -472,7 +472,7 @@ final class Query extends Component implements QueryInterface
             $query = $query->value();
         }
 
-        $pairs = array_merge($this->pairs, QueryString::parse($query, $this->separator, PHP_QUERY_RFC3986));
+        $pairs = array_merge($this->pairs, QueryString::parse($query, $this->separator));
         if ($pairs === $this->pairs) {
             return $this;
         }

@@ -258,7 +258,6 @@ final class PathTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {

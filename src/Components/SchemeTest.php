@@ -126,7 +126,6 @@ final class SchemeTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

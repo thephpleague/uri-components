@@ -68,8 +68,6 @@ final class HostTest extends TestCase
      * @covers ::getUriComponent
      * @covers ::toAscii
      * @covers ::toUnicode
-     * @param ?string $uri
-     * @param ?string $iri
      */
     public function testValidHost(UriComponentInterface|Stringable|float|int|string|bool|null $host, ?string $uri, ?string $iri): void
     {
@@ -242,7 +240,6 @@ final class HostTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
@@ -285,7 +282,6 @@ final class HostTest extends TestCase
      * @dataProvider getIsDomainProvider
      * @covers ::isDomain
      * @covers ::isValidDomain
-     * @param ?string $host
      */
     public function test_host_is_domain(?string $host, bool $expectedIsDomain): void
     {

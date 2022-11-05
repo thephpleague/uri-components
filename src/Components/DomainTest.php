@@ -193,13 +193,11 @@ final class DomainTest extends TestCase
     }
 
     /**
-     * @param bool $expected
-     *
      * @dataProvider isAbsoluteProvider
      *
      * @covers ::isAbsolute
      */
-    public function testIsAbsolute(string $raw, $expected): void
+    public function testIsAbsolute(string $raw, bool $expected): void
     {
         self::assertSame($expected, Domain::createFromString($raw)->isAbsolute());
     }
@@ -274,7 +272,7 @@ final class DomainTest extends TestCase
      *
      * @covers ::count
      */
-    public function testCountable(string $host, int $nblabels, array $array): void
+    public function testCountable(string $host, int $nblabels): void
     {
         self::assertCount($nblabels, Domain::createFromString($host));
     }
@@ -561,7 +559,6 @@ final class DomainTest extends TestCase
     /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
-     * @param ?string $expected
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
