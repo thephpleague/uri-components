@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Stringable;
 use function array_key_exists;
@@ -81,7 +82,7 @@ final class QueryString
      * @return array<int, array{0:string, 1:string|null}>
      */
     public static function parse(
-        Stringable|float|int|string|bool|null $query,
+        UriComponentInterface|Stringable|float|int|string|bool|null $query,
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ): array {
@@ -114,10 +115,14 @@ final class QueryString
      * @throws SyntaxError If the encoding type is invalid
      * @throws SyntaxError If the query string is invalid
      */
-    private static function prepareQuery(Stringable|float|int|string|bool|null $query, int $enc_type): ?string
+    private static function prepareQuery(UriComponentInterface|Stringable|float|int|string|bool|null $query, int $enc_type): ?string
     {
         if (!isset(self::ENCODING_LIST[$enc_type])) {
             throw new SyntaxError('Unknown or Unsupported encoding');
+        }
+
+        if ($query instanceof UriComponentInterface) {
+            $query = $query->value();
         }
 
         if (null === $query) {
@@ -139,7 +144,7 @@ final class QueryString
     }
 
     /**
-     * @param  non-empty-string   $separator
+     * @param non-empty-string $separator
      * @return array<string|null>
      */
     private static function getPairs(string $query, string $separator): array

@@ -40,7 +40,7 @@ final class Path extends Component implements PathInterface
     /**
      * New instance.
      */
-    public function __construct(Stringable|float|int|string|bool $path = '')
+    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $path = '')
     {
         $this->path = $this->validate($path);
     }
@@ -53,9 +53,14 @@ final class Path extends Component implements PathInterface
     /**
      * Validate the component content.
      */
-    private function validate(Stringable|float|int|string|bool $path): string
+    private function validate(UriComponentInterface|Stringable|float|int|string|bool|null $path): string
     {
-        return (string) $this->validateComponent($path);
+        $path = $this->validateComponent($path);
+        if (null === $path) {
+            throw new SyntaxError('The path can not be null.');
+        }
+
+        return $path;
     }
 
     /**
@@ -103,17 +108,6 @@ final class Path extends Component implements PathInterface
     public function hasTrailingSlash(): bool
     {
         return '' !== $this->path && self::SEPARATOR === substr($this->path, -1);
-    }
-
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-
-        return match (true) {
-            null === $content => throw new SyntaxError('The path can not be null.'),
-            $content === $this->value() => $this,
-            default => new self($content),
-        };
     }
 
     public function withoutDotSegments(): PathInterface

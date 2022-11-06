@@ -40,8 +40,8 @@ final class UserInfo extends Component implements UserInfoInterface
      * New instance.
      */
     public function __construct(
-        Stringable|float|int|string|bool|null $user = null,
-        #[SensitiveParameter] Stringable|float|int|string|bool|null $pass = null
+        UriComponentInterface|Stringable|float|int|string|bool|null $user = null,
+        #[SensitiveParameter] UriComponentInterface|Stringable|float|int|string|bool|null $pass = null
     ) {
         $this->user = $this->validateComponent($user);
         $pass = $this->validateComponent($pass);

@@ -50,7 +50,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * @throws SyntaxError
      */
-    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $host)
+    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $host = null)
     {
         if (!$host instanceof HostInterface) {
             $host = new Host($host);
