@@ -6,15 +6,15 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- None
+- `value` method to replace deprecated `getContent` method.
 
 ### Fixed
 
-- None
+- converts Value Objects properties to being `private readonly` where possible.
 
 ### Deprecated
 
-- None
+- `withContent` and `getContent` methods
 
 ### Removed
 
