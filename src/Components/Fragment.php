@@ -31,7 +31,7 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * New instance.
      */
-    public function __construct(Stringable|float|int|string|bool|null $fragment = null)
+    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null  $fragment = null)
     {
         $this->fragment = $this->validateComponent($fragment);
     }

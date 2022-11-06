@@ -41,7 +41,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    public function __construct(Stringable|float|int|string|bool|null $authority = null)
+    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $authority = null)
     {
         $components = $this->parse(self::filterComponent($authority));
         $this->host = new Host($components['host']);

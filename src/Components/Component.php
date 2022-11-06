@@ -44,7 +44,7 @@ abstract class Component implements UriComponentInterface
     /**
      * Validate the component content.
      */
-    protected function validateComponent(Stringable|float|int|string|bool|null $component): ?string
+    protected function validateComponent(UriComponentInterface|Stringable|float|int|string|bool|null $component): ?string
     {
         $component = self::filterComponent($component);
         if (null === $component) {
@@ -150,4 +150,6 @@ abstract class Component implements UriComponentInterface
 
         return new static($content);
     }
+
+    abstract public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $value);
 }

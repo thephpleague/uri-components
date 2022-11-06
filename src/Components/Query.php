@@ -56,8 +56,11 @@ final class Query extends Component implements QueryInterface
     /**
      * Returns a new instance.
      */
-    private function __construct(Stringable|string|float|int|null|bool $query = null, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986)
-    {
+    public function __construct(
+        UriComponentInterface|Stringable|float|int|string|bool|null $query = null,
+        string $separator = '&',
+        int $enc_type = PHP_QUERY_RFC3986
+    ) {
         $this->pairs = QueryString::parse($query, $separator, $enc_type);
         $this->params = QueryString::convert($this->pairs);
         $this->separator = $separator;

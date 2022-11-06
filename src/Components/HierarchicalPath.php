@@ -65,7 +65,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * New instance.
      */
-    public function __construct(Stringable|float|int|string|bool $path = '')
+    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $path = '')
     {
         if (!$path instanceof PathInterface) {
             $path = new Path($path);
@@ -276,17 +276,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         return $this;
-    }
-
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-
-        return match (true) {
-            null === $content => throw new SyntaxError('The path can not be null.'),
-            $content === $this->value() => $this,
-            default => new self($content),
-        };
     }
 
     /**

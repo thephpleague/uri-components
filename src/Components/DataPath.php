@@ -66,7 +66,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * New instance.
      */
-    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool $path = '')
+    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $path = '')
     {
         $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
@@ -395,17 +395,6 @@ final class DataPath extends Component implements DataPathInterface
         }
 
         return new self($path);
-    }
-
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-
-        return match (true) {
-            null === $content => throw new SyntaxError('The path can not be null.'),
-            $content === $this->value() => $this,
-            default => new self($content),
-        };
     }
 
     public function withParameters(Stringable|string|float|bool|int $parameters): DataPathInterface
