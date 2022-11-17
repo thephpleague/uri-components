@@ -1,12 +1,9 @@
 <?php
 
 /**
- * League.Uri (https://uri.thephpleague.com/components/2.0/)
+ * League.Uri (https://uri.thephpleague.com)
  *
- * @package    League\Uri
- * @subpackage League\Uri\Components
- * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @link       https://github.com/thephpleague/uri-components
+ * (c) Ignace Nyamagana Butera <nyamsprod@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -144,7 +141,7 @@ final class QueryString
     }
 
     /**
-     * @param non-empty-string $separator
+     * @param  non-empty-string   $separator
      * @return array<string|null>
      */
     private static function getPairs(string $query, string $separator): array

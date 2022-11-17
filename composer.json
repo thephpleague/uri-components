@@ -31,18 +31,6 @@
         "league/uri-interfaces": "dev-master",
         "psr/http-message": "^1.0.1"
     },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^v3.13.0",
-        "guzzlehttp/psr7": "^2.4.3",
-        "laminas/laminas-diactoros": "^2.20",
-        "league/uri": "^6.8.0",
-        "phpbench/phpbench": "^1.2.7",
-        "phpstan/phpstan": "^1.9.1",
-        "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpstan/phpstan-phpunit": "^1.2.2",
-        "phpstan/phpstan-strict-rules": "^1.4.4",
-        "phpunit/phpunit": "^9.5.26"
-    },
     "suggest": {
         "ext-intl": "to handle IDN host",
         "ext-gmp": "to improve handle IPV4 parsing",
@@ -56,31 +44,6 @@
         "psr-4": {
             "League\\Uri\\": "src"
         }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "LeagueTest\\Uri\\": "tests"
-        }
-    },
-    "scripts": {
-        "benchmark": "phpbench run src --report=default",
-        "phpcs": "php-cs-fixer fix -v --diff --dry-run --allow-risky=yes --ansi",
-        "phpcs:fix": "php-cs-fixer fix -vvv --allow-risky=yes --ansi",
-        "phpstan": "phpstan analyse -l max -c phpstan.neon src --xdebug --ansi --memory-limit=256M",
-        "phpunit": "XDEBUG_MODE=coverage phpunit --coverage-text",
-        "test": [
-            "@phpunit",
-            "@phpstan",
-            "@phpcs:fix"
-        ]
-    },
-    "scripts-descriptions": {
-        "benchmark": "Runs benchmarks for the query string parser and builder",
-        "phpcs": "Runs coding style test suite",
-        "phpcs:fix": "Fix coding style",
-        "phpstan": "Runs complete codebase static analysis",
-        "phpunit": "Runs unit and functional testing",
-        "test": "Runs full test suite"
     },
     "extra": {
         "branch-alias": {

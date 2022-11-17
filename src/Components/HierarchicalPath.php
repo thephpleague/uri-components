@@ -1,12 +1,9 @@
 <?php
 
 /**
- * League.Uri (https://uri.thephpleague.com/components/2.0/)
+ * League.Uri (https://uri.thephpleague.com)
  *
- * @package    League\Uri
- * @subpackage League\Uri\Components
- * @author     Ignace Nyamagana Butera <nyamsprod@gmail.com>
- * @link       https://github.com/thephpleague/uri-components
+ * (c) Ignace Nyamagana Butera <nyamsprod@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -116,7 +113,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
         $pathSegments = array_map(fn (Stringable|string $segment): string => (string) $segment, $segments);
         $path = implode(self::SEPARATOR, $pathSegments);
-        if ($pathType === self::IS_RELATIVE) {
+        if (self::IS_RELATIVE === $pathType) {
             return new self(ltrim($path, self::SEPARATOR));
         }
 
