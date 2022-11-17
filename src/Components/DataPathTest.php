@@ -33,7 +33,7 @@ final class DataPathTest extends TestCase
 
     public function setUp(): void
     {
-        $this->rootPath = dirname(__DIR__, 2).'/test_data';
+        $this->rootPath = dirname(__DIR__, 2).'/test_files';
     }
 
     /**
@@ -199,7 +199,7 @@ final class DataPathTest extends TestCase
 
     public function validFilePath(): array
     {
-        $rootPath = dirname(__DIR__, 2).'/test_data';
+        $rootPath = dirname(__DIR__, 2).'/test_files';
 
         return [
             'text file' => [$rootPath.'/hello-world.txt', 'text/plain', 'text/plain;charset=us-ascii'],
@@ -299,7 +299,7 @@ final class DataPathTest extends TestCase
 
     public function fileProvider(): array
     {
-        $rootPath = dirname(__DIR__, 2).'/test_data';
+        $rootPath = dirname(__DIR__, 2).'/test_files';
 
         return [
             'with a file' => [DataPath::createFromFilePath($rootPath.'/red-nose.gif')],

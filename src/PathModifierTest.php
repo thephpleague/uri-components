@@ -60,7 +60,7 @@ final class PathModifierTest extends TestCase
 
     public function fileProvider(): array
     {
-        $rootPath = dirname(__DIR__).'/test_data';
+        $rootPath = dirname(__DIR__).'/test_files';
 
         $textPath = new DataPath('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $binPath = DataPath::createFromFilePath($rootPath.'/red-nose.gif');
