@@ -2,20 +2,7 @@
     "name": "league/uri-components",
     "type": "library",
     "description" : "URI components manipulation library",
-    "keywords": [
-        "url",
-        "uri",
-        "rfc3986",
-        "components",
-        "scheme",
-        "userinfo",
-        "host",
-        "port",
-        "authority",
-        "path",
-        "query",
-        "fragment"
-    ],
+    "keywords": ["url", "uri", "rfc3986", "components", "scheme", "userinfo", "host", "port", "authority", "path", "query", "fragment"],
     "license": "MIT",
     "homepage": "http://uri.thephpleague.com",
     "authors": [
@@ -49,6 +36,11 @@
         "branch-alias": {
             "dev-master": "2.x-dev"
         }
+    },
+    "support": {
+        "forum": "https://thephpleague.slack.com",
+        "docs": "https://uri.thephpleague.com",
+        "issues": "https://github.com/thephpleague/uri-src/issues"
     },
     "config": {
         "sort-packages": true
