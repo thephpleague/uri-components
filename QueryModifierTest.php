@@ -20,16 +20,11 @@ use PHPUnit\Framework\TestCase;
  */
 final class QueryModifierTest extends TestCase
 {
-    /**
-     * @var Http
-     */
-    private $uri;
+    private string $uri;
 
     protected function setUp(): void
     {
-        $this->uri = Http::createFromString(
-            'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar%20baz#doc3'
-        );
+        $this->uri = 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar%20baz#doc3';
     }
 
     /**
