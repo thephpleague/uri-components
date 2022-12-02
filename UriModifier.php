@@ -494,7 +494,7 @@ final class UriModifier
     {
         return match (true) {
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
-            default => Uri::createFromString((string) $uri),
+            default => Uri::createFromString($uri),
         };
     }
 

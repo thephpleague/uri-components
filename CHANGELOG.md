@@ -11,6 +11,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - converts Value Objects properties to being `private readonly` where possible.
+- `UriModifier` uri input now supports `Stringable` and `string` type.
 
 ### Deprecated
 
