@@ -15,6 +15,7 @@
     "require": {
         "php": "^8.1",
         "ext-json": "*",
+        "league/uri": "dev-master",
         "league/uri-interfaces": "dev-master",
         "psr/http-message": "^1.0.1"
     },

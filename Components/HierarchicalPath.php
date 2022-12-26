@@ -275,10 +275,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this;
     }
 
-    /**
-     * @param Stringable|float|int|string|bool|null $segment
-     */
-    public function append($segment): SegmentedPathInterface
+    public function append(Stringable|float|int|string|bool|null $segment): SegmentedPathInterface
     {
         $segment = self::filterComponent($segment);
         if (null === $segment) {
@@ -292,10 +289,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         );
     }
 
-    /**
-     * @param Stringable|float|int|string|bool|null $segment
-     */
-    public function prepend($segment): SegmentedPathInterface
+    public function prepend(Stringable|float|int|string|bool|null $segment): SegmentedPathInterface
     {
         $segment = self::filterComponent($segment);
         if (null === $segment) {

@@ -138,4 +138,15 @@ final class PortTest extends TestCase
 
         self::assertEquals(Port::createFromUri($uri), Port::createFromAuthority($auth));
     }
+
+    public function testCreateFromIntSucceeds(): void
+    {
+        self::assertEquals(0, Port::fromInt(0)->value());
+    }
+
+    public function testCreateFromIntFails(): void
+    {
+        $this->expectException(SyntaxError::class);
+        Port::fromInt(-1)->value();  /* @phpstan-ignore-line */
+    }
 }

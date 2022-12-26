@@ -68,6 +68,7 @@ final class SchemeTest extends TestCase
      * @dataProvider validSchemeProvider
      *
      * @covers ::validate
+     * @covers ::filterComponent
      * @covers ::__toString
      * @covers ::getUriComponent
      */
@@ -104,6 +105,7 @@ final class SchemeTest extends TestCase
      * @dataProvider invalidSchemeProvider
      *
      * @covers ::validate
+     * @covers ::filterComponent
      */
     public function testInvalidScheme(string $scheme): void
     {

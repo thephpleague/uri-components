@@ -7,6 +7,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Added
 
 - `value` method to replace deprecated `getContent` method.
+- requires `League\Uri` package.
 
 ### Fixed
 

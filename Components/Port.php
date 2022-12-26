@@ -36,9 +36,12 @@ final class Port extends Component implements PortInterface
         $this->port = $this->validate($port);
     }
 
+    /**
+     * @param int<0, max> $port
+     */
     public static function fromInt(int $port): self
     {
-        if (0 > $port) {
+        if (0 > $port) { /* @phpstan-ignore-line  */
             throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s.', $port));
         }
 

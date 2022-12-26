@@ -74,6 +74,8 @@ final class QueryString
     /**
      * Parses a query string into a collection of key/value pairs.
      *
+     * @param non-empty-string $separator
+     *
      * @throws SyntaxError
      *
      * @return array<int, array{0:string, 1:string|null}>
@@ -83,11 +85,7 @@ final class QueryString
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ): array {
-        if ('' === $separator) {
-            throw new SyntaxError('The separator character can not be the empty string.');
-        }
-
-        $query = self::prepareQuery($query, $enc_type);
+        $query = self::filterQuery($query, $separator, $enc_type);
         if (null === $query) {
             return [];
         }
@@ -107,16 +105,14 @@ final class QueryString
     }
 
     /**
-     * Prepare and normalize query before processing.
-     *
-     * @throws SyntaxError If the encoding type is invalid
-     * @throws SyntaxError If the query string is invalid
+     * @param non-empty-string $separator
      */
-    private static function prepareQuery(UriComponentInterface|Stringable|float|int|string|bool|null $query, int $enc_type): ?string
-    {
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new SyntaxError('Unknown or Unsupported encoding');
-        }
+    private static function filterQuery(
+        UriComponentInterface|Stringable|string|int|float|bool|null $query,
+        string $separator,
+        int $enc_type
+    ): ?string {
+        self::assertValidRfc($separator, $enc_type);
 
         if ($query instanceof UriComponentInterface) {
             $query = $query->value();
@@ -140,8 +136,20 @@ final class QueryString
         };
     }
 
+    private static function assertValidRfc(string $separator, int $enc_type): void
+    {
+        if ('' === $separator) {
+            throw new SyntaxError('The separator character can not be the empty string.');
+        }
+
+        if (!isset(self::ENCODING_LIST[$enc_type])) {
+            throw new SyntaxError('Unknown or Unsupported encoding');
+        }
+    }
+
     /**
-     * @param  non-empty-string   $separator
+     * @param non-empty-string $separator
+     *
      * @return array<string|null>
      */
     private static function getPairs(string $query, string $separator): array
@@ -215,13 +223,7 @@ final class QueryString
      */
     public static function build(iterable $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): ?string
     {
-        if ('' === $separator) {
-            throw new SyntaxError('The separator character can not be the empty string.');
-        }
-
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
-            throw new SyntaxError('Unknown or Unsupported encoding');
-        }
+        self::assertValidRfc($separator, $enc_type);
 
         self::$regexpValue = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote(
             str_replace(
@@ -320,11 +322,7 @@ final class QueryString
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ): array {
-        if ('' === $separator) {
-            throw new SyntaxError('The separator character can not be the empty string.');
-        }
-
-        $query = self::prepareQuery($query, $enc_type);
+        $query = self::filterQuery($query, $separator, $enc_type);
         if (null === $query || '' === $query) {
             return [];
         }

@@ -60,6 +60,7 @@ final class HostTest extends TestCase
      * @dataProvider validHostProvider
      *
      * @covers ::__construct
+     * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::value
      * @covers ::getUriComponent
@@ -155,6 +156,7 @@ final class HostTest extends TestCase
      * @dataProvider invalidHostProvider
      *
      * @covers ::__construct
+     * @covers ::parse
      * @covers ::isValidIpv6Hostname
      * @covers ::toUnicode
      */
@@ -194,6 +196,7 @@ final class HostTest extends TestCase
      * Test Punycode support.
      *
      * @dataProvider hostnamesProvider
+     * @covers ::parse
      * @covers ::toAscii
      * @covers ::toUnicode
      */

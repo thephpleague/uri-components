@@ -47,11 +47,14 @@ final class Query extends Component implements QueryInterface
 {
     /** @var array<int, array{0:string, 1:string|null}> */
     private readonly array $pairs;
+    /** @var non-empty-string */
     private readonly string $separator;
     private readonly ?array $params;
 
     /**
      * Returns a new instance.
+     *
+     * @param non-empty-string $separator
      */
     public function __construct(
         UriComponentInterface|Stringable|float|int|string|bool|null $query = null,
@@ -70,6 +73,8 @@ final class Query extends Component implements QueryInterface
 
     /**
      * Returns a new instance from the result of PHP's parse_str.
+     *
+     * @param non-empty-string $separator
      */
     public static function createFromParams(array|object $params = [], string $separator = '&'): self
     {
@@ -103,6 +108,7 @@ final class Query extends Component implements QueryInterface
      * Returns a new instance from the result of QueryString::parse.
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
+     * @param non-empty-string                              $separator
      */
     public static function createFromPairs(iterable $pairs = [], string $separator = '&'): self
     {
@@ -128,6 +134,8 @@ final class Query extends Component implements QueryInterface
 
     /**
      * Returns a new instance.
+     *
+     * @param non-empty-string $separator
      */
     public static function createFromRFC3986(UriComponentInterface|Stringable|float|int|string|bool|null $query = null, string $separator = '&'): self
     {
@@ -136,6 +144,8 @@ final class Query extends Component implements QueryInterface
 
     /**
      * Returns a new instance.
+     *
+     * @param non-empty-string $separator
      */
     public static function createFromRFC1738(UriComponentInterface|Stringable|float|int|string|bool|null $query = null, string $separator = '&'): self
     {

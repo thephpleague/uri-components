@@ -12,6 +12,7 @@
 namespace League\Uri;
 
 use ArrayIterator;
+use League\Uri\Components\Fragment;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use Stringable;
@@ -36,7 +37,7 @@ final class QueryStringTest extends TestCase
     public function testSyntaxErrorThrowsExceptionWithQueryParserAndAnEmptySeparator(): void
     {
         $this->expectException(SyntaxError::class);
-        QueryString::parse('foo=bar', '');
+        QueryString::parse('foo=bar', ''); /* @phpstan-ignore-line */
     }
 
     public function testEncodingThrowsExceptionWithQueryBuilder(): void
@@ -142,6 +143,8 @@ final class QueryStringTest extends TestCase
 
     /**
      * @dataProvider parserProvider
+     *
+     * @param non-empty-string $separator
      */
     public function testParse(Stringable|string|float|int|null|bool $query, string $separator, array $expected, int $encoding): void
     {
@@ -151,6 +154,12 @@ final class QueryStringTest extends TestCase
     public function parserProvider(): array
     {
         return [
+            'URI Component Object object' => [
+                new Fragment('a=1&a=2'),
+                '&',
+                [['a', '1'], ['a', '2']],
+                PHP_QUERY_RFC3986,
+            ],
             'stringable object' => [
                 new class() {
                     public function __toString()

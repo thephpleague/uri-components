@@ -209,6 +209,7 @@ final class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider createFromRelativeSegmentsValid
      *
+     * @covers ::createFromSegments
      * @covers ::createRelativeFromSegments
      */
     public function testCreateRelativeFromSegments(iterable $input, string $expected): void
@@ -230,6 +231,7 @@ final class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider createFromAbsoluteSegmentsValid
      *
+     * @covers ::createFromSegments
      * @covers ::createAbsoluteFromSegments
      */
     public function testCreateAbsoluteFromSegments(iterable $input, string $expected): void
@@ -254,6 +256,7 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @covers ::createRelativeFromSegments
+     * @covers ::createFromSegments
      */
     public function testCreateRelativeFromSegmentsFailed(): void
     {
@@ -263,6 +266,7 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @covers ::createAbsoluteFromSegments
+     * @covers ::createFromSegments
      */
     public function testCreateAbsoluteFromSegmentsFailed(): void
     {
@@ -892,6 +896,7 @@ final class HierarchicalPathTest extends TestCase
      *
      * @covers ::decoded
      * @covers ::value
+     * @covers ::getUriComponent
      */
     public function testGetUriComponent(string $decoded, string $encoded): void
     {
@@ -899,6 +904,7 @@ final class HierarchicalPathTest extends TestCase
 
         self::assertSame($decoded, $path->decoded());
         self::assertSame($encoded, $path->value());
+        self::assertSame($encoded, $path->getUriComponent());
     }
 
     public function validPathEncoding(): array
