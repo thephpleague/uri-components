@@ -16,15 +16,15 @@
         "php": "^8.1",
         "ext-json": "*",
         "league/uri": "^6.8.0",
-        "league/uri-interfaces": "^2.3.0",
-        "psr/http-message": "^1.0.1"
+        "league/uri-interfaces": "^2.4.0",
+        "psr/http-message": "^1.0.0"
     },
     "suggest": {
         "ext-intl": "to handle IDN host",
         "ext-gmp": "to improve handle IPV4 parsing",
-        "ext-fileinfo": "Needed to create Data URI from a filepath",
+        "ext-fileinfo": "to create Data URI from a filepath",
         "php-64bit": "to improve handle IPV4 parsing",
-        "jeremykendall/php-domain-parser": "Public Suffix and Top Level Domain parsing implemented in PHP",
+        "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
         "league/uri": "to allow manipulating URI objects",
         "psr/http-message-implementation": "to allow manipulating PSR-7 Uri objects"
     },
