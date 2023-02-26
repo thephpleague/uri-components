@@ -39,7 +39,7 @@ final class FragmentTest extends TestCase
         self::assertSame($encoded, (string) new Fragment($str));
     }
 
-    public function getUriComponentProvider(): array
+    public static function getUriComponentProvider(): array
     {
         $unreserved = 'a-zA-Z0-9.-_~!$&\'()*+,;=:@';
 
@@ -77,7 +77,7 @@ final class FragmentTest extends TestCase
         self::assertSame($expected, (new Fragment($str))->decoded());
     }
 
-    public function geValueProvider(): array
+    public static function geValueProvider(): array
     {
         return [
             [new Fragment(), null],
@@ -111,7 +111,7 @@ final class FragmentTest extends TestCase
         self::assertSame($expected, (new Fragment($input))->value());
     }
 
-    public function getContentProvider(): array
+    public static function getContentProvider(): array
     {
         return [
             ['€', '%E2%82%AC'],
@@ -195,7 +195,7 @@ final class FragmentTest extends TestCase
         self::assertSame($expected, $fragment->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [

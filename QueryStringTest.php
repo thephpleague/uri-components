@@ -60,7 +60,7 @@ final class QueryStringTest extends TestCase
         self::assertSame($expectedData, QueryString::extract($query));
     }
 
-    public function extractQueryProvider(): array
+    public static function extractQueryProvider(): array
     {
         return [
             [
@@ -151,7 +151,7 @@ final class QueryStringTest extends TestCase
         self::assertSame($expected, QueryString::parse($query, $separator, $encoding));
     }
 
-    public function parserProvider(): array
+    public static function parserProvider(): array
     {
         return [
             'URI Component Object object' => [
@@ -308,7 +308,7 @@ final class QueryStringTest extends TestCase
         self::assertSame($expected_rfc3986, QueryString::build($pairs, '&', PHP_QUERY_RFC3986));
     }
 
-    public function buildProvider(): array
+    public static function buildProvider(): array
     {
         return [
             'empty string' => [
@@ -408,7 +408,7 @@ final class QueryStringTest extends TestCase
         QueryString::build($pairs, $separator, $enc_type);
     }
 
-    public function failedBuilderProvider(): array
+    public static function failedBuilderProvider(): array
     {
         return [
             'The collection can not contain empty pair' => [

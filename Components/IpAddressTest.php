@@ -72,7 +72,7 @@ final class IpAddressTest extends TestCase
         self::assertSame($ipVersion, $host->getIpVersion());
     }
 
-    public function validIpAddressProvider(): array
+    public static function validIpAddressProvider(): array
     {
         return [
             'ip host object' => [
@@ -160,7 +160,7 @@ final class IpAddressTest extends TestCase
         self::assertSame($expected, (string) Host::createFromIp($input, $version));
     }
 
-    public function createFromIpValid(): array
+    public static function createFromIpValid(): array
     {
         return [
             'ipv4' => ['127.0.0.1', '', '127.0.0.1'],
@@ -183,7 +183,7 @@ final class IpAddressTest extends TestCase
         Host::createFromIp($input);
     }
 
-    public function createFromIpFailed(): array
+    public static function createFromIpFailed(): array
     {
         return [
             'false ipv4' => ['127..1'],
@@ -202,7 +202,7 @@ final class IpAddressTest extends TestCase
         self::assertSame($expected, (string) (new Host($host))->withoutZoneIdentifier());
     }
 
-    public function withoutZoneIdentifierProvider(): array
+    public static function withoutZoneIdentifierProvider(): array
     {
         return [
             'ipv4 host' => ['127.0.0.1', '127.0.0.1'],
@@ -221,7 +221,7 @@ final class IpAddressTest extends TestCase
         self::assertSame($expected, (new Host($host))->hasZoneIdentifier());
     }
 
-    public function hasZoneIdentifierProvider(): array
+    public static function hasZoneIdentifierProvider(): array
     {
         return [
             ['127.0.0.1', false],

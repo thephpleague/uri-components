@@ -56,7 +56,7 @@ final class UserInfoTest extends TestCase
         self::assertSame($uriComponent, $userinfo->getUriComponent());
     }
 
-    public function userInfoProvider(): array
+    public static function userInfoProvider(): array
     {
         return [
             [
@@ -164,7 +164,7 @@ final class UserInfoTest extends TestCase
         self::assertSame((new UserInfo($expected_user, $expected_pass))->value(), $conn->value());
     }
 
-    public function createFromStringProvider(): array
+    public static function createFromStringProvider(): array
     {
         return [
             'simple' => [null, 'user:pass', 'user', 'pass', 'user:pass'],
@@ -217,7 +217,7 @@ final class UserInfoTest extends TestCase
         self::assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
     }
 
-    public function withUserInfoProvider(): array
+    public static function withUserInfoProvider(): array
     {
         return [
             'simple' => ['user', 'pass', 'user:pass'],
@@ -247,7 +247,7 @@ final class UserInfoTest extends TestCase
         self::assertSame($expected, $userInfo->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [

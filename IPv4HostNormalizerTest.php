@@ -80,7 +80,7 @@ final class IPv4HostNormalizerTest extends TestCase
         self::assertEquals(new Host($expected), IPv4Normalizer::createFromBCMath()->normalizeHost(new Host($input)));
     }
 
-    public function providerHost(): array
+    public static function providerHost(): array
     {
         return [
             'null host' => [null, null],

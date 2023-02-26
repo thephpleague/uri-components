@@ -62,7 +62,7 @@ final class HostModifierTest extends TestCase
         self::assertSame($replace, UriModifier::replaceLabel($this->uri, $key, $label)->getHost());
     }
 
-    public function validHostProvider(): array
+    public static function validHostProvider(): array
     {
         return [
             ['toto', 2, 'toto.www.example.com', 'www.example.com.toto', 'toto.example.com'],
@@ -159,7 +159,7 @@ final class HostModifierTest extends TestCase
         self::assertSame($expected, UriModifier::removeLabels($this->uri, ...$keys)->getHost());
     }
 
-    public function validwithoutLabelProvider(): array
+    public static function validwithoutLabelProvider(): array
     {
         return [
             [[1], 'www.com'],

@@ -65,7 +65,7 @@ final class PortTest extends TestCase
         self::assertSame($uri_expected, (new Port($input))->getUriComponent());
     }
 
-    public function getToIntProvider(): array
+    public static function getToIntProvider(): array
     {
         return [
             [null, null, null, ''],
@@ -109,7 +109,7 @@ final class PortTest extends TestCase
         self::assertSame($expected, $port->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [

@@ -106,7 +106,7 @@ final class DomainTest extends TestCase
         self::assertSame($iri, $host->toUnicode());
     }
 
-    public function validDomainProvider(): array
+    public static function validDomainProvider(): array
     {
         return [
             'normalized' => [
@@ -159,7 +159,7 @@ final class DomainTest extends TestCase
         Domain::createFromHost(new Host($invalid));
     }
 
-    public function invalidDomainProvider(): array
+    public static function invalidDomainProvider(): array
     {
         return [
             'null' => [null],
@@ -199,7 +199,7 @@ final class DomainTest extends TestCase
         self::assertSame($expected, Domain::createFromString($raw)->isAbsolute());
     }
 
-    public function isAbsoluteProvider(): array
+    public static function isAbsoluteProvider(): array
     {
         return [
             ['example.com.', true],
@@ -236,7 +236,7 @@ final class DomainTest extends TestCase
         self::assertSame($unicode, $host->toUnicode());
     }
 
-    public function hostnamesProvider(): array
+    public static function hostnamesProvider(): array
     {
         // http://en.wikipedia.org/wiki/.test_(international_domain_name)#Test_TLDs
         return [
@@ -274,7 +274,7 @@ final class DomainTest extends TestCase
         self::assertCount($nblabels, Domain::createFromString($host));
     }
 
-    public function countableProvider(): array
+    public static function countableProvider(): array
     {
         return [
             'string' => ['secure.example.com', 3, ['com', 'example', 'secure']],
@@ -293,7 +293,7 @@ final class DomainTest extends TestCase
         self::assertSame($expected, (string) Domain::createFromLabels($input));
     }
 
-    public function createFromLabelsValid(): array
+    public static function createFromLabelsValid(): array
     {
         return [
             'array' => [['com', 'example', 'www'], 'www.example.com'],
@@ -380,7 +380,7 @@ final class DomainTest extends TestCase
         self::assertSame($res, (string) Domain::createFromString($host)->withoutLabel($without));
     }
 
-    public function withoutProvider(): array
+    public static function withoutProvider(): array
     {
         return [
             'remove one string label' => ['secure.example.com', 0, 'secure.example'],
@@ -418,7 +418,7 @@ final class DomainTest extends TestCase
         self::assertSame($expected, (string) Domain::createFromString($raw)->prepend($prepend));
     }
 
-    public function validPrepend(): array
+    public static function validPrepend(): array
     {
         return [
             ['secure.example.com', 'master', 'master.secure.example.com'],
@@ -457,7 +457,7 @@ final class DomainTest extends TestCase
         self::assertSame($expected, (string) Domain::createFromString($raw)->append($append));
     }
 
-    public function validAppend(): array
+    public static function validAppend(): array
     {
         return [
             ['secure.example.com', 'master', 'secure.example.com.master'],
@@ -498,7 +498,7 @@ final class DomainTest extends TestCase
         self::assertSame($expected, (string) Domain::createFromString($raw)->withLabel($offset, $input));
     }
 
-    public function replaceValid(): array
+    public static function replaceValid(): array
     {
         return [
             ['master.example.com', 'shop', 3, 'master.example.com.shop'],
@@ -545,7 +545,7 @@ final class DomainTest extends TestCase
         self::assertSame($expected_without_root, (string) $host->withoutRootLabel());
     }
 
-    public function rootProvider(): array
+    public static function rootProvider(): array
     {
         return [
             ['example.com', 'example.com.', 'example.com'],
@@ -564,7 +564,7 @@ final class DomainTest extends TestCase
         self::assertSame($expected, $domain->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [
@@ -588,7 +588,7 @@ final class DomainTest extends TestCase
         Domain::createFromUri($uri);
     }
 
-    public function provideInvalidDomainName(): iterable
+    public static function provideInvalidDomainName(): iterable
     {
         return [
             'PSR-7 URI object with no host' => [Http::createFromString('path/to/the/sky?foo')],

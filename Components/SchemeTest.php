@@ -82,7 +82,7 @@ final class SchemeTest extends TestCase
         self::assertSame($uriComponent, $scheme->getUriComponent());
     }
 
-    public function validSchemeProvider(): array
+    public static function validSchemeProvider(): array
     {
         return [
             [null, '', ''],
@@ -113,7 +113,7 @@ final class SchemeTest extends TestCase
         new Scheme($scheme);
     }
 
-    public function invalidSchemeProvider(): array
+    public static function invalidSchemeProvider(): array
     {
         return [
             'empty string' => [''],
@@ -133,7 +133,7 @@ final class SchemeTest extends TestCase
         self::assertSame($expected, $scheme->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [

@@ -76,7 +76,7 @@ final class HostTest extends TestCase
         self::assertSame($iri, $host->toUnicode());
     }
 
-    public function validHostProvider(): array
+    public static function validHostProvider(): array
     {
         return [
             'ipv4' => [
@@ -167,7 +167,7 @@ final class HostTest extends TestCase
         new Host($invalid);
     }
 
-    public function invalidHostProvider(): array
+    public static function invalidHostProvider(): array
     {
         return [
             'empty label' => ['tot.    .coucou.com'],
@@ -208,7 +208,7 @@ final class HostTest extends TestCase
         self::assertSame($unicode, $host->toUnicode());
     }
 
-    public function hostnamesProvider(): array
+    public static function hostnamesProvider(): array
     {
         // http://en.wikipedia.org/wiki/.test_(international_domain_name)#Test_TLDs
         return [
@@ -248,7 +248,7 @@ final class HostTest extends TestCase
         self::assertSame($expected, $host->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [
@@ -290,7 +290,7 @@ final class HostTest extends TestCase
         self::assertSame($host->isDomain(), $expectedIsDomain);
     }
 
-    public function getIsDomainProvider(): iterable
+    public static function getIsDomainProvider(): iterable
     {
         $maxLongHost = implode('.', array_fill(0, 126, 'a')).'.a';
         $tooLongHost = $maxLongHost.'b';

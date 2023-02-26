@@ -53,7 +53,7 @@ final class PathModifierTest extends TestCase
         self::assertSame((string) $ascii, (string) UriModifier::dataPathToAscii($binary));
     }
 
-    public function fileProvider(): array
+    public static function fileProvider(): array
     {
         $rootPath = dirname(__DIR__).'/test_files';
 
@@ -96,7 +96,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($append, UriModifier::appendSegment($this->uri, $segment)->getPath());
     }
 
-    public function appendSegmentProvider(): array
+    public static function appendSegmentProvider(): array
     {
         return [
             ['toto', '/path/to/the/sky.php/toto'],
@@ -105,7 +105,7 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @dataProvider validappendSegmentProvider
+     * @dataProvider validAppendSegmentProvider
      *
      * @covers ::normalizePath
      * @covers ::appendSegment
@@ -115,7 +115,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($expected, (string) UriModifier::appendSegment(Http::createFromString($uri), $segment));
     }
 
-    public function validappendSegmentProvider(): array
+    public static function validAppendSegmentProvider(): array
     {
         return [
             'uri with trailing slash' => [
@@ -152,7 +152,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($expected, (string) UriModifier::replaceBasename(Psr7\Utils::uriFor($uri), $path));
     }
 
-    public function validBasenameProvider(): array
+    public static function validBasenameProvider(): array
     {
         return [
             ['baz', 'http://example.com', 'http://example.com/baz'],
@@ -183,7 +183,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($expected, (string) UriModifier::replaceDirname(Psr7\Utils::uriFor($uri), $path));
     }
 
-    public function validDirnameProvider(): array
+    public static function validDirnameProvider(): array
     {
         return [
             ['baz', 'http://example.com', 'http://example.com/baz/'],
@@ -205,7 +205,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($prepend, UriModifier::prependSegment($uri, $segment)->getPath());
     }
 
-    public function prependSegmentProvider(): array
+    public static function prependSegmentProvider(): array
     {
         return [
             [
@@ -242,7 +242,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($replace, UriModifier::replaceSegment($this->uri, $key, $segment)->getPath());
     }
 
-    public function replaceSegmentProvider(): array
+    public static function replaceSegmentProvider(): array
     {
         return [
             ['toto', 2, '/path/to/the/sky.php/toto', '/toto/path/to/the/sky.php', '/path/to/toto/sky.php'],
@@ -261,7 +261,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($expected, UriModifier::addBasePath($this->uri, $basepath)->getPath());
     }
 
-    public function addBasepathProvider(): array
+    public static function addBasepathProvider(): array
     {
         return [
             ['/', '/path/to/the/sky.php'],
@@ -292,7 +292,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($expected, UriModifier::removeBasePath($this->uri, $basepath)->getPath());
     }
 
-    public function removeBasePathProvider(): array
+    public static function removeBasePathProvider(): array
     {
         return [
             ['/', '/path/to/the/sky.php'],
@@ -323,7 +323,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($expected, UriModifier::removeSegments($this->uri, ...$keys)->getPath());
     }
 
-    public function validwithoutSegmentProvider(): array
+    public static function validwithoutSegmentProvider(): array
     {
         return [
             [[1], '/path/the/sky.php'],
@@ -375,7 +375,7 @@ final class PathModifierTest extends TestCase
         self::assertSame($expected, UriModifier::replaceExtension($this->uri, $extension)->getPath());
     }
 
-    public function validExtensionProvider(): array
+    public static function validExtensionProvider(): array
     {
         return [
             ['csv', '/path/to/the/sky.csv'],

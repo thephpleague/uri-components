@@ -38,7 +38,7 @@ final class QueryModifierTest extends TestCase
         self::assertSame($expected, UriModifier::mergeQuery($this->uri, $query)->getQuery());
     }
 
-    public function validMergeQueryProvider(): array
+    public static function validMergeQueryProvider(): array
     {
         return [
             ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
@@ -57,7 +57,7 @@ final class QueryModifierTest extends TestCase
         self::assertSame($expected, UriModifier::appendQuery($this->uri, $query)->getQuery());
     }
 
-    public function validAppendQueryProvider(): array
+    public static function validAppendQueryProvider(): array
     {
         return [
             ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
@@ -86,7 +86,7 @@ final class QueryModifierTest extends TestCase
         self::assertSame($expected, UriModifier::removePairs($this->uri, ...$input)->getQuery());
     }
 
-    public function validWithoutQueryValuesProvider(): array
+    public static function validWithoutQueryValuesProvider(): array
     {
         return [
             [['1'], 'kingkong=toto&foo=bar%20baz'],
@@ -107,7 +107,7 @@ final class QueryModifierTest extends TestCase
         self::assertSame($expected, UriModifier::removeParams(Uri::createFromBaseUri($uri), ...$input)->getQuery());
     }
 
-    public function removeParamsProvider(): array
+    public static function removeParamsProvider(): array
     {
         return [
             [
@@ -142,7 +142,7 @@ final class QueryModifierTest extends TestCase
         self::assertSame($expected, UriModifier::removeEmptyPairs(Http::createFromBaseUri($uri))->__toString());
     }
 
-    public function removeEmptyPairsProvider(): iterable
+    public static function removeEmptyPairsProvider(): iterable
     {
         return [
             'null query component' => [

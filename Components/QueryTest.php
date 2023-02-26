@@ -133,7 +133,7 @@ final class QueryTest extends TestCase
         self::assertSame($expected, (string) $query);
     }
 
-    public function queryProvider(): array
+    public static function queryProvider(): array
     {
         $unreserved = 'a-zA-Z0-9.-_~!$&\'()*+,;=:@';
 
@@ -230,7 +230,7 @@ final class QueryTest extends TestCase
         self::assertSame($expected, $base->append($append_data)->toRFC3986());
     }
 
-    public function validAppendValue(): array
+    public static function validAppendValue(): array
     {
         return [
             ['', 'foo=bar&foo=baz', 'foo=bar&foo=baz'],
@@ -325,7 +325,7 @@ final class QueryTest extends TestCase
         self::assertSame($result, (string) (Query::createFromRFC3986($origin))->withoutPair(...$without));
     }
 
-    public function withoutPairProvider(): array
+    public static function withoutPairProvider(): array
     {
         return [
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
@@ -376,7 +376,7 @@ final class QueryTest extends TestCase
         self::assertSame($expected, (string) Query::createFromParams($origin)->withoutParam(...$without));
     }
 
-    public function withoutParamProvider(): array
+    public static function withoutParamProvider(): array
     {
         $data = [
             'filter' => [
@@ -480,7 +480,7 @@ final class QueryTest extends TestCase
      * @covers ::withoutNumericIndices
      * @covers ::encodeNumericIndices
      */
-    public function testWithoutNumericIndices(): void
+    public static function testWithoutNumericIndices(): void
     {
         $data = [
             'filter' => [
@@ -601,7 +601,7 @@ final class QueryTest extends TestCase
      * @covers ::sort
      * @covers ::reducePairs
      */
-    public function testSort(): void
+    public static function testSort(): void
     {
         $query = (Query::createFromRFC3986())
             ->appendTo('a', 3)
@@ -630,7 +630,7 @@ final class QueryTest extends TestCase
         self::assertSame($sortedQuery, $query);
     }
 
-    public function sameQueryAfterSortingProvider(): array
+    public static function sameQueryAfterSortingProvider(): array
     {
         return [
             'same already sorted' => ['a=3&a=1&b=2'],
@@ -650,7 +650,7 @@ final class QueryTest extends TestCase
         self::assertSame($expected, (Query::createFromRFC3986($query))->withPair($key, $value)->getAll($key));
     }
 
-    public function provideWithPairData(): array
+    public static function provideWithPairData(): array
     {
         return [
             [
@@ -704,7 +704,7 @@ final class QueryTest extends TestCase
         self::assertSame($expected, (string) (Query::createFromRFC3986($src))->merge($dest));
     }
 
-    public function mergeBasicProvider(): array
+    public static function mergeBasicProvider(): array
     {
         return [
             'merging null' => [
@@ -808,7 +808,7 @@ final class QueryTest extends TestCase
         self::assertSame($expected, $query->withoutDuplicates()->value());
     }
 
-    public function provideWithoutDuplicatesData(): array
+    public static function provideWithoutDuplicatesData(): array
     {
         return [
             'empty query' => [null, null],
@@ -893,7 +893,7 @@ final class QueryTest extends TestCase
         self::assertSame($expected, $query->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [

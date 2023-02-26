@@ -109,7 +109,7 @@ final class DataPathTest extends TestCase
         DataPath::createFromString($path);
     }
 
-    public function invalidDataUriPath(): array
+    public static function invalidDataUriPath(): array
     {
         return [
             'invalid format' => ['/usr/bin/yeah'],
@@ -158,7 +158,7 @@ final class DataPathTest extends TestCase
         self::assertSame($expected, (string) DataPath::createFromString($path));
     }
 
-    public function validPathContent(): array
+    public static function validPathContent(): array
     {
         return [
             [
@@ -197,7 +197,7 @@ final class DataPathTest extends TestCase
         self::assertSame($mediatype, $uri->getMediaType());
     }
 
-    public function validFilePath(): array
+    public static function validFilePath(): array
     {
         $rootPath = dirname(__DIR__, 2).'/test_files';
 
@@ -259,7 +259,7 @@ final class DataPathTest extends TestCase
         DataPath::createFromFilePath($path)->withParameters($parameters);
     }
 
-    public function invalidParametersString(): array
+    public static function invalidParametersString(): array
     {
         return [
             [
@@ -297,7 +297,7 @@ final class DataPathTest extends TestCase
         self::assertFalse($uri->toAscii()->isBinaryData());
     }
 
-    public function fileProvider(): array
+    public static function fileProvider(): array
     {
         $rootPath = dirname(__DIR__, 2).'/test_files';
 
@@ -321,7 +321,7 @@ final class DataPathTest extends TestCase
         $uri->withParameters($parameters);
     }
 
-    public function invalidParameters(): array
+    public static function invalidParameters(): array
     {
         return [
             'can not modify binary flag' => ['base64=3'],
@@ -457,7 +457,7 @@ final class DataPathTest extends TestCase
         self::assertSame($expected, $path->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [

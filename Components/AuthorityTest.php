@@ -74,7 +74,7 @@ final class AuthorityTest extends TestCase
         self::assertSame($component, $instance->value());
     }
 
-    public function validAuthorityDataProvider(): array
+    public static function validAuthorityDataProvider(): array
     {
         return [
             'null values' => [
@@ -129,7 +129,7 @@ final class AuthorityTest extends TestCase
         Authority::createFromString($authority);
     }
 
-    public function invalidAuthorityDataProvider(): array
+    public static function invalidAuthorityDataProvider(): array
     {
         return [
             'invalid port' => ['foo:bar@example.com:foo'],
@@ -174,7 +174,7 @@ final class AuthorityTest extends TestCase
         Authority::createFromString('foo:bar@example.com:443')->withHost($host);
     }
 
-    public function invalidHostDataProvider(): array
+    public static function invalidHostDataProvider(): array
     {
         return [
             'invalid host' => ["foo\0"],
@@ -253,7 +253,7 @@ final class AuthorityTest extends TestCase
         self::assertSame($uriComponent, $instance->getUriComponent());
     }
 
-    public function stringRepresentationDataProvider(): array
+    public static function stringRepresentationDataProvider(): array
     {
         return [
             'null' => [
@@ -299,7 +299,7 @@ final class AuthorityTest extends TestCase
         self::assertSame($expected, $authority->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [

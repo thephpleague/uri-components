@@ -44,7 +44,7 @@ final class PathTest extends TestCase
         self::assertSame($encoded, $path->value());
     }
 
-    public function validPathEncoding(): array
+    public static function validPathEncoding(): array
     {
         return [
             [
@@ -142,7 +142,7 @@ final class PathTest extends TestCase
     /**
      * Provides different segment to be normalized.
      */
-    public function normalizeProvider(): array
+    public static function normalizeProvider(): array
     {
         return [
             ['/a/b/c/./../../g', '/a/g'],
@@ -161,7 +161,7 @@ final class PathTest extends TestCase
         self::assertSame($expected, Path::createFromString($path)->hasTrailingSlash());
     }
 
-    public function trailingSlashProvider(): array
+    public static function trailingSlashProvider(): array
     {
         return [
             ['/path/to/my/', true],
@@ -181,7 +181,7 @@ final class PathTest extends TestCase
         self::assertSame($expected, (string) Path::createFromString($path)->withTrailingSlash());
     }
 
-    public function withTrailingSlashProvider(): array
+    public static function withTrailingSlashProvider(): array
     {
         return [
             'relative path without ending slash' => ['toto', 'toto/'],
@@ -201,7 +201,7 @@ final class PathTest extends TestCase
         self::assertSame($expected, (string) Path::createFromString($path)->withoutTrailingSlash());
     }
 
-    public function withoutTrailingSlashProvider(): array
+    public static function withoutTrailingSlashProvider(): array
     {
         return [
             'relative path without ending slash' => ['toto', 'toto'],
@@ -221,7 +221,7 @@ final class PathTest extends TestCase
         self::assertSame($expected, (string) Path::createFromString($path)->withLeadingSlash());
     }
 
-    public function withLeadingSlashProvider(): array
+    public static function withLeadingSlashProvider(): array
     {
         return [
             'relative path without leading slash' => ['toto', '/toto'],
@@ -241,7 +241,7 @@ final class PathTest extends TestCase
         self::assertSame($expected, (string) Path::createFromString($path)->withoutLeadingSlash());
     }
 
-    public function withoutLeadingSlashProvider(): array
+    public static function withoutLeadingSlashProvider(): array
     {
         return [
             'relative path without ending slash' => ['toto', 'toto'],
@@ -263,7 +263,7 @@ final class PathTest extends TestCase
         self::assertSame($expected, $path->value());
     }
 
-    public function getURIProvider(): iterable
+    public static function getURIProvider(): iterable
     {
         return [
             'PSR-7 URI object' => [
