@@ -37,8 +37,8 @@ final class UserInfo extends Component implements UserInfoInterface
      * New instance.
      */
     public function __construct(
-        UriComponentInterface|Stringable|float|int|string|bool|null $user = null,
-        #[SensitiveParameter] UriComponentInterface|Stringable|float|int|string|bool|null $pass = null
+        UriComponentInterface|Stringable|int|string|bool|null $user = null,
+        #[SensitiveParameter] UriComponentInterface|Stringable|int|string|bool|null $pass = null
     ) {
         $this->user = $this->validateComponent($user);
         $pass = $this->validateComponent($pass);
@@ -47,11 +47,6 @@ final class UserInfo extends Component implements UserInfoInterface
         }
 
         $this->pass = $pass;
-    }
-
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['user'], $properties['pass']);
     }
 
     /**

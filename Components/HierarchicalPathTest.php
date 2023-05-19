@@ -22,7 +22,6 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function date_create;
 use function iterator_to_array;
-use function var_export;
 
 /**
  * @group path
@@ -31,14 +30,6 @@ use function var_export;
  */
 final class HierarchicalPathTest extends TestCase
 {
-    public function testSetState(): void
-    {
-        $component = HierarchicalPath::createFromString('yolo');
-        $generateComponent = eval('return '.var_export($component, true).';');
-
-        self::assertEquals($component, $generateComponent);
-    }
-
     /**
      * @covers ::getIterator
      */

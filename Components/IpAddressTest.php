@@ -37,7 +37,7 @@ final class IpAddressTest extends TestCase
      * @covers ::getIpVersion
      */
     public function testValidIpAddress(
-        UriComponentInterface|Stringable|float|int|string|bool|null $host,
+        UriComponentInterface|Stringable|int|string|bool|null $host,
         bool $isDomain,
         bool $isIp,
         bool $isIpv4,

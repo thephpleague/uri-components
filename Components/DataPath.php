@@ -63,7 +63,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * New instance.
      */
-    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $path = '')
+    public function __construct(UriComponentInterface|HostInterface|Stringable|int|string|bool|null $path = '')
     {
         $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
@@ -173,11 +173,6 @@ final class DataPath extends Component implements DataPathInterface
         if (false === $res || $this->document !== base64_encode($res)) {
             throw new SyntaxError(sprintf('Invalid document, `%s`.', $this->document));
         }
-    }
-
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['path']);
     }
 
     /**
@@ -378,7 +373,7 @@ final class DataPath extends Component implements DataPathInterface
         return new self($path);
     }
 
-    public function withParameters(Stringable|string|float|bool|int $parameters): DataPathInterface
+    public function withParameters(Stringable|string|bool|int $parameters): DataPathInterface
     {
         $parameters = (string) $parameters;
         if ($parameters === $this->getParameters()) {

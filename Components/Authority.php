@@ -36,7 +36,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    protected function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $authority = null)
+    private function __construct(UriComponentInterface|Stringable|string|null $authority = null)
     {
         $components = $this->parse(self::filterComponent($authority));
         $this->host = new Host($components['host']);
@@ -87,11 +87,6 @@ final class Authority extends Component implements AuthorityInterface
         }
     }
 
-    public static function __set_state(array $properties): self
-    {
-        return new self(self::getAuthorityValue($properties['userInfo'], $properties['host'], $properties['port']));
-    }
-
     /**
      * Create a new instance from a URI object.
      */
@@ -131,7 +126,7 @@ final class Authority extends Component implements AuthorityInterface
      * Create a new instance from a hash representation of the URI similar
      * to PHP parse_url function result
      *
-     * @param array<string,null|int|string> $components
+     * @param array{user:?string, pass:?string, host:?string, port:?int} $components
      */
     public static function createFromComponents(array $components): self
     {
@@ -201,10 +196,7 @@ final class Authority extends Component implements AuthorityInterface
         return $this->userInfo->value();
     }
 
-    /**
-     * @param UriComponentInterface|Stringable|float|int|string|bool|null $host
-     */
-    public function withHost($host): AuthorityInterface
+    public function withHost(UriComponentInterface|Stringable|string|null $host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
             $host = new Host($host);
@@ -217,10 +209,7 @@ final class Authority extends Component implements AuthorityInterface
         return $this->newInstance($this->userInfo, $host, $this->port);
     }
 
-    /**
-     * @param UriComponentInterface|Stringable|float|int|string|bool|null $port
-     */
-    public function withPort($port): AuthorityInterface
+    public function withPort(UriComponentInterface|Stringable|string|int|null $port): AuthorityInterface
     {
         if (!$port instanceof Port) {
             $port = new Port($port);
@@ -233,11 +222,7 @@ final class Authority extends Component implements AuthorityInterface
         return $this->newInstance($this->userInfo, $this->host, $port);
     }
 
-    /**
-     * @param Stringable|float|int|string|bool|null $user
-     * @param Stringable|float|int|string|bool|null $password
-     */
-    public function withUserInfo($user, $password = null): AuthorityInterface
+    public function withUserInfo(Stringable|string|null $user, Stringable|string|null $password = null): AuthorityInterface
     {
         $userInfo = new UserInfo($user, $password);
         if ($userInfo->value() === $this->userInfo->value()) {

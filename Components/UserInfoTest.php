@@ -18,7 +18,6 @@ use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use function var_export;
 
 /**
  * @group userinfo
@@ -41,8 +40,8 @@ final class UserInfoTest extends TestCase
      * @covers ::getUriComponent
      */
     public function testConstructor(
-        Stringable|float|int|string|bool|null $user,
-        Stringable|float|int|string|bool|null $pass,
+        Stringable|int|string|bool|null $user,
+        Stringable|int|string|bool|null $pass,
         ?string $expected_user,
         ?string $expected_pass,
         string $expected_str,
@@ -172,16 +171,6 @@ final class UserInfoTest extends TestCase
             new UserInfo('user', 'pass'),
             UserInfo::createFromString('user:pass')
         );
-    }
-
-    /**
-     * @covers ::__set_state
-     */
-    public function testSetState(): void
-    {
-        $conn = new UserInfo('user', 'pass');
-        $generateConn = eval('return '.var_export($conn, true).';');
-        self::assertEquals($conn, $generateConn);
     }
 
     /**

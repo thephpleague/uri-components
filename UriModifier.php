@@ -40,7 +40,7 @@ final class UriModifier
      */
     public static function appendQuery(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|int|string|bool|null $query
+        UriComponentInterface|Stringable|int|string|bool|null $query
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -54,7 +54,7 @@ final class UriModifier
      */
     public static function mergeQuery(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|int|string|bool|null $query
+        UriComponentInterface|Stringable|int|string|bool|null $query
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -244,7 +244,7 @@ final class UriModifier
     public static function replaceLabel(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
         int $offset,
-        UriComponentInterface|Stringable|float|int|string|bool|null $label
+        UriComponentInterface|Stringable|int|string|bool|null $label
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
         $host = Domain::createFromUri($uri)->withLabel($offset, $label)->value();
@@ -305,7 +305,7 @@ final class UriModifier
      */
     public static function appendSegment(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|int|string|bool $segment
+        UriComponentInterface|Stringable|int|string|bool $segment
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -337,7 +337,7 @@ final class UriModifier
      */
     public static function prependSegment(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|int|string|bool $segment
+        UriComponentInterface|Stringable|int|string|bool $segment
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -349,7 +349,7 @@ final class UriModifier
      */
     public static function removeBasePath(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|int|string|bool $path
+        UriComponentInterface|Stringable|int|string|bool $path
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
         /** @var HierarchicalPath $basePath */
@@ -431,7 +431,7 @@ final class UriModifier
      */
     public static function replaceBasename(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|bool|int|null|string $basename
+        UriComponentInterface|Stringable|bool|int|null|string $basename
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -443,7 +443,7 @@ final class UriModifier
      */
     public static function replaceDataUriParameters(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|bool|int|string $parameters
+        UriComponentInterface|Stringable|bool|int|string $parameters
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -455,7 +455,7 @@ final class UriModifier
      */
     public static function replaceDirname(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|bool|int|string $dirname
+        UriComponentInterface|Stringable|bool|int|string $dirname
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -467,7 +467,7 @@ final class UriModifier
      */
     public static function replaceExtension(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
-        UriComponentInterface|Stringable|float|bool|int|null|string $extension
+        UriComponentInterface|Stringable|bool|int|null|string $extension
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -480,7 +480,7 @@ final class UriModifier
     public static function replaceSegment(
         Psr7UriInterface|UriInterface|Stringable|string $uri,
         int $offset,
-        UriComponentInterface|Stringable|float|int|string|bool $segment
+        UriComponentInterface|Stringable|string $segment
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 

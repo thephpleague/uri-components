@@ -155,7 +155,7 @@ final class QueryStringTest extends TestCase
     {
         return [
             'URI Component Object object' => [
-                new Fragment('a=1&a=2'),
+                Fragment::createFromString('a=1&a=2'),
                 '&',
                 [['a', '1'], ['a', '2']],
                 PHP_QUERY_RFC3986,

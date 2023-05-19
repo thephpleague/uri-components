@@ -57,18 +57,13 @@ final class Query extends Component implements QueryInterface
      * @param non-empty-string $separator
      */
     public function __construct(
-        UriComponentInterface|Stringable|float|int|string|bool|null $query = null,
+        UriComponentInterface|Stringable|int|string|bool|null $query = null,
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ) {
         $this->pairs = QueryString::parse($query, $separator, $enc_type);
         $this->params = QueryString::convert($this->pairs);
         $this->separator = $separator;
-    }
-
-    public static function __set_state(array $properties): self
-    {
-        return self::createFromPairs($properties['pairs'], $properties['separator']);
     }
 
     /**
@@ -137,7 +132,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC3986(UriComponentInterface|Stringable|float|int|string|bool|null $query = null, string $separator = '&'): self
+    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|bool|null $query = null, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC3986);
     }
@@ -147,7 +142,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC1738(UriComponentInterface|Stringable|float|int|string|bool|null $query = null, string $separator = '&'): self
+    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|bool|null $query = null, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC1738);
     }
@@ -393,7 +388,7 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * @param UriComponentInterface|Stringable|float|int|string|bool|null $query the query to be merged with.
+     * @param UriComponentInterface|Stringable|int|string|bool|null $query the query to be merged with.
      */
     public function merge($query): QueryInterface
     {
@@ -458,13 +453,13 @@ final class Query extends Component implements QueryInterface
         );
     }
 
-    public function appendTo(string $key, Stringable|string|float|int|bool|null $value): QueryInterface
+    public function appendTo(string $key, Stringable|string|int|bool|null $value): QueryInterface
     {
         return self::createFromPairs([...$this->pairs, [$key, $this->filterPair($value)]], $this->separator);
     }
 
     /**
-     * @param Stringable|string|float|int|null|bool $query the query to append
+     * @param Stringable|string|int|null|bool $query the query to append
      */
     public function append($query): QueryInterface
     {

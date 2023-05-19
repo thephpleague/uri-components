@@ -19,7 +19,6 @@ use League\Uri\UriString;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function parse_url;
-use function var_export;
 
 /**
  * @group userinfo
@@ -27,17 +26,6 @@ use function var_export;
  */
 final class AuthorityTest extends TestCase
 {
-    /**
-     * @covers ::__set_state
-     * @covers ::validate
-     */
-    public function testSetState(): void
-    {
-        $authority = Authority::createFromString('foo:bar@example.com:443');
-        $generatedAuthority = eval('return '.var_export($authority, true).';');
-        self::assertEquals($authority, $generatedAuthority);
-    }
-
     /**
      * @dataProvider validAuthorityDataProvider
      *

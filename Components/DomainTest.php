@@ -22,7 +22,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use TypeError;
 use function date_create;
-use function var_export;
 
 /**
  * @group host
@@ -30,16 +29,6 @@ use function var_export;
  */
 final class DomainTest extends TestCase
 {
-    /**
-     * @covers ::__set_state
-     */
-    public function testSetState(): void
-    {
-        $host = Domain::createFromString('uri.thephpleague.com');
-
-        self::assertEquals($host, eval('return '.var_export($host, true).';'));
-    }
-
     public function testItCanBeInstantiatedWithAHostInterfaceImplementingObject(): void
     {
         $host = new Host('uri.thephpleague.com');

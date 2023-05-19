@@ -24,7 +24,6 @@ use Stringable;
 use TypeError;
 use function is_array;
 use function json_encode;
-use function var_export;
 
 /**
  * @group query
@@ -37,15 +36,6 @@ final class QueryTest extends TestCase
     protected function setUp(): void
     {
         $this->query = Query::createFromRFC3986('kingkong=toto');
-    }
-
-    /**
-     * @covers ::__set_state
-     */
-    public function testSetState(): void
-    {
-        $generateComponent = eval('return '.var_export($this->query, true).';');
-        self::assertEquals($this->query, $generateComponent);
     }
 
     /**
@@ -214,7 +204,7 @@ final class QueryTest extends TestCase
      * @covers ::value
      * @covers ::filterEmptyValue
      */
-    public function testAppend(?string $query, Stringable|string|int|float|bool|null $append_data, ?string $expected): void
+    public function testAppend(?string $query, Stringable|string|int|bool|null $append_data, ?string $expected): void
     {
         $base = Query::createFromRFC3986($query);
 
@@ -690,7 +680,7 @@ final class QueryTest extends TestCase
      * @covers ::addPair
      * @covers ::filterPair
      */
-    public function testMergeBasic(string $src, UriComponentInterface|Stringable|float|int|string|bool|null $dest, string $expected): void
+    public function testMergeBasic(string $src, UriComponentInterface|Stringable|int|string|bool|null $dest, string $expected): void
     {
         self::assertSame($expected, (string) (Query::createFromRFC3986($src))->merge($dest));
     }

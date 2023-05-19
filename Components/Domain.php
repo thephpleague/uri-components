@@ -45,7 +45,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * @throws SyntaxError
      */
-    public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $host = null)
+    public function __construct(UriComponentInterface|HostInterface|Stringable|int|string|bool|null $host = null)
     {
         if (!$host instanceof HostInterface) {
             $host = new Host($host);
@@ -57,11 +57,6 @@ final class Domain extends Component implements DomainHostInterface
 
         $this->host = $host;
         $this->labels = array_reverse(explode(self::SEPARATOR, $this->host->value() ?? ''));
-    }
-
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['host']);
     }
 
     /**
@@ -194,7 +189,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $label
+     * @param UriComponentInterface|HostInterface|Stringable|int|string|bool|null $label
      */
     public function prepend($label): DomainHostInterface
     {
@@ -207,7 +202,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $label
+     * @param UriComponentInterface|HostInterface|Stringable|int|string|bool|null $label
      */
     public function append($label): DomainHostInterface
     {
@@ -243,7 +238,7 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $label
+     * @param UriComponentInterface|HostInterface|Stringable|int|string|bool|null $label
      *
      * @throws OffsetOutOfBounds
      */

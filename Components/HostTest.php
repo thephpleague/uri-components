@@ -21,7 +21,6 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function array_fill;
 use function implode;
-use function var_export;
 
 /**
  * @group host
@@ -29,16 +28,6 @@ use function var_export;
  */
 final class HostTest extends TestCase
 {
-    /**
-     * @covers ::__set_state
-     */
-    public function testSetState(): void
-    {
-        $host = new Host('uri.thephpleague.com');
-
-        self::assertEquals($host, eval('return '.var_export($host, true).';'));
-    }
-
     /**
      * Test valid Host.
      *
@@ -52,7 +41,7 @@ final class HostTest extends TestCase
      * @covers ::toAscii
      * @covers ::toUnicode
      */
-    public function testValidHost(UriComponentInterface|Stringable|float|int|string|bool|null $host, ?string $uri, ?string $iri): void
+    public function testValidHost(UriComponentInterface|Stringable|int|string|bool|null $host, ?string $uri, ?string $iri): void
     {
         $host = new Host($host);
 

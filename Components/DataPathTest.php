@@ -20,7 +20,6 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use function base64_encode;
 use function dirname;
 use function file_get_contents;
-use function var_export;
 
 /**
  * @group path
@@ -114,21 +113,6 @@ final class DataPathTest extends TestCase
         return [
             'invalid format' => ['/usr/bin/yeah'],
         ];
-    }
-
-    /**
-     * @covers ::__set_state
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateDocument
-     */
-    public function testSetState(): void
-    {
-        $component = DataPath::createFromString(';,Bonjour%20le%20monde%21');
-        $generateComponent = eval('return '.var_export($component, true).';');
-
-        self::assertEquals($component, $generateComponent);
     }
 
     /**

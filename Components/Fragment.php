@@ -28,14 +28,19 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * New instance.
      */
-    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null  $fragment = null)
+    private function __construct(UriComponentInterface|Stringable|string|null $fragment)
     {
         $this->fragment = $this->validateComponent($fragment);
     }
 
-    public static function __set_state(array $properties): self
+    public static function createFromString(Stringable|string $fragment): self
     {
-        return new self($properties['fragment']);
+        return new self((string) $fragment);
+    }
+
+    public static function createFromNull(): self
+    {
+        return new self(null);
     }
 
     /**
@@ -49,7 +54,7 @@ final class Fragment extends Component implements FragmentInterface
 
         $component = $uri->getFragment();
         if ('' === $component) {
-            return new self();
+            return new self(null);
         }
 
         return new self($component);

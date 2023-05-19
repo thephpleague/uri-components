@@ -28,7 +28,7 @@ final class Scheme extends Component
 
     private readonly ?string $scheme;
 
-    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $scheme = null)
+    private function __construct(UriComponentInterface|Stringable|string|null $scheme)
     {
         $this->scheme = $this->validate($scheme);
     }
@@ -38,19 +38,21 @@ final class Scheme extends Component
      *
      * @throws SyntaxError if the scheme is invalid
      */
-    private function validate(float|int|Stringable|string|bool|null $scheme): ?string
+    private function validate(Stringable|string|null $scheme): ?string
     {
         $scheme = self::filterComponent($scheme);
         if (null === $scheme) {
             return null;
         }
 
+        $fScheme = strtolower($scheme);
+
         static $inMemoryCache = [];
-        if (isset($inMemoryCache[$scheme])) {
-            return $inMemoryCache[$scheme];
+        if (isset($inMemoryCache[$fScheme])) {
+            return $inMemoryCache[$fScheme];
         }
 
-        if (1 !== preg_match(self::REGEXP_SCHEME, $scheme)) {
+        if (1 !== preg_match(self::REGEXP_SCHEME, $fScheme)) {
             throw new SyntaxError(sprintf("The scheme '%s' is invalid.", $scheme));
         }
 
@@ -58,12 +60,17 @@ final class Scheme extends Component
             unset($inMemoryCache[array_key_first($inMemoryCache)]);
         }
 
-        return $inMemoryCache[$scheme] = strtolower($scheme);
+        return $inMemoryCache[$fScheme] = $fScheme;
     }
 
-    public static function __set_state(array $properties): self
+    public static function createFromString(Stringable|string $scheme): self
     {
-        return new self($properties['scheme']);
+        return new self((string) $scheme);
+    }
+
+    public static function createFromNull(): self
+    {
+        return new self(null);
     }
 
     /**
@@ -77,7 +84,7 @@ final class Scheme extends Component
 
         $component = $uri->getScheme();
         if ('' === $component) {
-            return new self();
+            return new self(null);
         }
 
         return new self($component);
@@ -91,22 +98,5 @@ final class Scheme extends Component
     public function getUriComponent(): string
     {
         return $this->value().(null === $this->scheme ? '' : ':');
-    }
-
-
-
-    /**
-     * Filter the input component.
-     *
-     * @throws SyntaxError If the component can not be converted to a string or null
-     */
-    protected static function filterComponent(UriComponentInterface|Stringable|float|int|string|bool|null $component): ?string
-    {
-        $component = parent::filterComponent($component);
-        if (null !== $component) {
-            return strtolower($component);
-        }
-
-        return $component;
     }
 }

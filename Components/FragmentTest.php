@@ -11,6 +11,7 @@
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -18,7 +19,6 @@ use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use function var_export;
 
 /**
  * @group fragment
@@ -36,7 +36,9 @@ final class FragmentTest extends TestCase
      */
     public function testStringRepresentation(?string $str, string $encoded): void
     {
-        self::assertSame($encoded, (string) new Fragment($str));
+        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::createFromNull();
+
+        self::assertSame($encoded, (string) $fragment);
     }
 
     public static function getUriComponentProvider(): array
@@ -72,15 +74,21 @@ final class FragmentTest extends TestCase
      * @covers ::encodeMatches
      * @covers ::decodeMatches
      */
-    public function testGetValue(Stringable|float|int|string|bool|null $str, ?string $expected): void
+    public function testGetValue(UriComponentInterface|Stringable|string|null $str, ?string $expected): void
     {
-        self::assertSame($expected, (new Fragment($str))->decoded());
+        if ($str instanceof UriComponentInterface) {
+            $str = $str->value();
+        }
+
+        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::createFromNull();
+
+        self::assertSame($expected, $fragment->decoded());
     }
 
     public static function geValueProvider(): array
     {
         return [
-            [new Fragment(), null],
+            [Fragment::createFromNull(), null],
             [null, null],
             ['', ''],
             ['0', '0'],
@@ -108,7 +116,7 @@ final class FragmentTest extends TestCase
      */
     public function testGetContent(string $input, string $expected): void
     {
-        self::assertSame($expected, (new Fragment($input))->value());
+        self::assertSame($expected, Fragment::createFromString($input)->value());
     }
 
     public static function getContentProvider(): array
@@ -126,17 +134,8 @@ final class FragmentTest extends TestCase
     public function testFailedFragmentException(): void
     {
         $this->expectException(SyntaxError::class);
-        new Fragment("\0");
-    }
 
-    /**
-     * @covers ::__set_state
-     */
-    public function testSetState(): void
-    {
-        $component = new Fragment('yolo');
-        $generateComponent = eval('return '.var_export($component, true).';');
-        self::assertEquals($component, $generateComponent);
+        Fragment::createFromString("\0");
     }
 
     /**
@@ -144,8 +143,8 @@ final class FragmentTest extends TestCase
      */
     public function testGetUriComponent(): void
     {
-        self::assertSame('#yolo', (new Fragment('yolo'))->getUriComponent());
-        self::assertEquals('', (new Fragment())->getUriComponent());
+        self::assertSame('#yolo', Fragment::createFromString('yolo')->getUriComponent());
+        self::assertEquals('', Fragment::createFromNull()->getUriComponent());
     }
 
     /**
@@ -153,8 +152,7 @@ final class FragmentTest extends TestCase
      */
     public function testJsonSerialize(): void
     {
-        $component = new Fragment('yolo');
-        self::assertEquals('"yolo"', json_encode($component));
+        self::assertEquals('"yolo"', json_encode(Fragment::createFromString('yolo')));
     }
 
     /**
@@ -164,7 +162,7 @@ final class FragmentTest extends TestCase
      */
     public function testPreserverDelimiter(): void
     {
-        $fragment = new Fragment();
+        $fragment = Fragment::createFromNull();
         self::assertNull($fragment->value());
         self::assertSame('', $fragment->__toString());
     }

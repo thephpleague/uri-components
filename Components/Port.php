@@ -31,7 +31,7 @@ final class Port extends Component implements PortInterface
     /**
      * New instance.
      */
-    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $port = null)
+    public function __construct(UriComponentInterface|Stringable|int|string|bool|null $port = null)
     {
         $this->port = $this->validate($port);
     }
@@ -53,7 +53,7 @@ final class Port extends Component implements PortInterface
      *
      * @throws SyntaxError if the port is invalid
      */
-    private function validate(UriComponentInterface|Stringable|float|int|string|bool|null $port): ?int
+    private function validate(UriComponentInterface|Stringable|int|string|bool|null $port): ?int
     {
         $port = self::filterComponent($port);
         if (null === $port) {
@@ -65,12 +65,7 @@ final class Port extends Component implements PortInterface
             return $fport;
         }
 
-        throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s.', $port));
-    }
-
-    public static function __set_state(array $properties): self
-    {
-        return new self($properties['port']);
+        throw new SyntaxError('Expected port to be a positive integer or 0; received '.$port.'.');
     }
 
     /**
