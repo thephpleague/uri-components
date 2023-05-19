@@ -77,24 +77,10 @@ final class DomainTest extends TestCase
     }
 
     /**
-     * @covers ::createFromString
-     * @covers ::withContent
-     */
-    public function testWithContent(): void
-    {
-        $host = Domain::createFromString('uri.thephpleague.com');
-
-        self::assertSame($host, $host->withContent('uri.thephpleague.com'));
-        self::assertSame($host, $host->withContent($host));
-        self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
-    }
-
-    /**
      * Test valid Domain.
      * @dataProvider validDomainProvider
      *
      * @covers ::createFromString
-     * @covers ::setLabels
      * @covers ::value
      * @covers ::toUnicode
      */

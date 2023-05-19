@@ -40,21 +40,6 @@ final class HostTest extends TestCase
     }
 
     /**
-     * @covers ::__construct
-     * @covers ::withContent
-     * @covers ::isValidIpv6Hostname
-     * @covers ::isDomain
-     */
-    public function testWithContent(): void
-    {
-        $host = new Host('uri.thephpleague.com');
-
-        self::assertSame($host, $host->withContent('uri.thephpleague.com'));
-        self::assertSame($host, $host->withContent($host));
-        self::assertNotSame($host, $host->withContent('csv.thephpleague.com'));
-    }
-
-    /**
      * Test valid Host.
      *
      * @dataProvider validHostProvider

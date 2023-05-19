@@ -43,8 +43,6 @@ final class Domain extends Component implements DomainHostInterface
     private readonly array $labels;
 
     /**
-     * @deprecated 2.3.0 use the appropriate named constructor
-     *
      * @throws SyntaxError
      */
     public function __construct(UriComponentInterface|HostInterface|Stringable|float|int|string|bool|null $host = null)
@@ -58,18 +56,7 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         $this->host = $host;
-        $this->labels = $this->setLabels();
-    }
-
-    /**
-     * Sets the domain labels.
-     */
-    private function setLabels(): array
-    {
-        /** @var string $host */
-        $host = $this->host->value();
-
-        return array_reverse(explode(self::SEPARATOR, $host));
+        $this->labels = array_reverse(explode(self::SEPARATOR, $this->host->value() ?? ''));
     }
 
     public static function __set_state(array $properties): self

@@ -123,11 +123,6 @@ abstract class Component implements UriComponentInterface
 
     abstract public function getUriComponent(): string;
 
-    public function getContent(): ?string
-    {
-        return $this->value();
-    }
-
     public function toString(): string
     {
         return (string) $this->value();
@@ -138,15 +133,5 @@ abstract class Component implements UriComponentInterface
         return $this->toString();
     }
 
-    public function withContent($content): UriComponentInterface
-    {
-        $content = static::filterComponent($content);
-        if ($content === $this->value()) {
-            return $this;
-        }
-
-        return new static($content);
-    }
-
-    abstract public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $value);
+    abstract protected function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $value);
 }

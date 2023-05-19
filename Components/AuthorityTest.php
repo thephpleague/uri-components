@@ -139,17 +139,6 @@ final class AuthorityTest extends TestCase
     }
 
     /**
-     * @covers ::withContent
-     * @covers ::validate
-     */
-    public function testWithContent(): void
-    {
-        $authority = Authority::createFromString('foo:bar@example.com:443');
-        self::assertSame($authority, $authority->withContent('foo:bar@example.com:443'));
-        self::assertNotEquals($authority, $authority->withContent('example.com:443'));
-    }
-
-    /**
      * @covers ::withHost
      * @covers ::validate
      */

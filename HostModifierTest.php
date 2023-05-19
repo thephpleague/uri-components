@@ -11,7 +11,6 @@
 
 namespace League\Uri;
 
-use GuzzleHttp\Psr7\Uri as GuzzleUri;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 
@@ -116,23 +115,11 @@ final class HostModifierTest extends TestCase
      */
     public function testHostToAsciiProcess(): void
     {
-        $uri = new GuzzleUri('http://مثال.إختبار/where/to/go');
+        $uri = Uri::createFromString('http://مثال.إختبار/where/to/go');
         self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
             (string)  UriModifier::hostToAscii($uri)
         );
-    }
-
-    /**
-     * @covers ::hostToUnicode
-     * @covers ::normalizeComponent
-     */
-    public function testHostToUnicodeProcess(): void
-    {
-        $uri = new GuzzleUri('http://xn--mgbh0fb.xn--kgbechtv/where/to/go');
-        $expected = 'http://مثال.إختبار/where/to/go';
-
-        self::assertSame($expected, (string) UriModifier::hostToUnicode($uri));
     }
 
     /**

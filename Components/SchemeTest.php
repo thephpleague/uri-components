@@ -39,30 +39,12 @@ final class SchemeTest extends TestCase
     }
 
     /**
-     * @covers ::withContent
-     * @covers ::value
-     * @covers ::__toString
-     * @covers ::validate
-     */
-    public function testWithValue(): void
-    {
-        $scheme = new Scheme('ftp');
-        $http_scheme = $scheme->withContent('HTTP');
-        self::assertSame('http', $http_scheme->value());
-        self::assertSame('http', (string) $http_scheme);
-    }
-
-    /**
-     * @covers ::withContent
      * @covers ::validate
      */
     public function testWithContent(): void
     {
-        $scheme = new Scheme('ftp');
-        self::assertSame($scheme, $scheme->withContent('FtP'));
-        self::assertNotSame($scheme, $scheme->withContent('Http'));
+        self::assertEquals(new Scheme('ftp'), new Scheme('FtP'));
     }
-
 
     /**
      * @dataProvider validSchemeProvider

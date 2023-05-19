@@ -65,7 +65,7 @@ final class UserInfo extends Component implements UserInfoInterface
                 return new self();
             }
 
-            return self::createFromComponent($component);
+            return self::createFromString($component);
         }
 
         $component = $uri->getUserInfo();
@@ -73,7 +73,7 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self();
         }
 
-        return self::createFromComponent($component);
+        return self::createFromString($component);
     }
 
     /**
@@ -86,14 +86,16 @@ final class UserInfo extends Component implements UserInfoInterface
             return new self();
         }
 
-        return self::createFromComponent($userInfo);
+        return self::createFromString($userInfo);
     }
 
     /**
      * Creates a new instance from an encoded string.
      */
-    private static function createFromComponent(string $userInfo): self
+    public static function createFromString(Stringable|string $userInfo): self
     {
+        $userInfo = (string) $userInfo;
+
         [$user, $pass] = explode(':', $userInfo, 2) + [1 => null];
         if (null !== $user) {
             $user = self::decode($user);
@@ -145,20 +147,6 @@ final class UserInfo extends Component implements UserInfoInterface
     public function getPass(): ?string
     {
         return $this->pass;
-    }
-
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-        if ($content === $this->value()) {
-            return $this;
-        }
-
-        if (null === $content) {
-            return new self();
-        }
-
-        return self::createFromComponent($content);
     }
 
     public function withUserInfo($user, #[SensitiveParameter] $pass = null): UserInfoInterface

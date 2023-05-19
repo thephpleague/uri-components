@@ -132,21 +132,6 @@ final class DataPathTest extends TestCase
     }
 
     /**
-     * @covers ::withContent
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateDocument
-     */
-    public function testWithPath(): void
-    {
-        $path = DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-
-        self::assertSame($path, $path->withContent($path));
-        self::assertNotSame($path, $path->withContent(''));
-    }
-
-    /**
      * @dataProvider validPathContent
      *
      * @covers ::filterPath

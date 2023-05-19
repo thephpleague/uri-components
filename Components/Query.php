@@ -248,16 +248,6 @@ final class Query extends Component implements QueryInterface
         return self::createFromPairs($this->pairs, $separator);
     }
 
-    public function withContent($content): UriComponentInterface
-    {
-        $content = self::filterComponent($content);
-        if ($content === $this->value()) {
-            return $this;
-        }
-
-        return new self($content);
-    }
-
     public function sort(): QueryInterface
     {
         if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {

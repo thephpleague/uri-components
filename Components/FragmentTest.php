@@ -160,28 +160,13 @@ final class FragmentTest extends TestCase
     /**
      * @covers ::__toString
      * @covers ::validateComponent
-     * @covers ::withContent
      * @covers ::decodeMatches
      */
     public function testPreserverDelimiter(): void
     {
         $fragment = new Fragment();
-        $altFragment = $fragment->withContent(null);
-        self::assertSame($fragment, $altFragment);
-        self::assertNull($altFragment->value());
-        self::assertSame('', $altFragment->__toString());
-    }
-
-    /**
-     * @covers ::withContent
-     * @covers ::encodeMatches
-     * @covers ::decodeMatches
-     */
-    public function testWithContent(): void
-    {
-        $fragment = new Fragment('coucou');
-        self::assertSame($fragment, $fragment->withContent('coucou'));
-        self::assertNotSame($fragment, $fragment->withContent('Coucou'));
+        self::assertNull($fragment->value());
+        self::assertSame('', $fragment->__toString());
     }
 
     /**

@@ -89,16 +89,6 @@ final class PortTest extends TestCase
     }
 
     /**
-     * @covers ::withContent
-     */
-    public function testWithContent(): void
-    {
-        $port = new Port(23);
-        self::assertSame($port, $port->withContent('23'));
-        self::assertNotSame($port, $port->withContent('42'));
-    }
-
-    /**
      * @dataProvider getURIProvider
      * @covers ::createFromUri
      */

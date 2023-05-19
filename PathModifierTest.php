@@ -11,7 +11,6 @@
 
 namespace League\Uri;
 
-use GuzzleHttp\Psr7;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
@@ -149,7 +148,7 @@ final class PathModifierTest extends TestCase
      */
     public function testBasename(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) UriModifier::replaceBasename(Psr7\Utils::uriFor($uri), $path));
+        self::assertSame($expected, (string) UriModifier::replaceBasename(Uri::createFromString($uri), $path));
     }
 
     public static function validBasenameProvider(): array
@@ -169,7 +168,7 @@ final class PathModifierTest extends TestCase
     public function testBasenameThrowException(): void
     {
         $this->expectException(SyntaxError::class);
-        UriModifier::replaceBasename(Psr7\Utils::uriFor('http://example.com'), 'foo/baz');
+        UriModifier::replaceBasename(Uri::createFromString('http://example.com'), 'foo/baz');
     }
 
     /**
@@ -180,7 +179,7 @@ final class PathModifierTest extends TestCase
      */
     public function testDirname(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) UriModifier::replaceDirname(Psr7\Utils::uriFor($uri), $path));
+        self::assertSame($expected, (string) UriModifier::replaceDirname(Uri::createFromString($uri), $path));
     }
 
     public static function validDirnameProvider(): array

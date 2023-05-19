@@ -106,14 +106,6 @@ final class PathTest extends TestCase
         ];
     }
 
-    public function testWithContent(): void
-    {
-        $component = Path::createFromString('this is a normal path');
-
-        self::assertSame($component, $component->withContent($component));
-        self::assertNotSame($component, $component->withContent('new/path'));
-    }
-
     public function testConstructorThrowsExceptionWithInvalidData(): void
     {
         $this->expectException(SyntaxError::class);

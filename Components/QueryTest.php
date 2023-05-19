@@ -65,15 +65,6 @@ final class QueryTest extends TestCase
     }
 
     /**
-     * @covers ::withContent
-     */
-    public function testWithContent(): void
-    {
-        self::assertSame($this->query, $this->query->withContent('kingkong=toto'));
-        self::assertNotSame($this->query, $this->query->withContent('kingkong=tata'));
-    }
-
-    /**
      * @covers ::getIterator
      * @covers ::pairs
      */

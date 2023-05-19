@@ -34,11 +34,9 @@ final class Authority extends Component implements AuthorityInterface
     private readonly PortInterface $port;
 
     /**
-     * @deprecated since version 2.3.0 use a more appropriate named constructor.
-     *
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $authority = null)
+    protected function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $authority = null)
     {
         $components = $this->parse(self::filterComponent($authority));
         $this->host = new Host($components['host']);

@@ -55,14 +55,12 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     private readonly array $segments;
 
     /**
-     * @deprecated 2.3.0
-     *
      * @see ::createFromString
      * @see ::createFromPath
      *
      * New instance.
      */
-    public function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $path = '')
+    protected function __construct(UriComponentInterface|Stringable|float|int|string|bool|null $path = '')
     {
         if (!$path instanceof PathInterface) {
             $path = new Path($path);
