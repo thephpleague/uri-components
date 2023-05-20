@@ -37,7 +37,7 @@ final class Path extends Component implements PathInterface
     /**
      * New instance.
      */
-    public function __construct(UriComponentInterface|Stringable|int|string|bool|null $path = '')
+    public function __construct(UriComponentInterface|Stringable|int|string|null $path = '')
     {
         $this->path = $this->validate($path);
     }
@@ -45,7 +45,7 @@ final class Path extends Component implements PathInterface
     /**
      * Validate the component content.
      */
-    private function validate(UriComponentInterface|Stringable|int|string|bool|null $path): string
+    private function validate(UriComponentInterface|Stringable|int|string|null $path): string
     {
         $path = $this->validateComponent($path);
         if (null === $path) {

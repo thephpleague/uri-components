@@ -43,7 +43,7 @@ final class PortTest extends TestCase
      * @covers ::validate
      */
     public function testToInt(
-        UriComponentInterface|Stringable|int|string|bool|null $input,
+        UriComponentInterface|Stringable|int|string|null $input,
         ?int $expected,
         ?string $string_expected,
         string $uri_expected

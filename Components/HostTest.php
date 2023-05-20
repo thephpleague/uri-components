@@ -41,7 +41,7 @@ final class HostTest extends TestCase
      * @covers ::toAscii
      * @covers ::toUnicode
      */
-    public function testValidHost(UriComponentInterface|Stringable|int|string|bool|null $host, ?string $uri, ?string $iri): void
+    public function testValidHost(UriComponentInterface|Stringable|int|string|null $host, ?string $uri, ?string $iri): void
     {
         $host = new Host($host);
 

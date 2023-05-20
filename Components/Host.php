@@ -107,7 +107,7 @@ final class Host extends Component implements IpHostInterface
     private readonly ?string $ip_version;
     private readonly bool $has_zone_identifier;
 
-    public function __construct(UriComponentInterface|Stringable|int|string|bool|null $host = null)
+    public function __construct(UriComponentInterface|Stringable|int|string|null $host = null)
     {
         [
             'host' => $this->host,
@@ -121,7 +121,7 @@ final class Host extends Component implements IpHostInterface
      *
      * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
      */
-    private function parse(UriComponentInterface|Stringable|bool|int|string|null $host): array
+    private function parse(UriComponentInterface|Stringable|int|string|null $host): array
     {
         $host = self::filterComponent($host);
         $is_domain = false;

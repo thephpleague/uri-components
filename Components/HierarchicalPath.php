@@ -268,7 +268,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this;
     }
 
-    public function append(Stringable|int|string|bool|null $segment): SegmentedPathInterface
+    public function append(Stringable|int|string|null $segment): SegmentedPathInterface
     {
         $segment = self::filterComponent($segment);
         if (null === $segment) {
@@ -282,7 +282,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         );
     }
 
-    public function prepend(Stringable|int|string|bool|null $segment): SegmentedPathInterface
+    public function prepend(Stringable|int|string|null $segment): SegmentedPathInterface
     {
         $segment = self::filterComponent($segment);
         if (null === $segment) {
@@ -377,7 +377,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return new self($path);
     }
 
-    public function withDirname(PathInterface|Stringable|int|string|bool|null $path): SegmentedPathInterface
+    public function withDirname(PathInterface|Stringable|int|string|null $path): SegmentedPathInterface
     {
         if (null === $path) {
             throw new SyntaxError('A path can not be null.');
@@ -401,7 +401,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param UriComponentInterface|Stringable|bool|int|null|string $basename
+     * @param UriComponentInterface|Stringable|int|null|string $basename
      */
     public function withBasename($basename): SegmentedPathInterface
     {
@@ -418,7 +418,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param UriComponentInterface|Stringable|bool|int|null|string $extension
+     * @param UriComponentInterface|Stringable|int|null|string $extension
      */
     public function withExtension($extension): SegmentedPathInterface
     {

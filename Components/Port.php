@@ -31,7 +31,7 @@ final class Port extends Component implements PortInterface
     /**
      * New instance.
      */
-    public function __construct(UriComponentInterface|Stringable|int|string|bool|null $port = null)
+    public function __construct(UriComponentInterface|Stringable|int|string|null $port = null)
     {
         $this->port = $this->validate($port);
     }
@@ -53,7 +53,7 @@ final class Port extends Component implements PortInterface
      *
      * @throws SyntaxError if the port is invalid
      */
-    private function validate(UriComponentInterface|Stringable|int|string|bool|null $port): ?int
+    private function validate(UriComponentInterface|Stringable|int|string|null $port): ?int
     {
         $port = self::filterComponent($port);
         if (null === $port) {

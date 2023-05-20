@@ -42,7 +42,10 @@ final class Authority extends Component implements AuthorityInterface
         $this->host = new Host($components['host']);
         $this->port = new Port($components['port']);
         $this->userInfo = new UserInfo($components['user'], $components['pass']);
-        $this->validate();
+
+        if (null === $this->host->value() && null !== $this->value()) {
+            throw new SyntaxError('A non-empty authority must contains a non null host.');
+        }
     }
 
     /**
@@ -73,18 +76,6 @@ final class Authority extends Component implements AuthorityInterface
         $components['port'] = '' === $matches['port'] ? null : $matches['port'];
 
         return $components;
-    }
-
-    /**
-     * Check the authority validity against RFC3986 rules.
-     *
-     * @throws SyntaxError if the host is the only null component.
-     */
-    private function validate(): void
-    {
-        if (null === $this->host->value() && null !== $this->value()) {
-            throw new SyntaxError('A non-empty authority must contains a non null host.');
-        }
     }
 
     /**

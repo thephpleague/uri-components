@@ -32,7 +32,6 @@ final class AuthorityTest extends TestCase
      * @covers ::createFromNull
      * @covers ::createFromString
      * @covers ::parse
-     * @covers ::validate
      * @covers ::getHost
      * @covers ::getPort
      * @covers ::getUserInfo
@@ -108,7 +107,6 @@ final class AuthorityTest extends TestCase
      *
      * @covers ::__construct
      * @covers ::parse
-     * @covers ::validate
      */
     public function testConstructorFails(string $authority): void
     {
@@ -128,7 +126,6 @@ final class AuthorityTest extends TestCase
 
     /**
      * @covers ::withHost
-     * @covers ::validate
      */
     public function testWithHost(): void
     {
@@ -141,8 +138,6 @@ final class AuthorityTest extends TestCase
      * @dataProvider invalidHostDataProvider
      *
      * @covers ::withHost
-     * @covers ::validate
-     * @param ?string $host
      */
     public function testWithHostFails(?string $host): void
     {
@@ -161,7 +156,6 @@ final class AuthorityTest extends TestCase
 
     /**
      * @covers ::withPort
-     * @covers ::validate
      */
     public function testWithPort(): void
     {
@@ -183,7 +177,6 @@ final class AuthorityTest extends TestCase
 
     /**
      * @covers ::withUserInfo
-     * @covers ::validate
      */
     public function testWithUserInfo(): void
     {

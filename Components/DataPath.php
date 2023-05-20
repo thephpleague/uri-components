@@ -63,7 +63,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * New instance.
      */
-    public function __construct(UriComponentInterface|HostInterface|Stringable|int|string|bool|null $path = '')
+    public function __construct(UriComponentInterface|HostInterface|Stringable|int|string|null $path = '')
     {
         $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;

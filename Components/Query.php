@@ -57,7 +57,7 @@ final class Query extends Component implements QueryInterface
      * @param non-empty-string $separator
      */
     public function __construct(
-        UriComponentInterface|Stringable|int|string|bool|null $query = null,
+        UriComponentInterface|Stringable|int|string|null $query = null,
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ) {
@@ -132,7 +132,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|bool|null $query = null, string $separator = '&'): self
+    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query = null, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC3986);
     }
@@ -142,7 +142,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|bool|null $query = null, string $separator = '&'): self
+    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query = null, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC1738);
     }
