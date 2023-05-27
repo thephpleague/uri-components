@@ -350,7 +350,7 @@ final class DataPathTest extends TestCase
      */
     public function testDataPathConstructor(): void
     {
-        self::assertSame('text/plain;charset=us-ascii,', (string) new DataPath());
+        self::assertSame('text/plain;charset=us-ascii,', (string) DataPath::createFromString());
     }
 
     /**

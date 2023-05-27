@@ -277,8 +277,12 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface|UriComponentInterface $uri): self
     {
+        if ($uri instanceof UriComponentInterface) {
+            return new self($uri->value());
+        }
+
         if ($uri instanceof UriInterface) {
             return new self($uri->getHost());
         }

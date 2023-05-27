@@ -21,7 +21,6 @@ use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use TypeError;
 use function is_array;
 use function json_encode;
 
@@ -762,16 +761,6 @@ final class QueryTest extends TestCase
 
         $query = $query->merge(Query::createFromPairs([['q', $query->value()]]));
         self::assertSame('a=4&first=4', $query->get('q'));
-    }
-
-    /**
-     * @covers ::withPair
-     * @covers ::filterPair
-     */
-    public function testWithPairThrowsException(): void
-    {
-        $this->expectException(TypeError::class);
-        Query::createFromRFC3986()->withPair('foo', (object) ['data']);
     }
 
     /**

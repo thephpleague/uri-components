@@ -51,19 +51,13 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     private const IS_ABSOLUTE = 1;
     private const IS_RELATIVE = 0;
     private readonly PathInterface $path;
-    /** @var string[] */
+    /** @var array<string> */
     private readonly array $segments;
 
-    /**
-     * @see ::createFromString
-     * @see ::createFromPath
-     *
-     * New instance.
-     */
-    private function __construct(UriComponentInterface|Stringable|string|null $path = '')
+    private function __construct(UriComponentInterface|Stringable|string|int $path = '')
     {
         if (!$path instanceof PathInterface) {
-            $path = new Path($path);
+            $path = Path::createFromString($path);
         }
 
         $this->path = $path;
@@ -384,7 +378,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         if (!$path instanceof PathInterface) {
-            $path = new Path($path);
+            $path = Path::createFromString($path);
         }
 
         if ($path->value() === $this->getDirname()) {

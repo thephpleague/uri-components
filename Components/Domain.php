@@ -42,14 +42,14 @@ final class Domain extends Component implements DomainHostInterface
     /** @var string[] */
     private readonly array $labels;
 
-    /**
-     * @throws SyntaxError
-     */
-    public function __construct(UriComponentInterface|HostInterface|Stringable|int|string|null $host = null)
+    private function __construct(UriComponentInterface|Stringable|int|string|null $host = null)
     {
-        if (!$host instanceof HostInterface) {
-            $host = new Host($host);
-        }
+        $host = match (true) {
+            $host instanceof HostInterface => $host,
+            $host instanceof UriComponentInterface => Host::createFromUri($host),
+            null === $host => Host::createFromNull(),
+            default => Host::createFromString((string) $host),
+        };
 
         if (!$host->isDomain()) {
             throw new SyntaxError(sprintf('`%s` is an invalid domain name.', $host->value() ?? 'null'));
@@ -238,11 +238,9 @@ final class Domain extends Component implements DomainHostInterface
     }
 
     /**
-     * @param UriComponentInterface|HostInterface|Stringable|int|string|null $label
-     *
      * @throws OffsetOutOfBounds
      */
-    public function withLabel(int $key, $label): DomainHostInterface
+    public function withLabel(int $key, UriComponentInterface|HostInterface|Stringable|int|string|null $label): DomainHostInterface
     {
         $nb_labels = count($this->labels);
         if ($key < - $nb_labels - 1 || $key > $nb_labels) {

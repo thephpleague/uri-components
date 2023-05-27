@@ -43,7 +43,11 @@ final class HostTest extends TestCase
      */
     public function testValidHost(UriComponentInterface|Stringable|int|string|null $host, ?string $uri, ?string $iri): void
     {
-        $host = new Host($host);
+        $host = match (true) {
+            null === $host => Host::createFromNull(),
+            $host instanceof UriComponentInterface => Host::createFromUri($host),
+            default => Host::createFromString((string) $host),
+        };
 
         self::assertSame($uri, $host->toAscii());
         self::assertSame($host->__toString(), $host->getUriComponent());
@@ -54,7 +58,7 @@ final class HostTest extends TestCase
     {
         return [
             'ipv4' => [
-                new Host('127.0.0.1'),
+                Host::createFromString('127.0.0.1'),
                 '127.0.0.1',
                 '127.0.0.1',
             ],
@@ -138,7 +142,7 @@ final class HostTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        new Host($invalid);
+        Host::createFromString($invalid);
     }
 
     public static function invalidHostProvider(): array
@@ -176,7 +180,7 @@ final class HostTest extends TestCase
      */
     public function testValidUnicodeHost(string $unicode, string $ascii): void
     {
-        $host = new Host($unicode);
+        $host = Host::createFromString($unicode);
 
         self::assertSame($ascii, $host->toAscii());
         self::assertSame($unicode, $host->toUnicode());
@@ -259,7 +263,7 @@ final class HostTest extends TestCase
      */
     public function test_host_is_domain(?string $host, bool $expectedIsDomain): void
     {
-        $host = new Host($host);
+        $host = null !== $host ? Host::createFromString($host) : Host::createFromNull();
 
         self::assertSame($host->isDomain(), $expectedIsDomain);
     }

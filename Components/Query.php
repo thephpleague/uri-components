@@ -22,7 +22,6 @@ use League\Uri\QueryString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Traversable;
-use TypeError;
 use function array_column;
 use function array_count_values;
 use function array_filter;
@@ -35,7 +34,6 @@ use function count;
 use function http_build_query;
 use function implode;
 use function is_bool;
-use function is_scalar;
 use function iterator_to_array;
 use function preg_match;
 use function preg_quote;
@@ -56,8 +54,8 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public function __construct(
-        UriComponentInterface|Stringable|int|string|null $query = null,
+    private function __construct(
+        UriComponentInterface|Stringable|int|string|null $query,
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ) {
@@ -115,16 +113,12 @@ final class Query extends Component implements QueryInterface
      */
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        if ($uri instanceof UriInterface) {
-            return new self($uri->getQuery());
-        }
-
         $component = $uri->getQuery();
-        if ('' === $component) {
-            return new self();
-        }
 
-        return new self($component);
+        return match (true) {
+            '' === $component && $uri instanceof Psr7UriInterface => new self(null),
+            default => new self($component),
+        };
     }
 
     /**
@@ -154,7 +148,7 @@ final class Query extends Component implements QueryInterface
 
     public function value(): ?string
     {
-        return QueryString::build($this->pairs, $this->separator);
+        return $this->toRFC3986();
     }
 
     public function getUriComponent(): string
@@ -173,7 +167,7 @@ final class Query extends Component implements QueryInterface
 
     public function toRFC3986(): ?string
     {
-        return $this->value();
+        return QueryString::build($this->pairs, $this->separator);
     }
 
     public function jsonSerialize(): ?string
@@ -216,31 +210,24 @@ final class Query extends Component implements QueryInterface
 
     public function getAll(string $key): array
     {
-        $filter = static fn (array $pair): bool => $key === $pair[0];
-
-        return array_column(array_filter($this->pairs, $filter), 1);
+        return array_column(array_filter($this->pairs, fn (array $pair): bool => $key === $pair[0]), 1);
     }
 
     public function params(?string $key = null)
     {
-        if (null === $key) {
-            return $this->params;
-        }
-
-        return $this->params[$key] ?? null;
+        return match (true) {
+            null === $key => $this->params,
+            default => $this->params[$key] ?? null,
+        };
     }
 
     public function withSeparator(string $separator): QueryInterface
     {
-        if ($separator === $this->separator) {
-            return $this;
-        }
-
-        if ('' === $separator) {
-            throw new SyntaxError('The separator character can not be the empty string.');
-        }
-
-        return self::createFromPairs($this->pairs, $separator);
+        return match (true) {
+            $separator === $this->separator => $this,
+            '' === $separator => throw new SyntaxError('The separator character can not be the empty string.'),
+            default => self::createFromPairs($this->pairs, $separator),
+        };
     }
 
     public function sort(): QueryInterface
@@ -339,10 +326,7 @@ final class Query extends Component implements QueryInterface
         return $pair;
     }
 
-    /**
-     * @param mixed $value the pair value.
-     */
-    public function withPair(string $key, $value): QueryInterface
+    public function withPair(string $key, UriComponentInterface|Stringable|int|string|bool|null $value): QueryInterface
     {
         $pairs = $this->addPair($this->pairs, [$key, $this->filterPair($value)]);
         if ($pairs === $this->pairs) {
@@ -387,10 +371,7 @@ final class Query extends Component implements QueryInterface
         return $pairs;
     }
 
-    /**
-     * @param UriComponentInterface|Stringable|int|string|bool|null $query the query to be merged with.
-     */
-    public function merge($query): QueryInterface
+    public function merge(UriComponentInterface|Stringable|int|string|bool|null $query): QueryInterface
     {
         $pairs = $this->pairs;
         foreach (QueryString::parse(self::filterComponent($query), $this->separator) as $pair) {
@@ -408,10 +389,8 @@ final class Query extends Component implements QueryInterface
      * Validate the given pair.
      *
      * To be valid the pair must be the null value, a scalar or a collection of scalar and null values.
-     *
-     * @throws TypeError if the value type is invalid
      */
-    private function filterPair(mixed $value): ?string
+    private function filterPair(UriComponentInterface|Stringable|int|string|bool|null $value): ?string
     {
         if ($value instanceof UriComponentInterface) {
             return $value->value();
@@ -425,15 +404,7 @@ final class Query extends Component implements QueryInterface
             return true === $value ? 'true' : 'false';
         }
 
-        if ($value instanceof Stringable) {
-            return (string) $value;
-        }
-
-        if (is_scalar($value)) {
-            return (string) $value;
-        }
-
-        throw new TypeError('The submitted value is invalid.');
+        return (string) $value;
     }
 
     public function withoutPair(string ...$keys): QueryInterface
@@ -458,10 +429,7 @@ final class Query extends Component implements QueryInterface
         return self::createFromPairs([...$this->pairs, [$key, $this->filterPair($value)]], $this->separator);
     }
 
-    /**
-     * @param Stringable|string|int|null|bool $query the query to append
-     */
-    public function append($query): QueryInterface
+    public function append(Stringable|string|int|null|bool $query): QueryInterface
     {
         if ($query instanceof UriComponentInterface) {
             $query = $query->value();

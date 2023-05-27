@@ -353,7 +353,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
         /** @var HierarchicalPath $basePath */
-        $basePath = HierarchicalPath::createFromPath(new Path($path))->withLeadingSlash();
+        $basePath = HierarchicalPath::createFromPath(Path::createFromString($path))->withLeadingSlash();
         $currentPath = HierarchicalPath::createFromUri($uri);
         if ('/' === (string) $basePath) {
             return $uri;
