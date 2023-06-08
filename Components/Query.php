@@ -69,7 +69,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromParams(array|object $params = [], string $separator = '&'): self
+    public static function createFromParams(array|object $params, string $separator = '&'): self
     {
         if ($params instanceof QueryInterface) {
             /** @var array $queryParams */
@@ -103,7 +103,7 @@ final class Query extends Component implements QueryInterface
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      * @param non-empty-string                              $separator
      */
-    public static function createFromPairs(iterable $pairs = [], string $separator = '&'): self
+    public static function createFromPairs(iterable $pairs, string $separator = '&'): self
     {
         return new self(QueryString::build($pairs, $separator), $separator, PHP_QUERY_RFC3986);
     }
@@ -126,7 +126,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query = null, string $separator = '&'): self
+    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC3986);
     }
@@ -136,9 +136,14 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query = null, string $separator = '&'): self
+    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC1738);
+    }
+
+    public static function new(): self
+    {
+        return new self(null);
     }
 
     public function getSeparator(): string

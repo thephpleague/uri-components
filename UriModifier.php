@@ -135,7 +135,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
         $host = Host::createFromUri($uri);
-        $label = null === $label ? Host::createFromNull() : Host::createFromString($label);
+        $label = null === $label ? Host::new() : Host::createFromString($label);
         if (null === $label->value()) {
             return $uri;
         }
@@ -184,7 +184,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
         $host = Host::createFromUri($uri);
-        $label = null === $label ? Host::createFromNull() : Host::createFromString($label);
+        $label = null === $label ? Host::new() : Host::createFromString($label);
         if (null === $label->value()) {
             return $uri;
         }

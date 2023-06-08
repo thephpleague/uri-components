@@ -27,17 +27,6 @@ final class UserInfoTest extends TestCase
 {
     /**
      * @dataProvider userInfoProvider
-     *
-     * @covers ::__construct
-     * @covers ::validateComponent
-     * @covers ::value
-     * @covers ::__toString
-     * @covers ::decodeMatches
-     * @covers ::encodeMatches
-     * @covers ::getPass
-     * @covers ::getUser
-     * @covers ::encodeComponent
-     * @covers ::getUriComponent
      */
     public function testConstructor(
         Stringable|int|string|bool|null $user,
@@ -158,14 +147,9 @@ final class UserInfoTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::createFromString
-     * @covers ::decode
-     * @covers ::decodeMatches
-     */
     public function testWithContentReturnSameInstance(): void
     {
-        self::assertEquals(new UserInfo(), new UserInfo(null, ':pass'));
+        self::assertEquals(UserInfo::new(), new UserInfo(null, ':pass'));
 
         self::assertEquals(
             new UserInfo('user', 'pass'),
@@ -175,14 +159,10 @@ final class UserInfoTest extends TestCase
 
     /**
      * @dataProvider withUserInfoProvider
-     *
-     * @covers ::withUserInfo
-     * @covers ::decodeMatches
-     * @covers ::decode
      */
     public function testWithUserInfo(string $user, ?string $pass, string $expected): void
     {
-        self::assertSame($expected, (string) (new UserInfo('user', 'pass'))->withUserInfo($user, $pass));
+        self::assertSame($expected, (new UserInfo($user))->withPass($pass)->__toString());
     }
 
     public static function withUserInfoProvider(): array
@@ -205,8 +185,6 @@ final class UserInfoTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
-     * @covers ::decode
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

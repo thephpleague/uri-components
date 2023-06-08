@@ -28,19 +28,6 @@ final class AuthorityTest extends TestCase
 {
     /**
      * @dataProvider validAuthorityDataProvider
-     *
-     * @covers ::createFromNull
-     * @covers ::createFromString
-     * @covers ::parse
-     * @covers ::getHost
-     * @covers ::getPort
-     * @covers ::getUserInfo
-     * @covers ::value
-     * @param ?string $authority
-     * @param ?string $host
-     * @param ?int    $port
-     * @param ?string $userInfo
-     * @param ?string $component
      */
     public function testConstructor(
         ?string $authority,
@@ -50,7 +37,7 @@ final class AuthorityTest extends TestCase
         ?string $component
     ): void {
         if (null === $authority) {
-            $instance = Authority::createFromNull();
+            $instance = Authority::new();
         } else {
             $instance = Authority::createFromString($authority);
         }
@@ -104,9 +91,6 @@ final class AuthorityTest extends TestCase
 
     /**
      * @dataProvider invalidAuthorityDataProvider
-     *
-     * @covers ::__construct
-     * @covers ::parse
      */
     public function testConstructorFails(string $authority): void
     {
@@ -124,9 +108,6 @@ final class AuthorityTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withHost
-     */
     public function testWithHost(): void
     {
         $authority = Authority::createFromString('foo:bar@example.com:443');
@@ -136,8 +117,6 @@ final class AuthorityTest extends TestCase
 
     /**
      * @dataProvider invalidHostDataProvider
-     *
-     * @covers ::withHost
      */
     public function testWithHostFails(?string $host): void
     {
@@ -154,9 +133,6 @@ final class AuthorityTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withPort
-     */
     public function testWithPort(): void
     {
         $authority = Authority::createFromString('foo:bar@example.com:443');
@@ -165,9 +141,6 @@ final class AuthorityTest extends TestCase
         self::assertNotEquals($authority, $authority->withPort(80));
     }
 
-    /**
-     * @covers ::withPort
-     */
     public function testWithPortFails(): void
     {
         $this->expectException(SyntaxError::class);
@@ -175,9 +148,6 @@ final class AuthorityTest extends TestCase
         Authority::createFromString('foo:bar@example.com:443')->withPort(-1);
     }
 
-    /**
-     * @covers ::withUserInfo
-     */
     public function testWithUserInfo(): void
     {
         $authority = Authority::createFromString('foo:bar@example.com:443');
@@ -186,9 +156,6 @@ final class AuthorityTest extends TestCase
         self::assertNotEquals($authority, $authority->withUserInfo('foo'));
     }
 
-    /**
-     * @covers ::withUserInfo
-     */
     public function testWithUserInfoFails(): void
     {
         $this->expectException(SyntaxError::class);
@@ -198,11 +165,6 @@ final class AuthorityTest extends TestCase
 
     /**
      * @dataProvider stringRepresentationDataProvider
-     *
-     * @covers ::jsonSerialize
-     * @covers ::__toString
-     * @covers ::value
-     * @covers ::getUriComponent
     */
     public function testAuthorityStringRepresentation(
         ?string $authority,
@@ -212,7 +174,7 @@ final class AuthorityTest extends TestCase
         string $uriComponent
     ): void {
         if (null === $authority) {
-            $instance = Authority::createFromNull();
+            $instance = Authority::new();
         } else {
             $instance = Authority::createFromString($authority);
         }
@@ -260,7 +222,6 @@ final class AuthorityTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

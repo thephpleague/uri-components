@@ -32,19 +32,11 @@ final class HostTest extends TestCase
      * Test valid Host.
      *
      * @dataProvider validHostProvider
-     *
-     * @covers ::__construct
-     * @covers ::parse
-     * @covers ::isValidIpv6Hostname
-     * @covers ::value
-     * @covers ::getUriComponent
-     * @covers ::toAscii
-     * @covers ::toUnicode
      */
     public function testValidHost(UriComponentInterface|Stringable|int|string|null $host, ?string $uri, ?string $iri): void
     {
         $host = match (true) {
-            null === $host => Host::createFromNull(),
+            null === $host => Host::new(),
             $host instanceof UriComponentInterface => Host::createFromUri($host),
             default => Host::createFromString((string) $host),
         };
@@ -132,11 +124,6 @@ final class HostTest extends TestCase
 
     /**
      * @dataProvider invalidHostProvider
-     *
-     * @covers ::__construct
-     * @covers ::parse
-     * @covers ::isValidIpv6Hostname
-     * @covers ::toUnicode
      */
     public function testInvalidHost(string $invalid): void
     {
@@ -174,9 +161,6 @@ final class HostTest extends TestCase
      * Test Punycode support.
      *
      * @dataProvider hostnamesProvider
-     * @covers ::parse
-     * @covers ::toAscii
-     * @covers ::toUnicode
      */
     public function testValidUnicodeHost(string $unicode, string $ascii): void
     {
@@ -217,7 +201,6 @@ final class HostTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
@@ -258,12 +241,10 @@ final class HostTest extends TestCase
 
     /**
      * @dataProvider getIsDomainProvider
-     * @covers ::isDomain
-     * @covers ::isValidDomain
      */
     public function test_host_is_domain(?string $host, bool $expectedIsDomain): void
     {
-        $host = null !== $host ? Host::createFromString($host) : Host::createFromNull();
+        $host = null !== $host ? Host::createFromString($host) : Host::new();
 
         self::assertSame($host->isDomain(), $expectedIsDomain);
     }

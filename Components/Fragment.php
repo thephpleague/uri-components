@@ -38,7 +38,7 @@ final class Fragment extends Component implements FragmentInterface
         return new self((string) $fragment);
     }
 
-    public static function createFromNull(): self
+    public static function new(): self
     {
         return new self(null);
     }

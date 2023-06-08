@@ -32,7 +32,7 @@ final class BCMathCalculator implements IPv4Calculator
         'c' => '12', 'd' => '13', 'e' => '14', 'f' => '15',
     ];
 
-    public function baseConvert($value, int $base): string
+    public function baseConvert(mixed $value, int $base): string
     {
         $value = (string) $value;
         if (10 === $base) {
@@ -48,37 +48,37 @@ final class BCMathCalculator implements IPv4Calculator
         return $decimal;
     }
 
-    public function pow($value, int $exponent): string
+    public function pow(mixed $value, int $exponent): string
     {
         return bcpow((string) $value, (string) $exponent, self::SCALE);
     }
 
-    public function compare($value1, $value2): int
+    public function compare(mixed $value1, $value2): int
     {
         return bccomp((string) $value1, (string) $value2, self::SCALE);
     }
 
-    public function multiply($value1, $value2): string
+    public function multiply(mixed $value1, $value2): string
     {
         return bcmul((string) $value1, (string) $value2, self::SCALE);
     }
 
-    public function div($value, $base): string
+    public function div(mixed $value, mixed $base): string
     {
         return bcdiv((string) $value, (string) $base, self::SCALE);
     }
 
-    public function mod($value, $base): string
+    public function mod(mixed $value, mixed $base): string
     {
         return bcmod((string) $value, (string) $base, self::SCALE);
     }
 
-    public function add($value1, $value2): string
+    public function add(mixed $value1, mixed $value2): string
     {
         return bcadd((string) $value1, (string) $value2, self::SCALE);
     }
 
-    public function sub($value1, $value2): string
+    public function sub(mixed $value1, mixed $value2): string
     {
         return bcsub((string) $value1, (string) $value2, self::SCALE);
     }

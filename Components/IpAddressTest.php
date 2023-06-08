@@ -23,18 +23,7 @@ use Stringable;
 final class IpAddressTest extends TestCase
 {
     /**
-     * Test valid IpAddress.
-     *
      * @dataProvider validIpAddressProvider
-     *
-     * @covers ::__construct
-     * @covers ::isValidIpv6Hostname
-     * @covers ::isIp
-     * @covers ::isIpv4
-     * @covers ::isIpv6
-     * @covers ::isIpFuture
-     * @covers ::getIp
-     * @covers ::getIpVersion
      */
     public function testValidIpAddress(
         UriComponentInterface|Stringable|int|string|null $host,
@@ -48,7 +37,7 @@ final class IpAddressTest extends TestCase
         ?string $ip,
         string $iri
     ): void {
-        $host = new Host($host);
+        $host = null === $host ? Host::new() : Host::createFromString((string) $host);
 
         self::assertSame($isIp, $host->isIp());
         self::assertSame($isIpv4, $host->isIpv4());
@@ -138,8 +127,6 @@ final class IpAddressTest extends TestCase
 
     /**
      * @dataProvider createFromIpValid
-     * @covers ::createFromIp
-     * @covers \League\Uri\IPv4Normalizer
      */
     public function testCreateFromIp(string $input, string $version, string $expected): void
     {
@@ -161,7 +148,6 @@ final class IpAddressTest extends TestCase
 
     /**
      * @dataProvider createFromIpFailed
-     * @covers ::createFromIp
      */
     public function testCreateFromIpFailed(string $input): void
     {
@@ -181,11 +167,10 @@ final class IpAddressTest extends TestCase
 
     /**
      * @dataProvider withoutZoneIdentifierProvider
-     * @covers ::withoutZoneIdentifier
      */
     public function testWithoutZoneIdentifier(string $host, string $expected): void
     {
-        self::assertSame($expected, (string) (new Host($host))->withoutZoneIdentifier());
+        self::assertSame($expected, (string) Host::createFromString($host)->withoutZoneIdentifier());
     }
 
     public static function withoutZoneIdentifierProvider(): array
@@ -200,11 +185,10 @@ final class IpAddressTest extends TestCase
 
     /**
      * @dataProvider hasZoneIdentifierProvider
-     * @covers ::hasZoneIdentifier
      */
     public function testHasZoneIdentifier(string $host, bool $expected): void
     {
-        self::assertSame($expected, (new Host($host))->hasZoneIdentifier());
+        self::assertSame($expected, Host::createFromString($host)->hasZoneIdentifier());
     }
 
     public static function hasZoneIdentifierProvider(): array

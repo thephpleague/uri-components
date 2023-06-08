@@ -35,7 +35,10 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS or loads the GMP or the BCmath extension.');
         }
 
-        self::assertEquals(new Host($expected), IPv4Normalizer::createFromServer()->normalizeHost(new Host($input)));
+        $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
+        $input = (null === $input) ? Host::new() : Host::createFromString($input);
+
+        self::assertEquals($expected, IPv4Normalizer::createFromServer()->normalizeHost($input));
     }
 
     /**
@@ -49,7 +52,10 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The GMP extension is needed to execute this test.');
         }
 
-        self::assertEquals(new Host($expected), IPv4Normalizer::createFromGMP()->normalizeHost(new Host($input)));
+        $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
+        $input = (null === $input) ? Host::new() : Host::createFromString($input);
+
+        self::assertEquals($expected, IPv4Normalizer::createFromGMP()->normalizeHost($input));
     }
 
     /**
@@ -63,7 +69,10 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
-        self::assertEquals(new Host($expected), IPv4Normalizer::createFromNative()->normalizeHost(new Host($input)));
+        $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
+        $input = (null === $input) ? Host::new() : Host::createFromString($input);
+
+        self::assertEquals($expected, IPv4Normalizer::createFromNative()->normalizeHost($input));
     }
 
     /**
@@ -77,7 +86,10 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile with Bcmath extension enabled.');
         }
 
-        self::assertEquals(new Host($expected), IPv4Normalizer::createFromBCMath()->normalizeHost(new Host($input)));
+        $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
+        $input = (null === $input) ? Host::new() : Host::createFromString($input);
+
+        self::assertEquals($expected, IPv4Normalizer::createFromBCMath()->normalizeHost($input));
     }
 
     public static function providerHost(): array

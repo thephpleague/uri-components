@@ -256,10 +256,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider fileProvider
-     *
-     * @covers ::isBinaryData
-     * @covers ::formatComponent
-     * @covers ::toAscii
      */
     public function testToAscii(DataPath $uri): void
     {
@@ -278,10 +274,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidParameters
-     *
-     * @covers ::formatComponent
-     * @covers ::withParameters
-     * @covers ::__construct
      */
     public function testUpdateParametersFailed(string $parameters): void
     {
@@ -298,9 +290,6 @@ final class DataPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::save
-     */
     public function testBinarySave(): void
     {
         $newFilePath = $this->rootPath.'/temp.gif';
@@ -314,11 +303,6 @@ final class DataPathTest extends TestCase
         unlink($newFilePath);
     }
 
-    /**
-     * @covers ::createFromFilePath
-     * @covers ::save
-     * @covers ::getData
-     */
     public function testRawSave(): void
     {
         $context = stream_context_create([
@@ -341,26 +325,11 @@ final class DataPathTest extends TestCase
         unlink($newFilePath);
     }
 
-    /**
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     * @covers ::__construct
-     */
     public function testDataPathConstructor(): void
     {
-        self::assertSame('text/plain;charset=us-ascii,', (string) DataPath::createFromString());
+        self::assertSame('text/plain;charset=us-ascii,', (string) DataPath::new());
     }
 
-    /**
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     * @covers ::__construct
-     */
     public function testInvalidBase64Encoded(): void
     {
         $this->expectException(SyntaxError::class);
@@ -368,14 +337,6 @@ final class DataPathTest extends TestCase
         DataPath::createFromString('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
-    /**
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     * @covers ::__construct
-     */
     public function testInvalidComponent(): void
     {
         $this->expectException(SyntaxError::class);
@@ -383,14 +344,6 @@ final class DataPathTest extends TestCase
         DataPath::createFromString("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
-    /**
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     * @covers ::__construct
-     */
     public function testInvalidString(): void
     {
         $this->expectException(SyntaxError::class);
@@ -398,14 +351,6 @@ final class DataPathTest extends TestCase
         DataPath::createFromString('text/plain;boulook€');
     }
 
-    /**
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     * @covers ::__construct
-     */
     public function testInvalidMimetype(): void
     {
         $this->expectException(SyntaxError::class);
@@ -416,8 +361,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     *
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {

@@ -47,7 +47,7 @@ final class SchemeTest extends TestCase
         string $toString,
         string $uriComponent
     ): void {
-        $scheme = null !== $scheme ? Scheme::createFromString($scheme) : Scheme::createFromNull();
+        $scheme = null !== $scheme ? Scheme::createFromString($scheme) : Scheme::new();
 
         self::assertSame($toString, (string) $scheme);
         self::assertSame($uriComponent, $scheme->getUriComponent());

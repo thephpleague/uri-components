@@ -68,7 +68,7 @@ final class Scheme extends Component
         return new self((string) $scheme);
     }
 
-    public static function createFromNull(): self
+    public static function new(): self
     {
         return new self(null);
     }

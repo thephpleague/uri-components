@@ -95,9 +95,9 @@ final class QueryTest extends TestCase
      */
     public function testGetUriComponent(): void
     {
-        self::assertSame('', (Query::createFromRFC3986())->getUriComponent());
-        self::assertSame('?', (Query::createFromRFC3986(''))->getUriComponent());
-        self::assertSame('?foo=bar', (Query::createFromRFC3986('foo=bar'))->getUriComponent());
+        self::assertSame('', Query::new()->getUriComponent());
+        self::assertSame('?', Query::createFromRFC3986('')->getUriComponent());
+        self::assertSame('?foo=bar', Query::createFromRFC3986('foo=bar')->getUriComponent());
     }
 
     /**
@@ -333,7 +333,7 @@ final class QueryTest extends TestCase
      */
     public function testwithoutPairGetterMethod(): void
     {
-        $query = (Query::createFromRFC3986())->appendTo('first', 1);
+        $query = Query::new()->appendTo('first', 1);
         self::assertTrue($query->has('first'));
         self::assertSame('1', $query->get('first'));
         $query = $query->withoutPair('first');
@@ -583,7 +583,7 @@ final class QueryTest extends TestCase
      */
     public static function testSort(): void
     {
-        $query = (Query::createFromRFC3986())
+        $query = Query::new()
             ->appendTo('a', 3)
             ->appendTo('b', 2)
             ->appendTo('a', 1)
@@ -714,7 +714,7 @@ final class QueryTest extends TestCase
             ],
             'merge can use ComponentInterface' => [
                 'src' => 'a=b&c=d',
-                'dest' => Query::createFromRFC3986(),
+                'dest' => Query::new(),
                 'expected' => 'a=b&c=d',
             ],
         ];
@@ -794,7 +794,7 @@ final class QueryTest extends TestCase
      */
     public function testAppendToSameName(): void
     {
-        $query = Query::createFromRFC3986();
+        $query = Query::new();
         self::assertSame('a=b', (string) $query->appendTo('a', 'b'));
         self::assertSame('a=b&a=b', (string) $query->appendTo('a', 'b')->appendTo('a', 'b'));
         self::assertSame('a=b&a=b&a=c', (string) $query->appendTo('a', 'b')->appendTo('a', 'b')->appendTo('a', new class() {
@@ -811,7 +811,7 @@ final class QueryTest extends TestCase
      */
     public function testAppendToWithEmptyString(): void
     {
-        $query = Query::createFromRFC3986();
+        $query = Query::new();
         self::assertSame('', (string) $query->appendTo('', null));
         self::assertSame('=', (string) $query->appendTo('', ''));
         self::assertSame('a', (string) $query->appendTo('a', null));
@@ -835,7 +835,7 @@ final class QueryTest extends TestCase
      */
     public function testAppendToWithGetter(): void
     {
-        $query = Query::createFromRFC3986()
+        $query = Query::new()
             ->appendTo('first', 1)
             ->appendTo('second', 2)
             ->appendTo('third', '')

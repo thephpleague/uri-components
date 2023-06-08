@@ -30,9 +30,6 @@ final class HostModifierTest extends TestCase
 
     /**
      * @dataProvider validHostProvider
-     *
-     * @covers ::prependLabel
-     * @covers ::normalizeComponent
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
@@ -41,9 +38,6 @@ final class HostModifierTest extends TestCase
 
     /**
      * @dataProvider validHostProvider
-     *
-     * @covers ::appendLabel
-     * @covers ::normalizeComponent
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
@@ -52,9 +46,6 @@ final class HostModifierTest extends TestCase
 
     /**
      * @dataProvider validHostProvider
-     *
-     * @covers ::replaceLabel
-     * @covers ::normalizeComponent
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
@@ -109,10 +100,6 @@ final class HostModifierTest extends TestCase
         self::assertSame($uri, UriModifier::prependLabel($uri, null));
     }
 
-    /**
-     * @covers ::hostToAscii
-     * @covers ::normalizeComponent
-     */
     public function testHostToAsciiProcess(): void
     {
         $uri = Uri::createFromString('http://مثال.إختبار/where/to/go');
@@ -122,10 +109,6 @@ final class HostModifierTest extends TestCase
         );
     }
 
-    /**
-     * @covers ::removeZoneId
-     * @covers ::normalizeComponent
-     */
     public function testWithoutZoneIdentifierProcess(): void
     {
         $uri = Http::createFromString('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
@@ -137,9 +120,6 @@ final class HostModifierTest extends TestCase
 
     /**
      * @dataProvider validwithoutLabelProvider
-     *
-     * @covers ::removeLabels
-     * @covers ::normalizeComponent
      */
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
@@ -153,26 +133,16 @@ final class HostModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::removeLabels
-     * @covers ::normalizeComponent
-     */
     public function testRemoveLabels(): void
     {
         self::assertSame('example.com', UriModifier::removeLabels($this->uri, 2)->getHost());
     }
 
-    /**
-     * @covers ::addRootLabel
-     */
     public function testAddRootLabel(): void
     {
         self::assertSame('www.example.com.', UriModifier::addRootLabel($this->uri)->getHost());
     }
 
-    /**
-     * @covers ::removeRootLabel
-     */
     public function testRemoveRootLabel(): void
     {
         self::assertSame('www.example.com', UriModifier::removeRootLabel($this->uri)->getHost());

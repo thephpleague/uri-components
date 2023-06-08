@@ -36,7 +36,7 @@ final class FragmentTest extends TestCase
      */
     public function testStringRepresentation(?string $str, string $encoded): void
     {
-        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::createFromNull();
+        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::new();
 
         self::assertSame($encoded, (string) $fragment);
     }
@@ -80,7 +80,7 @@ final class FragmentTest extends TestCase
             $str = $str->value();
         }
 
-        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::createFromNull();
+        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::new();
 
         self::assertSame($expected, $fragment->decoded());
     }
@@ -88,7 +88,7 @@ final class FragmentTest extends TestCase
     public static function geValueProvider(): array
     {
         return [
-            [Fragment::createFromNull(), null],
+            [Fragment::new(), null],
             [null, null],
             ['', ''],
             ['0', '0'],
@@ -144,7 +144,7 @@ final class FragmentTest extends TestCase
     public function testGetUriComponent(): void
     {
         self::assertSame('#yolo', Fragment::createFromString('yolo')->getUriComponent());
-        self::assertEquals('', Fragment::createFromNull()->getUriComponent());
+        self::assertEquals('', Fragment::new()->getUriComponent());
     }
 
     /**
@@ -162,7 +162,7 @@ final class FragmentTest extends TestCase
      */
     public function testPreserverDelimiter(): void
     {
-        $fragment = Fragment::createFromNull();
+        $fragment = Fragment::new();
         self::assertNull($fragment->value());
         self::assertSame('', $fragment->__toString());
     }

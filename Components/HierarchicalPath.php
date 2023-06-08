@@ -54,7 +54,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /** @var array<string> */
     private readonly array $segments;
 
-    private function __construct(UriComponentInterface|Stringable|string|int $path = '')
+    private function __construct(UriComponentInterface|Stringable|string|int $path)
     {
         if (!$path instanceof PathInterface) {
             $path = Path::createFromString($path);
@@ -72,7 +72,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $path = ''): self
+    public static function createFromString(Stringable|string $path): self
     {
         return self::createFromPath(Path::createFromString($path));
     }
@@ -127,6 +127,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return new self(Path::createFromUri($uri));
+    }
+
+    public static function new(): self
+    {
+        return new self('');
     }
 
     public function count(): int

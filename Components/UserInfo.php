@@ -37,7 +37,7 @@ final class UserInfo extends Component implements UserInfoInterface
      * New instance.
      */
     public function __construct(
-        UriComponentInterface|Stringable|int|string|bool|null $user = null,
+        UriComponentInterface|Stringable|int|string|bool|null $user,
         #[SensitiveParameter] UriComponentInterface|Stringable|int|string|bool|null $pass = null
     ) {
         $this->user = $this->validateComponent($user);
@@ -49,6 +49,11 @@ final class UserInfo extends Component implements UserInfoInterface
         $this->pass = $pass;
     }
 
+    public static function new(): self
+    {
+        return new self(null);
+    }
+
     /**
      * Create a new instance from a URI object.
      */
@@ -57,7 +62,7 @@ final class UserInfo extends Component implements UserInfoInterface
         if ($uri instanceof UriInterface) {
             $component = $uri->getUserInfo();
             if (null === $component) {
-                return new self();
+                return self::new();
             }
 
             return self::createFromString($component);
@@ -65,7 +70,7 @@ final class UserInfo extends Component implements UserInfoInterface
 
         $component = $uri->getUserInfo();
         if ('' === $component) {
-            return new self();
+            return self::new();
         }
 
         return self::createFromString($component);
@@ -78,7 +83,7 @@ final class UserInfo extends Component implements UserInfoInterface
     {
         $userInfo = $authority->getUserInfo();
         if (null === $userInfo) {
-            return new self();
+            return self::new();
         }
 
         return self::createFromString($userInfo);
@@ -144,18 +149,13 @@ final class UserInfo extends Component implements UserInfoInterface
         return $this->pass;
     }
 
-    public function withUserInfo($user, #[SensitiveParameter] $pass = null): UserInfoInterface
+    public function withPass(#[SensitiveParameter] Stringable|string|null $pass): self
     {
-        $user = $this->validateComponent($user);
         $pass = $this->validateComponent($pass);
-        if (null === $user || '' === $user) {
-            $pass = null;
-        }
 
-        if ($user === $this->user && $pass === $this->pass) {
-            return $this;
-        }
-
-        return new self($user, $pass);
+        return match (true) {
+            $pass === $this->pass || null === $this->user => $this,
+            default => new self($this->user, $pass),
+        };
     }
 }

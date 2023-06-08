@@ -31,7 +31,7 @@ final class DomainTest extends TestCase
 {
     public function testItCanBeInstantiatedWithAHostInterfaceImplementingObject(): void
     {
-        $host = new Host('uri.thephpleague.com');
+        $host = Host::createFromString('uri.thephpleague.com');
         $domain = Domain::createFromHost($host);
 
         self::assertSame('uri.thephpleague.com', $domain->value());
@@ -131,7 +131,9 @@ final class DomainTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Domain::createFromHost(new Host($invalid));
+        $host = null === $invalid ? Host::new() : Host::createFromString($invalid);
+
+        Domain::createFromHost($host);
     }
 
     public static function invalidDomainProvider(): array

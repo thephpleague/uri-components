@@ -42,12 +42,11 @@ final class Domain extends Component implements DomainHostInterface
     /** @var string[] */
     private readonly array $labels;
 
-    private function __construct(UriComponentInterface|Stringable|int|string|null $host = null)
+    private function __construct(UriComponentInterface|Stringable|int|string $host)
     {
         $host = match (true) {
             $host instanceof HostInterface => $host,
             $host instanceof UriComponentInterface => Host::createFromUri($host),
-            null === $host => Host::createFromNull(),
             default => Host::createFromString((string) $host),
         };
 
@@ -62,7 +61,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $host = ''): self
+    public static function createFromString(Stringable|string $host): self
     {
         return self::createFromHost(Host::createFromString($host));
     }
@@ -108,6 +107,11 @@ final class Domain extends Component implements DomainHostInterface
     public static function createFromHost(HostInterface $host): self
     {
         return new self($host);
+    }
+
+    public static function new(): self
+    {
+        return new self(Host::new());
     }
 
     public function value(): ?string
@@ -260,7 +264,7 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         if (!$label instanceof HostInterface) {
-            $label = new Host($label);
+            $label = null === $label ? Host::new() : Host::createFromString((string) $label);
         }
 
         $label = $label->value();
@@ -300,7 +304,7 @@ final class Domain extends Component implements DomainHostInterface
 
     public function clear(): self
     {
-        return new self(Host::createFromNull());
+        return new self(Host::new());
     }
 
     public function slice(int $offset, int $length = null): self
@@ -315,6 +319,6 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        return new self([] === $labels ? Host::createFromNull() : Host::createFromString(implode('.', array_reverse($labels))));
+        return new self([] === $labels ? Host::new() : Host::createFromString(implode('.', array_reverse($labels))));
     }
 }

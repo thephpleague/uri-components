@@ -50,10 +50,11 @@ final class IPv4Normalizer
         '/^(?<number>\d+)$/' => 10,
     ];
 
-    private mixed $maxIpv4Number;
+    private readonly mixed $maxIpv4Number;
 
-    public function __construct(private IPv4Calculator $calculator)
-    {
+    public function __construct(
+        private readonly IPv4Calculator $calculator
+    ) {
         $this->maxIpv4Number = $calculator->sub($calculator->pow(2, 32), 1);
     }
 
@@ -164,7 +165,7 @@ final class IPv4Normalizer
             return $host;
         }
 
-        return new Host($ipv4host);
+        return Host::createFromString($ipv4host);
     }
 
     /**

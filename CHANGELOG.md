@@ -8,16 +8,22 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - `value` method to replace the removed `getContent` method.
 - requires `League\Uri` package.
-- `UserInfo::createFromString` named constructor
-- `Fragment::createFromString` named constructor
-- `Scheme::createFromString` named constructor
-- `Fragment::createFromNull` named constructor
-- `Scheme::createFromNull` named constructor
+- `UserInfo::new` named constructor
+- `Scheme::new` named constructor
+- `Host::new` named constructor
+- `Domain::new` named constructor
+- `Fragment::new` named constructor
+- `Query::new` named constructor
+- `Path::new` named constructor
+- `DataPath::new` named constructor
+- `UserInfo::withPass` modifier method
 
 ### Fixed
 
 - converts Value Objects properties to being `private readonly` where possible.
 - `UriModifier` uri input now supports `Stringable` and `string` type.
+- `createFromString` named constructor do not take the empty string as the default value
+- All components class constructors (except for the `UserInfo` class) are made private use the available named constructors instead
 
 ### Deprecated
 
@@ -29,6 +35,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `withContent` and `getContent` methods
 - Support for `__set_state`
 - Support for `float` type as possible argument for components
+- `UserInfo::withUserInfo` modifier method
 
 ## [2.4.1](https://github.com/thephpleague/uri-components/compare/2.4.0...2.4.1) - 2022-05-26
 

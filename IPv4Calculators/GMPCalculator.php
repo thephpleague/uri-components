@@ -26,42 +26,42 @@ use const GMP_ROUND_MINUSINF;
 
 final class GMPCalculator implements IPv4Calculator
 {
-    public function baseConvert($value, int $base): GMP
+    public function baseConvert(mixed $value, int $base): GMP
     {
         return gmp_init($value, $base);
     }
 
-    public function pow($value, int $exponent): GMP
+    public function pow(mixed $value, int $exponent): GMP
     {
         return gmp_pow($value, $exponent);
     }
 
-    public function compare($value1, $value2): int
+    public function compare(mixed $value1, mixed $value2): int
     {
         return gmp_cmp($value1, $value2);
     }
 
-    public function multiply($value1, $value2): GMP
+    public function multiply(mixed $value1, mixed $value2): GMP
     {
         return gmp_mul($value1, $value2);
     }
 
-    public function div($value, $base): GMP
+    public function div(mixed $value, mixed $base): GMP
     {
         return gmp_div_q($value, $base, GMP_ROUND_MINUSINF);
     }
 
-    public function mod($value, $base): GMP
+    public function mod(mixed $value, mixed $base): GMP
     {
         return gmp_mod($value, $base);
     }
 
-    public function add($value1, $value2): GMP
+    public function add(mixed $value1, mixed $value2): GMP
     {
         return gmp_add($value1, $value2);
     }
 
-    public function sub($value1, $value2): GMP
+    public function sub(mixed $value1, mixed $value2): GMP
     {
         return gmp_sub($value1, $value2);
     }

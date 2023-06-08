@@ -18,42 +18,42 @@ use function intval;
 
 final class NativeCalculator implements IPv4Calculator
 {
-    public function baseConvert($value, int $base): int
+    public function baseConvert(mixed $value, int $base): int
     {
         return intval((string) $value, $base);
     }
 
-    public function pow($value, int $exponent)
+    public function pow(mixed $value, int $exponent)
     {
         return $value ** $exponent;
     }
 
-    public function compare($value1, $value2): int
+    public function compare(mixed $value1, mixed $value2): int
     {
         return $value1 <=> $value2;
     }
 
-    public function multiply($value1, $value2): int
+    public function multiply(mixed $value1, mixed $value2): int
     {
         return $value1 * $value2;
     }
 
-    public function div($value, $base): int
+    public function div(mixed $value, mixed $base): int
     {
         return (int) floor($value / $base);
     }
 
-    public function mod($value, $base): int
+    public function mod(mixed $value, mixed $base): int
     {
         return $value % $base;
     }
 
-    public function add($value1, $value2): int
+    public function add(mixed $value1, mixed $value2): int
     {
         return $value1 + $value2;
     }
 
-    public function sub($value1, $value2): int
+    public function sub(mixed $value1, mixed $value2): int
     {
         return $value1 - $value2;
     }

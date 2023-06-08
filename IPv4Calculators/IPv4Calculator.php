@@ -23,7 +23,7 @@ interface IPv4Calculator
      *
      * @return mixed the addition result
      */
-    public function add($value1, $value2);
+    public function add(mixed $value1, mixed $value2);
 
     /**
      * Subtract one number from another.
@@ -33,7 +33,7 @@ interface IPv4Calculator
      *
      * @return mixed the subtraction result
      */
-    public function sub($value1, $value2);
+    public function sub(mixed $value1, mixed $value2);
 
     /**
      * Multiply numbers.
@@ -43,7 +43,7 @@ interface IPv4Calculator
      *
      * @return mixed the multiplication result
      */
-    public function multiply($value1, $value2);
+    public function multiply(mixed $value1, mixed $value2);
 
     /**
      * Divide numbers.
@@ -53,7 +53,7 @@ interface IPv4Calculator
      *
      * @return mixed the result of the division
      */
-    public function div($value, $base);
+    public function div(mixed $value, mixed $base);
 
     /**
      * Raise an number to the power of exponent.
@@ -62,7 +62,7 @@ interface IPv4Calculator
      *
      * @return mixed the value raised to the power of exp.
      */
-    public function pow($value, int $exponent);
+    public function pow(mixed $value, int $exponent);
 
     /**
      * Returns the int point remainder (modulo) of the division of the arguments.
@@ -72,7 +72,7 @@ interface IPv4Calculator
      *
      * @return mixed the remainder
      */
-    public function mod($value, $base);
+    public function mod(mixed $value, mixed $base);
 
     /**
      * Number comparison.
@@ -82,7 +82,7 @@ interface IPv4Calculator
      *
      * @return int Returns < 0 if value1 is less than value2; > 0 if value1 is greater than value2, and 0 if they are equal.
      */
-    public function compare($value1, $value2): int;
+    public function compare(mixed $value1, mixed $value2): int;
 
     /**
      * Get the decimal integer value of a variable.
@@ -91,5 +91,5 @@ interface IPv4Calculator
      *
      * @return mixed the integer value
      */
-    public function baseConvert($value, int $base);
+    public function baseConvert(mixed $value, int $base);
 }

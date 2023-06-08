@@ -36,11 +36,11 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    private function __construct(UriComponentInterface|Stringable|string|null $authority = null)
+    private function __construct(UriComponentInterface|Stringable|string|null $authority)
     {
         $components = $this->parse(self::filterComponent($authority));
-        $this->host = new Host($components['host']);
-        $this->port = new Port($components['port']);
+        $this->host = null === $components['host'] ? Host::new() : Host::createFromString($components['host']);
+        $this->port = null === $components['port'] ? Port::new() : Port::fromNumber($components['port']);
         $this->userInfo = new UserInfo($components['user'], $components['pass']);
 
         if (null === $this->host->value() && null !== $this->value()) {
@@ -89,24 +89,21 @@ final class Authority extends Component implements AuthorityInterface
 
         $authority = $uri->getAuthority();
         if ('' === $authority) {
-            return new self();
+            return self::new();
         }
 
         return new self($authority);
     }
 
-    /**
-     * Create a new instance from null.
-     */
-    public static function createFromNull(): self
+    public static function new(): self
     {
-        return new self();
+        return new self(null);
     }
 
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $authority = ''): self
+    public static function createFromString(Stringable|string $authority): self
     {
         return new self((string) $authority);
     }
@@ -117,7 +114,12 @@ final class Authority extends Component implements AuthorityInterface
      * Create a new instance from a hash representation of the URI similar
      * to PHP parse_url function result
      *
-     * @param array{user:?string, pass:?string, host:?string, port:?int} $components
+     * @param array{
+     *     user? : ?string,
+     *     pass? : ?string,
+     *     host? : ?string,
+     *     port? : ?int
+     * } $components
      */
     public static function createFromComponents(array $components): self
     {
@@ -190,7 +192,7 @@ final class Authority extends Component implements AuthorityInterface
     public function withHost(UriComponentInterface|Stringable|string|null $host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
-            $host = new Host($host);
+            $host = null === $host ? Host::new() : Host::createFromString($host);
         }
 
         if ($host->value() === $this->host->value()) {
@@ -203,7 +205,7 @@ final class Authority extends Component implements AuthorityInterface
     public function withPort(UriComponentInterface|Stringable|string|int|null $port): AuthorityInterface
     {
         if (!$port instanceof Port) {
-            $port = new Port($port);
+            $port = null === $port ? Port::new() : Port::fromNumber($port);
         }
 
         if ($port->value() === $this->port->value()) {

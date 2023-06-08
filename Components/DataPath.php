@@ -63,7 +63,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * New instance.
      */
-    private function __construct(UriComponentInterface|HostInterface|Stringable|int|string|null $path = '')
+    private function __construct(UriComponentInterface|HostInterface|Stringable|int|string|null $path)
     {
         $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
@@ -178,7 +178,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $path = ''): self
+    public static function createFromString(Stringable|string $path): self
     {
         return new self(Path::createFromString($path));
     }
@@ -227,6 +227,14 @@ final class DataPath extends Component implements DataPathInterface
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::createFromString(Path::createFromUri($uri)->__toString());
+    }
+
+    /**
+     * Create a new instance from a URI object.
+     */
+    public static function new(): self
+    {
+        return new self('');
     }
 
     public function value(): ?string

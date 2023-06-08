@@ -432,7 +432,7 @@ final class HierarchicalPathTest extends TestCase
         $path = HierarchicalPath::createFromString('/bar/3/troll/3');
 
         self::assertSame(['bar', '3', 'troll', '3'], $path->segments());
-        self::assertSame([''], HierarchicalPath::createFromString()->segments());
+        self::assertSame([''], HierarchicalPath::new()->segments());
         self::assertSame([''], HierarchicalPath::createFromString('/')->segments());
     }
 
@@ -567,7 +567,7 @@ final class HierarchicalPathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        HierarchicalPath::createFromString()->withExtension($extension);
+        HierarchicalPath::new()->withExtension($extension);
     }
 
     public static function invalidExtension(): array
