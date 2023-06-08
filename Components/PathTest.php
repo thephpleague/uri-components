@@ -27,13 +27,6 @@ final class PathTest extends TestCase
 {
     /**
      * @dataProvider validPathEncoding
-     *
-     * @covers ::__construct
-     * @covers ::validate
-     * @covers ::decodeMatches
-     * @covers ::decoded
-     * @covers ::value
-     * @covers ::encodeComponent
      */
     public function testGetUriComponent(string $decoded, string $encoded): void
     {
@@ -237,7 +230,6 @@ final class PathTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {

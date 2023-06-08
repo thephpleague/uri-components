@@ -31,9 +31,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::dataPathToBinary
-     *
      * @dataProvider fileProvider
      */
     public function testToBinary(Uri $binary, Uri $ascii): void
@@ -42,9 +39,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::dataPathToAscii
-     *
      * @dataProvider fileProvider
      */
     public function testToAscii(Uri $binary, Uri $ascii): void
@@ -71,10 +65,6 @@ final class PathModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::replaceDataUriParameters
-     */
     public function testDataUriWithParameters(): void
     {
         $uri = Uri::createFromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde!');
@@ -86,9 +76,6 @@ final class PathModifierTest extends TestCase
 
     /**
      * @dataProvider appendSegmentProvider
-     *
-     * @covers ::normalizePath
-     * @covers ::appendSegment
      */
     public function testAppendProcess(string $segment, string $append): void
     {
@@ -105,9 +92,6 @@ final class PathModifierTest extends TestCase
 
     /**
      * @dataProvider validAppendSegmentProvider
-     *
-     * @covers ::normalizePath
-     * @covers ::appendSegment
      */
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
@@ -141,9 +125,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::replaceBasename
-     *
      * @dataProvider validBasenameProvider
      */
     public function testBasename(string $path, string $uri, string $expected): void
@@ -161,10 +142,6 @@ final class PathModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::replaceBasename
-     */
     public function testBasenameThrowException(): void
     {
         $this->expectException(SyntaxError::class);
@@ -172,9 +149,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::replaceDirname
-     *
      * @dataProvider validDirnameProvider
      */
     public function testDirname(string $path, string $uri, string $expected): void
@@ -193,9 +167,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::prependSegment
-     *
      * @dataProvider prependSegmentProvider
      */
     public function testPrependProcess(string $uri, string $segment, string $prepend): void
@@ -231,9 +202,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::replaceSegment
-     *
      * @dataProvider replaceSegmentProvider
      */
     public function testReplaceSegmentProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
@@ -250,9 +218,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::addBasePath
-     *
      * @dataProvider addBasepathProvider
      */
     public function testaddBasepath(string $basepath, string $expected): void
@@ -270,10 +235,6 @@ final class PathModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::addBasePath
-     */
     public function testaddBasepathWithRelativePath(): void
     {
         $uri = Http::createFromString('base/path');
@@ -281,9 +242,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::removeBasePath
-     *
      * @dataProvider removeBasePathProvider
      */
     public function testRemoveBasePath(string $basepath, string $expected): void
@@ -301,10 +259,6 @@ final class PathModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::removeBasePath
-     */
     public function testRemoveBasePathWithRelativePath(): void
     {
         $uri = Http::createFromString('base/path');
@@ -312,9 +266,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::removeSegments
-     *
      * @dataProvider validwithoutSegmentProvider
      */
     public function testwithoutSegment(array $keys, string $expected): void
@@ -329,10 +280,6 @@ final class PathModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::removeDotSegments
-     */
     public function testWithoutDotSegmentsProcess(): void
     {
         $uri = Http::createFromString(
@@ -341,10 +288,6 @@ final class PathModifierTest extends TestCase
         self::assertSame('/to/the/sky.php', UriModifier::removeDotSegments($uri)->getPath());
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::removeEmptySegments
-     */
     public function testWithoutEmptySegmentsProcess(): void
     {
         $uri = Http::createFromString(
@@ -353,10 +296,6 @@ final class PathModifierTest extends TestCase
         self::assertSame('/path/to/the/sky.php', UriModifier::removeEmptySegments($uri)->getPath());
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::removeTrailingSlash
-     */
     public function testWithoutTrailingSlashProcess(): void
     {
         $uri = Http::createFromString('http://www.example.com/');
@@ -364,9 +303,6 @@ final class PathModifierTest extends TestCase
     }
 
     /**
-     * @covers ::normalizePath
-     * @covers ::replaceExtension
-     *
      * @dataProvider validExtensionProvider
      */
     public function testExtensionProcess(string $extension, string $expected): void
@@ -382,19 +318,11 @@ final class PathModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::addTrailingSlash
-     */
     public function testWithTrailingSlashProcess(): void
     {
         self::assertSame('/path/to/the/sky.php/', UriModifier::addTrailingSlash($this->uri)->getPath());
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::removeLeadingSlash
-     */
     public function testWithoutLeadingSlashProcess(): void
     {
         $uri = Http::createFromString('/foo/bar?q=b#h');
@@ -402,10 +330,6 @@ final class PathModifierTest extends TestCase
         self::assertSame('foo/bar?q=b#h', (string) UriModifier::removeLeadingSlash($uri));
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::addLeadingSlash
-     */
     public function testWithLeadingSlashProcess(): void
     {
         $uri = Http::createFromString('foo/bar?q=b#h');
@@ -413,20 +337,12 @@ final class PathModifierTest extends TestCase
         self::assertSame('/foo/bar?q=b#h', (string) UriModifier::addLeadingSlash($uri));
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::replaceSegment
-     */
     public function testReplaceSegmentConstructorFailed2(): void
     {
         $this->expectException(SyntaxError::class);
         UriModifier::replaceSegment($this->uri, 2, "whyno\0t");
     }
 
-    /**
-     * @covers ::normalizePath
-     * @covers ::replaceExtension
-     */
     public function testExtensionProcessFailed(): void
     {
         $this->expectException(SyntaxError::class);

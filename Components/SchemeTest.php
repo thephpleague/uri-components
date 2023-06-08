@@ -26,9 +26,6 @@ use Stringable;
  */
 final class SchemeTest extends TestCase
 {
-    /**
-     * @covers ::validate
-     */
     public function testWithContent(): void
     {
         self::assertEquals(Scheme::createFromString('ftp'), Scheme::createFromString('FtP'));
@@ -36,11 +33,6 @@ final class SchemeTest extends TestCase
 
     /**
      * @dataProvider validSchemeProvider
-     *
-     * @covers ::validate
-     * @covers ::filterComponent
-     * @covers ::__toString
-     * @covers ::getUriComponent
      */
     public function testValidScheme(
         UriComponentInterface|Stringable|string|null $scheme,
@@ -74,9 +66,6 @@ final class SchemeTest extends TestCase
 
     /**
      * @dataProvider invalidSchemeProvider
-     *
-     * @covers ::validate
-     * @covers ::filterComponent
      */
     public function testInvalidScheme(string $scheme): void
     {
@@ -96,7 +85,6 @@ final class SchemeTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

@@ -35,9 +35,6 @@ final class DataPathTest extends TestCase
         $this->rootPath = dirname(__DIR__, 2).'/test_files';
     }
 
-    /**
-     * @covers ::isAbsolute
-     */
     public function testIsAbsolute(): void
     {
         $path = DataPath::createFromString(';,Bonjour%20le%20monde!');
@@ -45,9 +42,6 @@ final class DataPathTest extends TestCase
         self::assertFalse($path->isAbsolute());
     }
 
-    /**
-     * @covers ::withoutDotSegments
-     */
     public function testWithoutDotSegments(): void
     {
         $path = DataPath::createFromString(';,Bonjour%20le%20monde%21');
@@ -55,9 +49,6 @@ final class DataPathTest extends TestCase
         self::assertEquals($path, $path->withoutDotSegments());
     }
 
-    /**
-     * @covers ::withLeadingSlash
-     */
     public function testWithLeadingSlash(): void
     {
         $this->expectException(SyntaxError::class);
@@ -65,9 +56,6 @@ final class DataPathTest extends TestCase
         DataPath::createFromString(';,Bonjour%20le%20monde%21')->withLeadingSlash();
     }
 
-    /**
-     * @covers ::withoutLeadingSlash
-     */
     public function testWithoutLeadingSlash(): void
     {
         $path = DataPath::createFromString(';,Bonjour%20le%20monde%21');
@@ -75,9 +63,6 @@ final class DataPathTest extends TestCase
         self::assertEquals($path, $path->withoutLeadingSlash());
     }
 
-    /**
-     * @covers ::__construct
-     */
     public function testConstructorFailedMalformePath(): void
     {
         $this->expectException(SyntaxError::class);
@@ -87,8 +72,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidDataUriPath
-     *
-     * @covers ::createFromFilePath
      */
     public function testCreateFromPathFailed(string $path): void
     {
@@ -99,7 +82,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidDataUriPath
-     * @covers ::__construct
      */
     public function testConstructorFailed(string $path): void
     {
@@ -117,10 +99,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider validPathContent
-     *
-     * @covers ::filterPath
-     * @covers ::value
-     * @covers ::__toString
      */
     public function testDefaultConstructor(string $path, string $expected): void
     {
@@ -147,16 +125,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider validFilePath
-     *
-     * @covers ::createFromFilePath
-     * @covers ::filterPath
-     * @covers ::formatComponent
-     * @covers ::getMimeType
-     * @covers ::getMediaType
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
      */
     public function testCreateFromPath(string $path, string $mimetype, string $mediatype): void
     {
@@ -176,14 +144,6 @@ final class DataPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withParameters
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     */
     public function testWithParameters(): void
     {
         $uri = DataPath::createFromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
@@ -192,15 +152,6 @@ final class DataPathTest extends TestCase
         self::assertSame($newUri, $uri);
     }
 
-    /**
-     * @covers ::withParameters
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     * @covers ::getParameters
-     */
     public function testWithParametersOnBinaryData(): void
     {
         $expected = 'charset=binary;foo=bar';
@@ -212,14 +163,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider invalidParametersString
-     *
-     * @covers ::withParameters
-     * @covers ::filterPath
-     * @covers ::filterMimeType
-     * @covers ::filterParameters
-     * @covers ::validateParameter
-     * @covers ::validateDocument
-     * @covers ::__construct
      */
     public function testWithParametersFailedWithInvalidParameters(string $path, string $parameters): void
     {
@@ -244,10 +187,6 @@ final class DataPathTest extends TestCase
 
     /**
      * @dataProvider fileProvider
-     *
-     * @covers ::isBinaryData
-     * @covers ::formatComponent
-     * @covers ::toBinary
      */
     public function testToBinary(DataPath $uri): void
     {

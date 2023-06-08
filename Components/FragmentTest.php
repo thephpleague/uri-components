@@ -28,11 +28,6 @@ final class FragmentTest extends TestCase
 {
     /**
      * @dataProvider getUriComponentProvider
-     *
-     * @covers ::__construct
-     * @covers ::validateComponent
-     * @covers ::filterComponent
-     * @covers ::__toString
      */
     public function testStringRepresentation(?string $str, string $encoded): void
     {
@@ -65,14 +60,6 @@ final class FragmentTest extends TestCase
 
     /**
      * @dataProvider geValueProvider
-     *
-     * @covers ::__construct
-     * @covers ::validateComponent
-     * @covers ::filterComponent
-     * @covers ::decoded
-     * @covers ::encodeComponent
-     * @covers ::encodeMatches
-     * @covers ::decodeMatches
      */
     public function testGetValue(UriComponentInterface|Stringable|string|null $str, ?string $expected): void
     {
@@ -106,13 +93,6 @@ final class FragmentTest extends TestCase
 
     /**
      * @dataProvider getContentProvider
-     *
-     * @covers ::__construct
-     * @covers ::validateComponent
-     * @covers ::filterComponent
-     * @covers ::value
-     * @covers ::encodeMatches
-     * @covers ::decodeMatches
      */
     public function testGetContent(string $input, string $expected): void
     {
@@ -128,9 +108,6 @@ final class FragmentTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::filterComponent
-     */
     public function testFailedFragmentException(): void
     {
         $this->expectException(SyntaxError::class);
@@ -138,28 +115,17 @@ final class FragmentTest extends TestCase
         Fragment::createFromString("\0");
     }
 
-    /**
-     * @covers ::getUriComponent
-     */
     public function testGetUriComponent(): void
     {
         self::assertSame('#yolo', Fragment::createFromString('yolo')->getUriComponent());
         self::assertEquals('', Fragment::new()->getUriComponent());
     }
 
-    /**
-     * @covers ::jsonSerialize
-     */
     public function testJsonSerialize(): void
     {
         self::assertEquals('"yolo"', json_encode(Fragment::createFromString('yolo')));
     }
 
-    /**
-     * @covers ::__toString
-     * @covers ::validateComponent
-     * @covers ::decodeMatches
-     */
     public function testPreserverDelimiter(): void
     {
         $fragment = Fragment::new();
@@ -169,7 +135,6 @@ final class FragmentTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {

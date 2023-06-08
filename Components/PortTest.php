@@ -26,9 +26,6 @@ use Stringable;
  */
 final class PortTest extends TestCase
 {
-    /**
-     * @covers ::__toString
-     */
     public function testPortSetter(): void
     {
         self::assertSame('443', Port::fromInt(443)->__toString());
@@ -36,11 +33,6 @@ final class PortTest extends TestCase
 
     /**
      * @dataProvider getToIntProvider
-     *
-     * @covers ::toInt
-     * @covers ::value
-     * @covers ::getUriComponent
-     * @covers ::validate
      */
     public function testToInt(
         UriComponentInterface|Stringable|int|string|null $input,
@@ -80,7 +72,6 @@ final class PortTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {

@@ -30,9 +30,6 @@ use function iterator_to_array;
  */
 final class HierarchicalPathTest extends TestCase
 {
-    /**
-     * @covers ::getIterator
-     */
     public function testIterator(): void
     {
         $path = HierarchicalPath::createFromString('/5.0/components/path');
@@ -42,10 +39,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider validPathProvider
-     *
-     * @covers ::__toString
-     * @covers ::__construct
-     * @covers ::value
      */
     public function testValidPath(string $raw, string $expected): void
     {
@@ -79,8 +72,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider isAbsoluteProvider
-     *
-     * @covers ::isAbsolute
      */
     public function testIsAbsolute(string $raw, bool $expected): void
     {
@@ -101,8 +92,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getProvider
-     *
-     * @covers ::get
      */
     public function testget(string $raw, int $key, ?string $expected): void
     {
@@ -185,9 +174,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider createFromRelativeSegmentsValid
-     *
-     * @covers ::createFromSegments
-     * @covers ::createRelativeFromSegments
      */
     public function testCreateRelativeFromSegments(iterable $input, string $expected): void
     {
@@ -207,9 +193,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider createFromAbsoluteSegmentsValid
-     *
-     * @covers ::createFromSegments
-     * @covers ::createAbsoluteFromSegments
      */
     public function testCreateAbsoluteFromSegments(iterable $input, string $expected): void
     {
@@ -231,20 +214,12 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::createRelativeFromSegments
-     * @covers ::createFromSegments
-     */
     public function testCreateRelativeFromSegmentsFailed(): void
     {
         $this->expectException(TypeError::class);
         HierarchicalPath::createRelativeFromSegments([date_create()]);
     }
 
-    /**
-     * @covers ::createAbsoluteFromSegments
-     * @covers ::createFromSegments
-     */
     public function testCreateAbsoluteFromSegmentsFailed(): void
     {
         $this->expectException(TypeError::class);
@@ -253,9 +228,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider prependData
-     *
-     * @covers ::prepend
-     * @covers ::withSegment
      */
     public function testPrepend(string $source, string $prepend, string $res): void
     {
@@ -276,9 +248,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider appendData
-     *
-     * @covers ::append
-     * @covers ::withSegment
      */
     public function testAppend(string $source, string $append, string $res): void
     {
@@ -299,10 +268,6 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::append
-     * @covers ::withSegment
-     */
     public function testWithSegmentUseAppend(): void
     {
         $path = HierarchicalPath::createFromString('foo/bar');
@@ -331,8 +296,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider replaceValid
-     *
-     * @covers ::withSegment
      */
     public function testReplace(string $raw, string $input, int $offset, string $expected): void
     {
@@ -355,9 +318,6 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withSegment
-     */
     public function testWithSegmentThrowsException(): void
     {
         $this->expectException(OffsetOutOfBounds::class);
@@ -369,8 +329,6 @@ final class HierarchicalPathTest extends TestCase
      * Test AbstractSegment::without.
      *
      * @dataProvider withoutProvider
-     *
-     * @covers ::withoutSegment
      *
      * @param int[] $without
      */
@@ -390,9 +348,6 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withoutSegment
-     */
     public function testWithoutSegmentThrowsException(): void
     {
         $this->expectException(OffsetOutOfBounds::class);
@@ -400,9 +355,6 @@ final class HierarchicalPathTest extends TestCase
         HierarchicalPath::createFromString('/test/')->withoutSegment(23);
     }
 
-    /**
-     * @covers ::withoutSegment
-     */
     public function testWithoutSegmentVariadicArgument(): void
     {
         $path = HierarchicalPath::createFromString('www/example/com');
@@ -410,9 +362,6 @@ final class HierarchicalPathTest extends TestCase
         self::assertSame($path, $path->withoutSegment());
     }
 
-    /**
-     * @covers ::keys
-     */
     public function testKeys(): void
     {
         $path = HierarchicalPath::createFromString('/bar/3/troll/3');
@@ -424,9 +373,6 @@ final class HierarchicalPathTest extends TestCase
         self::assertSame([0, 1, 2, 3], $path->keys());
     }
 
-    /**
-     * @covers ::segments
-     */
     public function testSegments(): void
     {
         $path = HierarchicalPath::createFromString('/bar/3/troll/3');
@@ -438,8 +384,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider arrayProvider
-     *
-     * @covers ::count
      */
     public function testCountable(string $input, array $gets, int $nbSegment): void
     {
@@ -457,9 +401,6 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::getBasename
-     */
     public function testGetBasemane(): void
     {
         $path = HierarchicalPath::createFromString('/path/to/my/file.txt');
@@ -467,9 +408,6 @@ final class HierarchicalPathTest extends TestCase
         self::assertSame('file.txt', $path->getBasename());
     }
 
-    /**
-     * @covers ::getBasename
-     */
     public function testGetBasemaneWithEmptyBasename(): void
     {
         $path = HierarchicalPath::createFromString('/path/to/my/');
@@ -479,8 +417,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider dirnameProvider
-     *
-     * @covers ::getDirname
      */
     public function testGetDirmane(string $path, string $dirname): void
     {
@@ -503,8 +439,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider extensionProvider
-     *
-     * @covers ::getExtension
      */
     public function testGetExtension(string $raw, string $parsed): void
     {
@@ -523,9 +457,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider withExtensionProvider
-     *
-     * @covers ::withExtension
-     * @covers ::getExtension
      */
     public function testWithExtension(string $raw, string $raw_ext, string $new_path, string $parsed_ext): void
     {
@@ -556,12 +487,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider invalidExtension
-     *
-     * @covers ::withExtension
-     * @covers ::withBasename
-     * @covers ::withSegment
-     * @covers ::buildBasename
-     * @param ?string $extension
      */
     public function testWithExtensionWithInvalidExtension(?string $extension): void
     {
@@ -582,11 +507,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider withExtensionProvider2
-     *
-     * @covers ::withExtension
-     * @covers ::withBasename
-     * @covers ::withSegment
-     * @covers ::buildBasename
      */
     public function testWithExtensionPreserveTypeCode(string $uri, string $extension, string $expected): void
     {
@@ -608,8 +528,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getExtensionProvider
-     *
-     * @covers ::getExtension
      */
     public function testGetExtensionPreserveTypeCode(string $uri, string $extension): void
     {
@@ -641,9 +559,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getDirnameProvider
-     *
-     * @covers ::withDirname
-     * @covers ::withSegment
      */
     public function testWithDirname(string $path, string $dirname, string $expected): void
     {
@@ -688,10 +603,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getBasenameProvider
-     *
-     * @covers ::withBasename
-     * @covers ::withSegment
-     * @covers ::buildBasename
      */
     public function testWithBasename(string $path, string $basename, string $expected): void
     {
@@ -731,9 +642,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider basenameInvalidProvider
-     *
-     * @covers ::withBasename
-     * @param ?string $path
      */
     public function testWithBasenameThrowException(?string $path): void
     {
@@ -742,9 +650,6 @@ final class HierarchicalPathTest extends TestCase
         HierarchicalPath::createFromString('foo/bar')->withBasename($path);
     }
 
-    /**
-     * @covers ::withBasename
-     */
     public static function basenameInvalidProvider(): array
     {
         return [
@@ -756,7 +661,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
@@ -795,10 +699,6 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::createFromUri
-     * @covers \League\Uri\Components\HierarchicalPath::createFromUri
-     */
     public function testCreateFromUriWithPSR7Implementation(): void
     {
         $uri = Uri::createFromString('http://example.com')
@@ -870,10 +770,6 @@ final class HierarchicalPathTest extends TestCase
 
     /**
      * @dataProvider validPathEncoding
-     *
-     * @covers ::decoded
-     * @covers ::value
-     * @covers ::getUriComponent
      */
     public function testGetUriComponent(string $decoded, string $encoded): void
     {

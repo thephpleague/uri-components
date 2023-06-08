@@ -126,9 +126,6 @@ final class IPv4HostNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::normalizeUri
-     */
     public function testIpv4NormalizeHostWithPsr7Uri(): void
     {
         $uri = Http::createFromString('http://0/test');
@@ -140,9 +137,6 @@ final class IPv4HostNormalizerTest extends TestCase
         self::assertSame($uri, $unchangedUri);
     }
 
-    /**
-     * @covers ::normalizeUri
-     */
     public function testIpv4NormalizeHostWithLeagueUri(): void
     {
         $uri = Uri::createFromString('http://0/test');
@@ -154,9 +148,6 @@ final class IPv4HostNormalizerTest extends TestCase
         self::assertSame($uri, $unchangedUri);
     }
 
-    /**
-     * @covers ::normalizeAuthority
-     */
     public function testIpv4NormalizeAuthority(): void
     {
         $authority = Authority::createFromString('hello:word@0:42');

@@ -51,11 +51,6 @@ final class DomainTest extends TestCase
         Domain::createFromHost(Domain::createFromString('127.0.0.1'));
     }
 
-    /**
-     * @covers ::getIterator
-     * @covers ::isDomain
-     * @covers ::isIp
-     */
     public function testIterator(): void
     {
         $host = Domain::createFromString('uri.thephpleague.com');
@@ -68,10 +63,6 @@ final class DomainTest extends TestCase
     /**
      * Test valid Domain.
      * @dataProvider validDomainProvider
-     *
-     * @covers ::createFromString
-     * @covers ::value
-     * @covers ::toUnicode
      */
     public function testValidDomain(string $host, string $uri, string $iri): void
     {
@@ -124,8 +115,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider invalidDomainProvider
-     * @covers ::createFromHost
-     * @param ?string $invalid
      */
     public function testInvalidDomain(?string $invalid): void
     {
@@ -168,8 +157,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider isAbsoluteProvider
-     *
-     * @covers ::isAbsolute
      */
     public function testIsAbsolute(string $raw, bool $expected): void
     {
@@ -184,10 +171,6 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::getIp
-     * @covers ::getIpVersion
-     */
     public function testIpProperty(): void
     {
         $host = Domain::createFromString('example.com');
@@ -197,13 +180,7 @@ final class DomainTest extends TestCase
     }
 
     /**
-     * Test Punycode support.
-     *
-     * @param string $unicode Unicode Domainname
-     * @param string $ascii   Ascii Domainname
      * @dataProvider hostnamesProvider
-     * @covers ::toUnicode
-     * @covers ::toAscii
      */
     public function testValidUnicodeDomain(string $unicode, string $ascii): void
     {
@@ -240,11 +217,7 @@ final class DomainTest extends TestCase
     }
 
     /**
-     * Test Countable.
-     *
      * @dataProvider countableProvider
-     *
-     * @covers ::count
      */
     public function testCountable(string $host, int $nblabels): void
     {
@@ -260,9 +233,6 @@ final class DomainTest extends TestCase
     }
 
     /**
-     * @covers ::createFromLabels
-     * @covers ::__toString
-     *
      * @dataProvider createFromLabelsValid
      */
     public function testCreateFromLabels(iterable $input, string $expected): void
@@ -280,45 +250,30 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::createFromLabels
-     */
     public function testCreateFromLabelsFailedWithInvalidArrayInput(): void
     {
         $this->expectException(TypeError::class);
         Domain::createFromLabels([date_create()]);
     }
 
-    /**
-     * @covers ::createFromLabels
-     */
     public function testCreateFromLabelsFailedWithNullLabel(): void
     {
         $this->expectException(TypeError::class);
         Domain::createFromLabels([null]);
     }
 
-    /**
-     * @covers ::createFromLabels
-     */
     public function testCreateFromLabelsFailedWithEmptyStringLabel(): void
     {
         $this->expectException(SyntaxError::class);
         Domain::createFromLabels(['']);
     }
 
-    /**
-     * @covers ::createFromLabels
-     */
     public function testCreateFromLabelsFailedWithEmptyLabel(): void
     {
         $this->expectException(SyntaxError::class);
         Domain::createFromLabels([]);
     }
 
-    /**
-     * @covers ::get
-     */
     public function testGet(): void
     {
         $host = Domain::createFromString('master.example.com');
@@ -328,9 +283,6 @@ final class DomainTest extends TestCase
         self::assertNull($host->get(23));
     }
 
-    /**
-     * @covers ::keys
-     */
     public function testOffsets(): void
     {
         $host = Domain::createFromString('master.example.com');
@@ -338,9 +290,6 @@ final class DomainTest extends TestCase
         self::assertSame([0, 1, 2], $host->keys());
     }
 
-    /**
-     * @covers ::labels
-     */
     public function testLabels(): void
     {
         $host = Domain::createFromString('master.example.com');
@@ -350,7 +299,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider withoutProvider
-     * @covers ::withoutLabel
      */
     public function testWithout(string $host, int $without, string $res): void
     {
@@ -365,9 +313,6 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withoutLabel
-     */
     public function testWithoutLabelVariadicArgument(): void
     {
         $host = Domain::createFromString('www.example.com');
@@ -375,9 +320,6 @@ final class DomainTest extends TestCase
         self::assertSame($host, $host->withoutLabel());
     }
 
-    /**
-     * @covers ::withoutLabel
-     */
     public function testWithoutTriggersException(): void
     {
         $this->expectException(OffsetOutOfBounds::class);
@@ -387,8 +329,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider validPrepend
-     *
-     * @covers ::prepend
      */
     public function testPrepend(string $raw, string $prepend, string $expected): void
     {
@@ -404,9 +344,6 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::prepend
-     */
     public function testPrependIpFailed(): void
     {
         $this->expectException(SyntaxError::class);
@@ -414,9 +351,6 @@ final class DomainTest extends TestCase
         Domain::createFromString('secure.example.com')->prepend(Domain::createFromString('master.'));
     }
 
-    /**
-     * @covers ::prepend
-     */
     public function testPrependNull(): void
     {
         $domain = Domain::createFromString('secure.example.com');
@@ -426,8 +360,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider validAppend
-     *
-     * @covers ::append
      */
     public function testAppend(string $raw, string $append, string $expected): void
     {
@@ -444,9 +376,6 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::append
-     */
     public function testAppendIpFailed(): void
     {
         $this->expectException(SyntaxError::class);
@@ -454,9 +383,6 @@ final class DomainTest extends TestCase
         Domain::createFromString('secure.example.com.')->append('master');
     }
 
-    /**
-     * @covers ::append
-     */
     public function testAppendNull(): void
     {
         $domain = Domain::createFromString('secure.example.com');
@@ -466,9 +392,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider replaceValid
-     * @covers ::withLabel
-     * @covers ::append
-     * @covers ::prepend
      */
     public function testReplace(string $raw, string $input, int $offset, string $expected): void
     {
@@ -489,9 +412,6 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @covers ::withLabel
-     */
     public function testReplaceIpMustFailed(): void
     {
         $this->expectException(SyntaxError::class);
@@ -499,9 +419,6 @@ final class DomainTest extends TestCase
         Domain::createFromString('secure.example.com')->withLabel(2, '[::1]');
     }
 
-    /**
-     * @covers ::withLabel
-     */
     public function testReplaceMustFailed(): void
     {
         $this->expectException(OffsetOutOfBounds::class);
@@ -511,8 +428,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider rootProvider
-     * @covers ::withRootLabel
-     * @covers ::withoutRootLabel
      */
     public function testWithRoot(string $host, string $expected_with_root, string $expected_without_root): void
     {
@@ -532,7 +447,6 @@ final class DomainTest extends TestCase
 
     /**
      * @dataProvider getURIProvider
-     * @covers ::createFromUri
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
