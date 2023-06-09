@@ -37,8 +37,8 @@ final class UserInfoTest extends TestCase
         string $uriComponent
     ): void {
         $userinfo = new UserInfo($user, $pass);
-        self::assertSame($expected_user, $userinfo->getUser());
-        self::assertSame($expected_pass, $userinfo->getPass());
+        self::assertSame($expected_user, $userinfo->getUsername());
+        self::assertSame($expected_pass, $userinfo->getPassword());
         self::assertSame($expected_str, (string) $userinfo);
         self::assertSame($uriComponent, $userinfo->getUriComponent());
     }
@@ -149,7 +149,10 @@ final class UserInfoTest extends TestCase
 
     public function testWithContentReturnSameInstance(): void
     {
-        self::assertEquals(UserInfo::new(), new UserInfo(null, ':pass'));
+        self::assertEquals(
+            new UserInfo(null),
+            new UserInfo(null, 'pass')
+        );
 
         self::assertEquals(
             new UserInfo('user', 'pass'),
@@ -162,7 +165,7 @@ final class UserInfoTest extends TestCase
      */
     public function testWithUserInfo(string $user, ?string $pass, string $expected): void
     {
-        self::assertSame($expected, (new UserInfo($user))->withPass($pass)->__toString());
+        self::assertSame($expected, (new UserInfo(null))->withUsername($user)->withPassword($pass)->__toString());
     }
 
     public static function withUserInfoProvider(): array

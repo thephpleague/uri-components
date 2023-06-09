@@ -30,28 +30,19 @@ final class UserInfo extends Component implements UserInfoInterface
     private const REGEXP_PASS_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:]+|%(?![A-Fa-f0-9]{2})/x';
     private const REGEXP_ENCODED_CHAR = ',%[A-Fa-f0-9]{2},';
 
-    private readonly ?string $user;
-    private readonly ?string $pass;
+    private readonly ?string $username;
+    private readonly ?string $password;
 
     /**
      * New instance.
      */
     public function __construct(
-        UriComponentInterface|Stringable|int|string|bool|null $user,
-        #[SensitiveParameter] UriComponentInterface|Stringable|int|string|bool|null $pass = null
+        UriComponentInterface|Stringable|int|string|bool|null $username,
+        #[SensitiveParameter] UriComponentInterface|Stringable|int|string|bool|null $password = null
     ) {
-        $this->user = $this->validateComponent($user);
-        $pass = $this->validateComponent($pass);
-        if (null === $this->user || '' === $this->user) {
-            $pass = null;
-        }
-
-        $this->pass = $pass;
-    }
-
-    public static function new(): self
-    {
-        return new self(null);
+        $this->username = $this->validateComponent($username);
+        $password = $this->validateComponent($password);
+        $this->password = (null === $this->username || '' === $this->username) ? null : $password;
     }
 
     /**
@@ -62,7 +53,7 @@ final class UserInfo extends Component implements UserInfoInterface
         if ($uri instanceof UriInterface) {
             $component = $uri->getUserInfo();
             if (null === $component) {
-                return self::new();
+                return new self(null);
             }
 
             return self::createFromString($component);
@@ -70,7 +61,7 @@ final class UserInfo extends Component implements UserInfoInterface
 
         $component = $uri->getUserInfo();
         if ('' === $component) {
-            return self::new();
+            return new self(null);
         }
 
         return self::createFromString($component);
@@ -83,7 +74,7 @@ final class UserInfo extends Component implements UserInfoInterface
     {
         $userInfo = $authority->getUserInfo();
         if (null === $userInfo) {
-            return self::new();
+            return new self(null);
         }
 
         return self::createFromString($userInfo);
@@ -122,40 +113,50 @@ final class UserInfo extends Component implements UserInfoInterface
 
     public function value(): ?string
     {
-        if (null === $this->user) {
+        if (null === $this->username) {
             return null;
         }
 
-        $userInfo = $this->encodeComponent($this->user, self::REGEXP_USER_ENCODING);
-        if (null === $this->pass) {
+        $userInfo = $this->encodeComponent($this->username, self::REGEXP_USER_ENCODING);
+        if (null === $this->password) {
             return $userInfo;
         }
 
-        return $userInfo.':'.$this->encodeComponent($this->pass, self::REGEXP_PASS_ENCODING);
+        return $userInfo.':'.$this->encodeComponent($this->password, self::REGEXP_PASS_ENCODING);
     }
 
     public function getUriComponent(): string
     {
-        return $this->value().(null === $this->user ? '' : '@');
+        return $this->value().(null === $this->username ? '' : '@');
     }
 
-    public function getUser(): ?string
+    public function getUsername(): ?string
     {
-        return $this->user;
+        return $this->username;
     }
 
-    public function getPass(): ?string
+    public function getPassword(): ?string
     {
-        return $this->pass;
+        return $this->password;
     }
 
-    public function withPass(#[SensitiveParameter] Stringable|string|null $pass): self
+    public function withUsername(Stringable|string|null $username): self
     {
-        $pass = $this->validateComponent($pass);
+        $username = $this->validateComponent($username);
 
         return match (true) {
-            $pass === $this->pass || null === $this->user => $this,
-            default => new self($this->user, $pass),
+            $username === $this->username => $this,
+            default => new self($username, $this->password),
+        };
+    }
+
+    public function withPassword(#[SensitiveParameter] Stringable|string|null $password): self
+    {
+        $password = $this->validateComponent($password);
+
+        return match (true) {
+            $password === $this->password || null === $this->username => $this,
+            default => new self($this->username, $password),
         };
     }
 }
