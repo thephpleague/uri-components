@@ -42,7 +42,12 @@ final class UserInfo extends Component implements UserInfoInterface
     ) {
         $this->username = $this->validateComponent($username);
         $password = $this->validateComponent($password);
-        $this->password = (null === $this->username || '' === $this->username) ? null : $password;
+        $this->password = null === $this->username ? null : $password;
+    }
+
+    public static function new(): self
+    {
+        return new self(null);
     }
 
     /**
@@ -53,7 +58,7 @@ final class UserInfo extends Component implements UserInfoInterface
         if ($uri instanceof UriInterface) {
             $component = $uri->getUserInfo();
             if (null === $component) {
-                return new self(null);
+                return self::new();
             }
 
             return self::createFromString($component);
@@ -61,7 +66,7 @@ final class UserInfo extends Component implements UserInfoInterface
 
         $component = $uri->getUserInfo();
         if ('' === $component) {
-            return new self(null);
+            return self::new();
         }
 
         return self::createFromString($component);
@@ -74,7 +79,7 @@ final class UserInfo extends Component implements UserInfoInterface
     {
         $userInfo = $authority->getUserInfo();
         if (null === $userInfo) {
-            return new self(null);
+            return self::new();
         }
 
         return self::createFromString($userInfo);
@@ -130,17 +135,17 @@ final class UserInfo extends Component implements UserInfoInterface
         return $this->value().(null === $this->username ? '' : '@');
     }
 
-    public function getUsername(): ?string
+    public function getUser(): ?string
     {
         return $this->username;
     }
 
-    public function getPassword(): ?string
+    public function getPass(): ?string
     {
         return $this->password;
     }
 
-    public function withUsername(Stringable|string|null $username): self
+    public function withUser(Stringable|string|null $username): self
     {
         $username = $this->validateComponent($username);
 
@@ -150,7 +155,7 @@ final class UserInfo extends Component implements UserInfoInterface
         };
     }
 
-    public function withPassword(#[SensitiveParameter] Stringable|string|null $password): self
+    public function withPass(#[SensitiveParameter] Stringable|string|null $password): self
     {
         $password = $this->validateComponent($password);
 

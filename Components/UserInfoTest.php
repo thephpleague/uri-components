@@ -37,8 +37,8 @@ final class UserInfoTest extends TestCase
         string $uriComponent
     ): void {
         $userinfo = new UserInfo($user, $pass);
-        self::assertSame($expected_user, $userinfo->getUsername());
-        self::assertSame($expected_pass, $userinfo->getPassword());
+        self::assertSame($expected_user, $userinfo->getUser());
+        self::assertSame($expected_pass, $userinfo->getPass());
         self::assertSame($expected_str, (string) $userinfo);
         self::assertSame($uriComponent, $userinfo->getUriComponent());
     }
@@ -98,9 +98,9 @@ final class UserInfoTest extends TestCase
                 'user' => '',
                 'pass' => '',
                 'expected_user' => '',
-                'expected_pass' => null,
-                'expected_str' => '',
-                'uriComponent' => '@',
+                'expected_pass' => '',
+                'expected_str' => ':',
+                'uriComponent' => ':@',
             ],
             [
                 'user' => null,
@@ -163,9 +163,9 @@ final class UserInfoTest extends TestCase
     /**
      * @dataProvider withUserInfoProvider
      */
-    public function testWithUserInfo(string $user, ?string $pass, string $expected): void
+    public function testWithUserInfo(?string $user, ?string $pass, ?string $expected): void
     {
-        self::assertSame($expected, (new UserInfo(null))->withUsername($user)->withPassword($pass)->__toString());
+        self::assertSame($expected, UserInfo::new()->withUser($user)->withPass($pass)->toString());
     }
 
     public static function withUserInfoProvider(): array
@@ -174,8 +174,9 @@ final class UserInfoTest extends TestCase
             'simple' => ['user', 'pass', 'user:pass'],
             'empty password' => ['user', '', 'user:'],
             'no password' => ['user', null, 'user'],
-            'no login but has password' => ['', 'pass', ''],
-            'empty all' => ['', '', ''],
+            'no login but has password' => ['', 'pass', ':pass'],
+            'empty all' => ['', '', ':'],
+            'null all' => [null, null, ''],
         ];
     }
 
