@@ -37,12 +37,12 @@ final class HostTest extends TestCase
     {
         $host = match (true) {
             null === $host => Host::new(),
-            $host instanceof UriComponentInterface => Host::createFromUri($host),
+            $host instanceof UriComponentInterface => Host::createFromString($host->value()),
             default => Host::createFromString((string) $host),
         };
 
         self::assertSame($uri, $host->toAscii());
-        self::assertSame($host->__toString(), $host->getUriComponent());
+        self::assertSame($host->toString(), $host->getUriComponent());
         self::assertSame($iri, $host->toUnicode());
     }
 

@@ -237,7 +237,7 @@ final class Host extends Component implements IpHostInterface
         return new self(null);
     }
 
-    public static function createFromString(Stringable|string $host): self
+    public static function createFromString(Stringable|string|null $host): self
     {
         return new self((string) $host);
     }
@@ -277,12 +277,8 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface|UriComponentInterface $uri): self
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        if ($uri instanceof UriComponentInterface) {
-            return new self($uri->value());
-        }
-
         if ($uri instanceof UriInterface) {
             return new self($uri->getHost());
         }

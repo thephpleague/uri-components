@@ -705,7 +705,7 @@ final class HierarchicalPathTest extends TestCase
             ->withPath('/path');
 
         self::assertSame('/path', $uri->getPath());
-        self::assertSame('/path', HierarchicalPath::createFromUri($uri)->__toString());
+        self::assertSame('/path', HierarchicalPath::createFromUri($uri)->toString());
     }
 
     /**

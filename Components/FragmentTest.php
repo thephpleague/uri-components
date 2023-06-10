@@ -130,7 +130,7 @@ final class FragmentTest extends TestCase
     {
         $fragment = Fragment::new();
         self::assertNull($fragment->value());
-        self::assertSame('', $fragment->__toString());
+        self::assertSame('', $fragment->toString());
     }
 
     /**

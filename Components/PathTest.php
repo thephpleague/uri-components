@@ -112,7 +112,7 @@ final class PathTest extends TestCase
      */
     public function testWithoutDotSegments(string $path, string $expected): void
     {
-        self::assertSame($expected, Path::createFromString($path)->withoutDotSegments()->__toString());
+        self::assertSame($expected, Path::createFromString($path)->withoutDotSegments()->toString());
     }
 
     /**

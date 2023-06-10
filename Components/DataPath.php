@@ -67,7 +67,7 @@ final class DataPath extends Component implements DataPathInterface
     {
         $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
-        [$mediaType, $this->document] = explode(',', $this->path->__toString(), 2) + [1 => ''];
+        [$mediaType, $this->document] = explode(',', $this->path->toString(), 2) + [1 => ''];
         [$mimetype, $parameters] = explode(';', $mediaType, 2) + [1 => ''];
         $this->mimetype = $this->filterMimeType($mimetype);
         $this->parameters = $this->filterParameters($parameters, $is_binary_data);
@@ -226,7 +226,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        return self::createFromString(Path::createFromUri($uri)->__toString());
+        return self::createFromString(Path::createFromUri($uri)->toString());
     }
 
     /**

@@ -28,7 +28,7 @@ final class PortTest extends TestCase
 {
     public function testPortSetter(): void
     {
-        self::assertSame('443', Port::fromInt(443)->__toString());
+        self::assertSame('443', Port::fromInt(443)->toString());
     }
 
     /**

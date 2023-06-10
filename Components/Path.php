@@ -109,7 +109,7 @@ final class Path extends Component implements PathInterface
 
     public function withoutDotSegments(): PathInterface
     {
-        $current = $this->__toString();
+        $current = $this->toString();
         if (!str_contains($current, '.')) {
             return $this;
         }
@@ -153,21 +153,21 @@ final class Path extends Component implements PathInterface
      */
     public function withTrailingSlash(): PathInterface
     {
-        return $this->hasTrailingSlash() ? $this : new self($this->__toString().self::SEPARATOR);
+        return $this->hasTrailingSlash() ? $this : new self($this->toString().self::SEPARATOR);
     }
 
     public function withoutTrailingSlash(): PathInterface
     {
-        return !$this->hasTrailingSlash() ? $this : new self(substr($this->__toString(), 0, -1));
+        return !$this->hasTrailingSlash() ? $this : new self(substr($this->toString(), 0, -1));
     }
 
     public function withLeadingSlash(): PathInterface
     {
-        return $this->isAbsolute() ? $this : new self(self::SEPARATOR.$this->__toString());
+        return $this->isAbsolute() ? $this : new self(self::SEPARATOR.$this->toString());
     }
 
     public function withoutLeadingSlash(): PathInterface
     {
-        return !$this->isAbsolute() ? $this : new self(substr($this->__toString(), 1));
+        return !$this->isAbsolute() ? $this : new self(substr($this->toString(), 1));
     }
 }

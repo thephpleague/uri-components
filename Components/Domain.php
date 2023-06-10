@@ -46,7 +46,7 @@ final class Domain extends Component implements DomainHostInterface
     {
         $host = match (true) {
             $host instanceof HostInterface => $host,
-            $host instanceof UriComponentInterface => Host::createFromUri($host),
+            $host instanceof UriComponentInterface => Host::createFromString($host->value()),
             default => Host::createFromString((string) $host),
         };
 

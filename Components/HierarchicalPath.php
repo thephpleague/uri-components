@@ -61,7 +61,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         $this->path = $path;
-        $segments = (string) $this->decodeComponent($path->__toString());
+        $segments = (string) $this->decodeComponent($path->toString());
         if ($this->path->isAbsolute()) {
             $segments = substr($segments, 1);
         }
@@ -171,7 +171,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     public function getDirname(): string
     {
-        $path = (string) $this->decodeComponent($this->path->__toString());
+        $path = (string) $this->decodeComponent($this->path->toString());
 
         return str_replace(
             ['\\', "\0"],
@@ -275,7 +275,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         return new self(
-            rtrim($this->path->__toString(), self::SEPARATOR)
+            rtrim($this->path->toString(), self::SEPARATOR)
             .self::SEPARATOR
             .ltrim($segment, self::SEPARATOR)
         );
@@ -291,7 +291,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return new self(
             rtrim($segment, self::SEPARATOR)
             .self::SEPARATOR
-            .ltrim($this->path->__toString(), self::SEPARATOR)
+            .ltrim($this->path->toString(), self::SEPARATOR)
         );
     }
 
@@ -339,7 +339,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public function withoutEmptySegments(): SegmentedPathInterface
     {
         /** @var string $path */
-        $path = preg_replace(',/+,', self::SEPARATOR, $this->__toString());
+        $path = preg_replace(',/+,', self::SEPARATOR, $this->toString());
 
         return new self($path);
     }
@@ -393,7 +393,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $segments = $this->segments;
 
         return new self(
-            rtrim($path->__toString(), self::SEPARATOR)
+            rtrim($path->toString(), self::SEPARATOR)
             .self::SEPARATOR
             .array_pop($segments)
         );

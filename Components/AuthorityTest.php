@@ -264,7 +264,7 @@ final class AuthorityTest extends TestCase
     {
         $instance = Authority::createFromComponents(parse_url('http://user:pass@ExaMplE.CoM:42#foobar'));
 
-        self::assertSame('user:pass@example.com:42', $instance->__toString());
+        self::assertSame('user:pass@example.com:42', $instance->toString());
     }
 
     public function testCreateFromParseUrlWithoutAuthority(): void
