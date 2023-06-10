@@ -9,16 +9,15 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `value` method to replace the removed `getContent` method.
 - requires `League\Uri` package.
 - `Scheme::new` named constructor
+- `UserInfo::new` named constructor
 - `Host::new` named constructor
 - `Domain::new` named constructor
 - `Fragment::new` named constructor
 - `Query::new` named constructor
 - `Path::new` named constructor
 - `DataPath::new` named constructor
-- `UserInfo::withUsername` modifier method
-- `UserInfo::withPassword` modifier method
-- `UserInfo::getUsername`
-- `UserInfo::getPassword`
+- `UserInfo::withUser` modifier method
+- `UserInfo::withPass` modifier method
 
 ### Fixed
 
@@ -37,9 +36,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `withContent` and `getContent` methods
 - Support for `__set_state`
 - Support for `float` type as possible argument for components
-- `UserInfo::withUserInfo` modifier method
-- `UserInfo::getUser` use instead `UserInfo::getUsername`
-- `UserInfo::getPass` use instead `UserInfo::getPassword`
+- `UserInfo::withUserInfo` modifier method use a combinaison of `UserInfo::withUser` and/or `UserInfo::withPass`
 
 ## [2.4.1](https://github.com/thephpleague/uri-components/compare/2.4.0...2.4.1) - 2022-05-26
 
