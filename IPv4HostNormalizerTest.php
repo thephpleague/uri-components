@@ -38,7 +38,7 @@ final class IPv4HostNormalizerTest extends TestCase
         $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
         $input = (null === $input) ? Host::new() : Host::createFromString($input);
 
-        self::assertEquals($expected, IPv4Normalizer::createFromServer()->normalizeHost($input));
+        self::assertEquals($expected, IPv4Normalizer::fromEnvironment()->normalizeHost($input));
     }
 
     /**
@@ -55,7 +55,7 @@ final class IPv4HostNormalizerTest extends TestCase
         $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
         $input = (null === $input) ? Host::new() : Host::createFromString($input);
 
-        self::assertEquals($expected, IPv4Normalizer::createFromGMP()->normalizeHost($input));
+        self::assertEquals($expected, IPv4Normalizer::fromGMP()->normalizeHost($input));
     }
 
     /**
@@ -72,7 +72,7 @@ final class IPv4HostNormalizerTest extends TestCase
         $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
         $input = (null === $input) ? Host::new() : Host::createFromString($input);
 
-        self::assertEquals($expected, IPv4Normalizer::createFromNative()->normalizeHost($input));
+        self::assertEquals($expected, IPv4Normalizer::fromNative()->normalizeHost($input));
     }
 
     /**
@@ -89,7 +89,7 @@ final class IPv4HostNormalizerTest extends TestCase
         $expected = (null === $expected) ? Host::new() : Host::createFromString($expected);
         $input = (null === $input) ? Host::new() : Host::createFromString($input);
 
-        self::assertEquals($expected, IPv4Normalizer::createFromBCMath()->normalizeHost($input));
+        self::assertEquals($expected, IPv4Normalizer::fromBCMath()->normalizeHost($input));
     }
 
     public static function providerHost(): array
@@ -128,34 +128,34 @@ final class IPv4HostNormalizerTest extends TestCase
 
     public function testIpv4NormalizeHostWithPsr7Uri(): void
     {
-        $uri = Http::createFromString('http://0/test');
-        $newUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        $uri = Http::fromString('http://0/test');
+        $newUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame('0.0.0.0', $newUri->getHost());
 
-        $uri = Http::createFromString('http://11.be/test');
-        $unchangedUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        $uri = Http::fromString('http://11.be/test');
+        $unchangedUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame($uri, $unchangedUri);
     }
 
     public function testIpv4NormalizeHostWithLeagueUri(): void
     {
-        $uri = Uri::createFromString('http://0/test');
-        $newUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        $uri = Uri::fromString('http://0/test');
+        $newUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame('0.0.0.0', $newUri->getHost());
 
-        $uri = Http::createFromString('http://11.be/test');
-        $unchangedUri = IPv4Normalizer::createFromServer()->normalizeUri($uri);
+        $uri = Http::fromString('http://11.be/test');
+        $unchangedUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame($uri, $unchangedUri);
     }
 
     public function testIpv4NormalizeAuthority(): void
     {
         $authority = Authority::createFromString('hello:word@0:42');
-        $newAuthority = IPv4Normalizer::createFromServer()->normalizeAuthority($authority);
+        $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($authority);
         self::assertSame('0.0.0.0', $newAuthority->getHost());
 
         $unChangedAuthority = Authority::createFromString('hello:word@11.be:42');
-        $newAuthority = IPv4Normalizer::createFromServer()->normalizeAuthority($unChangedAuthority);
+        $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($unChangedAuthority);
         self::assertSame($unChangedAuthority, $newAuthority);
     }
 }

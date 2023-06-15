@@ -147,27 +147,27 @@ final class FragmentTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://example.com#foobar'),
+                'uri' => Http::fromString('http://example.com#foobar'),
                 'expected' => 'foobar',
             ],
             'PSR-7 URI object with no fragment' => [
-                'uri' => Http::createFromString('http://example.com'),
+                'uri' => Http::fromString('http://example.com'),
                 'expected' => null,
             ],
             'PSR-7 URI object with empty string fragment' => [
-                'uri' => Http::createFromString('http://example.com#'),
+                'uri' => Http::fromString('http://example.com#'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://example.com#foobar'),
+                'uri' => Uri::fromString('http://example.com#foobar'),
                 'expected' => 'foobar',
             ],
             'League URI object with no fragment' => [
-                'uri' => Uri::createFromString('http://example.com'),
+                'uri' => Uri::fromString('http://example.com'),
                 'expected' => null,
             ],
             'League URI object with empty string fragment' => [
-                'uri' => Uri::createFromString('http://example.com#'),
+                'uri' => Uri::fromString('http://example.com#'),
                 'expected' => '',
             ],
         ];

@@ -234,27 +234,27 @@ final class AuthorityTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://foo:bar@example.com?foo=bar'),
+                'uri' => Http::fromString('http://foo:bar@example.com?foo=bar'),
                 'expected' => 'foo:bar@example.com',
             ],
             'PSR-7 URI object with no authority' => [
-                'uri' => Http::createFromString('path/to/the/sky?foo'),
+                'uri' => Http::fromString('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'PSR-7 URI object with empty string authority' => [
-                'uri' => Http::createFromString('file:///path/to/the/sky'),
+                'uri' => Http::fromString('file:///path/to/the/sky'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://foo:bar@example.com?foo=bar'),
+                'uri' => Uri::fromString('http://foo:bar@example.com?foo=bar'),
                 'expected' => 'foo:bar@example.com',
             ],
             'League URI object with no authority' => [
-                'uri' => Uri::createFromString('path/to/the/sky?foo'),
+                'uri' => Uri::fromString('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'League URI object with empty string authority' => [
-                'uri' => Uri::createFromString('file:///path/to/the/sky'),
+                'uri' => Uri::fromString('file:///path/to/the/sky'),
                 'expected' => '',
             ],
         ];

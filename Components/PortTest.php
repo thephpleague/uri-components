@@ -84,19 +84,19 @@ final class PortTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://example.com:443'),
+                'uri' => Http::fromString('http://example.com:443'),
                 'expected' => '443',
             ],
             'PSR-7 URI object with no fragment' => [
-                'uri' => Http::createFromString('toto://example.com'),
+                'uri' => Http::fromString('toto://example.com'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://example.com:443'),
+                'uri' => Uri::fromString('http://example.com:443'),
                 'expected' => '443',
             ],
             'League URI object with no fragment' => [
-                'uri' => Uri::createFromString('toto://example.com'),
+                'uri' => Uri::fromString('toto://example.com'),
                 'expected' => null,
             ],
         ];
@@ -104,7 +104,7 @@ final class PortTest extends TestCase
 
     public function testCreateFromAuthority(): void
     {
-        $uri = Uri::createFromString('http://example.com:443');
+        $uri = Uri::fromString('http://example.com:443');
         $auth = Authority::createFromUri($uri);
 
         self::assertEquals(Port::createFromUri($uri), Port::createFromAuthority($auth));

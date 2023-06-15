@@ -264,7 +264,7 @@ final class Host extends Component implements IpHostInterface
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        $normalizer = $normalizer ?? IPv4Normalizer::createFromServer();
+        $normalizer = $normalizer ?? IPv4Normalizer::fromEnvironment();
         /** @var Host $host */
         $host = $normalizer->normalizeHost(new self($ip));
         if ($host->isIpv4()) {

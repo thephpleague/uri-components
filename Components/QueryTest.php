@@ -699,27 +699,27 @@ final class QueryTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://example.com?foo=bar'),
+                'uri' => Http::fromString('http://example.com?foo=bar'),
                 'expected' => 'foo=bar',
             ],
             'PSR-7 URI object with no query' => [
-                'uri' => Http::createFromString('http://example.com'),
+                'uri' => Http::fromString('http://example.com'),
                 'expected' => null,
             ],
             'PSR-7 URI object with empty string query' => [
-                'uri' => Http::createFromString('http://example.com?'),
+                'uri' => Http::fromString('http://example.com?'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://example.com?foo=bar'),
+                'uri' => Uri::fromString('http://example.com?foo=bar'),
                 'expected' => 'foo=bar',
             ],
             'League URI object with no query' => [
-                'uri' => Uri::createFromString('http://example.com'),
+                'uri' => Uri::fromString('http://example.com'),
                 'expected' => null,
             ],
             'League URI object with empty string query' => [
-                'uri' => Uri::createFromString('http://example.com?'),
+                'uri' => Uri::fromString('http://example.com?'),
                 'expected' => '',
             ],
         ];

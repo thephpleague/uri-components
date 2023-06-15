@@ -201,31 +201,31 @@ final class UserInfoTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://foo:bar@example.com?foo=bar'),
+                'uri' => Http::fromString('http://foo:bar@example.com?foo=bar'),
                 'expected' => 'foo:bar',
             ],
             'PSR-7 URI object with no user info' => [
-                'uri' => Http::createFromString('path/to/the/sky?foo'),
+                'uri' => Http::fromString('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'PSR-7 URI object with empty string user info' => [
-                'uri' => Http::createFromString('http://@example.com?foo=bar'),
+                'uri' => Http::fromString('http://@example.com?foo=bar'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://foo:bar@example.com?foo=bar'),
+                'uri' => Uri::fromString('http://foo:bar@example.com?foo=bar'),
                 'expected' => 'foo:bar',
             ],
             'League URI object with no user info' => [
-                'uri' => Uri::createFromString('path/to/the/sky?foo'),
+                'uri' => Uri::fromString('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'League URI object with empty string user info' => [
-                'uri' => Uri::createFromString('http://@example.com?foo=bar'),
+                'uri' => Uri::fromString('http://@example.com?foo=bar'),
                 'expected' => '',
             ],
             'URI object with encoded user info string' => [
-                'uri' => Uri::createFromString('http://login%af:bar@example.com:81'),
+                'uri' => Uri::fromString('http://login%af:bar@example.com:81'),
                 'expected' => 'login%AF:bar',
             ],
         ];
@@ -233,7 +233,7 @@ final class UserInfoTest extends TestCase
 
     public function testCreateFromAuthorityWithoutUserInfoComponent(): void
     {
-        $uri = Uri::createFromString('http://example.com:443');
+        $uri = Uri::fromString('http://example.com:443');
         $auth = Authority::createFromUri($uri);
 
         self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));
@@ -241,7 +241,7 @@ final class UserInfoTest extends TestCase
 
     public function testCreateFromAuthorityWithActualUserInfoComponent(): void
     {
-        $uri = Uri::createFromString('http://user:pass@example.com:443');
+        $uri = Uri::fromString('http://user:pass@example.com:443');
         $auth = Authority::createFromUri($uri);
 
         self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));

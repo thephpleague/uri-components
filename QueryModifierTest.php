@@ -61,7 +61,7 @@ final class QueryModifierTest extends TestCase
 
     public function testKsortQuery(): void
     {
-        $uri = Http::createFromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
+        $uri = Http::fromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
         self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', UriModifier::sortQuery($uri)->getQuery());
     }
 
@@ -86,7 +86,7 @@ final class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
     {
-        self::assertSame($expected, UriModifier::removeParams(Uri::createFromBaseUri($uri), ...$input)->getQuery());
+        self::assertSame($expected, UriModifier::removeParams(Uri::fromBaseUri($uri), ...$input)->getQuery());
     }
 
     public static function removeParamsProvider(): array
@@ -115,8 +115,8 @@ final class QueryModifierTest extends TestCase
      */
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void
     {
-        self::assertSame($expected, UriModifier::removeEmptyPairs(Uri::createFromBaseUri($uri))->__toString());
-        self::assertSame($expected, UriModifier::removeEmptyPairs(Http::createFromBaseUri($uri))->__toString());
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Uri::fromBaseUri($uri))->__toString());
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Http::fromBaseUri($uri))->__toString());
     }
 
     public static function removeEmptyPairsProvider(): iterable

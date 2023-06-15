@@ -242,19 +242,19 @@ final class PathTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://example.com/path'),
+                'uri' => Http::fromString('http://example.com/path'),
                 'expected' => '/path',
             ],
             'PSR-7 URI object with no path' => [
-                'uri' => Http::createFromString('toto://example.com'),
+                'uri' => Http::fromString('toto://example.com'),
                 'expected' => '',
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://example.com/path'),
+                'uri' => Uri::fromString('http://example.com/path'),
                 'expected' => '/path',
             ],
             'League URI object with no path' => [
-                'uri' => Uri::createFromString('toto://example.com'),
+                'uri' => Uri::fromString('toto://example.com'),
                 'expected' => '',
             ],
         ];

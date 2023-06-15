@@ -95,19 +95,19 @@ final class SchemeTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://example.com?foo=bar'),
+                'uri' => Http::fromString('http://example.com?foo=bar'),
                 'expected' => 'http',
             ],
             'PSR-7 URI object with no scheme' => [
-                'uri' => Http::createFromString('//example.com/path'),
+                'uri' => Http::fromString('//example.com/path'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://example.com?foo=bar'),
+                'uri' => Uri::fromString('http://example.com?foo=bar'),
                 'expected' => 'http',
             ],
             'League URI object with no scheme' => [
-                'uri' => Uri::createFromString('//example.com/path'),
+                'uri' => Uri::fromString('//example.com/path'),
                 'expected' => null,
             ],
         ];

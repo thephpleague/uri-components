@@ -61,7 +61,7 @@ final class IPv4Normalizer
     /**
      * Returns an instance using a GMP calculator.
      */
-    public static function createFromGMP(): self
+    public static function fromGMP(): self
     {
         return new self(new GMPCalculator());
     }
@@ -69,7 +69,7 @@ final class IPv4Normalizer
     /**
      * Returns an instance using a Bcmath calculator.
      */
-    public static function createFromBCMath(): self
+    public static function fromBCMath(): self
     {
         return new self(new BCMathCalculator());
     }
@@ -77,7 +77,7 @@ final class IPv4Normalizer
     /**
      * Returns an instance using a PHP native calculator (requires 64bits PHP).
      */
-    public static function createFromNative(): self
+    public static function fromNative(): self
     {
         return new self(new NativeCalculator());
     }
@@ -90,12 +90,12 @@ final class IPv4Normalizer
      *
      * @codeCoverageIgnore
      */
-    public static function createFromServer(): self
+    public static function fromEnvironment(): self
     {
         return match (true) {
-            extension_loaded('gmp') => self::createFromGMP(),
-            extension_loaded('bcmath') => self::createFromBCMath(),
-            4 < PHP_INT_SIZE => self::createFromNative(),
+            extension_loaded('gmp') => self::fromGMP(),
+            extension_loaded('bcmath') => self::fromBCMath(),
+            4 < PHP_INT_SIZE => self::fromNative(),
             default => throw new IPv4CalculatorMissing(sprintf(
                 'No %s found. Use a x.64 PHP build or install the GMP or the BCMath extension.',
                 IPv4Calculator::class

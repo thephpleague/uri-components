@@ -213,27 +213,27 @@ final class HostTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::createFromString('http://example.com?foo=bar'),
+                'uri' => Http::fromString('http://example.com?foo=bar'),
                 'expected' => 'example.com',
             ],
             'PSR-7 URI object with no host' => [
-                'uri' => Http::createFromString('path/to/the/sky?foo'),
+                'uri' => Http::fromString('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'PSR-7 URI object with empty string host' => [
-                'uri' => Http::createFromString('file:///path/to/you'),
+                'uri' => Http::fromString('file:///path/to/you'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::createFromString('http://example.com?foo=bar'),
+                'uri' => Uri::fromString('http://example.com?foo=bar'),
                 'expected' => 'example.com',
             ],
             'League URI object with no host' => [
-                'uri' => Uri::createFromString('path/to/the/sky?foo'),
+                'uri' => Uri::fromString('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'League URI object with empty string query' => [
-                'uri' => Uri::createFromString('file:///path/to/you'),
+                'uri' => Uri::fromString('file:///path/to/you'),
                 'expected' => '',
             ],
         ];
