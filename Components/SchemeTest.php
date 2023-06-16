@@ -28,7 +28,7 @@ final class SchemeTest extends TestCase
 {
     public function testWithContent(): void
     {
-        self::assertEquals(Scheme::createFromString('ftp'), Scheme::createFromString('FtP'));
+        self::assertEquals(Scheme::fromString('ftp'), Scheme::fromString('FtP'));
     }
 
     /**
@@ -39,7 +39,7 @@ final class SchemeTest extends TestCase
         string $toString,
         string $uriComponent
     ): void {
-        $scheme = null !== $scheme ? Scheme::createFromString($scheme) : Scheme::new();
+        $scheme = null !== $scheme ? Scheme::fromString($scheme) : Scheme::new();
 
         self::assertSame($toString, (string) $scheme);
         self::assertSame($uriComponent, $scheme->getUriComponent());
@@ -49,7 +49,7 @@ final class SchemeTest extends TestCase
     {
         return [
             [null, '', ''],
-            [Scheme::createFromString('foo'), 'foo', 'foo:'],
+            [Scheme::fromString('foo'), 'foo', 'foo:'],
             [new class() {
                 public function __toString()
                 {
@@ -71,7 +71,7 @@ final class SchemeTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Scheme::createFromString($scheme);
+        Scheme::fromString($scheme);
     }
 
     public static function invalidSchemeProvider(): array
@@ -88,7 +88,7 @@ final class SchemeTest extends TestCase
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
-        self::assertSame($expected, Scheme::createFromUri($uri)->value());
+        self::assertSame($expected, Scheme::fromUri($uri)->value());
     }
 
     public static function getURIProvider(): iterable

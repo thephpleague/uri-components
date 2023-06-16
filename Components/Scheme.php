@@ -63,20 +63,20 @@ final class Scheme extends Component
         return $inMemoryCache[$fScheme] = $fScheme;
     }
 
-    public static function createFromString(Stringable|string $scheme): self
-    {
-        return new self((string) $scheme);
-    }
-
     public static function new(): self
     {
         return new self(null);
     }
 
+    public static function fromString(Stringable|string $scheme): self
+    {
+        return new self((string) $scheme);
+    }
+
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getScheme());
@@ -98,5 +98,34 @@ final class Scheme extends Component
     public function getUriComponent(): string
     {
         return $this->value().(null === $this->scheme ? '' : ':');
+    }
+
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Scheme::fromString()
+     *
+     * @codeCoverageIgnore
+     */
+    public static function createFromString(Stringable|string $scheme): self
+    {
+        return self::fromString($scheme);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Scheme::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
     }
 }
