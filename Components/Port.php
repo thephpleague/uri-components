@@ -59,6 +59,22 @@ final class Port extends Component implements PortInterface
     }
 
     /**
+     * Create a new instance from a URI object.
+     */
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return new self($uri->getPort());
+    }
+
+    /**
+     * Create a new instance from an Authority object.
+     */
+    public static function fromAuthority(AuthorityInterface $authority): self
+    {
+        return new self($authority->getPort());
+    }
+
+    /**
      * Validate a port.
      *
      * @throws SyntaxError if the port is invalid
@@ -78,22 +94,6 @@ final class Port extends Component implements PortInterface
         throw new SyntaxError('Expected port to be a positive integer or 0; received '.$port.'.');
     }
 
-    /**
-     * Create a new instance from a URI object.
-     */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
-    {
-        return new self($uri->getPort());
-    }
-
-    /**
-     * Create a new instance from an Authority object.
-     */
-    public static function createFromAuthority(AuthorityInterface $authority): self
-    {
-        return new self($authority->getPort());
-    }
-
     public function value(): ?string
     {
         if (null === $this->port) {
@@ -111,5 +111,35 @@ final class Port extends Component implements PortInterface
     public function toInt(): ?int
     {
         return $this->port;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Port::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Port::fromAuthority()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from an Authority object.
+     */
+    public static function createFromAuthority(AuthorityInterface $authority): self
+    {
+        return self::fromAuthority($authority);
     }
 }

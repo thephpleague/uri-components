@@ -75,7 +75,7 @@ final class PortTest extends TestCase
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
-        $port = Port::createFromUri($uri);
+        $port = Port::fromUri($uri);
 
         self::assertSame($expected, $port->value());
     }
@@ -107,7 +107,7 @@ final class PortTest extends TestCase
         $uri = Uri::fromString('http://example.com:443');
         $auth = Authority::fromUri($uri);
 
-        self::assertEquals(Port::createFromUri($uri), Port::createFromAuthority($auth));
+        self::assertEquals(Port::fromUri($uri), Port::fromAuthority($auth));
     }
 
     public function testCreateFromIntSucceeds(): void
