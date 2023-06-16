@@ -58,7 +58,7 @@ final class Path extends Component implements PathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string|int $path): self
+    public static function fromString(Stringable|string|int $path): self
     {
         return new self((string) $path);
     }
@@ -66,7 +66,7 @@ final class Path extends Component implements PathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
@@ -169,5 +169,35 @@ final class Path extends Component implements PathInterface
     public function withoutLeadingSlash(): PathInterface
     {
         return !$this->isAbsolute() ? $this : new self(substr($this->toString(), 1));
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see HierarchicalPath::fromString()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from a string or a stringable object.
+     */
+    public static function createFromString(Stringable|string|int $path): self
+    {
+        return self::fromString($path);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see HierarchicalPath::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
     }
 }

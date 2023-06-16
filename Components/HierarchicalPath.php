@@ -57,7 +57,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     private function __construct(UriComponentInterface|Stringable|string|int $path)
     {
         if (!$path instanceof PathInterface) {
-            $path = Path::createFromString($path);
+            $path = Path::fromString($path);
         }
 
         $this->path = $path;
@@ -72,12 +72,12 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $path): self
+    public static function fromString(Stringable|string $path): self
     {
-        return self::createFromPath(Path::createFromString($path));
+        return self::fromPath(Path::fromString($path));
     }
 
-    public static function createFromPath(PathInterface $path): self
+    public static function fromPath(PathInterface $path): self
     {
         return new self($path);
     }
@@ -87,12 +87,12 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * @throws TypeError If the segments are malformed
      */
-    public static function createRelativeFromSegments(iterable $segments): self
+    public static function fromRelativeSegments(iterable $segments): self
     {
-        return self::createFromSegments(self::IS_RELATIVE, $segments);
+        return self::fromSegments(self::IS_RELATIVE, $segments);
     }
 
-    private static function createFromSegments(int $pathType, iterable $segments): self
+    private static function fromSegments(int $pathType, iterable $segments): self
     {
         if ($segments instanceof Traversable) {
             $segments = iterator_to_array($segments, false);
@@ -116,17 +116,17 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * @throws TypeError If the segments are malformed
      */
-    public static function createAbsoluteFromSegments(iterable $segments): self
+    public static function fromAbsoluteSegments(iterable $segments): self
     {
-        return self::createFromSegments(self::IS_ABSOLUTE, $segments);
+        return self::fromSegments(self::IS_ABSOLUTE, $segments);
     }
 
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        return new self(Path::createFromUri($uri));
+        return new self(Path::fromUri($uri));
     }
 
     public static function new(): self
@@ -383,7 +383,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         if (!$path instanceof PathInterface) {
-            $path = Path::createFromString($path);
+            $path = Path::fromString($path);
         }
 
         if ($path->value() === $this->getDirname()) {
@@ -464,5 +464,82 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         return $ext.'.'.$extension.$param;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see HierarchicalPath::fromPath()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from a string or a stringable object.
+     */
+    public static function createFromString(Stringable|string $path): self
+    {
+        return self::fromString($path);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see HierarchicalPath::fromPath()
+     *
+     * @codeCoverageIgnore
+     */
+    public static function createFromPath(PathInterface $path): self
+    {
+        return self::fromPath($path);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see HierarchicalPath::fromRelativeSegments()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from an iterable structure.
+     *
+     * @throws TypeError If the segments are malformed
+     */
+    public static function createRelativeFromSegments(iterable $segments): self
+    {
+        return self::fromRelativeSegments($segments);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see HierarchicalPath::fromAbsoluteSegments()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from an iterable structure.
+     *
+     * @throws TypeError If the segments are malformed
+     */
+    public static function createAbsoluteFromSegments(iterable $segments): self
+    {
+        return self::fromAbsoluteSegments($segments);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see HierarchicalPath::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
     }
 }

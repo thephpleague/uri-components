@@ -263,9 +263,9 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
         /** @var HierarchicalPath $path */
-        $path = HierarchicalPath::createFromPath(Path::createFromString($path))->withLeadingSlash();
+        $path = HierarchicalPath::fromPath(Path::fromString($path))->withLeadingSlash();
         /** @var HierarchicalPath $currentPath */
-        $currentPath = HierarchicalPath::createFromUri($uri)->withLeadingSlash();
+        $currentPath = HierarchicalPath::fromUri($uri)->withLeadingSlash();
 
         /**
          * @var int    $offset
@@ -287,7 +287,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::createFromUri($uri)->withLeadingSlash()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withLeadingSlash()->__toString());
     }
 
     /**
@@ -297,7 +297,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::createFromUri($uri)->withTrailingSlash()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withTrailingSlash()->__toString());
     }
 
     /**
@@ -309,7 +309,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->append($segment));
+        return self::normalizePath($uri, HierarchicalPath::fromUri($uri)->append($segment));
     }
 
     /**
@@ -319,7 +319,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(DataPath::createFromUri($uri)->toAscii()->__toString());
+        return $uri->withPath(DataPath::fromUri($uri)->toAscii()->__toString());
     }
 
     /**
@@ -329,7 +329,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(DataPath::createFromUri($uri)->toBinary()->__toString());
+        return $uri->withPath(DataPath::fromUri($uri)->toBinary()->__toString());
     }
 
     /**
@@ -341,7 +341,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->prepend($segment));
+        return self::normalizePath($uri, HierarchicalPath::fromUri($uri)->prepend($segment));
     }
 
     /**
@@ -353,8 +353,8 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
         /** @var HierarchicalPath $basePath */
-        $basePath = HierarchicalPath::createFromPath(Path::createFromString($path))->withLeadingSlash();
-        $currentPath = HierarchicalPath::createFromUri($uri);
+        $basePath = HierarchicalPath::fromPath(Path::fromString($path))->withLeadingSlash();
+        $currentPath = HierarchicalPath::fromUri($uri);
         if ('/' === (string) $basePath) {
             return $uri;
         }
@@ -383,7 +383,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::createFromUri($uri)->withoutDotSegments()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withoutDotSegments()->__toString());
     }
 
     /**
@@ -393,7 +393,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::createFromUri($uri)->withoutEmptySegments()->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withoutEmptySegments()->__toString());
     }
 
     /**
@@ -403,7 +403,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, Path::createFromUri($uri)->withoutLeadingSlash());
+        return self::normalizePath($uri, Path::fromUri($uri)->withoutLeadingSlash());
     }
 
     /**
@@ -413,7 +413,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::createFromUri($uri)->withoutTrailingSlash()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withoutTrailingSlash()->__toString());
     }
 
     /**
@@ -423,7 +423,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::createFromUri($uri)->withoutSegment(...$keys)->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withoutSegment(...$keys)->__toString());
     }
 
     /**
@@ -435,7 +435,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withBasename($basename));
+        return self::normalizePath($uri, HierarchicalPath::fromUri($uri)->withBasename($basename));
     }
 
     /**
@@ -447,7 +447,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(DataPath::createFromUri($uri)->withParameters($parameters)->__toString());
+        return $uri->withPath(DataPath::fromUri($uri)->withParameters($parameters)->__toString());
     }
 
     /**
@@ -459,7 +459,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return self::normalizePath($uri, HierarchicalPath::createFromUri($uri)->withDirname($dirname));
+        return self::normalizePath($uri, HierarchicalPath::fromUri($uri)->withDirname($dirname));
     }
 
     /**
@@ -471,7 +471,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::createFromUri($uri)->withExtension($extension)->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withExtension($extension)->__toString());
     }
 
     /**
@@ -484,7 +484,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::createFromUri($uri)->withSegment($offset, $segment)->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withSegment($offset, $segment)->__toString());
     }
 
     /**

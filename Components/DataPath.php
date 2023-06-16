@@ -65,7 +65,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     private function __construct(UriComponentInterface|HostInterface|Stringable|int|string|null $path)
     {
-        $this->path = Path::createFromString($this->filterPath(self::filterComponent($path)));
+        $this->path = Path::fromString($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
         [$mediaType, $this->document] = explode(',', $this->path->toString(), 2) + [1 => ''];
         [$mimetype, $parameters] = explode(';', $mediaType, 2) + [1 => ''];
@@ -178,9 +178,9 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $path): self
+    public static function fromString(Stringable|string $path): self
     {
-        return new self(Path::createFromString($path));
+        return new self(Path::fromString($path));
     }
 
     /**
@@ -190,7 +190,7 @@ final class DataPath extends Component implements DataPathInterface
      *
      * @throws SyntaxError If the File is not readable
      */
-    public static function createFromFilePath(string $path, $context = null): self
+    public static function fromFilePath(string $path, $context = null): self
     {
         static $fileInfoSupport = null;
         $fileInfoSupport = $fileInfoSupport ?? class_exists(finfo::class);
@@ -224,9 +224,9 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        return self::createFromString(Path::createFromUri($uri)->toString());
+        return self::fromString(Path::fromUri($uri)->toString());
     }
 
     /**
@@ -389,5 +389,54 @@ final class DataPath extends Component implements DataPathInterface
         }
 
         return new self($this->formatComponent($this->mimetype, $parameters, $this->is_binary_data, $this->document));
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Authority::fromString()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from a string or a stringable object.
+     */
+    public static function createFromString(Stringable|string $path): self
+    {
+        return self::fromString($path);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Authority::fromFilePath()
+     *
+     * @codeCoverageIgnore
+     *
+     * Creates a new instance from a file path.
+     *
+     * @param null|resource $context
+     *
+     * @throws SyntaxError If the File is not readable
+     */
+    public static function createFromFilePath(string $path, $context = null): self
+    {
+        return self::fromFilePath($path, $context);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Authority::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
     }
 }
