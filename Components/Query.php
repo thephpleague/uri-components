@@ -64,12 +64,17 @@ final class Query extends Component implements QueryInterface
         $this->separator = $separator;
     }
 
+    public static function new(): self
+    {
+        return new self(null);
+    }
+
     /**
      * Returns a new instance from the result of PHP's parse_str.
      *
      * @param non-empty-string $separator
      */
-    public static function createFromParams(array|object $params, string $separator = '&'): self
+    public static function fromParams(array|object $params, string $separator = '&'): self
     {
         if ($params instanceof QueryInterface) {
             /** @var array $queryParams */
@@ -103,7 +108,7 @@ final class Query extends Component implements QueryInterface
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      * @param non-empty-string                              $separator
      */
-    public static function createFromPairs(iterable $pairs, string $separator = '&'): self
+    public static function fromPairs(iterable $pairs, string $separator = '&'): self
     {
         return new self(QueryString::build($pairs, $separator), $separator, PHP_QUERY_RFC3986);
     }
@@ -111,7 +116,7 @@ final class Query extends Component implements QueryInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
         $component = $uri->getQuery();
 
@@ -126,7 +131,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    public static function fromRFC3986(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC3986);
     }
@@ -136,14 +141,9 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    public static function fromRFC1738(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC1738);
-    }
-
-    public static function new(): self
-    {
-        return new self(null);
     }
 
     public function getSeparator(): string
@@ -231,7 +231,7 @@ final class Query extends Component implements QueryInterface
         return match (true) {
             $separator === $this->separator => $this,
             '' === $separator => throw new SyntaxError('The separator character can not be the empty string.'),
-            default => self::createFromPairs($this->pairs, $separator),
+            default => self::fromPairs($this->pairs, $separator),
         };
     }
 
@@ -247,7 +247,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs($pairs);
+        return self::fromPairs($pairs);
     }
 
     /**
@@ -272,7 +272,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs($pairs, $this->separator);
+        return self::fromPairs($pairs, $this->separator);
     }
 
     /**
@@ -294,7 +294,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs($pairs);
+        return self::fromPairs($pairs);
     }
 
     /**
@@ -312,7 +312,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs($pairs, $this->separator);
+        return self::fromPairs($pairs, $this->separator);
     }
 
     /**
@@ -338,7 +338,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs($pairs, $this->separator);
+        return self::fromPairs($pairs, $this->separator);
     }
 
     /**
@@ -387,7 +387,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs($pairs, $this->separator);
+        return self::fromPairs($pairs, $this->separator);
     }
 
     /**
@@ -423,7 +423,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs(
+        return self::fromPairs(
             array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keys_to_remove, true)),
             $this->separator
         );
@@ -431,7 +431,7 @@ final class Query extends Component implements QueryInterface
 
     public function appendTo(string $key, Stringable|string|int|bool|null $value): QueryInterface
     {
-        return self::createFromPairs([...$this->pairs, [$key, $this->filterPair($value)]], $this->separator);
+        return self::fromPairs([...$this->pairs, [$key, $this->filterPair($value)]], $this->separator);
     }
 
     public function append(Stringable|string|int|null|bool $query): QueryInterface
@@ -445,7 +445,7 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs(array_filter($pairs, $this->filterEmptyValue(...)), $this->separator);
+        return self::fromPairs(array_filter($pairs, $this->filterEmptyValue(...)), $this->separator);
     }
 
     /**
@@ -471,6 +471,91 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        return self::createFromPairs($pairs, $this->separator);
+        return self::fromPairs($pairs, $this->separator);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::fromParams()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from the result of PHP's parse_str.
+     *
+     * @param non-empty-string $separator
+     */
+    public static function createFromParams(array|object $params, string $separator = '&'): self
+    {
+        return self::fromParams($params, $separator);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::fromPairs()
+     *
+     * @codeCoverageIgnore
+     *
+     *
+     * Returns a new instance from the result of QueryString::parse.
+     *
+     * @param iterable<int, array{0:string, 1:string|null}> $pairs
+     * @param non-empty-string                              $separator
+     */
+    public static function createFromPairs(iterable $pairs, string $separator = '&'): self
+    {
+        return self::fromPairs($pairs, $separator);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::fromRFC3986()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance.
+     *
+     * @param non-empty-string $separator
+     */
+    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    {
+        return self::fromRFC3986($query, $separator);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::fromRFC1738()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance.
+     *
+     * @param non-empty-string $separator
+     */
+    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    {
+        return self::fromRFC1738($query, $separator);
     }
 }

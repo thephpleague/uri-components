@@ -45,7 +45,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->append($query)->value(), $uri)
+            self::normalizeComponent(Query::fromUri($uri)->append($query)->value(), $uri)
         );
     }
 
@@ -59,7 +59,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->merge($query)->value(), $uri)
+            self::normalizeComponent(Query::fromUri($uri)->merge($query)->value(), $uri)
         );
     }
 
@@ -71,7 +71,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->withoutPair(...$keys)->value(), $uri)
+            self::normalizeComponent(Query::fromUri($uri)->withoutPair(...$keys)->value(), $uri)
         );
     }
 
@@ -86,7 +86,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->withoutEmptyPairs()->value(), $uri)
+            self::normalizeComponent(Query::fromUri($uri)->withoutEmptyPairs()->value(), $uri)
         );
     }
 
@@ -98,7 +98,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withQuery(
-            self::normalizeComponent(Query::createFromUri($uri)->withoutParam(...$keys)->value(), $uri)
+            self::normalizeComponent(Query::fromUri($uri)->withoutParam(...$keys)->value(), $uri)
         );
     }
 
@@ -109,7 +109,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withQuery(self::normalizeComponent(Query::createFromUri($uri)->sort()->value(), $uri));
+        return $uri->withQuery(self::normalizeComponent(Query::fromUri($uri)->sort()->value(), $uri));
     }
 
     /*********************************
