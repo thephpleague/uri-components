@@ -33,20 +33,20 @@ final class Fragment extends Component implements FragmentInterface
         $this->fragment = $this->validateComponent($fragment);
     }
 
-    public static function createFromString(Stringable|string $fragment): self
-    {
-        return new self((string) $fragment);
-    }
-
     public static function new(): self
     {
         return new self(null);
     }
 
+    public static function fromString(Stringable|string $fragment): self
+    {
+        return new self((string) $fragment);
+    }
+
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getFragment());
@@ -76,5 +76,33 @@ final class Fragment extends Component implements FragmentInterface
     public function decoded(): ?string
     {
         return $this->fragment;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Fragment::fromString()
+     *
+     * @codeCoverageIgnore
+     */
+    public static function createFromString(Stringable|string $fragment): self
+    {
+        return self::fromString($fragment);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Fragment::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
     }
 }

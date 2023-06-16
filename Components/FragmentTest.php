@@ -31,7 +31,7 @@ final class FragmentTest extends TestCase
      */
     public function testStringRepresentation(?string $str, string $encoded): void
     {
-        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::new();
+        $fragment = null !== $str ? Fragment::fromString($str) : Fragment::new();
 
         self::assertSame($encoded, (string) $fragment);
     }
@@ -67,7 +67,7 @@ final class FragmentTest extends TestCase
             $str = $str->value();
         }
 
-        $fragment = null !== $str ? Fragment::createFromString($str) : Fragment::new();
+        $fragment = null !== $str ? Fragment::fromString($str) : Fragment::new();
 
         self::assertSame($expected, $fragment->decoded());
     }
@@ -96,7 +96,7 @@ final class FragmentTest extends TestCase
      */
     public function testGetContent(string $input, string $expected): void
     {
-        self::assertSame($expected, Fragment::createFromString($input)->value());
+        self::assertSame($expected, Fragment::fromString($input)->value());
     }
 
     public static function getContentProvider(): array
@@ -112,18 +112,18 @@ final class FragmentTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Fragment::createFromString("\0");
+        Fragment::fromString("\0");
     }
 
     public function testGetUriComponent(): void
     {
-        self::assertSame('#yolo', Fragment::createFromString('yolo')->getUriComponent());
+        self::assertSame('#yolo', Fragment::fromString('yolo')->getUriComponent());
         self::assertEquals('', Fragment::new()->getUriComponent());
     }
 
     public function testJsonSerialize(): void
     {
-        self::assertEquals('"yolo"', json_encode(Fragment::createFromString('yolo')));
+        self::assertEquals('"yolo"', json_encode(Fragment::fromString('yolo')));
     }
 
     public function testPreserverDelimiter(): void
@@ -138,7 +138,7 @@ final class FragmentTest extends TestCase
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
-        $fragment = Fragment::createFromUri($uri);
+        $fragment = Fragment::fromUri($uri);
 
         self::assertSame($expected, $fragment->value());
     }
