@@ -37,7 +37,7 @@ final class IpAddressTest extends TestCase
         ?string $ip,
         string $iri
     ): void {
-        $host = null === $host ? Host::new() : Host::createFromString((string) $host);
+        $host = null === $host ? Host::new() : Host::fromString((string) $host);
 
         self::assertSame($isIp, $host->isIp());
         self::assertSame($isIpv4, $host->isIpv4());
@@ -51,7 +51,7 @@ final class IpAddressTest extends TestCase
     {
         return [
             'ip host object' => [
-                Host::createFromIp('127.0.0.1'),
+                Host::fromIp('127.0.0.1'),
                 false,
                 true,
                 true,
@@ -130,7 +130,7 @@ final class IpAddressTest extends TestCase
      */
     public function testCreateFromIp(string $input, string $version, string $expected): void
     {
-        self::assertSame($expected, (string) Host::createFromIp($input, $version));
+        self::assertSame($expected, (string) Host::fromIp($input, $version));
     }
 
     public static function createFromIpValid(): array
@@ -152,7 +152,7 @@ final class IpAddressTest extends TestCase
     public function testCreateFromIpFailed(string $input): void
     {
         $this->expectException(SyntaxError::class);
-        Host::createFromIp($input);
+        Host::fromIp($input);
     }
 
     public static function createFromIpFailed(): array
@@ -170,7 +170,7 @@ final class IpAddressTest extends TestCase
      */
     public function testWithoutZoneIdentifier(string $host, string $expected): void
     {
-        self::assertSame($expected, (string) Host::createFromString($host)->withoutZoneIdentifier());
+        self::assertSame($expected, (string) Host::fromString($host)->withoutZoneIdentifier());
     }
 
     public static function withoutZoneIdentifierProvider(): array
@@ -188,7 +188,7 @@ final class IpAddressTest extends TestCase
      */
     public function testHasZoneIdentifier(string $host, bool $expected): void
     {
-        self::assertSame($expected, Host::createFromString($host)->hasZoneIdentifier());
+        self::assertSame($expected, Host::fromString($host)->hasZoneIdentifier());
     }
 
     public static function hasZoneIdentifierProvider(): array

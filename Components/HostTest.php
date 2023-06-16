@@ -37,8 +37,8 @@ final class HostTest extends TestCase
     {
         $host = match (true) {
             null === $host => Host::new(),
-            $host instanceof UriComponentInterface => Host::createFromString($host->value()),
-            default => Host::createFromString((string) $host),
+            $host instanceof UriComponentInterface => Host::fromString($host->value()),
+            default => Host::fromString((string) $host),
         };
 
         self::assertSame($uri, $host->toAscii());
@@ -50,7 +50,7 @@ final class HostTest extends TestCase
     {
         return [
             'ipv4' => [
-                Host::createFromString('127.0.0.1'),
+                Host::fromString('127.0.0.1'),
                 '127.0.0.1',
                 '127.0.0.1',
             ],
@@ -129,7 +129,7 @@ final class HostTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Host::createFromString($invalid);
+        Host::fromString($invalid);
     }
 
     public static function invalidHostProvider(): array
@@ -164,7 +164,7 @@ final class HostTest extends TestCase
      */
     public function testValidUnicodeHost(string $unicode, string $ascii): void
     {
-        $host = Host::createFromString($unicode);
+        $host = Host::fromString($unicode);
 
         self::assertSame($ascii, $host->toAscii());
         self::assertSame($unicode, $host->toUnicode());
@@ -204,7 +204,7 @@ final class HostTest extends TestCase
      */
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
-        $host = Host::createFromUri($uri);
+        $host = Host::fromUri($uri);
 
         self::assertSame($expected, $host->value());
     }
@@ -244,7 +244,7 @@ final class HostTest extends TestCase
      */
     public function test_host_is_domain(?string $host, bool $expectedIsDomain): void
     {
-        $host = null !== $host ? Host::createFromString($host) : Host::new();
+        $host = null !== $host ? Host::fromString($host) : Host::new();
 
         self::assertSame($host->isDomain(), $expectedIsDomain);
     }

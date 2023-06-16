@@ -39,7 +39,7 @@ final class Authority extends Component implements AuthorityInterface
     private function __construct(UriComponentInterface|Stringable|string|null $authority)
     {
         $components = $this->parse(self::filterComponent($authority));
-        $this->host = null === $components['host'] ? Host::new() : Host::createFromString($components['host']);
+        $this->host = null === $components['host'] ? Host::new() : Host::fromString($components['host']);
         $this->port = null === $components['port'] ? Port::new() : Port::fromNumber($components['port']);
         $this->userInfo = new UserInfo($components['user'], $components['pass']);
 
@@ -192,7 +192,7 @@ final class Authority extends Component implements AuthorityInterface
     public function withHost(UriComponentInterface|Stringable|string|null $host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
-            $host = null === $host ? Host::new() : Host::createFromString($host);
+            $host = null === $host ? Host::new() : Host::fromString($host);
         }
 
         if ($host->value() === $this->host->value()) {

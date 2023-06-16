@@ -237,7 +237,7 @@ final class Host extends Component implements IpHostInterface
         return new self(null);
     }
 
-    public static function createFromString(Stringable|string|null $host): self
+    public static function fromString(Stringable|string|null $host): self
     {
         return new self((string) $host);
     }
@@ -248,7 +248,7 @@ final class Host extends Component implements IpHostInterface
      * @throws IPv4CalculatorMissing If detecting IPv4 is not possible
      * @throws SyntaxError           If the $ip can not be converted into a Host
      */
-    public static function createFromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
+    public static function fromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
     {
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
@@ -277,7 +277,7 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getHost());
@@ -294,8 +294,12 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function createFromAuthority(AuthorityInterface $authority): self
+    public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
+        if (!$authority instanceof AuthorityInterface) {
+            $authority = Authority::fromString($authority);
+        }
+
         return new self($authority->getHost());
     }
 
@@ -389,6 +393,67 @@ final class Host extends Component implements IpHostInterface
 
         [$ipv6] = explode('%', substr((string) $this->host, 1, -1));
 
-        return self::createFromIp($ipv6);
+        return self::fromIp($ipv6);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Host::fromString()
+     *
+     * @codeCoverageIgnore
+     */
+    public static function createFromString(Stringable|string|null $host): self
+    {
+        return self::fromString($host);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Host::fromIp()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a host from an IP address.
+     *
+     * @throws IPv4CalculatorMissing If detecting IPv4 is not possible
+     * @throws SyntaxError           If the $ip can not be converted into a Host
+     */
+    public static function createFromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
+    {
+        return self::fromIp($ip, $version, $normalizer);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Host::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Host::fromAuthority()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from an Authority object.
+     */
+    public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
+    {
+        return self::fromAuthority($authority);
     }
 }

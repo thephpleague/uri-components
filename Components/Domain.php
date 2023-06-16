@@ -46,8 +46,8 @@ final class Domain extends Component implements DomainHostInterface
     {
         $host = match (true) {
             $host instanceof HostInterface => $host,
-            $host instanceof UriComponentInterface => Host::createFromString($host->value()),
-            default => Host::createFromString((string) $host),
+            $host instanceof UriComponentInterface => Host::fromString($host->value()),
+            default => Host::fromString((string) $host),
         };
 
         if (!$host->isDomain()) {
@@ -58,12 +58,17 @@ final class Domain extends Component implements DomainHostInterface
         $this->labels = array_reverse(explode(self::SEPARATOR, $this->host->value() ?? ''));
     }
 
+    public static function new(): self
+    {
+        return new self(Host::new());
+    }
+
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $host): self
+    public static function fromString(Stringable|string $host): self
     {
-        return self::createFromHost(Host::createFromString($host));
+        return self::fromHost(Host::fromString($host));
     }
 
     /**
@@ -71,7 +76,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * @throws TypeError If a label is the null value
      */
-    public static function createFromLabels(iterable $labels): self
+    public static function fromLabels(iterable $labels): self
     {
         $hostLabels = [];
         foreach ($labels as $label) {
@@ -82,36 +87,31 @@ final class Domain extends Component implements DomainHostInterface
             $hostLabels[] = $label;
         }
 
-        return self::createFromString(implode(self::SEPARATOR, array_reverse($hostLabels)));
+        return self::fromString(implode(self::SEPARATOR, array_reverse($hostLabels)));
     }
 
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        return self::createFromHost(Host::createFromUri($uri));
+        return self::fromHost(Host::fromUri($uri));
     }
 
     /**
      * Create a new instance from an Authority object.
      */
-    public static function createFromAuthority(AuthorityInterface $authority): self
+    public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
-        return self::createFromHost(Host::createFromAuthority($authority));
+        return self::fromHost(Host::fromAuthority($authority));
     }
 
     /**
      * Returns a new instance from an iterable structure.
      */
-    public static function createFromHost(HostInterface $host): self
+    public static function fromHost(HostInterface $host): self
     {
         return new self($host);
-    }
-
-    public static function new(): self
-    {
-        return new self(Host::new());
     }
 
     public function value(): ?string
@@ -238,7 +238,7 @@ final class Domain extends Component implements DomainHostInterface
         $labels = $this->labels;
         array_shift($labels);
 
-        return self::createFromLabels($labels);
+        return self::fromLabels($labels);
     }
 
     /**
@@ -264,7 +264,7 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         if (!$label instanceof HostInterface) {
-            $label = null === $label ? Host::new() : Host::createFromString((string) $label);
+            $label = null === $label ? Host::new() : Host::fromString((string) $label);
         }
 
         $label = $label->value();
@@ -299,7 +299,7 @@ final class Domain extends Component implements DomainHostInterface
         $deleted_keys = array_keys(array_count_values($keys));
         $filter = static fn ($key): bool => !in_array($key, $deleted_keys, true);
 
-        return self::createFromLabels(array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
+        return self::fromLabels(array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
     }
 
     public function clear(): self
@@ -319,6 +319,83 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        return new self([] === $labels ? Host::new() : Host::createFromString(implode('.', array_reverse($labels))));
+        return new self([] === $labels ? Host::new() : Host::fromString(implode('.', array_reverse($labels))));
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Domain::fromString()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from a string or a stringable object.
+     */
+    public static function createFromString(Stringable|string $host): self
+    {
+        return self::fromString($host);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Domain::fromLabels()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from an iterable structure.
+     *
+     * @throws TypeError If a label is the null value
+     */
+    public static function createFromLabels(iterable $labels): self
+    {
+        return self::fromLabels($labels);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Domain::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    {
+        return self::fromUri($uri);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Domain::fromAuthority()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from an Authority object.
+     */
+    public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
+    {
+        return self::fromAuthority($authority);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Domain::fromHost()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from an iterable structure.
+     */
+    public static function createFromHost(HostInterface $host): self
+    {
+        return self::fromHost($host);
     }
 }

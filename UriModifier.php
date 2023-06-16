@@ -123,7 +123,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withHost(self::normalizeComponent(Domain::createFromUri($uri)->withRootLabel()->value(), $uri));
+        return $uri->withHost(self::normalizeComponent(Domain::fromUri($uri)->withRootLabel()->value(), $uri));
     }
 
     /**
@@ -134,14 +134,14 @@ final class UriModifier
     public static function appendLabel(Psr7UriInterface|UriInterface|Stringable|string $uri, Stringable|string|null $label): Psr7UriInterface|UriInterface
     {
         $uri = self::filterUri($uri);
-        $host = Host::createFromUri($uri);
-        $label = null === $label ? Host::new() : Host::createFromString($label);
+        $host = Host::fromUri($uri);
+        $label = null === $label ? Host::new() : Host::fromString($label);
         if (null === $label->value()) {
             return $uri;
         }
 
         if ($host->isDomain()) {
-            $component = Domain::createFromHost($host)->append($label)->value();
+            $component = Domain::fromHost($host)->append($label)->value();
 
             return $uri->withHost(self::normalizeComponent($component, $uri));
         }
@@ -159,7 +159,7 @@ final class UriModifier
     public static function hostToAscii(Psr7UriInterface|UriInterface|Stringable|string $uri): Psr7UriInterface|UriInterface
     {
         $uri = self::filterUri($uri);
-        $host = Host::createFromUri($uri)->value();
+        $host = Host::fromUri($uri)->value();
 
         return $uri->withHost(self::normalizeComponent($host, $uri));
     }
@@ -170,7 +170,7 @@ final class UriModifier
     public static function hostToUnicode(Psr7UriInterface|UriInterface|Stringable|string $uri): Psr7UriInterface|UriInterface
     {
         $uri = self::filterUri($uri);
-        $host = Host::createFromUri($uri)->toUnicode();
+        $host = Host::fromUri($uri)->toUnicode();
 
         return $uri->withHost(self::normalizeComponent($host, $uri));
     }
@@ -183,14 +183,14 @@ final class UriModifier
     public static function prependLabel(Psr7UriInterface|UriInterface|Stringable|string $uri, Stringable|string|null $label): Psr7UriInterface|UriInterface
     {
         $uri = self::filterUri($uri);
-        $host = Host::createFromUri($uri);
-        $label = null === $label ? Host::new() : Host::createFromString($label);
+        $host = Host::fromUri($uri);
+        $label = null === $label ? Host::new() : Host::fromString($label);
         if (null === $label->value()) {
             return $uri;
         }
 
         if ($host->isDomain()) {
-            $component = Domain::createFromHost($host)->prepend($label)->value();
+            $component = Domain::fromHost($host)->prepend($label)->value();
 
             return $uri->withHost($component);
         }
@@ -210,7 +210,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withHost(
-            self::normalizeComponent(Domain::createFromUri($uri)->withoutLabel(...$keys)->value(), $uri)
+            self::normalizeComponent(Domain::fromUri($uri)->withoutLabel(...$keys)->value(), $uri)
         );
     }
 
@@ -222,7 +222,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withHost(
-            self::normalizeComponent(Domain::createFromUri($uri)->withoutRootLabel()->value(), $uri)
+            self::normalizeComponent(Domain::fromUri($uri)->withoutRootLabel()->value(), $uri)
         );
     }
 
@@ -234,7 +234,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withHost(
-            self::normalizeComponent(Host::createFromUri($uri)->withoutZoneIdentifier()->value(), $uri)
+            self::normalizeComponent(Host::fromUri($uri)->withoutZoneIdentifier()->value(), $uri)
         );
     }
 
@@ -247,7 +247,7 @@ final class UriModifier
         UriComponentInterface|Stringable|int|string|null $label
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
-        $host = Domain::createFromUri($uri)->withLabel($offset, $label)->value();
+        $host = Domain::fromUri($uri)->withLabel($offset, $label)->value();
 
         return $uri->withHost(self::normalizeComponent($host, $uri));
     }
