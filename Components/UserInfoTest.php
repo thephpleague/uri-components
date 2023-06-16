@@ -156,7 +156,7 @@ final class UserInfoTest extends TestCase
 
         self::assertEquals(
             new UserInfo('user', 'pass'),
-            UserInfo::createFromString('user:pass')
+            UserInfo::fromString('user:pass')
         );
     }
 
@@ -192,7 +192,7 @@ final class UserInfoTest extends TestCase
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
-        $userInfo = UserInfo::createFromUri($uri);
+        $userInfo = UserInfo::fromUri($uri);
 
         self::assertSame($expected, $userInfo->value());
     }
@@ -236,7 +236,7 @@ final class UserInfoTest extends TestCase
         $uri = Uri::fromString('http://example.com:443');
         $auth = Authority::fromUri($uri);
 
-        self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));
+        self::assertEquals(UserInfo::fromUri($uri), UserInfo::fromAuthority($auth));
     }
 
     public function testCreateFromAuthorityWithActualUserInfoComponent(): void
@@ -244,6 +244,6 @@ final class UserInfoTest extends TestCase
         $uri = Uri::fromString('http://user:pass@example.com:443');
         $auth = Authority::fromUri($uri);
 
-        self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));
+        self::assertEquals(UserInfo::fromUri($uri), UserInfo::fromAuthority($auth));
     }
 }
