@@ -69,8 +69,12 @@ final class Port extends Component implements PortInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(AuthorityInterface $authority): self
+    public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
+        if (!$authority instanceof AuthorityInterface) {
+            $authority = Authority::fromString($authority);
+        }
+
         return new self($authority->getPort());
     }
 
@@ -138,7 +142,7 @@ final class Port extends Component implements PortInterface
      *
      * Create a new instance from an Authority object.
      */
-    public static function createFromAuthority(AuthorityInterface $authority): self
+    public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
         return self::fromAuthority($authority);
     }
