@@ -105,7 +105,7 @@ final class PortTest extends TestCase
     public function testCreateFromAuthority(): void
     {
         $uri = Uri::fromString('http://example.com:443');
-        $auth = Authority::createFromUri($uri);
+        $auth = Authority::fromUri($uri);
 
         self::assertEquals(Port::createFromUri($uri), Port::createFromAuthority($auth));
     }

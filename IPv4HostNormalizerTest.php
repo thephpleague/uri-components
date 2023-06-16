@@ -150,11 +150,11 @@ final class IPv4HostNormalizerTest extends TestCase
 
     public function testIpv4NormalizeAuthority(): void
     {
-        $authority = Authority::createFromString('hello:word@0:42');
+        $authority = Authority::fromString('hello:word@0:42');
         $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($authority);
         self::assertSame('0.0.0.0', $newAuthority->getHost());
 
-        $unChangedAuthority = Authority::createFromString('hello:word@11.be:42');
+        $unChangedAuthority = Authority::fromString('hello:word@11.be:42');
         $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($unChangedAuthority);
         self::assertSame($unChangedAuthority, $newAuthority);
     }

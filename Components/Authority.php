@@ -78,10 +78,15 @@ final class Authority extends Component implements AuthorityInterface
         return $components;
     }
 
+    public static function new(): self
+    {
+        return new self(null);
+    }
+
     /**
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(UriInterface|Psr7UriInterface $uri): self
+    public static function fromUri(UriInterface|Psr7UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getAuthority());
@@ -95,15 +100,10 @@ final class Authority extends Component implements AuthorityInterface
         return new self($authority);
     }
 
-    public static function new(): self
-    {
-        return new self(null);
-    }
-
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $authority): self
+    public static function fromString(Stringable|string $authority): self
     {
         return new self((string) $authority);
     }
@@ -121,7 +121,7 @@ final class Authority extends Component implements AuthorityInterface
      *     port? : ?int
      * } $components
      */
-    public static function createFromComponents(array $components): self
+    public static function fromComponents(array $components): self
     {
         $components += ['user' => null, 'pass' => null, 'host' => null, 'port' => null];
 
@@ -233,5 +233,60 @@ final class Authority extends Component implements AuthorityInterface
         }
 
         return new self($value);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Authority::fromUri()
+     *
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a URI object.
+     */
+    public static function createFromUri(UriInterface|Psr7UriInterface $uri): self
+    {
+        return self::fromUri($uri);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Authority::fromString()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from a string or a stringable object.
+     */
+    public static function createFromString(Stringable|string $authority): self
+    {
+        return self::fromString($authority);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Authority::fromComponents()
+     *x
+     * @codeCoverageIgnore
+     *
+     * Create a new instance from a hash of parse_url parts.
+     *
+     * Create a new instance from a hash representation of the URI similar
+     * to PHP parse_url function result
+     *
+     * @param array{
+     *     user? : ?string,
+     *     pass? : ?string,
+     *     host? : ?string,
+     *     port? : ?int
+     * } $components
+     */
+    public static function createFromComponents(array $components): self
+    {
+        return self::fromComponents($components);
     }
 }

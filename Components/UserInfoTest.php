@@ -234,7 +234,7 @@ final class UserInfoTest extends TestCase
     public function testCreateFromAuthorityWithoutUserInfoComponent(): void
     {
         $uri = Uri::fromString('http://example.com:443');
-        $auth = Authority::createFromUri($uri);
+        $auth = Authority::fromUri($uri);
 
         self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));
     }
@@ -242,7 +242,7 @@ final class UserInfoTest extends TestCase
     public function testCreateFromAuthorityWithActualUserInfoComponent(): void
     {
         $uri = Uri::fromString('http://user:pass@example.com:443');
-        $auth = Authority::createFromUri($uri);
+        $auth = Authority::fromUri($uri);
 
         self::assertEquals(UserInfo::createFromUri($uri), UserInfo::createFromAuthority($auth));
     }

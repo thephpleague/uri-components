@@ -490,7 +490,7 @@ final class DomainTest extends TestCase
     public function testCreateFromAuthority(): void
     {
         $uri = Uri::fromString('http://example.com:443');
-        $auth = Authority::createFromUri($uri);
+        $auth = Authority::fromUri($uri);
 
         self::assertEquals(Domain::createFromUri($uri), Domain::createFromAuthority($auth));
     }

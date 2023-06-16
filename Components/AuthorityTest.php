@@ -39,7 +39,7 @@ final class AuthorityTest extends TestCase
         if (null === $authority) {
             $instance = Authority::new();
         } else {
-            $instance = Authority::createFromString($authority);
+            $instance = Authority::fromString($authority);
         }
 
         self::assertSame($host, $instance->getHost());
@@ -96,7 +96,7 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::createFromString($authority);
+        Authority::fromString($authority);
     }
 
     public static function invalidAuthorityDataProvider(): array
@@ -110,7 +110,7 @@ final class AuthorityTest extends TestCase
 
     public function testWithHost(): void
     {
-        $authority = Authority::createFromString('foo:bar@example.com:443');
+        $authority = Authority::fromString('foo:bar@example.com:443');
         self::assertSame($authority, $authority->withHost('eXAmPle.CoM'));
         self::assertNotEquals($authority, $authority->withHost('[::1]'));
     }
@@ -122,7 +122,7 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::createFromString('foo:bar@example.com:443')->withHost($host);
+        Authority::fromString('foo:bar@example.com:443')->withHost($host);
     }
 
     public static function invalidHostDataProvider(): array
@@ -135,7 +135,7 @@ final class AuthorityTest extends TestCase
 
     public function testWithPort(): void
     {
-        $authority = Authority::createFromString('foo:bar@example.com:443');
+        $authority = Authority::fromString('foo:bar@example.com:443');
 
         self::assertSame($authority, $authority->withPort(443));
         self::assertNotEquals($authority, $authority->withPort(80));
@@ -145,12 +145,12 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::createFromString('foo:bar@example.com:443')->withPort(-1);
+        Authority::fromString('foo:bar@example.com:443')->withPort(-1);
     }
 
     public function testWithUserInfo(): void
     {
-        $authority = Authority::createFromString('foo:bar@example.com:443');
+        $authority = Authority::fromString('foo:bar@example.com:443');
 
         self::assertSame($authority, $authority->withUserInfo('foo', 'bar'));
         self::assertNotEquals($authority, $authority->withUserInfo('foo'));
@@ -160,7 +160,7 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::createFromString('foo:bar@example.com:443')->withUserInfo("\0foo", 'bar');
+        Authority::fromString('foo:bar@example.com:443')->withUserInfo("\0foo", 'bar');
     }
 
     /**
@@ -176,7 +176,7 @@ final class AuthorityTest extends TestCase
         if (null === $authority) {
             $instance = Authority::new();
         } else {
-            $instance = Authority::createFromString($authority);
+            $instance = Authority::fromString($authority);
         }
 
         self::assertSame($string, (string) $instance);
@@ -225,7 +225,7 @@ final class AuthorityTest extends TestCase
      */
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
-        $authority = Authority::createFromUri($uri);
+        $authority = Authority::fromUri($uri);
 
         self::assertSame($expected, $authority->value());
     }
@@ -262,14 +262,14 @@ final class AuthorityTest extends TestCase
 
     public function testCreateFromParseUrl(): void
     {
-        $instance = Authority::createFromComponents(parse_url('http://user:pass@ExaMplE.CoM:42#foobar'));
+        $instance = Authority::fromComponents(parse_url('http://user:pass@ExaMplE.CoM:42#foobar'));
 
         self::assertSame('user:pass@example.com:42', $instance->toString());
     }
 
     public function testCreateFromParseUrlWithoutAuthority(): void
     {
-        $instance = Authority::createFromComponents(UriString::parse('/example.com:42#foobar'));
+        $instance = Authority::fromComponents(UriString::parse('/example.com:42#foobar'));
 
         self::assertNull($instance->value());
     }
