@@ -7,6 +7,8 @@ Uri Components
 
 This package contains concrete URI components instances represented as immutable value objects.
 
+> ⚠️ this is a sub-split, for development, pull requests and issues, visit: https://github.com/thephpleague/uri-src
+
 System Requirements
 -------
 
@@ -38,12 +40,6 @@ Documentation
 --------
 
 Full documentation can be found at [uri.thephpleague.com][].
-
-
-Contributing
--------
-
-> ⚠️ this is a sub-split, for development, pull requests and issues, visit: https://github.com/thephpleague/uri-src
 
 License
 -------
