@@ -54,7 +54,7 @@ final class PortTest extends TestCase
             [23, 23, '23', ':23'],
             ['23', 23, '23', ':23'],
             [new class() {
-                public function __toString()
+                public function __toString(): string
                 {
                     return '23';
                 }

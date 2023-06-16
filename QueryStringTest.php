@@ -162,7 +162,7 @@ final class QueryStringTest extends TestCase
             ],
             'stringable object' => [
                 new class() {
-                    public function __toString()
+                    public function __toString(): string
                     {
                         return 'a=1&a=2';
                     }

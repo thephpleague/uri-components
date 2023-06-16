@@ -150,7 +150,7 @@ final class UriModifier
             return $uri->withHost($host->value().'.'.ltrim($label->value(), '.'));
         }
 
-        throw new SyntaxError(sprintf('The URI host %s can not be appended.', $host->__toString()));
+        throw new SyntaxError(sprintf('The URI host %s can not be appended.', $host->toString()));
     }
 
     /**
@@ -273,11 +273,11 @@ final class UriModifier
          */
         foreach ($path as $offset => $segment) {
             if ($currentPath->get($offset) !== $segment) {
-                return $uri->withPath($path->append($currentPath)->__toString());
+                return $uri->withPath($path->append($currentPath)->toString());
             }
         }
 
-        return $uri->withPath($currentPath->__toString());
+        return $uri->withPath($currentPath->toString());
     }
 
     /**
@@ -287,7 +287,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::fromUri($uri)->withLeadingSlash()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withLeadingSlash()->toString());
     }
 
     /**
@@ -297,7 +297,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::fromUri($uri)->withTrailingSlash()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withTrailingSlash()->toString());
     }
 
     /**
@@ -319,7 +319,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(DataPath::fromUri($uri)->toAscii()->__toString());
+        return $uri->withPath(DataPath::fromUri($uri)->toAscii()->toString());
     }
 
     /**
@@ -329,7 +329,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(DataPath::fromUri($uri)->toBinary()->__toString());
+        return $uri->withPath(DataPath::fromUri($uri)->toBinary()->toString());
     }
 
     /**
@@ -373,7 +373,7 @@ final class UriModifier
             return $uri;
         }
 
-        return $uri->withPath($currentPath->withoutSegment(...$basePath->keys())->__toString());
+        return $uri->withPath($currentPath->withoutSegment(...$basePath->keys())->toString());
     }
 
     /**
@@ -383,7 +383,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::fromUri($uri)->withoutDotSegments()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withoutDotSegments()->toString());
     }
 
     /**
@@ -393,7 +393,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::fromUri($uri)->withoutEmptySegments()->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withoutEmptySegments()->toString());
     }
 
     /**
@@ -413,7 +413,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(Path::fromUri($uri)->withoutTrailingSlash()->__toString());
+        return $uri->withPath(Path::fromUri($uri)->withoutTrailingSlash()->toString());
     }
 
     /**
@@ -423,7 +423,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::fromUri($uri)->withoutSegment(...$keys)->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withoutSegment(...$keys)->toString());
     }
 
     /**
@@ -447,7 +447,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(DataPath::fromUri($uri)->withParameters($parameters)->__toString());
+        return $uri->withPath(DataPath::fromUri($uri)->withParameters($parameters)->toString());
     }
 
     /**
@@ -471,7 +471,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::fromUri($uri)->withExtension($extension)->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withExtension($extension)->toString());
     }
 
     /**
@@ -484,7 +484,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
-        return $uri->withPath(HierarchicalPath::fromUri($uri)->withSegment($offset, $segment)->__toString());
+        return $uri->withPath(HierarchicalPath::fromUri($uri)->withSegment($offset, $segment)->toString());
     }
 
     /**
@@ -506,7 +506,7 @@ final class UriModifier
      */
     private static function normalizePath(Psr7UriInterface|UriInterface $uri, PathInterface $path): Psr7UriInterface|UriInterface
     {
-        $pathString = $path->__toString();
+        $pathString = $path->toString();
         if ('' === (string) $uri->getAuthority() || '' === $pathString || '/' === $pathString[0]) {
             return $uri->withPath($pathString);
         }

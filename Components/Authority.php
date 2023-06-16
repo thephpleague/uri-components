@@ -36,7 +36,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    private function __construct(UriComponentInterface|Stringable|string|null $authority)
+    private function __construct(Stringable|string|null $authority)
     {
         $components = $this->parse(self::filterComponent($authority));
         $this->host = null === $components['host'] ? Host::new() : Host::fromString($components['host']);
@@ -86,7 +86,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(UriInterface|Psr7UriInterface $uri): self
+    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getAuthority());
