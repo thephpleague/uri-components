@@ -18,6 +18,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `DataPath::new` named constructor
 - `UserInfo::withUser` modifier method
 - `UserInfo::withPass` modifier method
+- `Port::fromNumber` modifier method
 
 ### Fixed
 
@@ -25,10 +26,12 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `UriModifier` uri input now supports `Stringable` and `string` type.
 - `createFromString` named constructor do not take the empty string as the default value
 - All components class constructors (except for the `UserInfo` class) are made private use the available named constructors instead
+- Named constructors default value are removed, you need to explicitly add an argument value or use the `::new()` named constructor instead.
+- `UserInfo` class makes a distinction between `null` and the empty string.
 
 ### Deprecated
 
-- None
+- All named constructors which starts with `createFrom*` replaced by the same method starting with `from*`. For example `Authority::createFromString` is deprecated in favor of `Authority::fromString`
 
 ### Removed
 
