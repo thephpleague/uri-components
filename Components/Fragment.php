@@ -33,14 +33,9 @@ final class Fragment extends Component implements FragmentInterface
         $this->fragment = $this->validateComponent($fragment);
     }
 
-    public static function new(): self
+    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
     {
-        return new self(null);
-    }
-
-    public static function fromString(Stringable|string $fragment): self
-    {
-        return new self((string) $fragment);
+        return new self($value);
     }
 
     /**
@@ -82,13 +77,13 @@ final class Fragment extends Component implements FragmentInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Fragment::fromString()
+     * @see Fragment::new()
      *
      * @codeCoverageIgnore
      */
     public static function createFromString(Stringable|string $fragment): self
     {
-        return self::fromString($fragment);
+        return self::new($fragment);
     }
 
     /**

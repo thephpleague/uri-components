@@ -35,8 +35,8 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS or loads the GMP or the BCmath extension.');
         }
 
-        $expected = (null === $expected) ? Host::new() : Host::fromString($expected);
-        $input = (null === $input) ? Host::new() : Host::fromString($input);
+        $expected = (null === $expected) ? Host::new() : Host::new($expected);
+        $input = (null === $input) ? Host::new() : Host::new($input);
 
         self::assertEquals($expected, IPv4Normalizer::fromEnvironment()->normalizeHost($input));
     }
@@ -52,8 +52,8 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The GMP extension is needed to execute this test.');
         }
 
-        $expected = (null === $expected) ? Host::new() : Host::fromString($expected);
-        $input = (null === $input) ? Host::new() : Host::fromString($input);
+        $expected = (null === $expected) ? Host::new() : Host::new($expected);
+        $input = (null === $input) ? Host::new() : Host::new($input);
 
         self::assertEquals($expected, IPv4Normalizer::fromGMP()->normalizeHost($input));
     }
@@ -69,8 +69,8 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile for a x64 OS.');
         }
 
-        $expected = (null === $expected) ? Host::new() : Host::fromString($expected);
-        $input = (null === $input) ? Host::new() : Host::fromString($input);
+        $expected = (null === $expected) ? Host::new() : Host::new($expected);
+        $input = (null === $input) ? Host::new() : Host::new($input);
 
         self::assertEquals($expected, IPv4Normalizer::fromNative()->normalizeHost($input));
     }
@@ -86,8 +86,8 @@ final class IPv4HostNormalizerTest extends TestCase
             self::markTestSkipped('The PHP must be compile with Bcmath extension enabled.');
         }
 
-        $expected = (null === $expected) ? Host::new() : Host::fromString($expected);
-        $input = (null === $input) ? Host::new() : Host::fromString($input);
+        $expected = (null === $expected) ? Host::new() : Host::new($expected);
+        $input = (null === $input) ? Host::new() : Host::new($input);
 
         self::assertEquals($expected, IPv4Normalizer::fromBCMath()->normalizeHost($input));
     }
@@ -150,11 +150,11 @@ final class IPv4HostNormalizerTest extends TestCase
 
     public function testIpv4NormalizeAuthority(): void
     {
-        $authority = Authority::fromString('hello:word@0:42');
+        $authority = Authority::new('hello:word@0:42');
         $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($authority);
         self::assertSame('0.0.0.0', $newAuthority->getHost());
 
-        $unChangedAuthority = Authority::fromString('hello:word@11.be:42');
+        $unChangedAuthority = Authority::new('hello:word@11.be:42');
         $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($unChangedAuthority);
         self::assertSame($unChangedAuthority, $newAuthority);
     }

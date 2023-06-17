@@ -32,7 +32,7 @@ final class HierarchicalPathTest extends TestCase
 {
     public function testIterator(): void
     {
-        $path = HierarchicalPath::fromString('/5.0/components/path');
+        $path = HierarchicalPath::new('/5.0/components/path');
 
         self::assertEquals(['5.0', 'components', 'path'], iterator_to_array($path));
     }
@@ -42,7 +42,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testValidPath(string $raw, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($raw));
+        self::assertSame($expected, (string) HierarchicalPath::new($raw));
     }
 
     public static function validPathProvider(): array
@@ -75,7 +75,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testIsAbsolute(string $raw, bool $expected): void
     {
-        $path = HierarchicalPath::fromString($raw);
+        $path = HierarchicalPath::new($raw);
 
         self::assertSame($expected, $path->isAbsolute());
     }
@@ -95,7 +95,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testget(string $raw, int $key, ?string $expected): void
     {
-        self::assertSame($expected, HierarchicalPath::fromString($raw)->get($key));
+        self::assertSame($expected, HierarchicalPath::new($raw)->get($key));
     }
 
     public static function getProvider(): array
@@ -116,7 +116,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithoutDotSegments(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withoutDotSegments());
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withoutDotSegments());
     }
 
     /**
@@ -138,7 +138,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithLeadingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withLeadingSlash());
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withLeadingSlash());
     }
 
     public static function withLeadingSlashProvider(): array
@@ -158,7 +158,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithoutLeadingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withoutLeadingSlash());
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withoutLeadingSlash());
     }
 
     public static function withoutLeadingSlashProvider(): array
@@ -204,7 +204,7 @@ final class HierarchicalPathTest extends TestCase
         return [
             'array (2)' => [['www', 'example', 'com'], '/www/example/com'],
             'iterator' => [new ArrayIterator(['www', 'example', 'com']), '/www/example/com'],
-            'Path object' => [HierarchicalPath::fromString('/foo/bar/baz'), '/foo/bar/baz'],
+            'Path object' => [HierarchicalPath::new('/foo/bar/baz'), '/foo/bar/baz'],
             'arbitrary cut 1' => [['foo', 'bar', 'baz'], '/foo/bar/baz'],
             'arbitrary cut 2' => [['foo/bar', 'baz'], '/foo/bar/baz'],
             'arbitrary cut 3' => [['foo/bar/baz'], '/foo/bar/baz'],
@@ -231,7 +231,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testPrepend(string $source, string $prepend, string $res): void
     {
-        self::assertSame($res, (string) HierarchicalPath::fromString($source)->prepend($prepend));
+        self::assertSame($res, (string) HierarchicalPath::new($source)->prepend($prepend));
     }
 
     public static function prependData(): array
@@ -251,7 +251,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testAppend(string $source, string $append, string $res): void
     {
-        self::assertSame($res, (string) HierarchicalPath::fromString($source)->append($append));
+        self::assertSame($res, (string) HierarchicalPath::new($source)->append($append));
     }
 
     public static function appendData(): array
@@ -270,7 +270,7 @@ final class HierarchicalPathTest extends TestCase
 
     public function testWithSegmentUseAppend(): void
     {
-        $path = HierarchicalPath::fromString('foo/bar');
+        $path = HierarchicalPath::new('foo/bar');
 
         self::assertEquals($path->withSegment(2, 'baz'), $path->append('baz'));
     }
@@ -281,7 +281,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithoutEmptySegments(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withoutEmptySegments());
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withoutEmptySegments());
     }
 
     public static function withoutEmptySegmentsProvider(): array
@@ -299,7 +299,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testReplace(string $raw, string $input, int $offset, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($raw)->withSegment($offset, $input));
+        self::assertSame($expected, (string) HierarchicalPath::new($raw)->withSegment($offset, $input));
     }
 
     public static function replaceValid(): array
@@ -322,7 +322,7 @@ final class HierarchicalPathTest extends TestCase
     {
         $this->expectException(OffsetOutOfBounds::class);
 
-        HierarchicalPath::fromString('/test/')->withSegment(23, 'bar');
+        HierarchicalPath::new('/test/')->withSegment(23, 'bar');
     }
 
     /**
@@ -334,7 +334,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithout(string $origin, array $without, string $result): void
     {
-        self::assertSame($result, (string) HierarchicalPath::fromString($origin)->withoutSegment(...$without));
+        self::assertSame($result, (string) HierarchicalPath::new($origin)->withoutSegment(...$without));
     }
 
     public static function withoutProvider(): array
@@ -352,19 +352,19 @@ final class HierarchicalPathTest extends TestCase
     {
         $this->expectException(OffsetOutOfBounds::class);
 
-        HierarchicalPath::fromString('/test/')->withoutSegment(23);
+        HierarchicalPath::new('/test/')->withoutSegment(23);
     }
 
     public function testWithoutSegmentVariadicArgument(): void
     {
-        $path = HierarchicalPath::fromString('www/example/com');
+        $path = HierarchicalPath::new('www/example/com');
 
         self::assertSame($path, $path->withoutSegment());
     }
 
     public function testKeys(): void
     {
-        $path = HierarchicalPath::fromString('/bar/3/troll/3');
+        $path = HierarchicalPath::new('/bar/3/troll/3');
 
         self::assertCount(0, $path->keys('foo'));
         self::assertSame([0], $path->keys('bar'));
@@ -375,11 +375,11 @@ final class HierarchicalPathTest extends TestCase
 
     public function testSegments(): void
     {
-        $path = HierarchicalPath::fromString('/bar/3/troll/3');
+        $path = HierarchicalPath::new('/bar/3/troll/3');
 
         self::assertSame(['bar', '3', 'troll', '3'], $path->segments());
         self::assertSame([''], HierarchicalPath::new()->segments());
-        self::assertSame([''], HierarchicalPath::fromString('/')->segments());
+        self::assertSame([''], HierarchicalPath::new('/')->segments());
     }
 
     /**
@@ -387,7 +387,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testCountable(string $input, array $gets, int $nbSegment): void
     {
-        $path = HierarchicalPath::fromString($input);
+        $path = HierarchicalPath::new($input);
 
         self::assertCount($nbSegment, $path);
     }
@@ -403,14 +403,14 @@ final class HierarchicalPathTest extends TestCase
 
     public function testGetBasemane(): void
     {
-        $path = HierarchicalPath::fromString('/path/to/my/file.txt');
+        $path = HierarchicalPath::new('/path/to/my/file.txt');
 
         self::assertSame('file.txt', $path->getBasename());
     }
 
     public function testGetBasemaneWithEmptyBasename(): void
     {
-        $path = HierarchicalPath::fromString('/path/to/my/');
+        $path = HierarchicalPath::new('/path/to/my/');
 
         self::assertEmpty($path->getBasename());
     }
@@ -420,7 +420,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testGetDirmane(string $path, string $dirname): void
     {
-        self::assertSame($dirname, HierarchicalPath::fromString($path)->getDirname());
+        self::assertSame($dirname, HierarchicalPath::new($path)->getDirname());
     }
 
     public static function dirnameProvider(): array
@@ -442,7 +442,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testGetExtension(string $raw, string $parsed): void
     {
-        self::assertSame($parsed, HierarchicalPath::fromString($raw)->getExtension());
+        self::assertSame($parsed, HierarchicalPath::new($raw)->getExtension());
     }
 
     public static function extensionProvider(): array
@@ -460,7 +460,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithExtension(string $raw, string $raw_ext, string $new_path, string $parsed_ext): void
     {
-        $newPath = HierarchicalPath::fromString($raw)->withExtension($raw_ext);
+        $newPath = HierarchicalPath::new($raw)->withExtension($raw_ext);
 
         self::assertSame($new_path, (string) $newPath);
         self::assertSame($parsed_ext, $newPath->getExtension());
@@ -512,7 +512,7 @@ final class HierarchicalPathTest extends TestCase
     {
         self::assertSame(
             $expected,
-            (string) HierarchicalPath::fromString($uri)->withExtension($extension)
+            (string) HierarchicalPath::new($uri)->withExtension($extension)
         );
     }
 
@@ -531,7 +531,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testGetExtensionPreserveTypeCode(string $uri, string $extension): void
     {
-        self::assertSame($extension, HierarchicalPath::fromString($uri)->getExtension());
+        self::assertSame($extension, HierarchicalPath::new($uri)->getExtension());
     }
 
     public static function getExtensionProvider(): array
@@ -562,7 +562,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithDirname(string $path, string $dirname, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withDirname($dirname));
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withDirname($dirname));
     }
 
     public static function getDirnameProvider(): array
@@ -606,7 +606,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithBasename(string $path, string $basename, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withBasename($basename));
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withBasename($basename));
     }
 
     public static function getBasenameProvider(): array
@@ -647,7 +647,7 @@ final class HierarchicalPathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        HierarchicalPath::fromString('foo/bar')->withBasename($path);
+        HierarchicalPath::new('foo/bar')->withBasename($path);
     }
 
     public static function basenameInvalidProvider(): array
@@ -713,7 +713,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testHasTrailingSlash(string $path, bool $expected): void
     {
-        self::assertSame($expected, HierarchicalPath::fromString($path)->hasTrailingSlash());
+        self::assertSame($expected, HierarchicalPath::new($path)->hasTrailingSlash());
     }
 
     public static function trailingSlashProvider(): array
@@ -733,7 +733,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithTrailingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withTrailingSlash());
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withTrailingSlash());
     }
 
     public static function withTrailingSlashProvider(): array
@@ -753,7 +753,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testWithoutTrailingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromString($path)->withoutTrailingSlash());
+        self::assertSame($expected, (string) HierarchicalPath::new($path)->withoutTrailingSlash());
     }
 
     public static function withoutTrailingSlashProvider(): array
@@ -773,7 +773,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testGetUriComponent(string $decoded, string $encoded): void
     {
-        $path = HierarchicalPath::fromString($decoded);
+        $path = HierarchicalPath::new($decoded);
 
         self::assertSame($decoded, $path->decoded());
         self::assertSame($encoded, $path->value());

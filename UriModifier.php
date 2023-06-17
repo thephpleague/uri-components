@@ -135,7 +135,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
         $host = Host::fromUri($uri);
-        $label = null === $label ? Host::new() : Host::fromString($label);
+        $label = null === $label ? Host::new() : Host::new($label);
         if (null === $label->value()) {
             return $uri;
         }
@@ -184,7 +184,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
         $host = Host::fromUri($uri);
-        $label = null === $label ? Host::new() : Host::fromString($label);
+        $label = null === $label ? Host::new() : Host::new($label);
         if (null === $label->value()) {
             return $uri;
         }
@@ -263,7 +263,7 @@ final class UriModifier
     {
         $uri = self::filterUri($uri);
         /** @var HierarchicalPath $path */
-        $path = HierarchicalPath::fromPath(Path::fromString($path))->withLeadingSlash();
+        $path = HierarchicalPath::fromPath(Path::new($path))->withLeadingSlash();
         /** @var HierarchicalPath $currentPath */
         $currentPath = HierarchicalPath::fromUri($uri)->withLeadingSlash();
 
@@ -353,7 +353,7 @@ final class UriModifier
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
         /** @var HierarchicalPath $basePath */
-        $basePath = HierarchicalPath::fromPath(Path::fromString($path))->withLeadingSlash();
+        $basePath = HierarchicalPath::fromPath(Path::new($path))->withLeadingSlash();
         $currentPath = HierarchicalPath::fromUri($uri);
         if ('/' === (string) $basePath) {
             return $uri;

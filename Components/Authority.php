@@ -39,8 +39,8 @@ final class Authority extends Component implements AuthorityInterface
     private function __construct(Stringable|string|null $authority)
     {
         $components = $this->parse(self::filterComponent($authority));
-        $this->host = null === $components['host'] ? Host::new() : Host::fromString($components['host']);
-        $this->port = null === $components['port'] ? Port::new() : Port::fromNumber($components['port']);
+        $this->host = null === $components['host'] ? Host::new() : Host::new($components['host']);
+        $this->port = null === $components['port'] ? Port::new() : Port::new($components['port']);
         $this->userInfo = new UserInfo($components['user'], $components['pass']);
 
         if (null === $this->host->value() && null !== $this->value()) {
@@ -78,9 +78,16 @@ final class Authority extends Component implements AuthorityInterface
         return $components;
     }
 
-    public static function new(): self
+    /**
+     * Returns a new instance from a value.
+     */
+    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
     {
-        return new self(null);
+        if ($value instanceof UriComponentInterface) {
+            $value = $value->value();
+        }
+
+        return new self($value);
     }
 
     /**
@@ -98,14 +105,6 @@ final class Authority extends Component implements AuthorityInterface
         }
 
         return new self($authority);
-    }
-
-    /**
-     * Returns a new instance from a string or a stringable object.
-     */
-    public static function fromString(Stringable|string $authority): self
-    {
-        return new self((string) $authority);
     }
 
     /**
@@ -192,7 +191,7 @@ final class Authority extends Component implements AuthorityInterface
     public function withHost(UriComponentInterface|Stringable|string|null $host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
-            $host = null === $host ? Host::new() : Host::fromString($host);
+            $host = Host::new($host);
         }
 
         if ($host->value() === $this->host->value()) {
@@ -205,7 +204,7 @@ final class Authority extends Component implements AuthorityInterface
     public function withPort(UriComponentInterface|Stringable|string|int|null $port): AuthorityInterface
     {
         if (!$port instanceof Port) {
-            $port = null === $port ? Port::new() : Port::fromNumber($port);
+            $port = Port::new($port);
         }
 
         if ($port->value() === $this->port->value()) {
@@ -254,7 +253,7 @@ final class Authority extends Component implements AuthorityInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Authority::fromString()
+     * @see Authority::new()
      *
      * @codeCoverageIgnore
      *
@@ -262,7 +261,7 @@ final class Authority extends Component implements AuthorityInterface
      */
     public static function createFromString(Stringable|string $authority): self
     {
-        return self::fromString($authority);
+        return self::new($authority);
     }
 
     /**

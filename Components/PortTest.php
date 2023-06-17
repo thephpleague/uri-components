@@ -40,7 +40,7 @@ final class PortTest extends TestCase
         ?string $string_expected,
         string $uri_expected
     ): void {
-        $port = null === $input ? Port::new() : Port::fromNumber($input);
+        $port = null === $input ? Port::new() : Port::new($input);
 
         self::assertSame($expected, $port->toInt());
         self::assertSame($string_expected, $port->value());
@@ -67,7 +67,7 @@ final class PortTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Port::fromNumber(-1);
+        Port::new(-1);
     }
 
     /**

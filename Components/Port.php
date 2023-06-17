@@ -48,14 +48,9 @@ final class Port extends Component implements PortInterface
         return new self($port);
     }
 
-    public static function fromNumber(Stringable|int|string $port): self
+    public static function new(UriComponentInterface|Stringable|int|string|null $port = null): self
     {
         return new self($port);
-    }
-
-    public static function new(): self
-    {
-        return new self(null);
     }
 
     /**
@@ -72,7 +67,7 @@ final class Port extends Component implements PortInterface
     public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
         if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::fromString($authority);
+            $authority = Authority::new($authority);
         }
 
         return new self($authority->getPort());

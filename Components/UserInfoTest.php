@@ -156,7 +156,7 @@ final class UserInfoTest extends TestCase
 
         self::assertEquals(
             new UserInfo('user', 'pass'),
-            UserInfo::fromString('user:pass')
+            UserInfo::new('user:pass')
         );
     }
 

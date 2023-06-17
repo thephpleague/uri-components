@@ -46,8 +46,8 @@ final class Domain extends Component implements DomainHostInterface
     {
         $host = match (true) {
             $host instanceof HostInterface => $host,
-            $host instanceof UriComponentInterface => Host::fromString($host->value()),
-            default => Host::fromString((string) $host),
+            $host instanceof UriComponentInterface => Host::new($host->value()),
+            default => Host::new((string) $host),
         };
 
         if (!$host->isDomain()) {
@@ -58,17 +58,12 @@ final class Domain extends Component implements DomainHostInterface
         $this->labels = array_reverse(explode(self::SEPARATOR, $this->host->value() ?? ''));
     }
 
-    public static function new(): self
-    {
-        return new self(Host::new());
-    }
-
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function fromString(Stringable|string $host): self
+    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
     {
-        return self::fromHost(Host::fromString($host));
+        return self::fromHost(Host::new($value));
     }
 
     /**
@@ -87,7 +82,7 @@ final class Domain extends Component implements DomainHostInterface
             $hostLabels[] = $label;
         }
 
-        return self::fromString(implode(self::SEPARATOR, array_reverse($hostLabels)));
+        return self::new(implode(self::SEPARATOR, array_reverse($hostLabels)));
     }
 
     /**
@@ -264,7 +259,7 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         if (!$label instanceof HostInterface) {
-            $label = null === $label ? Host::new() : Host::fromString((string) $label);
+            $label = null === $label ? Host::new() : Host::new((string) $label);
         }
 
         $label = $label->value();
@@ -319,14 +314,14 @@ final class Domain extends Component implements DomainHostInterface
             return $this;
         }
 
-        return new self([] === $labels ? Host::new() : Host::fromString(implode('.', array_reverse($labels))));
+        return new self([] === $labels ? Host::new() : Host::new(implode('.', array_reverse($labels))));
     }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Domain::fromString()
+     * @see Domain::new()
      *
      * @codeCoverageIgnore
      *
@@ -334,7 +329,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function createFromString(Stringable|string $host): self
     {
-        return self::fromString($host);
+        return self::new($host);
     }
 
     /**

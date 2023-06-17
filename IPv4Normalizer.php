@@ -165,7 +165,7 @@ final class IPv4Normalizer
             return $host;
         }
 
-        return Host::fromString($ipv4host);
+        return Host::new($ipv4host);
     }
 
     /**

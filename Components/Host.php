@@ -232,14 +232,9 @@ final class Host extends Component implements IpHostInterface
             && str_starts_with((string)inet_pton((string)$ipv6), self::ADDRESS_BLOCK);
     }
 
-    public static function new(): self
+    public static function new(UriComponentInterface|Stringable|string|null $host = null): self
     {
-        return new self(null);
-    }
-
-    public static function fromString(Stringable|string|null $host): self
-    {
-        return new self((string) $host);
+        return new self($host);
     }
 
     /**
@@ -297,7 +292,7 @@ final class Host extends Component implements IpHostInterface
     public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
         if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::fromString($authority);
+            $authority = Authority::new($authority);
         }
 
         return new self($authority->getHost());
@@ -400,13 +395,13 @@ final class Host extends Component implements IpHostInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Host::fromString()
+     * @see Host::new()
      *
      * @codeCoverageIgnore
      */
     public static function createFromString(Stringable|string|null $host): self
     {
-        return self::fromString($host);
+        return self::new($host);
     }
 
     /**

@@ -65,7 +65,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     private function __construct(UriComponentInterface|HostInterface|Stringable|int|string|null $path)
     {
-        $this->path = Path::fromString($this->filterPath(self::filterComponent($path)));
+        $this->path = Path::new($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
         [$mediaType, $this->document] = explode(',', $this->path->toString(), 2) + [1 => ''];
         [$mimetype, $parameters] = explode(';', $mediaType, 2) + [1 => ''];
@@ -178,9 +178,9 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function fromString(Stringable|string $path): self
+    public static function new(UriComponentInterface|Stringable|string $value = ''): self
     {
-        return new self(Path::fromString($path));
+        return new self(Path::new($value));
     }
 
     /**
@@ -226,15 +226,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
-        return self::fromString(Path::fromUri($uri)->toString());
-    }
-
-    /**
-     * Create a new instance from a URI object.
-     */
-    public static function new(): self
-    {
-        return new self('');
+        return self::new(Path::fromUri($uri)->toString());
     }
 
     public function value(): ?string
@@ -395,7 +387,7 @@ final class DataPath extends Component implements DataPathInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Authority::fromString()
+     * @see Authority::new()
      *
      * @codeCoverageIgnore
      *
@@ -403,7 +395,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function createFromString(Stringable|string $path): self
     {
-        return self::fromString($path);
+        return self::new($path);
     }
 
     /**

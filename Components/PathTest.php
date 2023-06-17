@@ -30,7 +30,7 @@ final class PathTest extends TestCase
      */
     public function testGetUriComponent(string $decoded, string $encoded): void
     {
-        $path = Path::fromString($decoded);
+        $path = Path::new($decoded);
 
         self::assertSame($decoded, $path->decoded());
         self::assertSame($encoded, $path->value());
@@ -102,7 +102,7 @@ final class PathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Path::fromString("\0");
+        Path::new("\0");
     }
 
     /**
@@ -112,7 +112,7 @@ final class PathTest extends TestCase
      */
     public function testWithoutDotSegments(string $path, string $expected): void
     {
-        self::assertSame($expected, Path::fromString($path)->withoutDotSegments()->toString());
+        self::assertSame($expected, Path::new($path)->withoutDotSegments()->toString());
     }
 
     /**
@@ -134,7 +134,7 @@ final class PathTest extends TestCase
      */
     public function testHasTrailingSlash(string $path, bool $expected): void
     {
-        self::assertSame($expected, Path::fromString($path)->hasTrailingSlash());
+        self::assertSame($expected, Path::new($path)->hasTrailingSlash());
     }
 
     public static function trailingSlashProvider(): array
@@ -154,7 +154,7 @@ final class PathTest extends TestCase
      */
     public function testWithTrailingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) Path::fromString($path)->withTrailingSlash());
+        self::assertSame($expected, (string) Path::new($path)->withTrailingSlash());
     }
 
     public static function withTrailingSlashProvider(): array
@@ -174,7 +174,7 @@ final class PathTest extends TestCase
      */
     public function testWithoutTrailingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) Path::fromString($path)->withoutTrailingSlash());
+        self::assertSame($expected, (string) Path::new($path)->withoutTrailingSlash());
     }
 
     public static function withoutTrailingSlashProvider(): array
@@ -194,7 +194,7 @@ final class PathTest extends TestCase
      */
     public function testWithLeadingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) Path::fromString($path)->withLeadingSlash());
+        self::assertSame($expected, (string) Path::new($path)->withLeadingSlash());
     }
 
     public static function withLeadingSlashProvider(): array
@@ -214,7 +214,7 @@ final class PathTest extends TestCase
      */
     public function testWithoutLeadingSlash(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) Path::fromString($path)->withoutLeadingSlash());
+        self::assertSame($expected, (string) Path::new($path)->withoutLeadingSlash());
     }
 
     public static function withoutLeadingSlashProvider(): array

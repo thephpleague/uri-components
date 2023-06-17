@@ -58,9 +58,9 @@ final class Path extends Component implements PathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function fromString(Stringable|string|int $path): self
+    public static function new(UriComponentInterface|Stringable|string|int $value = ''): self
     {
-        return new self((string) $path);
+        return new self($value);
     }
 
     /**
@@ -75,11 +75,6 @@ final class Path extends Component implements PathInterface
         }
 
         return new self('/'.$path);
-    }
-
-    public static function new(): self
-    {
-        return new self('');
     }
 
     public function value(): ?string
@@ -175,7 +170,7 @@ final class Path extends Component implements PathInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see HierarchicalPath::fromString()
+     * @see HierarchicalPath::new()
      *
      * @codeCoverageIgnore
      *
@@ -183,7 +178,7 @@ final class Path extends Component implements PathInterface
      */
     public static function createFromString(Stringable|string|int $path): self
     {
-        return self::fromString($path);
+        return self::new($path);
     }
 
     /**

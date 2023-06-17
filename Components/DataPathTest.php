@@ -37,14 +37,14 @@ final class DataPathTest extends TestCase
 
     public function testIsAbsolute(): void
     {
-        $path = DataPath::fromString(';,Bonjour%20le%20monde!');
+        $path = DataPath::new(';,Bonjour%20le%20monde!');
 
         self::assertFalse($path->isAbsolute());
     }
 
     public function testWithoutDotSegments(): void
     {
-        $path = DataPath::fromString(';,Bonjour%20le%20monde%21');
+        $path = DataPath::new(';,Bonjour%20le%20monde%21');
 
         self::assertEquals($path, $path->withoutDotSegments());
     }
@@ -53,12 +53,12 @@ final class DataPathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::fromString(';,Bonjour%20le%20monde%21')->withLeadingSlash();
+        DataPath::new(';,Bonjour%20le%20monde%21')->withLeadingSlash();
     }
 
     public function testWithoutLeadingSlash(): void
     {
-        $path = DataPath::fromString(';,Bonjour%20le%20monde%21');
+        $path = DataPath::new(';,Bonjour%20le%20monde%21');
 
         self::assertEquals($path, $path->withoutLeadingSlash());
     }
@@ -67,7 +67,7 @@ final class DataPathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::fromString('€');
+        DataPath::new('€');
     }
 
     /**
@@ -87,7 +87,7 @@ final class DataPathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::fromString($path);
+        DataPath::new($path);
     }
 
     public static function invalidDataUriPath(): array
@@ -102,7 +102,7 @@ final class DataPathTest extends TestCase
      */
     public function testDefaultConstructor(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) DataPath::fromString($path));
+        self::assertSame($expected, (string) DataPath::new($path));
     }
 
     public static function validPathContent(): array
@@ -146,7 +146,7 @@ final class DataPathTest extends TestCase
 
     public function testWithParameters(): void
     {
-        $uri = DataPath::fromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $uri = DataPath::new('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $newUri = $uri->withParameters('charset=us-ascii');
 
         self::assertSame($newUri, $uri);
@@ -207,7 +207,7 @@ final class DataPathTest extends TestCase
 
         return [
             'with a file' => [DataPath::fromFilePath($rootPath.'/red-nose.gif')],
-            'with a text' => [DataPath::fromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21')],
+            'with a text' => [DataPath::new('text/plain;charset=us-ascii,Bonjour%20le%20monde%21')],
         ];
     }
 
@@ -217,7 +217,7 @@ final class DataPathTest extends TestCase
     public function testUpdateParametersFailed(string $parameters): void
     {
         $this->expectException(SyntaxError::class);
-        $uri = DataPath::fromString('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $uri = DataPath::new('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $uri->withParameters($parameters);
     }
 
@@ -273,28 +273,28 @@ final class DataPathTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::fromString('text/plain;charset=us-ascii;base64,boulook%20at%20me');
+        DataPath::new('text/plain;charset=us-ascii;base64,boulook%20at%20me');
     }
 
     public function testInvalidComponent(): void
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::fromString("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
+        DataPath::new("data:text/plain;charset=us-ascii,bou\nlook%20at%20me");
     }
 
     public function testInvalidString(): void
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::fromString('text/plain;boulook€');
+        DataPath::new('text/plain;boulook€');
     }
 
     public function testInvalidMimetype(): void
     {
         $this->expectException(SyntaxError::class);
 
-        DataPath::fromString('data:toto\\bar;foo=bar,');
+        DataPath::new('data:toto\\bar;foo=bar,');
     }
 
 
@@ -332,12 +332,12 @@ final class DataPathTest extends TestCase
 
     public function testHasTrailingSlash(): void
     {
-        self::assertFalse(DataPath::fromString('text/plain;charset=us-ascii,')->hasTrailingSlash());
+        self::assertFalse(DataPath::new('text/plain;charset=us-ascii,')->hasTrailingSlash());
     }
 
     public function testWithTrailingSlash(): void
     {
-        $path = DataPath::fromString('text/plain;charset=us-ascii,')->withTrailingSlash();
+        $path = DataPath::new('text/plain;charset=us-ascii,')->withTrailingSlash();
 
         self::assertSame('text/plain;charset=us-ascii,/', (string) $path);
         self::assertSame($path, $path->withTrailingSlash());
@@ -345,7 +345,7 @@ final class DataPathTest extends TestCase
 
     public function testWithoutTrailingSlash(): void
     {
-        $path = DataPath::fromString('text/plain;charset=us-ascii,/')->withoutTrailingSlash();
+        $path = DataPath::new('text/plain;charset=us-ascii,/')->withoutTrailingSlash();
 
         self::assertSame('text/plain;charset=us-ascii,', (string) $path);
         self::assertSame($path, $path->withoutTrailingSlash());
@@ -355,7 +355,7 @@ final class DataPathTest extends TestCase
     {
         $encodedPath = 'text/plain;charset=us-ascii,Bonjour%20le%20monde%21';
         $decodedPath = 'text/plain;charset=us-ascii,Bonjour le monde%21';
-        $path = DataPath::fromString($encodedPath);
+        $path = DataPath::new($encodedPath);
 
         self::assertSame($encodedPath, $path->value());
         self::assertSame($decodedPath, $path->decoded());

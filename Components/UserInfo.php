@@ -45,11 +45,6 @@ final class UserInfo extends Component implements UserInfoInterface
         $this->password = null === $this->username ? null : $password;
     }
 
-    public static function new(): self
-    {
-        return new self(null);
-    }
-
     /**
      * Create a new instance from a URI object.
      */
@@ -61,7 +56,7 @@ final class UserInfo extends Component implements UserInfoInterface
                 return self::new();
             }
 
-            return self::fromString($component);
+            return self::new($component);
         }
 
         $component = $uri->getUserInfo();
@@ -69,7 +64,7 @@ final class UserInfo extends Component implements UserInfoInterface
             return self::new();
         }
 
-        return self::fromString($component);
+        return self::new($component);
     }
 
     /**
@@ -78,7 +73,7 @@ final class UserInfo extends Component implements UserInfoInterface
     public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
         if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::fromString($authority);
+            $authority = Authority::new($authority);
         }
 
         $userInfo = $authority->getUserInfo();
@@ -86,14 +81,22 @@ final class UserInfo extends Component implements UserInfoInterface
             return self::new();
         }
 
-        return self::fromString($userInfo);
+        return self::new($userInfo);
     }
 
     /**
      * Creates a new instance from an encoded string.
      */
-    public static function fromString(Stringable|string $userInfo): self
+    public static function new(UriComponentInterface|Stringable|string|null $userInfo = null): self
     {
+        if ($userInfo instanceof UriComponentInterface) {
+            $userInfo = $userInfo->value();
+        }
+
+        if (null === $userInfo) {
+            return new self(null);
+        }
+
         $userInfo = (string) $userInfo;
 
         [$user, $pass] = explode(':', $userInfo, 2) + [1 => null];
@@ -203,7 +206,7 @@ final class UserInfo extends Component implements UserInfoInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see UserInfo::fromString()
+     * @see UserInfo::new()
      *
      * @codeCoverageIgnore
      *
@@ -211,6 +214,6 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public static function createFromString(Stringable|string $userInfo): self
     {
-        return self::fromString($userInfo);
+        return self::new($userInfo);
     }
 }

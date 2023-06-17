@@ -37,7 +37,7 @@ final class IpAddressTest extends TestCase
         ?string $ip,
         string $iri
     ): void {
-        $host = null === $host ? Host::new() : Host::fromString((string) $host);
+        $host = null === $host ? Host::new() : Host::new((string) $host);
 
         self::assertSame($isIp, $host->isIp());
         self::assertSame($isIpv4, $host->isIpv4());
@@ -170,7 +170,7 @@ final class IpAddressTest extends TestCase
      */
     public function testWithoutZoneIdentifier(string $host, string $expected): void
     {
-        self::assertSame($expected, (string) Host::fromString($host)->withoutZoneIdentifier());
+        self::assertSame($expected, (string) Host::new($host)->withoutZoneIdentifier());
     }
 
     public static function withoutZoneIdentifierProvider(): array
@@ -188,7 +188,7 @@ final class IpAddressTest extends TestCase
      */
     public function testHasZoneIdentifier(string $host, bool $expected): void
     {
-        self::assertSame($expected, Host::fromString($host)->hasZoneIdentifier());
+        self::assertSame($expected, Host::new($host)->hasZoneIdentifier());
     }
 
     public static function hasZoneIdentifierProvider(): array

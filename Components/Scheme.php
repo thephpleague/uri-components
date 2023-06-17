@@ -63,14 +63,9 @@ final class Scheme extends Component
         return $inMemoryCache[$fScheme] = $fScheme;
     }
 
-    public static function new(): self
+    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
     {
-        return new self(null);
-    }
-
-    public static function fromString(Stringable|string $scheme): self
-    {
-        return new self((string) $scheme);
+        return new self($value);
     }
 
     /**
@@ -105,13 +100,13 @@ final class Scheme extends Component
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Scheme::fromString()
+     * @see Scheme::new()
      *
      * @codeCoverageIgnore
      */
     public static function createFromString(Stringable|string $scheme): self
     {
-        return self::fromString($scheme);
+        return self::new($scheme);
     }
 
     /**

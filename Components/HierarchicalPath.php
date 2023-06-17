@@ -57,7 +57,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     private function __construct(UriComponentInterface|Stringable|string|int $path)
     {
         if (!$path instanceof PathInterface) {
-            $path = Path::fromString($path);
+            $path = Path::new($path);
         }
 
         $this->path = $path;
@@ -72,9 +72,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function fromString(Stringable|string $path): self
+    public static function new(UriComponentInterface|Stringable|string $value = ''): self
     {
-        return self::fromPath(Path::fromString($path));
+        return self::fromPath(Path::new($value));
     }
 
     public static function fromPath(PathInterface $path): self
@@ -127,11 +127,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public static function fromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return new self(Path::fromUri($uri));
-    }
-
-    public static function new(): self
-    {
-        return new self('');
     }
 
     public function count(): int
@@ -383,7 +378,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         if (!$path instanceof PathInterface) {
-            $path = Path::fromString($path);
+            $path = Path::new($path);
         }
 
         if ($path->value() === $this->getDirname()) {
@@ -478,7 +473,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      */
     public static function createFromString(Stringable|string $path): self
     {
-        return self::fromString($path);
+        return self::new($path);
     }
 
     /**

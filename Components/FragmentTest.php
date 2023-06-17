@@ -31,9 +31,7 @@ final class FragmentTest extends TestCase
      */
     public function testStringRepresentation(?string $str, string $encoded): void
     {
-        $fragment = null !== $str ? Fragment::fromString($str) : Fragment::new();
-
-        self::assertSame($encoded, (string) $fragment);
+        self::assertSame($encoded, Fragment::new($str)->toString());
     }
 
     public static function getUriComponentProvider(): array
@@ -67,9 +65,7 @@ final class FragmentTest extends TestCase
             $str = $str->value();
         }
 
-        $fragment = null !== $str ? Fragment::fromString($str) : Fragment::new();
-
-        self::assertSame($expected, $fragment->decoded());
+        self::assertSame($expected, Fragment::new($str)->decoded());
     }
 
     public static function geValueProvider(): array
@@ -96,7 +92,7 @@ final class FragmentTest extends TestCase
      */
     public function testGetContent(string $input, string $expected): void
     {
-        self::assertSame($expected, Fragment::fromString($input)->value());
+        self::assertSame($expected, Fragment::new($input)->value());
     }
 
     public static function getContentProvider(): array
@@ -112,18 +108,18 @@ final class FragmentTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Fragment::fromString("\0");
+        Fragment::new("\0");
     }
 
     public function testGetUriComponent(): void
     {
-        self::assertSame('#yolo', Fragment::fromString('yolo')->getUriComponent());
+        self::assertSame('#yolo', Fragment::new('yolo')->getUriComponent());
         self::assertEquals('', Fragment::new()->getUriComponent());
     }
 
     public function testJsonSerialize(): void
     {
-        self::assertEquals('"yolo"', json_encode(Fragment::fromString('yolo')));
+        self::assertEquals('"yolo"', json_encode(Fragment::new('yolo')));
     }
 
     public function testPreserverDelimiter(): void

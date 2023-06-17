@@ -39,7 +39,7 @@ final class AuthorityTest extends TestCase
         if (null === $authority) {
             $instance = Authority::new();
         } else {
-            $instance = Authority::fromString($authority);
+            $instance = Authority::new($authority);
         }
 
         self::assertSame($host, $instance->getHost());
@@ -96,7 +96,7 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::fromString($authority);
+        Authority::new($authority);
     }
 
     public static function invalidAuthorityDataProvider(): array
@@ -110,7 +110,7 @@ final class AuthorityTest extends TestCase
 
     public function testWithHost(): void
     {
-        $authority = Authority::fromString('foo:bar@example.com:443');
+        $authority = Authority::new('foo:bar@example.com:443');
         self::assertSame($authority, $authority->withHost('eXAmPle.CoM'));
         self::assertNotEquals($authority, $authority->withHost('[::1]'));
     }
@@ -122,7 +122,7 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::fromString('foo:bar@example.com:443')->withHost($host);
+        Authority::new('foo:bar@example.com:443')->withHost($host);
     }
 
     public static function invalidHostDataProvider(): array
@@ -135,7 +135,7 @@ final class AuthorityTest extends TestCase
 
     public function testWithPort(): void
     {
-        $authority = Authority::fromString('foo:bar@example.com:443');
+        $authority = Authority::new('foo:bar@example.com:443');
 
         self::assertSame($authority, $authority->withPort(443));
         self::assertNotEquals($authority, $authority->withPort(80));
@@ -145,12 +145,12 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::fromString('foo:bar@example.com:443')->withPort(-1);
+        Authority::new('foo:bar@example.com:443')->withPort(-1);
     }
 
     public function testWithUserInfo(): void
     {
-        $authority = Authority::fromString('foo:bar@example.com:443');
+        $authority = Authority::new('foo:bar@example.com:443');
 
         self::assertSame($authority, $authority->withUserInfo('foo', 'bar'));
         self::assertNotEquals($authority, $authority->withUserInfo('foo'));
@@ -160,7 +160,7 @@ final class AuthorityTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Authority::fromString('foo:bar@example.com:443')->withUserInfo("\0foo", 'bar');
+        Authority::new('foo:bar@example.com:443')->withUserInfo("\0foo", 'bar');
     }
 
     /**
@@ -176,7 +176,7 @@ final class AuthorityTest extends TestCase
         if (null === $authority) {
             $instance = Authority::new();
         } else {
-            $instance = Authority::fromString($authority);
+            $instance = Authority::new($authority);
         }
 
         self::assertSame($string, (string) $instance);
