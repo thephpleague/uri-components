@@ -232,9 +232,9 @@ final class Host extends Component implements IpHostInterface
             && str_starts_with((string)inet_pton((string)$ipv6), self::ADDRESS_BLOCK);
     }
 
-    public static function new(UriComponentInterface|Stringable|string|null $host = null): self
+    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
     {
-        return new self($host);
+        return new self($value);
     }
 
     /**

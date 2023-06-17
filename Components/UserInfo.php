@@ -87,19 +87,19 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Creates a new instance from an encoded string.
      */
-    public static function new(UriComponentInterface|Stringable|string|null $userInfo = null): self
+    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
     {
-        if ($userInfo instanceof UriComponentInterface) {
-            $userInfo = $userInfo->value();
+        if ($value instanceof UriComponentInterface) {
+            $value = $value->value();
         }
 
-        if (null === $userInfo) {
+        if (null === $value) {
             return new self(null);
         }
 
-        $userInfo = (string) $userInfo;
+        $value = (string) $value;
 
-        [$user, $pass] = explode(':', $userInfo, 2) + [1 => null];
+        [$user, $pass] = explode(':', $value, 2) + [1 => null];
         if (null !== $user) {
             $user = self::decode($user);
         }

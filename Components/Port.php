@@ -48,9 +48,9 @@ final class Port extends Component implements PortInterface
         return new self($port);
     }
 
-    public static function new(UriComponentInterface|Stringable|int|string|null $port = null): self
+    public static function new(UriComponentInterface|Stringable|int|string|null $value = null): self
     {
-        return new self($port);
+        return new self($value);
     }
 
     /**
