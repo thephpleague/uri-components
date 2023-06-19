@@ -107,7 +107,7 @@ final class Host extends Component implements IpHostInterface
     private readonly ?string $ip_version;
     private readonly bool $has_zone_identifier;
 
-    private function __construct(UriComponentInterface|Stringable|int|string|null $host)
+    private function __construct(Stringable|int|string|null $host)
     {
         [
             'host' => $this->host,
@@ -232,7 +232,7 @@ final class Host extends Component implements IpHostInterface
             && str_starts_with((string)inet_pton((string)$ipv6), self::ADDRESS_BLOCK);
     }
 
-    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
+    public static function new(Stringable|string|null $value = null): self
     {
         return new self($value);
     }

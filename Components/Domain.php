@@ -42,7 +42,7 @@ final class Domain extends Component implements DomainHostInterface
     /** @var string[] */
     private readonly array $labels;
 
-    private function __construct(UriComponentInterface|Stringable|int|string $host)
+    private function __construct(Stringable|int|string $host)
     {
         $host = match (true) {
             $host instanceof HostInterface => $host,
@@ -61,7 +61,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
+    public static function new(Stringable|string|null $value = null): self
     {
         return self::fromHost(Host::new($value));
     }

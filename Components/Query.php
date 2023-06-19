@@ -55,7 +55,7 @@ final class Query extends Component implements QueryInterface
      * @param non-empty-string $separator
      */
     private function __construct(
-        UriComponentInterface|Stringable|int|string|null $query,
+        Stringable|int|string|null $query,
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ) {

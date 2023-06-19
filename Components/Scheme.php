@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -28,7 +27,7 @@ final class Scheme extends Component
 
     private readonly ?string $scheme;
 
-    private function __construct(UriComponentInterface|Stringable|string|null $scheme)
+    private function __construct(Stringable|string|null $scheme)
     {
         $this->scheme = $this->validate($scheme);
     }
@@ -63,7 +62,7 @@ final class Scheme extends Component
         return $inMemoryCache[$fScheme] = $fScheme;
     }
 
-    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
+    public static function new(Stringable|string|null $value = null): self
     {
         return new self($value);
     }

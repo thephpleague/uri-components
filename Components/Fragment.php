@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use League\Uri\Contracts\FragmentInterface;
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -28,12 +27,12 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * New instance.
      */
-    private function __construct(UriComponentInterface|Stringable|string|null $fragment)
+    private function __construct(Stringable|string|null $fragment)
     {
         $this->fragment = $this->validateComponent($fragment);
     }
 
-    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
+    public static function new(Stringable|string|null $value = null): self
     {
         return new self($value);
     }

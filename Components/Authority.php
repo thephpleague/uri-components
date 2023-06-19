@@ -81,7 +81,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Returns a new instance from a value.
      */
-    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
+    public static function new(Stringable|string|null $value = null): self
     {
         if ($value instanceof UriComponentInterface) {
             $value = $value->value();

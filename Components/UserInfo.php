@@ -37,8 +37,8 @@ final class UserInfo extends Component implements UserInfoInterface
      * New instance.
      */
     public function __construct(
-        UriComponentInterface|Stringable|int|string|bool|null $username,
-        #[SensitiveParameter] UriComponentInterface|Stringable|int|string|bool|null $password = null
+        Stringable|int|string|bool|null $username,
+        #[SensitiveParameter] Stringable|int|string|bool|null $password = null
     ) {
         $this->username = $this->validateComponent($username);
         $password = $this->validateComponent($password);
@@ -87,7 +87,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Creates a new instance from an encoded string.
      */
-    public static function new(UriComponentInterface|Stringable|string|null $value = null): self
+    public static function new(Stringable|string|null $value = null): self
     {
         if ($value instanceof UriComponentInterface) {
             $value = $value->value();

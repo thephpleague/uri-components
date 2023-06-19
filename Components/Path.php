@@ -37,7 +37,7 @@ final class Path extends Component implements PathInterface
     /**
      * New instance.
      */
-    private function __construct(UriComponentInterface|Stringable|int|string|null $path)
+    private function __construct(Stringable|int|string|null $path)
     {
         $this->path = $this->validate($path);
     }
@@ -58,7 +58,7 @@ final class Path extends Component implements PathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(UriComponentInterface|Stringable|string|int $value = ''): self
+    public static function new(Stringable|string|int $value = ''): self
     {
         return new self($value);
     }

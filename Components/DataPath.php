@@ -15,9 +15,7 @@ namespace League\Uri\Components;
 
 use finfo;
 use League\Uri\Contracts\DataPathInterface;
-use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\PathInterface;
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\FileinfoSupportMissing;
 use League\Uri\Exceptions\SyntaxError;
@@ -63,7 +61,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * New instance.
      */
-    private function __construct(UriComponentInterface|HostInterface|Stringable|int|string|null $path)
+    private function __construct(Stringable|int|string|null $path)
     {
         $this->path = Path::new($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
@@ -178,7 +176,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(UriComponentInterface|Stringable|string $value = ''): self
+    public static function new(Stringable|string $value = ''): self
     {
         return new self(Path::new($value));
     }

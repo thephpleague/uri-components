@@ -31,7 +31,7 @@ final class Port extends Component implements PortInterface
     /**
      * New instance.
      */
-    private function __construct(UriComponentInterface|Stringable|int|string|null $port = null)
+    private function __construct(Stringable|int|string|null $port = null)
     {
         $this->port = $this->validate($port);
     }
@@ -48,7 +48,7 @@ final class Port extends Component implements PortInterface
         return new self($port);
     }
 
-    public static function new(UriComponentInterface|Stringable|int|string|null $value = null): self
+    public static function new(Stringable|int|string|null $value = null): self
     {
         return new self($value);
     }
