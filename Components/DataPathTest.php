@@ -312,19 +312,19 @@ final class DataPathTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::fromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21'),
+                'uri' => Http::new('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21'),
                 'expected' => 'text/plain;charset=us-ascii,Bonjour%20le%20monde%21',
             ],
             'PSR-7 URI object with no path' => [
-                'uri' => Http::fromString(),
+                'uri' => Http::new(),
                 'expected' => 'text/plain;charset=us-ascii,',
             ],
             'League URI object' => [
-                'uri' => Uri::fromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21'),
+                'uri' => Uri::new('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21'),
                 'expected' => 'text/plain;charset=us-ascii,Bonjour%20le%20monde%21',
             ],
             'League URI object with no path' => [
-                'uri' => Uri::fromString(),
+                'uri' => Uri::new(),
                 'expected' => 'text/plain;charset=us-ascii,',
             ],
         ];

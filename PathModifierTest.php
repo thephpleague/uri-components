@@ -53,11 +53,11 @@ final class PathModifierTest extends TestCase
         $textPath = DataPath::new('text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
         $binPath = DataPath::fromFilePath($rootPath.'/red-nose.gif');
 
-        $ascii = Uri::fromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
-        $binary = Uri::fromString('data:'.$textPath->toBinary());
+        $ascii = Uri::new('data:text/plain;charset=us-ascii,Bonjour%20le%20monde%21');
+        $binary = Uri::new('data:'.$textPath->toBinary());
 
         $pathBin = Uri::fromDataPath($rootPath.'/red-nose.gif');
-        $pathAscii = Uri::fromString('data:'.$binPath->toAscii());
+        $pathAscii = Uri::new('data:'.$binPath->toAscii());
 
         return [
             [$pathBin, $pathAscii],
@@ -67,7 +67,7 @@ final class PathModifierTest extends TestCase
 
     public function testDataUriWithParameters(): void
     {
-        $uri = Uri::fromString('data:text/plain;charset=us-ascii,Bonjour%20le%20monde!');
+        $uri = Uri::new('data:text/plain;charset=us-ascii,Bonjour%20le%20monde!');
         self::assertSame(
             'text/plain;coco=chanel,Bonjour%20le%20monde!',
             UriModifier::replaceDataUriParameters($uri, 'coco=chanel')->getPath()
@@ -95,7 +95,7 @@ final class PathModifierTest extends TestCase
      */
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
-        self::assertSame($expected, (string) UriModifier::appendSegment(Http::fromString($uri), $segment));
+        self::assertSame($expected, (string) UriModifier::appendSegment(Http::new($uri), $segment));
     }
 
     public static function validAppendSegmentProvider(): array
@@ -129,7 +129,7 @@ final class PathModifierTest extends TestCase
      */
     public function testBasename(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) UriModifier::replaceBasename(Uri::fromString($uri), $path));
+        self::assertSame($expected, (string) UriModifier::replaceBasename(Uri::new($uri), $path));
     }
 
     public static function validBasenameProvider(): array
@@ -145,7 +145,7 @@ final class PathModifierTest extends TestCase
     public function testBasenameThrowException(): void
     {
         $this->expectException(SyntaxError::class);
-        UriModifier::replaceBasename(Uri::fromString('http://example.com'), 'foo/baz');
+        UriModifier::replaceBasename(Uri::new('http://example.com'), 'foo/baz');
     }
 
     /**
@@ -153,7 +153,7 @@ final class PathModifierTest extends TestCase
      */
     public function testDirname(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) UriModifier::replaceDirname(Uri::fromString($uri), $path));
+        self::assertSame($expected, (string) UriModifier::replaceDirname(Uri::new($uri), $path));
     }
 
     public static function validDirnameProvider(): array
@@ -171,7 +171,7 @@ final class PathModifierTest extends TestCase
      */
     public function testPrependProcess(string $uri, string $segment, string $prepend): void
     {
-        $uri = Uri::fromString($uri);
+        $uri = Uri::new($uri);
         self::assertSame($prepend, UriModifier::prependSegment($uri, $segment)->getPath());
     }
 
@@ -237,7 +237,7 @@ final class PathModifierTest extends TestCase
 
     public function testaddBasepathWithRelativePath(): void
     {
-        $uri = Http::fromString('base/path');
+        $uri = Http::new('base/path');
         self::assertSame('/base/path', UriModifier::addBasePath($uri, '/base/path')->getPath());
     }
 
@@ -261,7 +261,7 @@ final class PathModifierTest extends TestCase
 
     public function testRemoveBasePathWithRelativePath(): void
     {
-        $uri = Http::fromString('base/path');
+        $uri = Http::new('base/path');
         self::assertSame('base/path', UriModifier::removeBasePath($uri, '/base/path')->getPath());
     }
 
@@ -282,7 +282,7 @@ final class PathModifierTest extends TestCase
 
     public function testWithoutDotSegmentsProcess(): void
     {
-        $uri = Http::fromString(
+        $uri = Http::new(
             'http://www.example.com/path/../to/the/./sky.php?kingkong=toto&foo=bar+baz#doc3'
         );
         self::assertSame('/to/the/sky.php', UriModifier::removeDotSegments($uri)->getPath());
@@ -290,7 +290,7 @@ final class PathModifierTest extends TestCase
 
     public function testWithoutEmptySegmentsProcess(): void
     {
-        $uri = Http::fromString(
+        $uri = Http::new(
             'http://www.example.com/path///to/the//sky.php?kingkong=toto&foo=bar+baz#doc3'
         );
         self::assertSame('/path/to/the/sky.php', UriModifier::removeEmptySegments($uri)->getPath());
@@ -298,7 +298,7 @@ final class PathModifierTest extends TestCase
 
     public function testWithoutTrailingSlashProcess(): void
     {
-        $uri = Http::fromString('http://www.example.com/');
+        $uri = Http::new('http://www.example.com/');
         self::assertSame('', UriModifier::removeTrailingSlash($uri)->getPath());
     }
 
@@ -325,14 +325,14 @@ final class PathModifierTest extends TestCase
 
     public function testWithoutLeadingSlashProcess(): void
     {
-        $uri = Http::fromString('/foo/bar?q=b#h');
+        $uri = Http::new('/foo/bar?q=b#h');
 
         self::assertSame('foo/bar?q=b#h', (string) UriModifier::removeLeadingSlash($uri));
     }
 
     public function testWithLeadingSlashProcess(): void
     {
-        $uri = Http::fromString('foo/bar?q=b#h');
+        $uri = Http::new('foo/bar?q=b#h');
 
         self::assertSame('/foo/bar?q=b#h', (string) UriModifier::addLeadingSlash($uri));
     }

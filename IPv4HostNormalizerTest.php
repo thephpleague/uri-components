@@ -128,22 +128,22 @@ final class IPv4HostNormalizerTest extends TestCase
 
     public function testIpv4NormalizeHostWithPsr7Uri(): void
     {
-        $uri = Http::fromString('http://0/test');
+        $uri = Http::new('http://0/test');
         $newUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame('0.0.0.0', $newUri->getHost());
 
-        $uri = Http::fromString('http://11.be/test');
+        $uri = Http::new('http://11.be/test');
         $unchangedUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame($uri, $unchangedUri);
     }
 
     public function testIpv4NormalizeHostWithLeagueUri(): void
     {
-        $uri = Uri::fromString('http://0/test');
+        $uri = Uri::new('http://0/test');
         $newUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame('0.0.0.0', $newUri->getHost());
 
-        $uri = Http::fromString('http://11.be/test');
+        $uri = Http::new('http://11.be/test');
         $unchangedUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
         self::assertSame($uri, $unchangedUri);
     }

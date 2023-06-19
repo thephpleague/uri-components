@@ -61,7 +61,7 @@ final class QueryModifierTest extends TestCase
 
     public function testKsortQuery(): void
     {
-        $uri = Http::fromString('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
+        $uri = Http::new('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
         self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', UriModifier::sortQuery($uri)->getQuery());
     }
 

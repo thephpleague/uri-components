@@ -457,11 +457,11 @@ final class DomainTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::fromString('http://example.com?foo=bar'),
+                'uri' => Http::new('http://example.com?foo=bar'),
                 'expected' => 'example.com',
             ],
             'League URI object' => [
-                'uri' => Uri::fromString('http://example.com?foo=bar'),
+                'uri' => Uri::new('http://example.com?foo=bar'),
                 'expected' => 'example.com',
             ],
         ];
@@ -480,14 +480,14 @@ final class DomainTest extends TestCase
     public static function provideInvalidDomainName(): iterable
     {
         return [
-            'PSR-7 URI object with no host' => [Http::fromString('path/to/the/sky?foo')],
-            'PSR-7 URI object with empty string host' => [Http::fromString('file:///path/to/you')],
+            'PSR-7 URI object with no host' => [Http::new('path/to/the/sky?foo')],
+            'PSR-7 URI object with empty string host' => [Http::new('file:///path/to/you')],
         ];
     }
 
     public function testCreateFromAuthority(): void
     {
-        $uri = Uri::fromString('http://example.com:443');
+        $uri = Uri::new('http://example.com:443');
         $auth = Authority::fromUri($uri);
 
         self::assertEquals(Domain::fromUri($uri), Domain::fromAuthority($auth));

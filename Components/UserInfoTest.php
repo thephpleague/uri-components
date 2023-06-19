@@ -201,31 +201,31 @@ final class UserInfoTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::fromString('http://foo:bar@example.com?foo=bar'),
+                'uri' => Http::new('http://foo:bar@example.com?foo=bar'),
                 'expected' => 'foo:bar',
             ],
             'PSR-7 URI object with no user info' => [
-                'uri' => Http::fromString('path/to/the/sky?foo'),
+                'uri' => Http::new('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'PSR-7 URI object with empty string user info' => [
-                'uri' => Http::fromString('http://@example.com?foo=bar'),
+                'uri' => Http::new('http://@example.com?foo=bar'),
                 'expected' => null,
             ],
             'League URI object' => [
-                'uri' => Uri::fromString('http://foo:bar@example.com?foo=bar'),
+                'uri' => Uri::new('http://foo:bar@example.com?foo=bar'),
                 'expected' => 'foo:bar',
             ],
             'League URI object with no user info' => [
-                'uri' => Uri::fromString('path/to/the/sky?foo'),
+                'uri' => Uri::new('path/to/the/sky?foo'),
                 'expected' => null,
             ],
             'League URI object with empty string user info' => [
-                'uri' => Uri::fromString('http://@example.com?foo=bar'),
+                'uri' => Uri::new('http://@example.com?foo=bar'),
                 'expected' => '',
             ],
             'URI object with encoded user info string' => [
-                'uri' => Uri::fromString('http://login%af:bar@example.com:81'),
+                'uri' => Uri::new('http://login%af:bar@example.com:81'),
                 'expected' => 'login%AF:bar',
             ],
         ];
@@ -233,7 +233,7 @@ final class UserInfoTest extends TestCase
 
     public function testCreateFromAuthorityWithoutUserInfoComponent(): void
     {
-        $uri = Uri::fromString('http://example.com:443');
+        $uri = Uri::new('http://example.com:443');
         $auth = Authority::fromUri($uri);
 
         self::assertEquals(UserInfo::fromUri($uri), UserInfo::fromAuthority($auth));
@@ -241,7 +241,7 @@ final class UserInfoTest extends TestCase
 
     public function testCreateFromAuthorityWithActualUserInfoComponent(): void
     {
-        $uri = Uri::fromString('http://user:pass@example.com:443');
+        $uri = Uri::new('http://user:pass@example.com:443');
         $auth = Authority::fromUri($uri);
 
         self::assertEquals(UserInfo::fromUri($uri), UserInfo::fromAuthority($auth));

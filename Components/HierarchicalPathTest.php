@@ -673,27 +673,27 @@ final class HierarchicalPathTest extends TestCase
     {
         return [
             'PSR-7 URI object' => [
-                'uri' => Http::fromString('http://example.com/path'),
+                'uri' => Http::new('http://example.com/path'),
                 'expected' => '/path',
             ],
             'PSR-7 URI object with no path' => [
-                'uri' => Http::fromString('toto://example.com'),
+                'uri' => Http::new('toto://example.com'),
                 'expected' => '',
             ],
             'PSR-7 URI object with no authority' => [
-                'uri' => Http::fromString('path/to/sky?toto'),
+                'uri' => Http::new('path/to/sky?toto'),
                 'expected' => 'path/to/sky',
             ],
             'League URI object' => [
-                'uri' => Uri::fromString('http://example.com/path'),
+                'uri' => Uri::new('http://example.com/path'),
                 'expected' => '/path',
             ],
             'League URI object with no path' => [
-                'uri' => Uri::fromString('toto://example.com'),
+                'uri' => Uri::new('toto://example.com'),
                 'expected' => '',
             ],
             'League URI object with no authority' => [
-                'uri' => Uri::fromString('path/to/sky?toto'),
+                'uri' => Uri::new('path/to/sky?toto'),
                 'expected' => 'path/to/sky',
             ],
         ];
@@ -701,7 +701,7 @@ final class HierarchicalPathTest extends TestCase
 
     public function testCreateFromUriWithPSR7Implementation(): void
     {
-        $uri = Uri::fromString('http://example.com')
+        $uri = Uri::new('http://example.com')
             ->withPath('/path');
 
         self::assertSame('/path', $uri->getPath());
