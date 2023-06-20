@@ -17,6 +17,7 @@ use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
@@ -48,40 +49,34 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
         if ($uri instanceof UriInterface) {
+            return self::new($uri->getUserInfo());
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
             $component = $uri->getUserInfo();
-            if (null === $component) {
+            if ('' === $component) {
                 return self::new();
             }
 
             return self::new($component);
         }
 
-        $component = $uri->getUserInfo();
-        if ('' === $component) {
-            return self::new();
-        }
-
-        return self::new($component);
+        return self::new(Uri::new($uri)->getUserInfo());
     }
 
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
+    public static function fromAuthority(Stringable|string $authority): self
     {
         if (!$authority instanceof AuthorityInterface) {
             $authority = Authority::new($authority);
         }
 
-        $userInfo = $authority->getUserInfo();
-        if (null === $userInfo) {
-            return self::new();
-        }
-
-        return self::new($userInfo);
+        return self::new($authority->getUserInfo());
     }
 
     /**

@@ -17,6 +17,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function array_pop;
@@ -66,8 +67,12 @@ final class Path extends Component implements PathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
+        if (!$uri instanceof Psr7UriInterface && !$uri instanceof UriInterface) {
+            $uri = Uri::new($uri);
+        }
+
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
         if (null === $authority || '' === $authority || '' === $path || '/' === $path[0]) {

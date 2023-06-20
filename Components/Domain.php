@@ -88,7 +88,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
         return self::fromHost(Host::fromUri($uri));
     }
@@ -96,7 +96,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
+    public static function fromAuthority(Stringable|string $authority): self
     {
         return self::fromHost(Host::fromAuthority($authority));
     }

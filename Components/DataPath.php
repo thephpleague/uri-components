@@ -222,7 +222,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
         return self::new(Path::fromUri($uri)->toString());
     }

@@ -18,6 +18,7 @@ use League\Uri\Contracts\PortInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function filter_var;
@@ -56,21 +57,23 @@ final class Port extends Component implements PortInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
-        return new self($uri->getPort());
+        return match (true) {
+            $uri instanceof UriInterface || $uri instanceof Psr7UriInterface => new self($uri->getPort()),
+            default => new self(Uri::new($uri)->getPort()),
+        };
     }
 
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
+    public static function fromAuthority(Stringable|string $authority): self
     {
-        if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::new($authority);
-        }
-
-        return new self($authority->getPort());
+        return match (true) {
+            $authority instanceof AuthorityInterface => new self($authority->getPort()),
+            default => new self(Authority::new($authority)->getPort()),
+        };
     }
 
     /**

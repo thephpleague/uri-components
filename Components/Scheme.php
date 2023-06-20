@@ -15,6 +15,7 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function preg_match;
@@ -70,18 +71,22 @@ final class Scheme extends Component
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getScheme());
         }
 
-        $component = $uri->getScheme();
-        if ('' === $component) {
-            return new self(null);
+        if ($uri instanceof Psr7UriInterface) {
+            $component = $uri->getScheme();
+            if ('' === $component) {
+                return new self(null);
+            }
+
+            return new self($component);
         }
 
-        return new self($component);
+        return new self(Uri::new($uri)->getScheme());
     }
 
     public function value(): ?string

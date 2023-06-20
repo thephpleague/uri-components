@@ -19,6 +19,7 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\QueryString;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Traversable;
@@ -116,8 +117,12 @@ final class Query extends Component implements QueryInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
+        if (!$uri instanceof Psr7UriInterface && !$uri instanceof UriInterface) {
+            $uri = Uri::new($uri);
+        }
+
         $component = $uri->getQuery();
 
         return match (true) {

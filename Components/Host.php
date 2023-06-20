@@ -22,6 +22,7 @@ use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
 use League\Uri\IPv4Normalizer;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function compact;
@@ -272,30 +273,33 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
         if ($uri instanceof UriInterface) {
             return new self($uri->getHost());
         }
 
-        $component = $uri->getHost();
-        if ('' === $component) {
-            return self::new();
+        if ($uri instanceof Psr7UriInterface) {
+            $component = $uri->getHost();
+            if ('' === $component) {
+                return self::new();
+            }
+
+            return new self($component);
         }
 
-        return new self($component);
+        return new self(Uri::new($uri)->getHost());
     }
 
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(AuthorityInterface|Stringable|string $authority): self
+    public static function fromAuthority(Stringable|string $authority): self
     {
-        if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::new($authority);
-        }
-
-        return new self($authority->getHost());
+        return match (true) {
+            $authority instanceof AuthorityInterface => new self($authority->getHost()),
+            default => new self(Authority::new($authority)->getHost()),
+        };
     }
 
     public function value(): ?string

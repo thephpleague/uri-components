@@ -124,7 +124,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function fromUri(Stringable|string $uri): self
     {
         return new self(Path::fromUri($uri));
     }
