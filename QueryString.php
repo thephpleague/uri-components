@@ -86,22 +86,16 @@ final class QueryString
         int $enc_type = PHP_QUERY_RFC3986
     ): array {
         $query = self::filterQuery($query, $separator, $enc_type);
-        if (null === $query) {
-            return [];
-        }
 
-        if ('' === $query) {
-            return [['', null]];
-        }
-
-        $returnedValue = [];
-        foreach (self::getPairs($query, $separator) as $pairString) {
-            /** @var array{0:string, 1:string|null} $pair */
-            $pair = self::parsePair((string) $pairString, self::DECODE_PAIR_VALUE);
-            $returnedValue[] = $pair;
-        }
-
-        return $returnedValue;
+        return match (true) {
+            null === $query => [],
+            '' === $query => [['', null]],
+            default => array_reduce(
+                self::getPairs($query, $separator),
+                fn (array $carry, $pairString) => [...$carry, self::parsePair($pairString, self::DECODE_PAIR_VALUE)],
+                []
+            ),
+        };
     }
 
     /**
@@ -162,8 +156,9 @@ final class QueryString
      *
      * @return array{0:string, 1:string|null}
      */
-    private static function parsePair(string $pair, int $parseValue): array
+    private static function parsePair(int|string|null $pair, int $parseValue): array
     {
+        $pair = (string) $pair;
         [$key, $value] = explode('=', $pair, 2) + [1 => null];
         $key = (string) $key;
 
@@ -172,15 +167,13 @@ final class QueryString
             $key = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, self::decodeMatch(...), $key);
         }
 
-        if (null === $value) {
-            return [$key, $value];
-        }
-
-        if (self::DECODE_PAIR_VALUE === $parseValue && 1 === preg_match(self::REGEXP_ENCODED_PATTERN, $value)) {
-            $value = preg_replace_callback(self::REGEXP_ENCODED_PATTERN, self::decodeMatch(...), $value);
-        }
-
-        return [$key, $value];
+        return match (true) {
+            null !== $value
+            && self::DECODE_PAIR_VALUE === $parseValue
+            && 1 === preg_match(self::REGEXP_ENCODED_PATTERN, $value)
+                => [$key, preg_replace_callback(self::REGEXP_ENCODED_PATTERN, self::decodeMatch(...), $value)],
+            default => [$key, $value],
+        };
     }
 
     private static function formatStringValue(string $value, int|string|float|null $name): string
@@ -323,16 +316,15 @@ final class QueryString
         int $enc_type = PHP_QUERY_RFC3986
     ): array {
         $query = self::filterQuery($query, $separator, $enc_type);
-        if (null === $query || '' === $query) {
-            return [];
-        }
 
-        $returnedValue = [];
-        foreach (self::getPairs($query, $separator) as $pair) {
-            $returnedValue[] = self::parsePair((string) $pair, self::PRESERVE_PAIR_VALUE);
-        }
-
-        return self::convert($returnedValue);
+        return match (true) {
+            null === $query || '' === $query => [],
+            default => self::convert(array_reduce(
+                self::getPairs($query, $separator),
+                fn (array $carry, $pair) => [...$carry, self::parsePair($pair, self::PRESERVE_PAIR_VALUE)],
+                []
+            )),
+        };
     }
 
     /**

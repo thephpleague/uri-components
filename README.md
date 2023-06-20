@@ -12,18 +12,14 @@ This package contains concrete URI components instances represented as immutable
 System Requirements
 -------
 
-The latest stable version of PHP is recommended.
-
-Please find below the PHP support for `URI` version 2.
-
-| Min. Library Version | Min. PHP Version | Max. Supported PHP Version |
-|----------------------|------------------|----------------------------|
-| 2.4.0                | PHP 7.4          | PHP 8.1.x                  |
-| 2.0.0                | PHP 7.3          | PHP 8.0.x                  |
+- You require **PHP >= 8.1** but the latest stable version of PHP is recommended
+- You will need the **ext-intl** to handle i18n URI.
+- You will need the **ext-fileinfo** to handle Data URI creation from a filepath.
 
 Dependencies
 -------
 
+- [League URI][]
 - [League URI Interfaces][]
 - [PSR-7][]
 
@@ -49,3 +45,4 @@ The MIT License (MIT). Please see [License File](LICENSE) for more information.
 [PSR-7]: http://www.php-fig.org/psr/psr-7/
 [uri.thephpleague.com]: http://uri.thephpleague.com
 [League URI Interfaces]: https://github.com/thephpleague/uri-interfaces
+[League URI]: https://github.com/thephpleague/uri

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use League\Uri\Components\Authority;
 use League\Uri\Components\Host;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
@@ -23,6 +24,7 @@ use League\Uri\IPv4Calculators\GMPCalculator;
 use League\Uri\IPv4Calculators\IPv4Calculator;
 use League\Uri\IPv4Calculators\NativeCalculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use function array_pop;
 use function count;
 use function explode;
@@ -109,8 +111,12 @@ final class IPv4Normalizer
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeUri(UriInterface|Psr7UriInterface $uri): UriInterface|Psr7UriInterface
+    public function normalizeUri(Stringable|string $uri): UriInterface|Psr7UriInterface
     {
+        if (!$uri instanceof UriInterface && !$uri instanceof Psr7UriInterface) {
+            $uri = Uri::new($uri);
+        }
+
         $host = Host::fromUri($uri);
         $normalizedHost = $this->normalizeHost($host)->value();
 
@@ -127,16 +133,19 @@ final class IPv4Normalizer
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeAuthority(AuthorityInterface $authority): AuthorityInterface
+    public function normalizeAuthority(Stringable|string $authority): AuthorityInterface
     {
+        if (!$authority instanceof AuthorityInterface) {
+            $authority = Authority::new($authority);
+        }
+
         $host = Host::fromAuthority($authority);
         $normalizeHost = $this->normalizeHost($host)->value();
 
-        if ($normalizeHost === $host->value()) {
-            return $authority;
-        }
-
-        return $authority->withHost($normalizeHost);
+        return match (true) {
+            $normalizeHost === $host->value() => $authority,
+            default => $authority->withHost($normalizeHost),
+        };
     }
 
     /**
