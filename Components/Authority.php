@@ -21,15 +21,12 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use function explode;
-use function preg_match;
 
 final class Authority extends Component implements AuthorityInterface
 {
-    private const REGEXP_HOST_PORT = ',^(?<host>\[.*\]|[^:]*)(:(?<port>.*))?$,';
-
     private readonly UserInfoInterface $userInfo;
     private readonly HostInterface $host;
     private readonly PortInterface $port;
@@ -39,44 +36,14 @@ final class Authority extends Component implements AuthorityInterface
      */
     private function __construct(Stringable|string|null $authority)
     {
-        $components = $this->parse(self::filterComponent($authority));
-        $this->host = null === $components['host'] ? Host::new() : Host::new($components['host']);
-        $this->port = null === $components['port'] ? Port::new() : Port::new($components['port']);
+        $components = UriString::parseAuthority(self::filterComponent($authority));
+        $this->host = Host::new($components['host']);
+        $this->port = Port::new($components['port']);
         $this->userInfo = new UserInfo($components['user'], $components['pass']);
 
         if (null === $this->host->value() && null !== $this->value()) {
             throw new SyntaxError('A non-empty authority must contains a non null host.');
         }
-    }
-
-    /**
-     * Extracts the authority parts from a given string.
-     *
-     * @return array{user:string|null, pass:string|null, host:string|null, port:string|null}
-     */
-    private function parse(?string $authority): array
-    {
-        $components = ['user' => null, 'pass' => null, 'host' => null, 'port' => null];
-        if (null === $authority) {
-            return $components;
-        }
-
-        if ('' === $authority) {
-            $components['host'] = '';
-
-            return $components;
-        }
-
-        $parts = explode('@', $authority, 2);
-        if (isset($parts[1])) {
-            [$components['user'], $components['pass']] = explode(':', $parts[0], 2) + [1 => null];
-        }
-        preg_match(self::REGEXP_HOST_PORT, $parts[1] ?? $parts[0], $matches);
-        $matches += ['port' => ''];
-        $components['host'] = $matches['host'];
-        $components['port'] = '' === $matches['port'] ? null : $matches['port'];
-
-        return $components;
     }
 
     /**
@@ -267,6 +234,21 @@ final class Authority extends Component implements AuthorityInterface
     public static function createFromString(Stringable|string $authority): self
     {
         return self::new($authority);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Authority::new()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from null.
+     */
+    public static function createFromNull(): self
+    {
+        return self::new();
     }
 
     /**

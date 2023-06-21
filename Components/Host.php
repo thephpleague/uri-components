@@ -412,6 +412,21 @@ final class Host extends Component implements IpHostInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
+     * @see Host::new()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from null.
+     */
+    public static function createFromNull(): self
+    {
+        return self::new();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
      * @see Host::fromIp()
      *
      * @codeCoverageIgnore
