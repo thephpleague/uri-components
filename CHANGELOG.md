@@ -30,7 +30,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Deprecated
 
-- All `createFromString` named constructors are replaced by the `new` named constructor which also accepts `null`.
+- All `createFromString` named constructors are replaced by the `new` named constructor.
+- All `createFromSNull` named constructors are replaced by the `new` named constructor.
 - All remaining named constructors which starts with `createFrom*` replaced by the same method starting with `from*`. For example `Authority::createFromUri` is deprecated in favor of `Authority::fromUri`
 
 ### Removed
