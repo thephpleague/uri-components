@@ -52,7 +52,7 @@ final class Authority extends Component implements AuthorityInterface
     public static function new(Stringable|string|null $value = null): self
     {
         if ($value instanceof UriComponentInterface) {
-            $value = $value->value();
+            return new self($value->value());
         }
 
         return new self($value);
@@ -76,7 +76,7 @@ final class Authority extends Component implements AuthorityInterface
             return new self($uri->getAuthority());
         }
 
-        return new self($uri = Uri::new($uri)->getAuthority());
+        return new self(Uri::new($uri)->getAuthority());
     }
 
     /**
@@ -142,7 +142,7 @@ final class Authority extends Component implements AuthorityInterface
 
     public function getUriComponent(): string
     {
-        return (null === $this->host->value() ? '' : '//').$this->value();
+        return  (null === $this->host->value()) ? $this->toString() : '//'.$this->toString();
     }
 
     public function getHost(): ?string
