@@ -15,17 +15,13 @@
     "require": {
         "php": "^8.1",
         "ext-json": "*",
-        "ext-fileinfo": "*",
-        "league/uri": "7.x-dev",
-        "league/uri-interfaces": "7.x-dev",
-        "psr/http-message": "^2.0"
+        "league/uri": "7.0.0-beta.1"
     },
     "suggest": {
         "ext-intl": "to handle IDN host",
         "ext-gmp": "to improve handle IPV4 parsing",
         "ext-fileinfo": "to create Data URI from a filepath",
         "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
-        "league/uri": "to allow manipulating URI objects",
         "php-64bit": "to improve handle IPV4 parsing",
         "psr/http-message-implementation": "to allow manipulating PSR-7 Uri objects",
         "symfony/polyfill-intl-idn": "to use the IDNA feature via Symfony Polyfill"
