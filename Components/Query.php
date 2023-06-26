@@ -35,6 +35,7 @@ use function count;
 use function http_build_query;
 use function implode;
 use function is_bool;
+use function is_int;
 use function iterator_to_array;
 use function preg_match;
 use function preg_quote;
@@ -136,7 +137,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromRFC3986(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    public static function fromRFC3986(Stringable|string|null $query, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC3986);
     }
@@ -146,7 +147,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromRFC1738(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    public static function fromRFC1738(Stringable|string|null $query, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC1738);
     }
@@ -542,8 +543,12 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query = '', string $separator = '&'): self
+    public static function createFromRFC3986(Stringable|int|string|null $query = '', string $separator = '&'): self
     {
+        if (is_int($query)) {
+            $query = (string) $query;
+        }
+
         return self::fromRFC3986($query, $separator);
     }
 
@@ -559,8 +564,12 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query = '', string $separator = '&'): self
+    public static function createFromRFC1738(Stringable|int|string|null $query = '', string $separator = '&'): self
     {
+        if (is_int($query)) {
+            $query = (string) $query;
+        }
+
         return self::fromRFC1738($query, $separator);
     }
 }
