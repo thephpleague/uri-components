@@ -17,6 +17,7 @@ use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
@@ -43,7 +44,11 @@ final class UserInfo extends Component implements UserInfoInterface
     ) {
         $this->username = $this->validateComponent($username);
         $password = $this->validateComponent($password);
-        $this->password = null === $this->username ? null : $password;
+        if (null === $this->username && null !== $password) {
+            throw new SyntaxError('It is not possible to associated a password to an undefined user.');
+        }
+
+        $this->password = $password;
     }
 
     /**
@@ -162,7 +167,8 @@ final class UserInfo extends Component implements UserInfoInterface
         $password = $this->validateComponent($password);
 
         return match (true) {
-            $password === $this->password || null === $this->username => $this,
+            $password === $this->password => $this,
+            null === $this->username => throw new SyntaxError('It is not possible to associated a password to an undefined user.'),
             default => new self($this->username, $password),
         };
     }

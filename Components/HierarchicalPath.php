@@ -22,7 +22,6 @@ use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use Traversable;
 use TypeError;
 use function array_count_values;
 use function array_filter;
@@ -74,12 +73,15 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      */
     public static function new(Stringable|string $value = ''): self
     {
-        return self::fromPath(Path::new($value));
+        return new self($value);
     }
 
-    public static function fromPath(PathInterface $path): self
+    /**
+     * Create a new instance from a URI object.
+     */
+    public static function fromUri(Stringable|string $uri): self
     {
-        return new self($path);
+        return new self(Path::fromUri($uri));
     }
 
     /**
@@ -87,17 +89,26 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * @throws TypeError If the segments are malformed
      */
-    public static function fromRelativeSegments(iterable $segments): self
+    public static function fromRelative(string ...$segments): self
     {
         return self::fromSegments(self::IS_RELATIVE, $segments);
     }
 
-    private static function fromSegments(int $pathType, iterable $segments): self
+    /**
+     * Returns a new instance from an iterable structure.
+     *
+     * @throws TypeError If the segments are malformed
+     */
+    public static function fromAbsolute(string ...$segments): self
     {
-        if ($segments instanceof Traversable) {
-            $segments = iterator_to_array($segments, false);
-        }
+        return self::fromSegments(self::IS_ABSOLUTE, $segments);
+    }
 
+    /**
+     * @param array<string> $segments
+     */
+    private static function fromSegments(int $pathType, array $segments): self
+    {
         $pathSegments = array_map(fn (Stringable|string $segment): string => (string) $segment, $segments);
         $path = implode(self::SEPARATOR, $pathSegments);
         if (self::IS_RELATIVE === $pathType) {
@@ -109,24 +120,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         return new self($path);
-    }
-
-    /**
-     * Returns a new instance from an iterable structure.
-     *
-     * @throws TypeError If the segments are malformed
-     */
-    public static function fromAbsoluteSegments(iterable $segments): self
-    {
-        return self::fromSegments(self::IS_ABSOLUTE, $segments);
-    }
-
-    /**
-     * Create a new instance from a URI object.
-     */
-    public static function fromUri(Stringable|string $uri): self
-    {
-        return new self(Path::fromUri($uri));
     }
 
     public function count(): int
@@ -465,7 +458,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see HierarchicalPath::fromPath()
+     * @see HierarchicalPath::new()
      *
      * @codeCoverageIgnore
      *
@@ -480,47 +473,47 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see HierarchicalPath::fromPath()
+     * @see HierarchicalPath::new()
      *
      * @codeCoverageIgnore
      */
     public static function createFromPath(PathInterface $path): self
     {
-        return self::fromPath($path);
+        return self::new($path);
     }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @deprecated Since version 7.0.0
-     * @see HierarchicalPath::fromRelativeSegments()
+     * @throws TypeError If the segments are malformed
+     *@see HierarchicalPath::fromRelative()
      *
      * @codeCoverageIgnore
      *
      * Returns a new instance from an iterable structure.
      *
-     * @throws TypeError If the segments are malformed
+     * @deprecated Since version 7.0.0
      */
     public static function createRelativeFromSegments(iterable $segments): self
     {
-        return self::fromRelativeSegments($segments);
+        return self::fromRelative(...$segments);
     }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @deprecated Since version 7.0.0
-     * @see HierarchicalPath::fromAbsoluteSegments()
+     * @throws TypeError If the segments are malformed
+     *@see HierarchicalPath::fromAbsolute()
      *
      * @codeCoverageIgnore
      *
      * Returns a new instance from an iterable structure.
      *
-     * @throws TypeError If the segments are malformed
+     * @deprecated Since version 7.0.0
      */
     public static function createAbsoluteFromSegments(iterable $segments): self
     {
-        return self::fromAbsoluteSegments($segments);
+        return self::fromAbsolute(...$segments);
     }
 
     /**

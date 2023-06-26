@@ -20,8 +20,6 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
-use function date_create;
 
 /**
  * @group host
@@ -32,7 +30,7 @@ final class DomainTest extends TestCase
     public function testItCanBeInstantiatedWithAHostInterfaceImplementingObject(): void
     {
         $host = Host::new('uri.thephpleague.com');
-        $domain = Domain::fromHost($host);
+        $domain = Domain::new($host);
 
         self::assertSame('uri.thephpleague.com', $domain->value());
     }
@@ -41,14 +39,13 @@ final class DomainTest extends TestCase
     {
         $this->expectException(UriException::class);
 
-        Domain::fromHost(Host::fromIp('127.0.0.1'));
+        Domain::new(Host::fromIp('127.0.0.1'));
     }
 
     public function testItFailsIfTheHostIsNotADomain(): void
     {
         $this->expectException(UriException::class);
-
-        Domain::fromHost(Domain::new('127.0.0.1'));
+        Domain::new('127.0.0.1');
     }
 
     public function testIterator(): void
@@ -120,7 +117,7 @@ final class DomainTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Domain::fromHost(Host::new($invalid));
+        Domain::new($invalid);
     }
 
     public static function invalidDomainProvider(): array
@@ -235,7 +232,7 @@ final class DomainTest extends TestCase
      */
     public function testCreateFromLabels(iterable $input, string $expected): void
     {
-        self::assertSame($expected, (string) Domain::fromLabels($input));
+        self::assertSame($expected, (string) Domain::fromLabels(...$input));
     }
 
     public static function createFromLabelsValid(): array
@@ -248,28 +245,16 @@ final class DomainTest extends TestCase
         ];
     }
 
-    public function testCreateFromLabelsFailedWithInvalidArrayInput(): void
-    {
-        $this->expectException(TypeError::class);
-        Domain::fromLabels([date_create()]);
-    }
-
-    public function testCreateFromLabelsFailedWithNullLabel(): void
-    {
-        $this->expectException(TypeError::class);
-        Domain::fromLabels([null]);
-    }
-
     public function testCreateFromLabelsFailedWithEmptyStringLabel(): void
     {
         $this->expectException(SyntaxError::class);
-        Domain::fromLabels(['']);
+        Domain::fromLabels('');
     }
 
     public function testCreateFromLabelsFailedWithEmptyLabel(): void
     {
         $this->expectException(SyntaxError::class);
-        Domain::fromLabels([]);
+        Domain::fromLabels();
     }
 
     public function testGet(): void

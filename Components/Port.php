@@ -22,7 +22,6 @@ use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function filter_var;
-use function sprintf;
 use const FILTER_VALIDATE_INT;
 
 final class Port extends Component implements PortInterface
@@ -32,24 +31,12 @@ final class Port extends Component implements PortInterface
     /**
      * New instance.
      */
-    private function __construct(Stringable|int|string|null $port = null)
+    private function __construct(Stringable|string|int|null $port = null)
     {
         $this->port = $this->validate($port);
     }
 
-    /**
-     * @param int<0, max> $port
-     */
-    public static function fromInt(int $port): self
-    {
-        if (0 > $port) { /* @phpstan-ignore-line  */
-            throw new SyntaxError(sprintf('Expected port to be a positive integer or 0; received %s.', $port));
-        }
-
-        return new self($port);
-    }
-
-    public static function new(Stringable|int|string|null $value = null): self
+    public static function new(Stringable|string|int|null $value = null): self
     {
         return new self($value);
     }
@@ -143,5 +130,18 @@ final class Port extends Component implements PortInterface
     public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
         return self::fromAuthority($authority);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Port::new()
+     *
+     * @codeCoverageIgnore
+     */
+    public static function fromInt(int $port): self
+    {
+        return self::new($port);
     }
 }

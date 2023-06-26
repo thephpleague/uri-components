@@ -19,8 +19,6 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
-use TypeError;
-use function date_create;
 use function iterator_to_array;
 
 /**
@@ -177,7 +175,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testCreateRelativeFromSegments(iterable $input, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromRelativeSegments($input));
+        self::assertSame($expected, (string) HierarchicalPath::fromRelative(...$input));
     }
 
     public static function createFromRelativeSegmentsValid(): array
@@ -196,7 +194,7 @@ final class HierarchicalPathTest extends TestCase
      */
     public function testCreateAbsoluteFromSegments(iterable $input, string $expected): void
     {
-        self::assertSame($expected, (string) HierarchicalPath::fromAbsoluteSegments($input));
+        self::assertSame($expected, (string) HierarchicalPath::fromAbsolute(...$input));
     }
 
     public static function createFromAbsoluteSegmentsValid(): array
@@ -212,18 +210,6 @@ final class HierarchicalPathTest extends TestCase
             'enforce path status (2)' => [['', 'toto', 'yeah', ''], '/toto/yeah/'],
             'enforce path status (4)' => [['', '', 'toto', 'yeah', ''], '//toto/yeah/'],
         ];
-    }
-
-    public function testCreateRelativeFromSegmentsFailed(): void
-    {
-        $this->expectException(TypeError::class);
-        HierarchicalPath::fromRelativeSegments([date_create()]);
-    }
-
-    public function testCreateAbsoluteFromSegmentsFailed(): void
-    {
-        $this->expectException(TypeError::class);
-        HierarchicalPath::fromAbsoluteSegments([date_create()]);
     }
 
     /**

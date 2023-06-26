@@ -542,7 +542,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    public static function createFromRFC3986(UriComponentInterface|Stringable|int|string|null $query = '', string $separator = '&'): self
     {
         return self::fromRFC3986($query, $separator);
     }
@@ -559,7 +559,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query, string $separator = '&'): self
+    public static function createFromRFC1738(UriComponentInterface|Stringable|int|string|null $query = '', string $separator = '&'): self
     {
         return self::fromRFC1738($query, $separator);
     }

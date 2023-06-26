@@ -42,12 +42,12 @@ final class Domain extends Component implements DomainHostInterface
     /** @var string[] */
     private readonly array $labels;
 
-    private function __construct(Stringable|int|string $host)
+    private function __construct(Stringable|string|null $host)
     {
         $host = match (true) {
             $host instanceof HostInterface => $host,
             $host instanceof UriComponentInterface => Host::new($host->value()),
-            default => Host::new((string) $host),
+            default => Host::new($host),
         };
 
         if (!$host->isDomain()) {
@@ -63,7 +63,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function new(Stringable|string|null $value = null): self
     {
-        return self::fromHost(Host::new($value));
+        return new self($value);
     }
 
     /**
@@ -71,7 +71,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * @throws TypeError If a label is the null value
      */
-    public static function fromLabels(iterable $labels): self
+    public static function fromLabels(Stringable|string ...$labels): self
     {
         $hostLabels = [];
         foreach ($labels as $label) {
@@ -90,7 +90,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function fromUri(Stringable|string $uri): self
     {
-        return self::fromHost(Host::fromUri($uri));
+        return self::new(Host::fromUri($uri));
     }
 
     /**
@@ -98,15 +98,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function fromAuthority(Stringable|string $authority): self
     {
-        return self::fromHost(Host::fromAuthority($authority));
-    }
-
-    /**
-     * Returns a new instance from an iterable structure.
-     */
-    public static function fromHost(HostInterface $host): self
-    {
-        return new self($host);
+        return self::new(Host::fromAuthority($authority));
     }
 
     public function value(): ?string
@@ -233,7 +225,7 @@ final class Domain extends Component implements DomainHostInterface
         $labels = $this->labels;
         array_shift($labels);
 
-        return self::fromLabels($labels);
+        return self::fromLabels(...$labels);
     }
 
     /**
@@ -294,7 +286,7 @@ final class Domain extends Component implements DomainHostInterface
         $deleted_keys = array_keys(array_count_values($keys));
         $filter = static fn ($key): bool => !in_array($key, $deleted_keys, true);
 
-        return self::fromLabels(array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
+        return self::fromLabels(...array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
     }
 
     public function clear(): self
@@ -346,7 +338,7 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function createFromLabels(iterable $labels): self
     {
-        return self::fromLabels($labels);
+        return self::fromLabels(...$labels);
     }
 
     /**
@@ -383,7 +375,7 @@ final class Domain extends Component implements DomainHostInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Domain::fromHost()
+     * @see Domain::new()
      *
      * @codeCoverageIgnore
      *
@@ -391,6 +383,6 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function createFromHost(HostInterface $host): self
     {
-        return self::fromHost($host);
+        return self::new($host);
     }
 }

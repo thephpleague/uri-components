@@ -28,7 +28,7 @@ final class PortTest extends TestCase
 {
     public function testPortSetter(): void
     {
-        self::assertSame('443', Port::fromInt(443)->toString());
+        self::assertSame('443', Port::new(443)->toString());
     }
 
     /**
@@ -40,7 +40,7 @@ final class PortTest extends TestCase
         ?string $string_expected,
         string $uri_expected
     ): void {
-        $port = null === $input ? Port::new() : Port::new($input);
+        $port = Port::new($input);
 
         self::assertSame($expected, $port->toInt());
         self::assertSame($string_expected, $port->value());
@@ -59,7 +59,7 @@ final class PortTest extends TestCase
                     return '23';
                 }
             }, 23, '23', ':23'],
-            [Port::fromInt(23), 23, '23', ':23'],
+            [Port::new(23), 23, '23', ':23'],
         ];
     }
 
@@ -112,12 +112,13 @@ final class PortTest extends TestCase
 
     public function testCreateFromIntSucceeds(): void
     {
-        self::assertEquals(0, Port::fromInt(0)->value());
+        self::assertEquals(0, Port::new(0)->value());
     }
 
     public function testCreateFromIntFails(): void
     {
         $this->expectException(SyntaxError::class);
-        Port::fromInt(-1)->value();  /* @phpstan-ignore-line */
+
+        Port::new(-1);
     }
 }

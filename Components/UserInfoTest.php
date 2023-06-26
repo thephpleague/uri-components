@@ -46,7 +46,7 @@ final class UserInfoTest extends TestCase
     public static function userInfoProvider(): array
     {
         return [
-            [
+            'using stringable object' => [
                 'user' => new UserInfo('login'),
                 'pass' => new UserInfo('pass'),
                 'expected_user' => 'login',
@@ -54,7 +54,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => 'login:pass',
                 'uriComponent' => 'login:pass@',
             ],
-            [
+            'using strings' => [
                 'user' => 'login',
                 'pass' => 'pass',
                 'expected_user' => 'login',
@@ -62,7 +62,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => 'login:pass',
                 'uriComponent' => 'login:pass@',
             ],
-            [
+            'using encoded string for username' => [
                 'user' => 'login%61',
                 'pass' => 'pass',
                 'expected_user' => 'login%61',
@@ -70,7 +70,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => 'login%61:pass',
                 'uriComponent' => 'login%61:pass@',
             ],
-            [
+            'with an undefined password' => [
                 'user' => 'login',
                 'pass' => null,
                 'expected_user' => 'login',
@@ -78,7 +78,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => 'login',
                 'uriComponent' => 'login@',
             ],
-            [
+            'with an undefined username and password' => [
                 'user' => null,
                 'pass' => null,
                 'expected_user' => null,
@@ -86,7 +86,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => '',
                 'uriComponent' => '',
             ],
-            [
+            'with an undefined password and an empty string as the username' => [
                 'user' => '',
                 'pass' => null,
                 'expected_user' => '',
@@ -94,7 +94,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => '',
                 'uriComponent' => '@',
             ],
-            [
+            'with empty strings' => [
                 'user' => '',
                 'pass' => '',
                 'expected_user' => '',
@@ -102,15 +102,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => ':',
                 'uriComponent' => ':@',
             ],
-            [
-                'user' => null,
-                'pass' => 'pass',
-                'expected_user' => null,
-                'expected_pass' => null,
-                'expected_str' => '',
-                'uriComponent' => '',
-            ],
-            [
+            'with encoded username and password' => [
                 'user' => 'foò',
                 'pass' => 'bar',
                 'expected_user' => 'foò',
@@ -118,7 +110,7 @@ final class UserInfoTest extends TestCase
                 'expected_str' => 'fo%C3%B2:bar',
                 'uriComponent' => 'fo%C3%B2:bar@',
             ],
-            [
+            'with encoded username and password containing + sign' => [
                 'user' => 'fo+o',
                 'pass' => 'ba+r',
                 'expected_user' => 'fo+o',
@@ -126,7 +118,6 @@ final class UserInfoTest extends TestCase
                 'expected_str' => 'fo+o:ba+r',
                 'uriComponent' => 'fo+o:ba+r@',
             ],
-
         ];
     }
 
@@ -149,11 +140,6 @@ final class UserInfoTest extends TestCase
 
     public function testWithContentReturnSameInstance(): void
     {
-        self::assertEquals(
-            new UserInfo(null),
-            new UserInfo(null, 'pass')
-        );
-
         self::assertEquals(
             new UserInfo('user', 'pass'),
             UserInfo::new('user:pass')
@@ -178,6 +164,13 @@ final class UserInfoTest extends TestCase
             'empty all' => ['', '', ':'],
             'null all' => [null, null, ''],
         ];
+    }
+
+    public function testItWillThrowIfWeAttemptToModifyAPasswordOnANullUser(): void
+    {
+        $this->expectException(SyntaxError::class);
+
+        UserInfo::new()->withPass('toto');
     }
 
     public function testConstructorThrowsException(): void
@@ -245,5 +238,12 @@ final class UserInfoTest extends TestCase
         $auth = Authority::fromUri($uri);
 
         self::assertEquals(UserInfo::fromUri($uri), UserInfo::fromAuthority($auth));
+    }
+
+    public function testItFailsToCreateANewInstanceWhenTheUsernameIsUndefined(): void
+    {
+        $this->expectException(SyntaxError::class);
+
+        new UserInfo(null, 'password');
     }
 }
