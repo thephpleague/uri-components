@@ -474,7 +474,7 @@ final class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider invalidExtension
      */
-    public function testWithExtensionWithInvalidExtension(?string $extension): void
+    public function testWithExtensionWithInvalidExtension(string $extension): void
     {
         $this->expectException(SyntaxError::class);
 
@@ -487,7 +487,6 @@ final class HierarchicalPathTest extends TestCase
             'invalid format' => ['t/xt'],
             'starting with a dot' => ['.csv'],
             'invalid chars' => ["\0"],
-            'null chars' => [null],
         ];
     }
 
@@ -629,7 +628,7 @@ final class HierarchicalPathTest extends TestCase
     /**
      * @dataProvider basenameInvalidProvider
      */
-    public function testWithBasenameThrowException(?string $path): void
+    public function testWithBasenameThrowException(string $path): void
     {
         $this->expectException(SyntaxError::class);
 
@@ -640,7 +639,6 @@ final class HierarchicalPathTest extends TestCase
     {
         return [
             ['foo/bar'],
-            [null],
         ];
     }
 

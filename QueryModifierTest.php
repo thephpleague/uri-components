@@ -86,7 +86,7 @@ final class QueryModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
     {
-        self::assertSame($expected, UriModifier::removeParams(Uri::fromBaseUri($uri), ...$input)->getQuery());
+        self::assertSame($expected, UriModifier::removeParams(Uri::fromClient($uri), ...$input)->getQuery());
     }
 
     public static function removeParamsProvider(): array
@@ -115,8 +115,8 @@ final class QueryModifierTest extends TestCase
      */
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void
     {
-        self::assertSame($expected, UriModifier::removeEmptyPairs(Uri::fromBaseUri($uri))->__toString());
-        self::assertSame($expected, UriModifier::removeEmptyPairs(Http::fromBaseUri($uri))->__toString());
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Uri::fromClient($uri))->__toString());
+        self::assertSame($expected, UriModifier::removeEmptyPairs(Http::fromClient($uri))->__toString());
     }
 
     public static function removeEmptyPairsProvider(): iterable

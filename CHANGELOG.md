@@ -19,6 +19,9 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `UserInfo::withUser` modifier method
 - `UserInfo::withPass` modifier method
 - `Port::fromNumber` modifier method
+- `Query::parameters` accessing method
+- `Query::parameter` accessing method
+- `Query::hasParameter` accessing method
 
 ### Fixed
 
@@ -27,12 +30,14 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - All components class constructors (except for the `UserInfo` class) are made private use the available named constructors instead
 - Named constructors default value are removed, you need to explicitly add an argument value or use the `::new()` named constructor instead.
 - `UserInfo` class makes a distinction between `null` and the empty string.
+- `Query::has` accessing method accept a variadic parameters to check multiple keys at the same time.
 
 ### Deprecated
 
 - All `createFromString` named constructors are replaced by the `new` named constructor.
 - All `createFromSNull` named constructors are replaced by the `new` named constructor.
 - All remaining named constructors which starts with `createFrom*` replaced by the same method starting with `from*`. For example `Authority::createFromUri` is deprecated in favor of `Authority::fromUri`
+- `Query::params` is replaced by `Query::parameters` and `Query::parameter`
 
 ### Removed
 
@@ -40,7 +45,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `withContent` and `getContent` methods
 - Support for `__set_state`
 - Support for `float` type as possible argument for components
-- `UserInfo::withUserInfo` modifier method use a combinaison of `UserInfo::withUser` and/or `UserInfo::withPass`
+- Support for `int` type as possible argument for components
+- `UserInfo::withUserInfo` modifier method use `UserInfo::withUser` and/or `UserInfo::withPass` instead
 
 ## [2.4.1](https://github.com/thephpleague/uri-components/compare/2.4.0...2.4.1) - 2022-05-26
 

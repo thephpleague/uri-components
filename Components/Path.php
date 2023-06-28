@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use League\Uri\Contracts\PathInterface;
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
@@ -38,7 +37,7 @@ final class Path extends Component implements PathInterface
     /**
      * New instance.
      */
-    private function __construct(Stringable|int|string|null $path)
+    private function __construct(Stringable|string $path)
     {
         $this->path = $this->validate($path);
     }
@@ -46,7 +45,7 @@ final class Path extends Component implements PathInterface
     /**
      * Validate the component content.
      */
-    private function validate(UriComponentInterface|Stringable|int|string|null $path): string
+    private function validate(Stringable|string $path): string
     {
         $path = $this->validateComponent($path);
         if (null === $path) {
@@ -59,7 +58,7 @@ final class Path extends Component implements PathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(Stringable|string|int $value = ''): self
+    public static function new(Stringable|string $value = ''): self
     {
         return new self($value);
     }
@@ -183,7 +182,7 @@ final class Path extends Component implements PathInterface
      */
     public static function createFromString(Stringable|string|int $path): self
     {
-        return self::new($path);
+        return self::new((string) $path);
     }
 
     /**

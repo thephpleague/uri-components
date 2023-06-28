@@ -61,7 +61,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * New instance.
      */
-    private function __construct(Stringable|int|string|null $path)
+    private function __construct(Stringable|string|null $path)
     {
         $this->path = Path::new($this->filterPath(self::filterComponent($path)));
         $is_binary_data = false;
@@ -188,7 +188,7 @@ final class DataPath extends Component implements DataPathInterface
      *
      * @throws SyntaxError If the File is not readable
      */
-    public static function fromFilePath(string $path, $context = null): self
+    public static function fromFileContents(string $path, $context = null): self
     {
         static $fileInfoSupport = null;
         $fileInfoSupport = $fileInfoSupport ?? class_exists(finfo::class);
@@ -371,7 +371,7 @@ final class DataPath extends Component implements DataPathInterface
         return new self($path);
     }
 
-    public function withParameters(Stringable|string|bool|int $parameters): DataPathInterface
+    public function withParameters(Stringable|string $parameters): DataPathInterface
     {
         $parameters = (string) $parameters;
         if ($parameters === $this->getParameters()) {
@@ -412,7 +412,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function createFromFilePath(string $path, $context = null): self
     {
-        return self::fromFilePath($path, $context);
+        return self::fromFileContents($path, $context);
     }
 
     /**

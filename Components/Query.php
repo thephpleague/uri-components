@@ -49,7 +49,7 @@ final class Query extends Component implements QueryInterface
     private readonly array $pairs;
     /** @var non-empty-string */
     private readonly string $separator;
-    private readonly ?array $params;
+    private readonly array $params;
 
     /**
      * Returns a new instance.
@@ -57,7 +57,7 @@ final class Query extends Component implements QueryInterface
      * @param non-empty-string $separator
      */
     private function __construct(
-        Stringable|int|string|null $query,
+        Stringable|string|null $query,
         string $separator = '&',
         int $enc_type = PHP_QUERY_RFC3986
     ) {
@@ -76,32 +76,25 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromParams(array|object $params, string $separator = '&'): self
+    public static function fromParameters(iterable $parameters, string $separator = '&'): self
     {
-        if ($params instanceof QueryInterface) {
-            /** @var array $queryParams */
-            $queryParams = $params->params();
+        if ($parameters instanceof QueryInterface) {
+            return self::fromRFC3986($parameters->value(), $parameters->getSeparator())->withSeparator($separator);
+        }
 
-            return new self(
-                http_build_query($queryParams, '', $separator, PHP_QUERY_RFC3986),
+        $newParams = match (true) {
+            $parameters instanceof Traversable => iterator_to_array($parameters),
+            default => $parameters,
+        };
+
+        return match (true) {
+            [] === $newParams => self::new(),
+            default => new self(
+                http_build_query($newParams, '', $separator, PHP_QUERY_RFC3986),
                 $separator,
                 PHP_QUERY_RFC3986
-            );
-        }
-
-        if ($params instanceof Traversable) {
-            $params = iterator_to_array($params);
-        }
-
-        if ([] === $params) {
-            return new self(null, $separator, PHP_QUERY_RFC3986);
-        }
-
-        return new self(
-            http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
-            $separator,
-            PHP_QUERY_RFC3986
-        );
+            )
+        };
     }
 
     /**
@@ -164,11 +157,10 @@ final class Query extends Component implements QueryInterface
 
     public function getUriComponent(): string
     {
-        if ([] === $this->pairs) {
-            return '';
-        }
-
-        return '?'.$this->value();
+        return match (true) {
+            [] === $this->pairs => '',
+            default => '?'.$this->value(),
+        };
     }
 
     public function toRFC1738(): ?string
@@ -203,9 +195,15 @@ final class Query extends Component implements QueryInterface
         }
     }
 
-    public function has(string $key): bool
+    public function has(string ...$keys): bool
     {
-        return isset(array_flip(array_column($this->pairs, 0))[$key]);
+        foreach ($keys as $key) {
+            if (!isset(array_flip(array_column($this->pairs, 0))[$key])) {
+                return false;
+            }
+        }
+
+        return [] !== $keys;
     }
 
     public function get(string $key): ?string
@@ -224,15 +222,28 @@ final class Query extends Component implements QueryInterface
         return array_column(array_filter($this->pairs, fn (array $pair): bool => $key === $pair[0]), 1);
     }
 
-    public function params(?string $key = null)
+    public function parameters(): iterable
     {
-        return match (true) {
-            null === $key => $this->params,
-            default => $this->params[$key] ?? null,
-        };
+        yield from $this->params;
     }
 
-    public function withSeparator(string $separator): QueryInterface
+    public function parameter(string $name): mixed
+    {
+        return $this->params[$name] ?? null;
+    }
+
+    public function hasParameter(string ...$names): bool
+    {
+        foreach ($names as $name) {
+            if (!isset($this->params[$name])) {
+                return false;
+            }
+        }
+
+        return [] !== $names;
+    }
+
+    public function withSeparator(string $separator): self
     {
         return match (true) {
             $separator === $this->separator => $this,
@@ -241,7 +252,7 @@ final class Query extends Component implements QueryInterface
         };
     }
 
-    public function sort(): QueryInterface
+    public function sort(): self
     {
         if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
             return $this;
@@ -267,7 +278,7 @@ final class Query extends Component implements QueryInterface
         return $pairs;
     }
 
-    public function withoutDuplicates(): QueryInterface
+    public function withoutDuplicates(): self
     {
         if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
             return $this;
@@ -293,7 +304,7 @@ final class Query extends Component implements QueryInterface
         return $pairs;
     }
 
-    public function withoutEmptyPairs(): QueryInterface
+    public function withoutEmptyPairs(): self
     {
         $pairs = array_filter($this->pairs, $this->filterEmptyPair(...));
         if ($pairs === $this->pairs) {
@@ -311,7 +322,7 @@ final class Query extends Component implements QueryInterface
         return '' !== $pair[0] && null !== $pair[1] && '' !== $pair[1];
     }
 
-    public function withoutNumericIndices(): QueryInterface
+    public function withoutNumericIndices(): self
     {
         $pairs = array_map($this->encodeNumericIndices(...), $this->pairs);
         if ($pairs === $this->pairs) {
@@ -337,14 +348,14 @@ final class Query extends Component implements QueryInterface
         return $pair;
     }
 
-    public function withPair(string $key, UriComponentInterface|Stringable|int|string|bool|null $value): QueryInterface
+    public function withPair(string $key, Stringable|string|int|bool|null $value): QueryInterface
     {
         $pairs = $this->addPair($this->pairs, [$key, $this->filterPair($value)]);
-        if ($pairs === $this->pairs) {
-            return $this;
-        }
 
-        return self::fromPairs($pairs, $this->separator);
+        return match (true) {
+            $pairs === $this->pairs => $this,
+            default => self::fromPairs($pairs, $this->separator),
+        };
     }
 
     /**
@@ -382,7 +393,7 @@ final class Query extends Component implements QueryInterface
         return $pairs;
     }
 
-    public function merge(UriComponentInterface|Stringable|int|string|bool|null $query): QueryInterface
+    public function merge(Stringable|string|null $query): QueryInterface
     {
         $pairs = $this->pairs;
         foreach (QueryString::parse(self::filterComponent($query), $this->separator) as $pair) {
@@ -401,7 +412,7 @@ final class Query extends Component implements QueryInterface
      *
      * To be valid the pair must be the null value, a scalar or a collection of scalar and null values.
      */
-    private function filterPair(UriComponentInterface|Stringable|int|string|bool|null $value): ?string
+    private function filterPair(Stringable|string|int|bool|null $value): ?string
     {
         if ($value instanceof UriComponentInterface) {
             return $value->value();
@@ -424,13 +435,13 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $keys_to_remove = array_intersect($keys, array_column($this->pairs, 0));
-        if ([] === $keys_to_remove) {
+        $keysToRemove = array_intersect($keys, array_column($this->pairs, 0));
+        if ([] === $keysToRemove) {
             return $this;
         }
 
         return self::fromPairs(
-            array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keys_to_remove, true)),
+            array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keysToRemove, true)),
             $this->separator
         );
     }
@@ -440,7 +451,7 @@ final class Query extends Component implements QueryInterface
         return self::fromPairs([...$this->pairs, [$key, $this->filterPair($value)]], $this->separator);
     }
 
-    public function append(Stringable|string|int|null|bool $query): QueryInterface
+    public function append(Stringable|string|null $query): QueryInterface
     {
         if ($query instanceof UriComponentInterface) {
             $query = $query->value();
@@ -462,14 +473,14 @@ final class Query extends Component implements QueryInterface
         return '' !== $pair[0] || null !== $pair[1];
     }
 
-    public function withoutParam(string ...$keys): QueryInterface
+    public function withoutParameters(string ...$names): QueryInterface
     {
-        if ([] === $keys) {
+        if ([] === $names) {
             return $this;
         }
 
         $mapper = static fn (string $offset): string => preg_quote($offset, ',').'(\[.*\].*)?';
-        $regexp = ',^('.implode('|', array_map($mapper, $keys)).')?$,';
+        $regexp = ',^('.implode('|', array_map($mapper, $names)).')?$,';
         $filter = fn (array $pair): bool => 1 !== preg_match($regexp, $pair[0]);
 
         $pairs = array_filter($this->pairs, $filter);
@@ -484,17 +495,27 @@ final class Query extends Component implements QueryInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Query::fromParams()
+     * @see Query::fromParameters()
      *
      * @codeCoverageIgnore
      *
+     * @param non-empty-string $separator
+     *
      * Returns a new instance from the result of PHP's parse_str.
      *
-     * @param non-empty-string $separator
+     * @deprecated Since version 7.0.0
      */
-    public static function createFromParams(array|object $params, string $separator = '&'): self
+    public static function createFromParams(iterable|object $params, string $separator = '&'): self
     {
-        return self::fromParams($params, $separator);
+        if (!is_iterable($params)) {
+            return new self(
+                http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
+                $separator,
+                PHP_QUERY_RFC3986
+            );
+        }
+
+        return self::fromParameters($params, $separator);
     }
 
     /**
@@ -543,7 +564,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC3986(Stringable|int|string|null $query = '', string $separator = '&'): self
+    public static function createFromRFC3986(Stringable|string|int|null $query = '', string $separator = '&'): self
     {
         if (is_int($query)) {
             $query = (string) $query;
@@ -564,12 +585,44 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function createFromRFC1738(Stringable|int|string|null $query = '', string $separator = '&'): self
+    public static function createFromRFC1738(Stringable|string|int|null $query = '', string $separator = '&'): self
     {
         if (is_int($query)) {
             $query = (string) $query;
         }
 
         return self::fromRFC1738($query, $separator);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::parameters()
+     * @see Query::parameter()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns the query as a collection of PHP variables or a single variable assign to a specific key
+     */
+    public function params(?string $key = null): mixed
+    {
+        return match (true) {
+            null === $key => $this->parameters(),
+            default => $this->parameter($key),
+        };
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::withoutParameters()
+     *
+     * @codeCoverageIgnore
+     */
+    public function withoutParams(string ...$names): QueryInterface
+    {
+        return $this->withoutParameters(...$names);
     }
 }

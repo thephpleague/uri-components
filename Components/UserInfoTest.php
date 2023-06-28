@@ -29,8 +29,8 @@ final class UserInfoTest extends TestCase
      * @dataProvider userInfoProvider
      */
     public function testConstructor(
-        Stringable|int|string|bool|null $user,
-        Stringable|int|string|bool|null $pass,
+        Stringable|string|null $user,
+        Stringable|string|null $pass,
         ?string $expected_user,
         ?string $expected_pass,
         string $expected_str,

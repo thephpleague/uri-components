@@ -179,10 +179,7 @@ final class Domain extends Component implements DomainHostInterface
         return count($this->labels) > 1 && '' === $this->labels[array_key_first($this->labels)];
     }
 
-    /**
-     * @param UriComponentInterface|HostInterface|Stringable|int|string|null $label
-     */
-    public function prepend($label): DomainHostInterface
+    public function prepend(Stringable|string|int|null $label): DomainHostInterface
     {
         $label = self::filterComponent($label);
         if (null === $label) {
@@ -192,10 +189,7 @@ final class Domain extends Component implements DomainHostInterface
         return new self($label.self::SEPARATOR.$this->value());
     }
 
-    /**
-     * @param UriComponentInterface|HostInterface|Stringable|int|string|null $label
-     */
-    public function append($label): DomainHostInterface
+    public function append(Stringable|string|int|null $label): DomainHostInterface
     {
         $label = self::filterComponent($label);
         if (null === $label) {
@@ -231,18 +225,18 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * @throws OffsetOutOfBounds
      */
-    public function withLabel(int $key, UriComponentInterface|HostInterface|Stringable|int|string|null $label): DomainHostInterface
+    public function withLabel(int $key, Stringable|string|int|null $label): DomainHostInterface
     {
-        $nb_labels = count($this->labels);
-        if ($key < - $nb_labels - 1 || $key > $nb_labels) {
+        $nbLabels = count($this->labels);
+        if ($key < - $nbLabels - 1 || $key > $nbLabels) {
             throw new OffsetOutOfBounds(sprintf('No label can be added with the submitted key : `%s`.', $key));
         }
 
         if (0 > $key) {
-            $key += $nb_labels;
+            $key += $nbLabels;
         }
 
-        if ($nb_labels === $key) {
+        if ($nbLabels === $key) {
             return $this->append($label);
         }
 
@@ -250,11 +244,10 @@ final class Domain extends Component implements DomainHostInterface
             return $this->prepend($label);
         }
 
-        if (!$label instanceof HostInterface) {
-            $label = null === $label ? Host::new() : Host::new((string) $label);
+        if (!$label instanceof HostInterface && null !== $label) {
+            $label = Host::new((string) $label)->value();
         }
 
-        $label = $label->value();
         if ($label === $this->labels[$key]) {
             return $this;
         }
@@ -291,7 +284,7 @@ final class Domain extends Component implements DomainHostInterface
 
     public function clear(): self
     {
-        return new self(Host::new());
+        return self::new();
     }
 
     public function slice(int $offset, int $length = null): self
@@ -302,11 +295,12 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         $labels = array_slice($this->labels, $offset, $length, true);
-        if ($labels === $this->labels) {
-            return $this;
-        }
 
-        return new self([] === $labels ? Host::new() : Host::new(implode('.', array_reverse($labels))));
+        return match (true) {
+            $labels === $this->labels => $this,
+            [] !== $labels => self::new(implode('.', array_reverse($labels))),
+            default => self::new(),
+        };
     }
 
     /**

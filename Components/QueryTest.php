@@ -12,8 +12,7 @@
 namespace League\Uri\Components;
 
 use ArrayIterator;
-use DateInterval;
-use League\Uri\Contracts\UriComponentInterface;
+use Generator;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -163,7 +162,7 @@ final class QueryTest extends TestCase
     /**
      * @dataProvider validAppendValue
      */
-    public function testAppend(?string $query, Stringable|string|int|bool|null $append_data, ?string $expected): void
+    public function testAppend(?string $query, Stringable|string|null $append_data, ?string $expected): void
     {
         $base = Query::fromRFC3986($query);
 
@@ -231,11 +230,11 @@ final class QueryTest extends TestCase
     public function testParams(): void
     {
         $query = Query::fromRFC3986('foo[]=bar&foo[]=baz');
-        /** @var array $params */
-        $params = $query->params();
-        self::assertCount(1, $params);
-        self::assertSame(['bar', 'baz'], $query->params('foo'));
-        self::assertNull($query->params('foo[]'));
+        /** @var Generator $params */
+        $params = $query->parameters();
+        self::assertCount(1, iterator_to_array($params));
+        self::assertSame(['bar', 'baz'], $query->parameter('foo'));
+        self::assertNull($query->parameter('foo[]'));
     }
 
     /**
@@ -286,7 +285,7 @@ final class QueryTest extends TestCase
      */
     public function testwithoutParam(array $origin, array $without, string $expected): void
     {
-        self::assertSame($expected, (string) Query::fromParams($origin)->withoutParam(...$without));
+        self::assertSame($expected, (string) Query::fromParameters($origin)->withoutParameters(...$without));
     }
 
     public static function withoutParamProvider(): array
@@ -345,18 +344,22 @@ final class QueryTest extends TestCase
             ],
         ];
 
-        $query = Query::fromParams($data);
+        $query = Query::fromParameters($data);
         self::assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->value());
-        $new_query = $query->withoutParam('foo[0]');
-        self::assertSame('foo%5B1%5D=baz', $new_query->value());
-        self::assertSame(['foo' => [1 => 'baz']], $new_query->params());
+
+        $newQuery = $query->withoutParameters('foo[0]');
+        /** @var Generator $newParameters */
+        $newParameters = $newQuery->parameters();
+
+        self::assertSame('foo%5B1%5D=baz', $newQuery->value());
+        self::assertSame(['foo' => [1 => 'baz']], iterator_to_array($newParameters));
     }
 
     public function testWithoutParamVariadicArgument(): void
     {
         $query = Query::fromRFC3986('foo&bar=baz');
 
-        self::assertSame($query, $query->withoutParam());
+        self::assertSame($query, $query->withoutParameters());
     }
 
     public function testCreateFromParamsWithTraversable(): void
@@ -367,14 +370,18 @@ final class QueryTest extends TestCase
                 'baz',
             ],
         ];
-        $query = Query::fromParams(new ArrayIterator($data));
-        self::assertSame($data, $query->params());
+
+        $query = Query::fromParameters(new ArrayIterator($data));
+        /** @var Generator $parameters */
+        $parameters = $query->parameters();
+
+        self::assertSame($data, iterator_to_array($parameters));
     }
 
     public function testCreateFromParamsWithQueryObject(): void
     {
         $query = Query::fromRFC3986('a=1&b=2');
-        self::assertEquals($query->value(), Query::fromParams($query)->value());
+        self::assertEquals($query->value(), Query::fromParameters($query)->value());
     }
 
     public static function testWithoutNumericIndices(): void
@@ -396,13 +403,17 @@ final class QueryTest extends TestCase
 
         $without_indices = 'filter%5Bfoo%5D%5B%5D=bar&filter%5Bfoo%5D%5B%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar';
 
-        $query = Query::fromParams($data);
+        $query = Query::fromParameters($data);
+        /** @var Generator $parameters */
+        $parameters = $query->parameters();
         self::assertSame($with_indices, $query->value());
-        self::assertSame($data, $query->params());
+        self::assertSame($data, iterator_to_array($parameters));
 
-        $new_query = $query->withoutNumericIndices();
-        self::assertSame($without_indices, $new_query->value());
-        self::assertSame($data, $new_query->params());
+        $newQuery = $query->withoutNumericIndices();
+        /** @var Generator $newParameters */
+        $newParameters = $newQuery->parameters();
+        self::assertSame($without_indices, $newQuery->value());
+        self::assertSame($data, iterator_to_array($newParameters));
     }
 
     public function testWithoutNumericIndicesRetursSameInstance(): void
@@ -419,48 +430,40 @@ final class QueryTest extends TestCase
 
     public function testWithoutNumericIndicesDoesNotAffectPairValue(): void
     {
-        $query = Query::fromParams(['foo' => 'bar[3]']);
+        $query = Query::fromParameters(['foo' => 'bar[3]']);
         self::assertSame($query, $query->withoutNumericIndices());
     }
 
     public function testCreateFromParamsOnEmptyParams(): void
     {
-        $query = Query::fromParams([]);
+        $query = Query::fromParameters([]);
         self::assertSame($query, $query->withoutNumericIndices());
-    }
-
-    public function testCreateFromParamsWithObject(): void
-    {
-        $query = Query::fromParams(new DateInterval('PT1H'));
-        self::assertTrue($query->has('f'));
-        self::assertTrue($query->has('days'));
-        self::assertTrue($query->has('y'));
     }
 
     public function testGetContentOnEmptyContent(): void
     {
-        self::assertNull(Query::fromParams([])->value());
+        self::assertNull(Query::fromParameters([])->value());
     }
 
     public function testGetContentOnHavingContent(): void
     {
-        self::assertSame('foo=bar', Query::fromParams(['foo' => 'bar'])->value());
+        self::assertSame('foo=bar', Query::fromParameters(['foo' => 'bar'])->value());
     }
 
     public function testGetContentOnToString(): void
     {
-        self::assertSame('foo=bar', (string) Query::fromParams(['foo' => 'bar']));
+        self::assertSame('foo=bar', (string) Query::fromParameters(['foo' => 'bar']));
     }
 
     public function testWithSeperatorOnHavingSeparator(): void
     {
-        $query = Query::fromParams(['foo' => '/bar']);
+        $query = Query::fromParameters(['foo' => '/bar']);
         self::assertSame($query, $query->withSeparator('&'));
     }
 
     public function testWithoutNumericIndicesOnEmptyContent(): void
     {
-        $query = Query::fromParams([]);
+        $query = Query::fromParameters([]);
         self::assertSame($query, $query->withoutNumericIndices());
     }
 
@@ -546,7 +549,7 @@ final class QueryTest extends TestCase
     /**
      * @dataProvider mergeBasicProvider
      */
-    public function testMergeBasic(string $src, UriComponentInterface|Stringable|int|string|bool|null $dest, string $expected): void
+    public function testMergeBasic(string $src, Stringable|string|null $dest, string $expected): void
     {
         self::assertSame($expected, (string) (Query::fromRFC3986($src))->merge($dest));
     }

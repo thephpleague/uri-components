@@ -38,7 +38,7 @@ final class UriModifier
      */
     public static function appendQuery(
         Stringable|string $uri,
-        Stringable|int|string|null $query
+        Stringable|string|null $query
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -52,7 +52,7 @@ final class UriModifier
      */
     public static function mergeQuery(
         Stringable|string $uri,
-        Stringable|int|string|null $query
+        Stringable|string|null $query
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
 
@@ -96,7 +96,7 @@ final class UriModifier
         $uri = self::filterUri($uri);
 
         return $uri->withQuery(
-            self::normalizeComponent(Query::fromUri($uri)->withoutParam(...$keys)->value(), $uri)
+            self::normalizeComponent(Query::fromUri($uri)->withoutParameters(...$keys)->value(), $uri)
         );
     }
 
@@ -410,10 +410,8 @@ final class UriModifier
     /**
      * Replace the URI path basename.
      */
-    public static function replaceBasename(
-        Stringable|string $uri,
-        Stringable|string|null $basename
-    ): Psr7UriInterface|UriInterface {
+    public static function replaceBasename(Stringable|string $uri, Stringable|string $basename): Psr7UriInterface|UriInterface
+    {
         $uri = self::filterUri($uri);
 
         return self::normalizePath($uri, HierarchicalPath::fromUri($uri)->withBasename($basename));
@@ -422,10 +420,8 @@ final class UriModifier
     /**
      * Replace the data URI path parameters.
      */
-    public static function replaceDataUriParameters(
-        Stringable|string $uri,
-        Stringable|string $parameters
-    ): Psr7UriInterface|UriInterface {
+    public static function replaceDataUriParameters(Stringable|string $uri, Stringable|string $parameters): Psr7UriInterface|UriInterface
+    {
         $uri = self::filterUri($uri);
 
         return $uri->withPath(DataPath::fromUri($uri)->withParameters($parameters)->toString());
@@ -434,10 +430,8 @@ final class UriModifier
     /**
      * Replace the URI path dirname.
      */
-    public static function replaceDirname(
-        Stringable|string $uri,
-        Stringable|string $dirname
-    ): Psr7UriInterface|UriInterface {
+    public static function replaceDirname(Stringable|string $uri, Stringable|string $dirname): Psr7UriInterface|UriInterface
+    {
         $uri = self::filterUri($uri);
 
         return self::normalizePath($uri, HierarchicalPath::fromUri($uri)->withDirname($dirname));
@@ -446,10 +440,8 @@ final class UriModifier
     /**
      * Replace the URI path basename extension.
      */
-    public static function replaceExtension(
-        Stringable|string $uri,
-        Stringable|string|null $extension
-    ): Psr7UriInterface|UriInterface {
+    public static function replaceExtension(Stringable|string $uri, Stringable|string $extension): Psr7UriInterface|UriInterface
+    {
         $uri = self::filterUri($uri);
 
         return $uri->withPath(HierarchicalPath::fromUri($uri)->withExtension($extension)->toString());
