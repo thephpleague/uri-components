@@ -8,20 +8,22 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - `value` method to replace the removed `getContent` method.
 - requires `League\Uri` package.
-- `Scheme::new` named constructor
-- `UserInfo::new` named constructor
-- `Host::new` named constructor
-- `Domain::new` named constructor
-- `Fragment::new` named constructor
-- `Query::new` named constructor
-- `Path::new` named constructor
-- `DataPath::new` named constructor
-- `UserInfo::withUser` modifier method
-- `UserInfo::withPass` modifier method
-- `Port::fromNumber` modifier method
-- `Query::parameters` accessing method
-- `Query::parameter` accessing method
-- `Query::hasParameter` accessing method
+- `League\Uri\Components\Scheme::new` named constructor
+- `League\Uri\Components\UserInfo::new` named constructor
+- `League\Uri\Components\Host::new` named constructor
+- `League\Uri\Components\Domain::new` named constructor
+- `League\Uri\Components\Fragment::new` named constructor
+- `League\Uri\Components\Query::new` named constructor
+- `League\Uri\Components\Path::new` named constructor
+- `League\Uri\Components\DataPath::new` named constructor
+- `League\Uri\Components\UserInfo::withUser` modifier method
+- `League\Uri\Components\UserInfo::withPass` modifier method
+- `League\Uri\Components\Port::fromNumber` modifier method
+- `League\Uri\Components\Query::parameters` accessing method
+- `League\Uri\Components\Query::parameter` accessing method
+- `League\Uri\Components\Query::hasParameter` accessing method
+- `League\Uri\IPv4Calculators\MissingIPv4Calculator` exception
+- `League\Uri\Components\OffsetOutOfBounds` exception added
 
 ### Fixed
 
@@ -47,6 +49,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Support for `float` type as possible argument for components
 - Support for `int` type as possible argument for components
 - `UserInfo::withUserInfo` modifier method use `UserInfo::withUser` and/or `UserInfo::withPass` instead
+- Remove the `Exceptions` namespace
+- `League\Uri\Exceptions\IPv4CalculatorMissing` use `League\Uri\IPv4Calculators\MissingIPv4Calculator` instead
+- `League\Uri\Exceptions\OffsetOutOfBounds` use `League\Uri\Components\OffsetOutOfBounds` instead
+
 
 ## [2.4.1](https://github.com/thephpleague/uri-components/compare/2.4.0...2.4.1) - 2022-05-26
 

@@ -11,11 +11,11 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Exceptions;
+namespace League\Uri\IPv4Calculators;
 
 use InvalidArgumentException;
 use League\Uri\Contracts\UriException;
 
-class IPv4CalculatorMissing extends InvalidArgumentException implements UriException
+class MissingIPv4Calculator extends InvalidArgumentException implements UriException
 {
 }

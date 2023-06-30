@@ -18,10 +18,10 @@ use League\Uri\Components\Host;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\IPv4Calculators\BCMathCalculator;
 use League\Uri\IPv4Calculators\GMPCalculator;
 use League\Uri\IPv4Calculators\IPv4Calculator;
+use League\Uri\IPv4Calculators\MissingIPv4Calculator;
 use League\Uri\IPv4Calculators\NativeCalculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -87,7 +87,7 @@ final class IPv4Normalizer
     /**
      * Returns an instance using a detected calculator depending on the PHP environment.
      *
-     * @throws IPv4CalculatorMissing If no IPv4Calculator implementing object can be used
+     * @throws MissingIPv4Calculator If no IPv4Calculator implementing object can be used
      *                               on the platform
      *
      * @codeCoverageIgnore
@@ -98,7 +98,7 @@ final class IPv4Normalizer
             extension_loaded('gmp') => self::fromGMP(),
             extension_loaded('bcmath') => self::fromBCMath(),
             4 < PHP_INT_SIZE => self::fromNative(),
-            default => throw new IPv4CalculatorMissing(sprintf(
+            default => throw new MissingIPv4Calculator(sprintf(
                 'No %s found. Use a x.64 PHP build or install the GMP or the BCMath extension.',
                 IPv4Calculator::class
             ))

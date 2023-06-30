@@ -17,7 +17,6 @@ use Iterator;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\SegmentedPathInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;

@@ -19,7 +19,6 @@ use League\Uri\Contracts\DomainHostInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;

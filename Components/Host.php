@@ -18,9 +18,9 @@ use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnaConversionFailed;
-use League\Uri\Exceptions\IPv4CalculatorMissing;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
+use League\Uri\IPv4Calculators\MissingIPv4Calculator;
 use League\Uri\IPv4Normalizer;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -241,7 +241,7 @@ final class Host extends Component implements IpHostInterface
     /**
      * Returns a host from an IP address.
      *
-     * @throws IPv4CalculatorMissing If detecting IPv4 is not possible
+     * @throws MissingIPv4Calculator If detecting IPv4 is not possible
      * @throws SyntaxError           If the $ip can not be converted into a Host
      */
     public static function fromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
@@ -426,6 +426,8 @@ final class Host extends Component implements IpHostInterface
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
+     * @throws \League\Uri\IPv4Calculators\MissingIPv4Calculator If detecting IPv4 is not possible
+     * @throws SyntaxError                                       If the $ip can not be converted into a Host
      * @deprecated Since version 7.0.0
      * @see Host::fromIp()
      *
@@ -433,8 +435,6 @@ final class Host extends Component implements IpHostInterface
      *
      * Returns a host from an IP address.
      *
-     * @throws IPv4CalculatorMissing If detecting IPv4 is not possible
-     * @throws SyntaxError           If the $ip can not be converted into a Host
      */
     public static function createFromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
     {
