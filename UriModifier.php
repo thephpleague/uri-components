@@ -467,6 +467,7 @@ final class UriModifier
     {
         return match (true) {
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
+            $uri instanceof BaseUri => $uri->value,
             default => Uri::new($uri),
         };
     }

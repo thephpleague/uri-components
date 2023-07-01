@@ -18,7 +18,6 @@ use League\Uri\Contracts\PortInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function filter_var;
@@ -46,10 +45,7 @@ final class Port extends Component implements PortInterface
      */
     public static function fromUri(Stringable|string $uri): self
     {
-        return match (true) {
-            $uri instanceof UriInterface || $uri instanceof Psr7UriInterface => new self($uri->getPort()),
-            default => new self(Uri::new($uri)->getPort()),
-        };
+        return new self(self::filterUri($uri)->getPort());
     }
 
     /**

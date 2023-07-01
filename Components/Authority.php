@@ -20,7 +20,6 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -63,20 +62,13 @@ final class Authority extends Component implements AuthorityInterface
      */
     public static function fromUri(Stringable|string $uri): self
     {
-        if ($uri instanceof Psr7UriInterface) {
-            $authority = $uri->getAuthority();
-            if ('' === $authority) {
-                return self::new();
-            }
-
-            return new self($authority);
+        $uri = self::filterUri($uri);
+        $authority = $uri->getAuthority();
+        if ($uri instanceof Psr7UriInterface && '' === $authority) {
+            return self::new();
         }
 
-        if ($uri instanceof UriInterface) {
-            return new self($uri->getAuthority());
-        }
-
-        return new self(Uri::new($uri)->getAuthority());
+        return new self($authority);
     }
 
     /**

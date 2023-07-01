@@ -22,7 +22,6 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
 use League\Uri\IPv4Calculators\MissingIPv4Calculator;
 use League\Uri\IPv4Normalizer;
-use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function compact;
@@ -275,20 +274,13 @@ final class Host extends Component implements IpHostInterface
      */
     public static function fromUri(Stringable|string $uri): self
     {
-        if ($uri instanceof UriInterface) {
+        $uri = self::filterUri($uri);
+        $component = $uri->getHost();
+        if ($uri instanceof  UriInterface || '' !== $component) {
             return new self($uri->getHost());
         }
 
-        if ($uri instanceof Psr7UriInterface) {
-            $component = $uri->getHost();
-            if ('' === $component) {
-                return self::new();
-            }
-
-            return new self($component);
-        }
-
-        return new self(Uri::new($uri)->getHost());
+        return self::new();
     }
 
     /**

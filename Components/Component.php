@@ -13,8 +13,12 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\BaseUri;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Uri;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function preg_match;
 use function preg_replace_callback;
@@ -53,6 +57,15 @@ abstract class Component implements UriComponentInterface
     public function __toString(): string
     {
         return $this->toString();
+    }
+
+    final protected static function filterUri(Stringable|string $uri): UriInterface|Psr7UriInterface
+    {
+        return match (true) {
+            $uri instanceof BaseUri => $uri->value,
+            $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
+            default => Uri::new($uri),
+        };
     }
 
     /**
