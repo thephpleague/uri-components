@@ -466,6 +466,7 @@ final class UriModifier
     private static function filterUri(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
         return match (true) {
+            $uri instanceof BaseUri => $uri->uri(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
             default => Uri::new($uri),
         };
