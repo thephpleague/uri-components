@@ -272,6 +272,11 @@ final class DataPath extends Component implements DataPathInterface
         return $this->path->hasTrailingSlash();
     }
 
+    public function hasNoTrailingSlash(): bool
+    {
+        return $this->path->hasNoTrailingSlash();
+    }
+
     public function decoded(): string
     {
         return $this->path->decoded();
