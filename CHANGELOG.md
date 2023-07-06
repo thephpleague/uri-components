@@ -33,6 +33,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Named constructors default value are removed, you need to explicitly add an argument value or use the `::new()` named constructor instead.
 - `UserInfo` class makes a distinction between `null` and the empty string.
 - `Query::has` accessing method accept a variadic parameters to check multiple keys at the same time.
+- `Domain` value can be `null` or a non-empty string previously it would trigger an exception
 
 ### Deprecated
 

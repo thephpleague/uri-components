@@ -267,7 +267,7 @@ final class HostTest extends TestCase
             'too long label' => ['host' => $tooLongLabel, 'expectedIsDomain' => false],
             'empty string host' => ['host' => '', 'expectedIsDomain' => false],
             'single dot' => ['host' => '.', 'expectedIsDomain' => false],
-            'null string host' => ['host' => null, 'expectedIsDomain' => false],
+            'null string host' => ['host' => null, 'expectedIsDomain' => true],
             'multiple domain with a dot ending' => ['host' => 'ulb.ac.be.', 'expectedIsDomain' => true],
         ];
     }

@@ -24,7 +24,6 @@ use League\Uri\IPv4Calculators\MissingIPv4Calculator;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use function compact;
 use function explode;
 use function filter_var;
 use function in_array;
@@ -127,8 +126,25 @@ final class Host extends Component implements IpHostInterface
         $is_domain = false;
         $ip_version = null;
         $has_zone_identifier = false;
-        if (null === $host || '' === $host) {
-            return compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
+
+        if (null === $host) {
+            $is_domain = true;
+
+            return [
+                'host' => $host,
+                'is_domain' => $is_domain,
+                'ip_version' => $ip_version,
+                'has_zone_identifier' => $has_zone_identifier,
+            ];
+        }
+
+        if ('' === $host) {
+            return [
+                'host' => $host,
+                'is_domain' => $is_domain,
+                'ip_version' => $ip_version,
+                'has_zone_identifier' => $has_zone_identifier,
+            ];
         }
 
         static $inMemoryCache = [];
@@ -143,7 +159,12 @@ final class Host extends Component implements IpHostInterface
         if (false !== filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $ip_version = '4';
 
-            return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
+            return $inMemoryCache[$host] = [
+                'host' => $host,
+                'is_domain' => $is_domain,
+                'ip_version' => $ip_version,
+                'has_zone_identifier' => $has_zone_identifier,
+            ];
         }
 
         if ('[' === $host[0] && str_ends_with($host, ']')) {
@@ -152,13 +173,23 @@ final class Host extends Component implements IpHostInterface
                 $ip_version = '6';
                 $has_zone_identifier = str_contains($ip_host, '%');
 
-                return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
+                return $inMemoryCache[$host] = [
+                    'host' => $host,
+                    'is_domain' => $is_domain,
+                    'ip_version' => $ip_version,
+                    'has_zone_identifier' => $has_zone_identifier,
+                ];
             }
 
             if (1 === preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
                 $ip_version = $matches['version'];
 
-                return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
+                return $inMemoryCache[$host] = [
+                    'host' => $host,
+                    'is_domain' => $is_domain,
+                    'ip_version' => $ip_version,
+                    'has_zone_identifier' => $has_zone_identifier,
+                ];
             }
 
             throw new SyntaxError(sprintf('`%s` is an invalid IP literal format.', $host));
@@ -178,7 +209,12 @@ final class Host extends Component implements IpHostInterface
                 Idna::toUnicode($host, Idna::IDNA2008_UNICODE)->result();
             }
 
-            return $inMemoryCache[$host] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
+            return $inMemoryCache[$host] = [
+                'host' => $host,
+                'is_domain' => $is_domain,
+                'ip_version' => $ip_version,
+                'has_zone_identifier' => $has_zone_identifier,
+            ];
         }
 
         if ($is_ascii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
@@ -190,11 +226,15 @@ final class Host extends Component implements IpHostInterface
             throw IdnaConversionFailed::dueToIDNAError($domain_name, $info);
         }
 
-        $unicodeHost = $host;
         $host = $info->result();
         $is_domain = $this->isValidDomain($host);
 
-        return $inMemoryCache[$unicodeHost] = compact('host', 'is_domain', 'ip_version', 'has_zone_identifier');
+        return $inMemoryCache[$host] = [
+            'host' => $host,
+            'is_domain' => $is_domain,
+            'ip_version' => $ip_version,
+            'has_zone_identifier' => $has_zone_identifier,
+        ];
     }
 
     /**

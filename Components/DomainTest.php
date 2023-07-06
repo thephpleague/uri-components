@@ -122,7 +122,6 @@ final class DomainTest extends TestCase
     public static function invalidDomainProvider(): array
     {
         return [
-            'null' => [null],
             'empty string' => [''],
             'ipv4' => ['127.0.0.1'],
             'ipv6' => ['::1'],
@@ -250,10 +249,9 @@ final class DomainTest extends TestCase
         Domain::fromLabels('');
     }
 
-    public function testCreateFromLabelsFailedWithEmptyLabel(): void
+    public function testCreateFromLabelsSucceedsWithEmptyLabel(): void
     {
-        $this->expectException(SyntaxError::class);
-        Domain::fromLabels();
+        self::assertNull(Domain::fromLabels()->value());
     }
 
     public function testGet(): void
@@ -448,24 +446,6 @@ final class DomainTest extends TestCase
                 'uri' => Uri::new('http://example.com?foo=bar'),
                 'expected' => 'example.com',
             ],
-        ];
-    }
-
-    /**
-     * @dataProvider provideInvalidDomainName
-     */
-    public function testCreateFromUriThrowsSyntaxtError(Psr7UriInterface $uri): void
-    {
-        $this->expectException(SyntaxError::class);
-
-        Domain::fromUri($uri);
-    }
-
-    public static function provideInvalidDomainName(): iterable
-    {
-        return [
-            'PSR-7 URI object with no host' => [Http::new('path/to/the/sky?foo')],
-            'PSR-7 URI object with empty string host' => [Http::new('file:///path/to/you')],
         ];
     }
 

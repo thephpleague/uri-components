@@ -81,6 +81,10 @@ final class Domain extends Component implements DomainHostInterface
             $hostLabels[] = $label;
         }
 
+        if ([] === $hostLabels) {
+            return new self(null);
+        }
+
         return self::new(implode(self::SEPARATOR, array_reverse($hostLabels)));
     }
 
