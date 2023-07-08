@@ -44,11 +44,11 @@ final class Fragment extends Component implements FragmentInterface
     {
         $uri = self::filterUri($uri);
         $component = $uri->getFragment();
-        if ($uri instanceof UriInterface || '' !== $component) {
-            return new self($component);
-        }
 
-        return new self(null);
+        return match (true) {
+            $uri instanceof UriInterface, '' !== $component => new self($component),
+            default => new self(null),
+        };
     }
 
     public function value(): ?string

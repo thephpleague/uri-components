@@ -58,9 +58,9 @@ final class Query extends Component implements QueryInterface
     private function __construct(
         Stringable|string|null $query,
         string $separator = '&',
-        int $enc_type = PHP_QUERY_RFC3986
+        int $encType = PHP_QUERY_RFC3986
     ) {
-        $this->pairs = QueryString::parse($query, $separator, $enc_type);
+        $this->pairs = QueryString::parse($query, $separator, $encType);
         $this->params = QueryString::convert($this->pairs);
         $this->separator = $separator;
     }
@@ -116,8 +116,8 @@ final class Query extends Component implements QueryInterface
         $component = $uri->getQuery();
 
         return match (true) {
-            '' === $component && $uri instanceof Psr7UriInterface => new self(null),
-            default => new self($component),
+            $uri instanceof UriInterface, '' !== $component => new self($component),
+            default => new self(null),
         };
     }
 

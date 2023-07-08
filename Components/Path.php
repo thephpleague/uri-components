@@ -70,21 +70,16 @@ final class Path extends Component implements PathInterface
         $uri = self::filterUri($uri);
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
-        if (null === $authority || '' === $authority || '' === $path || '/' === $path[0]) {
-            return new self($path);
-        }
 
-        return new self('/'.$path);
+        return match (true) {
+            null === $authority, '' === $authority, '' === $path, '/' === $path[0] => new self($path),
+            default => new self('/'.$path),
+        };
     }
 
     public function value(): ?string
     {
         return $this->encodeComponent($this->path, self::REGEXP_PATH_ENCODING);
-    }
-
-    public function getUriComponent(): string
-    {
-        return (string) $this->value();
     }
 
     public function decoded(): string

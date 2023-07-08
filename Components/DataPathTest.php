@@ -102,7 +102,7 @@ final class DataPathTest extends TestCase
      */
     public function testDefaultConstructor(string $path, string $expected): void
     {
-        self::assertSame($expected, (string) DataPath::new($path));
+        self::assertSame($expected, DataPath::new($path)->toString());
     }
 
     public static function validPathContent(): array
@@ -235,7 +235,7 @@ final class DataPathTest extends TestCase
         $uri = DataPath::fromFileContents($this->rootPath.'/red-nose.gif');
         $res = $uri->save($newFilePath);
 
-        self::assertSame((string) $uri, (string) DataPath::fromFileContents($newFilePath));
+        self::assertSame($uri->toString(), DataPath::fromFileContents($newFilePath)->toString());
 
         // Ensure file handle of \SplFileObject gets closed.
         unset($res);

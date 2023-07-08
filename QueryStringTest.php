@@ -55,7 +55,7 @@ final class QueryStringTest extends TestCase
     /**
      * @dataProvider extractQueryProvider
      */
-    public function testExtractQuery(Stringable|string|float|int|null|bool $query, array $expectedData): void
+    public function testExtractQuery(Stringable|string|null|bool $query, array $expectedData): void
     {
         self::assertSame($expectedData, QueryString::extract($query));
     }
@@ -146,7 +146,7 @@ final class QueryStringTest extends TestCase
      *
      * @param non-empty-string $separator
      */
-    public function testParse(Stringable|string|float|int|null|bool $query, string $separator, array $expected, int $encoding): void
+    public function testParse(Stringable|string|null|bool $query, string $separator, array $expected, int $encoding): void
     {
         self::assertSame($expected, QueryString::parse($query, $separator, $encoding));
     }

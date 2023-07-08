@@ -232,11 +232,6 @@ final class DataPath extends Component implements DataPathInterface
         return $this->path->value();
     }
 
-    public function getUriComponent(): string
-    {
-        return (string) $this->value();
-    }
-
     public function getData(): string
     {
         return $this->document;

@@ -81,11 +81,11 @@ final class QueryString
      * @return array<int, array{0:string, 1:string|null}>
      */
     public static function parse(
-        UriComponentInterface|Stringable|float|int|string|bool|null $query,
+        Stringable|string|bool|null $query,
         string $separator = '&',
-        int $enc_type = PHP_QUERY_RFC3986
+        int $encType = PHP_QUERY_RFC3986
     ): array {
-        $query = self::filterQuery($query, $separator, $enc_type);
+        $query = self::filterQuery($query, $separator, $encType);
 
         return match (true) {
             null === $query => [],
@@ -102,11 +102,11 @@ final class QueryString
      * @param non-empty-string $separator
      */
     private static function filterQuery(
-        UriComponentInterface|Stringable|string|int|float|bool|null $query,
+        Stringable|string|bool|null $query,
         string $separator,
-        int $enc_type
+        int $encType
     ): ?string {
-        self::assertValidRfc($separator, $enc_type);
+        self::assertValidRfc($separator, $encType);
 
         if ($query instanceof UriComponentInterface) {
             $query = $query->value();
@@ -125,18 +125,18 @@ final class QueryString
         return match (true) {
             '' === $query => '',
             1 === preg_match(self::REGEXP_INVALID_CHARS, $query) => throw new SyntaxError(sprintf('Invalid query string: %s', $query)),
-            PHP_QUERY_RFC1738 === $enc_type => str_replace('+', ' ', $query),
+            PHP_QUERY_RFC1738 === $encType => str_replace('+', ' ', $query),
             default => $query,
         };
     }
 
-    private static function assertValidRfc(string $separator, int $enc_type): void
+    private static function assertValidRfc(string $separator, int $encType): void
     {
         if ('' === $separator) {
             throw new SyntaxError('The separator character can not be the empty string.');
         }
 
-        if (!isset(self::ENCODING_LIST[$enc_type])) {
+        if (!isset(self::ENCODING_LIST[$encType])) {
             throw new SyntaxError('Unknown or Unsupported encoding');
         }
     }
@@ -214,15 +214,15 @@ final class QueryString
      * @throws SyntaxError If the encoding type is invalid
      * @throws SyntaxError If a pair is invalid
      */
-    public static function build(iterable $pairs, string $separator = '&', int $enc_type = PHP_QUERY_RFC3986): ?string
+    public static function build(iterable $pairs, string $separator = '&', int $encType = PHP_QUERY_RFC3986): ?string
     {
-        self::assertValidRfc($separator, $enc_type);
+        self::assertValidRfc($separator, $encType);
 
         self::$regexpValue = '/(%[A-Fa-f0-9]{2})|[^A-Za-z0-9_\-\.~'.preg_quote(
             str_replace(
                 html_entity_decode($separator, ENT_HTML5, 'UTF-8'),
                 '',
-                self::ENCODING_LIST[$enc_type]['suffixValue']
+                self::ENCODING_LIST[$encType]['suffixValue']
             ),
             '/'
         ).']+/ux';
@@ -231,7 +231,7 @@ final class QueryString
             str_replace(
                 html_entity_decode($separator, ENT_HTML5, 'UTF-8'),
                 '',
-                self::ENCODING_LIST[$enc_type]['suffixKey']
+                self::ENCODING_LIST[$encType]['suffixKey']
             ),
             '/'
         ).']+/ux';
@@ -246,7 +246,7 @@ final class QueryString
         }
 
         $query = implode($separator, $res);
-        if (PHP_QUERY_RFC1738 === $enc_type) {
+        if (PHP_QUERY_RFC1738 === $encType) {
             return str_replace(['+', '%20'], ['%2B', '+'], $query);
         }
 
@@ -291,11 +291,10 @@ final class QueryString
      */
     private static function encodeMatches(array $matches): string
     {
-        if (1 === preg_match(self::REGEXP_UNRESERVED_CHAR, rawurldecode($matches[0]))) {
-            return rawurlencode($matches[0]);
-        }
-
-        return $matches[0];
+        return match (true) {
+            1 === preg_match(self::REGEXP_UNRESERVED_CHAR, rawurldecode($matches[0])) => rawurlencode($matches[0]),
+            default => $matches[0],
+        };
     }
 
     /**
@@ -311,11 +310,11 @@ final class QueryString
      * @param non-empty-string $separator
      */
     public static function extract(
-        Stringable|float|int|string|bool|null $query,
+        Stringable|string|bool|null $query,
         string $separator = '&',
-        int $enc_type = PHP_QUERY_RFC3986
+        int $encType = PHP_QUERY_RFC3986
     ): array {
-        $query = self::filterQuery($query, $separator, $enc_type);
+        $query = self::filterQuery($query, $separator, $encType);
 
         return match (true) {
             null === $query || '' === $query => [],

@@ -51,10 +51,15 @@ abstract class Component implements UriComponentInterface
 
     public function toString(): string
     {
-        return (string) $this->value();
+        return $this->value() ?? '';
     }
 
     public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    public function getUriComponent(): string
     {
         return $this->toString();
     }
@@ -71,14 +76,9 @@ abstract class Component implements UriComponentInterface
     /**
      * Validate the component content.
      */
-    protected function validateComponent(UriComponentInterface|Stringable|int|string|bool|null $component): ?string
+    protected function validateComponent(Stringable|int|string|null $component): ?string
     {
-        $component = self::filterComponent($component);
-        if (null === $component) {
-            return null;
-        }
-
-        return $this->decodeComponent($component);
+        return $this->decodeComponent(self::filterComponent($component));
     }
 
     /**
@@ -86,30 +86,25 @@ abstract class Component implements UriComponentInterface
      *
      * @throws SyntaxError If the component can not be converted to a string or null
      */
-    protected static function filterComponent(Stringable|int|string|bool|null $component): ?string
+    final protected static function filterComponent(Stringable|int|string|null $component): ?string
     {
-        if ($component instanceof UriComponentInterface) {
-            return $component->value();
-        }
-
-        if (null === $component) {
-            return null;
-        }
-
-        $component = (string) $component;
-        if (1 !== preg_match(self::REGEXP_INVALID_URI_CHARS, $component)) {
-            return $component;
-        }
-
-        throw new SyntaxError(sprintf('Invalid component string: %s.', $component));
+        return match (true) {
+            $component instanceof UriComponentInterface => $component->value(),
+            null === $component => null,
+            1 === preg_match(self::REGEXP_INVALID_URI_CHARS, (string) $component) => throw new SyntaxError(sprintf('Invalid component string: %s.', $component)),
+            default => (string) $component,
+        };
     }
 
     /**
      * Filter the URI password component.
      */
-    protected function decodeComponent(string $str): ?string
+    protected function decodeComponent(?string $str): ?string
     {
-        return preg_replace_callback(self::REGEXP_ENCODED_CHARS, $this->decodeMatches(...), $str);
+        return match (true) {
+            null === $str => null,
+            default => preg_replace_callback(self::REGEXP_ENCODED_CHARS, $this->decodeMatches(...), $str),
+        };
     }
 
     /**
@@ -117,11 +112,10 @@ abstract class Component implements UriComponentInterface
      */
     protected function decodeMatches(array $matches): string
     {
-        if (1 === preg_match(static::REGEXP_PREVENTS_DECODING, $matches[0])) {
-            return strtoupper($matches[0]);
-        }
-
-        return rawurldecode($matches[0]);
+        return match (true) {
+            1 === preg_match(static::REGEXP_PREVENTS_DECODING, $matches[0]) => strtoupper($matches[0]),
+            default => rawurldecode($matches[0]),
+        };
     }
 
     /**
@@ -129,11 +123,10 @@ abstract class Component implements UriComponentInterface
      */
     protected function encodeComponent(?string $str, string $regexp): ?string
     {
-        if (null !== $str && 1 === preg_match(self::REGEXP_NO_ENCODING, $str)) {
-            return preg_replace_callback($regexp, $this->encodeMatches(...), $str) ?? rawurlencode($str);
-        }
-
-        return $str;
+        return match (true) {
+            null === $str || 1 !== preg_match(self::REGEXP_NO_ENCODING, $str) => $str,
+            default => preg_replace_callback($regexp, $this->encodeMatches(...), $str) ?? rawurlencode($str),
+        };
     }
 
     /**

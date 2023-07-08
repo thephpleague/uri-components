@@ -102,17 +102,17 @@ final class Host extends Component implements IpHostInterface
     private const ADDRESS_BLOCK = "\xfe\x80";
 
     private readonly ?string $host;
-    private readonly bool $is_domain;
-    private readonly ?string $ip_version;
-    private readonly bool $has_zone_identifier;
+    private readonly bool $isDomain;
+    private readonly ?string $ipVersion;
+    private readonly bool $hasZoneIdentifier;
 
     private function __construct(Stringable|int|string|null $host)
     {
         [
             'host' => $this->host,
-            'is_domain' => $this->is_domain,
-            'ip_version' => $this->ip_version,
-            'has_zone_identifier' => $this->has_zone_identifier,
+            'is_domain' => $this->isDomain,
+            'ip_version' => $this->ipVersion,
+            'has_zone_identifier' => $this->hasZoneIdentifier,
         ] = $this->parse($host);
     }
 
@@ -316,11 +316,11 @@ final class Host extends Component implements IpHostInterface
     {
         $uri = self::filterUri($uri);
         $component = $uri->getHost();
-        if ($uri instanceof  UriInterface || '' !== $component) {
-            return new self($uri->getHost());
-        }
 
-        return self::new();
+        return match (true) {
+            $uri instanceof UriInterface, '' !== $component => new self($component),
+            default => new self(null),
+        };
     }
 
     /**
@@ -339,11 +339,6 @@ final class Host extends Component implements IpHostInterface
         return $this->host;
     }
 
-    public function getUriComponent(): string
-    {
-        return (string) $this->value();
-    }
-
     public function toAscii(): ?string
     {
         return $this->value();
@@ -351,7 +346,7 @@ final class Host extends Component implements IpHostInterface
 
     public function toUnicode(): ?string
     {
-        if (null !== $this->ip_version || null === $this->host || !str_contains($this->host, 'xn--')) {
+        if (null !== $this->ipVersion || null === $this->host || !str_contains($this->host, 'xn--')) {
             return $this->host;
         }
 
@@ -360,21 +355,21 @@ final class Host extends Component implements IpHostInterface
 
     public function getIpVersion(): ?string
     {
-        return $this->ip_version;
+        return $this->ipVersion;
     }
 
     public function getIp(): ?string
     {
-        if (null === $this->ip_version) {
+        if (null === $this->ipVersion) {
             return null;
         }
 
-        if ('4' === $this->ip_version) {
+        if ('4' === $this->ipVersion) {
             return $this->host;
         }
 
         $ip = substr((string) $this->host, 1, -1);
-        if ('6' !== $this->ip_version) {
+        if ('6' !== $this->ipVersion) {
             return substr($ip, (int) strpos($ip, '.') + 1);
         }
 
@@ -388,37 +383,37 @@ final class Host extends Component implements IpHostInterface
 
     public function isDomain(): bool
     {
-        return $this->is_domain;
+        return $this->isDomain;
     }
 
     public function isIp(): bool
     {
-        return null !== $this->ip_version;
+        return null !== $this->ipVersion;
     }
 
     public function isIpv4(): bool
     {
-        return '4' === $this->ip_version;
+        return '4' === $this->ipVersion;
     }
 
     public function isIpv6(): bool
     {
-        return '6' === $this->ip_version;
+        return '6' === $this->ipVersion;
     }
 
     public function isIpFuture(): bool
     {
-        return !in_array($this->ip_version, [null, '4', '6'], true);
+        return !in_array($this->ipVersion, [null, '4', '6'], true);
     }
 
     public function hasZoneIdentifier(): bool
     {
-        return $this->has_zone_identifier;
+        return $this->hasZoneIdentifier;
     }
 
     public function withoutZoneIdentifier(): IpHostInterface
     {
-        if (!$this->has_zone_identifier) {
+        if (!$this->hasZoneIdentifier) {
             return $this;
         }
 

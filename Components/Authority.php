@@ -64,11 +64,11 @@ final class Authority extends Component implements AuthorityInterface
     {
         $uri = self::filterUri($uri);
         $authority = $uri->getAuthority();
-        if ($uri instanceof Psr7UriInterface && '' === $authority) {
-            return self::new();
-        }
 
-        return new self($authority);
+        return match (true) {
+            $uri instanceof UriInterface, '' !== $authority => new self($authority),
+            default => new self(null),
+        };
     }
 
     /**
@@ -248,7 +248,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * @deprecated Since version 7.0.0
      * @see Authority::fromComponents()
-     *x
+     *
      * @codeCoverageIgnore
      *
      * Create a new instance from a hash of parse_url parts.

@@ -74,11 +74,11 @@ final class Scheme extends Component
     {
         $uri = self::filterUri($uri);
         $component = $uri->getScheme();
-        if ($uri instanceof Psr7UriInterface && '' === $component) {
-            return new self(null);
-        }
 
-        return new self($component);
+        return match (true) {
+            $uri instanceof UriInterface, '' !== $component => new self($component),
+            default => new self(null),
+        };
     }
 
     public function value(): ?string

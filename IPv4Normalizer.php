@@ -170,11 +170,11 @@ final class IPv4Normalizer
         }
 
         $ipv4host = $this->convertHost($hostString);
-        if (null === $ipv4host) {
-            return $host;
-        }
 
-        return Host::new($ipv4host);
+        return match (true) {
+            null === $ipv4host => $host,
+            default => Host::new($ipv4host),
+        };
     }
 
     /**
@@ -263,5 +263,70 @@ final class IPv4Normalizer
         }
 
         return $output;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see IPv4Calculator::fromGMP()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns an instance using a GMP calculator.
+     */
+    public static function createFromGMP(): self
+    {
+        return self::fromGMP();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see IPv4Calculator::fromBCMath()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns an instance using a Bcmath calculator.
+     */
+    public static function createFromBCMath(): self
+    {
+        return self::fromBCMath();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see IPv4Calculator::fromNative()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns an instance using a PHP native calculator (requires 64bits PHP).
+     */
+    public static function createFromNative(): self
+    {
+        return self::fromNative();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see IPv4Calculator::fromEnvironment()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns an instance using a detected calculator depending on the PHP environment.
+     *
+     * @throws MissingIPv4Calculator If no IPv4Calculator implementing object can be used
+     *                               on the platform
+     *
+     * @codeCoverageIgnore
+     */
+    public static function createFromServer(): self
+    {
+        return self::fromEnvironment();
     }
 }

@@ -58,7 +58,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         $this->path = $path;
-        $segments = (string) $this->decodeComponent($path->toString());
+        $segments = $this->decodeComponent($this->path->value()) ?? '';
         if ($this->path->isAbsolute()) {
             $segments = substr($segments, 1);
         }
@@ -148,11 +148,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public function value(): ?string
     {
         return $this->path->value();
-    }
-
-    public function getUriComponent(): string
-    {
-        return (string) $this->value();
     }
 
     public function decoded(): string

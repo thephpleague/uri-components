@@ -57,11 +57,11 @@ final class UserInfo extends Component implements UserInfoInterface
     {
         $uri = self::filterUri($uri);
         $component = $uri->getUserInfo();
-        if ($uri instanceof Psr7UriInterface && '' === $component) {
-            return self::new();
-        }
 
-        return self::new($component);
+        return match (true) {
+            $uri instanceof UriInterface, '' !== $component => self::new($component),
+            default => self::new(),
+        };
     }
 
     /**

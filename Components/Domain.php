@@ -109,11 +109,6 @@ final class Domain extends Component implements DomainHostInterface
         return $this->host->value();
     }
 
-    public function getUriComponent(): string
-    {
-        return (string) $this->value();
-    }
-
     public function toAscii(): ?string
     {
         return $this->host->toAscii();
