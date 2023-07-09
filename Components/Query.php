@@ -65,9 +65,9 @@ final class Query extends Component implements QueryInterface
         $this->separator = $separator;
     }
 
-    public static function new(): self
+    public static function new(Stringable|string|null $value = null): self
     {
-        return new self(null);
+        return self::fromRFC3986($value);
     }
 
     /**
@@ -148,7 +148,7 @@ final class Query extends Component implements QueryInterface
 
     public function value(): ?string
     {
-        return $this->toRFC3986();
+        return QueryString::build($this->pairs, $this->separator);
     }
 
     public function getUriComponent(): string
@@ -162,11 +162,6 @@ final class Query extends Component implements QueryInterface
     public function toRFC1738(): ?string
     {
         return QueryString::build($this->pairs, $this->separator, PHP_QUERY_RFC1738);
-    }
-
-    public function toRFC3986(): ?string
-    {
-        return QueryString::build($this->pairs, $this->separator);
     }
 
     public function jsonSerialize(): ?string
@@ -562,7 +557,7 @@ final class Query extends Component implements QueryInterface
      */
     public static function createFromRFC3986(Stringable|string|int|null $query = '', string $separator = '&'): self
     {
-        if (is_int($query)) {
+        if (null !== $query) {
             $query = (string) $query;
         }
 
@@ -620,5 +615,18 @@ final class Query extends Component implements QueryInterface
     public function withoutParams(string ...$names): QueryInterface
     {
         return $this->withoutParameters(...$names);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::value()
+     *
+     * @codeCoverageIgnore
+     */
+    public function toRFC3986(): ?string
+    {
+        return $this->value();
     }
 }
