@@ -11,7 +11,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -35,7 +34,7 @@ final class PortTest extends TestCase
      * @dataProvider getToIntProvider
      */
     public function testToInt(
-        UriComponentInterface|Stringable|int|string|null $input,
+        Stringable|int|string|null $input,
         ?int $expected,
         ?string $string_expected,
         string $uri_expected

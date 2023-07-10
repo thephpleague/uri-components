@@ -140,11 +140,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->path->hasTrailingSlash();
     }
 
-    public function hasNoTrailingSlash(): bool
-    {
-        return $this->path->hasNoTrailingSlash();
-    }
-
     public function value(): ?string
     {
         return $this->path->value();

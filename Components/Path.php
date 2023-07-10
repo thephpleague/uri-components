@@ -97,11 +97,6 @@ final class Path extends Component implements PathInterface
         return '' !== $this->path && self::SEPARATOR === substr($this->path, -1);
     }
 
-    public function hasNoTrailingSlash(): bool
-    {
-        return ! $this->hasTrailingSlash();
-    }
-
     public function withoutDotSegments(): PathInterface
     {
         $current = $this->toString();

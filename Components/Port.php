@@ -15,7 +15,6 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\PortInterface;
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -64,7 +63,7 @@ final class Port extends Component implements PortInterface
      *
      * @throws SyntaxError if the port is invalid
      */
-    private function validate(UriComponentInterface|Stringable|int|string|null $port): ?int
+    private function validate(Stringable|int|string|null $port): ?int
     {
         $port = self::filterComponent($port);
         if (null === $port) {

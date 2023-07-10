@@ -15,7 +15,6 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnaConversionFailed;
 use League\Uri\Exceptions\SyntaxError;
@@ -120,7 +119,7 @@ final class Host extends Component implements IpHostInterface
      *
      * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
      */
-    private function parse(UriComponentInterface|Stringable|int|string|null $host): array
+    private function parse(Stringable|int|string|null $host): array
     {
         $host = self::filterComponent($host);
         $is_domain = false;
@@ -453,8 +452,8 @@ final class Host extends Component implements IpHostInterface
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @throws \League\Uri\IPv4Calculators\MissingIPv4Calculator If detecting IPv4 is not possible
-     * @throws SyntaxError                                       If the $ip can not be converted into a Host
+     * @throws MissingIPv4Calculator If detecting IPv4 is not possible
+     * @throws SyntaxError           If the $ip can not be converted into a Host
      * @deprecated Since version 7.0.0
      * @see Host::fromIp()
      *
@@ -493,7 +492,7 @@ final class Host extends Component implements IpHostInterface
      *
      * Create a new instance from an Authority object.
      */
-    public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
+    public static function createFromAuthority(Stringable|string $authority): self
     {
         return self::fromAuthority($authority);
     }

@@ -33,7 +33,7 @@ final class HostTest extends TestCase
      *
      * @dataProvider validHostProvider
      */
-    public function testValidHost(UriComponentInterface|Stringable|int|string|null $host, ?string $uri, ?string $iri): void
+    public function testValidHost(Stringable|int|string|null $host, ?string $uri, ?string $iri): void
     {
         $host = match (true) {
             null === $host => Host::new(),

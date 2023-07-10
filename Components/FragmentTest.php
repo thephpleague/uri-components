@@ -59,7 +59,7 @@ final class FragmentTest extends TestCase
     /**
      * @dataProvider geValueProvider
      */
-    public function testGetValue(UriComponentInterface|Stringable|string|null $str, ?string $expected): void
+    public function testGetValue(Stringable|string|null $str, ?string $expected): void
     {
         if ($str instanceof UriComponentInterface) {
             $str = $str->value();

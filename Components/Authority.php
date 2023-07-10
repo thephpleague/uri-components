@@ -152,7 +152,7 @@ final class Authority extends Component implements AuthorityInterface
         return $this->userInfo->value();
     }
 
-    public function withHost(UriComponentInterface|Stringable|string|null $host): AuthorityInterface
+    public function withHost(Stringable|string|null $host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
             $host = Host::new($host);
@@ -165,9 +165,9 @@ final class Authority extends Component implements AuthorityInterface
         return $this->newInstance($this->userInfo, $host, $this->port);
     }
 
-    public function withPort(UriComponentInterface|Stringable|string|int|null $port): AuthorityInterface
+    public function withPort(Stringable|string|int|null $port): AuthorityInterface
     {
-        if (!$port instanceof Port) {
+        if (!$port instanceof PortInterface) {
             $port = Port::new($port);
         }
 

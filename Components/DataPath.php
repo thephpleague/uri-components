@@ -51,25 +51,23 @@ final class DataPath extends Component implements DataPathInterface
     private const REGEXP_DATAPATH = '/^\w+\/[-.\w]+(?:\+[-.\w]+)?;,$/';
     private const REGEXP_DATAPATH_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:\/@]+|%(?![A-Fa-f0-9]{2})/x';
 
-    private Path $path;
-    private string $mimetype;
+    private readonly PathInterface $path;
+    private readonly string $mimetype;
     /** @var string[] */
-    private array $parameters;
-    private bool $is_binary_data;
-    private string $document;
+    private readonly array $parameters;
+    private readonly bool $isBinaryData;
+    private readonly string $document;
 
     /**
      * New instance.
      */
-    private function __construct(Stringable|string|null $path)
+    private function __construct(Stringable|string $path)
     {
         $this->path = Path::new($this->filterPath(self::filterComponent($path)));
-        $is_binary_data = false;
         [$mediaType, $this->document] = explode(',', $this->path->toString(), 2) + [1 => ''];
         [$mimetype, $parameters] = explode(';', $mediaType, 2) + [1 => ''];
         $this->mimetype = $this->filterMimeType($mimetype);
-        $this->parameters = $this->filterParameters($parameters, $is_binary_data);
-        $this->is_binary_data = $is_binary_data;
+        [$this->parameters, $this->isBinaryData] = $this->filterParameters($parameters);
         $this->validateDocument();
     }
 
@@ -121,21 +119,20 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Extract and set the binary flag from the parameters if it exists.
      *
-     * @param bool $is_binary_data the binary flag to set
-     *
      * @throws SyntaxError If the mediatype parameters contain invalid data
      *
-     * @return string[]
+     * @return array{0:array<string>, 1:bool}
      */
-    private function filterParameters(string $parameters, bool &$is_binary_data): array
+    private function filterParameters(string $parameters): array
     {
         if ('' === $parameters) {
-            return [self::DEFAULT_PARAMETER];
+            return [[self::DEFAULT_PARAMETER], false];
         }
 
+        $isBinaryData = false;
         if (1 === preg_match(',(;|^)'.self::BINARY_PARAMETER.'$,', $parameters, $matches)) {
             $parameters = substr($parameters, 0, - strlen($matches[0]));
-            $is_binary_data = true;
+            $isBinaryData = true;
         }
 
         $params = array_filter(explode(';', $parameters));
@@ -143,7 +140,7 @@ final class DataPath extends Component implements DataPathInterface
             throw new SyntaxError(sprintf('Invalid mediatype parameters, `%s`.', $parameters));
         }
 
-        return $params;
+        return [$params, $isBinaryData];
     }
 
     /**
@@ -163,7 +160,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     private function validateDocument(): void
     {
-        if (!$this->is_binary_data) {
+        if (!$this->isBinaryData) {
             return;
         }
 
@@ -178,7 +175,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function new(Stringable|string $value = ''): self
     {
-        return new self(Path::new($value));
+        return new self($value);
     }
 
     /**
@@ -199,19 +196,19 @@ final class DataPath extends Component implements DataPathInterface
         }
         // @codeCoverageIgnoreEnd
 
-        $file_args = [$path, false];
-        $mime_args = [$path, FILEINFO_MIME];
+        $fileArgs = [$path, false];
+        $mimeArgs = [$path, FILEINFO_MIME];
         if (null !== $context) {
-            $file_args[] = $context;
-            $mime_args[] = $context;
+            $fileArgs[] = $context;
+            $mimeArgs[] = $context;
         }
 
-        $content = @file_get_contents(...$file_args);
+        $content = @file_get_contents(...$fileArgs);
         if (false === $content) {
             throw new SyntaxError(sprintf('`%s` failed to open stream: No such file or directory.', $path));
         }
 
-        $mimetype = (string) (new finfo(FILEINFO_MIME))->file(...$mime_args);
+        $mimetype = (string) (new finfo(FILEINFO_MIME))->file(...$mimeArgs);
 
         return new self(
             str_replace(' ', '', $mimetype)
@@ -239,7 +236,7 @@ final class DataPath extends Component implements DataPathInterface
 
     public function isBinaryData(): bool
     {
-        return $this->is_binary_data;
+        return $this->isBinaryData;
     }
 
     public function getMimeType(): string
@@ -267,11 +264,6 @@ final class DataPath extends Component implements DataPathInterface
         return $this->path->hasTrailingSlash();
     }
 
-    public function hasNoTrailingSlash(): bool
-    {
-        return $this->path->hasNoTrailingSlash();
-    }
-
     public function decoded(): string
     {
         return $this->path->decoded();
@@ -279,8 +271,8 @@ final class DataPath extends Component implements DataPathInterface
 
     public function save(string $path, string $mode = 'w'): SplFileObject
     {
+        $data = $this->isBinaryData ? base64_decode($this->document, true) : rawurldecode($this->document);
         $file = new SplFileObject($path, $mode);
-        $data = $this->is_binary_data ? base64_decode($this->document, true) : rawurldecode($this->document);
         $file->fwrite((string) $data);
 
         return $file;
@@ -288,7 +280,7 @@ final class DataPath extends Component implements DataPathInterface
 
     public function toBinary(): DataPathInterface
     {
-        if ($this->is_binary_data) {
+        if ($this->isBinaryData) {
             return $this;
         }
 
@@ -306,14 +298,14 @@ final class DataPath extends Component implements DataPathInterface
     private function formatComponent(
         string $mimetype,
         string $parameters,
-        bool $is_binary_data,
+        bool $isBinaryData,
         string $data
     ): string {
         if ('' != $parameters) {
             $parameters = ';'.$parameters;
         }
 
-        if ($is_binary_data) {
+        if ($isBinaryData) {
             $parameters .= ';base64';
         }
 
@@ -324,7 +316,7 @@ final class DataPath extends Component implements DataPathInterface
 
     public function toAscii(): DataPathInterface
     {
-        if (false === $this->is_binary_data) {
+        if (false === $this->isBinaryData) {
             return $this;
         }
 
@@ -378,14 +370,14 @@ final class DataPath extends Component implements DataPathInterface
             return $this;
         }
 
-        return new self($this->formatComponent($this->mimetype, $parameters, $this->is_binary_data, $this->document));
+        return new self($this->formatComponent($this->mimetype, $parameters, $this->isBinaryData, $this->document));
     }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Authority::new()
+     * @see DataPath::new()
      *
      * @codeCoverageIgnore
      *
@@ -400,7 +392,7 @@ final class DataPath extends Component implements DataPathInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Authority::fromFilePath()
+     * @see DataPath::fromFilePath()
      *
      * @codeCoverageIgnore
      *
@@ -419,7 +411,7 @@ final class DataPath extends Component implements DataPathInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Authority::fromUri()
+     * @see DataPath::fromUri()
      *
      * @codeCoverageIgnore
      *

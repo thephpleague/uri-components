@@ -11,7 +11,6 @@
 
 namespace League\Uri\Components;
 
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use Stringable;
@@ -26,7 +25,7 @@ final class IpAddressTest extends TestCase
      * @dataProvider validIpAddressProvider
      */
     public function testValidIpAddress(
-        UriComponentInterface|Stringable|int|string|null $host,
+        Stringable|int|string|null $host,
         bool $isDomain,
         bool $isIp,
         bool $isIpv4,
