@@ -598,21 +598,31 @@ final class QueryTest extends TestCase
     public function testWithPairGetterMethods(): void
     {
         $query = Query::new('a=1&a=2&a=3');
-
         self::assertSame('1', $query->get('a'));
-        self::assertSame('1', $query->withPair('first', 4)->get('a'));
-        self::assertSame('4', $query->withPair('a', 4)->get('a'));
-        self::assertSame('a=4&first=4', $query->withPair('q', $query)->get('q'));
+
+        $query = $query->withPair('first', 4);
+        self::assertSame('1', $query->get('a'));
+
+        $query = $query->withPair('a', 4);
+        self::assertSame('4', $query->get('a'));
+
+        $query = $query->withPair('q', $query);
+        self::assertSame('a=4&first=4', $query->get('q'));
     }
 
     public function testMergeGetterMethods(): void
     {
         $query = Query::new('a=1&a=2&a=3');
-
         self::assertSame('1', $query->get('a'));
-        self::assertSame('1', $query->merge(Query::new('first=4'))->get('a'));
-        self::assertSame('4', $query->merge('a=4')->get('a'));
-        self::assertSame('a=4&first=4', $query->merge(Query::fromPairs([['q', $query->value()]]))->get('q'));
+
+        $query = $query->merge(Query::new('first=4'));
+        self::assertSame('1', $query->get('a'));
+
+        $query = $query->merge('a=4');
+        self::assertSame('4', $query->get('a'));
+
+        $query = $query->merge(Query::fromPairs([['q', $query->value()]]));
+        self::assertSame('a=4&first=4', $query->get('q'));
     }
 
     /**
