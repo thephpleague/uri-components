@@ -252,10 +252,10 @@ final class PathModifierTest extends TestCase
     public static function removeBasePathProvider(): array
     {
         return [
-            ['/', '/path/to/the/sky.php'],
-            ['', '/path/to/the/sky.php'],
-            ['/path/to', '/the/sky.php'],
-            ['/route/to', '/path/to/the/sky.php'],
+            'base path is the leading slash' => ['/', '/path/to/the/sky.php'],
+            'base path is the empty string' => ['', '/path/to/the/sky.php'],
+            'base path is included in the current path' => ['/path/to', '/the/sky.php'],
+            'base path is not included in the current path' => ['/route/to', '/path/to/the/sky.php'],
         ];
     }
 

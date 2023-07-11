@@ -42,6 +42,7 @@ final class IpAddressTest extends TestCase
         self::assertSame($isIpv4, $host->isIpv4());
         self::assertSame($isIpv6, $host->isIpv6());
         self::assertSame($isIpFuture, $host->isIpFuture());
+        self::assertNotEquals($isIp, $host->isRegisteredName());
         self::assertSame($ip, $host->getIp());
         self::assertSame($ipVersion, $host->getIpVersion());
     }

@@ -54,6 +54,7 @@ final class DomainTest extends TestCase
         self::assertEquals(['com', 'thephpleague', 'uri'], iterator_to_array($host));
         self::assertFalse($host->isIp());
         self::assertTrue($host->isDomain());
+        self::assertTrue($host->isRegisteredName());
     }
 
     /**

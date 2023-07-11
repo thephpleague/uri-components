@@ -256,19 +256,71 @@ final class HostTest extends TestCase
         $tooLongLabel = implode('', array_fill(0, 64, 'c')).'.a';
 
         return [
-            'registered named' => ['host' => '-registered-.name', 'expectedIsDomain' => false],
-            'ipv4 host' => ['host' => '127.0.0.1', 'expectedIsDomain' => false],
-            'ipv6 host' => ['host' => '[::1]', 'expectedIsDomain' => false],
-            'too long domain name' => ['host' => $tooLongHost, 'expectedIsDomain' => false],
-            'single label domain' => ['host' => 'localhost', 'expectedIsDomain' => true],
-            'single label domain with ending dot' => ['host' => 'localhost.', 'expectedIsDomain' => true],
-            'longest domain name' => ['host' => $maxLongHost, 'expectedIsDomain' => true],
-            'longest domain name with ending dot' => ['host' => $maxLongHost.'.', 'expectedIsDomain' => true],
-            'too long label' => ['host' => $tooLongLabel, 'expectedIsDomain' => false],
-            'empty string host' => ['host' => '', 'expectedIsDomain' => false],
-            'single dot' => ['host' => '.', 'expectedIsDomain' => false],
-            'null string host' => ['host' => null, 'expectedIsDomain' => true],
-            'multiple domain with a dot ending' => ['host' => 'ulb.ac.be.', 'expectedIsDomain' => true],
+            'registered named' => [
+                'host' => '-registered-.name',
+                'expectedIsDomain' => false,
+                'isRegisteredName' => true,
+            ],
+            'ipv4 host' => [
+                'host' => '127.0.0.1',
+                'expectedIsDomain' => false,
+                'isRegisteredName' => false,
+            ],
+            'ipv6 host' => [
+                'host' => '[::1]',
+                'expectedIsDomain' => false,
+                'isRegisteredName' => false,
+            ],
+            'too long domain name' => [
+                'host' => $tooLongHost,
+                'expectedIsDomain' => false,
+                'isRegisteredName' => true,
+            ],
+            'single label domain' => [
+                'host' => 'localhost',
+                'expectedIsDomain' => true,
+                'isRegisteredName' => true,
+            ],
+            'single label domain with ending dot' => [
+                'host' => 'localhost.',
+                'expectedIsDomain' => true,
+                'isRegisteredName' => true,
+            ],
+            'longest domain name' => [
+                'host' => $maxLongHost,
+                'expectedIsDomain' => true,
+                'isRegisteredName' => true,
+            ],
+            'longest domain name with ending dot' => [
+                'host' => $maxLongHost.'.',
+                'expectedIsDomain' => true,
+                'isRegisteredName' => true,
+            ],
+            'too long label' => [
+                'host' => $tooLongLabel,
+                'expectedIsDomain' => false,
+                'isRegisteredName' => true,
+            ],
+            'empty string host' => [
+                'host' => '',
+                'expectedIsDomain' => false,
+                'isRegisteredName' => true,
+            ],
+            'single dot' => [
+                'host' => '.',
+                'expectedIsDomain' => false,
+                'isRegisteredName' => true,
+            ],
+            'null string host' => [
+                'host' => null,
+                'expectedIsDomain' => true,
+                'isRegisteredName' => true,
+            ],
+            'multiple domain with a dot ending' => [
+                'host' => 'ulb.ac.be.',
+                'expectedIsDomain' => true,
+                'isRegisteredName' => true,
+            ],
         ];
     }
 }

@@ -248,17 +248,10 @@ final class UriModifier
         /** @var HierarchicalPath $currentPath */
         $currentPath = HierarchicalPath::fromUri($uri)->withLeadingSlash();
 
-        /**
-         * @var int    $offset
-         * @var string $segment
-         */
-        foreach ($path as $offset => $segment) {
-            if ($currentPath->get($offset) !== $segment) {
-                return $uri->withPath($path->append($currentPath)->toString());
-            }
-        }
-
-        return $uri->withPath($currentPath->toString());
+        return match (true) {
+            !str_starts_with($currentPath->toString(), $path->toString()) => $uri->withPath($path->append($currentPath)->toString()),
+            default => self::normalizePath($uri, $currentPath),
+        };
     }
 
     /**
@@ -333,28 +326,16 @@ final class UriModifier
         Stringable|string $path
     ): Psr7UriInterface|UriInterface {
         $uri = self::filterUri($uri);
-        /** @var HierarchicalPath $basePath */
-        $basePath = HierarchicalPath::new($path)->withLeadingSlash();
-        $currentPath = HierarchicalPath::fromUri($uri);
-        if ('/' === (string) $basePath) {
-            return $uri;
-        }
+        $basePath = HierarchicalPath::new($path)->withLeadingSlash()->toString();
+        $currentPath = HierarchicalPath::fromUri($uri)->withLeadingSlash()->toString();
+        $newPath = substr($currentPath, strlen($basePath));
 
-        /**
-         * @var int    $offset
-         * @var string $segment
-         */
-        foreach ($basePath as $offset => $segment) {
-            if ($segment !== $currentPath->get($offset)) {
-                return $uri;
-            }
-        }
-
-        if (!$currentPath->isAbsolute()) {
-            return $uri;
-        }
-
-        return $uri->withPath($currentPath->withoutSegment(...$basePath->keys())->toString());
+        return match (true) {
+            '/' === $basePath,
+            !str_starts_with($currentPath, $basePath),
+            !str_starts_with($newPath, '/') => $uri,
+            default => $uri->withPath($newPath),
+        };
     }
 
     /**
@@ -481,9 +462,13 @@ final class UriModifier
     private static function normalizePath(Psr7UriInterface|UriInterface $uri, PathInterface $path): Psr7UriInterface|UriInterface
     {
         $pathString = $path->toString();
+        $authority = $uri->getAuthority();
 
         return match (true) {
-            '' === (string) $uri->getAuthority(), '' === $pathString, '/' === $pathString[0] => $uri->withPath($pathString),
+            '' === $pathString,
+            '/' === $pathString[0],
+            null === $authority,
+            '' === $authority => $uri->withPath($pathString),
             default => $uri->withPath('/'.$pathString),
         };
     }

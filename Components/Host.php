@@ -380,6 +380,11 @@ final class Host extends Component implements IpHostInterface
         return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
     }
 
+    public function isRegisteredName(): bool
+    {
+        return !$this->isIp();
+    }
+
     public function isDomain(): bool
     {
         return $this->isDomain;

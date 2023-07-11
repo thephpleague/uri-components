@@ -129,6 +129,11 @@ final class Domain extends Component implements DomainHostInterface
         return true;
     }
 
+    public function isRegisteredName(): bool
+    {
+        return true;
+    }
+
     public function getIpVersion(): ?string
     {
         return null;
