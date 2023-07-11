@@ -481,11 +481,11 @@ final class UriModifier
     private static function normalizePath(Psr7UriInterface|UriInterface $uri, PathInterface $path): Psr7UriInterface|UriInterface
     {
         $pathString = $path->toString();
-        if ('' === (string) $uri->getAuthority() || '' === $pathString || '/' === $pathString[0]) {
-            return $uri->withPath($pathString);
-        }
 
-        return $uri->withPath('/'.$pathString);
+        return match (true) {
+            '' === (string) $uri->getAuthority(), '' === $pathString, '/' === $pathString[0] => $uri->withPath($pathString),
+            default => $uri->withPath('/'.$pathString),
+        };
     }
 
     /**
