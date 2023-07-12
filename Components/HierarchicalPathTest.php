@@ -362,9 +362,9 @@ final class HierarchicalPathTest extends TestCase
     {
         $path = HierarchicalPath::new('/bar/3/troll/3');
 
-        self::assertSame(['bar', '3', 'troll', '3'], $path->segments());
-        self::assertSame([''], HierarchicalPath::new()->segments());
-        self::assertSame([''], HierarchicalPath::new('/')->segments());
+        self::assertSame(['bar', '3', 'troll', '3'], iterator_to_array($path));
+        self::assertSame([''], iterator_to_array(HierarchicalPath::new()));
+        self::assertSame([''], iterator_to_array(HierarchicalPath::new('/')));
     }
 
     /**
@@ -386,19 +386,32 @@ final class HierarchicalPathTest extends TestCase
         ];
     }
 
-    public function testGetBasemane(): void
+    /**
+     * @dataProvider provideBasenamePath
+     */
+    public function testGetBasemane(string $path, string $expected): void
     {
-        $path = HierarchicalPath::new('/path/to/my/file.txt');
-
-        self::assertSame('file.txt', $path->getBasename());
+        self::assertSame($expected, HierarchicalPath::new($path)->getBasename());
     }
 
-    public function testGetBasemaneWithEmptyBasename(): void
+    public static function provideBasenamePath(): iterable
     {
-        $path = HierarchicalPath::new('/path/to/my/');
+        yield 'simple basename' => [
+            'path' => '/path/to/my/file.txt',
+            'expected' => 'file.txt',
+        ];
 
-        self::assertEmpty($path->getBasename());
+        yield 'path with trailing slash' => [
+            'path' => '/path/to/my/',
+            'expected' => '',
+        ];
+
+        yield 'basename with path parameter' => [
+            'path' => '/path/to/my/file.txt;param1;param2',
+            'expected' => 'file.txt',
+        ];
     }
+
 
     /**
      * @dataProvider dirnameProvider

@@ -164,8 +164,13 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public function getBasename(): string
     {
         $data = $this->segments;
+        $basename = (string) array_pop($data);
+        $pos = strpos($basename, ';');
 
-        return (string) array_pop($data);
+        return match (true) {
+            false !== $pos => substr($basename, 0, $pos),
+            default => $basename,
+        };
     }
 
     public function getExtension(): string

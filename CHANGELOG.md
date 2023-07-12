@@ -53,6 +53,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Remove the `Exceptions` namespace
 - `League\Uri\Exceptions\IPv4CalculatorMissing` use `League\Uri\IPv4Calculators\MissingIPv4Calculator` instead
 - `League\Uri\Exceptions\OffsetOutOfBounds` use `League\Uri\Components\OffsetOutOfBounds` instead
+- `HierarchicalPath::segments` use `HierarchicalPath::getIterator` instead
 
 
 ## [2.4.1](https://github.com/thephpleague/uri-components/compare/2.4.0...2.4.1) - 2022-05-26
