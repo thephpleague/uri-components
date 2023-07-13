@@ -149,7 +149,7 @@ final class QueryTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Query::fromPairs([['toto' => ['foo' => [(object) []]]]]);
+        Query::fromPairs([['toto' => ['foo' => [(object) []]]]]); /* @phpstan-ignore-line */
     }
 
     public function testNormalization(): void

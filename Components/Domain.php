@@ -172,11 +172,6 @@ final class Domain extends Component implements DomainHostInterface
         return array_keys($this->labels, $label, true);
     }
 
-    public function labels(): array
-    {
-        return $this->labels;
-    }
-
     public function isAbsolute(): bool
     {
         return count($this->labels) > 1 && '' === $this->labels[array_key_first($this->labels)];

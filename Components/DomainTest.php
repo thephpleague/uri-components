@@ -274,8 +274,8 @@ final class DomainTest extends TestCase
     public function testLabels(): void
     {
         $host = Domain::new('master.example.com');
-        self::assertSame(['com', 'example', 'master'], $host->labels());
-        self::assertSame(['', 'localhost'], Domain::new('localhost.')->labels());
+        self::assertSame(['com', 'example', 'master'], [...$host]);
+        self::assertSame(['', 'localhost'], [...Domain::new('localhost.')]);
     }
 
     /**
