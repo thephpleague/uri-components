@@ -305,6 +305,21 @@ final class Domain extends Component implements DomainHostInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
+     * @see Domain::getIterator()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from a string or a stringable object.
+     */
+    public function labels(): array
+    {
+        return $this->labels;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
      * @see Domain::new()
      *
      * @codeCoverageIgnore

@@ -41,6 +41,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - All `createFromSNull` named constructors are replaced by the `new` named constructor.
 - All remaining named constructors which starts with `createFrom*` replaced by the same method starting with `from*`. For example `Authority::createFromUri` is deprecated in favor of `Authority::fromUri`
 - `Query::params` is replaced by `Query::parameters` and `Query::parameter`
+- `HierarchicalPath::segments` use `HierarchicalPath::getIterator` instead
+- `Domain::labels` use `Domain::getIterator` instead
 
 ### Removed
 
@@ -53,8 +55,6 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Remove the `Exceptions` namespace
 - `League\Uri\Exceptions\IPv4CalculatorMissing` use `League\Uri\IPv4Calculators\MissingIPv4Calculator` instead
 - `League\Uri\Exceptions\OffsetOutOfBounds` use `League\Uri\Components\OffsetOutOfBounds` instead
-- `HierarchicalPath::segments` use `HierarchicalPath::getIterator` instead
-- `Domain::labels` use `Domain::getIterator` instead
 
 ## [2.4.1](https://github.com/thephpleague/uri-components/compare/2.4.0...2.4.1) - 2022-05-26
 

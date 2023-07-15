@@ -189,68 +189,64 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->segments[$offset] ?? null;
     }
 
-    public function keys(?string $segment = null): array
+    public function keys(Stringable|string|null $segment = null): array
     {
-        if (null === $segment) {
-            return array_keys($this->segments);
-        }
+        $segment = self::filterComponent($segment);
 
-        return array_keys($this->segments, $segment, true);
-    }
-
-    public function segments(): array
-    {
-        return $this->segments;
+        return match (true) {
+            null === $segment => array_keys($this->segments),
+            default => array_keys($this->segments, $segment, true),
+        };
     }
 
     public function withoutDotSegments(): PathInterface
     {
         $path = $this->path->withoutDotSegments();
-        if ($path !== $this->path) {
-            return new self($path);
-        }
 
-        return $this;
+        return match (true) {
+            $path !== $this->path => new self($path),
+            default => $this,
+        };
     }
 
     public function withLeadingSlash(): PathInterface
     {
         $path = $this->path->withLeadingSlash();
-        if ($path !== $this->path) {
-            return new self($path);
-        }
 
-        return $this;
+        return match (true) {
+            $path !== $this->path => new self($path),
+            default => $this,
+        };
     }
 
     public function withoutLeadingSlash(): PathInterface
     {
         $path = $this->path->withoutLeadingSlash();
-        if ($path !== $this->path) {
-            return new self($path);
-        }
 
-        return $this;
+        return match (true) {
+            $path !== $this->path => new self($path),
+            default => $this,
+        };
     }
 
     public function withoutTrailingSlash(): PathInterface
     {
         $path = $this->path->withoutTrailingSlash();
-        if ($path !== $this->path) {
-            return new self($path);
-        }
 
-        return $this;
+        return match (true) {
+            $path !== $this->path => new self($path),
+            default => $this,
+        };
     }
 
     public function withTrailingSlash(): PathInterface
     {
         $path = $this->path->withTrailingSlash();
-        if ($path !== $this->path) {
-            return new self($path);
-        }
 
-        return $this;
+        return match (true) {
+            $path !== $this->path => new self($path),
+            default => $this,
+        };
     }
 
     public function append(Stringable|string|null $segment): SegmentedPathInterface
@@ -440,6 +436,21 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         return $ext.'.'.$extension.$param;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Domain::getIterator()
+     *
+     * @codeCoverageIgnore
+     *
+     * Returns a new instance from a string or a stringable object.
+     */
+    public function segments(): array
+    {
+        return $this->segments;
     }
 
     /**
