@@ -77,6 +77,24 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
+     * Create a new instance from a hash of parse_url parts.
+     *
+     * Create a new instance from a hash representation of the URI similar
+     * to PHP parse_url function result
+     *
+     * @param array{user? : ?string, pass? : ?string} $components
+     */
+    public static function fromComponents(array $components): self
+    {
+        $components += ['user' => null, 'pass' => null];
+
+        return match (true) {
+            null === $components['user'] => new self(null),
+            default => new self($components['user'], $components['pass']),
+        };
+    }
+
+    /**
      * Creates a new instance from an encoded string.
      */
     public static function new(Stringable|string|null $value = null): self
@@ -142,6 +160,17 @@ final class UserInfo extends Component implements UserInfoInterface
     public function getPass(): ?string
     {
         return $this->password;
+    }
+
+    /**
+     * @return array{user: ?string, pass: ?string}
+     */
+    public function components(): array
+    {
+        return [
+            'user' => $this->username,
+            'pass' => $this->password,
+        ];
     }
 
     public function withUser(Stringable|string|null $username): self

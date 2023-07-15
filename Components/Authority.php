@@ -16,7 +16,6 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\PortInterface;
-use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
@@ -26,35 +25,38 @@ use Stringable;
 
 final class Authority extends Component implements AuthorityInterface
 {
-    private readonly UserInfoInterface $userInfo;
     private readonly HostInterface $host;
     private readonly PortInterface $port;
+    private readonly UserInfoInterface $userInfo;
 
-    /**
-     * @throws SyntaxError If the component contains invalid HostInterface part.
-     */
-    private function __construct(Stringable|string|null $authority)
-    {
-        $components = UriString::parseAuthority(self::filterComponent($authority));
-        $this->host = Host::new($components['host']);
-        $this->port = Port::new($components['port']);
-        $this->userInfo = new UserInfo($components['user'], $components['pass']);
-
+    public function __construct(
+        Stringable|string|null $host,
+        Stringable|string|int|null $port = null,
+        Stringable|string|null $userInfo = null
+    ) {
+        $this->host = !$host instanceof HostInterface ? Host::new($host) : $host;
+        $this->port = !$port instanceof PortInterface ? Port::new($port) : $port;
+        $this->userInfo = !$userInfo instanceof UserInfoInterface ? UserInfo::new($userInfo) : $userInfo;
         if (null === $this->host->value() && null !== $this->value()) {
             throw new SyntaxError('A non-empty authority must contains a non null host.');
         }
     }
 
     /**
-     * Returns a new instance from a value.
+     * @throws SyntaxError If the component contains invalid HostInterface part.
      */
     public static function new(Stringable|string|null $value = null): self
     {
-        if ($value instanceof UriComponentInterface) {
-            return new self($value->value());
-        }
+        $components = UriString::parseAuthority(self::filterComponent($value));
 
-        return new self($value);
+        return new self(
+            Host::new($components['host']),
+            Port::new($components['port']),
+            new UserInfo(
+                $components['user'],
+                $components['pass']
+            )
+        );
     }
 
     /**
@@ -66,8 +68,8 @@ final class Authority extends Component implements AuthorityInterface
         $authority = $uri->getAuthority();
 
         return match (true) {
-            $uri instanceof UriInterface, '' !== $authority => new self($authority),
-            default => new self(null),
+            $uri instanceof UriInterface, '' !== $authority => self::new($authority),
+            default => self::new(),
         };
     }
 
@@ -88,24 +90,11 @@ final class Authority extends Component implements AuthorityInterface
     {
         $components += ['user' => null, 'pass' => null, 'host' => null, 'port' => null];
 
-        $authority = $components['host'];
-        if (null !== $components['port']) {
-            $authority .= ':'.$components['port'];
-        }
-
-        $userInfo = null;
-        if (null !== $components['user']) {
-            $userInfo = $components['user'];
-            if (null !== $components['pass']) {
-                $userInfo .= ':'.$components['pass'];
-            }
-        }
-
-        if (null !== $userInfo) {
-            $authority = $userInfo.'@'.$authority;
-        }
-
-        return new self($authority);
+        return match (true) {
+            null === $components['user'] => new self($components['host'], $components['port']),
+            null === $components['pass'] => new self($components['host'], $components['port'], $components['user']),
+            default => new self($components['host'], $components['port'], $components['user'].':'.$components['pass']),
+        };
     }
 
     public function value(): ?string
@@ -152,6 +141,17 @@ final class Authority extends Component implements AuthorityInterface
         return $this->userInfo->value();
     }
 
+    /**
+     * @return array{user: ?string, pass: ?string, host: ?string, port: ?int}
+     */
+    public function components(): array
+    {
+        return  $this->userInfo->components() + [
+            'host' => $this->host->value(),
+            'port' => $this->port->toInt(),
+        ];
+    }
+
     public function withHost(Stringable|string|null $host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
@@ -162,7 +162,7 @@ final class Authority extends Component implements AuthorityInterface
             return $this;
         }
 
-        return $this->newInstance($this->userInfo, $host, $this->port);
+        return new self($host, $this->port, $this->userInfo);
     }
 
     public function withPort(Stringable|string|int|null $port): AuthorityInterface
@@ -175,7 +175,7 @@ final class Authority extends Component implements AuthorityInterface
             return $this;
         }
 
-        return $this->newInstance($this->userInfo, $this->host, $port);
+        return new self($this->host, $port, $this->userInfo);
     }
 
     public function withUserInfo(Stringable|string|null $user, Stringable|string|null $password = null): AuthorityInterface
@@ -185,17 +185,7 @@ final class Authority extends Component implements AuthorityInterface
             return $this;
         }
 
-        return $this->newInstance($userInfo, $this->host, $this->port);
-    }
-
-    private function newInstance(UserInfoInterface $userInfo, HostInterface $host, PortInterface $port): self
-    {
-        $value = self::getAuthorityValue($userInfo, $host, $port);
-        if (null === $host->value() && null !== $value) {
-            throw new SyntaxError('A non-empty authority must contains a non null host.');
-        }
-
-        return new self($value);
+        return new self($this->host, $this->port, $userInfo);
     }
 
     /**
