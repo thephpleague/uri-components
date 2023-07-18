@@ -15,7 +15,6 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function array_pop;
@@ -46,10 +45,8 @@ final class Path extends Component implements PathInterface
      */
     private function validate(Stringable|string $path): string
     {
+        /** @var string $path */
         $path = $this->validateComponent($path);
-        if (null === $path) {
-            throw new SyntaxError('The path can not be null.');
-        }
 
         return $path;
     }

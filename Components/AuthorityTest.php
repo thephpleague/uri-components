@@ -219,15 +219,15 @@ final class AuthorityTest extends TestCase
         ];
     }
 
-
     /**
      * @dataProvider getURIProvider
      */
-    public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
+    public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected, array $components): void
     {
         $authority = Authority::fromUri($uri);
 
         self::assertSame($expected, $authority->value());
+        self::assertSame($components, $authority->components());
     }
 
     public static function getURIProvider(): iterable
@@ -236,26 +236,32 @@ final class AuthorityTest extends TestCase
             'PSR-7 URI object' => [
                 'uri' => Http::new('http://foo:bar@example.com?foo=bar'),
                 'expected' => 'foo:bar@example.com',
+                'components' => ['user' => 'foo', 'pass' => 'bar', 'host' => 'example.com', 'port' => null],
             ],
             'PSR-7 URI object with no authority' => [
                 'uri' => Http::new('path/to/the/sky?foo'),
                 'expected' => null,
+                'components' => ['user' => null, 'pass' => null, 'host' => null, 'port' => null],
             ],
             'PSR-7 URI object with empty string authority' => [
                 'uri' => Http::new('file:///path/to/the/sky'),
                 'expected' => null,
+                'components' => ['user' => null, 'pass' => null, 'host' => null, 'port' => null],
             ],
             'League URI object' => [
-                'uri' => Uri::new('http://foo:bar@example.com?foo=bar'),
-                'expected' => 'foo:bar@example.com',
+                'uri' => Uri::new('http://foo:bar@example.com:83?foo=bar'),
+                'expected' => 'foo:bar@example.com:83',
+                'components' => ['user' => 'foo', 'pass' => 'bar', 'host' => 'example.com', 'port' => 83],
             ],
             'League URI object with no authority' => [
                 'uri' => Uri::new('path/to/the/sky?foo'),
                 'expected' => null,
+                'components' => ['user' => null, 'pass' => null, 'host' => null, 'port' => null],
             ],
             'League URI object with empty string authority' => [
                 'uri' => Uri::new('file:///path/to/the/sky'),
                 'expected' => '',
+                'components' => ['user' => null, 'pass' => null, 'host' => '', 'port' => null],
             ],
         ];
     }

@@ -348,6 +348,10 @@ final class QueryTest extends TestCase
         $query = Query::fromParameters($data);
         self::assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->value());
 
+        self::assertTrue($query->hasParameter('foo'));
+        self::assertFalse($query->hasParameter('bar'));
+        self::assertFalse($query->hasParameter('foo', 'bar'));
+
         $newQuery = $query->withoutParameters('foo[0]');
         /** @var Generator $newParameters */
         $newParameters = $newQuery->parameters();

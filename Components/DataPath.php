@@ -63,7 +63,9 @@ final class DataPath extends Component implements DataPathInterface
      */
     private function __construct(Stringable|string $path)
     {
-        $this->path = Path::new($this->filterPath(self::filterComponent($path)));
+        /** @var string $path */
+        $path = self::filterComponent($path);
+        $this->path = Path::new($this->filterPath($path));
         [$mediaType, $this->document] = explode(',', $this->path->toString(), 2) + [1 => ''];
         [$mimetype, $parameters] = explode(';', $mediaType, 2) + [1 => ''];
         $this->mimetype = $this->filterMimeType($mimetype);
@@ -77,12 +79,8 @@ final class DataPath extends Component implements DataPathInterface
      * @throws SyntaxError If the path is null
      * @throws SyntaxError If the path is not valid according to RFC2937
      */
-    private function filterPath(?string $path): string
+    private function filterPath(string $path): string
     {
-        if (null === $path) {
-            throw new SyntaxError('The path can not be null.');
-        }
-
         if ('' === $path || ',' === $path) {
             return 'text/plain;charset=us-ascii,';
         }

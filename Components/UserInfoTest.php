@@ -15,6 +15,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use League\Uri\UriString;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -229,7 +230,15 @@ final class UserInfoTest extends TestCase
         $uri = Uri::new('http://example.com:443');
         $auth = Authority::fromUri($uri);
 
-        self::assertEquals(UserInfo::fromUri($uri), UserInfo::fromAuthority($auth));
+        self::assertEquals(
+            UserInfo::fromUri($uri),
+            UserInfo::fromAuthority($auth)
+        );
+
+        self::assertEquals(
+            UserInfo::fromUri($uri),
+            UserInfo::fromAuthority($uri->getAuthority())
+        );
     }
 
     public function testCreateFromAuthorityWithActualUserInfoComponent(): void
@@ -245,5 +254,42 @@ final class UserInfoTest extends TestCase
         $this->expectException(SyntaxError::class);
 
         new UserInfo(null, 'password');
+    }
+
+    /**
+     * @dataProvider providesUriToParse
+     *
+     * @param array{user: ?string, pass: ?string} $components
+     */
+    public function testNewInstanceFromUriParsing(string $uri, ?string $expected, array $components): void
+    {
+        $userInfo = UserInfo::fromComponents(UriString::parse($uri));
+
+        self::assertSame($expected, $userInfo->value());
+        self::assertSame($components, $userInfo->components());
+    }
+
+    /**
+     * @return iterable<string, array{uri: string, expected: ?string}>
+     */
+    public static function providesUriToParse(): iterable
+    {
+        yield 'uri without user info' => [
+            'uri' => 'https://example.com',
+            'expected' => null,
+            'components' => ['user' => null, 'pass' => null],
+        ];
+
+        yield 'uri with a full user info' => [
+            'uri' => 'https://user:pass@example.com',
+            'expected' => 'user:pass',
+            'components' => ['user' => 'user', 'pass' => 'pass'],
+        ];
+
+        yield 'uri with a user info with an empty user name' => [
+            'uri' => 'https://:pass@example.com',
+            'expected' => ':pass',
+            'components' => ['user' => '', 'pass' => 'pass'],
+        ];
     }
 }

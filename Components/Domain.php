@@ -67,25 +67,16 @@ final class Domain extends Component implements DomainHostInterface
 
     /**
      * Returns a new instance from an iterable structure.
-     *
-     * @throws TypeError If a label is the null value
      */
     public static function fromLabels(Stringable|string ...$labels): self
     {
-        $hostLabels = [];
-        foreach ($labels as $label) {
-            $label = self::filterComponent($label);
-            if (null === $label) {
-                throw new TypeError('A label can not be null.');
-            }
-            $hostLabels[] = $label;
-        }
-
-        if ([] === $hostLabels) {
-            return new self(null);
-        }
-
-        return self::new(implode(self::SEPARATOR, array_reverse($hostLabels)));
+        return new self(match (true) {
+            [] === $labels => null,
+            default => implode(self::SEPARATOR, array_reverse(array_map(
+                fn ($label) => self::filterComponent($label),
+                $labels
+            ))),
+        });
     }
 
     /**
@@ -278,11 +269,6 @@ final class Domain extends Component implements DomainHostInterface
         $filter = static fn ($key): bool => !in_array($key, $deleted_keys, true);
 
         return self::fromLabels(...array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
-    }
-
-    public function clear(): self
-    {
-        return self::new();
     }
 
     public function slice(int $offset, int $length = null): self

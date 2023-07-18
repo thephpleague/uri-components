@@ -67,7 +67,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(Stringable|string $authority): self
+    public static function fromAuthority(Stringable|string|null $authority): self
     {
         if (!$authority instanceof AuthorityInterface) {
             $authority = Authority::new($authority);

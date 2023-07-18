@@ -249,12 +249,10 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         };
     }
 
-    public function append(Stringable|string|null $segment): SegmentedPathInterface
+    public function append(Stringable|string $segment): SegmentedPathInterface
     {
+        /** @var string $segment */
         $segment = self::filterComponent($segment);
-        if (null === $segment) {
-            throw new TypeError('The appended path can not be null.');
-        }
 
         return new self(
             rtrim($this->path->toString(), self::SEPARATOR)
@@ -263,12 +261,10 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         );
     }
 
-    public function prepend(Stringable|string|null $segment): SegmentedPathInterface
+    public function prepend(Stringable|string $segment): SegmentedPathInterface
     {
+        /** @var string $segment */
         $segment = self::filterComponent($segment);
-        if (null === $segment) {
-            throw new TypeError('The prepended path can not be null.');
-        }
 
         return new self(
             rtrim($segment, self::SEPARATOR)
@@ -277,27 +273,23 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         );
     }
 
-    public function withSegment(int $key, Stringable|string|null $segment): SegmentedPathInterface
+    public function withSegment(int $key, Stringable|string $segment): SegmentedPathInterface
     {
-        $nb_segments = count($this->segments);
-        if ($key < - $nb_segments - 1 || $key > $nb_segments) {
+        $nbSegments = count($this->segments);
+        if ($key < - $nbSegments - 1 || $key > $nbSegments) {
             throw new OffsetOutOfBounds(sprintf('The given key `%s` is invalid.', $key));
         }
 
         if (0 > $key) {
-            $key += $nb_segments;
+            $key += $nbSegments;
         }
 
-        if ($nb_segments === $key) {
+        if ($nbSegments === $key) {
             return $this->append($segment);
         }
 
         if (-1 === $key) {
             return $this->prepend($segment);
-        }
-
-        if (null === $segment) {
-            throw new SyntaxError('The segment can not be null.');
         }
 
         if (!$segment instanceof PathInterface) {
@@ -379,11 +371,8 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     public function withBasename(Stringable|string $basename): SegmentedPathInterface
     {
+        /** @var string $basename */
         $basename = $this->validateComponent($basename);
-        if (null === $basename) {
-            throw new SyntaxError('A basename sequence can not be null.');
-        }
-
         if (str_contains($basename, self::SEPARATOR)) {
             throw new SyntaxError('The basename can not contain the path separator.');
         }
@@ -393,11 +382,8 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     public function withExtension(Stringable|string $extension): SegmentedPathInterface
     {
+        /** @var string $extension */
         $extension = $this->validateComponent($extension);
-        if (null === $extension) {
-            throw new SyntaxError('An extension sequence can not be null.');
-        }
-
         if (str_contains($extension, self::SEPARATOR)) {
             throw new SyntaxError('An extension sequence can not contain a path delimiter.');
         }
