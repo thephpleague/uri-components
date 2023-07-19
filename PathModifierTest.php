@@ -11,6 +11,7 @@
 
 namespace League\Uri;
 
+use BadMethodCallException;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
@@ -24,10 +25,12 @@ use function dirname;
 final class PathModifierTest extends TestCase
 {
     private string $uri;
+    private UriModifier $modifier;
 
     protected function setUp(): void
     {
         $this->uri = 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar+baz#doc3';
+        $this->modifier = UriModifier::from($this->uri);
     }
 
     /**
@@ -80,6 +83,7 @@ final class PathModifierTest extends TestCase
     public function testAppendProcess(string $segment, string $append): void
     {
         self::assertSame($append, UriModifier::appendSegment($this->uri, $segment)->getPath());
+        self::assertSame($append, $this->modifier->pipe('appendSegment', $segment)->get()->getPath());
     }
 
     public static function appendSegmentProvider(): array
@@ -96,6 +100,7 @@ final class PathModifierTest extends TestCase
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
         self::assertSame($expected, (string) UriModifier::appendSegment(Http::new($uri), $segment));
+        self::assertSame($expected, (string) UriModifier::from($uri)->pipe('appendSegment', $segment)->get());
     }
 
     public static function validAppendSegmentProvider(): array
@@ -347,5 +352,21 @@ final class PathModifierTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
         UriModifier::replaceExtension($this->uri, 'to/to');
+    }
+
+    /**
+     * @dataProvider providesInvalidMethodNames
+     */
+    public function testPipeToInexistantMethod(string $method): void
+    {
+        $this->expectException(BadMethodCallException::class);
+
+        UriModifier::from('https://example.com')->pipe($method);
+    }
+
+    public static function providesInvalidMethodNames(): iterable
+    {
+        yield 'unknown method' => ['method' => 'unknownMethod'];
+        yield 'case sensitive method' => ['method' => 'rePLAceExtenSIOn'];
     }
 }
