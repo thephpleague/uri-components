@@ -322,14 +322,17 @@ final class DomainTest extends TestCase
             ['secure.example.com', 'master', 'master.secure.example.com'],
             ['secure.example.com.', 'master', 'master.secure.example.com.'],
             ['secure.example.com', '127.0.0.1', '127.0.0.1.secure.example.com'],
+            ['secure.example.com', '127.', '127.secure.example.com'],
+            ['secure.example.com.', '127.', '127.secure.example.com.'],
+            ['secure.example.com', '127', '127.secure.example.com'],
         ];
     }
 
-    public function testPrependIpFailed(): void
+    public function testPrependFailsWithInvalidAbsoluteHost(): void
     {
         $this->expectException(SyntaxError::class);
 
-        Domain::new('secure.example.com')->prepend(Domain::new('master.'));
+        Domain::new('secure.example.com')->prepend('master..');
     }
 
     public function testPrependNull(): void
@@ -354,14 +357,17 @@ final class DomainTest extends TestCase
             ['secure.example.com', 'master.', 'secure.example.com.master.'],
             ['toto', '127.0.0.1', 'toto.127.0.0.1'],
             ['example.com', '', 'example.com.'],
+            ['secure.example.com.', 'master', 'secure.example.com.master.'],
+            ['secure.example.com.', 'master.', 'secure.example.com.master.'],
+            ['secure.example.com', 'master.', 'secure.example.com.master.'],
         ];
     }
 
-    public function testAppendIpFailed(): void
+    public function testAppendFailsWithInvalidAbsoluteHost(): void
     {
         $this->expectException(SyntaxError::class);
 
-        Domain::new('secure.example.com.')->append('master');
+        Domain::new('secure.example.com')->append('master..');
     }
 
     public function testAppendNull(): void

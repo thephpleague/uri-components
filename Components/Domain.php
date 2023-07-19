@@ -171,21 +171,28 @@ final class Domain extends Component implements DomainHostInterface
     public function prepend(Stringable|string|int|null $label): DomainHostInterface
     {
         $label = self::filterComponent($label);
-        if (null === $label) {
-            return $this;
-        }
+        $value = $this->value();
 
-        return new self($label.self::SEPARATOR.$this->value());
+        return match (true) {
+            null === $label => $this,
+            null === $value => new self($label),
+            str_ends_with($label, self::SEPARATOR) => new self($label.$value),
+            default => new self($label.self::SEPARATOR.$value),
+        };
     }
 
     public function append(Stringable|string|int|null $label): DomainHostInterface
     {
         $label = self::filterComponent($label);
-        if (null === $label) {
-            return $this;
-        }
+        $value = $this->value();
 
-        return new self($this->value().self::SEPARATOR.$label);
+        return match (true) {
+            null === $label => $this,
+            null === $value => new self($label),
+            !$this->isAbsolute() => new self($value.self::SEPARATOR.$label),
+            str_ends_with($label, self::SEPARATOR) => new self($value.$label),
+            default => new self($value.$label.self::SEPARATOR),
+        };
     }
 
     public function withRootLabel(): DomainHostInterface
