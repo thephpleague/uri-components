@@ -72,7 +72,7 @@ final class PathModifierTest extends TestCase
         $uri = Uri::new('data:text/plain;charset=us-ascii,Bonjour%20le%20monde!');
         self::assertSame(
             'text/plain;coco=chanel,Bonjour%20le%20monde!',
-            Modifier::from($uri)->replaceDataUriParameters('coco=chanel')->get()->getPath()
+            Modifier::from($uri)->replaceDataUriParameters('coco=chanel')->getUri()->getPath()
         );
     }
 
@@ -81,7 +81,7 @@ final class PathModifierTest extends TestCase
      */
     public function testAppendProcess(string $segment, string $append): void
     {
-        self::assertSame($append, $this->modifier->appendSegment($segment)->get()->getPath());
+        self::assertSame($append, $this->modifier->appendSegment($segment)->getUri()->getPath());
     }
 
     public static function appendSegmentProvider(): array
@@ -97,7 +97,7 @@ final class PathModifierTest extends TestCase
      */
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
-        self::assertSame($expected, (string) Modifier::from($uri)->appendSegment($segment)->get());
+        self::assertSame($expected, (string) Modifier::from($uri)->appendSegment($segment)->getUri());
     }
 
     public static function validAppendSegmentProvider(): array
@@ -175,7 +175,7 @@ final class PathModifierTest extends TestCase
     public function testPrependProcess(string $uri, string $segment, string $prepend): void
     {
         $uri = Uri::new($uri);
-        self::assertSame($prepend, Modifier::from($uri)->prependSegment($segment)->get()->getPath());
+        self::assertSame($prepend, Modifier::from($uri)->prependSegment($segment)->getUri()->getPath());
     }
 
     public static function prependSegmentProvider(): array
@@ -209,7 +209,7 @@ final class PathModifierTest extends TestCase
      */
     public function testReplaceSegmentProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
-        self::assertSame($replace, $this->modifier->replaceSegment($key, $segment)->get()->getPath());
+        self::assertSame($replace, $this->modifier->replaceSegment($key, $segment)->getUri()->getPath());
     }
 
     public static function replaceSegmentProvider(): array
@@ -225,7 +225,7 @@ final class PathModifierTest extends TestCase
      */
     public function testaddBasepath(string $basepath, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->addBasePath($basepath)->get()->getPath());
+        self::assertSame($expected, $this->modifier->addBasePath($basepath)->getUri()->getPath());
     }
 
     public static function addBasepathProvider(): array
@@ -241,7 +241,7 @@ final class PathModifierTest extends TestCase
     public function testaddBasepathWithRelativePath(): void
     {
         $uri = Http::new('base/path');
-        self::assertSame('/base/path', Modifier::from($uri)->addBasePath('/base/path')->get()->getPath());
+        self::assertSame('/base/path', Modifier::from($uri)->addBasePath('/base/path')->getUri()->getPath());
     }
 
     /**
@@ -249,7 +249,7 @@ final class PathModifierTest extends TestCase
      */
     public function testRemoveBasePath(string $basepath, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeBasePath($basepath)->get()->getPath());
+        self::assertSame($expected, $this->modifier->removeBasePath($basepath)->getUri()->getPath());
     }
 
     public static function removeBasePathProvider(): array
@@ -265,7 +265,7 @@ final class PathModifierTest extends TestCase
     public function testRemoveBasePathWithRelativePath(): void
     {
         $uri = Http::new('base/path');
-        self::assertSame('base/path', Modifier::from($uri)->removeBasePath('/base/path')->get()->getPath());
+        self::assertSame('base/path', Modifier::from($uri)->removeBasePath('/base/path')->getUri()->getPath());
     }
 
     /**
@@ -273,7 +273,7 @@ final class PathModifierTest extends TestCase
      */
     public function testwithoutSegment(array $keys, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeSegments(...$keys)->get()->getPath());
+        self::assertSame($expected, $this->modifier->removeSegments(...$keys)->getUri()->getPath());
     }
 
     public static function validwithoutSegmentProvider(): array
@@ -288,7 +288,7 @@ final class PathModifierTest extends TestCase
         $uri = Http::new(
             'http://www.example.com/path/../to/the/./sky.php?kingkong=toto&foo=bar+baz#doc3'
         );
-        self::assertSame('/to/the/sky.php', Modifier::from($uri)->removeDotSegments()->get()->getPath());
+        self::assertSame('/to/the/sky.php', Modifier::from($uri)->removeDotSegments()->getUri()->getPath());
     }
 
     public function testWithoutEmptySegmentsProcess(): void
@@ -296,13 +296,13 @@ final class PathModifierTest extends TestCase
         $uri = Http::new(
             'http://www.example.com/path///to/the//sky.php?kingkong=toto&foo=bar+baz#doc3'
         );
-        self::assertSame('/path/to/the/sky.php', Modifier::from($uri)->removeEmptySegments()->get()->getPath());
+        self::assertSame('/path/to/the/sky.php', Modifier::from($uri)->removeEmptySegments()->getUri()->getPath());
     }
 
     public function testWithoutTrailingSlashProcess(): void
     {
         $uri = Http::new('http://www.example.com/');
-        self::assertSame('', Modifier::from($uri)->removeTrailingSlash()->get()->getPath());
+        self::assertSame('', Modifier::from($uri)->removeTrailingSlash()->getUri()->getPath());
     }
 
     /**
@@ -310,7 +310,7 @@ final class PathModifierTest extends TestCase
      */
     public function testExtensionProcess(string $extension, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->replaceExtension($extension)->get()->getPath());
+        self::assertSame($expected, $this->modifier->replaceExtension($extension)->getUri()->getPath());
     }
 
     public static function validExtensionProvider(): array
@@ -323,7 +323,7 @@ final class PathModifierTest extends TestCase
 
     public function testWithTrailingSlashProcess(): void
     {
-        self::assertSame('/path/to/the/sky.php/', $this->modifier->addTrailingSlash()->get()->getPath());
+        self::assertSame('/path/to/the/sky.php/', $this->modifier->addTrailingSlash()->getUri()->getPath());
     }
 
     public function testWithoutLeadingSlashProcess(): void

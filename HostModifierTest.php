@@ -36,7 +36,7 @@ final class HostModifierTest extends TestCase
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($prepend, $this->modifier->prependLabel($label)->get()->getHost());
+        self::assertSame($prepend, $this->modifier->prependLabel($label)->getUri()->getHost());
     }
 
     /**
@@ -44,7 +44,7 @@ final class HostModifierTest extends TestCase
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($append, $this->modifier->appendLabel($label)->get()->getHost());
+        self::assertSame($append, $this->modifier->appendLabel($label)->getUri()->getHost());
     }
 
     /**
@@ -52,7 +52,7 @@ final class HostModifierTest extends TestCase
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($replace, $this->modifier->replaceLabel($key, $label)->get()->getHost());
+        self::assertSame($replace, $this->modifier->replaceLabel($key, $label)->getUri()->getHost());
     }
 
     public static function validHostProvider(): array
@@ -69,7 +69,7 @@ final class HostModifierTest extends TestCase
 
         self::assertSame(
             '127.0.0.1.localhost',
-            Modifier::from($uri)->appendLabel('.localhost')->get()->getHost()
+            Modifier::from($uri)->appendLabel('.localhost')->getUri()->getHost()
         );
     }
 
@@ -86,7 +86,7 @@ final class HostModifierTest extends TestCase
 
         self::assertSame(
             'localhost.127.0.0.1',
-            Modifier::from($uri)->prependLabel('localhost.')->get()->getHost()
+            Modifier::from($uri)->prependLabel('localhost.')->getUri()->getHost()
         );
     }
 
@@ -94,7 +94,7 @@ final class HostModifierTest extends TestCase
     {
         $uri = Uri::new('http://127.0.0.1');
 
-        self::assertSame($uri, Modifier::from($uri)->appendLabel(null)->get());
+        self::assertSame($uri, Modifier::from($uri)->appendLabel(null)->getUri());
     }
 
     public function testPrependLabelThrowsWithOtherIpHost(): void
@@ -108,7 +108,7 @@ final class HostModifierTest extends TestCase
     {
         $uri = Uri::new('http://127.0.0.1');
 
-        self::assertSame($uri, Modifier::from($uri)->prependLabel(null)->get());
+        self::assertSame($uri, Modifier::from($uri)->prependLabel(null)->getUri());
     }
 
     public function testHostToAsciiProcess(): void
@@ -136,7 +136,7 @@ final class HostModifierTest extends TestCase
      */
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeLabels(...$keys)->get()->getHost());
+        self::assertSame($expected, $this->modifier->removeLabels(...$keys)->getUri()->getHost());
     }
 
     public static function validwithoutLabelProvider(): array
@@ -148,18 +148,18 @@ final class HostModifierTest extends TestCase
 
     public function testRemoveLabels(): void
     {
-        self::assertSame('example.com', $this->modifier->removeLabels(2)->get()->getHost());
+        self::assertSame('example.com', $this->modifier->removeLabels(2)->getUri()->getHost());
     }
 
     public function testAddRootLabel(): void
     {
-        self::assertSame('www.example.com.', $this->modifier->addRootLabel()->addRootLabel()->get()->getHost());
+        self::assertSame('www.example.com.', $this->modifier->addRootLabel()->addRootLabel()->getUri()->getHost());
     }
 
     public function testRemoveRootLabel(): void
     {
-        self::assertSame('www.example.com', $this->modifier->addRootLabel()->removeRootLabel()->get()->getHost());
-        self::assertSame('www.example.com', $this->modifier->removeRootLabel()->get()->getHost());
+        self::assertSame('www.example.com', $this->modifier->addRootLabel()->removeRootLabel()->getUri()->getHost());
+        self::assertSame('www.example.com', $this->modifier->removeRootLabel()->getUri()->getHost());
     }
 
     public function testItCanBeJsonSerialize(): void

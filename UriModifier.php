@@ -36,7 +36,7 @@ class UriModifier
         Stringable|string $uri,
         Stringable|string|null $query
     ): Psr7UriInterface|UriInterface {
-        return Modifier::from($uri)->appendQuery($query)->get();
+        return Modifier::from($uri)->appendQuery($query)->getUri();
     }
 
     /**
@@ -46,7 +46,7 @@ class UriModifier
         Stringable|string $uri,
         Stringable|string|null $query
     ): Psr7UriInterface|UriInterface {
-        return Modifier::from($uri)->mergeQuery($query)->get();
+        return Modifier::from($uri)->mergeQuery($query)->getUri();
     }
 
     /**
@@ -54,7 +54,7 @@ class UriModifier
      */
     public static function removePairs(Stringable|string $uri, string ...$keys): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removePairs(...$keys)->get();
+        return Modifier::from($uri)->removePairs(...$keys)->getUri();
     }
 
     /**
@@ -65,7 +65,7 @@ class UriModifier
      */
     public static function removeEmptyPairs(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeEmptyPairs()->get();
+        return Modifier::from($uri)->removeEmptyPairs()->getUri();
     }
 
     /**
@@ -73,7 +73,7 @@ class UriModifier
      */
     public static function removeParams(Stringable|string $uri, string ...$keys): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeParams(...$keys)->get();
+        return Modifier::from($uri)->removeParams(...$keys)->getUri();
     }
 
     /**
@@ -81,7 +81,7 @@ class UriModifier
      */
     public static function sortQuery(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->sortQuery()->get();
+        return Modifier::from($uri)->sortQuery()->getUri();
     }
 
     /*********************************
@@ -93,7 +93,7 @@ class UriModifier
      */
     public static function addRootLabel(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->addRootLabel()->get();
+        return Modifier::from($uri)->addRootLabel()->getUri();
     }
 
     /**
@@ -103,7 +103,7 @@ class UriModifier
      */
     public static function appendLabel(Stringable|string $uri, Stringable|string|null $label): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->appendLabel($label)->get();
+        return Modifier::from($uri)->appendLabel($label)->getUri();
     }
 
     /**
@@ -111,7 +111,7 @@ class UriModifier
      */
     public static function hostToAscii(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->hostToAscii()->get();
+        return Modifier::from($uri)->hostToAscii()->getUri();
     }
 
     /**
@@ -119,7 +119,7 @@ class UriModifier
      */
     public static function hostToUnicode(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->hostToUnicode()->get();
+        return Modifier::from($uri)->hostToUnicode()->getUri();
     }
 
     /**
@@ -129,7 +129,7 @@ class UriModifier
      */
     public static function prependLabel(Stringable|string $uri, Stringable|string|null $label): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->prependLabel($label)->get();
+        return Modifier::from($uri)->prependLabel($label)->getUri();
     }
 
     /**
@@ -137,7 +137,7 @@ class UriModifier
      */
     public static function removeLabels(Stringable|string $uri, int ...$keys): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeLabels(...$keys)->get();
+        return Modifier::from($uri)->removeLabels(...$keys)->getUri();
     }
 
     /**
@@ -145,7 +145,7 @@ class UriModifier
      */
     public static function removeRootLabel(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeRootLabel()->get();
+        return Modifier::from($uri)->removeRootLabel()->getUri();
     }
 
     /**
@@ -153,7 +153,7 @@ class UriModifier
      */
     public static function removeZoneId(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeZoneId()->get();
+        return Modifier::from($uri)->removeZoneId()->getUri();
     }
 
     /**
@@ -164,7 +164,7 @@ class UriModifier
         int $offset,
         Stringable|string|null $label
     ): Psr7UriInterface|UriInterface {
-        return Modifier::from($uri)->replaceLabel($offset, $label)->get();
+        return Modifier::from($uri)->replaceLabel($offset, $label)->getUri();
     }
 
     /*********************************
@@ -176,7 +176,7 @@ class UriModifier
      */
     public static function addBasePath(Stringable|string $uri, Stringable|string $path): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->addBasePath($path)->get();
+        return Modifier::from($uri)->addBasePath($path)->getUri();
     }
 
     /**
@@ -184,7 +184,7 @@ class UriModifier
      */
     public static function addLeadingSlash(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->addLeadingSlash()->get();
+        return Modifier::from($uri)->addLeadingSlash()->getUri();
     }
 
     /**
@@ -192,7 +192,7 @@ class UriModifier
      */
     public static function addTrailingSlash(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->addTrailingSlash()->get();
+        return Modifier::from($uri)->addTrailingSlash()->getUri();
     }
 
     /**
@@ -200,7 +200,7 @@ class UriModifier
      */
     public static function appendSegment(Stringable|string $uri, Stringable|string $segment): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->appendSegment($segment)->get();
+        return Modifier::from($uri)->appendSegment($segment)->getUri();
     }
 
     /**
@@ -208,7 +208,7 @@ class UriModifier
      */
     public static function dataPathToAscii(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->dataPathToAscii()->get();
+        return Modifier::from($uri)->dataPathToAscii()->getUri();
     }
 
     /**
@@ -216,7 +216,7 @@ class UriModifier
      */
     public static function dataPathToBinary(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->dataPathToBinary()->get();
+        return Modifier::from($uri)->dataPathToBinary()->getUri();
     }
 
     /**
@@ -226,7 +226,7 @@ class UriModifier
         Stringable|string $uri,
         Stringable|string $segment
     ): Psr7UriInterface|UriInterface {
-        return Modifier::from($uri)->prependSegment($segment)->get();
+        return Modifier::from($uri)->prependSegment($segment)->getUri();
     }
 
     /**
@@ -236,7 +236,7 @@ class UriModifier
         Stringable|string $uri,
         Stringable|string $path
     ): Psr7UriInterface|UriInterface {
-        return Modifier::from($uri)->removeBasePath($path)->get();
+        return Modifier::from($uri)->removeBasePath($path)->getUri();
     }
 
     /**
@@ -244,7 +244,7 @@ class UriModifier
      */
     public static function removeDotSegments(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeDotSegments()->get();
+        return Modifier::from($uri)->removeDotSegments()->getUri();
     }
 
     /**
@@ -252,7 +252,7 @@ class UriModifier
      */
     public static function removeEmptySegments(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeEmptySegments()->get();
+        return Modifier::from($uri)->removeEmptySegments()->getUri();
     }
 
     /**
@@ -260,7 +260,7 @@ class UriModifier
      */
     public static function removeLeadingSlash(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeLeadingSlash()->get();
+        return Modifier::from($uri)->removeLeadingSlash()->getUri();
 
     }
 
@@ -269,7 +269,7 @@ class UriModifier
      */
     public static function removeTrailingSlash(Stringable|string $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeTrailingSlash()->get();
+        return Modifier::from($uri)->removeTrailingSlash()->getUri();
     }
 
     /**
@@ -277,7 +277,7 @@ class UriModifier
      */
     public static function removeSegments(Stringable|string $uri, int ...$keys): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeSegments(...$keys)->get();
+        return Modifier::from($uri)->removeSegments(...$keys)->getUri();
     }
 
     /**
@@ -285,7 +285,7 @@ class UriModifier
      */
     public static function replaceBasename(Stringable|string $uri, Stringable|string $basename): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->replaceBasename($basename)->get();
+        return Modifier::from($uri)->replaceBasename($basename)->getUri();
     }
 
     /**
@@ -293,7 +293,7 @@ class UriModifier
      */
     public static function replaceDataUriParameters(Stringable|string $uri, Stringable|string $parameters): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->replaceDataUriParameters($parameters)->get();
+        return Modifier::from($uri)->replaceDataUriParameters($parameters)->getUri();
     }
 
     /**
@@ -301,7 +301,7 @@ class UriModifier
      */
     public static function replaceDirname(Stringable|string $uri, Stringable|string $dirname): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->replaceDirname($dirname)->get();
+        return Modifier::from($uri)->replaceDirname($dirname)->getUri();
     }
 
     /**
@@ -309,7 +309,7 @@ class UriModifier
      */
     public static function replaceExtension(Stringable|string $uri, Stringable|string $extension): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->replaceExtension($extension)->get();
+        return Modifier::from($uri)->replaceExtension($extension)->getUri();
     }
 
     /**
@@ -320,6 +320,6 @@ class UriModifier
         int $offset,
         Stringable|string $segment
     ): Psr7UriInterface|UriInterface {
-        return Modifier::from($uri)->replaceSegment($offset, $segment)->get();
+        return Modifier::from($uri)->replaceSegment($offset, $segment)->getUri();
     }
 }
