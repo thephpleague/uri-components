@@ -45,7 +45,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Query::params` is replaced by `Query::parameters` and `Query::parameter`
 - `HierarchicalPath::segments` use `HierarchicalPath::getIterator` instead
 - `Domain::labels` use `Domain::getIterator` instead
-- `League\Uri\Modifier`
+- `League\Uri\UriModifier`
 
 ### Removed
 

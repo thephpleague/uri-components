@@ -37,7 +37,7 @@ final class PathModifierTest extends TestCase
      */
     public function testToBinary(Uri $binary, Uri $ascii): void
     {
-        self::assertSame((string) $binary, (string) Modifier::from($ascii)->dataPathToBinary());
+        self::assertSame($binary->toString(), Modifier::from($ascii)->dataPathToBinary()->getUriString());
     }
 
     /**
@@ -45,7 +45,7 @@ final class PathModifierTest extends TestCase
      */
     public function testToAscii(Uri $binary, Uri $ascii): void
     {
-        self::assertSame((string) $ascii, (string) Modifier::from($binary)->dataPathToAscii());
+        self::assertSame($ascii->toString(), Modifier::from($binary)->dataPathToAscii()->getUriString());
     }
 
     public static function fileProvider(): array

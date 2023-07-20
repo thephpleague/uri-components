@@ -24,6 +24,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function ltrim;
@@ -35,11 +36,12 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     {
     }
 
-    public static function from(Stringable|string $uri): self
+    public static function from(Stringable|string $uri, UriFactoryInterface|null $uriFactory = null): self
     {
         return new self(match (true) {
             $uri instanceof UriAccess => $uri->getUri(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
+            $uriFactory instanceof UriFactoryInterface => $uriFactory->createUri((string) $uri),
             default => Uri::new($uri),
         });
     }
@@ -47,6 +49,11 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     public function getUri(): Psr7UriInterface|UriInterface
     {
         return $this->uri;
+    }
+
+    public function getUriString(): string
+    {
+        return $this->uri->__toString();
     }
 
     public function jsonSerialize(): string
