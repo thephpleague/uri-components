@@ -114,7 +114,7 @@ final class IPv4Normalizer
     public function normalizeUri(Stringable|string $uri): UriInterface|Psr7UriInterface
     {
         if ($uri instanceof BaseUri) {
-            $uri = $uri->uri();
+            $uri = $uri->get();
         }
 
         if (!$uri instanceof UriInterface && !$uri instanceof Psr7UriInterface) {

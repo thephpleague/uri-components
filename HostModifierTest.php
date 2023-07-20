@@ -11,6 +11,7 @@
 
 namespace League\Uri;
 
+use GuzzleHttp\Psr7\Utils;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 
@@ -21,11 +22,13 @@ use PHPUnit\Framework\TestCase;
  */
 final class HostModifierTest extends TestCase
 {
-    private string $uri;
+    private readonly string $uri;
+    private readonly Modifier $modifier;
 
     protected function setUp(): void
     {
         $this->uri = 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar+baz#doc3';
+        $this->modifier = Modifier::from($this->uri);
     }
 
     /**
@@ -33,7 +36,7 @@ final class HostModifierTest extends TestCase
      */
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($prepend, UriModifier::prependLabel($this->uri, $label)->getHost());
+        self::assertSame($prepend, $this->modifier->prependLabel($label)->get()->getHost());
     }
 
     /**
@@ -41,7 +44,7 @@ final class HostModifierTest extends TestCase
      */
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($append, UriModifier::appendLabel($this->uri, $label)->getHost());
+        self::assertSame($append, $this->modifier->appendLabel($label)->get()->getHost());
     }
 
     /**
@@ -49,7 +52,7 @@ final class HostModifierTest extends TestCase
      */
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
-        self::assertSame($replace, UriModifier::replaceLabel($this->uri, $key, $label)->getHost());
+        self::assertSame($replace, $this->modifier->replaceLabel($key, $label)->get()->getHost());
     }
 
     public static function validHostProvider(): array
@@ -64,57 +67,67 @@ final class HostModifierTest extends TestCase
     {
         $uri = Http::new('http://127.0.0.1/foo/bar');
 
-        self::assertSame('127.0.0.1.localhost', UriModifier::appendLabel($uri, '.localhost')->getHost());
+        self::assertSame(
+            '127.0.0.1.localhost',
+            Modifier::from($uri)->appendLabel('.localhost')->get()->getHost()
+        );
     }
 
     public function testAppendLabelThrowsWithOtherIpHost(): void
     {
         $this->expectException(SyntaxError::class);
 
-        $uri = Http::new('http://[::1]/foo/bar');
-        UriModifier::appendLabel($uri, '.localhost');
+        Modifier::from(Http::new('http://[::1]/foo/bar'))->appendLabel('.localhost');
     }
 
     public function testPrependLabelWithIpv4Host(): void
     {
         $uri = Http::new('http://127.0.0.1/foo/bar');
-        self::assertSame('localhost.127.0.0.1', UriModifier::prependLabel($uri, 'localhost.')->getHost());
+
+        self::assertSame(
+            'localhost.127.0.0.1',
+            Modifier::from($uri)->prependLabel('localhost.')->get()->getHost()
+        );
     }
 
     public function testAppendNulLabel(): void
     {
         $uri = Uri::new('http://127.0.0.1');
-        self::assertSame($uri, UriModifier::appendLabel($uri, null));
+
+        self::assertSame($uri, Modifier::from($uri)->appendLabel(null)->get());
     }
 
     public function testPrependLabelThrowsWithOtherIpHost(): void
     {
         $this->expectException(SyntaxError::class);
-        $uri = Http::new('http://[::1]/foo/bar');
-        UriModifier::prependLabel($uri, '.localhost');
+
+        Modifier::from(Http::new('http://[::1]/foo/bar'))->prependLabel('.localhost');
     }
 
     public function testPrependNullLabel(): void
     {
         $uri = Uri::new('http://127.0.0.1');
-        self::assertSame($uri, UriModifier::prependLabel($uri, null));
+
+        self::assertSame($uri, Modifier::from($uri)->prependLabel(null)->get());
     }
 
     public function testHostToAsciiProcess(): void
     {
         $uri = Uri::new('http://مثال.إختبار/where/to/go');
+
         self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
-            (string)  UriModifier::hostToAscii($uri)
+            (string)  Modifier::from($uri)->hostToAscii()
         );
     }
 
     public function testWithoutZoneIdentifierProcess(): void
     {
         $uri = Http::new('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
+
         self::assertSame(
             'http://[fe80::1234]/path/to/the/sky.php',
-            (string) UriModifier::removeZoneId($uri)
+            (string) Modifier::from($uri)->removeZoneId()
         );
     }
 
@@ -123,7 +136,7 @@ final class HostModifierTest extends TestCase
      */
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
-        self::assertSame($expected, UriModifier::removeLabels($this->uri, ...$keys)->getHost());
+        self::assertSame($expected, $this->modifier->removeLabels(...$keys)->get()->getHost());
     }
 
     public static function validwithoutLabelProvider(): array
@@ -135,16 +148,35 @@ final class HostModifierTest extends TestCase
 
     public function testRemoveLabels(): void
     {
-        self::assertSame('example.com', UriModifier::removeLabels($this->uri, 2)->getHost());
+        self::assertSame('example.com', $this->modifier->removeLabels(2)->get()->getHost());
     }
 
     public function testAddRootLabel(): void
     {
-        self::assertSame('www.example.com.', UriModifier::addRootLabel($this->uri)->getHost());
+        self::assertSame('www.example.com.', $this->modifier->addRootLabel()->addRootLabel()->get()->getHost());
     }
 
     public function testRemoveRootLabel(): void
     {
-        self::assertSame('www.example.com', UriModifier::removeRootLabel($this->uri)->getHost());
+        self::assertSame('www.example.com', $this->modifier->addRootLabel()->removeRootLabel()->get()->getHost());
+        self::assertSame('www.example.com', $this->modifier->removeRootLabel()->get()->getHost());
+    }
+
+    public function testItCanBeJsonSerialize(): void
+    {
+        $uri = Http::new($this->uri);
+
+        self::assertSame(json_encode($uri), json_encode($this->modifier));
+    }
+
+    public function testItCanConvertHostToUnicode(): void
+    {
+        $uriString = 'http://bébé.be';
+        $uri = (string) Http::new($uriString);
+        $modifier = Modifier::from(Utils::uriFor($uri));
+
+        self::assertSame('http://xn--bb-bjab.be', $uri);
+        self::assertSame('http://xn--bb-bjab.be', (string) $modifier);
+        self::assertSame($uriString, (string) $modifier->hostToUnicode());
     }
 }

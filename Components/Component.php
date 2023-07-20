@@ -67,7 +67,7 @@ abstract class Component implements UriComponentInterface
     final protected static function filterUri(Stringable|string $uri): UriInterface|Psr7UriInterface
     {
         return match (true) {
-            $uri instanceof BaseUri => $uri->uri(),
+            $uri instanceof BaseUri => $uri->get(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
             default => Uri::new($uri),
         };
