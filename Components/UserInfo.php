@@ -110,23 +110,16 @@ final class UserInfo extends Component implements UserInfoInterface
         $value = (string) $value;
 
         [$user, $pass] = explode(':', $value, 2) + [1 => null];
-        if (null !== $user) {
-            $user = self::decode($user);
-        }
 
-        if (null !== $pass) {
-            $pass = self::decode($pass);
-        }
-
-        return new self($user, $pass);
+        return new self(self::decode($user), self::decode($pass));
     }
 
     /**
      * Decodes an encoded string.
      */
-    private static function decode(string $str): ?string
+    private static function decode(?string $str): ?string
     {
-        return preg_replace_callback(
+        return null === $str ? null : preg_replace_callback(
             self::REGEXP_ENCODED_CHAR,
             static fn (array $matches): string => rawurldecode($matches[0]),
             $str

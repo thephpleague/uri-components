@@ -125,8 +125,8 @@ final class IPv4Normalizer
 
         return match (true) {
             $normalizedHost === $host->value() => $uri,
-            $uri instanceof UriInterface => $uri->withHost($normalizedHost),
-            default => $uri->withHost((string) $normalizedHost),
+            $uri instanceof Psr7UriInterface => $uri->withHost((string) $normalizedHost),
+            default => $uri->withHost($normalizedHost),
         };
     }
 
@@ -157,18 +157,15 @@ final class IPv4Normalizer
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeHost(Stringable|string $host): HostInterface
+    public function normalizeHost(Stringable|string|null $host): HostInterface
     {
         if (!$host instanceof HostInterface) {
             $host = Host::new($host);
         }
 
-        if (!$host->isDomain()) {
-            return $host;
-        }
-
         $hostString = $host->toString();
-        if ('' === $hostString || 1 !== preg_match(self::REGEXP_IPV4_HOST, $hostString)) {
+
+        if (!$host->isDomain() || '' === $hostString || 1 !== preg_match(self::REGEXP_IPV4_HOST, $hostString)) {
             return $host;
         }
 

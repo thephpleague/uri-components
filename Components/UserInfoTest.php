@@ -38,6 +38,7 @@ final class UserInfoTest extends TestCase
         string $uriComponent
     ): void {
         $userinfo = new UserInfo($user, $pass);
+
         self::assertSame($expected_user, $userinfo->getUser());
         self::assertSame($expected_pass, $userinfo->getPass());
         self::assertSame($expected_str, (string) $userinfo);
@@ -48,8 +49,8 @@ final class UserInfoTest extends TestCase
     {
         return [
             'using stringable object' => [
-                'user' => new UserInfo('login'),
-                'pass' => new UserInfo('pass'),
+                'user' => Host::new('login'),
+                'pass' => Scheme::new('pass'),
                 'expected_user' => 'login',
                 'expected_pass' => 'pass',
                 'expected_str' => 'login:pass',
@@ -144,6 +145,11 @@ final class UserInfoTest extends TestCase
         self::assertEquals(
             new UserInfo('user', 'pass'),
             UserInfo::new('user:pass')
+        );
+
+        self::assertEquals(
+            new UserInfo('user', 'pass'),
+            UserInfo::new(Path::new('user:pass'))
         );
     }
 

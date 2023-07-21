@@ -87,7 +87,6 @@ final class IPv4HostNormalizerTest extends TestCase
         }
 
         $expected = (null === $expected) ? Host::new() : Host::new($expected);
-        $input = (null === $input) ? Host::new() : Host::new($input);
 
         self::assertEquals($expected, IPv4Normalizer::fromBCMath()->normalizeHost($input));
     }
@@ -150,7 +149,7 @@ final class IPv4HostNormalizerTest extends TestCase
 
     public function testIpv4NormalizeAuthority(): void
     {
-        $authority = Authority::new('hello:word@0:42');
+        $authority = 'hello:word@0:42';
         $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($authority);
         self::assertSame('0.0.0.0', $newAuthority->getHost());
 
