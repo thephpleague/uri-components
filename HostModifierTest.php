@@ -185,6 +185,6 @@ final class HostModifierTest extends TestCase
         $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
         $expected = 'http://192.168.0.1/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->normalizeIp()->getUriString());
+        self::assertSame($expected, Modifier::from($uri)->normalizeIpV4()->getUriString());
     }
 }

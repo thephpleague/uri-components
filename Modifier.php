@@ -219,7 +219,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeIp(?IPv4Calculator $calculator = null): self
+    public function normalizeIpV4(?IPv4Calculator $calculator = null): self
     {
         $normalizer = null !== $calculator ? new IPv4Normalizer($calculator) : IPv4Normalizer::fromEnvironment();
 
