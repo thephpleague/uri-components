@@ -17,6 +17,7 @@ use League\Uri\Components\Authority;
 use League\Uri\Components\Host;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
+use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\IPv4Calculators\BCMathCalculator;
 use League\Uri\IPv4Calculators\GMPCalculator;
@@ -113,13 +114,11 @@ final class IPv4Normalizer
      */
     public function normalizeUri(Stringable|string $uri): UriInterface|Psr7UriInterface
     {
-        if ($uri instanceof BaseUri) {
-            $uri = $uri->getUri();
-        }
-
-        if (!$uri instanceof UriInterface && !$uri instanceof Psr7UriInterface) {
-            $uri = Uri::new($uri);
-        }
+        $uri = match (true) {
+            $uri instanceof UriAccess => $uri->getUri(),
+            $uri instanceof UriInterface, $uri instanceof Psr7UriInterface => $uri,
+            default => Uri::new($uri),
+        };
 
         $host = Host::fromUri($uri);
         $normalizedHost = $this->normalizeHost($host)->value();

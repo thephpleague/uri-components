@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\BaseUri;
+use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
@@ -67,7 +67,7 @@ abstract class Component implements UriComponentInterface
     final protected static function filterUri(Stringable|string $uri): UriInterface|Psr7UriInterface
     {
         return match (true) {
-            $uri instanceof BaseUri => $uri->getUri(),
+            $uri instanceof UriAccess => $uri->getUri(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
             default => Uri::new($uri),
         };

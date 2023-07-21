@@ -24,6 +24,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\IPv4Calculators\IPv4Calculator;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -210,6 +211,19 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
                 $this->uri
             )
         ));
+    }
+
+    /**
+     * Normalizes the URI host content to a IPv4 dot-decimal notation if possible
+     * otherwise returns the uri instance unchanged.
+     *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     */
+    public function normalizeIp(?IPv4Calculator $calculator = null): self
+    {
+        $normalizer = null !== $calculator ? new IPv4Normalizer($calculator) : IPv4Normalizer::fromEnvironment();
+
+        return new self($normalizer->normalizeUri($this->uri));
     }
 
     /**

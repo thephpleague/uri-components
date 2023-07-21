@@ -179,4 +179,12 @@ final class HostModifierTest extends TestCase
         self::assertSame('http://xn--bb-bjab.be', (string) $modifier);
         self::assertSame($uriString, (string) $modifier->hostToUnicode());
     }
+
+    public function testICanNormalizeIPv4Host(): void
+    {
+        $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
+        $expected = 'http://192.168.0.1/path/to/the/sky.php';
+
+        self::assertSame($expected, Modifier::from($uri)->normalizeIp()->getUriString());
+    }
 }
