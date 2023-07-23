@@ -181,7 +181,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
 
         return match (true) {
             null === $label->value() => $this,
-            $host->isDomain() => new self($this->uri->withHost(self::normalizeComponent(Domain::new($host)->append($label)->value(), $this->uri))),
+            $host->isDomain() => new self($this->uri->withHost(self::normalizeComponent(Domain::new($host)->append($label)->toUnicode(), $this->uri))),
             $host->isIpv4() => new self($this->uri->withHost($host->value().'.'.ltrim($label->value(), '.'))),
             default => throw new SyntaxError('The URI host '.$host->toString().' can not be appended.'),
         };
@@ -219,7 +219,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeIpV4(?IPv4Calculator $calculator = null): self
+    public function normalizeIPv4(?IPv4Calculator $calculator = null): self
     {
         $normalizer = null !== $calculator ? new IPv4Normalizer($calculator) : IPv4Normalizer::fromEnvironment();
 
@@ -238,8 +238,8 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
 
         return match (true) {
             null === $label->value() => $this,
-            $host->isDomain() => new self($this->uri->withHost(self::normalizeComponent(Domain::new($host)->prepend($label)->value(), $this->uri))),
             $host->isIpv4() => new self($this->uri->withHost(rtrim($label->value(), '.').'.'.$host->value())),
+            $host->isDomain() => new self($this->uri->withHost(self::normalizeComponent(Domain::new($host)->prepend($label)->toUnicode(), $this->uri))),
             default => throw new SyntaxError('The URI host '.$host->toString().' can not be prepended.'),
         };
     }
@@ -251,7 +251,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     {
         return new self($this->uri->withHost(
             self::normalizeComponent(
-                Domain::fromUri($this->uri)->withoutLabel(...$keys)->value(),
+                Domain::fromUri($this->uri)->withoutLabel(...$keys)->toUnicode(),
                 $this->uri
             )
         ));
@@ -293,7 +293,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     {
         return new self($this->uri->withHost(
             self::normalizeComponent(
-                Domain::fromUri($this->uri)->withLabel($offset, $label)->value(),
+                Domain::fromUri($this->uri)->withLabel($offset, $label)->toUnicode(),
                 $this->uri
             )
         ));

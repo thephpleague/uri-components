@@ -151,6 +151,26 @@ final class HostModifierTest extends TestCase
         self::assertSame('example.com', $this->modifier->removeLabels(2)->getUri()->getHost());
     }
 
+    public function testModifyingTheHostKeepHostUnicode(): void
+    {
+        $modifier = Modifier::from(Utils::uriFor('http://shop.bébé.be'));
+
+        self::assertSame('http://shop.bébé', $modifier->removeLabels(0)->getUriString());
+        self::assertSame('http://www.bébé.be', $modifier->replaceLabel(-1, 'www')->getUriString());
+        self::assertSame('http://new.shop.bébé.be', $modifier->prependLabel('new')->getUriString());
+        self::assertSame('http://shop.bébé.be.new', $modifier->appendLabel('new')->getUriString());
+        self::assertSame('http://shop.bébé.be', $modifier->hostToUnicode()->getUriString());
+        self::assertSame('http://shop.xn--bb-bjab.be', $modifier->hostToAscii()->getUriString());
+
+        $modifier = Modifier::from(Utils::uriFor('http://shop.bebe.be'));
+
+        self::assertSame('http://bébé.bebe.be', $modifier->replaceLabel(-1, 'bébé')->getUriString());
+        self::assertSame('http://bébé.shop.bebe.be', $modifier->prependLabel('bébé')->getUriString());
+        self::assertSame('http://shop.bebe.be.bébé', $modifier->appendLabel('bébé')->getUriString());
+        self::assertSame('http://shop.bebe.be', $modifier->hostToAscii()->getUriString());
+        self::assertSame('http://shop.bebe.be', $modifier->hostToUnicode()->getUriString());
+    }
+
     public function testAddRootLabel(): void
     {
         self::assertSame('www.example.com.', $this->modifier->addRootLabel()->addRootLabel()->getUri()->getHost());
@@ -185,6 +205,6 @@ final class HostModifierTest extends TestCase
         $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
         $expected = 'http://192.168.0.1/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->normalizeIpV4()->getUriString());
+        self::assertSame($expected, Modifier::from($uri)->normalizeIPv4()->getUriString());
     }
 }

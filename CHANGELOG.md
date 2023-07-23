@@ -29,7 +29,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - converts Value Objects properties to being `private readonly` where possible.
-- `UriModifier` uri input now supports `Stringable` and `string` type.
+- `Modifier` uri input now supports `Stringable` and `string` type.
+- Host related `Modifier` preserve unicode text if not `Http` implementation.
 - All components class constructors (except for the `UserInfo` class) are made private use the available named constructors instead
 - Named constructors default value are removed, you need to explicitly add an argument value or use the `::new()` named constructor instead.
 - `UserInfo` class makes a distinction between `null` and the empty string.
