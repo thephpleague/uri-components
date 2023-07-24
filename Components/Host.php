@@ -352,6 +352,17 @@ final class Host extends Component implements IpHostInterface
         return Idna::toUnicode($this->host, Idna::IDNA2008_UNICODE)->result();
     }
 
+    public function toIPv4(?IPv4Normalizer $normalizer = null): ?string
+    {
+        return match (true) {
+            '4' === $this->ipVersion => $this->getIp(),
+            null !== $this->ipVersion,
+            !$this->isDomain,
+            null === $this->host => null,
+            default => ($normalizer ?? IPv4Normalizer::fromEnvironment())->normalize($this)
+        };
+    }
+
     public function getIpVersion(): ?string
     {
         return $this->ipVersion;

@@ -107,48 +107,32 @@ final class IPv4Normalizer
     }
 
     /**
-     * Normalizes the URI host content to a IPv4 dot-decimal notation if possible
-     * otherwise returns the uri instance unchanged.
+     * Normalizes the host content to a IPv4 dot-decimal notation if possible
+     * otherwise returns the Host instance unchanged.
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeUri(Stringable|string $uri): UriInterface|Psr7UriInterface
+    public function normalize(Stringable|string|null $host): ?string
     {
-        $uri = match (true) {
-            $uri instanceof UriAccess => $uri->getUri(),
-            $uri instanceof UriInterface, $uri instanceof Psr7UriInterface => $uri,
-            default => Uri::new($uri),
-        };
-
-        $host = Host::fromUri($uri);
-        $normalizedHost = $this->normalizeHost($host)->value();
-
-        return match (true) {
-            $normalizedHost === $host->value() => $uri,
-            $uri instanceof Psr7UriInterface => $uri->withHost((string) $normalizedHost),
-            default => $uri->withHost($normalizedHost),
-        };
-    }
-
-    /**
-     * Normalizes the authority host content to a IPv4 dot-decimal notation if possible
-     * otherwise returns the uri instance unchanged.
-     *
-     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
-     */
-    public function normalizeAuthority(Stringable|string $authority): AuthorityInterface
-    {
-        if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::new($authority);
+        $originHost = (string) $host;
+        if ('' === $originHost) {
+            return null;
         }
 
-        $host = Host::fromAuthority($authority);
-        $normalizeHost = $this->normalizeHost($host)->value();
+        if (!$host instanceof HostInterface) {
+            $host = Host::new($host);
+        }
 
-        return match (true) {
-            $normalizeHost === $host->value() => $authority,
-            default => $authority->withHost($normalizeHost),
-        };
+        $hostString = $host->toString();
+        if (!$host->isDomain() || 1 !== preg_match(self::REGEXP_IPV4_HOST, $hostString)) {
+            return $originHost;
+        }
+
+        if (str_ends_with($hostString, '.')) {
+            $hostString = substr($hostString, 0, -1);
+        }
+
+        return $this->convertHost($hostString);
     }
 
     /**
@@ -159,25 +143,11 @@ final class IPv4Normalizer
      */
     public function normalizeHost(Stringable|string|null $host): HostInterface
     {
-        if (!$host instanceof HostInterface) {
-            $host = Host::new($host);
-        }
-
-        $hostString = $host->toString();
-
-        if (!$host->isDomain() || '' === $hostString || 1 !== preg_match(self::REGEXP_IPV4_HOST, $hostString)) {
-            return $host;
-        }
-
-        if (str_ends_with($hostString, '.')) {
-            $hostString = substr($hostString, 0, -1);
-        }
-
-        $ipv4host = $this->convertHost($hostString);
+        $convertedHost = $this->normalize($host);
 
         return match (true) {
-            null === $ipv4host => $host,
-            default => Host::new($ipv4host),
+            null === $convertedHost => $host instanceof HostInterface ? $host : Host::new($host),
+            default => Host::new($convertedHost),
         };
     }
 
@@ -332,5 +302,64 @@ final class IPv4Normalizer
     public static function createFromServer(): self
     {
         return self::fromEnvironment();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Modifier::normalizeIPv4()
+     *
+     * @codeCoverageIgnore
+     *
+     * Normalizes the URI host content to a IPv4 dot-decimal notation if possible
+     * otherwise returns the uri instance unchanged.
+     *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     */
+    public function normalizeUri(Stringable|string $uri): UriInterface|Psr7UriInterface
+    {
+        $uri = match (true) {
+            $uri instanceof UriAccess => $uri->getUri(),
+            $uri instanceof UriInterface, $uri instanceof Psr7UriInterface => $uri,
+            default => Uri::new($uri),
+        };
+
+        $host = Host::fromUri($uri);
+        $normalizedHost = $this->normalizeHost($host)->value();
+
+        return match (true) {
+            $normalizedHost === $host->value() => $uri,
+            $uri instanceof Psr7UriInterface => $uri->withHost((string) $normalizedHost),
+            default => $uri->withHost($normalizedHost),
+        };
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Modifier::normalizeIPv4()
+     *
+     * @codeCoverageIgnore
+     *
+     * Normalizes the authority host content to a IPv4 dot-decimal notation if possible
+     * otherwise returns the uri instance unchanged.
+     *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     */
+    public function normalizeAuthority(Stringable|string $authority): AuthorityInterface
+    {
+        if (!$authority instanceof AuthorityInterface) {
+            $authority = Authority::new($authority);
+        }
+
+        $host = Host::fromAuthority($authority);
+        $normalizeHost = $this->normalizeHost($host)->value();
+
+        return match (true) {
+            $normalizeHost === $host->value() => $authority,
+            default => $authority->withHost($normalizeHost),
+        };
     }
 }

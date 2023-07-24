@@ -128,33 +128,33 @@ final class IPv4HostNormalizerTest extends TestCase
     public function testIpv4NormalizeHostWithPsr7Uri(): void
     {
         $uri = Http::new('http://0/test');
-        $newUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
+        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
         self::assertSame('0.0.0.0', $newUri->getHost());
 
         $uri = Http::new('http://11.be/test');
-        $unchangedUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
+        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
         self::assertSame($uri, $unchangedUri);
     }
 
     public function testIpv4NormalizeHostWithLeagueUri(): void
     {
         $uri = Uri::new('http://0/test');
-        $newUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
+        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
         self::assertSame('0.0.0.0', $newUri->getHost());
 
         $uri = Http::new('http://11.be/test');
-        $unchangedUri = IPv4Normalizer::fromEnvironment()->normalizeUri($uri);
+        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
         self::assertSame($uri, $unchangedUri);
     }
 
     public function testIpv4NormalizeAuthority(): void
     {
         $authority = 'hello:word@0:42';
-        $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($authority);
-        self::assertSame('0.0.0.0', $newAuthority->getHost());
+        $newAuthority = Modifier::from('//'.$authority)->normalizeIPv4()->getUri()->getAuthority();
+        self::assertSame('hello:word@0.0.0.0:42', $newAuthority);
 
         $unChangedAuthority = Authority::new('hello:word@11.be:42');
-        $newAuthority = IPv4Normalizer::fromEnvironment()->normalizeAuthority($unChangedAuthority);
-        self::assertSame($unChangedAuthority, $newAuthority);
+        $newAuthority = Modifier::from('//'.$unChangedAuthority->toString())->normalizeIPv4()->getUri()->getAuthority();
+        self::assertSame($unChangedAuthority->toString(), $newAuthority);
     }
 }

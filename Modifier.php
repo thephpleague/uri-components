@@ -24,7 +24,6 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\IPv4Calculators\IPv4Calculator;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -219,11 +218,14 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeIPv4(?IPv4Calculator $calculator = null): self
+    public function normalizeIPv4(?IPv4Normalizer $normalizer = null): self
     {
-        $normalizer = null !== $calculator ? new IPv4Normalizer($calculator) : IPv4Normalizer::fromEnvironment();
+        $hostIp = Host::fromUri($this->uri)->toIPv4($normalizer);
 
-        return new self($normalizer->normalizeUri($this->uri));
+        return match (true) {
+            null === $hostIp => $this,
+            default => new self($this->uri->withHost($hostIp)),
+        };
     }
 
     /**
