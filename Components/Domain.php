@@ -20,7 +20,7 @@ use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\IPv4Calculators\IPv4Calculator;
+use League\Uri\IPv4\IPv4Calculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use TypeError;

@@ -19,8 +19,9 @@ use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\IPv4Calculators\IPv4Calculator;
-use League\Uri\IPv4Calculators\MissingIPv4Calculator;
+use League\Uri\IPv4\IPv4Calculator;
+use League\Uri\IPv4\IPv4Converter;
+use League\Uri\IPv4\MissingIPv4Calculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
