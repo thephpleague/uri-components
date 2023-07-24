@@ -25,7 +25,6 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `League\Uri\IPv4Calculators\MissingIPv4Calculator` exception
 - `League\Uri\Components\OffsetOutOfBounds` exception added
 - `League\Uri\Modifier` to replace deprecated `League\Uri\Modifier`
-- `League\Uri\IPv4Normalizer::normalize`
 
 ### Fixed
 
@@ -48,8 +47,6 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `HierarchicalPath::segments` use `HierarchicalPath::getIterator` instead
 - `Domain::labels` use `Domain::getIterator` instead
 - `League\Uri\UriModifier`
-- `League\Uri\IPv4NormalizeUri` use `Modifier::normalizeIPv4`
-- `League\Uri\IPv4NormalizeAuthority` use `Modifier::normalizeIPv4`
 
 ### Removed
 
