@@ -207,4 +207,26 @@ final class HostModifierTest extends TestCase
 
         self::assertSame($expected, Modifier::from($uri)->normalizeIPv4()->getUriString());
     }
+
+    public function testIpv4NormalizeHostWithPsr7Uri(): void
+    {
+        $uri = Http::new('http://0/test');
+        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame('0.0.0.0', $newUri->getHost());
+
+        $uri = Http::new('http://11.be/test');
+        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame($uri, $unchangedUri);
+    }
+
+    public function testIpv4NormalizeHostWithLeagueUri(): void
+    {
+        $uri = Uri::new('http://0/test');
+        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame('0.0.0.0', $newUri->getHost());
+
+        $uri = Http::new('http://11.be/test');
+        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame($uri, $unchangedUri);
+    }
 }

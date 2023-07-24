@@ -20,7 +20,7 @@ use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\IPv4Normalizer;
+use League\Uri\IPv4Calculators\IPv4Calculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use TypeError;
@@ -111,9 +111,9 @@ final class Domain extends Component implements DomainHostInterface
         return $this->host->toUnicode();
     }
 
-    public function toIPv4(?IPv4Normalizer $normalizer = null): ?string
+    public function toIPv4(?IPv4Calculator $calculator = null): ?string
     {
-        return $this->host->toIPv4($normalizer);
+        return $this->host->toIPv4($calculator);
     }
 
     public function isIp(): bool

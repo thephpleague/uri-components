@@ -47,6 +47,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `HierarchicalPath::segments` use `HierarchicalPath::getIterator` instead
 - `Domain::labels` use `Domain::getIterator` instead
 - `League\Uri\UriModifier`
+- `League\Uri\IPv4Normalizer` use `League\Uri\IPv4Converter`, `League\Uri\Modifier`, `League\Uri\BaseUri` instead
 
 ### Removed
 

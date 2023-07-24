@@ -19,7 +19,9 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnaConversionFailed;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
+use League\Uri\IPv4Calculators\IPv4Calculator;
 use League\Uri\IPv4Calculators\MissingIPv4Calculator;
+use League\Uri\IPv4Converter;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -282,7 +284,7 @@ final class Host extends Component implements IpHostInterface
      * @throws MissingIPv4Calculator If detecting IPv4 is not possible
      * @throws SyntaxError           If the $ip can not be converted into a Host
      */
-    public static function fromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
+    public static function fromIp(string $ip, string $version = '', IPv4Calculator $calculator = null): self
     {
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
@@ -298,14 +300,14 @@ final class Host extends Component implements IpHostInterface
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        $normalizer = $normalizer ?? IPv4Normalizer::fromEnvironment();
-        /** @var Host $host */
-        $host = $normalizer->normalizeHost(new self($ip));
-        if ($host->isIpv4()) {
-            return $host;
+        $converter = null !== $calculator ? new IPv4Converter($calculator) : IPv4Converter::fromEnvironment();
+
+        $host = $converter->normalize($ip);
+        if (null === $host) {
+            throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
         }
 
-        throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
+        return new self($host);
     }
 
     /**
@@ -352,14 +354,14 @@ final class Host extends Component implements IpHostInterface
         return Idna::toUnicode($this->host, Idna::IDNA2008_UNICODE)->result();
     }
 
-    public function toIPv4(?IPv4Normalizer $normalizer = null): ?string
+    public function toIPv4(?IPv4Calculator $calculator = null): ?string
     {
         return match (true) {
             '4' === $this->ipVersion => $this->getIp(),
             null !== $this->ipVersion,
             !$this->isDomain,
             null === $this->host => null,
-            default => ($normalizer ?? IPv4Normalizer::fromEnvironment())->normalize($this)
+            default => (null !== $calculator ? new IPv4Converter($calculator) : IPv4Converter::fromEnvironment())->normalize($this)
         };
     }
 
@@ -480,7 +482,7 @@ final class Host extends Component implements IpHostInterface
      */
     public static function createFromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
     {
-        return self::fromIp($ip, $version, $normalizer);
+        return self::fromIp($ip, $version);
     }
 
     /**
