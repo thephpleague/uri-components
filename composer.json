@@ -22,6 +22,7 @@
     "suggest": {
         "ext-intl": "to handle IDN host",
         "ext-gmp": "to improve handle IPV4 parsing",
+        "ext-bcmath": "to improve handle IPV4 parsing",
         "ext-fileinfo": "to create Data URI from a filepath",
         "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
         "php-64bit": "to improve handle IPV4 parsing",

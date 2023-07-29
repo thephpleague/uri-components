@@ -60,6 +60,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - Remove the `Exceptions` namespace
 - `League\Uri\Exceptions\IPv4CalculatorMissing` use `League\Uri\IPv4Calculators\MissingIPv4Calculator` instead
 - `League\Uri\Exceptions\OffsetOutOfBounds` use `League\Uri\Components\OffsetOutOfBounds` instead
+- `League\Uri\QueryString` class. Class moved to the `uri-interfaces` package.
 
 ## [2.4.1](https://github.com/thephpleague/uri-components/compare/2.4.0...2.4.1) - 2022-05-26
 
