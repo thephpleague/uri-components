@@ -351,11 +351,9 @@ final class QueryTest extends TestCase
         self::assertFalse($query->hasParameter('foo', 'bar'));
 
         $newQuery = $query->withoutParameters('foo[0]');
-        /** @var Generator $newParameters */
-        $newParameters = $newQuery->parameters();
 
         self::assertSame('foo%5B1%5D=baz', $newQuery->value());
-        self::assertSame(['foo' => [1 => 'baz']], iterator_to_array($newParameters));
+        self::assertSame(['foo' => [1 => 'baz']], $newQuery->parameters());
     }
 
     public function testWithoutParamVariadicArgument(): void
