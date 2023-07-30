@@ -37,7 +37,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     {
     }
 
-    public static function from(Stringable|string $uri, UriFactoryInterface|null $uriFactory = null): self
+    public static function from(Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): self
     {
         return new self(match (true) {
             $uri instanceof UriAccess => $uri->getUri(),
