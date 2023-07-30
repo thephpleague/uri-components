@@ -12,7 +12,6 @@
 namespace League\Uri\Components;
 
 use ArrayIterator;
-use Generator;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -631,7 +630,7 @@ final class QueryTest extends TestCase
             'empty query' => [null, null],
             'remove duplicate pair' => ['foo=bar&foo=bar', 'foo=bar'],
             'no duplicate pair key' => ['foo=bar&bar=foo', 'foo=bar&bar=foo'],
-            'no diplicate pair value' => ['foo=bar&foo=baz', 'foo=bar&foo=baz'],
+            'no duplicate pair value' => ['foo=bar&foo=baz', 'foo=bar&foo=baz'],
         ];
     }
 
