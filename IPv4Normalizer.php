@@ -51,7 +51,7 @@ final class IPv4Normalizer
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see IPv4Converter::normalize()
+     * @see IPv4Converter::__invoke()
      *
      * @codeCoverageIgnore
      *
@@ -62,7 +62,7 @@ final class IPv4Normalizer
      */
     public function normalize(Stringable|string|null $host): ?string
     {
-        return $this->converter->normalize($host);
+        return ($this->converter)($host);
     }
 
     /**
@@ -145,7 +145,7 @@ final class IPv4Normalizer
         };
 
         $host = Host::fromUri($uri);
-        $normalizedHostString = $this->converter->normalize($host);
+        $normalizedHostString = ($this->converter)($host);
 
         return match (true) {
             null === $normalizedHostString,
@@ -174,7 +174,7 @@ final class IPv4Normalizer
         }
 
         $host = Host::fromAuthority($authority);
-        $normalizedHostString = $this->converter->normalize($host);
+        $normalizedHostString = ($this->converter)($host);
 
         return match (true) {
             null === $normalizedHostString,
@@ -198,11 +198,11 @@ final class IPv4Normalizer
      */
     public function normalizeHost(Stringable|string|null $host): HostInterface
     {
-        $convertedHost = $this->converter->normalize($host);
+        $normalizedHostString = ($this->converter)($host);
 
         return match (true) {
-            null === $convertedHost => $host instanceof HostInterface ? $host : Host::new($host),
-            default => Host::new($convertedHost),
+            null === $normalizedHostString => $host instanceof HostInterface ? $host : Host::new($host),
+            default => Host::new($normalizedHostString),
         };
     }
 }

@@ -303,7 +303,7 @@ final class Host extends Component implements IpHostInterface
 
         $converter = null !== $calculator ? new IPv4Converter($calculator) : IPv4Converter::fromEnvironment();
 
-        $host = $converter->normalize($ip);
+        $host = ($converter)($ip);
         if (null === $host) {
             throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
         }
@@ -362,7 +362,7 @@ final class Host extends Component implements IpHostInterface
             null !== $this->ipVersion,
             !$this->isDomain,
             null === $this->host => null,
-            default => (null !== $calculator ? new IPv4Converter($calculator) : IPv4Converter::fromEnvironment())->normalize($this)
+            default => (null !== $calculator ? new IPv4Converter($calculator) : IPv4Converter::fromEnvironment())($this)
         };
     }
 
