@@ -48,7 +48,7 @@ final class Query extends Component implements QueryInterface
     private readonly array $pairs;
     /** @var non-empty-string */
     private readonly string $separator;
-    private readonly array $params;
+    private readonly array $parameters;
 
     /**
      * Returns a new instance.
@@ -61,7 +61,7 @@ final class Query extends Component implements QueryInterface
         int $encType = PHP_QUERY_RFC3986
     ) {
         $this->pairs = QueryString::parse($query, $separator, $encType);
-        $this->params = QueryString::convert($this->pairs);
+        $this->parameters = QueryString::convert($this->pairs);
         $this->separator = $separator;
     }
 
@@ -213,20 +213,20 @@ final class Query extends Component implements QueryInterface
         return array_column(array_filter($this->pairs, fn (array $pair): bool => $key === $pair[0]), 1);
     }
 
-    public function parameters(): iterable
+    public function parameters(): array
     {
-        yield from $this->params;
+        return $this->parameters;
     }
 
     public function parameter(string $name): mixed
     {
-        return $this->params[$name] ?? null;
+        return $this->parameters[$name] ?? null;
     }
 
     public function hasParameter(string ...$names): bool
     {
         foreach ($names as $name) {
-            if (!isset($this->params[$name])) {
+            if (!isset($this->parameters[$name])) {
                 return false;
             }
         }
