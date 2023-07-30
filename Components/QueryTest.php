@@ -230,10 +230,8 @@ final class QueryTest extends TestCase
     public function testParams(): void
     {
         $query = Query::new('foo[]=bar&foo[]=baz');
-        /** @var Generator $params */
-        $params = $query->parameters();
 
-        self::assertCount(1, iterator_to_array($params));
+        self::assertCount(1, $query->parameters());
         self::assertSame(['bar', 'baz'], $query->parameter('foo'));
         self::assertNull($query->parameter('foo[]'));
     }
@@ -376,11 +374,7 @@ final class QueryTest extends TestCase
             ],
         ];
 
-        $query = Query::fromParameters(new ArrayIterator($data));
-        /** @var Generator $parameters */
-        $parameters = $query->parameters();
-
-        self::assertSame($data, iterator_to_array($parameters));
+        self::assertSame($data, Query::fromParameters(new ArrayIterator($data))->parameters());
     }
 
     public function testCreateFromParamsWithQueryObject(): void
@@ -408,16 +402,12 @@ final class QueryTest extends TestCase
         $withoutIndices = 'filter%5Bfoo%5D%5B%5D=bar&filter%5Bfoo%5D%5B%5D=baz&filter%5Bbar%5D%5Bbar%5D=foo&filter%5Bbar%5D%5Bfoo%5D=bar';
 
         $query = Query::fromParameters($data);
-        /** @var Generator $parameters */
-        $parameters = $query->parameters();
         self::assertSame($withIndices, $query->value());
-        self::assertSame($data, iterator_to_array($parameters));
+        self::assertSame($data, $query->parameters());
 
         $newQuery = $query->withoutNumericIndices();
-        /** @var Generator $newParameters */
-        $newParameters = $newQuery->parameters();
         self::assertSame($withoutIndices, $newQuery->value());
-        self::assertSame($data, iterator_to_array($newParameters));
+        self::assertSame($data, $newQuery->parameters());
     }
 
     public function testWithoutNumericIndicesRetursSameInstance(): void
