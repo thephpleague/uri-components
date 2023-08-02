@@ -11,26 +11,359 @@
 
 namespace League\Uri;
 
+use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
-use function dirname;
 
 /**
- * @group path
+ * @group host
  * @group resolution
  * @coversDefaultClass \League\Uri\UriModifier
  */
-final class PathModifierTest extends TestCase
+final class ModifierTest extends TestCase
 {
     private readonly string $uri;
     private readonly Modifier $modifier;
 
     protected function setUp(): void
     {
-        $this->uri = 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar+baz#doc3';
+        $this->uri = 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar%20baz#doc3';
         $this->modifier = Modifier::from($this->uri);
     }
+
+    /*****************************
+     * QUERY MODIFIER METHOD TESTS
+     ****************************/
+
+    /**
+     * @dataProvider validMergeQueryProvider
+     */
+    public function testMergeQuery(string $query, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->mergeQuery($query)->getUri()->getQuery());
+    }
+
+    public static function validMergeQueryProvider(): array
+    {
+        return [
+            ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
+            ['kingkong=ape', 'kingkong=ape&foo=bar%20baz'],
+        ];
+    }
+
+    /**
+     * @dataProvider validAppendQueryProvider
+     */
+    public function testAppendQuery(string $query, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->appendQuery($query)->getUri()->getQuery());
+    }
+
+    public static function validAppendQueryProvider(): array
+    {
+        return [
+            ['toto', 'kingkong=toto&foo=bar%20baz&toto'],
+            ['kingkong=ape', 'kingkong=toto&foo=bar%20baz&kingkong=ape'],
+        ];
+    }
+
+    public function testKsortQuery(): void
+    {
+        $uri = Http::new('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
+        self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', Modifier::from($uri)->sortQuery()->getUri()->getQuery());
+    }
+
+    /**
+     * @dataProvider validWithoutQueryValuesProvider
+     */
+    public function testWithoutQueryValuesProcess(array $input, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->removePairs(...$input)->getUri()->getQuery());
+    }
+
+    public static function validWithoutQueryValuesProvider(): array
+    {
+        return [
+            [['1'], 'kingkong=toto&foo=bar%20baz'],
+            [['kingkong'], 'foo=bar%20baz'],
+        ];
+    }
+
+    /**
+     * @dataProvider removeParamsProvider
+     */
+    public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
+    {
+        self::assertSame($expected, Modifier::from($uri)->removeParams(...$input)->getUri()->getQuery());
+    }
+
+    public static function removeParamsProvider(): array
+    {
+        return [
+            [
+                'uri' => 'http://example.com',
+                'input' => ['foo'],
+                'expected' => null,
+            ],
+            [
+                'uri' => 'http://example.com?foo=bar&bar=baz',
+                'input' => ['foo'],
+                'expected' => 'bar=baz',
+            ],
+            [
+                'uri' => 'http://example.com?fo.o=bar&fo_o=baz',
+                'input' => ['fo_o'],
+                'expected' => 'fo.o=bar',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider removeEmptyPairsProvider
+     */
+    public function testRemoveEmptyPairs(string $uri, ?string $expected): void
+    {
+        self::assertSame($expected, Modifier::from(Uri::fromBaseUri($uri))->removeEmptyPairs()->getUri()->__toString());
+        self::assertSame($expected, Modifier::from(Http::fromBaseUri($uri))->removeEmptyPairs()->getUri()->__toString());
+    }
+
+    public static function removeEmptyPairsProvider(): iterable
+    {
+        return [
+            'null query component' => [
+                'uri' => 'http://example.com',
+                'expected' => 'http://example.com',
+            ],
+            'empty query component' => [
+                'uri' => 'http://example.com?',
+                'expected' => 'http://example.com',
+            ],
+            'no empty pair query component' => [
+                'uri' => 'http://example.com?foo=bar',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair as last pair' => [
+                'uri' => 'http://example.com?foo=bar&',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair as first pair' => [
+                'uri' => 'http://example.com?&foo=bar',
+                'expected' => 'http://example.com?foo=bar',
+            ],
+            'with empty pair inside the component' => [
+                'uri' => 'http://example.com?foo=bar&&&&bar=baz',
+                'expected' => 'http://example.com?foo=bar&bar=baz',
+            ],
+        ];
+    }
+
+    /*****************************
+     * HOST MODIFIER METHOD TESTS
+     ****************************/
+
+    /**
+     * @dataProvider validHostProvider
+     */
+    public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
+    {
+        self::assertSame($prepend, $this->modifier->prependLabel($label)->getUri()->getHost());
+    }
+
+    /**
+     * @dataProvider validHostProvider
+     */
+    public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
+    {
+        self::assertSame($append, $this->modifier->appendLabel($label)->getUri()->getHost());
+    }
+
+    /**
+     * @dataProvider validHostProvider
+     */
+    public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
+    {
+        self::assertSame($replace, $this->modifier->replaceLabel($key, $label)->getUri()->getHost());
+    }
+
+    public static function validHostProvider(): array
+    {
+        return [
+            ['toto', 2, 'toto.www.example.com', 'www.example.com.toto', 'toto.example.com'],
+            ['123', 1, '123.www.example.com', 'www.example.com.123', 'www.123.com'],
+        ];
+    }
+
+    public function testAppendLabelWithIpv4Host(): void
+    {
+        $uri = Http::new('http://127.0.0.1/foo/bar');
+
+        self::assertSame(
+            '127.0.0.1.localhost',
+            Modifier::from($uri)->appendLabel('.localhost')->getUri()->getHost()
+        );
+    }
+
+    public function testAppendLabelThrowsWithOtherIpHost(): void
+    {
+        $this->expectException(SyntaxError::class);
+
+        Modifier::from(Http::new('http://[::1]/foo/bar'))->appendLabel('.localhost');
+    }
+
+    public function testPrependLabelWithIpv4Host(): void
+    {
+        $uri = Http::new('http://127.0.0.1/foo/bar');
+
+        self::assertSame(
+            'localhost.127.0.0.1',
+            Modifier::from($uri)->prependLabel('localhost.')->getUri()->getHost()
+        );
+    }
+
+    public function testAppendNulLabel(): void
+    {
+        $uri = Uri::new('http://127.0.0.1');
+
+        self::assertSame($uri, Modifier::from($uri)->appendLabel(null)->getUri());
+    }
+
+    public function testPrependLabelThrowsWithOtherIpHost(): void
+    {
+        $this->expectException(SyntaxError::class);
+
+        Modifier::from(Http::new('http://[::1]/foo/bar'))->prependLabel('.localhost');
+    }
+
+    public function testPrependNullLabel(): void
+    {
+        $uri = Uri::new('http://127.0.0.1');
+
+        self::assertSame($uri, Modifier::from($uri)->prependLabel(null)->getUri());
+    }
+
+    public function testHostToAsciiProcess(): void
+    {
+        $uri = Uri::new('http://مثال.إختبار/where/to/go');
+
+        self::assertSame(
+            'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
+            (string)  Modifier::from($uri)->hostToAscii()
+        );
+    }
+
+    public function testWithoutZoneIdentifierProcess(): void
+    {
+        $uri = Http::new('http://[fe80::1234%25eth0-1]/path/to/the/sky.php');
+
+        self::assertSame(
+            'http://[fe80::1234]/path/to/the/sky.php',
+            (string) Modifier::from($uri)->removeZoneId()
+        );
+    }
+
+    /**
+     * @dataProvider validwithoutLabelProvider
+     */
+    public function testwithoutLabelProcess(array $keys, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->removeLabels(...$keys)->getUri()->getHost());
+    }
+
+    public static function validwithoutLabelProvider(): array
+    {
+        return [
+            [[1], 'www.com'],
+        ];
+    }
+
+    public function testRemoveLabels(): void
+    {
+        self::assertSame('example.com', $this->modifier->removeLabels(2)->getUri()->getHost());
+    }
+
+    public function testModifyingTheHostKeepHostUnicode(): void
+    {
+        $modifier = Modifier::from(Utils::uriFor('http://shop.bébé.be'));
+
+        self::assertSame('http://shop.bébé', $modifier->removeLabels(0)->getUriString());
+        self::assertSame('http://www.bébé.be', $modifier->replaceLabel(-1, 'www')->getUriString());
+        self::assertSame('http://new.shop.bébé.be', $modifier->prependLabel('new')->getUriString());
+        self::assertSame('http://shop.bébé.be.new', $modifier->appendLabel('new')->getUriString());
+        self::assertSame('http://shop.bébé.be', $modifier->hostToUnicode()->getUriString());
+        self::assertSame('http://shop.xn--bb-bjab.be', $modifier->hostToAscii()->getUriString());
+
+        $modifier = Modifier::from(Utils::uriFor('http://shop.bebe.be'));
+
+        self::assertSame('http://bébé.bebe.be', $modifier->replaceLabel(-1, 'bébé')->getUriString());
+        self::assertSame('http://bébé.shop.bebe.be', $modifier->prependLabel('bébé')->getUriString());
+        self::assertSame('http://shop.bebe.be.bébé', $modifier->appendLabel('bébé')->getUriString());
+        self::assertSame('http://shop.bebe.be', $modifier->hostToAscii()->getUriString());
+        self::assertSame('http://shop.bebe.be', $modifier->hostToUnicode()->getUriString());
+    }
+
+    public function testAddRootLabel(): void
+    {
+        self::assertSame('www.example.com.', $this->modifier->addRootLabel()->addRootLabel()->getUri()->getHost());
+    }
+
+    public function testRemoveRootLabel(): void
+    {
+        self::assertSame('www.example.com', $this->modifier->addRootLabel()->removeRootLabel()->getUri()->getHost());
+        self::assertSame('www.example.com', $this->modifier->removeRootLabel()->getUri()->getHost());
+    }
+
+    public function testItCanBeJsonSerialize(): void
+    {
+        $uri = Http::new($this->uri);
+
+        self::assertSame(json_encode($uri), json_encode($this->modifier));
+    }
+
+    public function testItCanConvertHostToUnicode(): void
+    {
+        $uriString = 'http://bébé.be';
+        $uri = (string) Http::new($uriString);
+        $modifier = Modifier::from(Utils::uriFor($uri));
+
+        self::assertSame('http://xn--bb-bjab.be', $uri);
+        self::assertSame('http://xn--bb-bjab.be', (string) $modifier);
+        self::assertSame($uriString, (string) $modifier->hostToUnicode());
+    }
+
+    public function testICanNormalizeIPv4Host(): void
+    {
+        $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
+        $expected = 'http://192.168.0.1/path/to/the/sky.php';
+
+        self::assertSame($expected, Modifier::from($uri)->normalizeIPv4()->getUriString());
+    }
+
+    public function testIpv4NormalizeHostWithPsr7Uri(): void
+    {
+        $uri = Http::new('http://0/test');
+        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame('0.0.0.0', $newUri->getHost());
+
+        $uri = Http::new('http://11.be/test');
+        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame($uri, $unchangedUri);
+    }
+
+    public function testIpv4NormalizeHostWithLeagueUri(): void
+    {
+        $uri = Uri::new('http://0/test');
+        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame('0.0.0.0', $newUri->getHost());
+
+        $uri = Http::new('http://11.be/test');
+        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        self::assertSame($uri, $unchangedUri);
+    }
+
+    /*********************
+     * PATH MODIFIER TESTS
+     *********************/
 
     /**
      * @dataProvider fileProvider

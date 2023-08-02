@@ -41,7 +41,7 @@
         "ext-fileinfo": "to create Data URI from a filepath",
         "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
         "php-64bit": "to improve handle IPV4 parsing",
-        "symfony/polyfill-intl-idn": "to use the IDNA feature via Symfony Polyfill"
+        "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill"
     },
     "autoload": {
         "psr-4": {

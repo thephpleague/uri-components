@@ -13,7 +13,7 @@ System Requirements
 -------
 
 - You require **PHP >= 8.1** but the latest stable version of PHP is recommended
-- You will need the **ext-intl** to handle i18n URI.
+- You will need the **ext-intl** to handle i18n URI **or** a polyfill for the IDN functions like the `symfony/polyfill-intl-idn` package.
 - You will need the **ext-fileinfo** to handle Data URI creation from a filepath.
 
 Dependencies

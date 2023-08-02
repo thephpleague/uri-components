@@ -68,7 +68,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     }
 
     /*********************************
-     * Query resolution methods
+     * Query modifier methods
      *********************************/
 
     /**
@@ -153,7 +153,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     }
 
     /*********************************
-     * Host resolution methods
+     * Host modifier methods
      *********************************/
 
     /**
@@ -303,7 +303,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     }
 
     /*********************************
-     * Path resolution methods
+     * Path modifier methods
      *********************************/
 
     /**

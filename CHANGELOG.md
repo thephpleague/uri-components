@@ -29,9 +29,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - converts Value Objects properties to being `private readonly` where possible.
-- `Modifier` uri input now supports `Stringable` and `string` type.
-- Host related `Modifier` preserve unicode text if not `Http` implementation.
-- All components class constructors (except for the `UserInfo` class) are made private use the available named constructors instead
+- All components class constructors (except for the `UserInfo`  and the `Authority` classes) are made private use the available named constructors instead
 - Named constructors default value are removed, you need to explicitly add an argument value or use the `::new()` named constructor instead.
 - `UserInfo` class makes a distinction between `null` and the empty string.
 - `Query::has` accessing method accept a variadic parameters to check multiple keys at the same time.
@@ -41,13 +39,13 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Deprecated
 
 - All `createFromString` named constructors are replaced by the `new` named constructor.
-- All `createFromSNull` named constructors are replaced by the `new` named constructor.
+- All `createFromNull` named constructors are replaced by the `new` named constructor.
 - All remaining named constructors which starts with `createFrom*` replaced by the same method starting with `from*`. For example `Authority::createFromUri` is deprecated in favor of `Authority::fromUri`
 - `Query::params` is replaced by `Query::parameters` and `Query::parameter`
 - `HierarchicalPath::segments` use `HierarchicalPath::getIterator` instead
 - `Domain::labels` use `Domain::getIterator` instead
-- `League\Uri\UriModifier`
-- `League\Uri\IPv4Normalizer` use `League\Uri\IPv4Converter`, `League\Uri\Modifier`, `League\Uri\BaseUri` instead
+- `League\Uri\UriModifier` use `League\Uri\Modifier`
+- `League\Uri\IPv4Normalizer` use `League\Uri\Modifier` instead
 
 ### Removed
 
