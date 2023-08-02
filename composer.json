@@ -35,13 +35,13 @@
         "psr/http-message": "^1.1.0 || ^2.0"
     },
     "suggest": {
-        "ext-intl": "to handle IDN host",
+        "ext-intl": "to handle IDN host with the best performance",
         "ext-gmp": "to improve handle IPV4 parsing",
         "ext-bcmath": "to improve handle IPV4 parsing",
         "ext-fileinfo": "to create Data URI from a filepath",
         "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
         "php-64bit": "to improve handle IPV4 parsing",
-        "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill"
+        "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill if ext-intl is missing"
     },
     "autoload": {
         "psr-4": {

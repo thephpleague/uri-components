@@ -19,7 +19,6 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\IdnaConversionFailed;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Idna;
-use League\Uri\Idna\IdnaOption;
 use League\Uri\IPv4\IPv4Calculator;
 use League\Uri\IPv4\IPv4Converter;
 use League\Uri\IPv4\MissingIPv4Calculator;
@@ -208,7 +207,7 @@ final class Host extends Component implements IpHostInterface
             $host = $domain_name;
             $is_domain = $this->isValidDomain($domain_name);
             if (str_contains($host, 'xn--')) {
-                Idna::toUnicode($host, IdnaOption::forIDNA2008Unicode())->result();
+                Idna::toUnicode($host)->domain();
             }
 
             return $inMemoryCache[$host] = [
@@ -223,12 +222,12 @@ final class Host extends Component implements IpHostInterface
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
-        $info = Idna::toAscii($domain_name, IdnaOption::forIDNA2008Ascii());
+        $info = Idna::toAscii($domain_name);
         if ($info->hasErrors()) {
             throw IdnaConversionFailed::dueToIDNAError($domain_name, $info);
         }
 
-        $host = $info->result();
+        $host = $info->domain();
         $is_domain = $this->isValidDomain($host);
 
         return $inMemoryCache[$host] = [
@@ -352,7 +351,7 @@ final class Host extends Component implements IpHostInterface
             return $this->host;
         }
 
-        return Idna::toUnicode($this->host, IdnaOption::forIDNA2008Unicode())->result();
+        return Idna::toUnicode($this->host)->domain();
     }
 
     public function toIPv4(?IPv4Calculator $calculator = null): ?string
