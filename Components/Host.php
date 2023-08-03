@@ -18,8 +18,8 @@ use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\ConversionFailed;
-use League\Uri\Idna\Idna;
-use League\Uri\IPv4\Converter;
+use League\Uri\Idna\Converter as IdnConverter;
+use League\Uri\IPv4\Converter as Ipv4Converter;
 use League\Uri\IPv4\MissingCalculator;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -206,7 +206,7 @@ final class Host extends Component implements IpHostInterface
             $host = $domain_name;
             $is_domain = $this->isValidDomain($domain_name);
             if (str_contains($host, 'xn--')) {
-                Idna::toUnicode($host)->domain();
+                IdnConverter::toUnicode($host)->domain();
             }
 
             return $inMemoryCache[$host] = [
@@ -221,7 +221,7 @@ final class Host extends Component implements IpHostInterface
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
-        $result = Idna::toAscii($domain_name);
+        $result = IdnConverter::toAscii($domain_name);
         if ($result->hasErrors()) {
             throw ConversionFailed::dueToError($domain_name, $result);
         }
@@ -300,7 +300,7 @@ final class Host extends Component implements IpHostInterface
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        $host = (Converter::fromEnvironment())($ip);
+        $host = (Ipv4Converter::fromEnvironment())($ip);
         if (null === $host) {
             throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
         }
@@ -349,7 +349,7 @@ final class Host extends Component implements IpHostInterface
             return $this->host;
         }
 
-        return Idna::toUnicode($this->host)->domain();
+        return IdnConverter::toUnicode($this->host)->domain();
     }
 
     public function toIPv4(): ?string
@@ -359,7 +359,7 @@ final class Host extends Component implements IpHostInterface
             null !== $this->ipVersion,
             !$this->isDomain,
             null === $this->host => null,
-            default => Converter::fromEnvironment()($this),
+            default => Ipv4Converter::fromEnvironment()($this),
         };
     }
 
