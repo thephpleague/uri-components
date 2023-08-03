@@ -35,8 +35,6 @@ Dependencies
 - [League URI Interfaces][]
 - [PSR-7][]
 
-In order to handle IDN host you should also require the `intl` extension otherwise an exception will be thrown when attempting to validate such host.
-
 Installation
 --------
 
