@@ -33,13 +33,13 @@
         "league/uri-interfaces": "7.x-dev"
     },
     "suggest": {
+        "ext-bcmath": "to improve IPV4 host parsing",
+        "ext-fileinfo": "to create Data URI from file contennts",
+        "ext-gmp": "to improve IPV4 host parsing",
         "ext-intl": "to handle IDN host with the best performance",
-        "ext-gmp": "to improve handle IPV4 parsing",
-        "ext-bcmath": "to improve handle IPV4 parsing",
-        "ext-fileinfo": "to create Data URI from a filepath",
         "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
-        "php-64bit": "to improve handle IPV4 parsing",
-        "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill if ext-intl is missing"
+        "php-64bit": "to improve IPV4 host parsing",
+        "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill if ext-intl is not present",
     },
     "autoload": {
         "psr-4": {

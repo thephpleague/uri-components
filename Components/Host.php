@@ -16,12 +16,11 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\IdnaConversionFailed;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Idna\ConversionFailed;
 use League\Uri\Idna\Idna;
-use League\Uri\IPv4\IPv4Calculator;
-use League\Uri\IPv4\IPv4Converter;
-use League\Uri\IPv4\MissingIPv4Calculator;
+use League\Uri\IPv4\Converter;
+use League\Uri\IPv4\MissingCalculator;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -222,12 +221,12 @@ final class Host extends Component implements IpHostInterface
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
-        $info = Idna::toAscii($domain_name);
-        if ($info->hasErrors()) {
-            throw IdnaConversionFailed::dueToIDNAError($domain_name, $info);
+        $result = Idna::toAscii($domain_name);
+        if ($result->hasErrors()) {
+            throw ConversionFailed::dueToError($domain_name, $result);
         }
 
-        $host = $info->domain();
+        $host = $result->domain();
         $is_domain = $this->isValidDomain($host);
 
         return $inMemoryCache[$host] = [
@@ -281,15 +280,16 @@ final class Host extends Component implements IpHostInterface
     /**
      * Returns a host from an IP address.
      *
-     * @throws MissingIPv4Calculator If detecting IPv4 is not possible
-     * @throws SyntaxError           If the $ip can not be converted into a Host
+     * @throws MissingCalculator If detecting IPv4 is not possible
+     * @throws SyntaxError       If the $ip can not be converted into a Host
      */
-    public static function fromIp(string $ip, string $version = '', IPv4Calculator $calculator = null): self
+    public static function fromIp(Stringable|string $ip, string $version = ''): self
     {
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
         }
 
+        $ip = (string) $ip;
         if (false !== filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             return new self('['.$ip.']');
         }
@@ -300,9 +300,7 @@ final class Host extends Component implements IpHostInterface
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        $converter = null !== $calculator ? new IPv4Converter($calculator) : IPv4Converter::fromEnvironment();
-
-        $host = ($converter)($ip);
+        $host = (Converter::fromEnvironment())($ip);
         if (null === $host) {
             throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
         }
@@ -354,14 +352,14 @@ final class Host extends Component implements IpHostInterface
         return Idna::toUnicode($this->host)->domain();
     }
 
-    public function toIPv4(?IPv4Calculator $calculator = null): ?string
+    public function toIPv4(): ?string
     {
         return match (true) {
             '4' === $this->ipVersion => $this->getIp(),
             null !== $this->ipVersion,
             !$this->isDomain,
             null === $this->host => null,
-            default => (null !== $calculator ? new IPv4Converter($calculator) : IPv4Converter::fromEnvironment())($this)
+            default => Converter::fromEnvironment()($this),
         };
     }
 
@@ -470,8 +468,8 @@ final class Host extends Component implements IpHostInterface
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @throws MissingIPv4Calculator If detecting IPv4 is not possible
-     * @throws SyntaxError           If the $ip can not be converted into a Host
+     * @throws MissingCalculator If detecting IPv4 is not possible
+     * @throws SyntaxError       If the $ip can not be converted into a Host
      * @deprecated Since version 7.0.0
      * @see Host::fromIp()
      *

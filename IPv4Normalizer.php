@@ -19,9 +19,9 @@ use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\IPv4\IPv4Calculator;
-use League\Uri\IPv4\IPv4Converter;
-use League\Uri\IPv4\MissingIPv4Calculator;
+use League\Uri\IPv4\Calculator;
+use League\Uri\IPv4\Converter;
+use League\Uri\IPv4\MissingCalculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
@@ -29,19 +29,19 @@ use Stringable;
  * DEPRECATION WARNING! This class will be removed in the next major point release.
  *
  * @deprecated Since version 7.0.0
- * @see IPv4Converter
+ * @see Converter
  *
  * @codeCoverageIgnore
  */
 final class IPv4Normalizer
 {
-    private readonly IPv4Converter $converter;
+    private readonly Converter $converter;
 
     public function __construct(
-        IPv4Converter|IPv4Calculator $calculator
+        Converter|Calculator $calculator
     ) {
-        if (!$calculator instanceof IPv4Converter) {
-            $calculator = new IPv4Converter($calculator);
+        if (!$calculator instanceof Converter) {
+            $calculator = new Converter($calculator);
         }
 
         $this->converter = $calculator;
@@ -51,7 +51,7 @@ final class IPv4Normalizer
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see IPv4Converter::__invoke()
+     * @see Converter::__invoke()
      *
      * @codeCoverageIgnore
      *
@@ -70,14 +70,14 @@ final class IPv4Normalizer
      */
     public static function createFromGMP(): self
     {
-        return new self(IPv4Converter::fromGMP());
+        return new self(Converter::fromGMP());
     }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see IPv4Converter::fromBCMath()
+     * @see Converter::fromBCMath()
      *
      * @codeCoverageIgnore
      *
@@ -85,14 +85,14 @@ final class IPv4Normalizer
      */
     public static function createFromBCMath(): self
     {
-        return new self(IPv4Converter::fromBCMath());
+        return new self(Converter::fromBCMath());
     }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see IPv4Converter::fromNative()
+     * @see Converter::fromNative()
      *
      * @codeCoverageIgnore
      *
@@ -100,27 +100,27 @@ final class IPv4Normalizer
      */
     public static function createFromNative(): self
     {
-        return new self(IPv4Converter::fromNative());
+        return new self(Converter::fromNative());
     }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @deprecated Since version 7.0.0
-     * @see IPv4Converter::fromEnvironment()
+     * @throws MissingCalculator If no IPv4Calculator implementing object can be used
+     *                           on the platform
+     *
+     * @codeCoverageIgnore
+     *@see Converter::fromEnvironment()
      *
      * @codeCoverageIgnore
      *
      * Returns an instance using a detected calculator depending on the PHP environment.
      *
-     * @throws MissingIPv4Calculator If no IPv4Calculator implementing object can be used
-     *                               on the platform
-     *
-     * @codeCoverageIgnore
+     * @deprecated Since version 7.0.0
      */
     public static function createFromServer(): self
     {
-        return new self(IPv4Converter::fromEnvironment());
+        return new self(Converter::fromEnvironment());
     }
 
     /**
