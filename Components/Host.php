@@ -205,8 +205,8 @@ final class Host extends Component implements IpHostInterface
         if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
             $host = $domain_name;
             $is_domain = $this->isValidDomain($domain_name);
-            if (str_contains($host, 'xn--')) {
-                IdnConverter::toUnicode($host)->domain();
+            if (IdnConverter::toUnicode($host)->hasErrors()) {
+                throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host can not be converted to unicode..', $host));
             }
 
             return $inMemoryCache[$host] = [
@@ -345,11 +345,16 @@ final class Host extends Component implements IpHostInterface
 
     public function toUnicode(): ?string
     {
-        if (null !== $this->ipVersion || null === $this->host || !str_contains($this->host, 'xn--')) {
+        if (null !== $this->ipVersion || null === $this->host) {
             return $this->host;
         }
 
-        return IdnConverter::toUnicode($this->host)->domain();
+        $result = IdnConverter::toUnicode($this->host);
+        if ($result->hasErrors()) {
+            return $this->host;
+        }
+
+        return $result->domain();
     }
 
     public function toIPv4(): ?string
