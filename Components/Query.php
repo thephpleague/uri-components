@@ -126,7 +126,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromRFC3986(Stringable|string|null $query, string $separator = '&'): self
+    public static function fromRFC3986(Stringable|string|null $query = null, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC3986);
     }
@@ -136,7 +136,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromRFC1738(Stringable|string|null $query, string $separator = '&'): self
+    public static function fromRFC1738(Stringable|string|null $query = null, string $separator = '&'): self
     {
         return new self($query, $separator, PHP_QUERY_RFC1738);
     }
