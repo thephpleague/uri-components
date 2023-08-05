@@ -15,6 +15,9 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
+use League\Uri\Idna\ConversionFailed;
+use League\Uri\Idna\Error;
+use League\Uri\Idna\Result;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -152,9 +155,20 @@ final class HostTest extends TestCase
             'invalid IPFuture' => ['[v4.1.2.3]'],
             'invalid host with mix content' => ['_b%C3%A9bé.be-'],
             'invalid Host with fullwith (1)' =>  ['％００.com'],
-            'invalid host with fullwidth escaped' =>   ['%ef%bc%85%ef%bc%94%ef%bc%91.com'],
-            //'invalid IDNA host' => ['xn--3'],
+            'invalid host with fullwidth escaped' => ['%ef%bc%85%ef%bc%94%ef%bc%91.com'],
         ];
+    }
+
+    public function testInvalidi18nConversionReturnsErrors(): void
+    {
+        $domain = '％００.com';
+        $this->expectExceptionObject(ConversionFailed::dueToError($domain, Result::fromIntl([
+            'result' => $domain,
+            'isTransitionalDifferent' => false,
+            'errors' => Error::DISALLOWED->value,
+        ])));
+
+        Host::new($domain);
     }
 
     /**
@@ -197,7 +211,6 @@ final class HostTest extends TestCase
             ['127.0.0.1', '127.0.0.1'],
         ];
     }
-
 
     /**
      * @dataProvider getURIProvider
