@@ -17,7 +17,7 @@ use finfo;
 use League\Uri\Contracts\DataPathInterface;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\FileinfoSupportMissing;
+use League\Uri\Exceptions\MissingSupport;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
@@ -190,7 +190,7 @@ final class DataPath extends Component implements DataPathInterface
 
         // @codeCoverageIgnoreStart
         if (!$fileInfoSupport) {
-            throw new FileinfoSupportMissing(sprintf('Please install ext/fileinfo to use the %s() method.', __METHOD__));
+            throw MissingSupport::forFileInfo();
         }
         // @codeCoverageIgnoreEnd
 

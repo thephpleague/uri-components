@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use League\Uri\Components\Authority;
 use League\Uri\Components\Host;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\MissingSupport;
 use League\Uri\IPv4\Calculator;
 use League\Uri\IPv4\Converter;
-use League\Uri\IPv4\MissingCalculator;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
@@ -105,8 +104,7 @@ final class IPv4Normalizer
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @throws MissingCalculator If no IPv4Calculator implementing object can be used
-     *                           on the platform
+     * @throws MissingSupport If no IPv4Calculator implementing object can be used on the platform
      *
      * @codeCoverageIgnore
      *@see Converter::fromEnvironment()
