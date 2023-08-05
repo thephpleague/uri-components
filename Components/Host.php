@@ -16,7 +16,7 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\MissingSupport;
+use League\Uri\Exceptions\MissingFeature;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\ConversionFailed;
 use League\Uri\Idna\Converter as IdnConverter;
@@ -262,7 +262,7 @@ final class Host extends Component implements IpHostInterface
     /**
      * Returns a host from an IP address.
      *
-     * @throws MissingSupport If detecting IPv4 is not possible
+     * @throws MissingFeature If detecting IPv4 is not possible
      * @throws SyntaxError    If the $ip can not be converted into a Host
      */
     public static function fromIp(Stringable|string $ip, string $version = ''): self
@@ -450,7 +450,7 @@ final class Host extends Component implements IpHostInterface
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @throws MissingSupport If detecting IPv4 is not possible
+     * @throws MissingFeature If detecting IPv4 is not possible
      * @throws SyntaxError    If the $ip can not be converted into a Host
      * @deprecated Since version 7.0.0
      * @see Host::fromIp()

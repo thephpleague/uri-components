@@ -17,8 +17,8 @@ use finfo;
 use League\Uri\Contracts\DataPathInterface;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\MissingSupport;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\FeatureDetection;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
 use Stringable;
@@ -185,14 +185,7 @@ final class DataPath extends Component implements DataPathInterface
      */
     public static function fromFileContents(string $path, $context = null): self
     {
-        static $fileInfoSupport = null;
-        $fileInfoSupport = $fileInfoSupport ?? class_exists(finfo::class);
-
-        // @codeCoverageIgnoreStart
-        if (!$fileInfoSupport) {
-            throw MissingSupport::forFileInfo();
-        }
-        // @codeCoverageIgnoreEnd
+        FeatureDetection::supportsFileDetection();
 
         $fileArgs = [$path, false];
         $mimeArgs = [$path, FILEINFO_MIME];
