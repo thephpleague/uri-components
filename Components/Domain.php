@@ -211,6 +211,21 @@ final class Domain extends Component implements DomainHostInterface
         return $this->append('');
     }
 
+    public function slice(int $offset, int $length = null): self
+    {
+        $nbLabels = count($this->labels);
+        if ($offset < -$nbLabels || $offset > $nbLabels) {
+            throw new OffsetOutOfBounds(sprintf('No label can be found with at : `%s`.', $offset));
+        }
+
+        $labels = array_slice($this->labels, $offset, $length, true);
+
+        return match (true) {
+            $labels === $this->labels => $this,
+            default => self::fromLabels(...$labels),
+        };
+    }
+
     public function withoutRootLabel(): DomainHostInterface
     {
         $key = array_key_first($this->labels);
@@ -282,22 +297,6 @@ final class Domain extends Component implements DomainHostInterface
         $filter = static fn ($key): bool => !in_array($key, $deleted_keys, true);
 
         return self::fromLabels(...array_filter($this->labels, $filter, ARRAY_FILTER_USE_KEY));
-    }
-
-    public function slice(int $offset, int $length = null): self
-    {
-        $nbLabels = count($this->labels);
-        if ($offset < - $nbLabels || $offset > $nbLabels) {
-            throw new OffsetOutOfBounds(sprintf('No label can be removed with the submitted key : `%s`.', $offset));
-        }
-
-        $labels = array_slice($this->labels, $offset, $length, true);
-
-        return match (true) {
-            $labels === $this->labels => $this,
-            [] !== $labels => self::new(implode('.', array_reverse($labels))),
-            default => self::new(),
-        };
     }
 
     /**

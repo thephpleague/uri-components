@@ -17,7 +17,6 @@ use League\Uri\Components\Authority;
 use League\Uri\Components\Host;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
-use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\IPv4\Calculator;
 use League\Uri\IPv4\Converter;
@@ -136,14 +135,8 @@ final class IPv4Normalizer
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeUri(Stringable|string $uri): UriInterface|Psr7UriInterface
+    public function normalizeUri(UriInterface|Psr7UriInterface $uri): UriInterface|Psr7UriInterface
     {
-        $uri = match (true) {
-            $uri instanceof UriAccess => $uri->getUri(),
-            $uri instanceof UriInterface, $uri instanceof Psr7UriInterface => $uri,
-            default => Uri::new($uri),
-        };
-
         $host = Host::fromUri($uri);
         $normalizedHostString = ($this->converter)($host);
 
@@ -167,12 +160,8 @@ final class IPv4Normalizer
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeAuthority(Stringable|string $authority): AuthorityInterface
+    public function normalizeAuthority(AuthorityInterface $authority): AuthorityInterface
     {
-        if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::new($authority);
-        }
-
         $host = Host::fromAuthority($authority);
         $normalizedHostString = ($this->converter)($host);
 
@@ -196,12 +185,12 @@ final class IPv4Normalizer
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeHost(Stringable|string|null $host): HostInterface
+    public function normalizeHost(HostInterface $host): HostInterface
     {
         $normalizedHostString = ($this->converter)($host);
 
         return match (true) {
-            null === $normalizedHostString => $host instanceof HostInterface ? $host : Host::new($host),
+            null === $normalizedHostString => $host,
             default => Host::new($normalizedHostString),
         };
     }
