@@ -123,27 +123,22 @@ final class Host extends Component implements IpHostInterface
     private function parse(Stringable|int|string|null $host): array
     {
         $host = self::filterComponent($host);
-        $is_domain = false;
-        $ip_version = null;
-        $has_zone_identifier = false;
 
         if (null === $host) {
-            $is_domain = true;
-
             return [
-                'host' => $host,
-                'is_domain' => $is_domain,
-                'ip_version' => $ip_version,
-                'has_zone_identifier' => $has_zone_identifier,
+                'host' => null,
+                'is_domain' => true,
+                'ip_version' => null,
+                'has_zone_identifier' => false,
             ];
         }
 
         if ('' === $host) {
             return [
-                'host' => $host,
-                'is_domain' => $is_domain,
-                'ip_version' => $ip_version,
-                'has_zone_identifier' => $has_zone_identifier,
+                'host' => '',
+                'is_domain' => false,
+                'ip_version' => null,
+                'has_zone_identifier' => false,
             ];
         }
 
@@ -157,83 +152,70 @@ final class Host extends Component implements IpHostInterface
         }
 
         if (false !== filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            $ip_version = '4';
-
             return $inMemoryCache[$host] = [
                 'host' => $host,
-                'is_domain' => $is_domain,
-                'ip_version' => $ip_version,
-                'has_zone_identifier' => $has_zone_identifier,
+                'is_domain' => false,
+                'ip_version' => '4',
+                'has_zone_identifier' => false,
             ];
         }
 
         if ('[' === $host[0] && str_ends_with($host, ']')) {
             $ip_host = substr($host, 1, -1);
             if ($this->isValidIpv6Hostname($ip_host)) {
-                $ip_version = '6';
-                $has_zone_identifier = str_contains($ip_host, '%');
-
                 return $inMemoryCache[$host] = [
                     'host' => $host,
-                    'is_domain' => $is_domain,
-                    'ip_version' => $ip_version,
-                    'has_zone_identifier' => $has_zone_identifier,
+                    'is_domain' => false,
+                    'ip_version' => '6',
+                    'has_zone_identifier' => str_contains($ip_host, '%'),
                 ];
             }
 
             if (1 === preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
-                $ip_version = $matches['version'];
-
                 return $inMemoryCache[$host] = [
                     'host' => $host,
-                    'is_domain' => $is_domain,
-                    'ip_version' => $ip_version,
-                    'has_zone_identifier' => $has_zone_identifier,
+                    'is_domain' => false,
+                    'ip_version' => $matches['version'],
+                    'has_zone_identifier' => false,
                 ];
             }
 
             throw new SyntaxError(sprintf('`%s` is an invalid IP literal format.', $host));
         }
 
-        $domain_name = rawurldecode($host);
-        $is_ascii = false;
-        if (1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $domain_name)) {
-            $domain_name = strtolower($domain_name);
-            $is_ascii = true;
+        $domainName = rawurldecode($host);
+        $isAscii = false;
+        if (1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $domainName)) {
+            $domainName = strtolower($domainName);
+            $isAscii = true;
         }
 
-        if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domain_name)) {
-            $host = $domain_name;
-            $is_domain = $this->isValidDomain($domain_name);
-            if (IdnConverter::toUnicode($host)->hasErrors()) {
-                throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host can not be converted to unicode..', $host));
-            }
-
-            return $inMemoryCache[$host] = [
-                'host' => $host,
-                'is_domain' => $is_domain,
-                'ip_version' => $ip_version,
-                'has_zone_identifier' => $has_zone_identifier,
+        if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domainName)) {
+            return $inMemoryCache[$domainName] = [
+                'host' => $domainName,
+                'is_domain' => $this->isValidDomain($domainName),
+                'ip_version' => null,
+                'has_zone_identifier' => false,
             ];
         }
 
-        if ($is_ascii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domain_name)) {
+        if ($isAscii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domainName)) {
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
-        $result = IdnConverter::toAscii($domain_name);
+        $result = IdnConverter::toAscii($domainName);
         if ($result->hasErrors()) {
-            throw ConversionFailed::dueToError($domain_name, $result);
+            throw ConversionFailed::dueToError($domainName, $result);
         }
 
         $host = $result->domain();
-        $is_domain = $this->isValidDomain($host);
+        $isDomain = $this->isValidDomain($host);
 
         return $inMemoryCache[$host] = [
             'host' => $host,
-            'is_domain' => $is_domain,
-            'ip_version' => $ip_version,
-            'has_zone_identifier' => $has_zone_identifier,
+            'is_domain' => $isDomain,
+            'ip_version' => null,
+            'has_zone_identifier' => false,
         ];
     }
 
@@ -345,16 +327,11 @@ final class Host extends Component implements IpHostInterface
 
     public function toUnicode(): ?string
     {
-        if (null !== $this->ipVersion || null === $this->host) {
-            return $this->host;
-        }
-
-        $result = IdnConverter::toUnicode($this->host);
-        if ($result->hasErrors()) {
-            return $this->host;
-        }
-
-        return $result->domain();
+        return match (true) {
+            null !== $this->ipVersion,
+            null === $this->host => $this->host,
+            default => IdnConverter::toUnicode($this->host)->domain(),
+        };
     }
 
     public function toIPv4(): ?string
