@@ -30,15 +30,15 @@ use Stringable;
 use function ltrim;
 use function rtrim;
 
-final class Modifier implements Stringable, JsonSerializable, UriAccess
+class Modifier implements Stringable, JsonSerializable, UriAccess
 {
-    public function __construct(private readonly Psr7UriInterface|UriInterface $uri)
+    final public function __construct(protected readonly Psr7UriInterface|UriInterface $uri)
     {
     }
 
-    public static function from(Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): self
+    public static function from(Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
     {
-        return new self(match (true) {
+        return new static(match (true) {
             $uri instanceof UriAccess => $uri->getUri(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
             $uriFactory instanceof UriFactoryInterface => $uriFactory->createUri((string) $uri),
@@ -73,10 +73,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Add the new query data to the existing URI query.
      */
-    public function appendQuery(Stringable|string|null $query): self
+    public function appendQuery(Stringable|string|null $query): static
     {
-        return new self($this->uri->withQuery(
-            self::normalizeComponent(
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
                 Query::fromUri($this->uri)->append($query)->value(),
                 $this->uri
             )
@@ -86,10 +86,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Merge a new query with the existing URI query.
      */
-    public function mergeQuery(Stringable|string|null $query): self
+    public function mergeQuery(Stringable|string|null $query): static
     {
-        return new self($this->uri->withQuery(
-            self::normalizeComponent(
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
                 Query::fromUri($this->uri)->merge($query)->value(),
                 $this->uri
             )
@@ -99,10 +99,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Remove query data according to their key name.
      */
-    public function removePairs(string ...$keys): self
+    public function removePairs(string ...$keys): static
     {
-        return new self($this->uri->withQuery(
-            self::normalizeComponent(
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
                 Query::fromUri($this->uri)->withoutPair(...$keys)->value(),
                 $this->uri
             )
@@ -115,10 +115,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      * A pair is considered empty if it's name is the empty string
      * and its value is either the empty string or the null value
      */
-    public function removeEmptyPairs(): self
+    public function removeEmptyPairs(): static
     {
-        return new self($this->uri->withQuery(
-            self::normalizeComponent(
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
                 Query::fromUri($this->uri)->withoutEmptyPairs()->value(),
                 $this->uri
             )
@@ -128,10 +128,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Remove query data according to their key name.
      */
-    public function removeParams(string ...$keys): self
+    public function removeParams(string ...$keys): static
     {
-        return new self($this->uri->withQuery(
-            self::normalizeComponent(
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
                 Query::fromUri($this->uri)->withoutParameters(...$keys)->value(),
                 $this->uri
             )
@@ -141,10 +141,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Sort the URI query by keys.
      */
-    public function sortQuery(): self
+    public function sortQuery(): static
     {
-        return new self($this->uri->withQuery(
-            self::normalizeComponent(
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
                 Query::fromUri($this->uri)->sort()->value(),
                 $this->uri
             )
@@ -158,14 +158,14 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Add the root label to the URI.
      */
-    public function addRootLabel(): self
+    public function addRootLabel(): static
     {
         $host = Domain::fromUri($this->uri)->withRootLabel()->value();
         if (null === $host || $host === $this->uri->getHost() || !str_ends_with($host, '.')) {
             return $this;
         }
 
-        return new self($this->uri->withHost($this->uri->getHost().'.'));
+        return new static($this->uri->withHost($this->uri->getHost().'.'));
     }
 
     /**
@@ -173,15 +173,15 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @throws SyntaxError If the host can not be appended
      */
-    public function appendLabel(Stringable|string|null $label): self
+    public function appendLabel(Stringable|string|null $label): static
     {
         $host = Host::fromUri($this->uri);
         $label = Host::new($label);
 
         return match (true) {
             null === $label->value() => $this,
-            $host->isDomain() => new self($this->uri->withHost(self::normalizeComponent(Domain::new($host)->append($label)->toUnicode(), $this->uri))),
-            $host->isIpv4() => new self($this->uri->withHost($host->value().'.'.ltrim($label->value(), '.'))),
+            $host->isDomain() => new static($this->uri->withHost(static::normalizeComponent(Domain::new($host)->append($label)->toUnicode(), $this->uri))),
+            $host->isIpv4() => new static($this->uri->withHost($host->value().'.'.ltrim($label->value(), '.'))),
             default => throw new SyntaxError('The URI host '.$host->toString().' can not be appended.'),
         };
     }
@@ -189,10 +189,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Convert the URI host part to its ascii value.
      */
-    public function hostToAscii(): self
+    public function hostToAscii(): static
     {
-        return new self($this->uri->withHost(
-            self::normalizeComponent(
+        return new static($this->uri->withHost(
+            static::normalizeComponent(
                 Host::fromUri($this->uri)->value(),
                 $this->uri
             )
@@ -202,10 +202,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Convert the URI host part to its unicode value.
      */
-    public function hostToUnicode(): self
+    public function hostToUnicode(): static
     {
-        return new self($this->uri->withHost(
-            self::normalizeComponent(
+        return new static($this->uri->withHost(
+            static::normalizeComponent(
                 Host::fromUri($this->uri)->toUnicode(),
                 $this->uri
             )
@@ -218,13 +218,13 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeIPv4(): self
+    public function normalizeIPv4(): static
     {
         $hostIp = Host::fromUri($this->uri)->toIPv4();
 
         return match (true) {
             null === $hostIp => $this,
-            default => new self($this->uri->withHost($hostIp)),
+            default => new static($this->uri->withHost($hostIp)),
         };
     }
 
@@ -233,15 +233,15 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @throws SyntaxError If the host can not be prepended
      */
-    public function prependLabel(Stringable|string|null $label): self
+    public function prependLabel(Stringable|string|null $label): static
     {
         $host = Host::fromUri($this->uri);
         $label = Host::new($label);
 
         return match (true) {
             null === $label->value() => $this,
-            $host->isIpv4() => new self($this->uri->withHost(rtrim($label->value(), '.').'.'.$host->value())),
-            $host->isDomain() => new self($this->uri->withHost(self::normalizeComponent(Domain::new($host)->prepend($label)->toUnicode(), $this->uri))),
+            $host->isIpv4() => new static($this->uri->withHost(rtrim($label->value(), '.').'.'.$host->value())),
+            $host->isDomain() => new static($this->uri->withHost(static::normalizeComponent(Domain::new($host)->prepend($label)->toUnicode(), $this->uri))),
             default => throw new SyntaxError('The URI host '.$host->toString().' can not be prepended.'),
         };
     }
@@ -249,10 +249,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Remove host labels according to their offset.
      */
-    public function removeLabels(int ...$keys): self
+    public function removeLabels(int ...$keys): static
     {
-        return new self($this->uri->withHost(
-            self::normalizeComponent(
+        return new static($this->uri->withHost(
+            static::normalizeComponent(
                 Domain::fromUri($this->uri)->withoutLabel(...$keys)->toUnicode(),
                 $this->uri
             )
@@ -262,7 +262,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Remove the root label to the URI.
      */
-    public function removeRootLabel(): self
+    public function removeRootLabel(): static
     {
         $currentHost = $this->uri->getHost();
         if (null === $currentHost || '' === $currentHost || !str_ends_with($currentHost, '.')) {
@@ -272,16 +272,16 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
         /** @var string $host */
         $host = Domain::new($currentHost)->value();
 
-        return new self($this->uri->withHost(substr($host, 0, -1)));
+        return new static($this->uri->withHost(substr($host, 0, -1)));
     }
 
     /**
      * Remove the host zone identifier.
      */
-    public function removeZoneId(): self
+    public function removeZoneId(): static
     {
-        return new self($this->uri->withHost(
-            self::normalizeComponent(
+        return new static($this->uri->withHost(
+            static::normalizeComponent(
                 Host::fromUri($this->uri)->withoutZoneIdentifier()->value(),
                 $this->uri
             )
@@ -291,10 +291,10 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Replace a label of the current URI host.
      */
-    public function replaceLabel(int $offset, Stringable|string|null $label): self
+    public function replaceLabel(int $offset, Stringable|string|null $label): static
     {
-        return new self($this->uri->withHost(
-            self::normalizeComponent(
+        return new static($this->uri->withHost(
+            static::normalizeComponent(
                 Domain::fromUri($this->uri)->withLabel($offset, $label)->toUnicode(),
                 $this->uri
             )
@@ -308,71 +308,71 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Add a new base path to the URI path.
      */
-    public function addBasePath(Stringable|string $path): self
+    public function addBasePath(Stringable|string $path): static
     {
         /** @var HierarchicalPath $path */
         $path = HierarchicalPath::new($path)->withLeadingSlash();
         /** @var HierarchicalPath $currentPath */
         $currentPath = HierarchicalPath::fromUri($this->uri)->withLeadingSlash();
 
-        return new self(match (true) {
+        return new static(match (true) {
             !str_starts_with($currentPath->toString(), $path->toString()) => $this->uri->withPath($path->append($currentPath)->toString()),
-            default => self::normalizePath($this->uri, $currentPath),
+            default => static::normalizePath($this->uri, $currentPath),
         });
     }
 
     /**
      * Add a leading slash to the URI path.
      */
-    public function addLeadingSlash(): self
+    public function addLeadingSlash(): static
     {
-        return new self($this->uri->withPath(Path::fromUri($this->uri)->withLeadingSlash()->toString()));
+        return new static($this->uri->withPath(Path::fromUri($this->uri)->withLeadingSlash()->toString()));
     }
 
     /**
      * Add a trailing slash to the URI path.
      */
-    public function addTrailingSlash(): self
+    public function addTrailingSlash(): static
     {
-        return new self($this->uri->withPath(Path::fromUri($this->uri)->withTrailingSlash()->toString()));
+        return new static($this->uri->withPath(Path::fromUri($this->uri)->withTrailingSlash()->toString()));
     }
 
     /**
      * Append a new segment or a new path to the URI path.
      */
-    public function appendSegment(Stringable|string $segment): self
+    public function appendSegment(Stringable|string $segment): static
     {
-        return new self(self::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->append($segment)));
+        return new static(static::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->append($segment)));
     }
 
     /**
      * Convert the Data URI path to its ascii form.
      */
-    public function dataPathToAscii(): self
+    public function dataPathToAscii(): static
     {
-        return new self($this->uri->withPath(DataPath::fromUri($this->uri)->toAscii()->toString()));
+        return new static($this->uri->withPath(DataPath::fromUri($this->uri)->toAscii()->toString()));
     }
 
     /**
      * Convert the Data URI path to its binary (base64encoded) form.
      */
-    public function dataPathToBinary(): self
+    public function dataPathToBinary(): static
     {
-        return new self($this->uri->withPath(DataPath::fromUri($this->uri)->toBinary()->toString()));
+        return new static($this->uri->withPath(DataPath::fromUri($this->uri)->toBinary()->toString()));
     }
 
     /**
      * Prepend a new segment or a new path to the URI path.
      */
-    public function prependSegment(Stringable|string $segment): self
+    public function prependSegment(Stringable|string $segment): static
     {
-        return new self(self::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->prepend($segment)));
+        return new static(static::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->prepend($segment)));
     }
 
     /**
      * Remove a base path from the URI path.
      */
-    public function removeBasePath(Stringable|string $path): self
+    public function removeBasePath(Stringable|string $path): static
     {
         $basePath = HierarchicalPath::new($path)->withLeadingSlash()->toString();
         $currentPath = HierarchicalPath::fromUri($this->uri)->withLeadingSlash()->toString();
@@ -382,88 +382,88 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
             '/' === $basePath,
             !str_starts_with($currentPath, $basePath),
             !str_starts_with($newPath, '/') => $this,
-            default => new self($this->uri->withPath($newPath)),
+            default => new static($this->uri->withPath($newPath)),
         };
     }
 
     /**
      * Remove dot segments from the URI path.
      */
-    public function removeDotSegments(): self
+    public function removeDotSegments(): static
     {
-        return new self($this->uri->withPath(Path::fromUri($this->uri)->withoutDotSegments()->toString()));
+        return new static($this->uri->withPath(Path::fromUri($this->uri)->withoutDotSegments()->toString()));
     }
 
     /**
      * Remove empty segments from the URI path.
      */
-    public function removeEmptySegments(): self
+    public function removeEmptySegments(): static
     {
-        return new self($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withoutEmptySegments()->toString()));
+        return new static($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withoutEmptySegments()->toString()));
     }
 
     /**
      * Remove the leading slash from the URI path.
      */
-    public function removeLeadingSlash(): self
+    public function removeLeadingSlash(): static
     {
-        return new self(self::normalizePath($this->uri, Path::fromUri($this->uri)->withoutLeadingSlash()));
+        return new static(static::normalizePath($this->uri, Path::fromUri($this->uri)->withoutLeadingSlash()));
     }
 
     /**
      * Remove the trailing slash from the URI path.
      */
-    public function removeTrailingSlash(): self
+    public function removeTrailingSlash(): static
     {
-        return new self($this->uri->withPath(Path::fromUri($this->uri)->withoutTrailingSlash()->toString()));
+        return new static($this->uri->withPath(Path::fromUri($this->uri)->withoutTrailingSlash()->toString()));
     }
 
     /**
      * Remove path segments from the URI path according to their offsets.
      */
-    public function removeSegments(int ...$keys): self
+    public function removeSegments(int ...$keys): static
     {
-        return new self($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withoutSegment(...$keys)->toString()));
+        return new static($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withoutSegment(...$keys)->toString()));
     }
 
     /**
      * Replace the URI path basename.
      */
-    public function replaceBasename(Stringable|string $basename): self
+    public function replaceBasename(Stringable|string $basename): static
     {
-        return new self(self::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->withBasename($basename)));
+        return new static(static::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->withBasename($basename)));
     }
 
     /**
      * Replace the data URI path parameters.
      */
-    public function replaceDataUriParameters(Stringable|string $parameters): self
+    public function replaceDataUriParameters(Stringable|string $parameters): static
     {
-        return new self($this->uri->withPath(DataPath::fromUri($this->uri)->withParameters($parameters)->toString()));
+        return new static($this->uri->withPath(DataPath::fromUri($this->uri)->withParameters($parameters)->toString()));
     }
 
     /**
      * Replace the URI path dirname.
      */
-    public function replaceDirname(Stringable|string $dirname): self
+    public function replaceDirname(Stringable|string $dirname): static
     {
-        return new self(self::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->withDirname($dirname)));
+        return new static(static::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->withDirname($dirname)));
     }
 
     /**
      * Replace the URI path basename extension.
      */
-    public function replaceExtension(Stringable|string $extension): self
+    public function replaceExtension(Stringable|string $extension): static
     {
-        return new self($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withExtension($extension)->toString()));
+        return new static($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withExtension($extension)->toString()));
     }
 
     /**
      * Replace a segment from the URI path according its offset.
      */
-    public function replaceSegment(int $offset, Stringable|string $segment): self
+    public function replaceSegment(int $offset, Stringable|string $segment): static
     {
-        return new self($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withSegment($offset, $segment)->toString()));
+        return new static($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withSegment($offset, $segment)->toString()));
     }
 
     /**
@@ -472,7 +472,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      * Make sure the path always has a leading slash if an authority is present
      * and the path is not the empty string.
      */
-    private static function normalizePath(Psr7UriInterface|UriInterface $uri, PathInterface $path): Psr7UriInterface|UriInterface
+    final protected static function normalizePath(Psr7UriInterface|UriInterface $uri, PathInterface $path): Psr7UriInterface|UriInterface
     {
         $pathString = $path->toString();
         $authority = $uri->getAuthority();
@@ -491,7 +491,7 @@ final class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * null value MUST be converted to the empty string if a Psr7 UriInterface is being manipulated.
      */
-    private static function normalizeComponent(?string $component, Psr7UriInterface|UriInterface $uri): ?string
+    final protected static function normalizeComponent(?string $component, Psr7UriInterface|UriInterface $uri): ?string
     {
         return match (true) {
             $uri instanceof Psr7UriInterface => (string) $component,
