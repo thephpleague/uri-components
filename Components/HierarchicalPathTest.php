@@ -839,4 +839,23 @@ final class HierarchicalPathTest extends TestCase
             ],
         ];
     }
+
+    public function testSlice(): void
+    {
+        $domain = HierarchicalPath::new('/ulb/ac/be');
+
+        self::assertSame($domain->value(), $domain->slice(-3)->value());
+        self::assertSame($domain->value(), $domain->slice(0)->value());
+
+        self::assertSame('/ac/be', $domain->slice(1)->value());
+        self::assertSame('/be', $domain->slice(-1)->value());
+        self::assertSame('/ulb', $domain->slice(-3, 1)->value());
+    }
+
+    public function testSliceThrowsOnOverFlow(): void
+    {
+        $this->expectException(OffsetOutOfBounds::class);
+
+        HierarchicalPath::new('/ulb/ac/be')->slice(5);
+    }
 }

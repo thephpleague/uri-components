@@ -160,12 +160,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function addRootLabel(): static
     {
-        $host = Domain::fromUri($this->uri)->withRootLabel()->value();
-        if (null === $host || $host === $this->uri->getHost() || !str_ends_with($host, '.')) {
-            return $this;
-        }
+        $host = $this->uri->getHost();
 
-        return new static($this->uri->withHost($this->uri->getHost().'.'));
+        return match (true) {
+            null === $host,
+            str_ends_with($host, '.') => $this,
+            default => new static($this->uri->withHost(Host::new($host.'.')->toUnicode())),
+        };
     }
 
     /**
@@ -220,7 +221,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function normalizeIPv4(): static
     {
-        $hostIp = Host::fromUri($this->uri)->toIPv4();
+        $hostIp = Host::new($this->uri->getHost())->toIPv4();
 
         return match (true) {
             null === $hostIp => $this,
@@ -265,14 +266,28 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function removeRootLabel(): static
     {
         $currentHost = $this->uri->getHost();
-        if (null === $currentHost || '' === $currentHost || !str_ends_with($currentHost, '.')) {
-            return $this;
-        }
 
-        /** @var string $host */
-        $host = Domain::new($currentHost)->value();
+        return match (true) {
+            null === $currentHost,
+            '' === $currentHost,
+            !str_ends_with($currentHost, '.') => $this,
+            default => new static($this->uri->withHost(substr($currentHost, 0, -1))),
+        };
+    }
 
-        return new static($this->uri->withHost(substr($host, 0, -1)));
+    /**
+     * Slice the host from the URI.
+     */
+    public function sliceHost(int $offset, int $length = null): static
+    {
+        $currentHost = $this->uri->getHost();
+        $host = Domain::new($currentHost)->slice($offset, $length);
+
+        return match (true) {
+            $host->value() === $currentHost,
+            $host->toUnicode() === $currentHost => $this,
+            default => new static($this->uri->withHost($host->toUnicode())),
+        };
     }
 
     /**
@@ -464,6 +479,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function replaceSegment(int $offset, Stringable|string $segment): static
     {
         return new static($this->uri->withPath(HierarchicalPath::fromUri($this->uri)->withSegment($offset, $segment)->toString()));
+    }
+
+    /**
+     * Slice the host from the URI.
+     */
+    public function slicePath(int $offset, int $length = null): static
+    {
+        return new static(static::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->slice($offset, $length)));
     }
 
     /**

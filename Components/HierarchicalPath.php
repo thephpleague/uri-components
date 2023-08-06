@@ -351,6 +351,22 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return new self($path);
     }
 
+    public function slice(int $offset, int $length = null): self
+    {
+        $nbSegments = count($this->segments);
+        if ($offset < -$nbSegments || $offset > $nbSegments) {
+            throw new OffsetOutOfBounds(sprintf('No segment can be found with at : `%s`.', $offset));
+        }
+
+        $segments = array_slice($this->segments, $offset, $length, true);
+
+        return match (true) {
+            $segments === $this->segments => $this,
+            $this->isAbsolute() => self::fromAbsolute(...$segments),
+            default => self::fromRelative(...$segments),
+        };
+    }
+
     public function withDirname(Stringable|string $path): SegmentedPathInterface
     {
         if (!$path instanceof PathInterface) {
