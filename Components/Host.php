@@ -204,12 +204,11 @@ final class Host extends Component implements IpHostInterface
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
-        $host = IdnConverter::toAsciiOrFail($domainName)->domain();
-        $isDomain = $this->isValidDomain($host);
+        $host = IdnConverter::toAsciiOrFail($domainName);
 
         return $inMemoryCache[$host] = [
             'host' => $host,
-            'is_domain' => $isDomain,
+            'is_domain' => $this->isValidDomain($host),
             'ip_version' => null,
             'has_zone_identifier' => false,
         ];

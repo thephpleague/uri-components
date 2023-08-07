@@ -162,7 +162,7 @@ final class HostTest extends TestCase
     public function testInvalidi18nConversionReturnsErrors(): void
     {
         $domain = '％００.com';
-        $this->expectExceptionObject(ConversionFailed::dueToError($domain, Result::fromIntl([
+        $this->expectExceptionObject(ConversionFailed::dueToInvalidHost($domain, Result::fromIntl([
             'result' => $domain,
             'isTransitionalDifferent' => false,
             'errors' => Error::DISALLOWED->value,
