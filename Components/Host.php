@@ -117,6 +117,7 @@ final class Host extends Component implements IpHostInterface
     }
 
     /**
+     * @throws ConversionFailed if the submitted IDN host can not be converted to a valid ascii form
      *
      * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
      */
@@ -203,12 +204,7 @@ final class Host extends Component implements IpHostInterface
             throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
         }
 
-        $result = IdnConverter::toAscii($domainName);
-        if ($result->hasErrors()) {
-            throw ConversionFailed::dueToError($domainName, $result);
-        }
-
-        $host = $result->domain();
+        $host = IdnConverter::toAsciiOrFail($domainName)->domain();
         $isDomain = $this->isValidDomain($host);
 
         return $inMemoryCache[$host] = [
