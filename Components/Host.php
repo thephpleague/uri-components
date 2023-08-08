@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\ConversionFailed;
 use League\Uri\Exceptions\MissingFeature;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnConverter;
@@ -116,7 +117,7 @@ final class Host extends Component implements IpHostInterface
     }
 
     /**
-     * @throws \League\Uri\Exceptions\ConversionFailed if the submitted IDN host can not be converted to a valid ascii form
+     * @throws ConversionFailed if the submitted IDN host can not be converted to a valid ascii form
      *
      * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
      */
