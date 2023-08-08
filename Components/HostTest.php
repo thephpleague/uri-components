@@ -13,9 +13,9 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\ConversionFailed;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
-use League\Uri\Idna\ConversionFailed;
 use League\Uri\Idna\Error;
 use League\Uri\Idna\Result;
 use League\Uri\Uri;
@@ -162,7 +162,7 @@ final class HostTest extends TestCase
     public function testInvalidi18nConversionReturnsErrors(): void
     {
         $domain = '％００.com';
-        $this->expectExceptionObject(ConversionFailed::dueToInvalidHost($domain, Result::fromIntl([
+        $this->expectExceptionObject(ConversionFailed::dueToIdnError($domain, Result::fromIntl([
             'result' => $domain,
             'isTransitionalDifferent' => false,
             'errors' => Error::DISALLOWED->value,

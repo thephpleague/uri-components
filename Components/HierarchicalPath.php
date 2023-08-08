@@ -359,6 +359,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         $segments = array_slice($this->segments, $offset, $length, true);
+        if ($this->hasTrailingSlash()) {
+            $segments[] = '';
+        }
 
         return match (true) {
             $segments === $this->segments => $this,

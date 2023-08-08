@@ -18,9 +18,8 @@ use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\MissingFeature;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Idna\ConversionFailed;
 use League\Uri\Idna\Converter as IdnConverter;
-use League\Uri\IPv4\Converter as Ipv4Converter;
+use League\Uri\IPv4\Converter as IPv4Converter;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -117,7 +116,7 @@ final class Host extends Component implements IpHostInterface
     }
 
     /**
-     * @throws ConversionFailed if the submitted IDN host can not be converted to a valid ascii form
+     * @throws \League\Uri\Exceptions\ConversionFailed if the submitted IDN host can not be converted to a valid ascii form
      *
      * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
      */
@@ -277,7 +276,7 @@ final class Host extends Component implements IpHostInterface
             return new self('['.$ipv6.'%25'.rawurlencode($zoneId).']');
         }
 
-        $host = (Ipv4Converter::fromEnvironment())($ip);
+        $host = IPv4Converter::fromEnvironment()->toDecimal($ip);
         if (null === $host) {
             throw new SyntaxError(sprintf('`%s` is an invalid IP Host.', $ip));
         }
@@ -326,17 +325,6 @@ final class Host extends Component implements IpHostInterface
             null !== $this->ipVersion,
             null === $this->host => $this->host,
             default => IdnConverter::toUnicode($this->host)->domain(),
-        };
-    }
-
-    public function toIPv4(): ?string
-    {
-        return match (true) {
-            '4' === $this->ipVersion => $this->getIp(),
-            null !== $this->ipVersion,
-            !$this->isDomain,
-            null === $this->host => null,
-            default => Ipv4Converter::fromEnvironment()($this),
         };
     }
 

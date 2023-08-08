@@ -331,33 +331,49 @@ final class ModifierTest extends TestCase
         self::assertSame($uriString, (string) $modifier->hostToUnicode());
     }
 
-    public function testICanNormalizeIPv4Host(): void
+    public function testICanNormalizeIPv4HostToDecimal(): void
     {
         $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
         $expected = 'http://192.168.0.1/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->normalizeIPv4()->getUriString());
+        self::assertSame($expected, Modifier::from($uri)->hostToDecimal()->getUriString());
+    }
+
+    public function testICanNormalizeIPv4HostToOctal(): void
+    {
+        $uri = 'http://0300.0250.0.1/path/to/the/sky.php';
+        $expected = 'http://0300.0250.0000.0001/path/to/the/sky.php';
+
+        self::assertSame($expected, Modifier::from($uri)->hostToOctal()->getUriString());
+    }
+
+    public function testICanNormalizeIPv4HostToHexadecimal(): void
+    {
+        $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
+        $expected = 'http://0xc0a801/path/to/the/sky.php';
+
+        self::assertSame($expected, Modifier::from($uri)->hostToHexadecimal()->getUriString());
     }
 
     public function testIpv4NormalizeHostWithPsr7Uri(): void
     {
         $uri = Http::new('http://0/test');
-        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        $newUri = Modifier::from($uri)->hostToDecimal()->getUri();
         self::assertSame('0.0.0.0', $newUri->getHost());
 
         $uri = Http::new('http://11.be/test');
-        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        $unchangedUri = Modifier::from($uri)->hostToDecimal()->getUri();
         self::assertSame($uri, $unchangedUri);
     }
 
     public function testIpv4NormalizeHostWithLeagueUri(): void
     {
         $uri = Uri::new('http://0/test');
-        $newUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        $newUri = Modifier::from($uri)->hostToDecimal()->getUri();
         self::assertSame('0.0.0.0', $newUri->getHost());
 
         $uri = Http::new('http://11.be/test');
-        $unchangedUri = Modifier::from($uri)->normalizeIPv4()->getUri();
+        $unchangedUri = Modifier::from($uri)->hostToDecimal()->getUri();
         self::assertSame($uri, $unchangedUri);
     }
 

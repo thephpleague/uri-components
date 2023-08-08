@@ -111,11 +111,6 @@ final class Domain extends Component implements DomainHostInterface
         return $this->host->toUnicode();
     }
 
-    public function toIPv4(): ?string
-    {
-        return $this->host->toIPv4();
-    }
-
     public function isIp(): bool
     {
         return false;

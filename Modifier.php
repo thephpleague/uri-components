@@ -24,6 +24,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\IPv4\Converter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -219,12 +220,56 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    public function normalizeIPv4(): static
+    public function hostToDecimal(): static
     {
-        $hostIp = Host::new($this->uri->getHost())->toIPv4();
+        $currentHost = $this->uri->getHost();
+        $hostIp = Converter::fromEnvironment()->toDecimal($currentHost);
 
         return match (true) {
-            null === $hostIp => $this,
+            null === $currentHost,
+            '' === $currentHost,
+            null === $hostIp,
+            $currentHost === $hostIp  => $this,
+            default => new static($this->uri->withHost($hostIp)),
+        };
+    }
+
+    /**
+     * Normalizes the URI host content to a IPv4 octal notation if possible
+     * otherwise returns the uri instance unchanged.
+     *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     */
+    public function hostToOctal(): static
+    {
+        $currentHost = $this->uri->getHost();
+        $hostIp = Converter::fromEnvironment()->toOctal($currentHost);
+
+        return match (true) {
+            null === $currentHost,
+            '' === $currentHost,
+            null === $hostIp,
+            $currentHost === $hostIp  => $this,
+            default => new static($this->uri->withHost($hostIp)),
+        };
+    }
+
+    /**
+     * Normalizes the URI host content to a IPv4 octal notation if possible
+     * otherwise returns the uri instance unchanged.
+     *
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     */
+    public function hostToHexadecimal(): static
+    {
+        $currentHost = $this->uri->getHost();
+        $hostIp = Converter::fromEnvironment()->toHexadecimal($currentHost);
+
+        return match (true) {
+            null === $currentHost,
+            '' === $currentHost,
+            null === $hostIp,
+            $currentHost === $hostIp  => $this,
             default => new static($this->uri->withHost($hostIp)),
         };
     }

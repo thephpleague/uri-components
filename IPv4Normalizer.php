@@ -49,7 +49,7 @@ final class IPv4Normalizer
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Converter::__invoke()
+     * @see Converter::toDecimal()
      *
      * @codeCoverageIgnore
      *
@@ -60,7 +60,7 @@ final class IPv4Normalizer
      */
     public function normalize(Stringable|string|null $host): ?string
     {
-        return ($this->converter)($host);
+        return $this->converter->toDecimal($host);
     }
 
     /**
@@ -124,7 +124,7 @@ final class IPv4Normalizer
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Modifier::normalizeIPv4()
+     * @see Modifier::hostToDecimal()
      *
      * @codeCoverageIgnore
      *
@@ -135,13 +135,13 @@ final class IPv4Normalizer
      */
     public function normalizeUri(UriInterface|Psr7UriInterface $uri): UriInterface|Psr7UriInterface
     {
-        $host = Host::fromUri($uri);
-        $normalizedHostString = ($this->converter)($host);
+        $host = $uri->getHost();
+        $decimalIPv4 = $this->converter->toDecimal($host);
 
         return match (true) {
-            null === $normalizedHostString,
-            $normalizedHostString === $host->value() => $uri,
-            default => $uri->withHost($normalizedHostString),
+            null === $decimalIPv4,
+            $decimalIPv4 === $host => $uri,
+            default => $uri->withHost($decimalIPv4),
         };
     }
 
@@ -149,7 +149,7 @@ final class IPv4Normalizer
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Modifier::normalizeIPv4()
+     * @see Modifier::hostToDecimal()
      *
      * @codeCoverageIgnore
      *
@@ -160,13 +160,13 @@ final class IPv4Normalizer
      */
     public function normalizeAuthority(AuthorityInterface $authority): AuthorityInterface
     {
-        $host = Host::fromAuthority($authority);
-        $normalizedHostString = ($this->converter)($host);
+        $host = $authority->getHost();
+        $decimalIpv4 = $this->converter->toDecimal($host);
 
         return match (true) {
-            null === $normalizedHostString,
-            $normalizedHostString === $host->value() => $authority,
-            default => $authority->withHost($normalizedHostString),
+            null === $decimalIpv4,
+            $decimalIpv4 === $host => $authority,
+            default => $authority->withHost($decimalIpv4),
         };
     }
 
@@ -174,7 +174,7 @@ final class IPv4Normalizer
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Modifier::normalizeIPv4()
+     * @see Modifier::hostToDecimal()
      *
      * @codeCoverageIgnore
      *
@@ -185,11 +185,11 @@ final class IPv4Normalizer
      */
     public function normalizeHost(HostInterface $host): HostInterface
     {
-        $normalizedHostString = ($this->converter)($host);
+        $decimalIPv4 = $this->converter->toDecimal($host->value());
 
         return match (true) {
-            null === $normalizedHostString => $host,
-            default => Host::new($normalizedHostString),
+            null === $decimalIPv4 => $host,
+            default => Host::new($decimalIPv4),
         };
     }
 }
