@@ -30,6 +30,8 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function ltrim;
 use function rtrim;
+use function str_ends_with;
+use function str_starts_with;
 
 class Modifier implements Stringable, JsonSerializable, UriAccess
 {
@@ -166,7 +168,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         return match (true) {
             null === $host,
             str_ends_with($host, '.') => $this,
-            default => new static($this->uri->withHost(Host::new($host.'.')->toUnicode())),
+            default => new static($this->uri->withHost($host.'.')),
         };
     }
 
@@ -223,13 +225,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function hostToDecimal(): static
     {
         $currentHost = $this->uri->getHost();
-        $hostIp = Converter::fromEnvironment()->toDecimal($currentHost);
+        $hostIp = self::ipv4Converter()->toDecimal($currentHost);
 
         return match (true) {
             null === $currentHost,
             '' === $currentHost,
             null === $hostIp,
-            $currentHost === $hostIp  => $this,
+            $currentHost === $hostIp => $this,
             default => new static($this->uri->withHost($hostIp)),
         };
     }
@@ -243,7 +245,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function hostToOctal(): static
     {
         $currentHost = $this->uri->getHost();
-        $hostIp = Converter::fromEnvironment()->toOctal($currentHost);
+        $hostIp = self::ipv4Converter()->toOctal($currentHost);
 
         return match (true) {
             null === $currentHost,
@@ -263,7 +265,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function hostToHexadecimal(): static
     {
         $currentHost = $this->uri->getHost();
-        $hostIp = Converter::fromEnvironment()->toHexadecimal($currentHost);
+        $hostIp = self::ipv4Converter()->toHexadecimal($currentHost);
 
         return match (true) {
             null === $currentHost,
@@ -386,7 +388,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function addLeadingSlash(): static
     {
-        return new static($this->uri->withPath(Path::fromUri($this->uri)->withLeadingSlash()->toString()));
+        $path = $this->uri->getPath();
+
+        return match (true) {
+            str_starts_with($path, '/') => $this,
+            default => new static($this->uri->withPath('/'.$path)),
+        };
     }
 
     /**
@@ -394,7 +401,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function addTrailingSlash(): static
     {
-        return new static($this->uri->withPath(Path::fromUri($this->uri)->withTrailingSlash()->toString()));
+        $path = $this->uri->getPath();
+
+        return match (true) {
+            str_ends_with($path, '/') => $this,
+            default => new static($this->uri->withPath($path.'/')),
+        };
     }
 
     /**
@@ -475,7 +487,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function removeTrailingSlash(): static
     {
-        return new static($this->uri->withPath(Path::fromUri($this->uri)->withoutTrailingSlash()->toString()));
+        $path = $this->uri->getPath();
+
+        return match (true) {
+            !str_ends_with($path, '/') => $this,
+            default => new static($this->uri->withPath(substr($path, 0, -1))),
+        };
     }
 
     /**
@@ -565,5 +582,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
             $uri instanceof Psr7UriInterface => (string) $component,
             default => $component,
         };
+    }
+
+    final protected static function ipv4Converter(): Converter
+    {
+        static $converter;
+
+        $converter = $converter ?? Converter::fromEnvironment();
+
+        return $converter;
     }
 }
