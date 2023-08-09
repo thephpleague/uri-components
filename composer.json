@@ -29,8 +29,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "league/uri": "7.x-dev",
-        "league/uri-interfaces": "7.x-dev"
+        "league/uri": "^7.0"
     },
     "suggest": {
         "ext-bcmath": "to improve IPV4 host parsing",
