@@ -24,7 +24,8 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\IPv4\Converter;
+use League\Uri\Idna\Converter as IdnConverter;
+use League\Uri\IPv4\Converter as IPv4Converter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -195,12 +196,15 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function hostToAscii(): static
     {
-        return new static($this->uri->withHost(
-            static::normalizeComponent(
-                Host::fromUri($this->uri)->value(),
-                $this->uri
-            )
-        ));
+        $currentHost = $this->uri->getHost();
+        $host = IdnConverter::toAsciiOrFail((string) $currentHost);
+
+        return match (true) {
+            null === $currentHost,
+            '' === $currentHost,
+            $host === $currentHost => $this,
+            default => new static($this->uri->withHost($host)),
+        };
     }
 
     /**
@@ -208,12 +212,15 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function hostToUnicode(): static
     {
-        return new static($this->uri->withHost(
-            static::normalizeComponent(
-                Host::fromUri($this->uri)->toUnicode(),
-                $this->uri
-            )
-        ));
+        $currentHost = $this->uri->getHost();
+        $host = IdnConverter::toUnicode((string) $currentHost)->domain();
+
+        return match (true) {
+            null === $currentHost,
+            '' === $currentHost,
+            $host === $currentHost => $this,
+            default => new static($this->uri->withHost($host)),
+        };
     }
 
     /**
@@ -312,13 +319,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function removeRootLabel(): static
     {
-        $currentHost = $this->uri->getHost();
+        $host = $this->uri->getHost();
 
         return match (true) {
-            null === $currentHost,
-            '' === $currentHost,
-            !str_ends_with($currentHost, '.') => $this,
-            default => new static($this->uri->withHost(substr($currentHost, 0, -1))),
+            null === $host,
+            '' === $host,
+            !str_ends_with($host, '.') => $this,
+            default => new static($this->uri->withHost(substr($host, 0, -1))),
         };
     }
 
@@ -342,12 +349,17 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function removeZoneId(): static
     {
-        return new static($this->uri->withHost(
-            static::normalizeComponent(
-                Host::fromUri($this->uri)->withoutZoneIdentifier()->value(),
-                $this->uri
-            )
-        ));
+        $host = Host::fromUri($this->uri);
+
+        return match (true) {
+            $host->hasZoneIdentifier() => new static($this->uri->withHost(
+                static::normalizeComponent(
+                    Host::fromUri($this->uri)->withoutZoneIdentifier()->value(),
+                    $this->uri
+                )
+            )),
+            default => $this,
+        };
     }
 
     /**
@@ -584,11 +596,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         };
     }
 
-    final protected static function ipv4Converter(): Converter
+    final protected static function ipv4Converter(): IPv4Converter
     {
         static $converter;
 
-        $converter = $converter ?? Converter::fromEnvironment();
+        $converter = $converter ?? IPv4Converter::fromEnvironment();
 
         return $converter;
     }

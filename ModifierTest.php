@@ -194,6 +194,13 @@ final class ModifierTest extends TestCase
         ];
     }
 
+    public function testItCanSliceHostLabels(): void
+    {
+        $uri = 'http://www.localhost.co.uk/path/to/the/sky/';
+
+        self::assertSame('http://www.localhost/path/to/the/sky/', Modifier::from($uri)->sliceLabels(2, 2)->getUriString());
+    }
+
     public function testAppendLabelWithIpv4Host(): void
     {
         $uri = Http::new('http://127.0.0.1/foo/bar');
@@ -707,5 +714,12 @@ final class ModifierTest extends TestCase
     {
         yield 'unknown method' => ['method' => 'unknownMethod'];
         yield 'case sensitive method' => ['method' => 'rePLAceExtenSIOn'];
+    }
+
+    public function testItCanSlicePathSegments(): void
+    {
+        $uri = 'http://www.localhost.com/path/to/the/sky/';
+
+        self::assertSame('http://www.localhost.com/the/sky/', Modifier::from($uri)->sliceSegments(2, 2)->getUriString());
     }
 }
