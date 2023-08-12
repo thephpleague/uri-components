@@ -60,8 +60,8 @@ final class QueryString
             'suffixValue' => '*&',
         ],
         PHP_QUERY_RFC3986 => [
-            'suffixKey' => "!$'()*+,;:@?/%",
-            'suffixValue' => "!$'()*+,;=:@?/&%",
+            'suffixKey' => "!$'()*,;:@?/%",
+            'suffixValue' => "!$'()*,;=:@?/&%",
         ],
     ];
 
@@ -293,7 +293,7 @@ final class QueryString
 
         $query = implode($separator, $res);
         if (PHP_QUERY_RFC1738 === $enc_type) {
-            return str_replace(['+', '%20'], ['%2B', '+'], $query);
+            return str_replace('%20', '+', $query);
         }
 
         return $query;
