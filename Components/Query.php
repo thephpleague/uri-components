@@ -61,7 +61,7 @@ final class Query extends Component implements QueryInterface
         int $encType = PHP_QUERY_RFC3986
     ) {
         $this->pairs = QueryString::parse($query, $separator, $encType);
-        $this->parameters = QueryString::convert($this->pairs);
+        $this->parameters = QueryString::extract($query, $separator, $encType);
         $this->separator = $separator;
     }
 
