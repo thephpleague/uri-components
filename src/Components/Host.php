@@ -437,7 +437,7 @@ final class Host extends Component implements IpHostInterface
             return $this;
         }
 
-        [$ipv6, ] = explode('%', substr((string) $this->host, 1, -1));
+        [$ipv6] = explode('%', substr((string) $this->host, 1, -1));
 
         return static::createFromIp($ipv6);
     }

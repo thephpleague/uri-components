@@ -48,7 +48,7 @@ return $config
         'no_empty_comment' => true,
         'no_leading_import_slash' => true,
         'no_superfluous_phpdoc_tags' => true,
-        'no_trailing_comma_in_singleline_array' => true,
+        'no_trailing_comma_in_singleline' => true,
         'no_unused_imports' => true,
         'ordered_imports' => [
             'imports_order' => [
@@ -58,9 +58,7 @@ return $config
             ],
             'sort_algorithm' => 'alpha',
         ],
-        'phpdoc_add_missing_param_annotation' => [
-            'only_untyped' => false,
-        ],
+        'phpdoc_add_missing_param_annotation' => ['only_untyped' => true],
         'phpdoc_align' => true,
         'phpdoc_no_empty_return' => true,
         'phpdoc_order' => true,
@@ -71,7 +69,7 @@ return $config
         'return_type_declaration' => [
             'space_before' => 'none',
         ],
-        'single_blank_line_before_namespace' => true,
+        'blank_lines_before_namespace' => true,
         'single_quote' => true,
         'space_after_semicolon' => true,
         'ternary_operator_spaces' => true,

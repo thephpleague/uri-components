@@ -243,7 +243,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      */
     public function getExtension(): string
     {
-        [$basename, ] = explode(';', $this->getBasename(), 2);
+        [$basename] = explode(';', $this->getBasename(), 2);
 
         return pathinfo($basename, PATHINFO_EXTENSION);
     }
