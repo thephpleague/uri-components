@@ -17,6 +17,7 @@ use Iterator;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\SegmentedPathInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -59,7 +60,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         $this->path = $path;
-        $segments = $this->decodeComponent($this->path->value()) ?? '';
+        $segments = $this->path->decoded();
         if ($this->path->isAbsolute()) {
             $segments = substr($segments, 1);
         }
@@ -153,7 +154,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
 
     public function getDirname(): string
     {
-        $path = (string) $this->decodeComponent($this->path->toString());
+        $path = $this->path->decoded();
 
         return str_replace(
             ['\\', "\0"],
@@ -297,7 +298,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
             $segment = new self($segment);
         }
 
-        $segment = $this->decodeComponent((string) $segment);
+        $segment = Encoder::decodeAll($segment);
         if ($segment === $this->segments[$key]) {
             return $this;
         }

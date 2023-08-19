@@ -103,15 +103,11 @@ final class DataPath extends Component implements DataPathInterface
      */
     private function filterMimeType(string $mimetype): string
     {
-        if ('' == $mimetype) {
-            return self::DEFAULT_MIMETYPE;
-        }
-
-        if (1 === preg_match(self::REGEXP_MIMETYPE, $mimetype)) {
-            return $mimetype;
-        }
-
-        throw new SyntaxError(sprintf('Invalid mimeType, `%s`.', $mimetype));
+        return match (true) {
+            '' == $mimetype => self::DEFAULT_MIMETYPE,
+            1 === preg_match(self::REGEXP_MIMETYPE, $mimetype) =>  $mimetype,
+            default => throw new SyntaxError(sprintf('Invalid mimeType, `%s`.', $mimetype)),
+        };
     }
 
     /**
@@ -302,7 +298,11 @@ final class DataPath extends Component implements DataPathInterface
 
         $path = $mimetype.$parameters.','.$data;
 
-        return preg_replace_callback(self::REGEXP_DATAPATH_ENCODING, $this->encodeMatches(...), $path) ?? $path;
+        return preg_replace_callback(
+            self::REGEXP_DATAPATH_ENCODING,
+            static fn (array $matches): string => rawurlencode($matches[0]),
+            $path
+        ) ?? $path;
     }
 
     public function toAscii(): DataPathInterface

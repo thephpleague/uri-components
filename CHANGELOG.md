@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## Next - TBD
+
+### Added
+
+- `Modifier::encodeQuery`
+
+### Fixed
+
+- Using the `Encoder` class to normalize encoding and decoding in all packages
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
 ## [7.0.0](https://github.com/thephpleague/uri-components/compare/2.4.1...7.0.0) - 2023-08-10
 
 ### Added

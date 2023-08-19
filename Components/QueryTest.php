@@ -37,10 +37,10 @@ final class QueryTest extends TestCase
     public function testSeparator(): void
     {
         $query = Query::new('foo=bar&kingkong=toto');
-        $newQuery = $query->withSeparator('|');
+        $newQuery = $query->withSeparator(';');
         self::assertSame('&', $query->getSeparator());
-        self::assertSame('|', $newQuery->getSeparator());
-        self::assertSame('foo=bar|kingkong=toto', $newQuery->value());
+        self::assertSame(';', $newQuery->getSeparator());
+        self::assertSame('foo=bar;kingkong=toto', $newQuery->value());
 
         $this->expectException(SyntaxError::class);
         $newQuery->withSeparator('');
@@ -682,11 +682,17 @@ final class QueryTest extends TestCase
         ];
     }
 
-    public function testCreateFromRFCSpecification(): void
+    public function testItFailsToCreateFromRFCSpecificationWithInvalidSeparator(): void
     {
-        self::assertEquals(
-            Query::fromRFC3986('foo=b%20ar|foo=baz', '|'),
-            Query::fromRFC1738('foo=b+ar|foo=baz', '|')
-        );
+        $this->expectException(SyntaxError::class);
+
+        Query::fromRFC3986('foo=b%20ar;foo=baz', ''); /* @phpstan-ignore-line */
+    }
+
+    public function testItFailsToCreateFromRFCSpecificationWithEmptySeparator(): void
+    {
+        $this->expectException(SyntaxError::class);
+
+        Query::fromRFC1738('foo=b%20ar;foo=baz', ''); /* @phpstan-ignore-line */
     }
 }

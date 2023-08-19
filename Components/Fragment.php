@@ -15,13 +15,12 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Encoder;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
 final class Fragment extends Component implements FragmentInterface
 {
-    private const REGEXP_FRAGMENT_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:\/@?]+|%(?![A-Fa-f0-9]{2})/';
-
     private readonly ?string $fragment;
 
     /**
@@ -53,7 +52,7 @@ final class Fragment extends Component implements FragmentInterface
 
     public function value(): ?string
     {
-        return $this->encodeComponent($this->fragment, self::REGEXP_FRAGMENT_ENCODING);
+        return Encoder::encodeQueryOrFragment($this->fragment);
     }
 
     public function getUriComponent(): string

@@ -15,6 +15,7 @@ namespace League\Uri\Components;
 
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Encoder;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use function array_pop;
@@ -27,7 +28,6 @@ use function substr;
 final class Path extends Component implements PathInterface
 {
     private const DOT_SEGMENTS = ['.' => 1, '..' => 1];
-    private const REGEXP_PATH_ENCODING = '/[^A-Za-z0-9_\-.!$&\'()*+,;=%:\/@]+|%(?![A-Fa-f0-9]{2})/';
     private const SEPARATOR = '/';
 
     private readonly string $path;
@@ -76,7 +76,7 @@ final class Path extends Component implements PathInterface
 
     public function value(): ?string
     {
-        return $this->encodeComponent($this->path, self::REGEXP_PATH_ENCODING);
+        return Encoder::encodePath($this->path);
     }
 
     public function decoded(): string

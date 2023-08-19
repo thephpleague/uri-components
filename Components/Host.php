@@ -41,6 +41,8 @@ use const FILTER_VALIDATE_IP;
 
 final class Host extends Component implements IpHostInterface
 {
+    protected const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
+
     /**
      * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
      *

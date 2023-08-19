@@ -17,20 +17,15 @@ use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
+use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
 use function explode;
-use function preg_replace_callback;
-use function rawurldecode;
 
 final class UserInfo extends Component implements UserInfoInterface
 {
-    private const REGEXP_USER_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%]+|%(?![A-Fa-f0-9]{2})/x';
-    private const REGEXP_PASS_ENCODING = '/[^A-Za-z0-9_\-.~!$&\'()*+,;=%:]+|%(?![A-Fa-f0-9]{2})/x';
-    private const REGEXP_ENCODED_CHAR = ',%[A-Fa-f0-9]{2},';
-
     private readonly ?string $username;
     private readonly ?string $password;
 
@@ -69,11 +64,10 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public static function fromAuthority(Stringable|string|null $authority): self
     {
-        if (!$authority instanceof AuthorityInterface) {
-            $authority = Authority::new($authority);
-        }
-
-        return self::new($authority->getUserInfo());
+        return match (true) {
+            $authority instanceof AuthorityInterface => self::new($authority->getUserInfo()),
+            default => self::new(Authority::new($authority)->getUserInfo()),
+        };
     }
 
     /**
@@ -111,33 +105,16 @@ final class UserInfo extends Component implements UserInfoInterface
 
         [$user, $pass] = explode(':', $value, 2) + [1 => null];
 
-        return new self(self::decode($user), self::decode($pass));
-    }
-
-    /**
-     * Decodes an encoded string.
-     */
-    private static function decode(?string $str): ?string
-    {
-        return null === $str ? null : preg_replace_callback(
-            self::REGEXP_ENCODED_CHAR,
-            static fn (array $matches): string => rawurldecode($matches[0]),
-            $str
-        );
+        return new self(Encoder::decodeAll($user), Encoder::decodeAll($pass));
     }
 
     public function value(): ?string
     {
-        if (null === $this->username) {
-            return null;
-        }
-
-        $userInfo = $this->encodeComponent($this->username, self::REGEXP_USER_ENCODING);
-        if (null === $this->password) {
-            return $userInfo;
-        }
-
-        return $userInfo.':'.$this->encodeComponent($this->password, self::REGEXP_PASS_ENCODING);
+        return match (true) {
+            null === $this->username => null,
+            null === $this->password => Encoder::encodeUser($this->username),
+            default => Encoder::encodeUser($this->username).':'.Encoder::encodePassword($this->password),
+        };
     }
 
     public function getUriComponent(): string

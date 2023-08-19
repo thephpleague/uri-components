@@ -26,6 +26,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
+use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -153,6 +154,37 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
                 $this->uri
             )
         ));
+    }
+
+    /**
+     * Change the encoding of the query.
+     */
+    public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int $from = null): static
+    {
+        $to = match (true) {
+            !$to instanceof KeyValuePairConverter => KeyValuePairConverter::fromEncodingType($to),
+            default => $to,
+        };
+
+        $from = match (true) {
+            null === $from => KeyValuePairConverter::fromRFC3986(),
+            !$from instanceof KeyValuePairConverter => KeyValuePairConverter::fromEncodingType($from),
+            default => $from,
+        };
+
+        if ($to == $from) {
+            return $this;
+        }
+
+        $originalQuery = $this->uri->getQuery();
+        $query = QueryString::buildFromPairs(QueryString::parseFromValue($originalQuery, $from), $to);
+
+        return match (true) {
+            null === $query,
+            '' === $query,
+            $originalQuery === $query => $this,
+            default => new static($this->uri->withQuery($query)),
+        };
     }
 
     /*********************************
