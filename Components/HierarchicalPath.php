@@ -111,15 +111,12 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $pathSegments = array_map(fn (Stringable|string $segment): string => (string) $segment, $segments);
         $path = implode(self::SEPARATOR, $pathSegments);
-        if (self::IS_RELATIVE === $pathType) {
-            return new self(ltrim($path, self::SEPARATOR));
-        }
 
-        if (self::SEPARATOR !== ($path[0] ?? '')) {
-            return new self(self::SEPARATOR.$path);
-        }
-
-        return new self($path);
+        return match (true) {
+            self::IS_RELATIVE === $pathType => new self(ltrim($path, self::SEPARATOR)),
+            self::SEPARATOR !== ($path[0] ?? '') => new self(self::SEPARATOR.$path),
+            default => new self($path),
+        };
     }
 
     public function count(): int
@@ -394,11 +391,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         /** @var string $basename */
         $basename = $this->validateComponent($basename);
-        if (str_contains($basename, self::SEPARATOR)) {
-            throw new SyntaxError('The basename can not contain the path separator.');
-        }
 
-        return $this->withSegment(count($this->segments) - 1, $basename);
+        return match (true) {
+            str_contains($basename, self::SEPARATOR) => throw new SyntaxError('The basename can not contain the path separator.'),
+            default => $this->withSegment(count($this->segments) - 1, $basename),
+        };
     }
 
     public function withExtension(Stringable|string $extension): SegmentedPathInterface

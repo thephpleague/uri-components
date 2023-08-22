@@ -158,8 +158,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
 
     /**
      * Change the encoding of the query.
+     *
+     * @param KeyValuePairConverter|PHP_QUERY_RFC3986|PHP_QUERY_RFC1738      $to
+     * @param KeyValuePairConverter|PHP_QUERY_RFC3986|PHP_QUERY_RFC1738|null $from
      */
-    public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int $from = null): static
+    public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int|null $from = null): static
     {
         $to = match (true) {
             !$to instanceof KeyValuePairConverter => KeyValuePairConverter::fromEncodingType($to),

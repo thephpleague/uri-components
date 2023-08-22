@@ -68,7 +68,8 @@ final class Authority extends Component implements AuthorityInterface
         $authority = $uri->getAuthority();
 
         return match (true) {
-            $uri instanceof UriInterface, '' !== $authority => self::new($authority),
+            $uri instanceof UriInterface,
+            '' !== $authority => self::new($authority),
             default => self::new(),
         };
     }
@@ -114,16 +115,19 @@ final class Authority extends Component implements AuthorityInterface
         }
 
         $userInfo = $userInfo->value();
-        if (null === $userInfo) {
-            return $auth;
-        }
 
-        return $userInfo.'@'.$auth;
+        return match (true) {
+            null === $userInfo => $auth,
+            default => $userInfo.'@'.$auth,
+        };
     }
 
     public function getUriComponent(): string
     {
-        return  (null === $this->host->value()) ? $this->toString() : '//'.$this->toString();
+        return match (true) {
+            null === $this->host->value() => $this->toString(),
+            default => '//'.$this->toString(),
+        };
     }
 
     public function getHost(): ?string
@@ -158,11 +162,10 @@ final class Authority extends Component implements AuthorityInterface
             $host = Host::new($host);
         }
 
-        if ($host->value() === $this->host->value()) {
-            return $this;
-        }
-
-        return new self($host, $this->port, $this->userInfo);
+        return match (true) {
+            $host->value() === $this->host->value() => $this,
+            default => new self($host, $this->port, $this->userInfo),
+        };
     }
 
     public function withPort(Stringable|string|int|null $port): AuthorityInterface
@@ -171,21 +174,20 @@ final class Authority extends Component implements AuthorityInterface
             $port = Port::new($port);
         }
 
-        if ($port->value() === $this->port->value()) {
-            return $this;
-        }
-
-        return new self($this->host, $port, $this->userInfo);
+        return match (true) {
+            $port->value() === $this->port->value() => $this,
+            default => new self($this->host, $port, $this->userInfo),
+        };
     }
 
     public function withUserInfo(Stringable|string|null $user, Stringable|string|null $password = null): AuthorityInterface
     {
         $userInfo = new UserInfo($user, $password);
-        if ($userInfo->value() === $this->userInfo->value()) {
-            return $this;
-        }
 
-        return new self($this->host, $this->port, $userInfo);
+        return match (true) {
+            $userInfo->value() === $this->userInfo->value() => $this,
+            default => new self($this->host, $this->port, $userInfo),
+        };
     }
 
     /**

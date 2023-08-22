@@ -71,8 +71,8 @@ final class Domain extends Component implements DomainHostInterface
      */
     public static function fromLabels(Stringable|string ...$labels): self
     {
-        return new self(match (true) {
-            [] === $labels => null,
+        return new self(match ([]) {
+            $labels => null,
             default => implode(self::SEPARATOR, array_reverse(array_map(
                 fn ($label) => self::filterComponent($label),
                 $labels
@@ -157,11 +157,10 @@ final class Domain extends Component implements DomainHostInterface
 
     public function keys(?string $label = null): array
     {
-        if (null === $label) {
-            return array_keys($this->labels);
-        }
-
-        return array_keys($this->labels, $label, true);
+        return match (true) {
+            null === $label => array_keys($this->labels),
+            default => array_keys($this->labels, $label, true),
+        };
     }
 
     public function isAbsolute(): bool
@@ -199,11 +198,11 @@ final class Domain extends Component implements DomainHostInterface
     public function withRootLabel(): DomainHostInterface
     {
         $key = array_key_first($this->labels);
-        if ('' === $this->labels[$key]) {
-            return $this;
-        }
 
-        return $this->append('');
+        return match (true) {
+            '' === $this->labels[$key] => $this,
+            default => $this->append(''),
+        };
     }
 
     public function slice(int $offset, int $length = null): self
@@ -215,8 +214,8 @@ final class Domain extends Component implements DomainHostInterface
 
         $labels = array_slice($this->labels, $offset, $length, true);
 
-        return match (true) {
-            $labels === $this->labels => $this,
+        return match ($labels) {
+            $this->labels => $this,
             default => self::fromLabels(...$labels),
         };
     }

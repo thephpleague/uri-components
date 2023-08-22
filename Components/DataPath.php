@@ -307,16 +307,15 @@ final class DataPath extends Component implements DataPathInterface
 
     public function toAscii(): DataPathInterface
     {
-        if (false === $this->isBinaryData) {
-            return $this;
-        }
-
-        return new self($this->formatComponent(
-            $this->mimetype,
-            $this->getParameters(),
-            false,
-            rawurlencode((string) base64_decode($this->document, true))
-        ));
+        return match (true) {
+            false === $this->isBinaryData => $this,
+            default => new self($this->formatComponent(
+                $this->mimetype,
+                $this->getParameters(),
+                false,
+                rawurlencode((string)base64_decode($this->document, true))
+            )),
+        };
     }
 
     public function withoutDotSegments(): PathInterface
@@ -337,31 +336,36 @@ final class DataPath extends Component implements DataPathInterface
     public function withoutTrailingSlash(): PathInterface
     {
         $path = $this->path->withoutTrailingSlash();
-        if ($path === $this->path) {
-            return $this;
-        }
 
-        return new self($path);
+        return match (true) {
+            $path === $this->path => $this,
+            default => new self($path),
+        };
     }
 
     public function withTrailingSlash(): PathInterface
     {
         $path = $this->path->withTrailingSlash();
-        if ($path === $this->path) {
-            return $this;
-        }
 
-        return new self($path);
+        return match (true) {
+            $path === $this->path => $this,
+            default => new self($path),
+        };
     }
 
     public function withParameters(Stringable|string $parameters): DataPathInterface
     {
         $parameters = (string) $parameters;
-        if ($parameters === $this->getParameters()) {
-            return $this;
-        }
 
-        return new self($this->formatComponent($this->mimetype, $parameters, $this->isBinaryData, $this->document));
+        return match (true) {
+            $parameters === $this->getParameters() => $this,
+            default => new self($this->formatComponent(
+                $this->mimetype,
+                $parameters,
+                $this->isBinaryData,
+                $this->document
+            )),
+        };
     }
 
     /**

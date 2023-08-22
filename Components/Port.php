@@ -80,16 +80,18 @@ final class Port extends Component implements PortInterface
 
     public function value(): ?string
     {
-        if (null === $this->port) {
-            return $this->port;
-        }
-
-        return (string) $this->port;
+        return match (true) {
+            null === $this->port => $this->port,
+            default => (string) $this->port,
+        };
     }
 
     public function getUriComponent(): string
     {
-        return (null === $this->port ? '' : ':').$this->value();
+        return match (true) {
+            null === $this->port => '',
+            default => ':'.$this->value(),
+        };
     }
 
     public function toInt(): ?int
