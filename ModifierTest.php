@@ -15,6 +15,7 @@ use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
+use const PHP_QUERY_RFC3986;
 
 /**
  * @group host
@@ -53,6 +54,54 @@ final class ModifierTest extends TestCase
     }
 
     /**
+     * @dataProvider validMergeQueryPairsProvider
+     */
+    public function testMergeQueryPairs(iterable $pairs, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->mergeQueryPairs($pairs)->getUri()->getQuery());
+    }
+
+    public static function validMergeQueryPairsProvider(): array
+    {
+        return [
+            [
+                'pairs' => [['toto', null]],
+                'expected' => 'kingkong=toto&foo=bar%20baz&toto',
+            ],
+            [
+                'pairs' => [['kingkong', 'ape']],
+                'expected' => 'kingkong=ape&foo=bar%20baz',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider validMergeQueryParametersProvider
+     */
+    public function testMergeQueryParameters(iterable $parameters, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->mergeQueryParameters($parameters)->getUri()->getQuery());
+    }
+
+    public static function validMergeQueryParametersProvider(): array
+    {
+        return [
+            [
+                'parameters' => ['toto' => null],
+                'expected' => 'kingkong=toto&foo=bar%20baz',
+            ],
+            [
+                'parameters' => ['toto' => ''],
+                'expected' => 'kingkong=toto&foo=bar%20baz&toto=',
+            ],
+            [
+                'parameters' => ['kingkong' => 'ape'],
+                'expected' => 'kingkong=ape&foo=bar%20baz',
+            ],
+        ];
+    }
+
+    /**
      * @dataProvider validAppendQueryProvider
      */
     public function testAppendQuery(string $query, string $expected): void
@@ -68,6 +117,50 @@ final class ModifierTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider validAppendQueryPairsProvider
+     */
+    public function testAppendQueryPairs(iterable $query, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->appendQueryPairs($query)->getUri()->getQuery());
+    }
+
+    public static function validAppendQueryPairsProvider(): array
+    {
+        return [
+            [
+                [['toto', null]],
+                'kingkong=toto&foo=bar%20baz&toto',
+            ],
+            [
+                [['kingkong', 'ape']],
+                'kingkong=toto&foo=bar%20baz&kingkong=ape',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider validAppendQueryParametersProvider
+     */
+    public function testAppendQueryParameters(iterable $query, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->appendQueryParameters($query)->getUri()->getQuery());
+    }
+
+    public static function validAppendQueryParametersProvider(): array
+    {
+        return [
+            [
+                ['toto' => ''],
+                'kingkong=toto&foo=bar%20baz&toto=',
+            ],
+            [
+                ['kingkong' => 'ape'],
+                'kingkong=toto&foo=bar%20baz&kingkong=ape',
+            ],
+        ];
+    }
+
     public function testKsortQuery(): void
     {
         $uri = Http::new('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
@@ -79,7 +172,7 @@ final class ModifierTest extends TestCase
      */
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removePairs(...$input)->getUri()->getQuery());
+        self::assertSame($expected, $this->modifier->removeQueryPairs(...$input)->getUri()->getQuery());
     }
 
     public static function validWithoutQueryValuesProvider(): array
@@ -95,7 +188,7 @@ final class ModifierTest extends TestCase
      */
     public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
     {
-        self::assertSame($expected, Modifier::from($uri)->removeParams(...$input)->getUri()->getQuery());
+        self::assertSame($expected, Modifier::from($uri)->removeQueryParameters(...$input)->getUri()->getQuery());
     }
 
     public static function removeParamsProvider(): array
@@ -124,8 +217,8 @@ final class ModifierTest extends TestCase
      */
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void
     {
-        self::assertSame($expected, Modifier::from(Uri::fromBaseUri($uri))->removeEmptyPairs()->getUri()->__toString());
-        self::assertSame($expected, Modifier::from(Http::fromBaseUri($uri))->removeEmptyPairs()->getUri()->__toString());
+        self::assertSame($expected, Modifier::from(Uri::fromBaseUri($uri))->removeEmptyQueryPairs()->getUri()->__toString());
+        self::assertSame($expected, Modifier::from(Http::fromBaseUri($uri))->removeEmptyQueryPairs()->getUri()->__toString());
     }
 
     public static function removeEmptyPairsProvider(): iterable
@@ -156,6 +249,19 @@ final class ModifierTest extends TestCase
                 'expected' => 'http://example.com?foo=bar&bar=baz',
             ],
         ];
+    }
+
+    public function testEncodeQuery(): void
+    {
+        self::assertSame(
+            $this->modifier->encodeQuery(PHP_QUERY_RFC3986)->getUriString(),
+            $this->modifier->getUriString()
+        );
+
+        self::assertSame(
+            $this->modifier->encodeQuery(PHP_QUERY_RFC1738)->getUri()->getQuery(),
+            'kingkong=toto&foo=bar+baz'
+        );
     }
 
     /*****************************

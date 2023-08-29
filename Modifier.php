@@ -30,6 +30,7 @@ use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Traversable;
 use function ltrim;
 use function rtrim;
 use function str_ends_with;
@@ -76,87 +77,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      *********************************/
 
     /**
-     * Add the new query data to the existing URI query.
-     */
-    public function appendQuery(Stringable|string|null $query): static
-    {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->append($query)->value(),
-                $this->uri
-            )
-        ));
-    }
-
-    /**
-     * Merge a new query with the existing URI query.
-     */
-    public function mergeQuery(Stringable|string|null $query): static
-    {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->merge($query)->value(),
-                $this->uri
-            )
-        ));
-    }
-
-    /**
-     * Remove query data according to their key name.
-     */
-    public function removePairs(string ...$keys): static
-    {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->withoutPair(...$keys)->value(),
-                $this->uri
-            )
-        ));
-    }
-
-    /**
-     * Remove empty pairs from the URL query component.
-     *
-     * A pair is considered empty if it's name is the empty string
-     * and its value is either the empty string or the null value
-     */
-    public function removeEmptyPairs(): static
-    {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->withoutEmptyPairs()->value(),
-                $this->uri
-            )
-        ));
-    }
-
-    /**
-     * Remove query data according to their key name.
-     */
-    public function removeParams(string ...$keys): static
-    {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->withoutParameters(...$keys)->value(),
-                $this->uri
-            )
-        ));
-    }
-
-    /**
-     * Sort the URI query by keys.
-     */
-    public function sortQuery(): static
-    {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->sort()->value(),
-                $this->uri
-            )
-        ));
-    }
-
-    /**
      * Change the encoding of the query.
      *
      * @param KeyValuePairConverter|PHP_QUERY_RFC3986|PHP_QUERY_RFC1738      $to
@@ -188,6 +108,146 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
             $originalQuery === $query => $this,
             default => new static($this->uri->withQuery($query)),
         };
+    }
+
+    /**
+     * Sort the URI query by keys.
+     */
+    public function sortQuery(): static
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromUri($this->uri)->sort()->value(),
+                $this->uri
+            )
+        ));
+    }
+
+    /**
+     * Add the new query data to the existing URI query.
+     */
+    public function appendQuery(Stringable|string|null $query): static
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromUri($this->uri)->append($query)->value(),
+                $this->uri
+            )
+        ));
+    }
+
+    /**
+     * Merge query paris with the existing URI query.
+     *
+     * @param iterable<int, array{0:string, 1:string|null}> $pairs
+     */
+    public function appendQueryPairs(iterable $pairs): self
+    {
+        return $this->appendQuery(Query::fromPairs($pairs)->value());
+    }
+
+    /**
+     * Append PHP query parameters to the existing URI query.
+     */
+    public function appendQueryParameters(iterable $parameters): self
+    {
+        return $this->appendQuery(Query::fromParameters($parameters)->value());
+    }
+
+    /**
+     * Merge a new query with the existing URI query.
+     */
+    public function mergeQuery(Stringable|string|null $query): static
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromUri($this->uri)->merge($query)->value(),
+                $this->uri
+            )
+        ));
+    }
+
+    /**
+     * Merge query paris with the existing URI query.
+     *
+     * @param iterable<int, array{0:string, 1:string|null}> $pairs
+     */
+    public function mergeQueryPairs(iterable $pairs): self
+    {
+        $currentPairs = [...Query::fromUri($this->uri)->pairs()];
+        $pairs = [...$pairs];
+
+        return match (true) {
+            [] === $pairs,
+            $currentPairs === $pairs => $this,
+            default => $this->mergeQuery(Query::fromPairs($pairs)->value()),
+        };
+    }
+
+    /**
+     *  Merge PHP query parameters with the existing URI query.
+     */
+    public function mergeQueryParameters(iterable $parameters): self
+    {
+        $parameters = match (true) {
+            $parameters instanceof Traversable => iterator_to_array($parameters),
+            default => $parameters,
+        };
+
+        $currentParameters = Query::fromUri($this->uri)->parameters();
+
+        return match (true) {
+            [] === $parameters,
+            $currentParameters === $parameters => $this,
+            default => new static($this->uri->withQuery(
+                self::normalizeComponent(
+                    Query::fromParameters([...$currentParameters, ...$parameters])->value(),
+                    $this->uri
+                )
+            )),
+        };
+    }
+
+    /**
+     * Remove query data according to their key name.
+     */
+    public function removeQueryPairs(string ...$keys): static
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromUri($this->uri)->withoutPair(...$keys)->value(),
+                $this->uri
+            )
+        ));
+    }
+
+    /**
+     * Remove query data according to their PHP parameter key name.
+     */
+    public function removeQueryParameters(string ...$keys): static
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromUri($this->uri)->withoutParameters(...$keys)->value(),
+                $this->uri
+            )
+        ));
+    }
+
+    /**
+     * Remove empty pairs from the URL query component.
+     *
+     * A pair is considered empty if it's name is the empty string
+     * and its value is either the empty string or the null value
+     */
+    public function removeEmptyQueryPairs(): static
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromUri($this->uri)->withoutEmptyPairs()->value(),
+                $this->uri
+            )
+        ));
     }
 
     /*********************************
@@ -638,5 +698,50 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         $converter = $converter ?? IPv4Converter::fromEnvironment();
 
         return $converter;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.2.0
+     * @codeCoverageIgnore
+     * @see Modifier::removeQueryParameters()
+     *
+     * Remove query data according to their key name.
+     */
+    public function removeParams(string ...$keys): static
+    {
+        return $this->removeQueryParameters(...$keys);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.2.0
+     * @codeCoverageIgnore
+     * @see Modifier::removeQueryPairs()
+     *
+     * Remove query data according to their key name.
+     */
+    public function removePairs(string ...$keys): static
+    {
+        return $this->removeQueryPairs(...$keys);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.2.0
+     * @codeCoverageIgnore
+     * @see Modifier::removeEmptyQueryPairs()
+     *
+     * Remove empty pairs from the URL query component.
+     *
+     * A pair is considered empty if it's name is the empty string
+     * and its value is either the empty string or the null value
+     */
+    public function removeEmptyPairs(): static
+    {
+        return $this->removeEmptyQueryPairs();
     }
 }

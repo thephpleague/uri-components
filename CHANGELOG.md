@@ -2,7 +2,33 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## 7.1.0 - 2023-08-21
+## Next - TBD
+
+### Added
+
+- `Modifier::appendQueryPairs`
+- `Modifier::mergeQueryPairs`
+- `Modifier::removeQueryPairs`
+- `Modifier::removeEmptyQueryPairs`
+- `Modifier::appendQueryParameters`
+- `Modifier::mergeQueryParameters`
+- `Modifier::removeQueryParameters`
+
+### Fixed
+
+- None
+
+### Deprecated
+
+- `Modifier::removeParams` use `Modifier::removeQueryParameters` instead
+- `Modifier::removePairs` use `Modifier::removeQueryPairs` instead
+- `Modifier::removeEmptyPairs` use `Modifier::removeEmptyQueryPairs` instead
+
+### Removed
+
+- None
+
+## [7.1.0](https://github.com/thephpleague/uri-components/compare/7.0.0...7.1.0) - 2023-08-21
 
 ### Added
 

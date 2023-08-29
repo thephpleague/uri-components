@@ -73,7 +73,7 @@ class UriModifier
      */
     public static function removeParams(Psr7UriInterface|UriInterface $uri, string ...$keys): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeParams(...$keys)->getUri();
+        return Modifier::from($uri)->removeQueryParameters(...$keys)->getUri();
     }
 
     /**
