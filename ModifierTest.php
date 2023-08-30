@@ -213,6 +213,32 @@ final class ModifierTest extends TestCase
     }
 
     /**
+     * @dataProvider removeQueryParameterIndicesProvider
+     */
+    public function testWithoutQueryParameterIndices(string $uri, string $expected): void
+    {
+        self::assertSame($expected, Modifier::from($uri)->removeQueryParameterIndices()->getUri()->getQuery());
+    }
+
+    public static function removeQueryParameterIndicesProvider(): array
+    {
+        return [
+            [
+                'uri' => 'http://example.com?foo=bar',
+                'expected' => 'foo=bar',
+            ],
+            [
+                'uri' => 'http://example.com?foo[0]=bar&foo[1]=baz',
+                'expected' => 'foo%5B%5D=bar&foo%5B%5D=baz',
+            ],
+            [
+                'uri' => 'http://example.com?foo[not-remove]=bar&foo[1]=baz',
+                'expected' => 'foo%5Bnot-remove%5D=bar&foo%5B%5D=baz',
+            ],
+        ];
+    }
+
+    /**
      * @dataProvider removeEmptyPairsProvider
      */
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void

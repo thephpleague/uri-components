@@ -13,6 +13,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::appendQueryParameters`
 - `Modifier::mergeQueryParameters`
 - `Modifier::removeQueryParameters`
+- `Modifier::removeQueryParametersIndices`
 
 ### Fixed
 

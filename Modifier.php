@@ -250,6 +250,25 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         ));
     }
 
+    /**
+     * Returns an instance where numeric indices associated to PHP's array like key are removed.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the query component normalized so that numeric indexes
+     * are removed from the pair key value.
+     *
+     * ie.: toto[3]=bar[3]&foo=bar becomes toto[]=bar[3]&foo=bar
+     */
+    public function removeQueryParameterIndices(): static
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromUri($this->uri)->withoutNumericIndices()->value(),
+                $this->uri
+            )
+        ));
+    }
+
     /*********************************
      * Host modifier methods
      *********************************/
