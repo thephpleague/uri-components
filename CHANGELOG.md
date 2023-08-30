@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## Next - TBD
+## [7.2.0](https://github.com/thephpleague/uri-components/compare/7.1.0...7.2.0) - 2023-08-30
 
 ### Added
 
