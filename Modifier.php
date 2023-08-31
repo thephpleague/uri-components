@@ -211,14 +211,43 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Remove query data according to their key name.
      */
-    public function removeQueryPairs(string ...$keys): static
+    public function removeQueryPairsByKey(string ...$keys): static
     {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->withoutPair(...$keys)->value(),
-                $this->uri
-            )
-        ));
+        $query = Query::fromUri($this->uri);
+        $newQuery = $query->withoutPairByKey(...$keys)->value();
+
+        return match (true) {
+            $query->value() === $newQuery => $this,
+            default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
+        };
+    }
+
+    /**
+     * Remove query pair according to their value.
+     */
+    public function removeQueryPairsByValue(Stringable|string|int|bool|null ...$values): static
+    {
+        $query = Query::fromUri($this->uri);
+        $newQuery = $query->withoutPairByValue(...$values)->value();
+
+        return match (true) {
+            $query->value() === $newQuery => $this,
+            default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
+        };
+    }
+
+    /**
+     * Remove query pair according to their key/value name.
+     */
+    public function removeQueryPairsByKeyValue(string $key, Stringable|string|int|bool|null $value): static
+    {
+        $query = Query::fromUri($this->uri);
+        $newQuery = $query->withoutPairByKeyValue($key, $value)->value();
+
+        return match (true) {
+            $query->value() === $newQuery => $this,
+            default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
+        };
     }
 
     /**
@@ -226,12 +255,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function removeQueryParameters(string ...$keys): static
     {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->withoutParameters(...$keys)->value(),
-                $this->uri
-            )
-        ));
+        $query = Query::fromUri($this->uri);
+        $newQuery = $query->withoutParameters(...$keys)->value();
+
+        return match (true) {
+            $query->value() === $newQuery => $this,
+            default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
+        };
     }
 
     /**
@@ -261,12 +291,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function removeQueryParameterIndices(): static
     {
-        return new static($this->uri->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->withoutNumericIndices()->value(),
-                $this->uri
-            )
-        ));
+        $query = Query::fromUri($this->uri);
+        $newQuery = $query->withoutNumericIndices()->value();
+
+        return match (true) {
+            $query->value() === $newQuery => $this,
+            default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
+        };
     }
 
     /*********************************
@@ -738,20 +769,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * @deprecated Since version 7.2.0
      * @codeCoverageIgnore
-     * @see Modifier::removeQueryPairs()
-     *
-     * Remove query data according to their key name.
-     */
-    public function removePairs(string ...$keys): static
-    {
-        return $this->removeQueryPairs(...$keys);
-    }
-
-    /**
-     * DEPRECATION WARNING! This method will be removed in the next major point release.
-     *
-     * @deprecated Since version 7.2.0
-     * @codeCoverageIgnore
      * @see Modifier::removeEmptyQueryPairs()
      *
      * Remove empty pairs from the URL query component.
@@ -762,5 +779,33 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function removeEmptyPairs(): static
     {
         return $this->removeEmptyQueryPairs();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.2.0
+     * @codeCoverageIgnore
+     * @see Modifier::removeQueryPairsByKey()
+     *
+     * Remove query data according to their key name.
+     */
+    public function removePairs(string ...$keys): static
+    {
+        return $this->removeQueryPairsByKey(...$keys);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.2.0
+     * @codeCoverageIgnore
+     * @see Modifier::removeQueryPairsByKey()
+     *
+     * Remove query data according to their key name.
+     */
+    public function removeQueryPairs(string ...$keys): static
+    {
+        return $this->removeQueryPairsByKey(...$keys);
     }
 }

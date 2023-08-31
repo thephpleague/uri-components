@@ -172,7 +172,7 @@ final class ModifierTest extends TestCase
      */
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeQueryPairs(...$input)->getUri()->getQuery());
+        self::assertSame($expected, $this->modifier->removeQueryPairsByKey(...$input)->getUri()->getQuery());
     }
 
     public static function validWithoutQueryValuesProvider(): array
@@ -180,6 +180,39 @@ final class ModifierTest extends TestCase
         return [
             [['1'], 'kingkong=toto&foo=bar%20baz'],
             [['kingkong'], 'foo=bar%20baz'],
+        ];
+    }
+
+    /**
+     * @dataProvider validWithoutQueryPairByValueProvider
+     */
+    public function testvalidWithoutQueryPairByValue(array $values, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->removeQueryPairsByValue(...$values)->getUri()->getQuery());
+    }
+
+    public static function validWithoutQueryPairByValueProvider(): array
+    {
+        return [
+            [['afdsfasd'], 'kingkong=toto&foo=bar%20baz'],
+            [['toto'], 'foo=bar%20baz'],
+        ];
+    }
+
+    /**
+     * @dataProvider validWithoutQueryPairByKeyValueProvider
+     */
+    public function testvalidWithoutQueryPairByKeyValue(array $values, string $expected): void
+    {
+        self::assertSame($expected, $this->modifier->removeQueryPairsByKeyValue(...$values)->getUri()->getQuery());
+    }
+
+    public static function validWithoutQueryPairByKeyValueProvider(): array
+    {
+        return [
+            [['afdsfasd', null], 'kingkong=toto&foo=bar%20baz'],
+            [['kingkong', 'tota'], 'kingkong=toto&foo=bar%20baz'],
+            [['kingkong', 'toto'], 'foo=bar%20baz'],
         ];
     }
 

@@ -197,14 +197,14 @@ final class QueryTest extends TestCase
     }
 
     /**
-     * @dataProvider withoutPairProvider
+     * @dataProvider withoutKeyPairProvider
      */
-    public function testWithoutPair(string $origin, array $without, string $result): void
+    public function testwithoutKeyPair(string $origin, array $without, string $result): void
     {
-        self::assertSame($result, (string) Query::new($origin)->withoutPair(...$without));
+        self::assertSame($result, (string) Query::new($origin)->withoutPairByKey(...$without));
     }
 
-    public static function withoutPairProvider(): array
+    public static function withoutKeyPairProvider(): array
     {
         return [
             ['foo&bar&baz&to.go=toofan', ['foo', 'to.go'], 'bar&baz'],
@@ -217,26 +217,130 @@ final class QueryTest extends TestCase
         ];
     }
 
-    public function testWithoutPairVariadicArgument(): void
+    public function testwithoutKeyPairVariadicArgument(): void
     {
         $query = Query::new('foo&bar=baz');
 
-        self::assertSame($query, $query->withoutPair());
+        self::assertSame($query, $query->withoutPairByKey());
     }
 
-    public function testwithoutPairGetterMethod(): void
+    public function testwithoutKeyPairGetterMethod(): void
     {
         $query = Query::new()->appendTo('first', 1);
         self::assertTrue($query->has('first'));
         self::assertSame('1', $query->get('first'));
-        $query = $query->withoutPair('first');
+        $query = $query->withoutPairByKey('first');
         self::assertFalse($query->has('first'));
         $query = $query
             ->appendTo('first', 1)
             ->appendTo('first', 10)
-            ->withoutPair('first')
+            ->withoutPairByKey('first')
         ;
         self::assertFalse($query->has('first'));
+    }
+
+    /**
+     * @dataProvider providePairsValuesToBeRemoved
+     *
+     * @param list<Stringable|string|int|bool|null> $values
+     */
+    public function testWithoutPairByValue(string $query, array $values, string $expected): void
+    {
+        self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByValue(...$values)->value());
+    }
+
+    public static function providePairsValuesToBeRemoved(): iterable
+    {
+        yield 'remove nothing' => [
+            'query' => 'foo=bar&foo=baz',
+            'values' => [],
+            'expected' => 'foo=bar&foo=baz',
+        ];
+
+        yield 'remove nothing if the value is not found' => [
+            'query' => 'foo=bar&foo=baz',
+            'values' => ['fdasfdsdsafsd'],
+            'expected' => 'foo=bar&foo=baz',
+        ];
+
+        yield 'remove null value pairs' => [
+            'query' => 'foo=bar&foo=baz&foo',
+            'values' => [null],
+            'expected' => 'foo=bar&foo=baz',
+        ];
+
+        yield 'remove empty value pairs' => [
+            'query' => 'foo=bar&foo=baz&foo=',
+            'values' => [''],
+            'expected' => 'foo=bar&foo=baz',
+        ];
+
+        yield 'remove multi match value pairs' => [
+            'query' => 'toto=bar&margo=bar&bar=toto',
+            'values' => ['bar'],
+            'expected' => 'bar=toto',
+        ];
+
+        yield 'remove boolean false value' => [
+            'query' => 'toto=false&margo=true&bar=toto',
+            'values' => [false],
+            'expected' => 'margo=true&bar=toto',
+        ];
+
+        yield 'remove boolean true value' => [
+            'query' => 'toto=false&margo=true&bar=toto',
+            'values' => [true],
+            'expected' => 'toto=false&bar=toto',
+        ];
+    }
+
+    /**
+     * @dataProvider providePairsToBeRemoved
+     *
+     * @param list{0:string, 1:Stringable|string|int|bool|null} $pair
+     */
+    public function testWithoutPairByKeyValue(string $query, array $pair, string $expected): void
+    {
+        self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByKeyValue(...$pair)->value());
+    }
+
+    public static function providePairsToBeRemoved(): iterable
+    {
+        yield 'remove nothing' => [
+            'query' => 'foo=bar&foo=baz',
+            'pair' => ['foo', 'fdasfdsdsafsd'],
+            'expected' => 'foo=bar&foo=baz',
+        ];
+
+        yield 'remove pair without value' => [
+            'query' => 'foo=bar&foo=baz&foo',
+            'pair' => ['foo', null],
+            'expected' => 'foo=bar&foo=baz',
+        ];
+
+        yield 'remove only one pair' => [
+            'query' => 'foo=bar&foo=baz',
+            'pair' => ['foo', 'bar'],
+            'expected' => 'foo=baz',
+        ];
+
+        yield 'remove multiple matching pairs' => [
+            'query' => 'foo=bar&foo=baz&foo=bar',
+            'pair' => ['foo', 'bar'],
+            'expected' => 'foo=baz',
+        ];
+
+        yield 'remove boolean false matching pairs' => [
+            'query' => 'foo=bar&foo=false&foo=true',
+            'pair' => ['foo', false],
+            'expected' => 'foo=bar&foo=true',
+        ];
+
+        yield 'remove boolean true matching pairs' => [
+            'query' => 'foo=bar&foo=true&foo=false',
+            'pair' => ['foo', true],
+            'expected' => 'foo=bar&foo=false',
+        ];
     }
 
     /**

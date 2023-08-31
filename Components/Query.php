@@ -413,7 +413,7 @@ final class Query extends Component implements QueryInterface
         };
     }
 
-    public function withoutPair(string ...$keys): QueryInterface
+    public function withoutPairByKey(string ...$keys): QueryInterface
     {
         if ([] === $keys) {
             return $this;
@@ -427,6 +427,32 @@ final class Query extends Component implements QueryInterface
                 array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keysToRemove, true)),
                 $this->separator
             ),
+        };
+    }
+
+    public function withoutPairByValue(Stringable|string|int|bool|null ...$values): self
+    {
+        if ([] === $values) {
+            return $this;
+        }
+
+        $values = array_map($this->filterPair(...), $values);
+        $newPairs = array_filter($this->pairs, fn (array $pair) => !in_array($pair[1], $values, true));
+
+        return match (true) {
+            $newPairs === $this->pairs => $this,
+            default => self::fromPairs($newPairs, $this->separator),
+        };
+    }
+
+    public function withoutPairByKeyValue(string $key, Stringable|string|int|bool|null $value): self
+    {
+        $pair = [$key, $this->filterPair($value)];
+        $newPairs = array_filter($this->pairs, fn (array $currentPair) => $currentPair !== $pair);
+
+        return match (true) {
+            $newPairs === $this->pairs => $this,
+            default => self::fromPairs($newPairs, $this->separator),
         };
     }
 
@@ -619,5 +645,18 @@ final class Query extends Component implements QueryInterface
     public function toRFC3986(): ?string
     {
         return $this->value();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.0.0
+     * @see Query::withoutPairByKey()
+     *
+     * @codeCoverageIgnore
+     */
+    public function withoutPair(string ...$keys): QueryInterface
+    {
+        return $this->withoutPairByKey(...$keys);
     }
 }

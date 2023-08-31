@@ -2,6 +2,30 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## [Next](https://github.com/thephpleague/uri-components/compare/7.2.0...master) - TBD
+
+### Added
+
+- `League\Uri\Modifier::removeQueryPairsByKey`
+- `League\Uri\Modifier::removeQueryPairsByValue`
+- `League\Uri\Modifier::removeQueryPairsByKeyValue`
+- `League\Uri\Components\Query::withoutPairByKey`
+- `League\Uri\Components\Query::withoutPairByValue`
+- `League\Uri\Components\Query::withoutPairByKeyValue`
+
+### Fixed
+
+- None
+
+### Deprecated
+
+- `League\Uri\Modifier::removeQueryPairs` use `League\Uri\Modifier::removeQueryPairsByKey` instead.
+- `League\Uri\Components\Query::withoutPair` use `League\Uri\Components\Query::withoutPairByKey` instead.
+
+### Removed
+
+- None
+
 ## [7.2.0](https://github.com/thephpleague/uri-components/compare/7.1.0...7.2.0) - 2023-08-30
 
 ### Added
