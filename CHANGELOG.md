@@ -2,25 +2,46 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## [Next](https://github.com/thephpleague/uri-components/compare/7.2.0...master) - TBD
+## [Next](https://github.com/thephpleague/uri-components/compare/7.2.1...master) - TBD
 
 ### Added
 
 - `League\Uri\Modifier::removeQueryPairsByKey`
 - `League\Uri\Modifier::removeQueryPairsByValue`
 - `League\Uri\Modifier::removeQueryPairsByKeyValue`
+- `League\Uri\Components\Query::hasPair`
 - `League\Uri\Components\Query::withoutPairByKey`
 - `League\Uri\Components\Query::withoutPairByValue`
 - `League\Uri\Components\Query::withoutPairByKeyValue`
+- `League\Uri\Components\URLSearchParams`
 
 ### Fixed
 
-- None
+- `League\Uri\Components\Query::sort` to improve WHATWG compliance.
+- `League\Uri\QueryString::buildFromPairs` should throw `SyntaxError` instead of `TypeError`
 
 ### Deprecated
 
 - `League\Uri\Modifier::removeQueryPairs` use `League\Uri\Modifier::removeQueryPairsByKey` instead.
 - `League\Uri\Components\Query::withoutPair` use `League\Uri\Components\Query::withoutPairByKey` instead.
+
+### Removed
+
+- None
+
+## [7.2.1](https://github.com/thephpleague/uri-components/compare/7.2.0...7.2.1) - 2023-08-30
+
+### Added
+
+- None
+
+### Fixed
+
+- `composer.json` constraints
+
+### Deprecated
+
+- None
 
 ### Removed
 

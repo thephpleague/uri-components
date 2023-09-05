@@ -33,6 +33,7 @@
     },
     "suggest": {
         "ext-bcmath": "to improve IPV4 host parsing",
+        "ext-mbstring": "to use the sorting algorithm of URLSearchParams",
         "ext-fileinfo": "to create Data URI from file contennts",
         "ext-gmp": "to improve IPV4 host parsing",
         "ext-intl": "to handle IDN host with the best performance",

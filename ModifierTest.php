@@ -164,7 +164,7 @@ final class ModifierTest extends TestCase
     public function testKsortQuery(): void
     {
         $uri = Http::new('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
-        self::assertSame('kingkong=toto&kingkong=ape&foo=bar%20baz', Modifier::from($uri)->sortQuery()->getUri()->getQuery());
+        self::assertSame('foo=bar%20baz&kingkong=toto&kingkong=ape', Modifier::from($uri)->sortQuery()->getUri()->getQuery());
     }
 
     /**

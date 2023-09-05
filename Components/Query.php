@@ -29,7 +29,6 @@ use function array_flip;
 use function array_intersect;
 use function array_map;
 use function array_merge;
-use function array_values;
 use function count;
 use function http_build_query;
 use function implode;
@@ -40,9 +39,11 @@ use function preg_quote;
 use function preg_replace;
 use const PHP_QUERY_RFC1738;
 use const PHP_QUERY_RFC3986;
+use const PREG_SPLIT_NO_EMPTY;
 
 final class Query extends Component implements QueryInterface
 {
+    private const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
     /** @var array<int, array{0:string, 1:string|null}> */
     private readonly array $pairs;
     /** @var non-empty-string */
@@ -197,6 +198,11 @@ final class Query extends Component implements QueryInterface
         return [] !== $keys;
     }
 
+    public function hasPair(string $key, ?string $value): bool
+    {
+        return in_array([$key, $value], $this->pairs, true);
+    }
+
     public function get(string $key): ?string
     {
         foreach ($this->pairs as $pair) {
@@ -245,28 +251,34 @@ final class Query extends Component implements QueryInterface
 
     public function sort(): self
     {
-        if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
-            return $this;
+        $codepoints = fn (?string $str): string => in_array($str, ['', null], true) ? '' : implode('.', array_map(
+            mb_ord(...), /* @phpstan-ignore-line */
+            (array) preg_split(pattern:'//u', subject: $str, flags: PREG_SPLIT_NO_EMPTY)
+        ));
+
+        $compare = fn (string $name1, string $name2): int => match (1) {
+            preg_match(self::REGEXP_NON_ASCII_PATTERN, $name1.$name2) => strcmp($codepoints($name1), $codepoints($name2)),
+            default => strcmp($name1, $name2),
+        };
+
+        $parameters = array_reduce($this->pairs, function (array $carry, array $pair) {
+            $carry[$pair[0]] ??= [];
+            $carry[$pair[0]][] = $pair[1];
+
+            return $carry;
+        }, []);
+
+        uksort($parameters, $compare);
+
+        $pairs = [];
+        foreach ($parameters as $key => $values) {
+            $pairs = [...$pairs, ...array_map(fn ($value) => [$key, $value], $values)];
         }
 
-        /** @var array<int, array{0:string, 1:string|null}> $pairs */
-        $pairs = array_merge(...array_values(array_reduce($this->pairs, $this->reducePairs(...), [])));
-        if ($pairs === $this->pairs) {
-            return $this;
-        }
-
-        return self::fromPairs($pairs);
-    }
-
-    /**
-     * Reduce pairs to help sorting them according to their keys.
-     */
-    private function reducePairs(array $pairs, array $pair): array
-    {
-        $pairs[$pair[0]] = $pairs[$pair[0]] ?? [];
-        $pairs[$pair[0]][] = $pair;
-
-        return $pairs;
+        return match (true) {
+            $pairs === $this->pairs => $this,
+            default => self::fromPairs($pairs),
+        };
     }
 
     public function withoutDuplicates(): self

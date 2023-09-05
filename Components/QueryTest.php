@@ -558,7 +558,7 @@ final class QueryTest extends TestCase
         return [
             'same already sorted' => ['a=3&a=1&b=2'],
             'empty query' => [null],
-            'contains each pair key only once' => ['batman=robin&aquaman=aqualad&foo=bar&bar=baz'],
+            'contains each pair key only once' => ['aquaman=aqualad&bar=baz&batman=robin&foo=bar'],
         ];
     }
 
