@@ -116,16 +116,16 @@ final class Authority extends Component implements AuthorityInterface
 
         $userInfo = $userInfo->value();
 
-        return match (true) {
-            null === $userInfo => $auth,
+        return match (null) {
+            $userInfo => $auth,
             default => $userInfo.'@'.$auth,
         };
     }
 
     public function getUriComponent(): string
     {
-        return match (true) {
-            null === $this->host->value() => $this->toString(),
+        return match (null) {
+            $this->host->value() => $this->toString(),
             default => '//'.$this->toString(),
         };
     }
@@ -162,8 +162,8 @@ final class Authority extends Component implements AuthorityInterface
             $host = Host::new($host);
         }
 
-        return match (true) {
-            $host->value() === $this->host->value() => $this,
+        return match ($this->host->value()) {
+            $host->value() => $this,
             default => new self($host, $this->port, $this->userInfo),
         };
     }
@@ -174,8 +174,8 @@ final class Authority extends Component implements AuthorityInterface
             $port = Port::new($port);
         }
 
-        return match (true) {
-            $port->value() === $this->port->value() => $this,
+        return match ($this->port->value()) {
+            $port->value() => $this,
             default => new self($this->host, $port, $this->userInfo),
         };
     }
@@ -184,8 +184,8 @@ final class Authority extends Component implements AuthorityInterface
     {
         $userInfo = new UserInfo($user, $password);
 
-        return match (true) {
-            $userInfo->value() === $this->userInfo->value() => $this,
+        return match ($this->userInfo->value()) {
+            $userInfo->value() => $this,
             default => new self($this->host, $this->port, $userInfo),
         };
     }

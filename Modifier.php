@@ -216,8 +216,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         $query = Query::fromUri($this->uri);
         $newQuery = $query->withoutPairByKey(...$keys)->value();
 
-        return match (true) {
-            $query->value() === $newQuery => $this,
+        return match ($query->value()) {
+            $newQuery => $this,
             default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
         };
     }
@@ -225,13 +225,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Remove query pair according to their value.
      */
-    public function removeQueryPairsByValue(Stringable|string|int|bool|null ...$values): static
+    public function removeQueryPairsByValue(Stringable|string|int|float|bool|null ...$values): static
     {
         $query = Query::fromUri($this->uri);
         $newQuery = $query->withoutPairByValue(...$values)->value();
 
-        return match (true) {
-            $query->value() === $newQuery => $this,
+        return match ($query->value()) {
+            $newQuery => $this,
             default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
         };
     }
@@ -244,8 +244,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         $query = Query::fromUri($this->uri);
         $newQuery = $query->withoutPairByKeyValue($key, $value)->value();
 
-        return match (true) {
-            $query->value() === $newQuery => $this,
+        return match ($newQuery) {
+            $query->value() => $this,
             default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
         };
     }
@@ -258,8 +258,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         $query = Query::fromUri($this->uri);
         $newQuery = $query->withoutParameters(...$keys)->value();
 
-        return match (true) {
-            $query->value() === $newQuery => $this,
+        return match ($newQuery) {
+            $query->value() => $this,
             default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
         };
     }
@@ -294,8 +294,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         $query = Query::fromUri($this->uri);
         $newQuery = $query->withoutNumericIndices()->value();
 
-        return match (true) {
-            $query->value() === $newQuery => $this,
+        return match ($newQuery) {
+            $query->value() => $this,
             default => new static($this->uri->withQuery(static::normalizeComponent($newQuery, $this->uri))),
         };
     }

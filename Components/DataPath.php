@@ -307,8 +307,8 @@ final class DataPath extends Component implements DataPathInterface
 
     public function toAscii(): DataPathInterface
     {
-        return match (true) {
-            false === $this->isBinaryData => $this,
+        return match (false) {
+            $this->isBinaryData => $this,
             default => new self($this->formatComponent(
                 $this->mimetype,
                 $this->getParameters(),
@@ -337,8 +337,8 @@ final class DataPath extends Component implements DataPathInterface
     {
         $path = $this->path->withoutTrailingSlash();
 
-        return match (true) {
-            $path === $this->path => $this,
+        return match ($this->path) {
+            $path => $this,
             default => new self($path),
         };
     }
@@ -347,8 +347,8 @@ final class DataPath extends Component implements DataPathInterface
     {
         $path = $this->path->withTrailingSlash();
 
-        return match (true) {
-            $path === $this->path => $this,
+        return match ($this->path) {
+            $path => $this,
             default => new self($path),
         };
     }
@@ -357,8 +357,8 @@ final class DataPath extends Component implements DataPathInterface
     {
         $parameters = (string) $parameters;
 
-        return match (true) {
-            $parameters === $this->getParameters() => $this,
+        return match ($this->getParameters()) {
+            $parameters => $this,
             default => new self($this->formatComponent(
                 $this->mimetype,
                 $parameters,

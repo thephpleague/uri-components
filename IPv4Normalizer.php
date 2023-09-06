@@ -187,8 +187,8 @@ final class IPv4Normalizer
     {
         $decimalIPv4 = $this->converter->toDecimal($host->value());
 
-        return match (true) {
-            null === $decimalIPv4 => $host,
+        return match (null) {
+            $decimalIPv4 => $host,
             default => Host::new($decimalIPv4),
         };
     }

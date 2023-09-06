@@ -34,7 +34,8 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public function __construct(
         Stringable|string|null $username,
-        #[SensitiveParameter] Stringable|string|null $password = null
+        #[SensitiveParameter]
+        Stringable|string|null $password = null
     ) {
         $this->username = $this->validateComponent($username);
         $password = $this->validateComponent($password);
@@ -82,8 +83,8 @@ final class UserInfo extends Component implements UserInfoInterface
     {
         $components += ['user' => null, 'pass' => null];
 
-        return match (true) {
-            null === $components['user'] => new self(null),
+        return match (null) {
+            $components['user'] => new self(null),
             default => new self($components['user'], $components['pass']),
         };
     }
@@ -147,8 +148,8 @@ final class UserInfo extends Component implements UserInfoInterface
     {
         $username = $this->validateComponent($username);
 
-        return match (true) {
-            $username === $this->username => $this,
+        return match ($this->username) {
+            $username => $this,
             default => new self($username, $this->password),
         };
     }

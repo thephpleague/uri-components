@@ -166,9 +166,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $basename = (string) array_pop($data);
         $pos = strpos($basename, ';');
 
-        return match (true) {
-            false !== $pos => substr($basename, 0, $pos),
-            default => $basename,
+        return match (false) {
+            $pos => $basename,
+            default => substr($basename, 0, $pos),
         };
     }
 
@@ -192,8 +192,8 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $segment = self::filterComponent($segment);
 
-        return match (true) {
-            null === $segment => array_keys($this->segments),
+        return match (null) {
+            $segment => array_keys($this->segments),
             default => array_keys($this->segments, $segment, true),
         };
     }
@@ -202,9 +202,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $path = $this->path->withoutDotSegments();
 
-        return match (true) {
-            $path !== $this->path => new self($path),
-            default => $this,
+        return match ($this->path) {
+            $path => $this,
+            default =>  new self($path),
         };
     }
 
@@ -212,9 +212,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $path = $this->path->withLeadingSlash();
 
-        return match (true) {
-            $path !== $this->path => new self($path),
-            default => $this,
+        return match ($this->path) {
+            $path => $this,
+            default =>  new self($path),
         };
     }
 
@@ -222,9 +222,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $path = $this->path->withoutLeadingSlash();
 
-        return match (true) {
-            $path !== $this->path => new self($path),
-            default => $this,
+        return match ($this->path) {
+            $path => $this,
+            default =>  new self($path),
         };
     }
 
@@ -232,9 +232,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $path = $this->path->withoutTrailingSlash();
 
-        return match (true) {
-            $path !== $this->path => new self($path),
-            default => $this,
+        return match ($this->path) {
+            $path => $this,
+            default =>  new self($path),
         };
     }
 
@@ -242,9 +242,9 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     {
         $path = $this->path->withTrailingSlash();
 
-        return match (true) {
-            $path !== $this->path => new self($path),
-            default => $this,
+        return match ($this->path) {
+            $path => $this,
+            default =>  new self($path),
         };
     }
 

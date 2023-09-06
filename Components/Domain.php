@@ -157,8 +157,8 @@ final class Domain extends Component implements DomainHostInterface
 
     public function keys(?string $label = null): array
     {
-        return match (true) {
-            null === $label => array_keys($this->labels),
+        return match (null) {
+            $label => array_keys($this->labels),
             default => array_keys($this->labels, $label, true),
         };
     }
@@ -199,8 +199,8 @@ final class Domain extends Component implements DomainHostInterface
     {
         $key = array_key_first($this->labels);
 
-        return match (true) {
-            '' === $this->labels[$key] => $this,
+        return match ($this->labels[$key]) {
+            '' => $this,
             default => $this->append(''),
         };
     }
