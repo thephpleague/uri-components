@@ -18,6 +18,7 @@ use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -37,7 +38,7 @@ use function iterator_to_array;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
-use const PHP_QUERY_RFC1738;
+use const JSON_PRESERVE_ZERO_FRACTION;
 use const PHP_QUERY_RFC3986;
 use const PREG_SPLIT_NO_EMPTY;
 
@@ -52,18 +53,13 @@ final class Query extends Component implements QueryInterface
 
     /**
      * Returns a new instance.
-     *
-     * @param non-empty-string                    $separator
-     * @param PHP_QUERY_RFC3986|PHP_QUERY_RFC1738 $encType
      */
-    private function __construct(
-        Stringable|string|null $query,
-        string $separator = '&',
-        int $encType = PHP_QUERY_RFC3986
-    ) {
-        $this->pairs = QueryString::parse($query, $separator, $encType);
-        $this->parameters = QueryString::extract($query, $separator, $encType);
-        $this->separator = $separator;
+    private function __construct(Stringable|string|null $query, Converter $converter = null)
+    {
+        $converter ??= Converter::fromRFC3986();
+        $this->pairs = QueryString::parseFromValue($query, $converter);
+        $this->parameters = QueryString::extractFromValue($query, $converter);
+        $this->separator = $converter->separator();
     }
 
     public static function new(Stringable|string|null $value = null): self
@@ -87,12 +83,11 @@ final class Query extends Component implements QueryInterface
             default => $parameters,
         };
 
-        return match (true) {
-            [] === $newParams => self::new(),
+        return match ([]) {
+            $newParams => self::new(),
             default => new self(
                 http_build_query($newParams, '', $separator, PHP_QUERY_RFC3986),
-                $separator,
-                PHP_QUERY_RFC3986
+                Converter::fromRFC3986($separator)
             )
         };
     }
@@ -105,7 +100,9 @@ final class Query extends Component implements QueryInterface
      */
     public static function fromPairs(iterable $pairs, string $separator = '&'): self
     {
-        return new self(QueryString::build($pairs, $separator), $separator, PHP_QUERY_RFC3986);
+        $converter = Converter::fromRFC3986($separator);
+
+        return new self(QueryString::buildFromPairs($pairs, $converter), $converter);
     }
 
     /**
@@ -129,7 +126,7 @@ final class Query extends Component implements QueryInterface
      */
     public static function fromRFC3986(Stringable|string|null $query = null, string $separator = '&'): self
     {
-        return new self($query, $separator, PHP_QUERY_RFC3986);
+        return new self($query, Converter::fromRFC3986($separator));
     }
 
     /**
@@ -139,7 +136,17 @@ final class Query extends Component implements QueryInterface
      */
     public static function fromRFC1738(Stringable|string|null $query = null, string $separator = '&'): self
     {
-        return new self($query, $separator, PHP_QUERY_RFC1738);
+        return new self($query, Converter::fromRFC1738($separator));
+    }
+
+    /**
+     * Returns a new instance.
+     *
+     * @param non-empty-string $separator
+     */
+    public static function fromFormData(Stringable|string|null $query = null, string $separator = '&'): self
+    {
+        return new self($query, Converter::fromFormData($separator));
     }
 
     public function getSeparator(): string
@@ -147,27 +154,37 @@ final class Query extends Component implements QueryInterface
         return $this->separator;
     }
 
-    public function value(): ?string
+    public function toRFC3986(): ?string
     {
-        return QueryString::build($this->pairs, $this->separator);
-    }
-
-    public function getUriComponent(): string
-    {
-        return match (true) {
-            [] === $this->pairs => '',
-            default => '?'.$this->value(),
-        };
+        return QueryString::buildFromPairs($this->pairs, Converter::fromRFC3986($this->separator));
     }
 
     public function toRFC1738(): ?string
     {
-        return QueryString::build($this->pairs, $this->separator, PHP_QUERY_RFC1738);
+        return QueryString::buildFromPairs($this->pairs, Converter::fromRFC1738($this->separator));
+    }
+
+    public function toFormData(): ?string
+    {
+        return QueryString::buildFromPairs($this->pairs, Converter::fromFormData($this->separator));
+    }
+
+    public function value(): ?string
+    {
+        return $this->toRFC3986();
+    }
+
+    public function getUriComponent(): string
+    {
+        return match ([]) {
+            $this->pairs => '',
+            default => '?'.$this->value(),
+        };
     }
 
     public function jsonSerialize(): ?string
     {
-        return $this->toRFC1738();
+        return $this->toFormData();
     }
 
     public function count(): int
@@ -275,8 +292,8 @@ final class Query extends Component implements QueryInterface
             $pairs = [...$pairs, ...array_map(fn ($value) => [$key, $value], $values)];
         }
 
-        return match (true) {
-            $pairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $pairs  => $this,
             default => self::fromPairs($pairs),
         };
     }
@@ -300,19 +317,18 @@ final class Query extends Component implements QueryInterface
      */
     private function removeDuplicates(array $pairs, array $pair): array
     {
-        if (!in_array($pair, $pairs, true)) {
-            $pairs[] = $pair;
-        }
-
-        return $pairs;
+        return match (true) {
+            in_array($pair, $pairs, true) => $pairs,
+            default => [...$pairs, $pair],
+        };
     }
 
     public function withoutEmptyPairs(): self
     {
         $pairs = array_filter($this->pairs, $this->filterEmptyPair(...));
 
-        return match (true) {
-            $pairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $pairs => $this,
             default => self::fromPairs($pairs),
         };
     }
@@ -329,8 +345,8 @@ final class Query extends Component implements QueryInterface
     {
         $pairs = array_map($this->encodeNumericIndices(...), $this->pairs);
 
-        return match (true) {
-            $pairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $pairs => $this,
             default => self::fromPairs($pairs, $this->separator),
         };
     }
@@ -351,12 +367,12 @@ final class Query extends Component implements QueryInterface
         return $pair;
     }
 
-    public function withPair(string $key, Stringable|string|int|bool|null $value): QueryInterface
+    public function withPair(string $key, Stringable|string|int|float|bool|null $value): QueryInterface
     {
         $pairs = $this->addPair($this->pairs, [$key, $this->filterPair($value)]);
 
-        return match (true) {
-            $pairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $pairs => $this,
             default => self::fromPairs($pairs, $this->separator),
         };
     }
@@ -403,8 +419,8 @@ final class Query extends Component implements QueryInterface
             $pairs = $this->addPair($pairs, $pair);
         }
 
-        return match (true) {
-            $pairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $pairs => $this,
             default => self::fromPairs($pairs, $this->separator),
         };
     }
@@ -414,13 +430,14 @@ final class Query extends Component implements QueryInterface
      *
      * To be valid the pair must be the null value, a scalar or a collection of scalar and null values.
      */
-    private function filterPair(Stringable|string|int|bool|null $value): ?string
+    private function filterPair(Stringable|string|int|float|bool|null $value): ?string
     {
         return match (true) {
             $value instanceof UriComponentInterface => $value->value(),
             null === $value => null,
             true === $value => 'true',
             false === $value => 'false',
+            is_float($value) => (string) json_encode($value, JSON_PRESERVE_ZERO_FRACTION),
             default => (string) $value,
         };
     }
@@ -433,8 +450,8 @@ final class Query extends Component implements QueryInterface
 
         $keysToRemove = array_intersect($keys, array_column($this->pairs, 0));
 
-        return match (true) {
-            [] === $keysToRemove => $this,
+        return match ([]) {
+            $keysToRemove => $this,
             default => self::fromPairs(
                 array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keysToRemove, true)),
                 $this->separator
@@ -442,7 +459,7 @@ final class Query extends Component implements QueryInterface
         };
     }
 
-    public function withoutPairByValue(Stringable|string|int|bool|null ...$values): self
+    public function withoutPairByValue(Stringable|string|int|float|bool|null ...$values): self
     {
         if ([] === $values) {
             return $this;
@@ -451,24 +468,24 @@ final class Query extends Component implements QueryInterface
         $values = array_map($this->filterPair(...), $values);
         $newPairs = array_filter($this->pairs, fn (array $pair) => !in_array($pair[1], $values, true));
 
-        return match (true) {
-            $newPairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $newPairs => $this,
             default => self::fromPairs($newPairs, $this->separator),
         };
     }
 
-    public function withoutPairByKeyValue(string $key, Stringable|string|int|bool|null $value): self
+    public function withoutPairByKeyValue(string $key, Stringable|string|int|float|bool|null $value): self
     {
         $pair = [$key, $this->filterPair($value)];
         $newPairs = array_filter($this->pairs, fn (array $currentPair) => $currentPair !== $pair);
 
-        return match (true) {
-            $newPairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $newPairs => $this,
             default => self::fromPairs($newPairs, $this->separator),
         };
     }
 
-    public function appendTo(string $key, Stringable|string|int|bool|null $value): QueryInterface
+    public function appendTo(string $key, Stringable|string|int|float|bool|null $value): QueryInterface
     {
         return self::fromPairs([...$this->pairs, [$key, $this->filterPair($value)]], $this->separator);
     }
@@ -481,8 +498,8 @@ final class Query extends Component implements QueryInterface
 
         $pairs = array_merge($this->pairs, QueryString::parse($query, $this->separator));
 
-        return match (true) {
-            $pairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $pairs  => $this,
             default => self::fromPairs(array_filter($pairs, $this->filterEmptyValue(...)), $this->separator),
         };
     }
@@ -506,8 +523,8 @@ final class Query extends Component implements QueryInterface
         $filter = fn (array $pair): bool => 1 !== preg_match($regexp, $pair[0]);
         $pairs = array_filter($this->pairs, $filter);
 
-        return match (true) {
-            $pairs === $this->pairs => $this,
+        return match ($this->pairs) {
+            $pairs => $this,
             default => self::fromPairs($pairs, $this->separator),
         };
     }
@@ -531,8 +548,7 @@ final class Query extends Component implements QueryInterface
         return match (true) {
             !is_iterable($params) => new self(
                 http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
-                $separator,
-                PHP_QUERY_RFC3986
+                Converter::fromRFC3986($separator)
             ),
             default => self::fromParameters($params, $separator),
         };
@@ -627,8 +643,8 @@ final class Query extends Component implements QueryInterface
      */
     public function params(?string $key = null): mixed
     {
-        return match (true) {
-            null === $key => $this->parameters(),
+        return match (null) {
+            $key => $this->parameters(),
             default => $this->parameter($key),
         };
     }
@@ -644,19 +660,6 @@ final class Query extends Component implements QueryInterface
     public function withoutParams(string ...$names): QueryInterface
     {
         return $this->withoutParameters(...$names);
-    }
-
-    /**
-     * DEPRECATION WARNING! This method will be removed in the next major point release.
-     *
-     * @deprecated Since version 7.0.0
-     * @see Query::value()
-     *
-     * @codeCoverageIgnore
-     */
-    public function toRFC3986(): ?string
-    {
-        return $this->value();
     }
 
     /**

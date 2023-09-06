@@ -29,13 +29,15 @@ use Stringable;
 use TypeError;
 
 use function array_map;
-use function array_reduce;
 use function count;
 use function func_get_arg;
 use function func_num_args;
 use function is_iterable;
 use function is_string;
+use function json_encode;
 use function str_starts_with;
+
+use const JSON_PRESERVE_ZERO_FRACTION;
 
 /**
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
@@ -64,18 +66,20 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             default => self::yieldPairs($query),
         };
 
-        $normalizer = fn (array $carry, array $pair): array => match (true) {
-            null !== $pair[1] => [...$carry, $pair],
-            '' !== $pair[0] => [...$carry, [$pair[0], '']],
-            '' === $pair[0] => $carry,
-        };
-
-        $this->pairs = Query::fromPairs(array_reduce([...$pairs], $normalizer, []));
+        $this->pairs = Query::fromPairs((function (iterable $pairs) {
+            foreach ($pairs as $pair) {
+                if (null !== $pair[1]) {
+                    yield [self::uvString($pair[0]), self::uvString($pair[1])];
+                } elseif ('' !== $pair[0]) {
+                    yield [self::uvString($pair[0]), ''];
+                }
+            }
+        })($pairs));
     }
 
     private static function parsePairs(string|null $query): array
     {
-        return QueryString::parseFromValue($query, self::converter());
+        return QueryString::parseFromValue($query, Converter::fromFormData());
     }
 
     /**
@@ -108,22 +112,9 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             null === $value => 'null',
             false === $value => 'false',
             true === $value => 'true',
+            is_float($value) => (string) json_encode($value, JSON_PRESERVE_ZERO_FRACTION),
             default => (string) $value,
         };
-    }
-
-    /**
-     * Encode/Decode string using The application/x-www-form-urlencoded parser rules.
-     *
-     * @see https://url.spec.whatwg.org/#urlencoded-parsing
-     */
-    private static function converter(): Converter
-    {
-        static $converter;
-
-        $converter = $converter ?? Converter::fromFormData();
-
-        return $converter;
     }
 
     /**
@@ -134,7 +125,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public static function new(Stringable|string|null $value): self
     {
-        return new self(Query::fromPairs(QueryString::parseFromValue(self::formatQuery($value), self::converter())));
+        return new self(Query::fromFormData(self::formatQuery($value)));
     }
 
     /**
@@ -171,7 +162,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             default => Uri::new($uri)->getQuery(),
         };
 
-        return new self(Query::fromPairs(QueryString::parseFromValue($query, self::converter())));
+        return new self(Query::fromPairs(QueryString::parseFromValue($query, Converter::fromFormData())));
     }
 
     /**
@@ -182,9 +173,9 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         return new self(Query::fromParameters($parameters));
     }
 
-    public function value(): string
+    public function value(): ?string
     {
-        return (string) QueryString::buildFromPairs($this->pairs, self::converter());
+        return $this->pairs->toFormData();
     }
 
     /**
@@ -192,25 +183,25 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public function toString(): string
     {
-        return $this->value();
+        return $this->value() ?? '';
     }
 
     public function __toString(): string
     {
-        return $this->value();
+        return $this->toString();
     }
 
     public function jsonSerialize(): string
     {
-        return $this->value();
+        return $this->toString();
     }
 
     public function getUriComponent(): string
     {
         $value = $this->value();
 
-        return match ('') {
-            $value => '',
+        return match (true) {
+            '' === $value, null === $value => '',
             default => '?'.$value,
         };
     }
@@ -285,7 +276,10 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public function getAll(?string $name): array
     {
-        return array_map(fn (?string  $value): string => $value ?? '', $this->pairs->getAll(self::uvString($name)));
+        return array_map(
+            fn (?string $value): string => $value ?? '',
+            $this->pairs->getAll(self::uvString($name))
+        );
     }
 
     /**
