@@ -23,6 +23,7 @@ use League\Uri\QueryString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Traversable;
+
 use function array_column;
 use function array_count_values;
 use function array_filter;
@@ -38,8 +39,8 @@ use function iterator_to_array;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
+
 use const JSON_PRESERVE_ZERO_FRACTION;
-use const PHP_QUERY_RFC3986;
 use const PREG_SPLIT_NO_EMPTY;
 
 final class Query extends Component implements QueryInterface
@@ -72,24 +73,23 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromParameters(iterable $parameters, string $separator = '&'): self
+    public static function fromParameters(object|array $parameters, string $separator = '&'): self
     {
         if ($parameters instanceof QueryInterface) {
-            return self::fromRFC3986($parameters->value(), $parameters->getSeparator())->withSeparator($separator);
+            return self::fromPairs($parameters, $separator);
         }
 
-        $newParams = match (true) {
+        $parameters = match (true) {
             $parameters instanceof Traversable => iterator_to_array($parameters),
             default => $parameters,
         };
 
-        return match ([]) {
-            $newParams => self::new(),
-            default => new self(
-                http_build_query($newParams, '', $separator, PHP_QUERY_RFC3986),
-                Converter::fromRFC3986($separator)
-            )
+        $query = match ([]) {
+            $parameters => null,
+            default => http_build_query(data: $parameters, arg_separator: $separator),
         };
+
+        return new self($query, Converter::fromRFC1738($separator));
     }
 
     /**
@@ -545,13 +545,7 @@ final class Query extends Component implements QueryInterface
      */
     public static function createFromParams(iterable|object $params, string $separator = '&'): self
     {
-        return match (true) {
-            !is_iterable($params) => new self(
-                http_build_query($params, '', $separator, PHP_QUERY_RFC3986),
-                Converter::fromRFC3986($separator)
-            ),
-            default => self::fromParameters($params, $separator),
-        };
+        return self::fromParameters($params, $separator);
     }
 
     /**
