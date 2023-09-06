@@ -120,8 +120,8 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     private static function converter(): Converter
     {
         static $converter;
-        $converter = $converter ?? Converter::new('&')
-            ->withEncodingMap(['%20' => '+', '%2A' => '*']);
+
+        $converter = $converter ?? Converter::fromFormData();
 
         return $converter;
     }
