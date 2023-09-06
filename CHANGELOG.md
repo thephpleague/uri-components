@@ -13,12 +13,18 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `League\Uri\Components\Query::withoutPairByKey`
 - `League\Uri\Components\Query::withoutPairByValue`
 - `League\Uri\Components\Query::withoutPairByKeyValue`
+- `League\Uri\Components\Query::fromFormData`
+- `League\Uri\Components\Query::toFormData`
 - `League\Uri\Components\URLSearchParams`
 
 ### Fixed
 
 - `League\Uri\Components\Query::sort` to improve WHATWG compliance.
 - `League\Uri\QueryString::buildFromPairs` should throw `SyntaxError` instead of `TypeError`
+- `League\Uri\Components\Query` uses internally `League\Uri\KeyValuePair\Converter`
+- `League\Uri\Components\Query::toRFC3986` is no longer deprecated
+- `League\Uri\Components\Query::jsonSerualize` uses `toFormData` instead of `toRFC1738`
+- `League\Uri\Components\Query` fix float handling.
 
 ### Deprecated
 
