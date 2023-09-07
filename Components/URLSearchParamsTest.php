@@ -15,9 +15,11 @@ namespace League\Uri\Components;
 
 use ArgumentCountError;
 use DateInterval;
+use IteratorAggregate;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use Traversable;
 use TypeError;
 
 final class URLSearchParamsTest extends TestCase
@@ -101,6 +103,16 @@ final class URLSearchParamsTest extends TestCase
 
         $params->append('g', 'h');
         self::assertFalse($seed->has('g'));
+
+        $params = new URLSearchParams(new class() implements IteratorAggregate {
+            public function getIterator(): Traversable
+            {
+                yield from ['a' => 'b', 'c' => 'd'];
+            }
+        });
+        self::assertSame('b', $params->get('a'));
+        self::assertSame('d', $params->get('c'));
+        self::assertFalse($params->has('d'));
     }
 
     public function testQueryParsing(): void

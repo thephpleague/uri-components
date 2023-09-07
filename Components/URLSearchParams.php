@@ -21,6 +21,7 @@ use IteratorAggregate;
 use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
 use League\Uri\Uri;
@@ -28,11 +29,15 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use TypeError;
 
+use function array_is_list;
+use function array_keys;
 use function array_map;
 use function count;
 use function func_get_arg;
 use function func_num_args;
+use function is_array;
 use function is_iterable;
+use function is_object;
 use function is_string;
 use function json_encode;
 use function str_starts_with;
@@ -55,28 +60,38 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * A literal sequence of name-value string pairs, or any object with an iterator that produces a sequence of string pairs.
      * A record of string keys and string values. Note that nesting is not supported.
      */
-    public function __construct(object|array|string|null $query = '')
+    public function __construct(object|array|string|null $init = '')
     {
-        $pairs = match (true) {
-            $query instanceof self,
-            $query instanceof QueryInterface => $query,
-            $query instanceof UriComponentInterface => self::parsePairs($query->value()),
-            is_iterable($query) => Query::fromPairs($query),
-            $query instanceof Stringable, null === $query, is_string($query) => self::parsePairs(self::formatQuery($query)),
-            default => self::yieldPairs($query),
+        $rawPairs = match (true) {
+            $init instanceof self,
+            $init instanceof QueryInterface => $init,
+            $init instanceof UriComponentInterface => self::parsePairs($init->value()),
+            is_iterable($init) => self::formatIterable($init),
+            $init instanceof Stringable, !is_object($init) => self::parsePairs(self::formatQuery($init)),
+            default => self::yieldPairs($init),
         };
 
-        $this->pairs = Query::fromPairs((function (iterable $pairs) {
-            foreach ($pairs as $pair) {
-                if (null !== $pair[1]) {
-                    yield [self::uvString($pair[0]), self::uvString($pair[1])];
-                } elseif ('' !== $pair[0]) {
-                    yield [self::uvString($pair[0]), ''];
-                }
-            }
-        })($pairs));
+        $this->pairs = Query::fromPairs(self::filterPairs($rawPairs));
     }
 
+    /**
+     * @return iterable<array{0:string, 1:string}>
+     */
+    private static function formatIterable(iterable $iterable): iterable
+    {
+        if (!is_array($iterable)) {
+            $iterable = iterator_to_array($iterable);
+        }
+
+        return match (true) {
+            array_is_list($iterable) => $iterable,
+            default => self::yieldPairs($iterable)
+        };
+    }
+
+    /**
+     * @return array<int, array{0:string, 1:string|null}>
+     */
     private static function parsePairs(string|null $query): array
     {
         return QueryString::parseFromValue($query, Converter::fromFormData());
@@ -84,6 +99,8 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
 
     /**
      * @param object|iterable<array-key, Stringable|string|float|int|bool|null> $associative
+     *
+     * @return Iterator<int, array{0:string, 1:string}>
      */
     private static function yieldPairs(object|iterable $associative): Iterator
     {
@@ -92,12 +109,31 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         }
     }
 
-    private static function formatQuery(Stringable|string|null $value): string
+    /**
+     * @return Iterator<int, array{0:string, 1:string}>
+     */
+    private static function filterPairs(iterable $pairs): iterable
+    {
+        foreach ($pairs as $pair) {
+            $filteredPair = match (true) {
+                !is_array($pair),
+                [0, 1] !== array_keys($pair) => throw new SyntaxError('A pair must be a sequential array starting at `0` and containing two elements.'),
+                null !== $pair[1] => [self::uvString($pair[0]), self::uvString($pair[1])],
+                '' !== $pair[0] => [self::uvString($pair[0]), ''],
+                default => null,
+            };
+            if (null !== $filteredPair) {
+                yield $filteredPair;
+            }
+        }
+    }
+
+    private static function formatQuery(Stringable|string|null $query): string
     {
         return match (true) {
-            null === $value => '',
-            str_starts_with((string) $value, '?') => substr((string) $value, 1),
-            default => (string) $value,
+            null === $query => '',
+            str_starts_with((string) $query, '?') => substr((string) $query, 1),
+            default => (string) $query,
         };
     }
 
@@ -123,9 +159,9 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * The input will be parsed from application/x-www-form-urlencoded format.
      * The leading '?' character if present is ignored.
      */
-    public static function new(Stringable|string|null $value): self
+    public static function new(Stringable|string|null $query): self
     {
-        return new self(Query::fromFormData(self::formatQuery($value)));
+        return new self(Query::fromFormData(self::formatQuery($query)));
     }
 
     /**
@@ -146,7 +182,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      *
      * @param object|iterable<array-key, Stringable|string|float|int|bool|null> $associative
      */
-    public static function fromAssociative(object|iterable $associative): self
+    public static function fromAssociative(object|array $associative): self
     {
         return new self(Query::fromPairs(self::yieldPairs($associative)));
     }
@@ -168,7 +204,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Returns a new instance from the result of PHP's parse_str.
      */
-    public static function fromParameters(iterable $parameters): self
+    public static function fromParameters(object|array $parameters): self
     {
         return new self(Query::fromParameters($parameters));
     }
@@ -198,10 +234,10 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
 
     public function getUriComponent(): string
     {
-        $value = $this->value();
+        $value = $this->value() ?? '';
 
-        return match (true) {
-            '' === $value, null === $value => '',
+        return match ('') {
+            $value => $value,
             default => '?'.$value,
         };
     }
@@ -248,7 +284,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             func_num_args() < 1 => throw new ArgumentCountError('The required name is missing.'),
             null === ($parameter = func_get_arg(0)) => 'null',
             is_string($parameter) => $parameter,
-            default => throw new TypeError('The required name must be a string or null; '.gettype($parameter).' received.'),
+            default => throw new TypeError('The required name must be of type string|null, '.gettype($parameter).' given.'),
         };
 
         return match (func_num_args()) {
@@ -388,7 +424,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             func_num_args() < 1 => throw new ArgumentCountError('The required name is missing.'),
             null === ($parameter = func_get_arg(0)) => 'null',
             is_string($parameter) => $parameter,
-            default => throw new TypeError('The required name must be a string or null; '.gettype($parameter).' received.'),
+            default => throw new TypeError('The required name must be of type string|null, '.gettype($parameter).' given.'),
         };
         $newQuery = match (func_num_args()) {
             1 => $this->pairs->withoutPairByKey($name),
