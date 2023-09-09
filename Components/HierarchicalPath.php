@@ -393,7 +393,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         $basename = $this->validateComponent($basename);
 
         return match (true) {
-            str_contains($basename, self::SEPARATOR) => throw new SyntaxError('The basename can not contain the path separator.'),
+            str_contains($basename, self::SEPARATOR) => throw new SyntaxError('The basename cannot contain the path separator.'),
             default => $this->withSegment(count($this->segments) - 1, $basename),
         };
     }
@@ -403,11 +403,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         /** @var string $extension */
         $extension = $this->validateComponent($extension);
         if (str_contains($extension, self::SEPARATOR)) {
-            throw new SyntaxError('An extension sequence can not contain a path delimiter.');
+            throw new SyntaxError('An extension sequence cannot contain a path delimiter.');
         }
 
         if (str_starts_with($extension, '.')) {
-            throw new SyntaxError('An extension sequence can not contain a leading `.` character.');
+            throw new SyntaxError('An extension sequence cannot contain a leading `.` character.');
         }
 
         /** @var string $basename */

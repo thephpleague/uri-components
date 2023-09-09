@@ -224,8 +224,8 @@ final class DataPathTest extends TestCase
     public static function invalidParameters(): array
     {
         return [
-            'can not modify binary flag' => ['base64=3'],
-            'can not add non empty flag' => ['image/jpg'],
+            'cannot modify binary flag' => ['base64=3'],
+            'cannot add non empty flag' => ['image/jpg'],
         ];
     }
 

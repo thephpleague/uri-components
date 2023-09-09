@@ -70,7 +70,7 @@ abstract class Component implements UriComponentInterface
     /**
      * Filter the input component.
      *
-     * @throws SyntaxError If the component can not be converted to a string or null
+     * @throws SyntaxError If the component cannot be converted to a string or null
      */
     final protected static function filterComponent(Stringable|int|string|null $component): ?string
     {

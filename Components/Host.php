@@ -119,7 +119,7 @@ final class Host extends Component implements IpHostInterface
     }
 
     /**
-     * @throws ConversionFailed if the submitted IDN host can not be converted to a valid ascii form
+     * @throws ConversionFailed if the submitted IDN host cannot be converted to a valid ascii form
      *
      * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
      */
@@ -260,7 +260,7 @@ final class Host extends Component implements IpHostInterface
      * Returns a host from an IP address.
      *
      * @throws MissingFeature If detecting IPv4 is not possible
-     * @throws SyntaxError    If the $ip can not be converted into a Host
+     * @throws SyntaxError    If the $ip cannot be converted into a Host
      */
     public static function fromIp(Stringable|string $ip, string $version = ''): self
     {
@@ -437,7 +437,7 @@ final class Host extends Component implements IpHostInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @throws MissingFeature If detecting IPv4 is not possible
-     * @throws SyntaxError    If the $ip can not be converted into a Host
+     * @throws SyntaxError    If the $ip cannot be converted into a Host
      * @deprecated Since version 7.0.0
      * @see Host::fromIp()
      *

@@ -261,7 +261,7 @@ final class Query extends Component implements QueryInterface
     {
         return match ($separator) {
             $this->separator => $this,
-            '' => throw new SyntaxError('The separator character can not be the empty string.'),
+            '' => throw new SyntaxError('The separator character cannot be the empty string.'),
             default => self::fromPairs($this->pairs, $separator),
         };
     }

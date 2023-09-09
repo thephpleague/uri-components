@@ -99,7 +99,7 @@ class UriModifier
     /**
      * Append a label or a host to the current URI host.
      *
-     * @throws SyntaxError If the host can not be appended
+     * @throws SyntaxError If the host cannot be appended
      */
     public static function appendLabel(Psr7UriInterface|UriInterface $uri, Stringable|string|null $label): Psr7UriInterface|UriInterface
     {
@@ -125,7 +125,7 @@ class UriModifier
     /**
      * Prepend a label or a host to the current URI host.
      *
-     * @throws SyntaxError If the host can not be prepended
+     * @throws SyntaxError If the host cannot be prepended
      */
     public static function prependLabel(Psr7UriInterface|UriInterface $uri, Stringable|string|null $label): Psr7UriInterface|UriInterface
     {

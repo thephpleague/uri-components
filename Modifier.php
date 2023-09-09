@@ -321,7 +321,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Append a label or a host to the current URI host.
      *
-     * @throws SyntaxError If the host can not be appended
+     * @throws SyntaxError If the host cannot be appended
      */
     public function appendLabel(Stringable|string|null $label): static
     {
@@ -332,7 +332,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
             null === $label->value() => $this,
             $host->isDomain() => new static($this->uri->withHost(static::normalizeComponent(Domain::new($host)->append($label)->toUnicode(), $this->uri))),
             $host->isIpv4() => new static($this->uri->withHost($host->value().'.'.ltrim($label->value(), '.'))),
-            default => throw new SyntaxError('The URI host '.$host->toString().' can not be appended.'),
+            default => throw new SyntaxError('The URI host '.$host->toString().' cannot be appended.'),
         };
     }
 
@@ -431,7 +431,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Prepend a label or a host to the current URI host.
      *
-     * @throws SyntaxError If the host can not be prepended
+     * @throws SyntaxError If the host cannot be prepended
      */
     public function prependLabel(Stringable|string|null $label): static
     {
@@ -442,7 +442,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
             null === $label->value() => $this,
             $host->isIpv4() => new static($this->uri->withHost(rtrim($label->value(), '.').'.'.$host->value())),
             $host->isDomain() => new static($this->uri->withHost(static::normalizeComponent(Domain::new($host)->prepend($label)->toUnicode(), $this->uri))),
-            default => throw new SyntaxError('The URI host '.$host->toString().' can not be prepended.'),
+            default => throw new SyntaxError('The URI host '.$host->toString().' cannot be prepended.'),
         };
     }
 
