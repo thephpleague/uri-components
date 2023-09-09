@@ -20,7 +20,6 @@ use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Traversable;
-use TypeError;
 
 final class URLSearchParamsTest extends TestCase
 {
@@ -319,22 +318,6 @@ final class URLSearchParamsTest extends TestCase
         $params->delete('a', 'c');
         self::assertSame($params->toString(), 'a=b&a=d');
         self::assertCount(2, $params);
-    }
-
-    public function testInvalidDeleteUsageWithoutArguments(): void
-    {
-        $this->expectException(ArgumentCountError::class);
-
-        $params = new URLSearchParams('a=b&a=d&c&e&');
-        $params->delete();
-    }
-
-    public function testInvalidDeleteUsageWithoutKeyInUnknownType(): void
-    {
-        $this->expectException(TypeError::class);
-
-        $params = new URLSearchParams('a=b&a=d&c&e&');
-        $params->delete(4);
     }
 
     public function testInvalidDeleteUsageWithoutMoreThanTwoArguments(): void
@@ -718,22 +701,6 @@ JSON;
 
         $params->delete('a', 'b');
         self::assertTrue($params->has('a', 'd'));
-    }
-
-    public function testInvalidHasUsageWithoutArguments(): void
-    {
-        $this->expectException(ArgumentCountError::class);
-
-        $params = new URLSearchParams('a=b&a=d&c&e&');
-        $params->has();
-    }
-
-    public function testInvalidHasUsageWithoutKeyInUnknownType(): void
-    {
-        $this->expectException(TypeError::class);
-
-        $params = new URLSearchParams('a=b&a=d&c&e&');
-        $params->has(4);
     }
 
     public function testInvalidHasUsageWithoutMoreThanTwoArguments(): void

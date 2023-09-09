@@ -27,7 +27,6 @@ use League\Uri\QueryString;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use TypeError;
 
 use function array_is_list;
 use function array_keys;
@@ -38,7 +37,6 @@ use function func_num_args;
 use function is_array;
 use function is_iterable;
 use function is_object;
-use function is_string;
 use function json_encode;
 use function str_starts_with;
 
@@ -278,14 +276,9 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * $params->has('a', 'c'); // return false
      * </code>
      */
-    public function has(): bool
+    public function has(?string $name): bool
     {
-        $name = match (true) {
-            func_num_args() < 1 => throw new ArgumentCountError('The required name is missing.'),
-            null === ($parameter = func_get_arg(0)) => 'null',
-            is_string($parameter) => $parameter,
-            default => throw new TypeError('The required name must be of type string|null, '.gettype($parameter).' given.'),
-        };
+        $name = self::uvString($name);
 
         return match (func_num_args()) {
             1 => $this->pairs->has($name),
@@ -418,21 +411,15 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * $params->delete('a', 'b') //delete all pairs with the key 'a' and the value 'b'
      * </code>
      */
-    public function delete(): void
+    public function delete(?string $name): void
     {
-        $name = match (true) {
-            func_num_args() < 1 => throw new ArgumentCountError('The required name is missing.'),
-            null === ($parameter = func_get_arg(0)) => 'null',
-            is_string($parameter) => $parameter,
-            default => throw new TypeError('The required name must be of type string|null, '.gettype($parameter).' given.'),
-        };
-        $newQuery = match (func_num_args()) {
+        $name = self::uvString($name);
+
+        $this->updateQuery(match (func_num_args()) {
             1 => $this->pairs->withoutPairByKey($name),
             2 => $this->pairs->withoutPairByKeyValue($name, self::uvString(func_get_arg(1))), /* @phpstan-ignore-line */
             default => throw new ArgumentCountError(__METHOD__.' requires at least one r as the pair name and a second optional argument as the pair value.'),
-        };
-
-        $this->updateQuery($newQuery);
+        });
     }
 
     /**

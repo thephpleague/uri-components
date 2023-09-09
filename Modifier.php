@@ -80,8 +80,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Change the encoding of the query.
      *
-     * @param KeyValuePairConverter|int $to
-     * @param KeyValuePairConverter|int|null $from
      */
     public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int|null $from = null): static
     {
