@@ -25,6 +25,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `League\Uri\Components\Query::toRFC3986` is no longer deprecated
 - `League\Uri\Components\Query::jsonSerualize` uses `toFormData` instead of `toRFC1738`
 - `League\Uri\Components\Query` fix float handling.
+- Exception message typo fix [#121](https://github.com/thephpleague/uri-src/pull/121) by [GrahamCampbell](https://github.com/GrahamCampbell)
 
 ### Deprecated
 
