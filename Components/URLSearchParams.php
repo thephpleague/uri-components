@@ -117,15 +117,16 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     private static function filterPairs(iterable $pairs): iterable
     {
+        $filter = static fn ($pair): ?array => match (true) {
+            !is_array($pair),
+            [0, 1] !== array_keys($pair) => throw new SyntaxError('A pair must be a sequential array starting at `0` and containing two elements.'),
+            null !== $pair[1] => [self::uvString($pair[0]), self::uvString($pair[1])],
+            '' !== $pair[0] => [self::uvString($pair[0]), ''],
+            default => null,
+        };
+
         foreach ($pairs as $pair) {
-            $filteredPair = match (true) {
-                !is_array($pair),
-                [0, 1] !== array_keys($pair) => throw new SyntaxError('A pair must be a sequential array starting at `0` and containing two elements.'),
-                null !== $pair[1] => [self::uvString($pair[0]), self::uvString($pair[1])],
-                '' !== $pair[0] => [self::uvString($pair[0]), ''],
-                default => null,
-            };
-            if (null !== $filteredPair) {
+            if (null !== ($filteredPair = $filter($pair))) {
                 yield $filteredPair;
             }
         }
