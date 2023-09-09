@@ -60,16 +60,24 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public function __construct(object|array|string|null $init = '')
     {
-        $rawPairs = match (true) {
+        $pairs = self::filterPairs(match (true) {
             $init instanceof self,
             $init instanceof QueryInterface => $init,
             $init instanceof UriComponentInterface => self::parsePairs($init->value()),
             is_iterable($init) => self::formatIterable($init),
             $init instanceof Stringable, !is_object($init) => self::parsePairs(self::formatQuery($init)),
             default => self::yieldPairs($init),
-        };
+        });
 
-        $this->pairs = Query::fromPairs(self::filterPairs($rawPairs));
+        $this->pairs = Query::fromPairs($pairs);
+    }
+
+    /**
+     * @return array<int, array{0:string, 1:string|null}>
+     */
+    private static function parsePairs(string|null $query): array
+    {
+        return QueryString::parseFromValue($query, Converter::fromFormData());
     }
 
     /**
@@ -88,19 +96,16 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     }
 
     /**
-     * @return array<int, array{0:string, 1:string|null}>
-     */
-    private static function parsePairs(string|null $query): array
-    {
-        return QueryString::parseFromValue($query, Converter::fromFormData());
-    }
-
-    /**
+     * Generates an Iterator containing pairs as items from an object or array.
+     *
+     * If an iterable is given, foreach will loop over the iterable structure
+     * If an object is give, foreach will loop over the object public properties if they are defined
+     *
      * @param object|iterable<array-key, Stringable|string|float|int|bool|null> $associative
      *
      * @return Iterator<int, array{0:string, 1:string}>
      */
-    private static function yieldPairs(object|iterable $associative): Iterator
+    private static function yieldPairs(object|array $associative): Iterator
     {
         foreach ($associative as $key => $value) { /* @phpstan-ignore-line */
             yield [self::uvString($key), self::uvString($value)];
