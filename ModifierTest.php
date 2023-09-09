@@ -15,6 +15,7 @@ use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
+
 use const PHP_QUERY_RFC3986;
 
 /**

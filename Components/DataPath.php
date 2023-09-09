@@ -22,6 +22,7 @@ use League\Uri\FeatureDetection;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
 use Stringable;
+
 use function base64_decode;
 use function base64_encode;
 use function count;
@@ -36,6 +37,7 @@ use function sprintf;
 use function str_replace;
 use function strlen;
 use function strtolower;
+
 use const FILEINFO_MIME;
 
 final class DataPath extends Component implements DataPathInterface

@@ -52,7 +52,7 @@ final class PortTest extends TestCase
             [null, null, null, ''],
             [23, 23, '23', ':23'],
             ['23', 23, '23', ':23'],
-            [new class() {
+            [new class () {
                 public function __toString(): string
                 {
                     return '23';

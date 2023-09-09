@@ -23,6 +23,7 @@ use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use TypeError;
+
 use function array_count_values;
 use function array_filter;
 use function array_keys;
@@ -40,6 +41,7 @@ use function str_replace;
 use function str_starts_with;
 use function strrpos;
 use function substr;
+
 use const ARRAY_FILTER_USE_KEY;
 use const FILTER_VALIDATE_INT;
 use const PATHINFO_EXTENSION;

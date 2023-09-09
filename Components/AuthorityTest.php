@@ -18,6 +18,7 @@ use League\Uri\Uri;
 use League\Uri\UriString;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+
 use function parse_url;
 
 /**

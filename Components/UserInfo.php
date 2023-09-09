@@ -22,6 +22,7 @@ use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
+
 use function explode;
 
 final class UserInfo extends Component implements UserInfoInterface

@@ -31,6 +31,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Traversable;
+
 use function ltrim;
 use function rtrim;
 use function str_ends_with;
@@ -79,8 +80,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Change the encoding of the query.
      *
-     * @param KeyValuePairConverter|PHP_QUERY_RFC3986|PHP_QUERY_RFC1738      $to
-     * @param KeyValuePairConverter|PHP_QUERY_RFC3986|PHP_QUERY_RFC1738|null $from
+     * @param KeyValuePairConverter|int $to
+     * @param KeyValuePairConverter|int|null $from
      */
     public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int|null $from = null): static
     {
@@ -149,7 +150,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Append PHP query parameters to the existing URI query.
      */
-    public function appendQueryParameters(iterable $parameters): self
+    public function appendQueryParameters(object|array $parameters): self
     {
         return $this->appendQuery(Query::fromParameters($parameters)->value());
     }

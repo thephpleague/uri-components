@@ -21,6 +21,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+
 use function preg_match;
 use function sprintf;
 

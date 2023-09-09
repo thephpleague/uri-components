@@ -49,7 +49,7 @@ final class SchemeTest extends TestCase
         return [
             [null, '', ''],
             [Scheme::new('foo'), 'foo', 'foo:'],
-            [new class() {
+            [new class () {
                 public function __toString(): string
                 {
                     return 'foo';

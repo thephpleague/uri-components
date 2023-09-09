@@ -104,7 +104,7 @@ final class URLSearchParamsTest extends TestCase
         $params->append('g', 'h');
         self::assertFalse($seed->has('g'));
 
-        $params = new URLSearchParams(new class() implements IteratorAggregate {
+        $params = new URLSearchParams(new class () implements IteratorAggregate {
             public function getIterator(): Traversable
             {
                 yield from ['a' => 'b', 'c' => 'd'];
@@ -491,7 +491,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializeEmptyNameAndValue(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('', '');
         self::assertSame($params.'', '=');
         $params->append('', '');
@@ -500,7 +500,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializePlusSign(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('a', 'b+c');
         self::assertSame($params.'', 'a=b%2Bc');
         $params->delete('a');
@@ -510,7 +510,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializeEqualSign(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('=', 'a');
         self::assertSame($params.'', '%3D=a');
         $params->append('b', '=');
@@ -519,7 +519,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializeAmpersandSign(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('&', 'a');
         self::assertSame($params.'', '%26=a');
         $params->append('b', '&');
@@ -528,7 +528,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializeReservedCharacters(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('a', '*-._');
         self::assertSame($params.'', 'a=*-._');
         $params->delete('a');
@@ -538,7 +538,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializePercentage(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('a', 'b%c');
         self::assertSame($params.'', 'a=b%25c');
         $params->delete('a');
@@ -551,7 +551,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializeNullByte(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('a', "b\0c");
         self::assertSame($params.'', 'a=b%00c');
         $params->delete('a');
@@ -561,7 +561,7 @@ final class URLSearchParamsTest extends TestCase
 
     public function testSerializePileOfPoo(): void
     {
-        $params =new URLSearchParams();
+        $params = new URLSearchParams();
         $params->append('a', 'b💩c');
         self::assertSame($params.'', 'a=b%F0%9F%92%A9c');
         $params->delete('a');

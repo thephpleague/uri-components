@@ -24,6 +24,7 @@ use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use TypeError;
+
 use function array_count_values;
 use function array_filter;
 use function array_keys;

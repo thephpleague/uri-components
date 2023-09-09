@@ -96,7 +96,7 @@ final class Query extends Component implements QueryInterface
      * Returns a new instance from the result of QueryString::parse.
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
-     * @param non-empty-string                              $separator
+     * @param non-empty-string $separator
      */
     public static function fromPairs(iterable $pairs, string $separator = '&'): self
     {
@@ -560,7 +560,7 @@ final class Query extends Component implements QueryInterface
      * Returns a new instance from the result of QueryString::parse.
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
-     * @param non-empty-string                              $separator
+     * @param non-empty-string $separator
      */
     public static function createFromPairs(iterable $pairs, string $separator = '&'): self
     {

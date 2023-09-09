@@ -24,6 +24,7 @@ use League\Uri\IPv4\Converter as IPv4Converter;
 use League\Uri\IPv4Normalizer;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+
 use function explode;
 use function filter_var;
 use function in_array;
@@ -35,6 +36,7 @@ use function sprintf;
 use function strpos;
 use function strtolower;
 use function substr;
+
 use const FILTER_FLAG_IPV4;
 use const FILTER_FLAG_IPV6;
 use const FILTER_VALIDATE_IP;
@@ -260,7 +262,7 @@ final class Host extends Component implements IpHostInterface
      * Returns a host from an IP address.
      *
      * @throws MissingFeature If detecting IPv4 is not possible
-     * @throws SyntaxError    If the $ip cannot be converted into a Host
+     * @throws SyntaxError If the $ip cannot be converted into a Host
      */
     public static function fromIp(Stringable|string $ip, string $version = ''): self
     {
@@ -437,7 +439,7 @@ final class Host extends Component implements IpHostInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @throws MissingFeature If detecting IPv4 is not possible
-     * @throws SyntaxError    If the $ip cannot be converted into a Host
+     * @throws SyntaxError If the $ip cannot be converted into a Host
      * @deprecated Since version 7.0.0
      * @see Host::fromIp()
      *

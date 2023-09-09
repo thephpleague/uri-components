@@ -19,6 +19,7 @@ use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+
 use function json_encode;
 
 /**
@@ -704,7 +705,7 @@ final class QueryTest extends TestCase
         $query = Query::new();
         self::assertSame('a=b', (string) $query->appendTo('a', 'b'));
         self::assertSame('a=b&a=b', (string) $query->appendTo('a', 'b')->appendTo('a', 'b'));
-        self::assertSame('a=b&a=b&a=c', (string) $query->appendTo('a', 'b')->appendTo('a', 'b')->appendTo('a', new class() {
+        self::assertSame('a=b&a=b&a=c', (string) $query->appendTo('a', 'b')->appendTo('a', 'b')->appendTo('a', new class () {
             public function __toString(): string
             {
                 return 'c';

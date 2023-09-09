@@ -18,6 +18,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+
 use function array_pop;
 use function array_reduce;
 use function end;

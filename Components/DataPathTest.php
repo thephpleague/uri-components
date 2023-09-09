@@ -17,6 +17,7 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+
 use function base64_encode;
 use function dirname;
 use function file_get_contents;
@@ -245,7 +246,7 @@ final class DataPathTest extends TestCase
     public function testRawSave(): void
     {
         $context = stream_context_create([
-            'http'=> [
+            'http' => [
                 'method' => 'GET',
                 'header' => "Accept-language: en\r\nCookie: foo=bar\r\n",
             ],

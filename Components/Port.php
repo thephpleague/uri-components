@@ -19,7 +19,9 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+
 use function filter_var;
+
 use const FILTER_VALIDATE_INT;
 
 final class Port extends Component implements PortInterface

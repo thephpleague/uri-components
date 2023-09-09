@@ -22,6 +22,7 @@ use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+
 use function array_fill;
 use function implode;
 

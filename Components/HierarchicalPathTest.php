@@ -19,6 +19,7 @@ use League\Uri\Http;
 use League\Uri\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+
 use function iterator_to_array;
 
 /**
