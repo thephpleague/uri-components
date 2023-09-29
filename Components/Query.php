@@ -22,6 +22,7 @@ use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+
 use Traversable;
 
 use function array_column;
@@ -35,7 +36,6 @@ use function count;
 use function http_build_query;
 use function implode;
 use function is_int;
-use function iterator_to_array;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
@@ -69,27 +69,13 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
-     * Returns a new instance from the result of PHP's parse_str.
+     * Returns a new instance from the input of http_build_query.
      *
      * @param non-empty-string $separator
      */
-    public static function fromParameters(object|array $parameters, string $separator = '&'): self
+    public static function fromVariable(object|array $parameters, string $separator = '&'): self
     {
-        if ($parameters instanceof QueryInterface) {
-            return self::fromPairs($parameters, $separator);
-        }
-
-        $parameters = match (true) {
-            $parameters instanceof Traversable => iterator_to_array($parameters),
-            default => $parameters,
-        };
-
-        $query = match ([]) {
-            $parameters => null,
-            default => http_build_query(data: $parameters, arg_separator: $separator),
-        };
-
-        return new self($query, Converter::fromRFC1738($separator));
+        return new self(http_build_query(data: $parameters, arg_separator: $separator), Converter::fromRFC1738($separator));
     }
 
     /**
@@ -667,5 +653,36 @@ final class Query extends Component implements QueryInterface
     public function withoutPair(string ...$keys): QueryInterface
     {
         return $this->withoutPairByKey(...$keys);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @param non-empty-string $separator
+     *
+     * @see Query::fromVariable()
+     *
+     * @codeCoverageIgnore
+     * Returns a new instance from the result of PHP's parse_str.
+     *
+     * @deprecated Since version 7.0.0
+     */
+    public static function fromParameters(object|array $parameters, string $separator = '&'): self
+    {
+        if ($parameters instanceof QueryInterface) {
+            return self::fromPairs($parameters, $separator);
+        }
+
+        $parameters = match (true) {
+            $parameters instanceof Traversable => iterator_to_array($parameters),
+            default => $parameters,
+        };
+
+        $query = match ([]) {
+            $parameters => null,
+            default => http_build_query(data: $parameters, arg_separator: $separator),
+        };
+
+        return new self($query, Converter::fromRFC1738($separator));
     }
 }

@@ -29,15 +29,20 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
 use function array_is_list;
+use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function count;
 use function func_get_arg;
 use function func_num_args;
+use function get_object_vars;
 use function is_array;
 use function is_iterable;
 use function is_object;
+use function is_scalar;
+use function iterator_to_array;
 use function json_encode;
+use function spl_object_hash;
 use function str_starts_with;
 
 use const JSON_PRESERVE_ZERO_FRACTION;
@@ -206,11 +211,48 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     }
 
     /**
-     * Returns a new instance from the result of PHP's parse_str.
+     * Returns a new instance from the input of PHP's http_build_query.
      */
-    public static function fromParameters(object|array $parameters): self
+    public static function fromVariable(object|array $parameters): self
     {
-        return new self(Query::fromParameters($parameters));
+        return self::fromPairs(self::parametersToPairs($parameters));
+    }
+
+    private static function parametersToPairs(array|object $data, string|int $prefix = '', array &$recursive = []): array
+    {
+        $yieldParameters = static fn (object|array $data): array => is_array($data) ? $data : get_object_vars($data);
+
+        $pairs = [];
+        foreach ($yieldParameters($data) as $name => $value) {
+            if (is_object($data)) {
+                $id = spl_object_hash($data);
+                if (!array_key_exists($id, $recursive)) {
+                    $recursive[$id] = 1;
+                }
+            }
+
+            if (is_object($value)) {
+                $id = spl_object_hash($value);
+                if (array_key_exists($id, $recursive)) {
+                    return [];
+                }
+
+                $recursive[$id] = 1;
+            }
+
+            if ('' !== $prefix) {
+                $name = $prefix.'['.$name.']';
+            }
+
+            $pairs = match (true) {
+                is_array($value),
+                is_object($value) => [...$pairs, ...self::parametersToPairs($value, $name, $recursive)],
+                is_scalar($value) => [...$pairs, [$name, self::uvString($value)]],
+                default => $pairs,
+            };
+        }
+
+        return $pairs;
     }
 
     public function value(): ?string
@@ -424,7 +466,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         $this->updateQuery(match (func_num_args()) {
             1 => $this->pairs->withoutPairByKey($name),
             2 => $this->pairs->withoutPairByKeyValue($name, self::uvString(func_get_arg(1))), /* @phpstan-ignore-line */
-            default => throw new ArgumentCountError(__METHOD__.' requires at least one r as the pair name and a second optional argument as the pair value.'),
+            default => throw new ArgumentCountError(__METHOD__.' requires at least one argument as the pair name and a second optional argument as the pair value.'),
         });
     }
 
@@ -438,5 +480,19 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     public function sort(): void
     {
         $this->updateQuery($this->pairs->sort());
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.4.0
+     * @see URLSearchParams::fromVariable()
+     *
+     * @codeCoverageIgnore
+     *
+     */
+    public static function fromParameters(object|array $parameters): self
+    {
+        return new self(Query::fromParameters($parameters));
     }
 }

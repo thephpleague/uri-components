@@ -19,6 +19,7 @@ use IteratorAggregate;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use Stringable;
 use Traversable;
 
 final class URLSearchParamsTest extends TestCase
@@ -741,7 +742,7 @@ JSON;
             ],
         ];
 
-        $params = URLSearchParams::fromParameters($parameters);
+        $params = URLSearchParams::fromVariable($parameters);
         self::assertCount(4, $params);
         self::assertSame('bar baz', $params->get('filter[foo][0]'));
         self::assertSame('bar', $params->get('filter[bar][foo]'));
@@ -804,5 +805,181 @@ JSON;
         self::assertSame('b', $params->get('a'));
 
         self::assertSame('b', URLSearchParams::new('%3Fa=b')->get('?a'));
+    }
+
+    public function testFromParametersRespectURLSpecTypeConversion(): void
+    {
+        $parameters = new DateInterval('P12MT23H12S');
+
+        self::assertSame(
+            URLSearchParams::fromAssociative($parameters)->toString(),
+            URLSearchParams::fromVariable($parameters)->toString(),
+        );
+    }
+
+    /**
+     * @see https://github.com/php/php-src/tree/master/ext/standard/tests/http/http_build_query
+     *
+     * @dataProvider providesParametersInput
+     */
+    public function testFromParametersWithDifferentInput(object|array $data, string $expected): void
+    {
+        self::assertSame($expected, URLSearchParams::fromVariable($data)->toString());
+    }
+
+    public static function providesParametersInput(): iterable
+    {
+        yield 'from an object with public properties' => [
+            'data' => ['foo' => 'bar', 'baz' => 1, 'test' => "a ' \" ", 'abc', 'float' => 10.42, 'true' => true, 'false' => false],
+            'expected' => 'foo=bar&baz=1&test=a+%27+%22+&0=abc&float=10.42&true=true&false=false',
+        ];
+
+        yield 'empty parameters' => [
+            'data' => [],
+            'expected' => '',
+        ];
+
+        yield 'encoding of the plus sign and the float number' => [
+            'data' => ['x' => 1E+14, 'y' => '1E+14'],
+            'expected' => 'x=100000000000000.0&y=1E%2B14',
+        ];
+
+        yield 'class public properties' => [
+          'data' => new class () {
+              public string $public = 'input';
+              protected string $protected = 'hello';
+              private string $private = 'world'; /* @phpstan-ignore-line */
+          },
+          'expected' => 'public=input',
+        ];
+
+        yield 'empty class' => [
+            'data' => new class () {},
+            'expected' => '',
+        ];
+
+        yield 'just stringable class' => [
+            'data' => new class () implements Stringable {
+                public function __toString(): string
+                {
+                    return $this::class;
+                }
+            },
+            'expected' => '',
+        ];
+
+        yield 'stringable object' => [
+            'data' => ['hello', new class () implements Stringable {
+                public function __toString(): string
+                {
+                    return $this::class;
+                }
+            }],
+            'expected' => '0=hello',
+        ];
+
+        yield 'stringable class with public properties' => [
+            'data' => new class () implements Stringable {
+                public string $public = 'input';
+                protected string $protected = 'hello';
+                private string $private = 'world'; /* @phpstan-ignore-line */
+                public function __toString(): string
+                {
+                    return $this::class;
+                }
+            },
+            'expected' => 'public=input',
+        ];
+
+        $parent = new class () {
+            public mixed $public = 'input';
+            protected string $protected = 'hello';
+            private string $private = 'world'; /* @phpstan-ignore-line */
+        };
+
+        $child = new class () {
+            public mixed $public = 'input';
+            protected string $protected = 'hello';
+            private string $private = 'world'; /* @phpstan-ignore-line */
+        };
+
+        $parent->public = $child;
+
+        yield 'nested classes' => [
+            'data' => $parent,
+            'expected' => 'public%5Bpublic%5D=input',
+        ];
+
+        yield 'nested arrays' => [
+            'data' => [
+                20,
+                5 => 13,
+                '9' => [
+                    1 => 'val1',
+                    3 => 'val2',
+                    'string' => 'string',
+                ],
+                'name' => 'homepage',
+                'page' => 10,
+                'sort' => [
+                    'desc',
+                    'admin' => [
+                        'admin1',
+                        'admin2' => [
+                            'who' => 'admin2',
+                            2 => 'test',
+                        ],
+                    ],
+                ],
+            ],
+            'expected' => '0=20&5=13&9%5B1%5D=val1&9%5B3%5D=val2&9%5Bstring%5D=string&name=homepage&page=10&sort%5B0%5D=desc&sort%5Badmin%5D%5B0%5D=admin1&sort%5Badmin%5D%5Badmin2%5D%5Bwho%5D=admin2&sort%5Badmin%5D%5Badmin2%5D%5B2%5D=test',
+        ];
+
+        yield 'test with mathematical expression' => [
+            'data' => [
+                'name' => 'main page',
+                'sort' => 'desc,admin',
+                'equation' => '10 + 10 - 5',
+            ],
+            'expected' => 'name=main+page&sort=desc%2Cadmin&equation=10+%2B+10+-+5',
+        ];
+
+        yield 'test with array containing null value' => [
+            'data' => [null],
+            'expected' => '',
+        ];
+
+        yield 'test with resource' => [
+            'data' => [STDIN],
+            'expected' => '',
+        ];
+
+        $recursive = new class () {
+            public mixed $public = 'input';
+        };
+        $recursive->public = $recursive;
+
+        yield 'test object recursion' => [
+            'data' => $recursive,
+            'expected' => '',
+        ];
+
+        $v = 'value';
+        $ref = &$v;
+
+        yield 'using reference in array' => [
+            'data' => [$ref],
+            'expected' => '0=value',
+        ];
+
+        yield 'using a traversable' => [
+            'data' => new class () implements IteratorAggregate {
+                public function getIterator(): Traversable
+                {
+                    yield from ['foo' => 'bar'];
+                }
+            },
+            'expected' => '',
+        ];
     }
 }

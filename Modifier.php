@@ -30,8 +30,8 @@ use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-use Traversable;
 
+use function get_object_vars;
 use function ltrim;
 use function rtrim;
 use function str_ends_with;
@@ -150,7 +150,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      */
     public function appendQueryParameters(object|array $parameters): self
     {
-        return $this->appendQuery(Query::fromParameters($parameters)->value());
+        return $this->appendQuery(Query::fromVariable($parameters)->value());
     }
 
     /**
@@ -186,10 +186,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      *  Merge PHP query parameters with the existing URI query.
      */
-    public function mergeQueryParameters(iterable $parameters): self
+    public function mergeQueryParameters(object|array $parameters): self
     {
         $parameters = match (true) {
-            $parameters instanceof Traversable => iterator_to_array($parameters),
+            is_object($parameters) => get_object_vars($parameters),
             default => $parameters,
         };
 
@@ -200,7 +200,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
             $currentParameters === $parameters => $this,
             default => new static($this->uri->withQuery(
                 self::normalizeComponent(
-                    Query::fromParameters([...$currentParameters, ...$parameters])->value(),
+                    Query::fromVariable([...$currentParameters, ...$parameters])->value(),
                     $this->uri
                 )
             )),
