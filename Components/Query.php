@@ -22,7 +22,6 @@ use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
-
 use Traversable;
 
 use function array_column;
