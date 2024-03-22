@@ -206,7 +206,7 @@ final class Domain extends Component implements DomainHostInterface
         };
     }
 
-    public function slice(int $offset, int $length = null): self
+    public function slice(int $offset, ?int $length = null): self
     {
         $nbLabels = count($this->labels);
         if ($offset < -$nbLabels || $offset > $nbLabels) {

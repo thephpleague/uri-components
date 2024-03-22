@@ -54,7 +54,7 @@ final class Query extends Component implements QueryInterface
     /**
      * Returns a new instance.
      */
-    private function __construct(Stringable|string|null $query, Converter $converter = null)
+    private function __construct(Stringable|string|null $query, ?Converter $converter = null)
     {
         $converter ??= Converter::fromRFC3986();
         $this->pairs = QueryString::parseFromValue($query, $converter);

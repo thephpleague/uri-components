@@ -351,7 +351,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return new self($path);
     }
 
-    public function slice(int $offset, int $length = null): self
+    public function slice(int $offset, ?int $length = null): self
     {
         $nbSegments = count($this->segments);
         if ($offset < -$nbSegments || $offset > $nbSegments) {
@@ -425,7 +425,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Creates a new basename with a new extension.
      */
-    private function buildBasename(string $extension, string $ext, string $param = null): string
+    private function buildBasename(string $extension, string $ext, ?string $param = null): string
     {
         $length = strrpos($ext, '.'.pathinfo($ext, PATHINFO_EXTENSION));
         if (false !== $length) {

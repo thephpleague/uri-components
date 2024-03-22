@@ -476,7 +476,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Slice the host from the URI.
      */
-    public function sliceLabels(int $offset, int $length = null): static
+    public function sliceLabels(int $offset, ?int $length = null): static
     {
         $currentHost = $this->uri->getHost();
         $host = Domain::new($currentHost)->slice($offset, $length);
@@ -702,7 +702,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     /**
      * Slice the host from the URI.
      */
-    public function sliceSegments(int $offset, int $length = null): static
+    public function sliceSegments(int $offset, ?int $length = null): static
     {
         return new static(static::normalizePath($this->uri, HierarchicalPath::fromUri($this->uri)->slice($offset, $length)));
     }
