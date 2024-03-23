@@ -2,6 +2,25 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## [Next](https://github.com/thephpleague/uri-components/compare/7.4.0...master) - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- Fix package to avoid PHP8.4 deprecation warnings
+- Bug Fix `removeEmptyPairs` [#133](https://github.com/thephpleague/uri-src/issues/133)
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
 ## [7.4.0](https://github.com/thephpleague/uri-components/compare/7.3.0...7.4.0) - 2023-12-01
 
 ### Added

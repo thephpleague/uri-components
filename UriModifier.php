@@ -65,7 +65,7 @@ class UriModifier
      */
     public static function removeEmptyPairs(Psr7UriInterface|UriInterface $uri): Psr7UriInterface|UriInterface
     {
-        return Modifier::from($uri)->removeQueryPairsByKey()->getUri();
+        return Modifier::from($uri)->removeEmptyQueryPairs()->getUri();
     }
 
     /**
