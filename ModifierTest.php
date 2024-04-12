@@ -14,15 +14,15 @@ namespace League\Uri;
 use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 use const PHP_QUERY_RFC3986;
 
-/**
- * @group host
- * @group resolution
- * @coversDefaultClass \League\Uri\UriModifier
- */
+#[CoversClass(UriModifier::class)] /** @phpstan-ignore-line */
+#[Group('host')]
+#[Group('resolution')]
 final class ModifierTest extends TestCase
 {
     private readonly string $uri;
@@ -37,10 +37,7 @@ final class ModifierTest extends TestCase
     /*****************************
      * QUERY MODIFIER METHOD TESTS
      ****************************/
-
-    /**
-     * @dataProvider validMergeQueryProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validMergeQueryProvider')]
     public function testMergeQuery(string $query, string $expected): void
     {
         self::assertSame($expected, $this->modifier->mergeQuery($query)->getUri()->getQuery());
@@ -54,9 +51,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validMergeQueryPairsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validMergeQueryPairsProvider')]
     public function testMergeQueryPairs(iterable $pairs, string $expected): void
     {
         self::assertSame($expected, $this->modifier->mergeQueryPairs($pairs)->getUri()->getQuery());
@@ -76,9 +71,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validMergeQueryParametersProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validMergeQueryParametersProvider')]
     public function testMergeQueryParameters(iterable $parameters, string $expected): void
     {
         self::assertSame($expected, $this->modifier->mergeQueryParameters($parameters)->getUri()->getQuery());
@@ -102,9 +95,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validAppendQueryProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validAppendQueryProvider')]
     public function testAppendQuery(string $query, string $expected): void
     {
         self::assertSame($expected, $this->modifier->appendQuery($query)->getUri()->getQuery());
@@ -118,9 +109,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validAppendQueryPairsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validAppendQueryPairsProvider')]
     public function testAppendQueryPairs(iterable $query, string $expected): void
     {
         self::assertSame($expected, $this->modifier->appendQueryPairs($query)->getUri()->getQuery());
@@ -140,9 +129,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validAppendQueryParametersProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validAppendQueryParametersProvider')]
     public function testAppendQueryParameters(iterable $query, string $expected): void
     {
         self::assertSame($expected, $this->modifier->appendQueryParameters($query)->getUri()->getQuery());
@@ -168,9 +155,7 @@ final class ModifierTest extends TestCase
         self::assertSame('foo=bar%20baz&kingkong=toto&kingkong=ape', Modifier::from($uri)->sortQuery()->getUri()->getQuery());
     }
 
-    /**
-     * @dataProvider validWithoutQueryValuesProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validWithoutQueryValuesProvider')]
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
         self::assertSame($expected, $this->modifier->removeQueryPairsByKey(...$input)->getUri()->getQuery());
@@ -184,9 +169,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validWithoutQueryPairByValueProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validWithoutQueryPairByValueProvider')]
     public function testvalidWithoutQueryPairByValue(array $values, string $expected): void
     {
         self::assertSame($expected, $this->modifier->removeQueryPairsByValue(...$values)->getUri()->getQuery());
@@ -200,9 +183,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validWithoutQueryPairByKeyValueProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validWithoutQueryPairByKeyValueProvider')]
     public function testvalidWithoutQueryPairByKeyValue(array $values, string $expected): void
     {
         self::assertSame($expected, $this->modifier->removeQueryPairsByKeyValue(...$values)->getUri()->getQuery());
@@ -217,9 +198,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider removeParamsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('removeParamsProvider')]
     public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
     {
         self::assertSame($expected, Modifier::from($uri)->removeQueryParameters(...$input)->getUri()->getQuery());
@@ -246,9 +225,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider removeQueryParameterIndicesProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('removeQueryParameterIndicesProvider')]
     public function testWithoutQueryParameterIndices(string $uri, string $expected): void
     {
         self::assertSame($expected, Modifier::from($uri)->removeQueryParameterIndices()->getUri()->getQuery());
@@ -272,9 +249,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider removeEmptyPairsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('removeEmptyPairsProvider')]
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void
     {
         self::assertSame($expected, Modifier::from(Uri::fromBaseUri($uri))->removeEmptyQueryPairs()->getUri()->__toString());
@@ -327,26 +302,19 @@ final class ModifierTest extends TestCase
     /*****************************
      * HOST MODIFIER METHOD TESTS
      ****************************/
-
-    /**
-     * @dataProvider validHostProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validHostProvider')]
     public function testPrependLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
         self::assertSame($prepend, $this->modifier->prependLabel($label)->getUri()->getHost());
     }
 
-    /**
-     * @dataProvider validHostProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validHostProvider')]
     public function testAppendLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
         self::assertSame($append, $this->modifier->appendLabel($label)->getUri()->getHost());
     }
 
-    /**
-     * @dataProvider validHostProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validHostProvider')]
     public function testReplaceLabelProcess(string $label, int $key, string $prepend, string $append, string $replace): void
     {
         self::assertSame($replace, $this->modifier->replaceLabel($key, $label)->getUri()->getHost());
@@ -435,9 +403,7 @@ final class ModifierTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider validwithoutLabelProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validwithoutLabelProvider')]
     public function testwithoutLabelProcess(array $keys, string $expected): void
     {
         self::assertSame($expected, $this->modifier->removeLabels(...$keys)->getUri()->getHost());
@@ -553,18 +519,13 @@ final class ModifierTest extends TestCase
     /*********************
      * PATH MODIFIER TESTS
      *********************/
-
-    /**
-     * @dataProvider fileProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('fileProvider')]
     public function testToBinary(Uri $binary, Uri $ascii): void
     {
         self::assertSame($binary->toString(), Modifier::from($ascii)->dataPathToBinary()->getUriString());
     }
 
-    /**
-     * @dataProvider fileProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('fileProvider')]
     public function testToAscii(Uri $binary, Uri $ascii): void
     {
         self::assertSame($ascii->toString(), Modifier::from($binary)->dataPathToAscii()->getUriString());
@@ -598,9 +559,7 @@ final class ModifierTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider appendSegmentProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('appendSegmentProvider')]
     public function testAppendProcess(string $segment, string $append): void
     {
         self::assertSame($append, $this->modifier->appendSegment($segment)->getUri()->getPath());
@@ -614,9 +573,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validAppendSegmentProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validAppendSegmentProvider')]
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
         self::assertSame($expected, (string) Modifier::from($uri)->appendSegment($segment)->getUri());
@@ -648,9 +605,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validBasenameProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validBasenameProvider')]
     public function testBasename(string $path, string $uri, string $expected): void
     {
         self::assertSame($expected, (string) Modifier::from(Uri::new($uri))->replaceBasename($path));
@@ -673,9 +628,7 @@ final class ModifierTest extends TestCase
         Modifier::from(Uri::new('http://example.com'))->replaceBasename('foo/baz');
     }
 
-    /**
-     * @dataProvider validDirnameProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validDirnameProvider')]
     public function testDirname(string $path, string $uri, string $expected): void
     {
         self::assertSame($expected, (string) Modifier::from(Uri::new($uri))->replaceDirname($path));
@@ -691,13 +644,11 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider prependSegmentProvider
-     */
-    public function testPrependProcess(string $uri, string $segment, string $prepend): void
+    #[\PHPUnit\Framework\Attributes\DataProvider('prependSegmentProvider')]
+    public function testPrependProcess(string $uri, string $segment, string $expectedPath): void
     {
         $uri = Uri::new($uri);
-        self::assertSame($prepend, Modifier::from($uri)->prependSegment($segment)->getUri()->getPath());
+        self::assertSame($expectedPath, Modifier::from($uri)->prependSegment($segment)->getUri()->getPath());
     }
 
     public static function prependSegmentProvider(): array
@@ -726,9 +677,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider replaceSegmentProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('replaceSegmentProvider')]
     public function testReplaceSegmentProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
         self::assertSame($replace, $this->modifier->replaceSegment($key, $segment)->getUri()->getPath());
@@ -742,9 +691,7 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider addBasepathProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('addBasepathProvider')]
     public function testaddBasepath(string $basepath, string $expected): void
     {
         self::assertSame($expected, $this->modifier->addBasePath($basepath)->getUri()->getPath());
@@ -766,9 +713,7 @@ final class ModifierTest extends TestCase
         self::assertSame('/base/path', Modifier::from($uri)->addBasePath('/base/path')->getUri()->getPath());
     }
 
-    /**
-     * @dataProvider removeBasePathProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('removeBasePathProvider')]
     public function testRemoveBasePath(string $basepath, string $expected): void
     {
         self::assertSame($expected, $this->modifier->removeBasePath($basepath)->getUri()->getPath());
@@ -790,9 +735,7 @@ final class ModifierTest extends TestCase
         self::assertSame('base/path', Modifier::from($uri)->removeBasePath('/base/path')->getUri()->getPath());
     }
 
-    /**
-     * @dataProvider validwithoutSegmentProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validwithoutSegmentProvider')]
     public function testwithoutSegment(array $keys, string $expected): void
     {
         self::assertSame($expected, $this->modifier->removeSegments(...$keys)->getUri()->getPath());
@@ -827,9 +770,7 @@ final class ModifierTest extends TestCase
         self::assertSame('', Modifier::from($uri)->removeTrailingSlash()->getUri()->getPath());
     }
 
-    /**
-     * @dataProvider validExtensionProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validExtensionProvider')]
     public function testExtensionProcess(string $extension, string $expected): void
     {
         self::assertSame($expected, $this->modifier->replaceExtension($extension)->getUri()->getPath());

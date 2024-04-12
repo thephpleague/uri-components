@@ -15,14 +15,15 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
-/**
- * @group scheme
- * @coversDefaultClass \League\Uri\Components\Scheme
- */
+#[CoversClass(Scheme::class)]
+#[Group('scheme')]
 final class SchemeTest extends TestCase
 {
     public function testWithContent(): void
@@ -30,9 +31,7 @@ final class SchemeTest extends TestCase
         self::assertEquals(Scheme::new('ftp'), Scheme::new('FtP'));
     }
 
-    /**
-     * @dataProvider validSchemeProvider
-     */
+    #[DataProvider('validSchemeProvider')]
     public function testValidScheme(
         Stringable|string|null $scheme,
         string $toString,
@@ -63,9 +62,7 @@ final class SchemeTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidSchemeProvider
-     */
+    #[DataProvider('invalidSchemeProvider')]
     public function testInvalidScheme(string $scheme): void
     {
         $this->expectException(SyntaxError::class);
@@ -82,9 +79,7 @@ final class SchemeTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
         self::assertSame($expected, Scheme::fromUri($uri)->value());

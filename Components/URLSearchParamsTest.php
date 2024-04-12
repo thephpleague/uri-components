@@ -17,6 +17,7 @@ use ArgumentCountError;
 use DateInterval;
 use IteratorAggregate;
 use League\Uri\Exceptions\SyntaxError;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Stringable;
@@ -163,9 +164,7 @@ final class URLSearchParamsTest extends TestCase
         self::assertSame('d', $params->get('c'));
     }
 
-    /**
-     * @dataProvider providesInvalidSequenceOfSequencesOfString
-     */
+    #[DataProvider('providesInvalidSequenceOfSequencesOfString')]
     public function testNewInstanceWithSequenceOfSequencesOfStringFails(array $sequences): void
     {
         $this->expectException(SyntaxError::class);
@@ -185,9 +184,7 @@ final class URLSearchParamsTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providesComplexConstructorData
-     */
+    #[DataProvider('providesComplexConstructorData')]
     public function testComplexConstructor(string $json): void
     {
         /** @var object{input: string, output: array<array{0: string, 1: string}>, name: string} $res */
@@ -582,9 +579,7 @@ final class URLSearchParamsTest extends TestCase
         self::assertSame($params->toString(), 'a%0Ab=c%0Dd&e%0A%0Df=g%0D%0Ah');
     }
 
-    /**
-     * @dataProvider provideSortingPayload
-     */
+    #[DataProvider('provideSortingPayload')]
     public function testSorting(string $input, array $output): void
     {
         $params = new URLSearchParams($input);
@@ -819,9 +814,8 @@ JSON;
 
     /**
      * @see https://github.com/php/php-src/tree/master/ext/standard/tests/http/http_build_query
-     *
-     * @dataProvider providesParametersInput
      */
+    #[DataProvider('providesParametersInput')]
     public function testFromParametersWithDifferentInput(object|array $data, string $expected): void
     {
         self::assertSame($expected, URLSearchParams::fromVariable($data)->toString());

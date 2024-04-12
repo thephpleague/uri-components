@@ -15,6 +15,9 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 
@@ -22,11 +25,9 @@ use function base64_encode;
 use function dirname;
 use function file_get_contents;
 
-/**
- * @group path
- * @group datapath
- * @coversDefaultClass \League\Uri\Components\DataPath
- */
+#[CoversClass(DataPath::class)]
+#[Group('path')]
+#[Group('datapath')]
 final class DataPathTest extends TestCase
 {
     private string $rootPath;
@@ -71,9 +72,7 @@ final class DataPathTest extends TestCase
         DataPath::new('€');
     }
 
-    /**
-     * @dataProvider invalidDataUriPath
-     */
+    #[DataProvider('invalidDataUriPath')]
     public function testCreateFromPathFailed(string $path): void
     {
         $this->expectException(SyntaxError::class);
@@ -81,9 +80,7 @@ final class DataPathTest extends TestCase
         DataPath::fromFileContents($path);
     }
 
-    /**
-     * @dataProvider invalidDataUriPath
-     */
+    #[DataProvider('invalidDataUriPath')]
     public function testConstructorFailed(string $path): void
     {
         $this->expectException(SyntaxError::class);
@@ -98,9 +95,7 @@ final class DataPathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validPathContent
-     */
+    #[DataProvider('validPathContent')]
     public function testDefaultConstructor(string $path, string $expected): void
     {
         self::assertSame($expected, DataPath::new($path)->toString());
@@ -124,9 +119,7 @@ final class DataPathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validFilePath
-     */
+    #[DataProvider('validFilePath')]
     public function testCreateFromPath(string $path, string $mimetype, string $mediatype): void
     {
         $uri = DataPath::fromFileContents($path);
@@ -162,9 +155,7 @@ final class DataPathTest extends TestCase
         self::assertSame($expected, $newUri->getParameters());
     }
 
-    /**
-     * @dataProvider invalidParametersString
-     */
+    #[DataProvider('invalidParametersString')]
     public function testWithParametersFailedWithInvalidParameters(string $path, string $parameters): void
     {
         $this->expectException(SyntaxError::class);
@@ -186,17 +177,13 @@ final class DataPathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider fileProvider
-     */
+    #[DataProvider('fileProvider')]
     public function testToBinary(DataPath $uri): void
     {
         self::assertTrue($uri->toBinary()->isBinaryData());
     }
 
-    /**
-     * @dataProvider fileProvider
-     */
+    #[DataProvider('fileProvider')]
     public function testToAscii(DataPath $uri): void
     {
         self::assertFalse($uri->toAscii()->isBinaryData());
@@ -212,9 +199,7 @@ final class DataPathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidParameters
-     */
+    #[DataProvider('invalidParameters')]
     public function testUpdateParametersFailed(string $parameters): void
     {
         $this->expectException(SyntaxError::class);
@@ -299,9 +284,7 @@ final class DataPathTest extends TestCase
     }
 
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $path = DataPath::fromUri($uri);

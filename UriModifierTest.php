@@ -13,11 +13,12 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 final class UriModifierTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_will_remove_empty_pairs_fix_issue_133(): void
     {
         $removeEmptyPairs = fn (string $str): ?string => UriModifier::removeEmptyPairs(Http::createFromString($str))->getQuery(); /* @phpstan-ignore-line */

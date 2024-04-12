@@ -15,14 +15,15 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
-/**
- * @group port
- * @coversDefaultClass \League\Uri\Components\Port
- */
+#[CoversClass(Port::class)]
+#[Group('port')]
 final class PortTest extends TestCase
 {
     public function testPortSetter(): void
@@ -30,9 +31,7 @@ final class PortTest extends TestCase
         self::assertSame('443', Port::new(443)->toString());
     }
 
-    /**
-     * @dataProvider getToIntProvider
-     */
+    #[DataProvider('getToIntProvider')]
     public function testToInt(
         Stringable|int|string|null $input,
         ?int $expected,
@@ -69,9 +68,7 @@ final class PortTest extends TestCase
         Port::new(-1);
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
         $port = Port::fromUri($uri);

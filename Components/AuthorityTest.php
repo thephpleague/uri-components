@@ -16,20 +16,19 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use League\Uri\UriString;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 
 use function parse_url;
 
-/**
- * @group userinfo
- * @coversDefaultClass \League\Uri\Components\Authority
- */
+#[CoversClass(Authority::class)]
+#[Group('userinfo')]
 final class AuthorityTest extends TestCase
 {
-    /**
-     * @dataProvider validAuthorityDataProvider
-     */
+    #[DataProvider('validAuthorityDataProvider')]
     public function testConstructor(
         ?string $authority,
         ?string $host,
@@ -90,9 +89,7 @@ final class AuthorityTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidAuthorityDataProvider
-     */
+    #[DataProvider('invalidAuthorityDataProvider')]
     public function testConstructorFails(string $authority): void
     {
         $this->expectException(SyntaxError::class);
@@ -116,9 +113,7 @@ final class AuthorityTest extends TestCase
         self::assertNotEquals($authority, $authority->withHost('[::1]'));
     }
 
-    /**
-     * @dataProvider invalidHostDataProvider
-     */
+    #[DataProvider('invalidHostDataProvider')]
     public function testWithHostFails(?string $host): void
     {
         $this->expectException(SyntaxError::class);
@@ -164,9 +159,7 @@ final class AuthorityTest extends TestCase
         Authority::new('foo:bar@example.com:443')->withUserInfo("\0foo", 'bar');
     }
 
-    /**
-     * @dataProvider stringRepresentationDataProvider
-    */
+    #[DataProvider('stringRepresentationDataProvider')]
     public function testAuthorityStringRepresentation(
         ?string $authority,
         string $string,
@@ -220,9 +213,7 @@ final class AuthorityTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected, array $components): void
     {
         $authority = Authority::fromUri($uri);

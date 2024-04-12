@@ -18,13 +18,14 @@ use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 
-/**
- * @group host
- * @coversDefaultClass \League\Uri\Components\Domain
- */
+#[CoversClass(Domain::class)]
+#[Group('host')]
 final class DomainTest extends TestCase
 {
     public function testItCanBeInstantiatedWithAHostInterfaceImplementingObject(): void
@@ -60,8 +61,8 @@ final class DomainTest extends TestCase
 
     /**
      * Test valid Domain.
-     * @dataProvider validDomainProvider
      */
+    #[DataProvider('validDomainProvider')]
     public function testValidDomain(string $host, string $uri, string $iri): void
     {
         $host = Domain::new($host);
@@ -111,9 +112,7 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidDomainProvider
-     */
+    #[DataProvider('invalidDomainProvider')]
     public function testInvalidDomain(?string $invalid): void
     {
         $this->expectException(SyntaxError::class);
@@ -150,9 +149,7 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider isAbsoluteProvider
-     */
+    #[DataProvider('isAbsoluteProvider')]
     public function testIsAbsolute(string $raw, bool $expected): void
     {
         self::assertSame($expected, Domain::new($raw)->isAbsolute());
@@ -174,9 +171,7 @@ final class DomainTest extends TestCase
         self::assertNull($host->getIp());
     }
 
-    /**
-     * @dataProvider hostnamesProvider
-     */
+    #[DataProvider('hostnamesProvider')]
     public function testValidUnicodeDomain(string $unicode, string $ascii): void
     {
         $host = Domain::new($unicode);
@@ -211,9 +206,7 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider countableProvider
-     */
+    #[DataProvider('countableProvider')]
     public function testCountable(string $host, int $nblabels): void
     {
         self::assertCount($nblabels, Domain::new($host));
@@ -227,9 +220,7 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider createFromLabelsValid
-     */
+    #[DataProvider('createFromLabelsValid')]
     public function testCreateFromLabels(iterable $input, string $expected): void
     {
         self::assertSame($expected, (string) Domain::fromLabels(...$input));
@@ -279,9 +270,7 @@ final class DomainTest extends TestCase
         self::assertSame(['', 'localhost'], [...Domain::new('localhost.')]);
     }
 
-    /**
-     * @dataProvider withoutProvider
-     */
+    #[DataProvider('withoutProvider')]
     public function testWithout(string $host, int $without, string $res): void
     {
         self::assertSame($res, (string) Domain::new($host)->withoutLabel($without));
@@ -309,9 +298,7 @@ final class DomainTest extends TestCase
         Domain::new('bébé.be')->withoutLabel(-23);
     }
 
-    /**
-     * @dataProvider validPrepend
-     */
+    #[DataProvider('validPrepend')]
     public function testPrepend(string $raw, string $prepend, string $expected): void
     {
         self::assertSame($expected, (string) Domain::new($raw)->prepend($prepend));
@@ -343,9 +330,7 @@ final class DomainTest extends TestCase
         self::assertSame($domain->prepend(null), $domain);
     }
 
-    /**
-     * @dataProvider validAppend
-     */
+    #[DataProvider('validAppend')]
     public function testAppend(string $raw, string $append, string $expected): void
     {
         self::assertSame($expected, (string) Domain::new($raw)->append($append));
@@ -378,9 +363,7 @@ final class DomainTest extends TestCase
         self::assertSame($domain->append(null), $domain);
     }
 
-    /**
-     * @dataProvider replaceValid
-     */
+    #[DataProvider('replaceValid')]
     public function testReplace(string $raw, string $input, int $offset, string $expected): void
     {
         self::assertSame($expected, (string) Domain::new($raw)->withLabel($offset, $input));
@@ -414,9 +397,7 @@ final class DomainTest extends TestCase
         Domain::new('secure.example.com')->withLabel(23, 'foo');
     }
 
-    /**
-     * @dataProvider rootProvider
-     */
+    #[DataProvider('rootProvider')]
     public function testWithRoot(string $host, string $expected_with_root, string $expected_without_root): void
     {
         $host = Domain::new($host);
@@ -433,9 +414,7 @@ final class DomainTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $domain = Domain::fromUri($uri);

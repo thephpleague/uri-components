@@ -15,19 +15,18 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 
-/**
- * @group path
- * @group defaultpath
- * @coversDefaultClass \League\Uri\Components\Path
- */
+#[CoversClass(Path::class)]
+#[Group('path')]
+#[Group('defaultpath')]
 final class PathTest extends TestCase
 {
-    /**
-     * @dataProvider validPathEncoding
-     */
+    #[DataProvider('validPathEncoding')]
     public function testGetUriComponent(string $decoded, string $encoded): void
     {
         $path = Path::new($decoded);
@@ -107,9 +106,8 @@ final class PathTest extends TestCase
 
     /**
      * Test Removing Dot Segment.
-     *
-     * @dataProvider normalizeProvider
      */
+    #[DataProvider('normalizeProvider')]
     public function testWithoutDotSegments(string $path, string $expected): void
     {
         self::assertSame($expected, Path::new($path)->withoutDotSegments()->toString());
@@ -129,9 +127,7 @@ final class PathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider trailingSlashProvider
-     */
+    #[DataProvider('trailingSlashProvider')]
     public function testHasTrailingSlash(string $path, bool $expected): void
     {
         self::assertSame($expected, Path::new($path)->hasTrailingSlash());
@@ -149,9 +145,7 @@ final class PathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider withTrailingSlashProvider
-     */
+    #[DataProvider('withTrailingSlashProvider')]
     public function testWithTrailingSlash(string $path, string $expected): void
     {
         self::assertSame($expected, (string) Path::new($path)->withTrailingSlash());
@@ -169,9 +163,7 @@ final class PathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider withoutTrailingSlashProvider
-     */
+    #[DataProvider('withoutTrailingSlashProvider')]
     public function testWithoutTrailingSlash(string $path, string $expected): void
     {
         self::assertSame($expected, (string) Path::new($path)->withoutTrailingSlash());
@@ -189,9 +181,7 @@ final class PathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider withLeadingSlashProvider
-     */
+    #[DataProvider('withLeadingSlashProvider')]
     public function testWithLeadingSlash(string $path, string $expected): void
     {
         self::assertSame($expected, (string) Path::new($path)->withLeadingSlash());
@@ -209,9 +199,7 @@ final class PathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider withoutLeadingSlashProvider
-     */
+    #[DataProvider('withoutLeadingSlashProvider')]
     public function testWithoutLeadingSlash(string $path, string $expected): void
     {
         self::assertSame($expected, (string) Path::new($path)->withoutLeadingSlash());
@@ -228,9 +216,7 @@ final class PathTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $path = Path::fromUri($uri);

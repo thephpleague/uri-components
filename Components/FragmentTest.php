@@ -16,19 +16,14 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
-/**
- * @group fragment
- * @coversDefaultClass \League\Uri\Components\Fragment
- */
 final class FragmentTest extends TestCase
 {
-    /**
-     * @dataProvider getUriComponentProvider
-     */
+    #[DataProvider('getUriComponentProvider')]
     public function testStringRepresentation(?string $str, string $encoded): void
     {
         self::assertSame($encoded, Fragment::new($str)->toString());
@@ -56,9 +51,7 @@ final class FragmentTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider geValueProvider
-     */
+    #[DataProvider('getValueProvider')]
     public function testGetValue(Stringable|string|null $str, ?string $expected): void
     {
         if ($str instanceof UriComponentInterface) {
@@ -68,7 +61,7 @@ final class FragmentTest extends TestCase
         self::assertSame($expected, Fragment::new($str)->decoded());
     }
 
-    public static function geValueProvider(): array
+    public static function getValueProvider(): array
     {
         return [
             [Fragment::new(), null],
@@ -87,9 +80,7 @@ final class FragmentTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider getContentProvider
-     */
+    #[DataProvider('getContentProvider')]
     public function testGetContent(string $input, string $expected): void
     {
         self::assertSame($expected, Fragment::new($input)->value());
@@ -129,9 +120,7 @@ final class FragmentTest extends TestCase
         self::assertSame('', $fragment->toString());
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         $fragment = Fragment::fromUri($uri);

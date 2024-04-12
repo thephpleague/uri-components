@@ -16,16 +16,17 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
 use function json_encode;
 
-/**
- * @group query
- * @coversDefaultClass \League\Uri\Components\Query
- */
+#[CoversClass(Query::class)]
+#[Group('query')]
 final class QueryTest extends TestCase
 {
     protected Query $query;
@@ -121,9 +122,7 @@ final class QueryTest extends TestCase
         self::assertSame($this->query, $this->query->withoutEmptyPairs());
     }
 
-    /**
-     * @dataProvider validAppendValue
-     */
+    #[DataProvider('validAppendValue')]
     public function testAppend(?string $query, Stringable|string|null $appendData, ?string $expected): void
     {
         self::assertSame($expected, Query::new($query)->append($appendData)->value());
@@ -197,9 +196,7 @@ final class QueryTest extends TestCase
         self::assertNull($query->parameter('foo[]'));
     }
 
-    /**
-     * @dataProvider withoutKeyPairProvider
-     */
+    #[DataProvider('withoutKeyPairProvider')]
     public function testwithoutKeyPair(string $origin, array $without, string $result): void
     {
         self::assertSame($result, (string) Query::new($origin)->withoutPairByKey(...$without));
@@ -241,10 +238,9 @@ final class QueryTest extends TestCase
     }
 
     /**
-     * @dataProvider providePairsValuesToBeRemoved
-     *
      * @param list<Stringable|string|int|bool|null> $values
      */
+    #[DataProvider('providePairsValuesToBeRemoved')]
     public function testWithoutPairByValue(string $query, array $values, string $expected): void
     {
         self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByValue(...$values)->value());
@@ -296,10 +292,9 @@ final class QueryTest extends TestCase
     }
 
     /**
-     * @dataProvider providePairsToBeRemoved
-     *
      * @param list{0:string, 1:Stringable|string|int|bool|null} $pair
      */
+    #[DataProvider('providePairsToBeRemoved')]
     public function testWithoutPairByKeyValue(string $query, array $pair, string $expected): void
     {
         self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByKeyValue(...$pair)->value());
@@ -344,9 +339,7 @@ final class QueryTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider withoutParamProvider
-     */
+    #[DataProvider('withoutParamProvider')]
     public function testwithoutParam(array $origin, array $without, string $expected): void
     {
         self::assertSame($expected, Query::fromVariable($origin)->withoutParameters(...$without)->toString());
@@ -544,9 +537,7 @@ final class QueryTest extends TestCase
         self::assertNotEquals($sortedQuery, $query);
     }
 
-    /**
-     * @dataProvider sameQueryAfterSortingProvider
-     */
+    #[DataProvider('sameQueryAfterSortingProvider')]
     public function testSortReturnSameInstance(?string $query): void
     {
         $query = Query::new($query);
@@ -563,9 +554,7 @@ final class QueryTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provideWithPairData
-     */
+    #[DataProvider('provideWithPairData')]
     public function testWithPair(?string $query, string $key, string|null|bool $value, array $expected): void
     {
         self::assertSame($expected, Query::new($query)->withPair($key, $value)->getAll($key));
@@ -608,9 +597,7 @@ final class QueryTest extends TestCase
         self::assertSame('a=b&c=d&e=f', Query::new('a=b&c=d')->withPair('e', 'f')->toString());
     }
 
-    /**
-     * @dataProvider mergeBasicProvider
-     */
+    #[DataProvider('mergeBasicProvider')]
     public function testMergeBasic(string $src, Stringable|string|null $dest, string $expected): void
     {
         self::assertSame($expected, Query::new($src)->merge($dest)->toString());
@@ -682,9 +669,7 @@ final class QueryTest extends TestCase
         self::assertSame('a=4&first=4', $query->get('q'));
     }
 
-    /**
-     * @dataProvider provideWithoutDuplicatesData
-     */
+    #[DataProvider('provideWithoutDuplicatesData')]
     public function testWithoutDuplicates(?string $query, ?string $expected): void
     {
         self::assertSame($expected, Query::new($query)->withoutDuplicates()->value());
@@ -749,9 +734,7 @@ final class QueryTest extends TestCase
         self::assertSame('1', $newQuery->get('first'));
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(Psr7UriInterface|UriInterface $uri, ?string $expected): void
     {
         self::assertSame($expected, Query::fromUri($uri)->value());

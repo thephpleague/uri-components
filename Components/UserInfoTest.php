@@ -16,19 +16,18 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\Uri;
 use League\Uri\UriString;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
-/**
- * @group userinfo
- * @coversDefaultClass \League\Uri\Components\UserInfo
- */
+#[CoversClass(UserInfo::class)]
+#[Group('userinfo')]
 final class UserInfoTest extends TestCase
 {
-    /**
-     * @dataProvider userInfoProvider
-     */
+    #[DataProvider('userInfoProvider')]
     public function testConstructor(
         Stringable|string|null $user,
         Stringable|string|null $pass,
@@ -153,9 +152,7 @@ final class UserInfoTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider withUserInfoProvider
-     */
+    #[DataProvider('withUserInfoProvider')]
     public function testWithUserInfo(?string $user, ?string $pass, ?string $expected): void
     {
         self::assertSame($expected, UserInfo::new()->withUser($user)->withPass($pass)->toString());
@@ -187,9 +184,7 @@ final class UserInfoTest extends TestCase
         new UserInfo("\0");
     }
 
-    /**
-     * @dataProvider getURIProvider
-     */
+    #[DataProvider('getURIProvider')]
     public function testCreateFromUri(UriInterface|Psr7UriInterface $uri, ?string $expected): void
     {
         $userInfo = UserInfo::fromUri($uri);
@@ -263,10 +258,9 @@ final class UserInfoTest extends TestCase
     }
 
     /**
-     * @dataProvider providesUriToParse
-     *
      * @param array{user: ?string, pass: ?string} $components
      */
+    #[DataProvider('providesUriToParse')]
     public function testNewInstanceFromUriParsing(string $uri, ?string $expected, array $components): void
     {
         $userInfo = UserInfo::fromComponents(UriString::parse($uri));

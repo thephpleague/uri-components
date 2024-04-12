@@ -15,15 +15,11 @@ use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\TestCase;
 use Stringable;
 
-/**
- * @group host
- * @coversDefaultClass \League\Uri\Components\Host
- */
+#[\PHPUnit\Framework\Attributes\CoversClass(\League\Uri\Components\Host::class)]
+#[\PHPUnit\Framework\Attributes\Group('host')]
 final class IpAddressTest extends TestCase
 {
-    /**
-     * @dataProvider validIpAddressProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('validIpAddressProvider')]
     public function testValidIpAddress(
         Stringable|int|string|null $host,
         bool $isDomain,
@@ -125,9 +121,7 @@ final class IpAddressTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider createFromIpValid
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('createFromIpValid')]
     public function testCreateFromIp(string $input, string $version, string $expected): void
     {
         self::assertSame($expected, (string) Host::fromIp($input, $version));
@@ -146,9 +140,7 @@ final class IpAddressTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider createFromIpFailed
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('createFromIpFailed')]
     public function testCreateFromIpFailed(string $input): void
     {
         $this->expectException(SyntaxError::class);
@@ -165,9 +157,7 @@ final class IpAddressTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider withoutZoneIdentifierProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('withoutZoneIdentifierProvider')]
     public function testWithoutZoneIdentifier(string $host, string $expected): void
     {
         self::assertSame($expected, (string) Host::new($host)->withoutZoneIdentifier());
@@ -183,9 +173,7 @@ final class IpAddressTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider hasZoneIdentifierProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('hasZoneIdentifierProvider')]
     public function testHasZoneIdentifier(string $host, bool $expected): void
     {
         self::assertSame($expected, Host::new($host)->hasZoneIdentifier());
