@@ -630,18 +630,22 @@ JSON;
         self::assertCount(3, $params);
         self::assertTrue($params->isNotEmpty());
         self::assertFalse($params->isEmpty());
+        self::assertSame(2, $params->uniqueKeyCount());
 
         $params->delete('a');
         self::assertCount(1, $params);
+        self::assertSame(1, $params->uniqueKeyCount());
     }
 
     public function testSizeWithAdditionMethodAndBehaviour(): void
     {
         $params = new URLSearchParams('a=1&b=2&a=3');
         self::assertCount(3, $params);
+        self::assertSame(2, $params->uniqueKeyCount());
 
         $params->append('b', '4');
         self::assertCount(4, $params);
+        self::assertSame(2, $params->uniqueKeyCount());
     }
 
     public function testSizeWithEmptyInstance(): void
@@ -650,6 +654,7 @@ JSON;
         self::assertCount(0, $params);
         self::assertFalse($params->isNotEmpty());
         self::assertTrue($params->isEmpty());
+        self::assertSame(0, $params->uniqueKeyCount());
     }
 
     public function testBasicHasMethod(): void

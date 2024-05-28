@@ -111,8 +111,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      */
     private static function fromSegments(int $pathType, array $segments): self
     {
-        $pathSegments = array_map(fn (Stringable|string $segment): string => (string) $segment, $segments);
-        $path = implode(self::SEPARATOR, $pathSegments);
+        $path = implode(self::SEPARATOR, $segments);
 
         return match (true) {
             self::IS_RELATIVE === $pathType => new self(ltrim($path, self::SEPARATOR)),

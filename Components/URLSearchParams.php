@@ -376,6 +376,18 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     }
 
     /**
+     * Returns the total number of distinct search parameter keys.
+     */
+    public function uniqueKeyCount(): int
+    {
+        return count(
+            array_count_values(
+                array_column([...$this->pairs], 0)
+            )
+        );
+    }
+
+    /**
      * Returns the total number of search parameter entries.
      */
     public function size(): int
