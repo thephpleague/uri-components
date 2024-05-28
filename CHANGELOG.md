@@ -7,6 +7,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Added
 
 - `UrlSearchParams::uniqueKeyCount`
+- `Modifier::getIdnUriString`
 
 ### Fixed
 

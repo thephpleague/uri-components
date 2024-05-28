@@ -15,12 +15,13 @@ use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 use const PHP_QUERY_RFC3986;
 
-#[CoversClass(UriModifier::class)] /** @phpstan-ignore-line */
+#[CoversClass(Modifier::class)]
 #[Group('host')]
 #[Group('resolution')]
 final class ModifierTest extends TestCase
@@ -828,5 +829,34 @@ final class ModifierTest extends TestCase
         $uri = 'http://www.localhost.com/path/to/the/sky/';
 
         self::assertSame('http://www.localhost.com/the/sky/', Modifier::from($uri)->sliceSegments(2, 2)->getUriString());
+    }
+
+    #[DataProvider('idnUriProvider')]
+    public function testItReturnsTheCorrectUriString(string $expected, string $input): void
+    {
+        self::assertSame($expected, Modifier::from($input)->getIdnUriString());
+    }
+
+    public static function idnUriProvider(): iterable
+    {
+        yield 'basic uri stays the same' => [
+            'expected' => 'http://example.com/foo/bar',
+            'input' => 'http://example.com/foo/bar',
+        ];
+
+        yield 'idn host are changed' => [
+            'expected' => "http://bébé.be",
+            'input' => "http://xn--bb-bjab.be",
+        ];
+
+        yield 'idn host are the same' => [
+            'expected' => "http://bébé.be",
+            'input' => "http://bébé.be",
+        ];
+
+        yield 'the rest of the URI is not affected and uses RFC3986 rules' => [
+            'expected' => "http://bébé.be?q=toto%20le%20h%C3%A9ros",
+            'input' => "http://bébé.be:80?q=toto le héros",
+        ];
     }
 }
