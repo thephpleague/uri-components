@@ -50,7 +50,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Stringable|string $uri): self
+    public static function fromUri(#[SensitiveParameter] Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
         $component = $uri->getUserInfo();
@@ -64,7 +64,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(Stringable|string|null $authority): self
+    public static function fromAuthority(#[SensitiveParameter] Stringable|string|null $authority): self
     {
         return match (true) {
             $authority instanceof AuthorityInterface => self::new($authority->getUserInfo()),
@@ -80,7 +80,7 @@ final class UserInfo extends Component implements UserInfoInterface
      *
      * @param array{user? : ?string, pass? : ?string} $components
      */
-    public static function fromComponents(array $components): self
+    public static function fromComponents(#[SensitiveParameter] array $components): self
     {
         $components += ['user' => null, 'pass' => null];
 
@@ -93,7 +93,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Creates a new instance from an encoded string.
      */
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(#[SensitiveParameter] Stringable|string|null $value = null): self
     {
         if ($value instanceof UriComponentInterface) {
             $value = $value->value();
@@ -113,9 +113,8 @@ final class UserInfo extends Component implements UserInfoInterface
     public function value(): ?string
     {
         return match (true) {
-            null === $this->username => null,
-            null === $this->password => Encoder::encodeUser($this->username),
-            default => Encoder::encodeUser($this->username).':'.Encoder::encodePassword($this->password),
+            null === $this->password => $this->getUsername(),
+            default => $this->getUsername().':'.$this->getPassword(),
         };
     }
 
@@ -132,6 +131,22 @@ final class UserInfo extends Component implements UserInfoInterface
     public function getPass(): ?string
     {
         return $this->password;
+    }
+
+    public function getUsername(): ?string
+    {
+        return match ($this->username) {
+            null => null,
+            default => Encoder::encodeUser($this->username)
+        };
+    }
+
+    public function getPassword(): ?string
+    {
+        return match ($this->password) {
+            null => null,
+            default => Encoder::encodePassword($this->password)
+        };
     }
 
     /**
@@ -176,7 +191,7 @@ final class UserInfo extends Component implements UserInfoInterface
      *
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function createFromUri(#[SensitiveParameter] Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);
     }
@@ -191,7 +206,7 @@ final class UserInfo extends Component implements UserInfoInterface
      *
      * Create a new instance from an Authority object.
      */
-    public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
+    public static function createFromAuthority(#[SensitiveParameter] AuthorityInterface|Stringable|string $authority): self
     {
         return self::fromAuthority($authority);
     }
@@ -206,7 +221,7 @@ final class UserInfo extends Component implements UserInfoInterface
      *
      * Creates a new instance from an encoded string.
      */
-    public static function createFromString(Stringable|string $userInfo): self
+    public static function createFromString(#[SensitiveParameter] Stringable|string $userInfo): self
     {
         return self::new($userInfo);
     }

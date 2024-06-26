@@ -26,6 +26,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
+use League\Uri\IPv6\Converter;
 use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -43,6 +44,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     {
     }
 
+    /**
+     * @param Stringable|string $uri
+     * @param UriFactoryInterface|null $uriFactory Deprecated, will be removed in the next major release
+     *
+     * @return static
+     */
     public static function from(Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
     {
         return new static(match (true) {
@@ -443,6 +450,20 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
             $currentHost === $hostIp  => $this,
             default => new static($this->uri->withHost($hostIp)),
         };
+    }
+
+    public function hostToIpv6Compressed(): static
+    {
+        return new static($this->uri->withHost(
+            Converter::compress($this->uri->getHost())
+        ));
+    }
+
+    public function hostToIpv6Expanded(): static
+    {
+        return new static($this->uri->withHost(
+            Converter::expand($this->uri->getHost())
+        ));
     }
 
     /**

@@ -859,4 +859,43 @@ final class ModifierTest extends TestCase
             'input' => "http://bébé.be:80?q=toto le héros",
         ];
     }
+
+    #[DataProvider('ipv6NormalizationUriProvider')]
+    public function testItCanExpandOrCompressTheHost(
+        string $inputUri,
+        string $compressedUri,
+        string $expandedUri,
+    ): void {
+        $uri = Modifier::from(Http::new($inputUri));
+
+        self::assertSame($compressedUri, $uri->hostToIpv6Compressed()->getUriString());
+        self::assertSame($expandedUri, $uri->hostToIpv6Expanded()->getUriString());
+    }
+
+    public static function ipv6NormalizationUriProvider(): iterable
+    {
+        yield 'no change happen with a non IP host' => [
+            'inputUri' => 'https://example.com/foo/bar',
+            'compressedUri' => 'https://example.com/foo/bar',
+            'expandedUri' => 'https://example.com/foo/bar',
+        ];
+
+        yield 'no change happen with a IPv4 host' => [
+            'inputUri' => 'https://127.0.0.1/foo/bar',
+            'compressedUri' => 'https://127.0.0.1/foo/bar',
+            'expandedUri' => 'https://127.0.0.1/foo/bar',
+        ];
+
+        yield 'IPv6 gets expanded if needed' => [
+            'inputUri' => 'https://[fe80::a%25en1]/foo/bar',
+            'compressedUri' => 'https://[fe80::a%25en1]/foo/bar',
+            'expandedUri' => 'https://[fe80:0000:0000:0000:0000:0000:0000:000a%25en1]/foo/bar',
+        ];
+
+        yield 'IPv6 gets compressed if needed' => [
+            'inputUri' => 'https://[0000:0000:0000:0000:0000:0000:0000:0001]/foo/bar',
+            'compressedUri' => 'https://[::1]/foo/bar',
+            'expandedUri' => 'https://[0000:0000:0000:0000:0000:0000:0000:0001]/foo/bar',
+        ];
+    }
 }

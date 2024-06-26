@@ -25,7 +25,6 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
 use League\Uri\Uri;
-use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
 use function array_is_list;
@@ -202,7 +201,6 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     public static function fromUri(Stringable|string $uri): self
     {
         $query = match (true) {
-            $uri instanceof Psr7UriInterface,
             $uri instanceof UriInterface => $uri->getQuery(),
             default => Uri::new($uri)->getQuery(),
         };

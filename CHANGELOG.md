@@ -8,14 +8,17 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - `UrlSearchParams::uniqueKeyCount`
 - `Modifier::getIdnUriString`
+- `Modifier::hostToIpv6Compressed`
+- `Modifier::hostToIpv6Expanded`
 
 ### Fixed
 
-- None
+- Adding `SensitiveParameter` attribute in the `UserInfo` and the `Authority` class.
+- Remove Usage of PSR-7 `UriInterface` in `UrlSearchParams` class
 
 ### Deprecated
 
-- None
+- Usage of PSR-7 `UriFactoryInterface` is deprecated in `Modifier` class
 
 ### Removed
 

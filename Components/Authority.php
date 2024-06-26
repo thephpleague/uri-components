@@ -21,6 +21,7 @@ use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use SensitiveParameter;
 use Stringable;
 
 final class Authority extends Component implements AuthorityInterface
@@ -32,7 +33,7 @@ final class Authority extends Component implements AuthorityInterface
     public function __construct(
         Stringable|string|null $host,
         Stringable|string|int|null $port = null,
-        Stringable|string|null $userInfo = null
+        #[SensitiveParameter] Stringable|string|null $userInfo = null
     ) {
         $this->host = !$host instanceof HostInterface ? Host::new($host) : $host;
         $this->port = !$port instanceof PortInterface ? Port::new($port) : $port;
@@ -45,7 +46,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(#[SensitiveParameter] Stringable|string|null $value = null): self
     {
         $components = UriString::parseAuthority(self::filterComponent($value));
 
@@ -62,7 +63,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Stringable|string $uri): self
+    public static function fromUri(#[SensitiveParameter] Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
         $authority = $uri->getAuthority();
@@ -87,7 +88,7 @@ final class Authority extends Component implements AuthorityInterface
      *     port? : ?int
      * } $components
      */
-    public static function fromComponents(array $components): self
+    public static function fromComponents(#[SensitiveParameter] array $components): self
     {
         $components += ['user' => null, 'pass' => null, 'host' => null, 'port' => null];
 
@@ -104,7 +105,7 @@ final class Authority extends Component implements AuthorityInterface
     }
 
     private static function getAuthorityValue(
-        UserInfoInterface $userInfo,
+        #[SensitiveParameter] UserInfoInterface $userInfo,
         HostInterface $host,
         PortInterface $port
     ): ?string {
@@ -180,7 +181,7 @@ final class Authority extends Component implements AuthorityInterface
         };
     }
 
-    public function withUserInfo(Stringable|string|null $user, Stringable|string|null $password = null): AuthorityInterface
+    public function withUserInfo(Stringable|string|null $user, #[SensitiveParameter] Stringable|string|null $password = null): AuthorityInterface
     {
         $userInfo = new UserInfo($user, $password);
 
@@ -200,7 +201,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * Create a new instance from a URI object.
      */
-    public static function createFromUri(UriInterface|Psr7UriInterface $uri): self
+    public static function createFromUri(#[SensitiveParameter] UriInterface|Psr7UriInterface $uri): self
     {
         return self::fromUri($uri);
     }
@@ -215,7 +216,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * Returns a new instance from a string or a stringable object.
      */
-    public static function createFromString(Stringable|string $authority): self
+    public static function createFromString(#[SensitiveParameter] Stringable|string $authority): self
     {
         return self::new($authority);
     }
@@ -255,7 +256,7 @@ final class Authority extends Component implements AuthorityInterface
      *     port? : ?int
      * } $components
      */
-    public static function createFromComponents(array $components): self
+    public static function createFromComponents(#[SensitiveParameter] array $components): self
     {
         return self::fromComponents($components);
     }
