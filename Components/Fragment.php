@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
@@ -42,11 +43,10 @@ final class Fragment extends Component implements FragmentInterface
     public static function fromUri(Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
-        $component = $uri->getFragment();
 
         return match (true) {
-            $uri instanceof UriInterface, '' !== $component => new self($component),
-            default => new self(null),
+            $uri instanceof UriInterface => new self($uri->getFragment()),
+            default => new self(Uri::new($uri)->getFragment()),
         };
     }
 

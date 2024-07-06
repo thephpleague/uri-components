@@ -19,6 +19,7 @@ use League\Uri\Contracts\PortInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
@@ -66,12 +67,10 @@ final class Authority extends Component implements AuthorityInterface
     public static function fromUri(#[SensitiveParameter] Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
-        $authority = $uri->getAuthority();
 
         return match (true) {
-            $uri instanceof UriInterface,
-            '' !== $authority => self::new($authority),
-            default => self::new(),
+            $uri instanceof UriInterface => self::new($uri->getAuthority()),
+            default => self::new(Uri::new($uri)->getAuthority()),
         };
     }
 

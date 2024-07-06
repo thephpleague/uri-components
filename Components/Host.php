@@ -23,6 +23,7 @@ use League\Uri\Idna\Converter as IdnConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
 use League\Uri\IPv4Normalizer;
 use League\Uri\IPv6\Converter;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
@@ -296,11 +297,10 @@ final class Host extends Component implements IpHostInterface
     public static function fromUri(Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
-        $component = $uri->getHost();
 
         return match (true) {
-            $uri instanceof UriInterface, '' !== $component => new self($component),
-            default => new self(null),
+            $uri instanceof UriInterface => new self($uri->getHost()),
+            default => new self(Uri::new($uri)->getHost()),
         };
     }
 

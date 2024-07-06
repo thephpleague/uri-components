@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
@@ -66,6 +67,9 @@ final class Path extends Component implements PathInterface
     public static function fromUri(Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
+        if (!$uri instanceof UriInterface) {
+            $uri = Uri::new($uri);
+        }
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
 

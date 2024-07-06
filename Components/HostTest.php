@@ -231,7 +231,7 @@ final class HostTest extends TestCase
             ],
             'PSR-7 URI object with empty string host' => [
                 'uri' => Http::new('file:///path/to/you'),
-                'expected' => null,
+                'expected' => '',
             ],
             'League URI object' => [
                 'uri' => Uri::new('http://example.com?foo=bar'),

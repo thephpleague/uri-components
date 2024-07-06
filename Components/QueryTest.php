@@ -753,7 +753,7 @@ final class QueryTest extends TestCase
             ],
             'PSR-7 URI object with empty string query' => [
                 'uri' => Http::new('http://example.com?'),
-                'expected' => null,
+                'expected' => '',
             ],
             'League URI object' => [
                 'uri' => Uri::new('http://example.com?foo=bar'),

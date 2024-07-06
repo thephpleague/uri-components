@@ -19,6 +19,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
@@ -53,11 +54,10 @@ final class UserInfo extends Component implements UserInfoInterface
     public static function fromUri(#[SensitiveParameter] Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
-        $component = $uri->getUserInfo();
 
         return match (true) {
-            $uri instanceof UriInterface, '' !== $component => self::new($component),
-            default => self::new(),
+            $uri instanceof UriInterface => new self($uri->getUsername(), $uri->getPassword()),
+            default => self::new(Uri::new($uri)->getUserInfo()),
         };
     }
 

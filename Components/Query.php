@@ -20,6 +20,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
+use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Traversable;
@@ -96,11 +97,10 @@ final class Query extends Component implements QueryInterface
     public static function fromUri(Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
-        $component = $uri->getQuery();
 
         return match (true) {
-            $uri instanceof UriInterface, '' !== $component => new self($component),
-            default => new self(null),
+            $uri instanceof UriInterface => new self($uri->getQuery()),
+            default => new self(Uri::new($uri)->getQuery()),
         };
     }
 

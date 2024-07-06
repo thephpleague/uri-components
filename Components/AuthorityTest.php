@@ -237,8 +237,8 @@ final class AuthorityTest extends TestCase
             ],
             'PSR-7 URI object with empty string authority' => [
                 'uri' => Http::new('file:///path/to/the/sky'),
-                'expected' => null,
-                'components' => ['user' => null, 'pass' => null, 'host' => null, 'port' => null],
+                'expected' => '',
+                'components' => ['user' => null, 'pass' => null, 'host' => '', 'port' => null],
             ],
             'League URI object' => [
                 'uri' => Uri::new('http://foo:bar@example.com:83?foo=bar'),
