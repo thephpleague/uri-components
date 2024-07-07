@@ -106,4 +106,48 @@ final class SchemeTest extends TestCase
             ],
         ];
     }
+
+    #[DataProvider('getSchemeInfoProvider')]
+    public function it_can_detect_information_about_special_schemes(
+        ?string $scheme,
+        bool $isHttp,
+        bool $isSsl,
+        bool $isSpecial,
+        Port $defaultPort,
+    ): void {
+        self::assertSame($isHttp, Scheme::new($scheme)->isHttp());
+        self::assertSame($isSsl, Scheme::new($scheme)->isSsl());
+        self::assertSame($isSpecial, Scheme::new($scheme)->isSpecial());
+        self::assertSame($defaultPort, Scheme::new($scheme)->defaultPort());
+    }
+
+    public static function getSchemeInfoProvider(): \Generator
+    {
+        yield 'detect an HTTP URL' => [
+            'scheme' => 'http',
+            'isHttp' => true,
+            'isWebsocket' => false,
+            'isSsl' => false,
+            'isSpecial' => true,
+            Port::new(80),
+        ];
+
+        yield 'detect an WSS URL' => [
+            'scheme' => 'wss',
+            'isHttp' => false,
+            'isWebsocket' => false,
+            'isSsl' => true,
+            'isSpecial' => true,
+            Port::new(443),
+        ];
+
+        yield 'detect an email URL' => [
+            'scheme' => 'email',
+            'isHttp' => false,
+            'isWebsocket' => false,
+            'isSsl' => false,
+            'isSpecial' => false,
+            Port::new(null),
+        ];
+    }
 }

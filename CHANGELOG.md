@@ -10,6 +10,10 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::getIdnUriString`
 - `Modifier::hostToIpv6Compressed`
 - `Modifier::hostToIpv6Expanded`
+- `Scheme::isHttp`
+- `Scheme::isWebsocket`
+- `Scheme::isSsl`
+- `Scheme::isSpecial`
 
 ### Fixed
 

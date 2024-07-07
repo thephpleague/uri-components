@@ -19,12 +19,30 @@ use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
+use function array_key_exists;
+use function in_array;
 use function preg_match;
 use function sprintf;
 use function strtolower;
 
 final class Scheme extends Component
 {
+    /**
+     * Supported schemes and corresponding default port.
+     *
+     * @var array<string, int|null>
+     */
+    private const SCHEME_DEFAULT_PORT = [
+        'data' => null,
+        'file' => null,
+        'ftp' => 21,
+        'gopher' => 70,
+        'http' => 80,
+        'https' => 443,
+        'ws' => 80,
+        'wss' => 443,
+    ];
+
     private const REGEXP_SCHEME = ',^[a-z]([-a-z0-9+.]+)?$,i';
 
     private readonly ?string $scheme;
@@ -32,6 +50,32 @@ final class Scheme extends Component
     private function __construct(Stringable|string|null $scheme)
     {
         $this->scheme = $this->validate($scheme);
+    }
+
+    public function isWebsocket(): bool
+    {
+        return in_array($this->scheme, ['ws', 'wss'], true);
+    }
+
+    public function isHttp(): bool
+    {
+        return in_array($this->scheme, ['http', 'https'], true);
+    }
+
+    public function isSsl(): bool
+    {
+        return in_array($this->scheme, ['https', 'wss'], true);
+    }
+
+    public function isSpecial(): bool
+    {
+        return null !== $this->scheme
+            && array_key_exists($this->scheme, self::SCHEME_DEFAULT_PORT);
+    }
+
+    public function defaultPort(): Port
+    {
+        return Port::new(self::SCHEME_DEFAULT_PORT[$this->scheme] ?? null);
     }
 
     /**
@@ -50,7 +94,7 @@ final class Scheme extends Component
 
         static $inMemoryCache = [];
         if (isset($inMemoryCache[$fScheme])) {
-            return $inMemoryCache[$fScheme];
+            return $fScheme;
         }
 
         if (1 !== preg_match(self::REGEXP_SCHEME, $fScheme)) {
@@ -60,8 +104,9 @@ final class Scheme extends Component
         if (100 < count($inMemoryCache)) {
             unset($inMemoryCache[array_key_first($inMemoryCache)]);
         }
+        $inMemoryCache[$fScheme] = 1;
 
-        return $inMemoryCache[$fScheme] = $fScheme;
+        return $fScheme;
     }
 
     public static function new(Stringable|string|null $value = null): self
@@ -91,7 +136,6 @@ final class Scheme extends Component
     {
         return $this->value().(null === $this->scheme ? '' : ':');
     }
-
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.

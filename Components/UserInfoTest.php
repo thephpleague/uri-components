@@ -205,7 +205,7 @@ final class UserInfoTest extends TestCase
             ],
             'PSR-7 URI object with empty string user info' => [
                 'uri' => Http::new('http://@example.com?foo=bar'),
-                'expected' => '',
+                'expected' => null,
             ],
             'League URI object' => [
                 'uri' => Uri::new('http://foo:bar@example.com?foo=bar'),
