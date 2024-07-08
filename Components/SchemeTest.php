@@ -111,14 +111,18 @@ final class SchemeTest extends TestCase
     public function it_can_detect_information_about_special_schemes(
         ?string $scheme,
         bool $isHttp,
+        bool $isWebsocket,
         bool $isSsl,
         bool $isSpecial,
         Port $defaultPort,
     ): void {
-        self::assertSame($isHttp, Scheme::new($scheme)->isHttp());
-        self::assertSame($isSsl, Scheme::new($scheme)->isSsl());
-        self::assertSame($isSpecial, Scheme::new($scheme)->isSpecial());
-        self::assertSame($defaultPort, Scheme::new($scheme)->defaultPort());
+        $schemeObject = Scheme::new($scheme);
+
+        self::assertSame($isHttp, $schemeObject->isHttp());
+        self::assertSame($isWebsocket, $schemeObject->isWebsocket());
+        self::assertSame($isSsl, $schemeObject->isSsl());
+        self::assertSame($isSpecial, $schemeObject->isSpecial());
+        self::assertSame($defaultPort, $schemeObject->defaultPort());
     }
 
     public static function getSchemeInfoProvider(): \Generator
@@ -135,7 +139,7 @@ final class SchemeTest extends TestCase
         yield 'detect an WSS URL' => [
             'scheme' => 'wss',
             'isHttp' => false,
-            'isWebsocket' => false,
+            'isWebsocket' => true,
             'isSsl' => true,
             'isSpecial' => true,
             Port::new(443),
