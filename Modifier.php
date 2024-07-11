@@ -77,7 +77,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
             return $this->getUriString();
         }
 
-        $components = $this->uri instanceof UriInterface ? $this->uri->getComponents() : UriString::parse($this->uri);
+        $components = $this->uri instanceof UriInterface ? $this->uri->toComponents() : UriString::parse($this->uri);
         $components['host'] = $host;
 
         return UriString::build($components);
