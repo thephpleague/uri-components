@@ -47,10 +47,7 @@ final class Path extends Component implements PathInterface
      */
     private function validate(Stringable|string $path): string
     {
-        /** @var string $path */
-        $path = $this->validateComponent($path);
-
-        return $path;
+        return (string) $this->validateComponent($path);
     }
 
     /**
@@ -66,7 +63,6 @@ final class Path extends Component implements PathInterface
      */
     public static function fromUri(Stringable|string $uri): self
     {
-        $uri = self::filterUri($uri);
         if (!$uri instanceof UriInterface) {
             $uri = Uri::new($uri);
         }
