@@ -11,6 +11,7 @@
 
 namespace League\Uri\Components;
 
+use Generator;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
@@ -125,7 +126,7 @@ final class SchemeTest extends TestCase
         self::assertSame($defaultPort, $schemeObject->defaultPort());
     }
 
-    public static function getSchemeInfoProvider(): \Generator
+    public static function getSchemeInfoProvider(): Generator
     {
         yield 'detect an HTTP URL' => [
             'scheme' => 'http',

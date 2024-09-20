@@ -17,7 +17,6 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- Adding `SensitiveParameter` attribute in the `UserInfo` and the `Authority` class.
 - Remove Usage of PSR-7 `UriInterface` in `UrlSearchParams` class
 - Normalizes `fromUri` to return the same value for the component if the URI object has the same string representation.
 

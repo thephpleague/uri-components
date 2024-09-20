@@ -45,10 +45,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     }
 
     /**
-     * @param Stringable|string $uri
      * @param UriFactoryInterface|null $uriFactory Deprecated, will be removed in the next major release
      *
-     * @return static
      */
     public static function from(Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
     {

@@ -845,18 +845,18 @@ final class ModifierTest extends TestCase
         ];
 
         yield 'idn host are changed' => [
-            'expected' => "http://bébé.be",
-            'input' => "http://xn--bb-bjab.be",
+            'expected' => 'http://bébé.be',
+            'input' => 'http://xn--bb-bjab.be',
         ];
 
         yield 'idn host are the same' => [
-            'expected' => "http://bébé.be",
-            'input' => "http://bébé.be",
+            'expected' => 'http://bébé.be',
+            'input' => 'http://bébé.be',
         ];
 
         yield 'the rest of the URI is not affected and uses RFC3986 rules' => [
-            'expected' => "http://bébé.be?q=toto%20le%20h%C3%A9ros",
-            'input' => "http://bébé.be:80?q=toto le héros",
+            'expected' => 'http://bébé.be?q=toto%20le%20h%C3%A9ros',
+            'input' => 'http://bébé.be:80?q=toto le héros',
         ];
     }
 
