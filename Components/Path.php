@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
@@ -169,6 +170,7 @@ final class Path extends Component implements PathInterface
      *
      * Returns a new instance from a string or a stringable object.
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string|int $path): self
     {
         return self::new((string) $path);
@@ -184,6 +186,7 @@ final class Path extends Component implements PathInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);

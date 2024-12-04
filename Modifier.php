@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use Deprecated;
 use JsonSerializable;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\Domain;
@@ -46,7 +47,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
 
     /**
      * @param UriFactoryInterface|null $uriFactory Deprecated, will be removed in the next major release
-     *
      */
     public static function from(Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
     {
@@ -102,7 +102,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
 
     /**
      * Change the encoding of the query.
-     *
      */
     public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int|null $from = null): static
     {
@@ -207,7 +206,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     }
 
     /**
-     *  Merge PHP query parameters with the existing URI query.
+     * Merge PHP query parameters with the existing URI query.
      */
     public function mergeQueryParameters(object|array $parameters): self
     {
@@ -795,6 +794,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * Remove query data according to their key name.
      */
+    #[Deprecated(message:'use League\Uri\Modifier::removeQueryParameters() instead', since:'league/uri-components:7.2.0')]
     public function removeParams(string ...$keys): static
     {
         return $this->removeQueryParameters(...$keys);
@@ -812,6 +812,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      * A pair is considered empty if it's name is the empty string
      * and its value is either the empty string or the null value
      */
+    #[Deprecated(message:'use League\Uri\Modifier::removeEmptyQueryPairs() instead', since:'league/uri-components:7.2.0')]
     public function removeEmptyPairs(): static
     {
         return $this->removeEmptyQueryPairs();
@@ -826,6 +827,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * Remove query data according to their key name.
      */
+    #[Deprecated(message:'use League\Uri\Modifier::removeQueryPairsByKey() instead', since:'league/uri-components:7.2.0')]
     public function removePairs(string ...$keys): static
     {
         return $this->removeQueryPairsByKey(...$keys);
@@ -840,6 +842,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
      *
      * Remove query data according to their key name.
      */
+    #[Deprecated(message:'use League\Uri\Modifier::removeQueryPairsByKey() instead', since:'league/uri-components:7.2.0')]
     public function removeQueryPairs(string ...$keys): static
     {
         return $this->removeQueryPairsByKey(...$keys);

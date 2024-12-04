@@ -17,6 +17,7 @@ use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use const PHP_QUERY_RFC3986;
@@ -897,5 +898,18 @@ final class ModifierTest extends TestCase
             'compressedUri' => 'https://[::1]/foo/bar',
             'expandedUri' => 'https://[0000:0000:0000:0000:0000:0000:0000:0001]/foo/bar',
         ];
+    }
+
+    #[Test]
+    public function it_will_remove_empty_pairs_fix_issue_133(): void
+    {
+        $removeEmptyPairs = fn (string $str): ?string => Modifier::from($str)
+            ->removeEmptyQueryPairs()
+            ->getUri()
+            ->getQuery();
+
+        self::assertNull($removeEmptyPairs('https://a.b/c?d='));
+        self::assertNull($removeEmptyPairs('https://a.b/c?=d'));
+        self::assertNull($removeEmptyPairs('https://a.b/c?='));
     }
 }

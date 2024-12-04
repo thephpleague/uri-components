@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriInterface;
@@ -415,6 +416,7 @@ final class Host extends Component implements IpHostInterface
      *
      * @codeCoverageIgnore
      */
+    #[Deprecated(message:'use League\Uri\Components\Host::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string|null $host): self
     {
         return self::new($host);
@@ -430,6 +432,7 @@ final class Host extends Component implements IpHostInterface
      *
      * Returns a new instance from null.
      */
+    #[Deprecated(message:'use League\Uri\Components\Host::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromNull(): self
     {
         return self::new();
@@ -448,6 +451,7 @@ final class Host extends Component implements IpHostInterface
      * Returns a host from an IP address.
      *
      */
+    #[Deprecated(message:'use League\Uri\Components\Host::fromIp() instead', since:'league/uri-components:7.0.0')]
     public static function createFromIp(string $ip, string $version = '', ?IPv4Normalizer $normalizer = null): self
     {
         return self::fromIp($ip, $version);
@@ -463,6 +467,7 @@ final class Host extends Component implements IpHostInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Host::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);
@@ -478,6 +483,7 @@ final class Host extends Component implements IpHostInterface
      *
      * Create a new instance from an Authority object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Host::fromAuthority() instead', since:'league/uri-components:7.0.0')]
     public static function createFromAuthority(Stringable|string $authority): self
     {
         return self::fromAuthority($authority);

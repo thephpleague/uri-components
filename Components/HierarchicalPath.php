@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use Iterator;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\SegmentedPathInterface;
@@ -447,12 +448,13 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.0.0
-     * @see Domain::getIterator()
+     * @see HierarchicalPath::getIterator()
      *
      * @codeCoverageIgnore
      *
      * Returns a new instance from a string or a stringable object.
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::getIterator() instead', since:'league/uri-components:7.0.0')]
     public function segments(): array
     {
         return $this->segments;
@@ -468,6 +470,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * Returns a new instance from a string or a stringable object.
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string $path): self
     {
         return self::new($path);
@@ -481,6 +484,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * @codeCoverageIgnore
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromPath(PathInterface $path): self
     {
         return self::new($path);
@@ -498,6 +502,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * @deprecated Since version 7.0.0
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::fromRelative() instead', since:'league/uri-components:7.0.0')]
     public static function createRelativeFromSegments(iterable $segments): self
     {
         return self::fromRelative(...$segments);
@@ -515,6 +520,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * @deprecated Since version 7.0.0
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::fromAbsolute() instead', since:'league/uri-components:7.0.0')]
     public static function createAbsoluteFromSegments(iterable $segments): self
     {
         return self::fromAbsolute(...$segments);
@@ -530,6 +536,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\HierarchicalPath::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);

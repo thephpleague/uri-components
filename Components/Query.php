@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use Iterator;
 use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
@@ -528,6 +529,7 @@ final class Query extends Component implements QueryInterface
      *
      * @deprecated Since version 7.0.0
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::fromVariables() instead', since:'league/uri-components:7.0.0')]
     public static function createFromParams(iterable|object $params, string $separator = '&'): self
     {
         return self::fromParameters($params, $separator);
@@ -547,6 +549,7 @@ final class Query extends Component implements QueryInterface
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      * @param non-empty-string $separator
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::fromPairs() instead', since:'league/uri-components:7.0.0')]
     public static function createFromPairs(iterable $pairs, string $separator = '&'): self
     {
         return self::fromPairs($pairs, $separator);
@@ -562,6 +565,7 @@ final class Query extends Component implements QueryInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);
@@ -579,6 +583,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::fromRFC3986() instead', since:'league/uri-components:7.0.0')]
     public static function createFromRFC3986(Stringable|string|int|null $query = '', string $separator = '&'): self
     {
         if (null !== $query) {
@@ -600,6 +605,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::fromRFC1738() instead', since:'league/uri-components:7.0.0')]
     public static function createFromRFC1738(Stringable|string|int|null $query = '', string $separator = '&'): self
     {
         if (is_int($query)) {
@@ -620,6 +626,7 @@ final class Query extends Component implements QueryInterface
      *
      * Returns the query as a collection of PHP variables or a single variable assign to a specific key
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::parameter() or League\Uri\Components\Query::parameters() instead', since:'league/uri-components:7.0.0')]
     public function params(?string $key = null): mixed
     {
         return match (null) {
@@ -636,6 +643,7 @@ final class Query extends Component implements QueryInterface
      *
      * @codeCoverageIgnore
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::withoutParameters() instead', since:'league/uri-components:7.0.0')]
     public function withoutParams(string ...$names): QueryInterface
     {
         return $this->withoutParameters(...$names);
@@ -644,11 +652,12 @@ final class Query extends Component implements QueryInterface
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
-     * @deprecated Since version 7.0.0
+     * @deprecated Since version 7.3.0
      * @see Query::withoutPairByKey()
      *
      * @codeCoverageIgnore
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::withoutPairByKey() instead', since:'league/uri-components:7.3.0')]
     public function withoutPair(string ...$keys): QueryInterface
     {
         return $this->withoutPairByKey(...$keys);
@@ -666,6 +675,7 @@ final class Query extends Component implements QueryInterface
      *
      * @deprecated Since version 7.0.0
      */
+    #[Deprecated(message:'use League\Uri\Components\Query::fromVariable() instead', since:'league/uri-components:7.0.0')]
     public static function fromParameters(object|array $parameters, string $separator = '&'): self
     {
         if ($parameters instanceof QueryInterface) {

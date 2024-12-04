@@ -107,7 +107,7 @@ final class IPv4Normalizer
      * @throws MissingFeature If no IPv4Calculator implementing object can be used on the platform
      *
      * @codeCoverageIgnore
-     *@see Converter::fromEnvironment()
+     * @see Converter::fromEnvironment()
      *
      * @codeCoverageIgnore
      *

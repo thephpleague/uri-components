@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\PortInterface;
 use League\Uri\Contracts\UriInterface;
@@ -111,6 +112,7 @@ final class Port extends Component implements PortInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Port::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);
@@ -126,6 +128,7 @@ final class Port extends Component implements PortInterface
      *
      * Create a new instance from an Authority object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Port::fromAuthority() instead', since:'league/uri-components:7.0.0')]
     public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
         return self::fromAuthority($authority);
@@ -139,6 +142,7 @@ final class Port extends Component implements PortInterface
      *
      * @codeCoverageIgnore
      */
+    #[Deprecated(message:'use League\Uri\Components\Port::new() instead', since:'league/uri-components:7.0.0')]
     public static function fromInt(int $port): self
     {
         return self::new($port);

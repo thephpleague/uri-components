@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
@@ -145,6 +146,7 @@ final class Scheme extends Component
      *
      * @codeCoverageIgnore
      */
+    #[Deprecated(message:'use League\Uri\Components\Scheme::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string $scheme): self
     {
         return self::new($scheme);
@@ -160,6 +162,7 @@ final class Scheme extends Component
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Scheme::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);

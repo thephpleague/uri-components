@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use Iterator;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\DomainHostInterface;
@@ -304,6 +305,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * Returns a new instance from a string or a stringable object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Domain::getIterator() instead', since:'league/uri-components:7.0.0')]
     public function labels(): array
     {
         return $this->labels;
@@ -319,6 +321,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * Returns a new instance from a string or a stringable object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Domain::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string $host): self
     {
         return self::new($host);
@@ -336,6 +339,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * @throws TypeError If a label is the null value
      */
+    #[Deprecated(message:'use League\Uri\Components\Domain::fromLabels() instead', since:'league/uri-components:7.0.0')]
     public static function createFromLabels(iterable $labels): self
     {
         return self::fromLabels(...$labels);
@@ -351,6 +355,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Domain::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);
@@ -366,6 +371,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * Create a new instance from an Authority object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Domain::fromAuthority() instead', since:'league/uri-components:7.0.0')]
     public static function createFromAuthority(AuthorityInterface|Stringable|string $authority): self
     {
         return self::fromAuthority($authority);
@@ -381,6 +387,7 @@ final class Domain extends Component implements DomainHostInterface
      *
      * Returns a new instance from an iterable structure.
      */
+    #[Deprecated(message:'use League\Uri\Components\Domain::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromHost(HostInterface $host): self
     {
         return self::new($host);

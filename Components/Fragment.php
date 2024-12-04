@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
@@ -76,6 +77,7 @@ final class Fragment extends Component implements FragmentInterface
      *
      * @codeCoverageIgnore
      */
+    #[Deprecated(message:'use League\Uri\Components\Fragment::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string $fragment): self
     {
         return self::new($fragment);
@@ -91,6 +93,7 @@ final class Fragment extends Component implements FragmentInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Fragment::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);

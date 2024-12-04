@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use ArgumentCountError;
 use Closure;
 use Countable;
+use Deprecated;
 use Iterator;
 use IteratorAggregate;
 use League\Uri\Contracts\QueryInterface;
@@ -501,6 +502,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * @codeCoverageIgnore
      *
      */
+    #[Deprecated(message:'use League\Uri\Components\URLSearchParams::fromVariable() instead', since:'league/uri-components:7.4.0')]
     public static function fromParameters(object|array $parameters): self
     {
         return new self(Query::fromParameters($parameters));

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\PortInterface;
@@ -200,6 +201,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Authority::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(UriInterface|Psr7UriInterface $uri): self
     {
         return self::fromUri($uri);
@@ -215,6 +217,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * Returns a new instance from a string or a stringable object.
      */
+    #[Deprecated(message:'use League\Uri\Components\Authority::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string $authority): self
     {
         return self::new($authority);
@@ -230,6 +233,7 @@ final class Authority extends Component implements AuthorityInterface
      *
      * Returns a new instance from null.
      */
+    #[Deprecated(message:'use League\Uri\Components\Authority::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromNull(): self
     {
         return self::new();
@@ -255,6 +259,7 @@ final class Authority extends Component implements AuthorityInterface
      *     port? : ?int
      * } $components
      */
+    #[Deprecated(message:'use League\Uri\Components\Authority::fromComponents() instead', since:'league/uri-components:7.0.0')]
     public static function createFromComponents(array $components): self
     {
         return self::fromComponents($components);

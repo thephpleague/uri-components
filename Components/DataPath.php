@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use Deprecated;
 use finfo;
 use League\Uri\Contracts\DataPathInterface;
 use League\Uri\Contracts\PathInterface;
@@ -380,6 +381,7 @@ final class DataPath extends Component implements DataPathInterface
      *
      * Returns a new instance from a string or a stringable object.
      */
+    #[Deprecated(message:'use League\Uri\Components\DataPath::new() instead', since:'league/uri-components:7.0.0')]
     public static function createFromString(Stringable|string $path): self
     {
         return self::new($path);
@@ -399,6 +401,7 @@ final class DataPath extends Component implements DataPathInterface
      *
      * @throws SyntaxError If the File is not readable
      */
+    #[Deprecated(message:'use League\Uri\Components\DataPath::fromFilePath() instead', since:'league/uri-components:7.0.0')]
     public static function createFromFilePath(string $path, $context = null): self
     {
         return self::fromFileContents($path, $context);
@@ -414,6 +417,7 @@ final class DataPath extends Component implements DataPathInterface
      *
      * Create a new instance from a URI object.
      */
+    #[Deprecated(message:'use League\Uri\Components\DataPath::fromUri() instead', since:'league/uri-components:7.0.0')]
     public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);
