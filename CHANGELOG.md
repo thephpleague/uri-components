@@ -2,7 +2,7 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## [Next](https://github.com/thephpleague/uri-components/compare/7.4.1...master) - TBD
+## [7.5.0](https://github.com/thephpleague/uri-components/compare/7.4.1...7.5.0) - 2024-12-08
 
 ### Added
 
@@ -14,6 +14,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Scheme::isWebsocket`
 - `Scheme::isSsl`
 - `Scheme::isSpecial`
+- Using PHP8.4 `Deprecated` attribute to signal deprecated public API methods and constants.
 
 ### Fixed
 
