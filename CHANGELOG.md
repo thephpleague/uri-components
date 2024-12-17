@@ -2,6 +2,28 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## [Next](https://github.com/thephpleague/uri-components/compare/7.5.1...master) - TBD
+
+### Added
+
+- `Component::when` conditional method to ease component building logic.
+- `URLSearchParams::when` conditional method to ease component building logic.
+- `Modifier::when` conditional method to ease component building logic.
+- `Modifier::with*` method from the underlying `Uri` object are proxy to improve DX.
+- `Modifier::displayUriString` shows the URI in a human-readable format which may be an invalid URI.
+
+### Fixed
+
+- None
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
 ## [7.5.0](https://github.com/thephpleague/uri-components/compare/7.4.1...7.5.0) - 2024-12-08
 
 ### Added

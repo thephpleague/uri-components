@@ -155,6 +155,11 @@ final class Query extends Component implements QueryInterface
         return QueryString::buildFromPairs($this->pairs, Converter::fromFormData($this->separator));
     }
 
+    public function decoded(): ?string
+    {
+        return Converter::new($this->separator)->toValue($this);
+    }
+
     public function value(): ?string
     {
         return $this->toRFC3986();

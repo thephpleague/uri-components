@@ -835,7 +835,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('idnUriProvider')]
     public function testItReturnsTheCorrectUriString(string $expected, string $input): void
     {
-        self::assertSame($expected, Modifier::from($input)->getIdnUriString());
+        self::assertSame($expected, Modifier::from($input)->displayUriString());
     }
 
     public static function idnUriProvider(): iterable
@@ -856,8 +856,8 @@ final class ModifierTest extends TestCase
         ];
 
         yield 'the rest of the URI is not affected and uses RFC3986 rules' => [
-            'expected' => 'http://bébé.be?q=toto%20le%20h%C3%A9ros',
-            'input' => 'http://bébé.be:80?q=toto le héros',
+            'expected' => 'http://bébé.be?q=toto le héros',
+            'input' => 'http://bébé.be:80?q=toto%20le%20h%C3%A9ros',
         ];
     }
 
@@ -911,5 +911,50 @@ final class ModifierTest extends TestCase
         self::assertNull($removeEmptyPairs('https://a.b/c?d='));
         self::assertNull($removeEmptyPairs('https://a.b/c?=d'));
         self::assertNull($removeEmptyPairs('https://a.b/c?='));
+    }
+
+    #[Test]
+    #[DataProvider('providesUriToDisplay')]
+    public function it_will_generate_the_display_uri_string(string $input, string $output): void
+    {
+        self::assertSame($output, Modifier::from($input)->displayUriString());
+    }
+
+    public static function providesUriToDisplay(): iterable
+    {
+        yield 'empty string' => [
+            'input' => '',
+            'output' => '',
+        ];
+
+        yield 'host IPv6' => [
+            'input' => 'https://[fe80:0000:0000:0000:0000:0000:0000:000a%25en1]/foo/bar',
+            'output' => 'https://[fe80::a%25en1]/foo/bar',
+        ];
+
+        yield 'IPv6 gets expanded if needed' => [
+            'input' => 'http://bébé.be?q=toto%20le%20h%C3%A9ros',
+            'output' => 'http://bébé.be?q=toto le héros',
+        ];
+
+        yield 'complex URI' => [
+            'input' => 'https://xn--google.com/secret/../search?q=%F0%9F%8D%94',
+            'output' => 'https://䕮䕵䕶䕱.com/search?q=🍔',
+        ];
+
+        yield 'basic uri stays the same' => [
+            'input' => 'http://example.com/foo/bar',
+            'output' => 'http://example.com/foo/bar',
+        ];
+
+        yield 'idn host are changed' => [
+            'input' => 'http://xn--bb-bjab.be',
+            'output' => 'http://bébé.be',
+        ];
+
+        yield 'idn host are the same' => [
+            'input' => 'http://bébé.be',
+            'output' => 'http://bébé.be',
+        ];
     }
 }

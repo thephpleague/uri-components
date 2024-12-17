@@ -37,6 +37,7 @@ use function func_get_arg;
 use function func_num_args;
 use function get_object_vars;
 use function is_array;
+use function is_bool;
 use function is_iterable;
 use function is_object;
 use function is_scalar;
@@ -491,6 +492,26 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     public function sort(): void
     {
         $this->updateQuery($this->pairs->sort());
+    }
+
+    /**
+     * Apply the callback if the given "condition" is (or resolves to) true.
+     *
+     * @param (callable($this): bool)|bool $condition
+     * @param callable($this): (self|null) $onSuccess
+     * @param ?callable($this): (self|null) $onFail
+     */
+    public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): self
+    {
+        if (!is_bool($condition)) {
+            $condition = $condition($this);
+        }
+
+        return match (true) {
+            $condition => $onSuccess($this),
+            null !== $onFail => $onFail($this),
+            default => $this,
+        } ?? $this;
     }
 
     /**

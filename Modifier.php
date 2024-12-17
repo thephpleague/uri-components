@@ -13,14 +13,17 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use BadMethodCallException;
 use Deprecated;
 use JsonSerializable;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\Domain;
+use League\Uri\Components\Fragment;
 use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
+use League\Uri\Components\UserInfo;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
@@ -33,12 +36,25 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
+use function array_map;
 use function get_object_vars;
+use function is_bool;
 use function ltrim;
+use function method_exists;
 use function rtrim;
+use function sprintf;
 use function str_ends_with;
 use function str_starts_with;
 
+/**
+ * @method static withScheme(Stringable|string|null $scheme) returns a new instance with the specified scheme.
+ * @method static withUserInfo(Stringable|string|null $user, Stringable|string|null $password = null) returns a new instance with the specified user info.
+ * @method static withHost(Stringable|string|null $host) returns a new instance with the specified host.
+ * @method static withPort(?int $port) returns a new instance with the specified port.
+ * @method static withPath(Stringable|string $path) returns a new instance with the specified path.
+ * @method static withQuery(Stringable|string|null $query) returns a new instance with the specified query.
+ * @method static withFragment(Stringable|string|null $fragment) returns a new instance with the specified fragment.
+ */
 class Modifier implements Stringable, JsonSerializable, UriAccess
 {
     final public function __construct(protected readonly Psr7UriInterface|UriInterface $uri)
@@ -63,24 +79,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         return $this->uri;
     }
 
-    public function getIdnUriString(): string
-    {
-        $currentHost = $this->uri->getHost();
-        if (null === $currentHost || '' === $currentHost) {
-            return $this->getUriString();
-        }
-
-        $host = IdnConverter::toUnicode($currentHost)->domain();
-        if ($host === $currentHost) {
-            return $this->getUriString();
-        }
-
-        $components = $this->uri instanceof UriInterface ? $this->uri->toComponents() : UriString::parse($this->uri);
-        $components['host'] = $host;
-
-        return UriString::build($components);
-    }
-
     public function getUriString(): string
     {
         return $this->uri->__toString();
@@ -94,6 +92,52 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function __toString(): string
     {
         return $this->uri->__toString();
+    }
+
+    public function displayUriString(): string
+    {
+        $userInfo = UserInfo::fromUri($this->uri);
+
+        return UriString::build([
+            'scheme' => $this->uri->getScheme(),
+            'host' => Host::fromUri($this->hostToDecimal()->hostToIpv6Compressed())->toUnicode(),
+            'port' => $this->uri->getPort(),
+            'user' => $userInfo->getUser(),
+            'pass' => $userInfo->getPass(),
+            'path' => Path::fromUri($this->uri)->withoutDotSegments()->decoded(),
+            'query' => Query::fromUri($this->uri)->decoded(),
+            'fragment' => Fragment::fromUri($this->uri)->decoded(),
+        ]);
+    }
+
+    final public function __call(string $name, array $arguments): static
+    {
+        return match (true) {
+            !str_starts_with($name, 'with'),
+            !method_exists($this->uri, $name) => throw new BadMethodCallException(sprintf('Call to undefined method %s::%s()', self::class, $name)),
+            $this->uri instanceof UriInterface || 'withPort' === $name => new static($this->uri->$name(...$arguments)),
+            default => new static($this->uri->$name(...array_map(fn (Stringable|string|null $value): string => (string) $value, $arguments))),
+        };
+    }
+
+    /**
+     * Apply the callback if the given "condition" is (or resolves to) true.
+     *
+     * @param (callable($this): bool)|bool $condition
+     * @param callable($this): (self|null) $onSuccess
+     * @param ?callable($this): (self|null) $onFail
+     */
+    final public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): self
+    {
+        if (!is_bool($condition)) {
+            $condition = $condition($this);
+        }
+
+        return match (true) {
+            $condition => $onSuccess($this),
+            null !== $onFail => $onFail($this),
+            default => $this,
+        } ?? $this;
     }
 
     /*********************************
@@ -173,6 +217,19 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function appendQueryParameters(object|array $parameters): self
     {
         return $this->appendQuery(Query::fromVariable($parameters)->value());
+    }
+
+    /**
+     * Prepend PHP query parameters to the existing URI query.
+     */
+    public function prependQueryParameters(object|array $parameters): self
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromVariable($parameters)->append(Query::fromUri($this->uri)->value())->value(),
+                $this->uri
+            )
+        ));
     }
 
     /**
@@ -783,6 +840,34 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         $converter = $converter ?? IPv4Converter::fromEnvironment();
 
         return $converter;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.6.0
+     * @codeCoverageIgnore
+     * @see Modifier::displayUriString()
+     *
+     * Remove query data according to their key name.
+     */
+    #[Deprecated(message:'use League\Uri\Modifier::displayUriString() instead', since:'league/uri-components:7.6.0')]
+    public function getIdnUriString(): string
+    {
+        $currentHost = $this->uri->getHost();
+        if (null === $currentHost || '' === $currentHost) {
+            return $this->getUriString();
+        }
+
+        $host = IdnConverter::toUnicode($currentHost)->domain();
+        if ($host === $currentHost) {
+            return $this->getUriString();
+        }
+
+        $components = $this->uri instanceof UriInterface ? $this->uri->toComponents() : UriString::parse($this->uri);
+        $components['host'] = $host;
+
+        return UriString::build($components);
     }
 
     /**
