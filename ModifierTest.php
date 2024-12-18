@@ -929,7 +929,7 @@ final class ModifierTest extends TestCase
 
         yield 'host IPv6' => [
             'input' => 'https://[fe80:0000:0000:0000:0000:0000:0000:000a%25en1]/foo/bar',
-            'output' => 'https://[fe80::a%25en1]/foo/bar',
+            'output' => 'https://[fe80::a%en1]/foo/bar',
         ];
 
         yield 'IPv6 gets expanded if needed' => [

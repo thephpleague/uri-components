@@ -30,7 +30,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
-use League\Uri\IPv6\Converter;
+use League\Uri\IPv6\Converter as IPv6Converter;
 use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -97,13 +97,23 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function displayUriString(): string
     {
         $userInfo = UserInfo::fromUri($this->uri);
+        $host = $this->uri->getHost();
+        if (null !== $host) {
+            $hostIp = self::ipv4Converter()->toDecimal($host);
+            $host = IdnConverter::toUnicode((string) IPv6Converter::compress(match (true) {
+                '' === $host,
+                null === $hostIp,
+                $host === $hostIp => $host,
+                default => $hostIp,
+            }))->domain();
+        }
 
         return UriString::build([
             'scheme' => $this->uri->getScheme(),
-            'host' => Host::fromUri($this->hostToDecimal()->hostToIpv6Compressed())->toUnicode(),
-            'port' => $this->uri->getPort(),
             'user' => $userInfo->getUser(),
             'pass' => $userInfo->getPass(),
+            'host' => $host,
+            'port' => $this->uri->getPort(),
             'path' => Path::fromUri($this->uri)->withoutDotSegments()->decoded(),
             'query' => Query::fromUri($this->uri)->decoded(),
             'fragment' => Fragment::fromUri($this->uri)->decoded(),
@@ -509,14 +519,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
     public function hostToIpv6Compressed(): static
     {
         return new static($this->uri->withHost(
-            Converter::compress($this->uri->getHost())
+            IPv6Converter::compress($this->uri->getHost())
         ));
     }
 
     public function hostToIpv6Expanded(): static
     {
         return new static($this->uri->withHost(
-            Converter::expand($this->uri->getHost())
+            IPv6Converter::expand($this->uri->getHost())
         ));
     }
 

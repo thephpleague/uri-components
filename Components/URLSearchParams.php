@@ -268,6 +268,11 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         return $this->value() ?? '';
     }
 
+    public function decoded(): string
+    {
+        return (string) Query::fromPairs($this->pairs)->decoded();
+    }
+
     public function __toString(): string
     {
         return $this->toString();

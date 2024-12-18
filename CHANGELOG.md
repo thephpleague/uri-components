@@ -8,9 +8,12 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 - `Component::when` conditional method to ease component building logic.
 - `URLSearchParams::when` conditional method to ease component building logic.
+- `Modifier::prependQueryParameters` returns a modifier with prepend query paramters
 - `Modifier::when` conditional method to ease component building logic.
 - `Modifier::with*` method from the underlying `Uri` object are proxy to improve DX.
 - `Modifier::displayUriString` shows the URI in a human-readable format which may be an invalid URI.
+- `Query::decoded` the string representation of the component decoded.
+- `URLSearchParams::decoded` the string representation of the component decoded.
 
 ### Fixed
 
@@ -18,7 +21,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Deprecated
 
-- None
+- `Modifier::getIdnUriString` use `Modifier::displayUriString` instead
 
 ### Removed
 
