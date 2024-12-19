@@ -40,7 +40,6 @@ use function array_map;
 use function get_object_vars;
 use function is_bool;
 use function ltrim;
-use function method_exists;
 use function rtrim;
 use function sprintf;
 use function str_ends_with;
@@ -122,10 +121,20 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
 
     final public function __call(string $name, array $arguments): static
     {
+        static $allowedMethods = [
+            'withScheme',
+            'withUserInfo',
+            'withHost',
+            'withPort',
+            'withPath',
+            'withQuery',
+            'withFragment',
+        ];
+
         return match (true) {
-            !str_starts_with($name, 'with'),
-            !method_exists($this->uri, $name) => throw new BadMethodCallException(sprintf('Call to undefined method %s::%s()', self::class, $name)),
-            $this->uri instanceof UriInterface || 'withPort' === $name => new static($this->uri->$name(...$arguments)),
+            !in_array($name, $allowedMethods, true) => throw new BadMethodCallException(sprintf('Call to undefined method %s::%s()', self::class, $name)),
+            $this->uri instanceof UriInterface,
+            'withPort' === $name => new static($this->uri->$name(...$arguments)),
             default => new static($this->uri->$name(...array_map(fn (Stringable|string|null $value): string => (string) $value, $arguments))),
         };
     }
