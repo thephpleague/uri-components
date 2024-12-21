@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\PortInterface;
+use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -40,6 +41,18 @@ final class Port extends Component implements PortInterface
     public static function new(Stringable|string|int|null $value = null): self
     {
         return new self($value);
+    }
+
+    /**
+     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     */
+    public static function tryNew(Stringable|string|null $uri = null): ?self
+    {
+        try {
+            return self::new($uri);
+        } catch (UriException) {
+            return null;
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ use Deprecated;
 use Iterator;
 use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
@@ -67,6 +68,18 @@ final class Query extends Component implements QueryInterface
     public static function new(Stringable|string|null $value = null): self
     {
         return self::fromRFC3986($value);
+    }
+
+    /**
+     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     */
+    public static function tryNew(Stringable|string|null $uri = null): ?self
+    {
+        try {
+            return self::new($uri);
+        } catch (UriException) {
+            return null;
+        }
     }
 
     /**

@@ -14,6 +14,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::displayUriString` shows the URI in a human-readable format which may be an invalid URI.
 - `Query::decoded` the string representation of the component decoded.
 - `URLSearchParams::decoded` the string representation of the component decoded.
+- `tryNew` named constructor added to all components class to returns a new instance on success or `null` on failure.
 
 ### Fixed
 

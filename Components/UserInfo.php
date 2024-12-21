@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Encoder;
@@ -109,6 +110,18 @@ final class UserInfo extends Component implements UserInfoInterface
         [$user, $pass] = explode(':', $value, 2) + [1 => null];
 
         return new self(Encoder::decodeAll($user), Encoder::decodeAll($pass));
+    }
+
+    /**
+     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     */
+    public static function tryNew(Stringable|string|null $uri = null): ?self
+    {
+        try {
+            return self::new($uri);
+        } catch (UriException) {
+            return null;
+        }
     }
 
     public function value(): ?string

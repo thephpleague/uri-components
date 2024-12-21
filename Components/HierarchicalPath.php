@@ -17,6 +17,7 @@ use Deprecated;
 use Iterator;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\SegmentedPathInterface;
+use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
@@ -77,6 +78,18 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public static function new(Stringable|string $value = ''): self
     {
         return new self($value);
+    }
+
+    /**
+     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     */
+    public static function tryNew(Stringable|string $uri = ''): ?self
+    {
+        try {
+            return self::new($uri);
+        } catch (UriException) {
+            return null;
+        }
     }
 
     /**

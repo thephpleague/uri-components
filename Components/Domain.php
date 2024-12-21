@@ -19,6 +19,7 @@ use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\DomainHostInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\UriComponentInterface;
+use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
@@ -66,6 +67,18 @@ final class Domain extends Component implements DomainHostInterface
     public static function new(Stringable|string|null $value = null): self
     {
         return new self($value);
+    }
+
+    /**
+     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     */
+    public static function tryNew(Stringable|string|null $uri = null): ?self
+    {
+        try {
+            return self::new($uri);
+        } catch (UriException) {
+            return null;
+        }
     }
 
     /**

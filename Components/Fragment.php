@@ -15,6 +15,7 @@ namespace League\Uri\Components;
 
 use Deprecated;
 use League\Uri\Contracts\FragmentInterface;
+use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Uri;
@@ -36,6 +37,18 @@ final class Fragment extends Component implements FragmentInterface
     public static function new(Stringable|string|null $value = null): self
     {
         return new self($value);
+    }
+
+    /**
+     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     */
+    public static function tryNew(Stringable|string|null $uri = null): ?self
+    {
+        try {
+            return self::new($uri);
+        } catch (UriException) {
+            return null;
+        }
     }
 
     /**
