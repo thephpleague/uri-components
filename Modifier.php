@@ -23,7 +23,6 @@ use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
-use League\Uri\Components\UserInfo;
 use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
@@ -92,32 +91,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function __toString(): string
     {
         return $this->uri->__toString();
-    }
-
-    public function displayUriString(): string
-    {
-        $userInfo = UserInfo::fromUri($this->uri);
-        $host = $this->uri->getHost();
-        if (null !== $host) {
-            $hostIp = self::ipv4Converter()->toDecimal($host);
-            $host = IdnConverter::toUnicode((string) IPv6Converter::compress(match (true) {
-                '' === $host,
-                null === $hostIp,
-                $host === $hostIp => $host,
-                default => $hostIp,
-            }))->domain();
-        }
-
-        return UriString::build([
-            'scheme' => $this->uri->getScheme(),
-            'user' => $userInfo->getUser(),
-            'pass' => $userInfo->getPass(),
-            'host' => $host,
-            'port' => $this->uri->getPort(),
-            'path' => Path::fromUri($this->uri)->withoutDotSegments()->decoded(),
-            'query' => Query::fromUri($this->uri)->decoded(),
-            'fragment' => Fragment::fromUri($this->uri)->decoded(),
-        ]);
     }
 
     final public function __call(string $name, array $arguments): static
