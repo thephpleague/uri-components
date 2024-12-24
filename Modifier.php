@@ -24,6 +24,7 @@ use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
 use League\Uri\Components\UserInfo;
+use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
@@ -54,7 +55,7 @@ use function str_starts_with;
  * @method static withQuery(Stringable|string|null $query) returns a new instance with the specified query.
  * @method static withFragment(Stringable|string|null $fragment) returns a new instance with the specified fragment.
  */
-class Modifier implements Stringable, JsonSerializable, UriAccess
+class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 {
     final public function __construct(protected readonly Psr7UriInterface|UriInterface $uri)
     {
@@ -139,14 +140,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess
         };
     }
 
-    /**
-     * Apply the callback if the given "condition" is (or resolves to) true.
-     *
-     * @param (callable($this): bool)|bool $condition
-     * @param callable($this): (self|null) $onSuccess
-     * @param ?callable($this): (self|null) $onFail
-     */
-    final public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): self
+    final public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): static
     {
         if (!is_bool($condition)) {
             $condition = $condition($this);

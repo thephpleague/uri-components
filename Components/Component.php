@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
@@ -26,7 +27,7 @@ use function is_bool;
 use function preg_match;
 use function sprintf;
 
-abstract class Component implements UriComponentInterface
+abstract class Component implements UriComponentInterface, Conditionable
 {
     protected const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
 
@@ -84,14 +85,6 @@ abstract class Component implements UriComponentInterface
         };
     }
 
-    /**
-     * Apply the callback if the given "condition" is (or resolves to) true.
-     *
-     * @param (callable($this): bool)|bool $condition
-     * @param callable($this): (static|null) $onSuccess
-     * @param ?callable($this): (static|null) $onFail
-     *
-     */
     final public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): static
     {
         if (!is_bool($condition)) {

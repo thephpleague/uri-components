@@ -503,7 +503,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Sorts all key/value pairs contained in this object in place and returns undefined.
      *
-     * The sort order is according to unicode code points of the keys. This method
+     * The sort order is according to Unicode code points of the keys. This method
      * uses a stable sorting algorithm (i.e. the relative order between
      * key/value pairs with equal keys will be preserved).
      */
@@ -512,24 +512,17 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         $this->updateQuery($this->pairs->sort());
     }
 
-    /**
-     * Apply the callback if the given "condition" is (or resolves to) true.
-     *
-     * @param (callable($this): bool)|bool $condition
-     * @param callable($this): (self|null) $onSuccess
-     * @param ?callable($this): (self|null) $onFail
-     */
-    public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): self
+    public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): static
     {
         if (!is_bool($condition)) {
             $condition = $condition($this);
         }
 
         return match (true) {
-            $condition => $onSuccess($this),
-            null !== $onFail => $onFail($this),
+            $condition => $onSuccess($this) ?? $this,
+            null !== $onFail => $onFail($this) ?? $this,
             default => $this,
-        } ?? $this;
+        };
     }
 
     /**
