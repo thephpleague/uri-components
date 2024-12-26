@@ -272,10 +272,13 @@ final class DataPath extends Component implements DataPathInterface
         return $this->path->decoded();
     }
 
-    public function save(string $path, string $mode = 'w'): SplFileObject
+    /**
+     * @param ?resource $context
+     */
+    public function save(string $path, string $mode = 'w', $context = null): SplFileObject
     {
         $data = $this->isBinaryData ? base64_decode($this->document, true) : rawurldecode($this->document);
-        $file = new SplFileObject($path, $mode);
+        $file = new SplFileObject($path, $mode, context: $context);
         $file->fwrite((string) $data);
 
         return $file;
