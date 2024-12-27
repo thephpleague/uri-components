@@ -19,19 +19,14 @@ use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
-use function array_pop;
-use function array_reduce;
-use function end;
-use function explode;
-use function implode;
 use function substr;
 
 final class Path extends Component implements PathInterface
 {
-    private const DOT_SEGMENTS = ['.' => 1, '..' => 1];
     private const SEPARATOR = '/';
 
     private readonly string $path;
@@ -116,35 +111,7 @@ final class Path extends Component implements PathInterface
             return $this;
         }
 
-        $input = explode(self::SEPARATOR, $current);
-        $new = implode(self::SEPARATOR, array_reduce($input, $this->filterDotSegments(...), []));
-        if (isset(self::DOT_SEGMENTS[end($input)])) {
-            $new .= self::SEPARATOR ;
-        }
-
-        return new self($new);
-    }
-
-    /**
-     * Filter Dot segment according to RFC3986.
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-5.2.4
-     *
-     * @return string[]
-     */
-    private function filterDotSegments(array $carry, string $segment): array
-    {
-        if ('..' === $segment) {
-            array_pop($carry);
-
-            return $carry;
-        }
-
-        if (!isset(self::DOT_SEGMENTS[$segment])) {
-            $carry[] = $segment;
-        }
-
-        return $carry;
+        return new self(UriString::removeDotSegments($current));
     }
 
     /**
