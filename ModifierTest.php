@@ -883,4 +883,16 @@ final class ModifierTest extends TestCase
         self::assertNull($removeEmptyPairs('https://a.b/c?=d'));
         self::assertNull($removeEmptyPairs('https://a.b/c?='));
     }
+
+    #[Test]
+    public function it_will_convert_uri_host_following_whatwg_rules(): void
+    {
+        self::assertSame(
+            '192.168.2.13',
+            Modifier::from(Http::new('https://0:0@0xc0a8020d/0?0#0'))
+                ->whatWgHost()
+                ->getUri()
+                ->getHost()
+        );
+    }
 }

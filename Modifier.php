@@ -26,6 +26,7 @@ use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Exceptions\MissingFeature;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnaConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
@@ -36,6 +37,7 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
 use function array_map;
+use function filter_var;
 use function get_object_vars;
 use function is_bool;
 use function ltrim;
@@ -43,6 +45,9 @@ use function rtrim;
 use function sprintf;
 use function str_ends_with;
 use function str_starts_with;
+
+use const FILTER_FLAG_IPV4;
+use const FILTER_VALIDATE_IP;
 
 /**
  * @method static withScheme(Stringable|string|null $scheme) returns a new instance with the specified scheme.
@@ -595,6 +600,27 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
                 $this->uri
             )
         ));
+    }
+
+    public function whatWgHost(): static
+    {
+        $host = $this->uri->getHost();
+        try {
+            $converted = IPv4Converter::fromEnvironment()->toDecimal($host);
+        } catch (MissingFeature) {
+            $converted = null;
+        }
+
+        if (false === filter_var($converted, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $converted = IPv6Converter::compress($host);
+        }
+
+        return match (true) {
+            null !== $converted => new static($this->uri->withHost($converted)),
+            '' === $host,
+            $this->uri instanceof UriInterface => $this,
+            default => new static($this->uri->withHost((string) Uri::fromComponents(['host' => $host])->getHost())),
+        };
     }
 
     /*********************************
