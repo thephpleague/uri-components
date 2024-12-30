@@ -18,7 +18,6 @@ use Deprecated;
 use JsonSerializable;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\Domain;
-use League\Uri\Components\Fragment;
 use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
@@ -28,7 +27,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Idna\Converter as IdnConverter;
+use League\Uri\Idna\Converter as IdnaConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
 use League\Uri\IPv6\Converter as IPv6Converter;
 use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
@@ -406,7 +405,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function hostToAscii(): static
     {
         $currentHost = $this->uri->getHost();
-        $host = IdnConverter::toAsciiOrFail((string) $currentHost);
+        $host = IdnaConverter::toAsciiOrFail((string) $currentHost);
 
         return match (true) {
             null === $currentHost,
@@ -422,7 +421,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function hostToUnicode(): static
     {
         $currentHost = $this->uri->getHost();
-        $host = IdnConverter::toUnicode((string) $currentHost)->domain();
+        $host = IdnaConverter::toUnicode((string) $currentHost)->domain();
 
         return match (true) {
             null === $currentHost,
@@ -845,7 +844,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             return $this->getUriString();
         }
 
-        $host = IdnConverter::toUnicode($currentHost)->domain();
+        $host = IdnaConverter::toUnicode($currentHost)->domain();
         if ($host === $currentHost) {
             return $this->getUriString();
         }
