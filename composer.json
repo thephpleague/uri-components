@@ -39,7 +39,8 @@
         "ext-intl": "to handle IDN host with the best performance",
         "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
         "php-64bit": "to improve IPV4 host parsing",
-        "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill if ext-intl is not present"
+        "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill if ext-intl is not present",
+        "rowbot/url": "to handle WHATWG URL"
     },
     "autoload": {
         "psr-4": {
