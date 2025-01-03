@@ -107,11 +107,12 @@ final class Path extends Component implements PathInterface
     public function withoutDotSegments(): PathInterface
     {
         $current = $this->toString();
-        if (!str_contains($current, '.')) {
+        $new = UriString::removeDotSegments($current);
+        if ($current === $new) {
             return $this;
         }
 
-        return new self(UriString::removeDotSegments($current));
+        return new self($new);
     }
 
     /**
