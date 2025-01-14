@@ -26,6 +26,7 @@ use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Contracts\UriRenderer;
 use League\Uri\Exceptions\MissingFeature;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnaConverter;
@@ -851,6 +852,15 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         $converter = $converter ?? IPv4Converter::fromEnvironment();
 
         return $converter;
+    }
+
+    public function displayUriString(): string
+    {
+        if ($this->uri instanceof UriRenderer) {
+            return $this->uri->toDisplayString();
+        }
+
+        return Uri::new($this->uri)->toDisplayString();
     }
 
     /**
