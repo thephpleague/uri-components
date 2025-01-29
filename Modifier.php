@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
-use BadMethodCallException;
 use Deprecated;
 use JsonSerializable;
 use League\Uri\Components\DataPath;
@@ -37,28 +36,17 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 
-use function array_map;
 use function filter_var;
 use function get_object_vars;
 use function is_bool;
 use function ltrim;
 use function rtrim;
-use function sprintf;
 use function str_ends_with;
 use function str_starts_with;
 
 use const FILTER_FLAG_IPV4;
 use const FILTER_VALIDATE_IP;
 
-/**
- * @method static withScheme(Stringable|string|null $scheme) returns a new instance with the specified scheme.
- * @method static withUserInfo(Stringable|string|null $user, Stringable|string|null $password = null) returns a new instance with the specified user info.
- * @method static withHost(Stringable|string|null $host) returns a new instance with the specified host.
- * @method static withPort(?int $port) returns a new instance with the specified port.
- * @method static withPath(Stringable|string $path) returns a new instance with the specified path.
- * @method static withQuery(Stringable|string|null $query) returns a new instance with the specified query.
- * @method static withFragment(Stringable|string|null $fragment) returns a new instance with the specified fragment.
- */
 class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 {
     final public function __construct(protected readonly Psr7UriInterface|UriInterface $uri)
@@ -85,37 +73,65 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function getUriString(): string
     {
-        return $this->uri->__toString();
+        return $this->toString();
     }
 
     public function jsonSerialize(): string
     {
-        return $this->uri->__toString();
+        return $this->toString();
     }
 
     public function __toString(): string
     {
+        return $this->toString();
+    }
+
+    public function toString(): string
+    {
         return $this->uri->__toString();
     }
 
-    final public function __call(string $name, array $arguments): static
+    public function toDisplayString(): string
     {
-        static $allowedMethods = [
-            'withScheme',
-            'withUserInfo',
-            'withHost',
-            'withPort',
-            'withPath',
-            'withQuery',
-            'withFragment',
-        ];
+        return ($this->uri instanceof UriRenderer) ? $this->uri->toDisplayString() : Uri::new($this->uri)->toDisplayString();
+    }
 
-        return match (true) {
-            !in_array($name, $allowedMethods, true) => throw new BadMethodCallException(sprintf('Call to undefined method %s::%s()', self::class, $name)),
-            $this->uri instanceof UriInterface,
-            'withPort' === $name => new static($this->uri->$name(...$arguments)),
-            default => new static($this->uri->$name(...array_map(fn (Stringable|string|null $value): string => (string) $value, $arguments))),
-        };
+    public function withScheme(Stringable|string|null $scheme): static
+    {
+        return new static($this->uri->withScheme(self::normalizeComponent($scheme, $this->uri)));
+    }
+
+    public function withUserInfo(Stringable|string|null $user, Stringable|string|null $password): static
+    {
+        return new static($this->uri->withUserInfo(
+            self::normalizeComponent($user, $this->uri),
+            $password instanceof Stringable ? $password->__toString() : $password
+        ));
+    }
+
+    public function withQuery(Stringable|string|null $query): static
+    {
+        return new static($this->uri->withQuery(self::normalizeComponent($query, $this->uri)));
+    }
+
+    public function withHost(Stringable|string|null $host): static
+    {
+        return new static($this->uri->withHost(self::normalizeComponent($host, $this->uri)));
+    }
+
+    public function withFragment(Stringable|string|null $fragment): static
+    {
+        return new static($this->uri->withFragment(self::normalizeComponent($fragment, $this->uri)));
+    }
+
+    public function withPort(?int $port): static
+    {
+        return new static($this->uri->withPort($port));
+    }
+
+    public function withPath(Stringable|string $path): static
+    {
+        return new static($this->uri->withPath((string) $path));
     }
 
     final public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): static
@@ -603,7 +619,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         ));
     }
 
-    public function whatWgHost(): static
+    public function whatwgHost(): static
     {
         $host = $this->uri->getHost();
         try {
@@ -837,10 +853,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * null value MUST be converted to the empty string if a Psr7 UriInterface is being manipulated.
      */
-    final protected static function normalizeComponent(?string $component, Psr7UriInterface|UriInterface $uri): ?string
+    final protected static function normalizeComponent(Stringable|string|null $component, Psr7UriInterface|UriInterface $uri): ?string
     {
         return match (true) {
-            $uri instanceof Psr7UriInterface => (string) $component,
+            $uri instanceof Psr7UriInterface,
+            $component instanceof Stringable => (string) $component,
             default => $component,
         };
     }

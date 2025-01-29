@@ -738,7 +738,7 @@ final class ModifierTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('validwithoutSegmentProvider')]
-    public function testwithoutSegment(array $keys, string $expected): void
+    public function testWithoutSegment(array $keys, string $expected): void
     {
         self::assertSame($expected, $this->modifier->removeSegments(...$keys)->getUri()->getPath());
     }
@@ -890,9 +890,41 @@ final class ModifierTest extends TestCase
         self::assertSame(
             '192.168.2.13',
             Modifier::from(Http::new('https://0:0@0xc0a8020d/0?0#0'))
-                ->whatWgHost()
+                ->whatwgHost()
                 ->getUri()
                 ->getHost()
         );
+    }
+
+    #[Test]
+    #[DataProvider('providesUriToDisplay')]
+    public function it_will_allow_direct_string_conversion(
+        string $uri,
+        string $expectedString,
+        string $expectedDisplayString
+    ): void {
+        self::assertSame($expectedString, Modifier::from($uri)->toString());
+        self::assertSame($expectedDisplayString, Modifier::from($uri)->toDisplayString());
+    }
+
+    public static function providesUriToDisplay(): iterable
+    {
+        yield 'uri is unchanged' => [
+            'uri' => 'https://127.0.0.1/foo/bar',
+            'expectedString' => 'https://127.0.0.1/foo/bar',
+            'expectedDisplayString' => 'https://127.0.0.1/foo/bar',
+        ];
+
+        yield 'idn host are changed' => [
+            'uri' => 'http://bébé.be',
+            'expectedString' => 'http://xn--bb-bjab.be',
+            'expectedDisplayString' => 'http://bébé.be',
+        ];
+
+        yield 'other components are changed' => [
+            'uri' => 'http://bébé.be:80?q=toto%20le%20h%C3%A9ros',
+            'expectedString' => 'http://xn--bb-bjab.be?q=toto%20le%20h%C3%A9ros',
+            'expectedDisplayString' => 'http://bébé.be?q=toto le héros',
+        ];
     }
 }
