@@ -436,9 +436,9 @@ final class ModifierTest extends TestCase
 
         $modifier = Modifier::from(Utils::uriFor('http://shop.bebe.be'));
 
-        self::assertSame('http://bébé.bebe.be', $modifier->replaceLabel(-1, 'bébé')->getUriString());
-        self::assertSame('http://bébé.shop.bebe.be', $modifier->prependLabel('bébé')->getUriString());
-        self::assertSame('http://shop.bebe.be.bébé', $modifier->appendLabel('bébé')->getUriString());
+        self::assertSame('http://xn--bb-bjab.bebe.be', $modifier->replaceLabel(-1, 'bébé')->getUriString());
+        self::assertSame('http://xn--bb-bjab.shop.bebe.be', $modifier->prependLabel('bébé')->getUriString());
+        self::assertSame('http://shop.bebe.be.xn--bb-bjab', $modifier->appendLabel('bébé')->getUriString());
         self::assertSame('http://shop.bebe.be', $modifier->hostToAscii()->getUriString());
         self::assertSame('http://shop.bebe.be', $modifier->hostToUnicode()->getUriString());
     }
@@ -469,7 +469,7 @@ final class ModifierTest extends TestCase
 
         self::assertSame('http://xn--bb-bjab.be', $uri);
         self::assertSame('http://xn--bb-bjab.be', (string) $modifier);
-        self::assertSame($uriString, (string) $modifier->hostToUnicode());
+        self::assertSame($uriString, $modifier->hostToUnicode()->getUriString());
     }
 
     public function testICanNormalizeIPv4HostToDecimal(): void

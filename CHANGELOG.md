@@ -18,7 +18,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- None
+- `Modifier::getUriString` returns the result of calling `__tostring` on the underlying URI object being manipulated
+- `Modifier` host related method return host in IDN form or ASCII form depending on the URI input format
 
 ### Deprecated
 

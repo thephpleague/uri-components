@@ -73,7 +73,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function getUriString(): string
     {
-        return $this->toString();
+        return $this->uri->__toString();
     }
 
     public function jsonSerialize(): string
@@ -88,7 +88,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function toString(): string
     {
-        return $this->uri->__toString();
+        return ($this->uri instanceof UriRenderer) ? $this->uri->toString() : Uri::new($this->uri)->toString();
     }
 
     public function toDisplayString(): string
@@ -156,10 +156,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int|null $from = null): static
     {
-        $to = match (true) {
-            !$to instanceof KeyValuePairConverter => KeyValuePairConverter::fromEncodingType($to),
-            default => $to,
-        };
+        if (!$to instanceof KeyValuePairConverter) {
+            $to = KeyValuePairConverter::fromEncodingType($to);
+        }
 
         $from = match (true) {
             null === $from => KeyValuePairConverter::fromRFC3986(),
@@ -172,14 +171,17 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         }
 
         $originalQuery = $this->uri->getQuery();
-        $query = QueryString::buildFromPairs(QueryString::parseFromValue($originalQuery, $from), $to);
+        if (null === $originalQuery || '' === trim($originalQuery)) {
+            return $this;
+        }
 
-        return match (true) {
-            null === $query,
-            '' === $query,
-            $originalQuery === $query => $this,
-            default => new static($this->uri->withQuery($query)),
-        };
+        /** @var string $query */
+        $query = QueryString::buildFromPairs(QueryString::parseFromValue($originalQuery, $from), $to);
+        if ($query === $originalQuery) {
+            return $this;
+        }
+
+        return new static($this->uri->withQuery($query));
     }
 
     /**
@@ -410,15 +412,28 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function appendLabel(Stringable|string|null $label): static
     {
-        $host = Host::fromUri($this->uri);
+        $host = $this->uri->getHost();
+        $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
+
+        $host = Host::new($host);
         $label = Host::new($label);
 
-        return match (true) {
-            null === $label->value() => $this,
-            $host->isDomain() => new static($this->uri->withHost(static::normalizeComponent(Domain::new($host)->append($label)->toUnicode(), $this->uri))),
-            $host->isIpv4() => new static($this->uri->withHost($host->value().'.'.ltrim($label->value(), '.'))),
-            default => throw new SyntaxError('The URI host '.$host->toString().' cannot be appended.'),
-        };
+        if (null === $label->value()) {
+            return $this;
+        }
+
+        if ($host->isIpv4()) {
+            return new static($this->uri->withHost($host->value().'.'.ltrim($label->value(), '.')));
+        }
+
+        if (!$host->isDomain()) {
+            throw new SyntaxError('The URI host '.$host->toString().' cannot be appended.');
+        }
+
+        $newHost = Domain::new($host)->append($label);
+        $newHost = !$isAsciiDomain ? $newHost->toUnicode() : $newHost->toAscii();
+
+        return new static($this->uri->withHost(static::normalizeComponent($newHost, $this->uri)));
     }
 
     /**
@@ -534,15 +549,28 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function prependLabel(Stringable|string|null $label): static
     {
-        $host = Host::fromUri($this->uri);
+        $host = $this->uri->getHost();
+        $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
+
+        $host = Host::new($host);
         $label = Host::new($label);
 
-        return match (true) {
-            null === $label->value() => $this,
-            $host->isIpv4() => new static($this->uri->withHost(rtrim($label->value(), '.').'.'.$host->value())),
-            $host->isDomain() => new static($this->uri->withHost(static::normalizeComponent(Domain::new($host)->prepend($label)->toUnicode(), $this->uri))),
-            default => throw new SyntaxError('The URI host '.$host->toString().' cannot be prepended.'),
-        };
+        if (null === $label->value()) {
+            return $this;
+        }
+
+        if ($host->isIpv4()) {
+            return new static($this->uri->withHost(rtrim($label->value(), '.').'.'.$host->value()));
+        }
+
+        if (!$host->isDomain()) {
+            throw new SyntaxError('The URI host '.$host->toString().' cannot be prepended.');
+        }
+
+        $newHost = Domain::new($host)->prepend($label);
+        $newHost = !$isAsciiDomain ? $newHost->toUnicode() : $newHost->toAscii();
+
+        return new static($this->uri->withHost(static::normalizeComponent($newHost, $this->uri)));
     }
 
     /**
@@ -550,12 +578,16 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function removeLabels(int ...$keys): static
     {
-        return new static($this->uri->withHost(
-            static::normalizeComponent(
-                Domain::fromUri($this->uri)->withoutLabel(...$keys)->toUnicode(),
-                $this->uri
-            )
-        ));
+        $host = $this->uri->getHost();
+        if (null === $host || ('' === $host && $this->uri instanceof Psr7UriInterface)) {
+            return $this;
+        }
+
+        $isAsciiDomain = IdnaConverter::toAscii($host)->domain() === $host;
+        $newHost = Domain::new($host)->withoutLabel(...$keys);
+        $newHost = !$isAsciiDomain ? $newHost->toUnicode() : $newHost->toAscii();
+
+        return new static($this->uri->withHost(static::normalizeComponent($newHost, $this->uri)));
     }
 
     /**
@@ -579,13 +611,19 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function sliceLabels(int $offset, ?int $length = null): static
     {
         $currentHost = $this->uri->getHost();
-        $host = Domain::new($currentHost)->slice($offset, $length);
+        if (null === $currentHost || ('' === $currentHost && $this->uri instanceof Psr7UriInterface)) {
+            return $this;
+        }
 
-        return match (true) {
-            $host->value() === $currentHost,
-            $host->toUnicode() === $currentHost => $this,
-            default => new static($this->uri->withHost($host->toUnicode())),
-        };
+        $isAsciiDomain = IdnaConverter::toAscii($currentHost)->domain() === $currentHost;
+        $host = Domain::new($currentHost)->slice($offset, $length);
+        $host = !$isAsciiDomain ? $host->toUnicode() : $host->toAscii();
+
+        if ($currentHost === $host) {
+            return $this;
+        }
+
+        return new static($this->uri->withHost($host));
     }
 
     /**
@@ -598,7 +636,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return match (true) {
             $host->hasZoneIdentifier() => new static($this->uri->withHost(
                 static::normalizeComponent(
-                    Host::fromUri($this->uri)->withoutZoneIdentifier()->value(),
+                    $host->withoutZoneIdentifier()->value(),
                     $this->uri
                 )
             )),
@@ -611,12 +649,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function replaceLabel(int $offset, Stringable|string|null $label): static
     {
-        return new static($this->uri->withHost(
-            static::normalizeComponent(
-                Domain::fromUri($this->uri)->withLabel($offset, $label)->toUnicode(),
-                $this->uri
-            )
-        ));
+        $host = $this->uri->getHost();
+        $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
+        $newHost = Domain::new($host)->withLabel($offset, $label);
+        $newHost = !$isAsciiDomain ? $newHost->toUnicode() : $newHost->toAscii();
+
+        return new static($this->uri->withHost(static::normalizeComponent($newHost, $this->uri)));
     }
 
     public function whatwgHost(): static
