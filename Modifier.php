@@ -657,7 +657,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return new static($this->uri->withHost(static::normalizeComponent($newHost, $this->uri)));
     }
 
-    public function whatwgHost(): static
+    public function useWhatwgHost(): static
     {
         $host = $this->uri->getHost();
         try {
