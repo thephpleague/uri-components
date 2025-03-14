@@ -38,6 +38,7 @@ use Stringable;
 
 use function filter_var;
 use function get_object_vars;
+use function in_array;
 use function is_bool;
 use function ltrim;
 use function rtrim;
@@ -88,12 +89,24 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function toString(): string
     {
-        return ($this->uri instanceof UriRenderer) ? $this->uri->toString() : Uri::new($this->uri)->toString();
+        if ($this->uri instanceof Psr7UriInterface) {
+            return $this->uri->__toString();
+        }
+
+        return $this->uri->toString();
     }
 
     public function toDisplayString(): string
     {
-        return ($this->uri instanceof UriRenderer) ? $this->uri->toDisplayString() : Uri::new($this->uri)->toDisplayString();
+        if ($this->uri instanceof Psr7UriInterface) {
+            return Uri::new($this->uri)->toDisplayString();
+        }
+
+        if ($this->uri instanceof UriRenderer) {
+            return $this->uri->toDisplayString();
+        }
+
+        return Uri::new($this->uri)->toDisplayString();
     }
 
     public function withScheme(Stringable|string|null $scheme): static
@@ -657,9 +670,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return new static($this->uri->withHost(static::normalizeComponent($newHost, $this->uri)));
     }
 
-    public function normalizeHostIp(): static
+    public function normalizeIp(): static
     {
         $host = $this->uri->getHost();
+        if (in_array($host, [null, ''], true)) {
+            return $this;
+        }
+
         try {
             $converted = IPv4Converter::fromEnvironment()->toDecimal($host);
         } catch (MissingFeature) {
@@ -670,12 +687,26 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             $converted = IPv6Converter::compress($host);
         }
 
-        return match (true) {
-            null !== $converted => new static($this->uri->withHost($converted)),
-            '' === $host,
-            $this->uri instanceof UriInterface => $this,
-            default => new static($this->uri->withHost((string) Uri::fromComponents(['host' => $host])->getHost())),
-        };
+        if ($converted !== $host) {
+            return new static($this->uri->withHost($converted));
+        }
+
+        return $this;
+    }
+
+    public function normalizeHost(): static
+    {
+        $host = $this->uri->getHost();
+        if (in_array($host, [null, ''], true)) {
+            return $this;
+        }
+
+        $new = $this->normalizeIp();
+        if ($new->uri->getHost() !== $host) {
+            return $new;
+        }
+
+        return new static($this->uri->withHost(Host::new($host)->toAscii()));
     }
 
     /*********************************

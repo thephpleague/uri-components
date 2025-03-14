@@ -13,12 +13,14 @@ namespace League\Uri;
 
 use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
+use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 
 use const PHP_QUERY_RFC3986;
 
@@ -885,15 +887,68 @@ final class ModifierTest extends TestCase
     }
 
     #[Test]
-    public function it_will_convert_uri_host_following_whatwg_rules(): void
+    #[DataProvider('normalizedHostProvider')]
+    public function it_will_convert_uri_host_following_whatwg_rules(?string $expectedHost, UriInterface|Psr7UriInterface|string $uri): void
     {
-        self::assertSame(
-            '192.168.2.13',
-            Modifier::from(Http::new('https://0:0@0xc0a8020d/0?0#0'))
-                ->normalizeHostIp()
-                ->getUri()
-                ->getHost()
-        );
+        self::assertSame($expectedHost, Modifier::from($uri)->normalizeHost()->getUri()->getHost());
+    }
+
+    public static function normalizedHostProvider(): iterable
+    {
+        yield 'null host with league uri interface' => [
+            'expectedHost' => null,
+            'uri' => Uri::new('mailto:foo@example.com'),
+        ];
+
+        yield 'empty host with psr7 uri interface' => [
+            'expectedHost' => '',
+            'uri' => Http::new('/uri/without/host'),
+        ];
+
+        yield 'non decimal IPv4 with psr7 uri interface' => [
+            'expectedHost' => '192.168.2.13',
+            'uri' => Http::new('https://0:0@0xc0a8020d/0?0#0'),
+        ];
+
+        yield 'non decimal IPv4 with league uri interface' => [
+            'expectedHost' => '192.168.2.13',
+            'uri' => Uri::new('https://0:0@0xc0a8020d/0?0#0'),
+        ];
+
+        yield 'non decimal IPv4 with string' => [
+            'expectedHost' => '192.168.2.13',
+            'uri' => 'https://0:0@0xc0a8020d/0?0#0',
+        ];
+
+        yield 'unicode host with string' => [
+            'expectedHost' => 'xn--bb-bjab.be',
+            'uri' => 'https://bébé.be/0?0#0',
+        ];
+
+        yield 'unicode host with league uri interface' => [
+            'expectedHost' => 'xn--bb-bjab.be',
+            'uri' => Uri::new('https://bébé.be/0?0#0'),
+        ];
+
+        yield 'unicode host with uri interface' => [
+            'expectedHost' => 'xn--bb-bjab.be',
+            'uri' => Http::new('https://bébé.be/0?0#0'),
+        ];
+
+        yield 'IPv6 host with PSR7 uri interface' => [
+            'expectedHost' => '[::1]',
+            'uri' => Http::new('https://[0000:0000:0000:0000:0000:0000:0000:0001]/0?0#0'),
+        ];
+
+        yield 'IPv6 host with league uri interface' => [
+            'expectedHost' => '[::1]',
+            'uri' => Uri::new('https://[0000:0000:0000:0000:0000:0000:0000:0001]/0?0#0'),
+        ];
+
+        yield 'IPv6 host with string uri' => [
+            'expectedHost' => '[::1]',
+            'uri' => 'https://[0000:0000:0000:0000:0000:0000:0000:0001]/0?0#0',
+        ];
     }
 
     #[Test]
