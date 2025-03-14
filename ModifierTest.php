@@ -890,7 +890,7 @@ final class ModifierTest extends TestCase
         self::assertSame(
             '192.168.2.13',
             Modifier::from(Http::new('https://0:0@0xc0a8020d/0?0#0'))
-                ->useWhatwgHost()
+                ->normalizeHostIp()
                 ->getUri()
                 ->getHost()
         );

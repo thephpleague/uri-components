@@ -10,7 +10,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `URLSearchParams::when` conditional method to ease component building logic.
 - `Modifier::prependQueryParameters` returns a modifier with prepend query paramters
 - `Modifier::when` conditional method to ease component building logic.
-- `Modifier::whatWgHost` returns the host as normalized by the WHATWG algorithm
+- `Modifier::normalizeHostIp` returns the host as normalized by the WHATWG algorithm
 - `Modifier::with*` method from the underlying `Uri` object are proxy to improve DX.
 - `Query::decoded` the string representation of the component decoded.
 - `URLSearchParams::decoded` the string representation of the component decoded.
