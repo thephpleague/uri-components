@@ -19,6 +19,7 @@ use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
+use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
@@ -171,6 +172,11 @@ final class Query extends Component implements QueryInterface
     public function decoded(): ?string
     {
         return Converter::new($this->separator)->toValue($this);
+    }
+
+    public function normalized(): ?string
+    {
+        return Encoder::normalizeQuery($this->value());
     }
 
     public function value(): ?string

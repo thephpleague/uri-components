@@ -164,6 +164,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->path->decoded();
     }
 
+    public function normalized(): ?string
+    {
+        return $this->path->normalized();
+    }
+
     public function getDirname(): string
     {
         $path = $this->path->decoded();
