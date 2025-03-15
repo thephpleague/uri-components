@@ -272,9 +272,9 @@ final class DataPath extends Component implements DataPathInterface
         return $this->path->decoded();
     }
 
-    public function normalized(): ?string
+    public function normalize(): self
     {
-        return $this->path->normalized();
+        return new self((string) $this->path->normalize()->value());
     }
 
     /**

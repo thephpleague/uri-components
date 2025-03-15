@@ -82,9 +82,9 @@ final class Fragment extends Component implements FragmentInterface
         return $this->fragment;
     }
 
-    public function normalized(): ?string
+    public function normalize(): self
     {
-        return  Encoder::normalizeFragment($this->value());
+        return  new self(Encoder::normalizeFragment($this->value()));
     }
 
     /**

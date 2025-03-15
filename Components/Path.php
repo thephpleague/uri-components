@@ -94,9 +94,9 @@ final class Path extends Component implements PathInterface
         return $this->path;
     }
 
-    public function normalized(): ?string
+    public function normalize(): self
     {
-        return Encoder::normalizePath($this->path);
+        return new self((string) Encoder::normalizePath($this->withoutDotSegments()));
     }
 
     public function isAbsolute(): bool

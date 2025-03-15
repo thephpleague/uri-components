@@ -174,9 +174,9 @@ final class Query extends Component implements QueryInterface
         return Converter::new($this->separator)->toValue($this);
     }
 
-    public function normalized(): ?string
+    public function normalize(): self
     {
-        return Encoder::normalizeQuery($this->value());
+        return self::new(Encoder::normalizeQuery($this->value()));
     }
 
     public function value(): ?string
