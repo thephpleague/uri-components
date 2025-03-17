@@ -67,7 +67,7 @@ abstract class Component implements UriComponentInterface, Conditionable
      */
     protected function validateComponent(Stringable|int|string|null $component): ?string
     {
-        return Encoder::decodeSafe($component);
+        return Encoder::decodeNecessary($component);
     }
 
     /**
