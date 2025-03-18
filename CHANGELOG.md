@@ -13,10 +13,12 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::normalizeIp` returns the host normalized for IPv6 and IPv4 addresses
 - `Modifier::normalizeHost` returns the host as normalized by the WHATWG algorithm
 - `Modifier::with*` method from the underlying `Uri` object are proxy to improve DX.
+- `Modifier::prefixQueryPairs` and `Modifier::prefixQueryParameters` to prefix Query using the pair key or the parameter names
 - `Query::decoded` the string representation of the component decoded.
 - `URLSearchParams::decoded` the string representation of the component decoded.
 - `tryNew` named constructor added to all components class to returns a new instance on success or `null` on failure.
 - `Query::normalized`
+- `Query::fromPairs` and `Query::fromVariable` takes a optional `$prefix` parameter to update the query pair keys or parameter names
 - `Path::nornalized`
 - `Fragment::normalized`
 - `HierarchicalPath::normalized`

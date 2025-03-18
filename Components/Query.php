@@ -33,6 +33,7 @@ use function array_count_values;
 use function array_filter;
 use function array_flip;
 use function array_intersect;
+use function array_is_list;
 use function array_map;
 use function array_merge;
 use function count;
@@ -88,9 +89,16 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromVariable(object|array $parameters, string $separator = '&'): self
+    public static function fromVariable(object|array $parameters, string $separator = '&', string $prefix = ''): self
     {
-        return new self(http_build_query(data: $parameters, arg_separator: $separator), Converter::fromRFC1738($separator));
+        $params = is_object($parameters) ? get_object_vars($parameters) : $parameters;
+
+        $data = [];
+        foreach ($params as $name => $value) {
+            $data[$prefix.$name] = $value;
+        }
+
+        return new self(http_build_query(data: $data, arg_separator: $separator), Converter::fromRFC1738($separator));
     }
 
     /**
@@ -99,11 +107,20 @@ final class Query extends Component implements QueryInterface
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      * @param non-empty-string $separator
      */
-    public static function fromPairs(iterable $pairs, string $separator = '&'): self
+    public static function fromPairs(iterable $pairs, string $separator = '&', string $prefix = ''): self
     {
+        $data = [];
+        foreach ($pairs as $pair) {
+            if (!is_array($pair) || !array_is_list($pair) || 2 !== count($pair)) {
+                throw new SyntaxError('A pair must be a sequential array starting at `0` and containing two elements.');
+            }
+
+            $data[] = [$prefix.$pair[0], $pair[1]];
+        }
+
         $converter = Converter::fromRFC3986($separator);
 
-        return new self(QueryString::buildFromPairs($pairs, $converter), $converter);
+        return new self(QueryString::buildFromPairs($data, $converter), $converter);
     }
 
     /**

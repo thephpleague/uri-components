@@ -228,27 +228,47 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      */
-    public function appendQueryPairs(iterable $pairs): self
+    public function appendQueryPairs(iterable $pairs, string $prefix = ''): self
     {
-        return $this->appendQuery(Query::fromPairs($pairs)->value());
+        return $this->appendQuery(Query::fromPairs($pairs, prefix: $prefix)->value());
+    }
+
+    public function prefixQueryPairs(string $prefix): self
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromPairs(Query::fromUri($this->uri), prefix: $prefix),
+                $this->uri,
+            )
+        ));
+    }
+
+    public function prefixQueryParameters(string $prefix): self
+    {
+        return new static($this->uri->withQuery(
+            static::normalizeComponent(
+                Query::fromVariable(Query::fromUri($this->uri)->parameters(), prefix: $prefix),
+                $this->uri,
+            )
+        ));
     }
 
     /**
      * Append PHP query parameters to the existing URI query.
      */
-    public function appendQueryParameters(object|array $parameters): self
+    public function appendQueryParameters(object|array $parameters, string $prefix = ''): self
     {
-        return $this->appendQuery(Query::fromVariable($parameters)->value());
+        return $this->appendQuery(Query::fromVariable($parameters, prefix: $prefix)->value());
     }
 
     /**
      * Prepend PHP query parameters to the existing URI query.
      */
-    public function prependQueryParameters(object|array $parameters): self
+    public function prependQueryParameters(object|array $parameters, string $prefix = ''): self
     {
         return new static($this->uri->withQuery(
             static::normalizeComponent(
-                Query::fromVariable($parameters)->append(Query::fromUri($this->uri)->value())->value(),
+                Query::fromVariable($parameters, prefix: $prefix)->append(Query::fromUri($this->uri)->value())->value(),
                 $this->uri
             )
         ));
@@ -272,7 +292,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      */
-    public function mergeQueryPairs(iterable $pairs): self
+    public function mergeQueryPairs(iterable $pairs, string $prefix = ''): self
     {
         $currentPairs = [...Query::fromUri($this->uri)->pairs()];
         $pairs = [...$pairs];
@@ -280,14 +300,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return match (true) {
             [] === $pairs,
             $currentPairs === $pairs => $this,
-            default => $this->mergeQuery(Query::fromPairs($pairs)->value()),
+            default => $this->mergeQuery(Query::fromPairs($pairs, prefix: $prefix)->value()),
         };
     }
 
     /**
      * Merge PHP query parameters with the existing URI query.
      */
-    public function mergeQueryParameters(object|array $parameters): self
+    public function mergeQueryParameters(object|array $parameters, string $prefix = ''): self
     {
         $parameters = match (true) {
             is_object($parameters) => get_object_vars($parameters),
@@ -301,7 +321,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             $currentParameters === $parameters => $this,
             default => new static($this->uri->withQuery(
                 self::normalizeComponent(
-                    Query::fromVariable([...$currentParameters, ...$parameters])->value(),
+                    Query::fromVariable([...$currentParameters, ...$parameters], prefix: $prefix)->value(),
                     $this->uri
                 )
             )),
