@@ -340,6 +340,23 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
+     * @template TInitial
+     *
+     * @param callable(TInitial|null, array{0:array-key, 1:mixed}, array-key=): TInitial $callback
+     * @param TInitial|null $initial
+     *
+     * @return TInitial|null
+     */
+    public function reduce(callable $callback, mixed $initial = null): mixed
+    {
+        foreach ($this->pairs as $offset => $pair) {
+            $initial = $callback($initial, $pair, $offset);
+        }
+
+        return $initial;
+    }
+
+    /**
      * Adds a query pair only if it is not already present in a given array.
      */
     private function removeDuplicates(array $pairs, array $pair): array
