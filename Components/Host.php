@@ -33,11 +33,13 @@ use function filter_var;
 use function in_array;
 use function inet_pton;
 use function preg_match;
+use function preg_replace_callback;
 use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
 use function strpos;
 use function strtolower;
+use function strtoupper;
 use function substr;
 
 use const FILTER_FLAG_IPV4;
@@ -344,6 +346,19 @@ final class Host extends Component implements IpHostInterface
             null !== $this->ipVersion,
             null === $this->host => $this->host,
             default => IdnConverter::toUnicode($this->host)->domain(),
+        };
+    }
+
+    public function encoded(): ?string
+    {
+        return match (true) {
+            null !== $this->ipVersion,
+            null === $this->host => $this->host,
+            default => (string) preg_replace_callback(
+                '/%[0-9A-F]{2}/i',
+                fn (array $matches) => strtoupper($matches[0]),
+                strtolower(rawurlencode(IdnConverter::toUnicode($this->host)->domain()))
+            ),
         };
     }
 

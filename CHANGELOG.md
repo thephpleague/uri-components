@@ -50,6 +50,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Scheme::isSsl`
 - `Scheme::isSpecial`
 - Using PHP8.4 `Deprecated` attribute to signal deprecated public API methods and constants.
+- `Host::encoded` method to raw url encode the host
 
 ### Fixed
 

@@ -126,6 +126,11 @@ final class Domain extends Component implements DomainHostInterface
         return $this->host->toUnicode();
     }
 
+    public function encoded(): ?string
+    {
+        return $this->host->encoded();
+    }
+
     public function isIp(): bool
     {
         return false;

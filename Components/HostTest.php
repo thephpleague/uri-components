@@ -28,6 +28,7 @@ use Stringable;
 
 use function array_fill;
 use function implode;
+use function rawurlencode;
 
 #[CoversClass(Host::class)]
 #[Group('host')]
@@ -37,7 +38,7 @@ final class HostTest extends TestCase
      * Test valid Host.
      */
     #[DataProvider('validHostProvider')]
-    public function testValidHost(Stringable|int|string|null $host, ?string $uri, ?string $iri): void
+    public function testValidHost(Stringable|int|string|null $host, ?string $uri, ?string $iri, ?string $encoded): void
     {
         $host = match (true) {
             null === $host => Host::new(),
@@ -48,6 +49,7 @@ final class HostTest extends TestCase
         self::assertSame($uri, $host->toAscii());
         self::assertSame($host->toString(), $host->getUriComponent());
         self::assertSame($iri, $host->toUnicode());
+        self::assertSame($encoded, $host->encoded());
     }
 
     public static function validHostProvider(): array
@@ -57,8 +59,10 @@ final class HostTest extends TestCase
                 Host::new('127.0.0.1'),
                 '127.0.0.1',
                 '127.0.0.1',
+                '127.0.0.1',
             ],
             'ipv6' => [
+                '[::1]',
                 '[::1]',
                 '[::1]',
                 '[::1]',
@@ -67,8 +71,10 @@ final class HostTest extends TestCase
                 '[fe80:1234::%251]',
                 '[fe80:1234::%251]',
                 '[fe80:1234::%251]',
+                '[fe80:1234::%251]',
             ],
             'ipfuture' => [
+                '[v1.ZZ.ZZ]',
                 '[v1.ZZ.ZZ]',
                 '[v1.ZZ.ZZ]',
                 '[v1.ZZ.ZZ]',
@@ -77,8 +83,10 @@ final class HostTest extends TestCase
                 'Master.EXAMPLE.cOm',
                 'master.example.com',
                 'master.example.com',
+                'master.example.com',
             ],
             'empty string' => [
+                '',
                 '',
                 '',
                 '',
@@ -87,8 +95,10 @@ final class HostTest extends TestCase
                 null,
                 null,
                 null,
+                null,
             ],
             'dot ending' => [
+                'example.com.',
                 'example.com.',
                 'example.com.',
                 'example.com.',
@@ -97,8 +107,10 @@ final class HostTest extends TestCase
                 '23.42c.two',
                 '23.42c.two',
                 '23.42c.two',
+                '23.42c.two',
             ],
             'all numeric' => [
+                '98.3.2',
                 '98.3.2',
                 '98.3.2',
                 '98.3.2',
@@ -107,18 +119,22 @@ final class HostTest extends TestCase
                 'toto.127.0.0.1',
                 'toto.127.0.0.1',
                 'toto.127.0.0.1',
+                'toto.127.0.0.1',
             ],
             'idn support' => [
                 'مثال.إختبار',
                 'xn--mgbh0fb.xn--kgbechtv',
                 'مثال.إختبار',
+                rawurlencode('مثال.إختبار'),
             ],
             'IRI support' => [
                 'xn--mgbh0fb.xn--kgbechtv',
                 'xn--mgbh0fb.xn--kgbechtv',
                 'مثال.إختبار',
+                rawurlencode('مثال.إختبار'),
             ],
             'Registered Name' => [
+                'test..example.com',
                 'test..example.com',
                 'test..example.com',
                 'test..example.com',
