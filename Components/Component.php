@@ -22,6 +22,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
 
 use function is_bool;
 use function preg_match;
@@ -53,7 +54,7 @@ abstract class Component implements UriComponentInterface, Conditionable
         return $this->toString();
     }
 
-    final protected static function filterUri(Stringable|string $uri): UriInterface|Psr7UriInterface
+    final protected static function filterUri(Rfc3986Uri|Stringable|string $uri): UriInterface|Psr7UriInterface
     {
         return match (true) {
             $uri instanceof UriAccess => $uri->getUri(),

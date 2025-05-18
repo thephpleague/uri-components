@@ -126,8 +126,12 @@ final class Query extends Component implements QueryInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Stringable|string $uri): self
+    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
     {
+        if ($uri instanceof \Uri\Rfc3986\Uri) {
+            return new self($uri->getRawQuery());
+        }
+
         $uri = self::filterUri($uri);
 
         return match (true) {

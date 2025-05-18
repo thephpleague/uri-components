@@ -56,7 +56,7 @@ final class Path extends Component implements PathInterface
     }
 
     /**
-     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     * Create a new instance from a string or a stringable structure or returns null on failure.
      */
     public static function tryNew(Stringable|string $uri = ''): ?self
     {
@@ -70,8 +70,12 @@ final class Path extends Component implements PathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Stringable|string $uri): self
+    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
     {
+        if ($uri instanceof \Uri\Rfc3986\Uri) {
+            return self::new($uri->getRawPath());
+        }
+
         if (!$uri instanceof UriInterface) {
             $uri = Uri::new($uri);
         }

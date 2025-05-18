@@ -213,9 +213,10 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Returns a new instance from a URI.
      */
-    public static function fromUri(Stringable|string $uri): self
+    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
     {
         $query = match (true) {
+            $uri instanceof \Uri\Rfc3986\Uri => $uri->getRawQuery(),
             $uri instanceof UriInterface => $uri->getQuery(),
             default => Uri::new($uri)->getQuery(),
         };

@@ -23,6 +23,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Fragment::normalized`
 - `HierarchicalPath::normalized`
 - `Datapath::normalized`
+- Support for `Uri\Rfc3986\Uri`
 
 ### Fixed
 

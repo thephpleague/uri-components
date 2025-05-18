@@ -35,6 +35,7 @@ use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
 
 use function filter_var;
 use function get_object_vars;
@@ -57,11 +58,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * @param UriFactoryInterface|null $uriFactory Deprecated, will be removed in the next major release
      */
-    public static function from(Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
+    public static function from(Rfc3986Uri|Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
     {
         return new static(match (true) {
             $uri instanceof UriAccess => $uri->getUri(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
+            $uri instanceof Rfc3986Uri => Uri::new($uri),
             $uriFactory instanceof UriFactoryInterface => $uriFactory->createUri((string) $uri),
             default => Uri::new($uri),
         });
