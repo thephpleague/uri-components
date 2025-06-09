@@ -26,6 +26,8 @@ use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 final class Authority extends Component implements AuthorityInterface
 {
@@ -78,7 +80,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(WhatwgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
 

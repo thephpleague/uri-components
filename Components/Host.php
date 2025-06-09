@@ -27,6 +27,8 @@ use League\Uri\IPv4Normalizer;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 use function explode;
 use function filter_var;
@@ -309,10 +311,14 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof \Uri\Rfc3986\Uri) {
+        if ($uri instanceof Rfc3986Uri) {
             return new self($uri->getRawHost());
+        }
+
+        if ($uri instanceof WhatWgUrl) {
+            return new self($uri->getAsciiHost());
         }
 
         $uri = self::filterUri($uri);

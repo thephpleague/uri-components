@@ -25,6 +25,8 @@ use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use TypeError;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 use function array_count_values;
 use function array_filter;
@@ -95,7 +97,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
         return new self(Path::fromUri($uri));
     }

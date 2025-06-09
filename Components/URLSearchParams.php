@@ -28,6 +28,8 @@ use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
 use League\Uri\Uri;
 use Stringable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 use function array_is_list;
 use function array_key_exists;
@@ -213,10 +215,14 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Returns a new instance from a URI.
      */
-    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
+        if ($uri instanceof WhatWgUrl) {
+            return new self(Query::fromPairs(QueryString::parseFromValue($uri->getQuery(), Converter::fromFormData())));
+        }
+
         $query = match (true) {
-            $uri instanceof \Uri\Rfc3986\Uri => $uri->getRawQuery(),
+            $uri instanceof Rfc3986Uri => $uri->getRawQuery(),
             $uri instanceof UriInterface => $uri->getQuery(),
             default => Uri::new($uri)->getQuery(),
         };

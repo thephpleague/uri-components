@@ -23,6 +23,7 @@ use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 use function is_bool;
 use function preg_match;
@@ -54,11 +55,12 @@ abstract class Component implements UriComponentInterface, Conditionable
         return $this->toString();
     }
 
-    final protected static function filterUri(Rfc3986Uri|Stringable|string $uri): UriInterface|Psr7UriInterface
+    final protected static function filterUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): UriInterface|Psr7UriInterface
     {
         return match (true) {
             $uri instanceof UriAccess => $uri->getUri(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
+            $uri instanceof WhatWgUrl => Uri::new($uri->toAsciiString()),
             default => Uri::new($uri),
         };
     }

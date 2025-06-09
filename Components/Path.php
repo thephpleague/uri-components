@@ -70,10 +70,14 @@ final class Path extends Component implements PathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(\Uri\WhatWg\Url|\Uri\Rfc3986\Uri|Stringable|string $uri): self
     {
         if ($uri instanceof \Uri\Rfc3986\Uri) {
             return self::new($uri->getRawPath());
+        }
+
+        if ($uri instanceof \Uri\WhatWg\Url) {
+            return self::new($uri->getPath());
         }
 
         if (!$uri instanceof UriInterface) {

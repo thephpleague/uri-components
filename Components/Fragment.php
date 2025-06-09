@@ -21,6 +21,8 @@ use League\Uri\Encoder;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 final class Fragment extends Component implements FragmentInterface
 {
@@ -54,10 +56,14 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof \Uri\Rfc3986\Uri) {
+        if ($uri instanceof Rfc3986Uri) {
             return new self($uri->getRawFragment());
+        }
+
+        if ($uri instanceof WhatWgUrl) {
+            return new self($uri->getFragment());
         }
 
         $uri = self::filterUri($uri);
