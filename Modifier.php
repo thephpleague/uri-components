@@ -71,15 +71,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         });
     }
 
-    public function getUri(): Psr7UriInterface|UriInterface
-    {
-        if ($this->uri instanceof Rfc3986Uri || $this->uri instanceof WhatWgUri) {
-            return Uri::new($this->uri);
-        }
-
-        return $this->uri;
-    }
-
     public function uri(): Rfc3986Uri|WhatWgUri|Psr7UriInterface|UriInterface
     {
         return $this->uri;
@@ -1122,5 +1113,24 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function removeQueryPairs(string ...$keys): static
     {
         return $this->removeQueryPairsByKey(...$keys);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.6.0
+     * @codeCoverageIgnore
+     * @see Modifier::uri()
+     *
+     * Remove query data according to their key name.
+     */
+    #[Deprecated(message:'use League\Uri\Modifier::uri() instead', since:'league/uri-components:7.6.0')]
+    public function getUri(): Psr7UriInterface|UriInterface
+    {
+        if ($this->uri instanceof Rfc3986Uri || $this->uri instanceof WhatWgUri) {
+            return Uri::new($this->uri);
+        }
+
+        return $this->uri;
     }
 }
