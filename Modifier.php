@@ -37,7 +37,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
-use Uri\WhatWg\Url as WhatWgUri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 use function filter_var;
 use function get_object_vars;
@@ -53,26 +53,28 @@ use const FILTER_VALIDATE_IP;
 
 class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 {
-    final public function __construct(protected readonly Psr7UriInterface|UriInterface|Rfc3986Uri|WhatWgUri $uri)
+    final public function __construct(protected readonly Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface $uri)
     {
     }
 
     /**
      * @param UriFactoryInterface|null $uriFactory deprecated, will be removed in the next major release
      */
-    public static function from(Rfc3986Uri|WhatWgUri|Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
+    public static function from(Rfc3986Uri|WhatWgUrl|Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
     {
         return new static(match (true) {
-            $uri instanceof UriAccess => $uri->getUri(),
-            $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
+            $uri instanceof self => $uri->uri,
+            $uri instanceof UriAccess => $uri->getUri(), // using League\Uri\BaseUri which is deprecated
+            $uri instanceof Psr7UriInterface,
+            $uri instanceof UriInterface,
             $uri instanceof Rfc3986Uri,
-            $uri instanceof WhatWgUri => $uri,
-            $uriFactory instanceof UriFactoryInterface => $uriFactory->createUri((string) $uri),
+            $uri instanceof WhatWgUrl => $uri,
+            $uriFactory instanceof UriFactoryInterface => $uriFactory->createUri((string) $uri),  // using UriFactoryInterface is deprecated
             default => Uri::new($uri),
         });
     }
 
-    public function uri(): Rfc3986Uri|WhatWgUri|Psr7UriInterface|UriInterface
+    public function uri(): Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface
     {
         return $this->uri;
     }
@@ -96,7 +98,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     {
         return match (true) {
             $this->uri instanceof Rfc3986Uri => $this->uri->toRawString(),
-            $this->uri instanceof WhatWgUri => $this->uri->toAsciiString(),
+            $this->uri instanceof WhatWgUrl => $this->uri->toAsciiString(),
             $this->uri instanceof UriInterface => $this->uri->toString(),
             default => $this->uri->__toString(),
         };
@@ -124,7 +126,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             });
         }
 
-        if ($this->uri instanceof WhatWgUri) {
+        if ($this->uri instanceof WhatWgUrl) {
             if (null !== $user) {
                 $user = (string) $user;
             }
@@ -147,12 +149,19 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         $query = self::normalizeComponent($query, $this->uri);
 
         $query = match (true) {
-            $this->uri instanceof Rfc3986Uri => Encoder::encodeQueryOrFragment($query),
-            $this->uri instanceof WhatWgUri => URLSearchParams::new($query),
+            $this->uri instanceof Rfc3986Uri => match (true) {
+                Encoder::isQueryEncoded($query) => $query,
+                default => Encoder::encodeQueryOrFragment($query),
+            },
+            $this->uri instanceof WhatWgUrl => URLSearchParams::new($query)->value(),
             default => $query,
         };
 
-        return new static($this->uri->withQuery($query));
+        return match (true) {
+            $this->uri instanceof Rfc3986Uri && $query === $this->uri->getRawQuery(),
+            $query === $this->uri->getQuery() => $this,
+            default => new static($this->uri->withQuery($query)),
+        };
     }
 
     public function withHost(Stringable|string|null $host): static
@@ -247,12 +256,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function sortQuery(): static
     {
-        return $this->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->sort()->value(),
-                $this->uri
-            )
-        );
+        return $this->withQuery(Query::fromUri($this->uri)->sort()->value());
     }
 
     /**
@@ -260,12 +264,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function appendQuery(Stringable|string|null $query): static
     {
-        return $this->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->append($query)->value(),
-                $this->uri
-            )
-        );
+        return $this->withQuery(Query::fromUri($this->uri)->append($query)->value());
     }
 
     /**
@@ -280,22 +279,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function prefixQueryPairs(string $prefix): self
     {
-        return $this->withQuery(
-            static::normalizeComponent(
-                Query::fromPairs(Query::fromUri($this->uri), prefix: $prefix),
-                $this->uri,
-            )
-        );
+        return $this->withQuery(Query::fromPairs(Query::fromUri($this->uri), prefix: $prefix));
     }
 
     public function prefixQueryParameters(string $prefix): self
     {
-        return $this->withQuery(
-            static::normalizeComponent(
-                Query::fromVariable(Query::fromUri($this->uri)->parameters(), prefix: $prefix),
-                $this->uri,
-            )
-        );
+        return $this->withQuery(Query::fromVariable(Query::fromUri($this->uri)->parameters(), prefix: $prefix));
     }
 
     /**
@@ -311,12 +300,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function prependQueryParameters(object|array $parameters, string $prefix = ''): self
     {
-        return $this->withQuery(
-            static::normalizeComponent(
-                Query::fromVariable($parameters, prefix: $prefix)->append(Query::fromUri($this->uri)->value())->value(),
-                $this->uri
-            )
-        );
+        return $this->withQuery(Query::fromVariable($parameters, prefix: $prefix)->append(Query::fromUri($this->uri)->value())->value());
     }
 
     /**
@@ -324,12 +308,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function mergeQuery(Stringable|string|null $query): static
     {
-        return $this->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->merge($query)->value(),
-                $this->uri
-            )
-        );
+        return $this->withQuery(Query::fromUri($this->uri)->merge($query)->value());
     }
 
     /**
@@ -364,12 +343,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return match (true) {
             [] === $parameters,
             $currentParameters === $parameters => $this,
-            default => $this->withQuery(
-                self::normalizeComponent(
-                    Query::fromVariable([...$currentParameters, ...$parameters], prefix: $prefix)->value(),
-                    $this->uri
-                )
-            ),
+            default => $this->withQuery(Query::fromVariable([...$currentParameters, ...$parameters], prefix: $prefix)->value()),
         };
     }
 
@@ -383,7 +357,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         return match ($query->value()) {
             $newQuery => $this,
-            default => $this->withQuery(static::normalizeComponent($newQuery, $this->uri)),
+            default => $this->withQuery($newQuery),
         };
     }
 
@@ -397,7 +371,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         return match ($query->value()) {
             $newQuery => $this,
-            default => $this->withQuery(static::normalizeComponent($newQuery, $this->uri)),
+            default => $this->withQuery($newQuery),
         };
     }
 
@@ -411,7 +385,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         return match ($newQuery) {
             $query->value() => $this,
-            default => $this->withQuery(static::normalizeComponent($newQuery, $this->uri)),
+            default => $this->withQuery($newQuery),
         };
     }
 
@@ -425,7 +399,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         return match ($newQuery) {
             $query->value() => $this,
-            default => $this->withQuery(static::normalizeComponent($newQuery, $this->uri)),
+            default => $this->withQuery($newQuery),
         };
     }
 
@@ -437,12 +411,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function removeEmptyQueryPairs(): static
     {
-        return $this->withQuery(
-            static::normalizeComponent(
-                Query::fromUri($this->uri)->withoutEmptyPairs()->value(),
-                $this->uri
-            )
-        );
+        return $this->withQuery(Query::fromUri($this->uri)->withoutEmptyPairs()->value());
     }
 
     /**
@@ -461,7 +430,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         return match ($newQuery) {
             $query->value() => $this,
-            default => $this->withQuery(static::normalizeComponent($newQuery, $this->uri)),
+            default => $this->withQuery($newQuery),
         };
     }
 
@@ -474,7 +443,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function addRootLabel(): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
 
         return match (true) {
             null === $host,
@@ -490,7 +459,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function appendLabel(Stringable|string|null $label): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
 
         $host = Host::new($host);
@@ -501,7 +470,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         }
 
         if ($host->isIpv4()) {
-            return new static($this->uri->withHost($host->value().'.'.ltrim($label->value(), '.')));
+            return $this->withHost($host->value().'.'.ltrim($label->value(), '.'));
         }
 
         if (!$host->isDomain()) {
@@ -515,11 +484,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     }
 
     /**
-     * Convert the URI host part to its ascii value.
+     * Convert the URI host part to its ASCII value.
      */
     public function hostToAscii(): static
     {
-        $currentHost = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $currentHost = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $host = IdnaConverter::toAsciiOrFail((string) $currentHost);
 
         return match (true) {
@@ -531,11 +500,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     }
 
     /**
-     * Convert the URI host part to its unicode value.
+     * Convert the URI host part to its Unicode value.
      */
     public function hostToUnicode(): static
     {
-        $currentHost = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $currentHost = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $host = IdnaConverter::toUnicode((string) $currentHost)->domain();
 
         return match (true) {
@@ -547,14 +516,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     }
 
     /**
-     * Normalizes the URI host content to a IPv4 dot-decimal notation if possible
+     * Normalizes the URI host content to an IPv4 dot-decimal notation if possible
      * otherwise returns the uri instance unchanged.
      *
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
     public function hostToDecimal(): static
     {
-        $currentHost = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $currentHost = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $hostIp = self::ipv4Converter()->toDecimal($currentHost);
 
         return match (true) {
@@ -574,7 +543,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function hostToOctal(): static
     {
-        $currentHost = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $currentHost = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $hostIp = self::ipv4Converter()->toOctal($currentHost);
 
         return match (true) {
@@ -594,7 +563,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function hostToHexadecimal(): static
     {
-        $currentHost = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $currentHost = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $hostIp = self::ipv4Converter()->toHexadecimal($currentHost);
 
         return match (true) {
@@ -608,12 +577,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function hostToIpv6Compressed(): static
     {
-        return $this->withHost(IPv6Converter::compress($this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost()));
+        return $this->withHost(IPv6Converter::compress($this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost()));
     }
 
     public function hostToIpv6Expanded(): static
     {
-        return $this->withHost(IPv6Converter::expand($this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost()));
+        return $this->withHost(IPv6Converter::expand($this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost()));
     }
 
     /**
@@ -623,7 +592,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function prependLabel(Stringable|string|null $label): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
 
         $host = Host::new($host);
@@ -652,7 +621,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function removeLabels(int ...$keys): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         if (null === $host || ('' === $host && $this->uri instanceof Psr7UriInterface)) {
             return $this;
         }
@@ -669,7 +638,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function removeRootLabel(): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
 
         return match (true) {
             null === $host,
@@ -684,7 +653,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function sliceLabels(int $offset, ?int $length = null): static
     {
-        $currentHost = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $currentHost = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         if (null === $currentHost || ('' === $currentHost && $this->uri instanceof Psr7UriInterface)) {
             return $this;
         }
@@ -718,7 +687,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function replaceLabel(int $offset, Stringable|string|null $label): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
         $newHost = Domain::new($host)->withLabel($offset, $label);
         $newHost = !$isAsciiDomain ? $newHost->toUnicode() : $newHost->toAscii();
@@ -728,7 +697,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function normalizeIp(): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         if (in_array($host, [null, ''], true)) {
             return $this;
         }
@@ -752,13 +721,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function normalizeHost(): static
     {
-        $host = $this->uri instanceof WhatWgUri ? $this->uri->getAsciiHost() : $this->uri->getHost();
+        $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         if (in_array($host, [null, ''], true)) {
             return $this;
         }
 
         $new = $this->normalizeIp();
-        $newHost = $new->uri instanceof WhatWgUri ? $new->uri->getAsciiHost() : $new->uri->getHost();
+        $newHost = $new->uri instanceof WhatWgUrl ? $new->uri->getAsciiHost() : $new->uri->getHost();
         if ($newHost !== $host) {
             return $new;
         }
@@ -960,7 +929,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      * Make sure the path always has a leading slash if an authority is present
      * and the path is not the empty string.
      */
-    final protected static function normalizePath(WhatWgUri|Rfc3986Uri|Psr7UriInterface|UriInterface $uri, PathInterface $path): WhatWgUri|Rfc3986Uri|Psr7UriInterface|UriInterface
+    final protected static function normalizePath(WhatWgUrl|Rfc3986Uri|Psr7UriInterface|UriInterface $uri, PathInterface $path): WhatWgUrl|Rfc3986Uri|Psr7UriInterface|UriInterface
     {
         $pathString = $path->toString();
         $authority = match (true) {
@@ -970,7 +939,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
                 'user' => $uri->getUsername(),
                 'pass' => $uri->getPassword(),
             ]),
-            $uri instanceof WhatWgUri => UriString::buildAuthority([
+            $uri instanceof WhatWgUrl => UriString::buildAuthority([
                 'host' => $uri->getAsciiHost(),
                 'port' => $uri->getPort(),
                 'user' => $uri->getUsername(),
@@ -993,7 +962,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * null value MUST be converted to the empty string if a Psr7 UriInterface is being manipulated.
      */
-    final protected static function normalizeComponent(Stringable|string|null $component, Rfc3986Uri|WhatWgUri|Psr7UriInterface|UriInterface $uri): ?string
+    final protected static function normalizeComponent(Stringable|string|null $component, Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface $uri): ?string
     {
         return match (true) {
             $uri instanceof Psr7UriInterface,
@@ -1032,7 +1001,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     #[Deprecated(message:'use League\Uri\Modifier::displayUriString() instead', since:'league/uri-components:7.6.0')]
     public function getIdnUriString(): string
     {
-        if ($this->uri instanceof WhatWgUri) {
+        if ($this->uri instanceof WhatWgUrl) {
             return $this->uri->toUnicodeString();
         }
 
@@ -1131,7 +1100,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     #[Deprecated(message:'use League\Uri\Modifier::uri() instead', since:'league/uri-components:7.6.0')]
     public function getUri(): Psr7UriInterface|UriInterface
     {
-        if ($this->uri instanceof Rfc3986Uri || $this->uri instanceof WhatWgUri) {
+        if ($this->uri instanceof Rfc3986Uri || $this->uri instanceof WhatWgUrl) {
             return Uri::new($this->uri);
         }
 
