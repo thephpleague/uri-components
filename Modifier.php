@@ -21,6 +21,7 @@ use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
+use League\Uri\Components\URLSearchParams;
 use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
@@ -146,6 +147,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         $query = self::normalizeComponent($query, $this->uri);
         if ($this->uri instanceof Rfc3986Uri) {
             $query = Encoder::encodeQueryOrFragment($query);
+        }
+
+        if ($this->uri instanceof WhatWgUri) {
+            $query = URLSearchParams::new($query)->toString();
         }
 
         return new static($this->uri->withQuery($query));
