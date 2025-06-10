@@ -145,13 +145,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function withQuery(Stringable|string|null $query): static
     {
         $query = self::normalizeComponent($query, $this->uri);
-        if ($this->uri instanceof Rfc3986Uri) {
-            $query = Encoder::encodeQueryOrFragment($query);
-        }
 
-        if ($this->uri instanceof WhatWgUri) {
-            $query = URLSearchParams::new($query)->toString();
-        }
+        $query = match (true) {
+            $this->uri instanceof Rfc3986Uri => Encoder::encodeQueryOrFragment($query),
+            $this->uri instanceof WhatWgUri => URLSearchParams::new($query),
+            default => $query,
+        };
 
         return new static($this->uri->withQuery($query));
     }
