@@ -14,11 +14,11 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use League\Uri\Contracts\Conditionable;
-use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\Modifier;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -55,10 +55,10 @@ abstract class Component implements UriComponentInterface, Conditionable
         return $this->toString();
     }
 
-    final protected static function filterUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): UriInterface|Psr7UriInterface
+    final protected static function filterUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): WhatWgUrl|Rfc3986Uri|UriInterface|Psr7UriInterface
     {
         return match (true) {
-            $uri instanceof UriAccess => $uri->getUri(),
+            $uri instanceof Modifier => $uri->uri(),
             $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
             $uri instanceof WhatWgUrl => Uri::new($uri->toAsciiString()),
             default => Uri::new($uri),

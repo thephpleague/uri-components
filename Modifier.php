@@ -63,7 +63,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     {
         return new static(match (true) {
             $uri instanceof self => $uri->uri,
-            $uri instanceof UriAccess => $uri->getUri(), // using League\Uri\BaseUri which is deprecated
             $uri instanceof Psr7UriInterface,
             $uri instanceof UriInterface,
             $uri instanceof Rfc3986Uri,
