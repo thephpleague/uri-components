@@ -15,11 +15,11 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::with*` method from the underlying `Uri` object are proxy to improve DX.
 - `Modifier::uri` method which returns the underlying URI object used by the Modifier class.
 - `Modifier::prefixQueryPairs` and `Modifier::prefixQueryParameters` to prefix Query using the pair key or the parameter names
+- `tryNew` named constructor added to all classes to return a new instance on success or `null` on failure.
 - `Query::decoded` the string representation of the component decoded.
-- `URLSearchParams::decoded` the string representation of the component decoded.
-- `tryNew` named constructor added to all components class to returns a new instance on success or `null` on failure.
 - `Query::normalized`
 - `Query::fromPairs` and `Query::fromVariable` takes a optional `$prefix` parameter to update the query pair keys or parameter names
+- `URLSearchParams::decoded` the string representation of the component decoded.
 - `Path::nornalized`
 - `Fragment::normalized`
 - `HierarchicalPath::normalized`
@@ -29,12 +29,12 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- `Modifier::getUriString` returns the result of calling `__tostring` on the underlying URI object being manipulated
 - `Modifier` host related method return host in IDN form or ASCII form depending on the URI input format
 
 ### Deprecated
 
-- `Modifier::getIdnUriString` use `Modifier::displayUriString` instead
+- `Modifier::getIdnUriString` use `Modifier::toDisplayString` instead
+- `Modifier::getUriString` use  `Modifier::toString` instead
 - `Modifier::getUri` use `Modifier::uri` instead
 
 ### Removed

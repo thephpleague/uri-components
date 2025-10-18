@@ -26,7 +26,6 @@ use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Contracts\UriRenderer;
 use League\Uri\Exceptions\MissingFeature;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnaConverter;
@@ -79,11 +78,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return $this->uri;
     }
 
-    public function getUriString(): string
-    {
-        return $this->toString();
-    }
-
     public function jsonSerialize(): string
     {
         return $this->toString();
@@ -97,16 +91,16 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function toString(): string
     {
         return match (true) {
-            $this->uri instanceof Rfc3986Uri => $this->uri->toRawString(),
-            $this->uri instanceof WhatWgUrl => $this->uri->toAsciiString(),
+            $this->uri instanceof Rfc3986Uri,
             $this->uri instanceof UriInterface => $this->uri->toString(),
-            default => $this->uri->__toString(),
+            $this->uri instanceof WhatWgUrl => $this->uri->toAsciiString(),
+            $this->uri instanceof Psr7UriInterface => $this->uri->__toString(),
         };
     }
 
     public function toDisplayString(): string
     {
-        $uri = $this->uri instanceof UriRenderer ? $this->uri : Uri::new($this->uri);
+        $uri = $this->uri instanceof Uri ? $this->uri : Uri::new($this->uri);
 
         return $uri->toDisplayString();
     }
@@ -119,11 +113,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function withUserInfo(Stringable|string|null $user, Stringable|string|null $password): static
     {
         if ($this->uri instanceof Rfc3986Uri) {
-            return new static(match (null) {
-                $user => $this->uri->withUserInfo(null),
-                $password => $this->uri->withUserInfo(Encoder::encodeUser($user)),
-                default => $this->uri->withUserInfo(Encoder::encodeUser($user).':'.Encoder::encodePassword($password)),
-            });
+            $userInfo = Encoder::encodeUser($user);
+            if (null !== $password) {
+                $userInfo .= ':'.Encoder::encodePassword($password);
+            }
+
+            return new static($this->uri->withUserInfo($userInfo));
         }
 
         if ($this->uri instanceof WhatWgUrl) {
@@ -138,9 +133,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             return new static($this->uri->withUsername($user)->withPassword($password));
         }
 
+        if (null == $user && $this->uri instanceof Psr7UriInterface) {
+            $user = '';
+        }
+
         return new static($this->uri->withUserInfo(
-            self::normalizeComponent($user, $this->uri),
-            $password instanceof Stringable ? $password->__toString() : $password
+            $user instanceof Stringable ? (string) $user : $user,
+            $password instanceof Stringable ? (string) $password : $password,
         ));
     }
 
@@ -982,7 +981,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function displayUriString(): string
     {
-        if ($this->uri instanceof UriRenderer) {
+        if ($this->uri instanceof Uri) {
             return $this->uri->toDisplayString();
         }
 
@@ -1007,12 +1006,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         $currentHost = $this->uri->getHost();
         if (null === $currentHost || '' === $currentHost) {
-            return $this->getUriString();
+            return $this->toString();
         }
 
         $host = IdnaConverter::toUnicode($currentHost)->domain();
         if ($host === $currentHost) {
-            return $this->getUriString();
+            return $this->toString();
         }
 
         $components = match (true) {
@@ -1105,5 +1104,20 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         }
 
         return $this->uri;
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.6.0
+     * @codeCoverageIgnore
+     * @see Modifier::toString()
+     *
+     * Remove query data according to their key name.
+     */
+    #[Deprecated(message:'use League\Uri\Modifier::toString() instead', since:'league/uri-components:7.6.0')]
+    public function getUriString(): string
+    {
+        return $this->toString();
     }
 }

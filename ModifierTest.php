@@ -294,8 +294,8 @@ final class ModifierTest extends TestCase
     public function testEncodeQuery(): void
     {
         self::assertSame(
-            $this->modifier->encodeQuery(PHP_QUERY_RFC3986)->getUriString(),
-            $this->modifier->getUriString()
+            $this->modifier->encodeQuery(PHP_QUERY_RFC3986)->toString(),
+            $this->modifier->toString()
         );
 
         self::assertSame(
@@ -337,7 +337,7 @@ final class ModifierTest extends TestCase
     {
         $uri = 'http://www.localhost.co.uk/path/to/the/sky/';
 
-        self::assertSame('http://www.localhost/path/to/the/sky/', Modifier::from($uri)->sliceLabels(2, 2)->getUriString());
+        self::assertSame('http://www.localhost/path/to/the/sky/', Modifier::from($uri)->sliceLabels(2, 2)->toString());
     }
 
     public function testAppendLabelWithIpv4Host(): void
@@ -430,20 +430,20 @@ final class ModifierTest extends TestCase
     {
         $modifier = Modifier::from(Utils::uriFor('http://shop.bébé.be'));
 
-        self::assertSame('http://shop.bébé', $modifier->removeLabels(0)->getUriString());
-        self::assertSame('http://www.bébé.be', $modifier->replaceLabel(-1, 'www')->getUriString());
-        self::assertSame('http://new.shop.bébé.be', $modifier->prependLabel('new')->getUriString());
-        self::assertSame('http://shop.bébé.be.new', $modifier->appendLabel('new')->getUriString());
-        self::assertSame('http://shop.bébé.be', $modifier->hostToUnicode()->getUriString());
-        self::assertSame('http://shop.xn--bb-bjab.be', $modifier->hostToAscii()->getUriString());
+        self::assertSame('http://shop.bébé', $modifier->removeLabels(0)->toString());
+        self::assertSame('http://www.bébé.be', $modifier->replaceLabel(-1, 'www')->toString());
+        self::assertSame('http://new.shop.bébé.be', $modifier->prependLabel('new')->toString());
+        self::assertSame('http://shop.bébé.be.new', $modifier->appendLabel('new')->toString());
+        self::assertSame('http://shop.bébé.be', $modifier->hostToUnicode()->toString());
+        self::assertSame('http://shop.xn--bb-bjab.be', $modifier->hostToAscii()->toString());
 
         $modifier = Modifier::from(Utils::uriFor('http://shop.bebe.be'));
 
-        self::assertSame('http://xn--bb-bjab.bebe.be', $modifier->replaceLabel(-1, 'bébé')->getUriString());
-        self::assertSame('http://xn--bb-bjab.shop.bebe.be', $modifier->prependLabel('bébé')->getUriString());
-        self::assertSame('http://shop.bebe.be.xn--bb-bjab', $modifier->appendLabel('bébé')->getUriString());
-        self::assertSame('http://shop.bebe.be', $modifier->hostToAscii()->getUriString());
-        self::assertSame('http://shop.bebe.be', $modifier->hostToUnicode()->getUriString());
+        self::assertSame('http://xn--bb-bjab.bebe.be', $modifier->replaceLabel(-1, 'bébé')->toString());
+        self::assertSame('http://xn--bb-bjab.shop.bebe.be', $modifier->prependLabel('bébé')->toString());
+        self::assertSame('http://shop.bebe.be.xn--bb-bjab', $modifier->appendLabel('bébé')->toString());
+        self::assertSame('http://shop.bebe.be', $modifier->hostToAscii()->toString());
+        self::assertSame('http://shop.bebe.be', $modifier->hostToUnicode()->toString());
     }
 
     public function testAddRootLabel(): void
@@ -472,7 +472,7 @@ final class ModifierTest extends TestCase
 
         self::assertSame('http://xn--bb-bjab.be', $uri);
         self::assertSame('http://xn--bb-bjab.be', (string) $modifier);
-        self::assertSame($uriString, $modifier->hostToUnicode()->getUriString());
+        self::assertSame($uriString, $modifier->hostToUnicode()->toString());
     }
 
     public function testICanNormalizeIPv4HostToDecimal(): void
@@ -480,7 +480,7 @@ final class ModifierTest extends TestCase
         $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
         $expected = 'http://192.168.0.1/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->hostToDecimal()->getUriString());
+        self::assertSame($expected, Modifier::from($uri)->hostToDecimal()->toString());
     }
 
     public function testICanNormalizeIPv4HostToOctal(): void
@@ -488,7 +488,7 @@ final class ModifierTest extends TestCase
         $uri = 'http://0300.0250.0.1/path/to/the/sky.php';
         $expected = 'http://0300.0250.0000.0001/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->hostToOctal()->getUriString());
+        self::assertSame($expected, Modifier::from($uri)->hostToOctal()->toString());
     }
 
     public function testICanNormalizeIPv4HostToHexadecimal(): void
@@ -496,7 +496,7 @@ final class ModifierTest extends TestCase
         $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
         $expected = 'http://0xc0a801/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->hostToHexadecimal()->getUriString());
+        self::assertSame($expected, Modifier::from($uri)->hostToHexadecimal()->toString());
     }
 
     public function testIpv4NormalizeHostWithPsr7Uri(): void
@@ -527,13 +527,13 @@ final class ModifierTest extends TestCase
     #[DataProvider('fileProvider')]
     public function testToBinary(Uri $binary, Uri $ascii): void
     {
-        self::assertSame($binary->toString(), Modifier::from($ascii)->dataPathToBinary()->getUriString());
+        self::assertSame($binary->toString(), Modifier::from($ascii)->dataPathToBinary()->toString());
     }
 
     #[DataProvider('fileProvider')]
     public function testToAscii(Uri $binary, Uri $ascii): void
     {
-        self::assertSame($ascii->toString(), Modifier::from($binary)->dataPathToAscii()->getUriString());
+        self::assertSame($ascii->toString(), Modifier::from($binary)->dataPathToAscii()->toString());
     }
 
     public static function fileProvider(): array
@@ -832,7 +832,7 @@ final class ModifierTest extends TestCase
     {
         $uri = 'http://www.localhost.com/path/to/the/sky/';
 
-        self::assertSame('http://www.localhost.com/the/sky/', Modifier::from($uri)->sliceSegments(2, 2)->getUriString());
+        self::assertSame('http://www.localhost.com/the/sky/', Modifier::from($uri)->sliceSegments(2, 2)->toString());
     }
 
     #[DataProvider('ipv6NormalizationUriProvider')]
@@ -843,8 +843,8 @@ final class ModifierTest extends TestCase
     ): void {
         $uri = Modifier::from(Http::new($inputUri));
 
-        self::assertSame($compressedUri, $uri->hostToIpv6Compressed()->getUriString());
-        self::assertSame($expandedUri, $uri->hostToIpv6Expanded()->getUriString());
+        self::assertSame($compressedUri, $uri->hostToIpv6Compressed()->toString());
+        self::assertSame($expandedUri, $uri->hostToIpv6Expanded()->toString());
     }
 
     public static function ipv6NormalizationUriProvider(): iterable
