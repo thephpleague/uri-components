@@ -6,6 +6,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
+- `FragmentDirective` support
 - `Component::when` conditional method to ease component building logic.
 - `URLSearchParams::when` conditional method to ease component building logic.
 - `Modifier::prependQueryParameters` returns a modifier which prepends query parameters

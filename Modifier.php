@@ -16,13 +16,16 @@ namespace League\Uri;
 use Deprecated;
 use JsonSerializable;
 use League\Uri\Components\DataPath;
+use League\Uri\Components\Directives\Directive;
 use League\Uri\Components\Domain;
+use League\Uri\Components\FragmentDirective;
 use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
 use League\Uri\Components\URLSearchParams;
 use League\Uri\Contracts\Conditionable;
+use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
@@ -176,12 +179,20 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function withFragment(Stringable|string|null $fragment): static
     {
-        $fragment = self::normalizeComponent($fragment, $this->uri);
-        if ($this->uri instanceof Rfc3986Uri) {
-            $fragment = Encoder::encodeQueryOrFragment($fragment);
+        if ($fragment instanceof Directive) {
+            $fragment = FragmentDirective::DELIMITER.$fragment->toString();
         }
 
-        return new static($this->uri->withFragment($fragment));
+        if ($fragment instanceof FragmentInterface) {
+            $fragment = $fragment->value();
+        }
+
+        return new static($this->uri->withFragment(match (true) {
+            $fragment instanceof Stringable,
+            $this->uri instanceof Psr7UriInterface => (string) $fragment,
+            $this->uri instanceof Rfc3986Uri => Encoder::encodeQueryOrFragment($fragment),
+            default => $fragment,
+        }));
     }
 
     public function withPort(?int $port): static
@@ -1021,6 +1032,40 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         $components['host'] = $host;
 
         return UriString::build($components);
+    }
+
+    /*********************************
+     * Fragment modifier methods
+     *********************************/
+
+    public function appendDirectives(FragmentDirective|Directive|Stringable|string ...$directives): static
+    {
+        return $this->withFragment(FragmentDirective::fromUri($this->uri())->append(...$directives));
+    }
+
+    public function prependDirectives(FragmentDirective|Directive|Stringable|string ...$directives): static
+    {
+        return $this->withFragment(FragmentDirective::fromUri($this->uri())->prepend(...$directives));
+    }
+
+    public function removeDirectives(int ...$offset): static
+    {
+        return $this->withFragment(FragmentDirective::fromUri($this->uri())->remove(...$offset));
+    }
+
+    public function replaceDirective(int $offset, Directive|Stringable|string $directive): static
+    {
+        return $this->withFragment(FragmentDirective::fromUri($this->uri())->replace($offset, $directive));
+    }
+
+    public function sliceDirectives(int $offset, ?int $length): static
+    {
+        return $this->withFragment(FragmentDirective::fromUri($this->uri())->slice($offset, $length));
+    }
+
+    public function filterDirectives(callable $callback): static
+    {
+        return $this->withFragment(FragmentDirective::fromUri($this->uri())->filter($callback));
     }
 
     /**

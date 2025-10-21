@@ -24,6 +24,8 @@ use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
+use function str_replace;
+
 final class Fragment extends Component implements FragmentInterface
 {
     private readonly ?string $fragment;
@@ -89,7 +91,11 @@ final class Fragment extends Component implements FragmentInterface
      */
     public function decoded(): ?string
     {
-        return $this->fragment;
+        if (null === $this->fragment) {
+            return null;
+        }
+
+        return  str_replace('%20', ' ', $this->fragment);
     }
 
     public function normalize(): self
