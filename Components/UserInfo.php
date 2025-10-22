@@ -20,7 +20,6 @@ use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Encoder;
-use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
@@ -41,16 +40,10 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public function __construct(
         Stringable|string|null $username,
-        #[SensitiveParameter]
-        Stringable|string|null $password = null
+        #[SensitiveParameter] Stringable|string|null $password = null,
     ) {
         $this->username = $this->validateComponent($username);
-        $password = $this->validateComponent($password);
-        if (null === $this->username && null !== $password) {
-            throw new SyntaxError('It is not possible to associated a password to an undefined user.');
-        }
-
-        $this->password = $password;
+        $this->password = $this->validateComponent($password);
     }
 
     /**
@@ -198,22 +191,21 @@ final class UserInfo extends Component implements UserInfoInterface
     public function withUser(Stringable|string|null $username): self
     {
         $username = $this->validateComponent($username);
+        if ($this->username === $username) {
+            return $this;
+        }
 
-        return match ($this->username) {
-            $username => $this,
-            default => new self($username, $this->password),
-        };
+        return new self($username, $this->password);
     }
 
     public function withPass(#[SensitiveParameter] Stringable|string|null $password): self
     {
         $password = $this->validateComponent($password);
+        if ($password === $this->password) {
+            return $this;
+        }
 
-        return match (true) {
-            $password === $this->password => $this,
-            null === $this->username => throw new SyntaxError('It is not possible to associated a password to an undefined user.'),
-            default => new self($this->username, $password),
-        };
+        return new self($this->username, $password);
     }
 
     /**

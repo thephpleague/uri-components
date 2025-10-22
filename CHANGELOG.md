@@ -32,6 +32,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - `Modifier` host related method return host in IDN form or ASCII form depending on the URI input format
+- `UserInfo` now can be constructed and mutated even when the `user` component is not present. It was throwing an exception before.
 
 ### Deprecated
 

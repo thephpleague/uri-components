@@ -172,9 +172,10 @@ final class UserInfoTest extends TestCase
 
     public function testItWillThrowIfWeAttemptToModifyAPasswordOnANullUser(): void
     {
-        $this->expectException(SyntaxError::class);
-
-        UserInfo::new()->withPass('toto');
+        self::assertSame(
+            UserInfo::new()->withPass('toto')->toString(),
+            ':toto',
+        );
     }
 
     public function testConstructorThrowsException(): void
@@ -248,13 +249,6 @@ final class UserInfoTest extends TestCase
         $auth = Authority::fromUri($uri);
 
         self::assertEquals(UserInfo::fromUri($uri), UserInfo::fromAuthority($auth));
-    }
-
-    public function testItFailsToCreateANewInstanceWhenTheUsernameIsUndefined(): void
-    {
-        $this->expectException(SyntaxError::class);
-
-        new UserInfo(null, 'password');
     }
 
     /**
