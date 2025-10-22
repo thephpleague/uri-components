@@ -45,7 +45,7 @@ final class GenericDirectiveTest extends TestCase
         $directive = GenericDirective::fromString('unknownDirective');
 
         self::assertTrue($directive->equals($inputText));
-        self::assertTrue($directive->equals(new GenericDirective($inputText)));
+        self::assertTrue($directive->equals(GenericDirective::fromString($inputText)));
         self::assertFalse($directive->equals(new stdClass()));
         self::assertFalse($directive->equals('text=foo'));
         self::assertFalse($directive->equals('invalid&text=foo'));

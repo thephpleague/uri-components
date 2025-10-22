@@ -21,14 +21,14 @@ use Stringable;
 interface Directive extends Stringable
 {
     /**
-     * The Directive name decoded.
+     * The decoded Directive name.
      *
      * @return non-empty-string
      */
     public function name(): string;
 
     /**
-     * The Directive value decoded.
+     * The decoded Directive value.
      */
     public function value(): ?string;
 

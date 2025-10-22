@@ -18,6 +18,7 @@ use JsonSerializable;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\Directives\Directive;
 use League\Uri\Components\Domain;
+use League\Uri\Components\Fragment;
 use League\Uri\Components\FragmentDirectives;
 use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
@@ -180,19 +181,20 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function withFragment(Stringable|string|null $fragment): static
     {
         if ($fragment instanceof Directive) {
-            $fragment = FragmentDirectives::DELIMITER.$fragment->toString();
+            $fragment = new FragmentDirectives($fragment);
         }
 
-        if ($fragment instanceof FragmentInterface) {
-            $fragment = $fragment->value();
+        if (!$fragment instanceof FragmentInterface) {
+            $fragment = str_starts_with((string) $fragment, FragmentDirectives::DELIMITER)
+                ? FragmentDirectives::new($fragment)
+                : Fragment::new($fragment);
         }
 
-        return new static($this->uri->withFragment(match (true) {
-            $fragment instanceof Stringable,
-            $this->uri instanceof Psr7UriInterface => (string) $fragment,
-            $this->uri instanceof Rfc3986Uri => Encoder::encodeQueryOrFragment($fragment),
-            default => $fragment,
-        }));
+        return new static($this->uri->withFragment(
+            $this->uri instanceof Psr7UriInterface
+                ? $fragment->toString()
+                : $fragment->value()
+        ));
     }
 
     public function withPort(?int $port): static

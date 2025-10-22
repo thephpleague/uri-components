@@ -23,8 +23,19 @@ use function str_replace;
 
 final class GenericDirective implements Directive
 {
-    public function __construct(private string $name, private ?string $value = null)
+    private function __construct(private string $name, private ?string $value = null)
     {
+    }
+
+    /**
+     * Create a new instance from a string without the Directive delimiter (:~:) or a separator (&).
+     */
+    public static function fromString(Stringable|string $value): self
+    {
+        [$name, $value] = explode('=', (string) $value, 2) + [1 => null];
+        (null !== $name && !str_contains($name, '&')) || throw new SyntaxError('The submitted text is not a valid directive.');
+
+        return new self($name, $value);
     }
 
     private static function decode(?string $value): ?string
@@ -43,17 +54,6 @@ final class GenericDirective implements Directive
     public function value(): ?string
     {
         return self::decode($this->value);
-    }
-
-    /**
-     * Create a new instance from a string without the Directive delimiter (:~:) or a separator (&).
-     */
-    public static function fromString(Stringable|string $value): self
-    {
-        [$name, $value] = explode('=', (string) $value, 2) + [1 => null];
-        (null !== $name && !str_contains($name, '&')) || throw new SyntaxError('The submitted text is not a valid directive.');
-
-        return new self($name, $value);
     }
 
     public function toString(): string

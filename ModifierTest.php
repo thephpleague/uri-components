@@ -13,6 +13,9 @@ namespace League\Uri;
 
 use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
+use League\Uri\Components\Directives\Directive;
+use League\Uri\Components\Directives\TextDirective;
+use League\Uri\Components\FragmentDirectives;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -21,11 +24,13 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use Stringable;
 use Uri\WhatWg\Url;
 
 use const PHP_QUERY_RFC3986;
 
 #[CoversClass(Modifier::class)]
+#[CoversClass(FragmentDirectives::class)]
 #[Group('host')]
 #[Group('resolution')]
 final class ModifierTest extends TestCase
@@ -991,5 +996,71 @@ final class ModifierTest extends TestCase
         $uri = $modifier->uri();
 
         return $uri instanceof Url ? $uri->getAsciiHost() : $uri->getHost();
+    }
+
+    #[DataProvider('providesDirectivesToAppend')]
+    public function test_it_can_append_the_fragment(
+        string $uri,
+        Directive|Stringable|string $directive,
+        string $expectedFragment
+    ): void {
+        self::assertSame(
+            $expectedFragment,
+            Modifier::from($uri)->appendDirectives($directive)->uri()->getFragment()
+        );
+    }
+
+    public static function providesDirectivesToAppend(): iterable
+    {
+        yield 'add new string directive on null fragment' => [
+            'uri' => 'http://host/path',
+            'directive' => 'foo=bar',
+            'expectedFragment' => ':~:foo=bar',
+        ];
+
+        yield 'add a directive instance on null fragment' => [
+            'uri' => 'http://host/path',
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'expectedFragment' => ":~:text=start,en'd",
+        ];
+
+        yield 'append a directive on existing fragment directive' => [
+            'uri' => 'http://host/path#:~:unknownDirective',
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'expectedFragment' => ":~:unknownDirective&text=start,en'd",
+        ];
+    }
+
+    #[DataProvider('providesDirectivesToPrepend')]
+    public function test_it_can_prepend_the_fragment(
+        string $uri,
+        Directive|Stringable|string $directive,
+        string $expectedFragment
+    ): void {
+        self::assertSame(
+            $expectedFragment,
+            Modifier::from($uri)->prependDirectives($directive)->uri()->getFragment()
+        );
+    }
+
+    public static function providesDirectivesToPrepend(): iterable
+    {
+        yield 'add new string directive on null fragment' => [
+            'uri' => 'http://host/path',
+            'directive' => 'foo=bar',
+            'expectedFragment' => ':~:foo=bar',
+        ];
+
+        yield 'add a directive instance on null fragment' => [
+            'uri' => 'http://host/path',
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'expectedFragment' => ":~:text=start,en'd",
+        ];
+
+        yield 'append a directive on existing fragment directive' => [
+            'uri' => 'http://host/path#:~:unknownDirective',
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'expectedFragment' => ":~:text=start,en'd&unknownDirective",
+        ];
     }
 }
