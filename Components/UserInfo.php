@@ -25,8 +25,11 @@ use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
 use function explode;
+use function is_string;
 
 final class UserInfo extends Component implements UserInfoInterface
 {
@@ -53,10 +56,14 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(Rfc3986Uri|WhatWgUrl|Stringable|string $uri): self
     {
-        if ($uri instanceof \Uri\Rfc3986\Uri) {
+        if ($uri instanceof Rfc3986Uri) {
             return new self($uri->getRawUsername(), $uri->getRawPassword());
+        }
+
+        if ($uri instanceof WhatWgUrl) {
+            return new self($uri->getUsername(), $uri->getPassword());
         }
 
         $uri = self::filterUri($uri);
@@ -136,6 +143,22 @@ final class UserInfo extends Component implements UserInfoInterface
         };
     }
 
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
+    }
+
     public function getUriComponent(): string
     {
         return $this->value().(null === $this->username ? '' : '@');
@@ -204,7 +227,7 @@ final class UserInfo extends Component implements UserInfoInterface
      * Create a new instance from a URI object.
      */
     #[Deprecated(message:'use League\Uri\Components\UserInfo::fromUri() instead', since:'league/uri-components:7.0.0')]
-    public static function createFromUri(Psr7UriInterface|UriInterface $uri): self
+    public static function createFromUri(Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface $uri): self
     {
         return self::fromUri($uri);
     }

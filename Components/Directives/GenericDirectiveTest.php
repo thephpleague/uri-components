@@ -16,6 +16,7 @@ namespace Components\Directives;
 use League\Uri\Components\Directives\GenericDirective;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 #[CoversClass(GenericDirective::class)]
 final class GenericDirectiveTest extends TestCase
@@ -36,5 +37,17 @@ final class GenericDirectiveTest extends TestCase
         self::assertSame('unknownDirective', (string) $directive);
         self::assertNull($directive->value());
         self::assertSame('unknownDirective', $directive->name());
+    }
+
+    public function test_it_can_tell_if_its_value_are_identical(): void
+    {
+        $inputText = 'unknownDirective';
+        $directive = GenericDirective::fromString('unknownDirective');
+
+        self::assertTrue($directive->equals($inputText));
+        self::assertTrue($directive->equals(new GenericDirective($inputText)));
+        self::assertFalse($directive->equals(new stdClass()));
+        self::assertFalse($directive->equals('text=foo'));
+        self::assertFalse($directive->equals('invalid&text=foo'));
     }
 }

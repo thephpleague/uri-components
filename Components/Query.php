@@ -42,6 +42,7 @@ use function count;
 use function http_build_query;
 use function implode;
 use function is_int;
+use function is_string;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
@@ -275,6 +276,22 @@ final class Query extends Component implements QueryInterface
     public function getAll(string $key): array
     {
         return array_column(array_filter($this->pairs, fn (array $pair): bool => $key === $pair[0]), 1);
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     public function parameters(): array

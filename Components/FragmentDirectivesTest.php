@@ -17,14 +17,15 @@ use League\Uri\Components\Directives\Directive;
 use League\Uri\Components\Directives\GenericDirective;
 use League\Uri\Components\Directives\TextDirective;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 use function PHPUnit\Framework\assertInstanceOf;
 
-final class FragmentDirectiveTest extends TestCase
+final class FragmentDirectivesTest extends TestCase
 {
     public function test_it_can_be_instantiated_with_the_constructor(): void
     {
-        $fragment = new FragmentDirective(
+        $fragment = new FragmentDirectives(
             new TextDirective(start:'linked URL', end:"-'s format"),
             new TextDirective(start: 'attributes', end: 'attribute', prefix: 'Deprecated'),
             'mydirectives=bbrown',
@@ -56,9 +57,20 @@ final class FragmentDirectiveTest extends TestCase
         self::assertFalse($removedFragment->contains($fragment->first()));
         self::assertSame($fragment->last(), $removedFragment->nth(1));
 
-        $fragmentBis = FragmentDirective::new(":~:text=linked%20URL,%2D's%20format&text=Deprecated-,attributes,attribute&mydirectives=bbrown&mydirection=maitreGims");
+        $fragmentBis = FragmentDirectives::new(":~:text=linked%20URL,%2D's%20format&text=Deprecated-,attributes,attribute&mydirectives=bbrown&mydirection=maitreGims");
         self::assertSame($fragmentBis->value(), $fragment->value());
 
-        self::assertNull(FragmentDirective::tryNew('foobar'));
+        self::assertNull(FragmentDirectives::tryNew('foobar'));
+    }
+
+    public function test_it_can_tell_if_its_value_are_identical(): void
+    {
+        $inputText = ':~:text=linked%20URL,%2Ds%20format';
+        $fragment =  FragmentDirectives::new($inputText);
+
+        self::assertTrue($fragment->equals($inputText));
+        self::assertFalse($fragment->equals(':~:unknownDirective'));
+        self::assertFalse($fragment->equals('invalid fragment'));
+        self::assertFalse($fragment->equals(new stdClass()));
     }
 }

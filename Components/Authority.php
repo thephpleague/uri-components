@@ -17,6 +17,7 @@ use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
 use League\Uri\Contracts\PortInterface;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
@@ -28,6 +29,8 @@ use SensitiveParameter;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
+
+use function is_string;
 
 final class Authority extends Component implements AuthorityInterface
 {
@@ -159,6 +162,22 @@ final class Authority extends Component implements AuthorityInterface
     public function getUserInfo(): ?string
     {
         return $this->userInfo->value();
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     /**

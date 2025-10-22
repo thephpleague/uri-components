@@ -280,6 +280,11 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         return $this->pairs->toFormData();
     }
 
+    public function equals(mixed $value): bool
+    {
+        return $this->pairs->equals($value);
+    }
+
     /**
      * Returns a query string suitable for use in a URL.
      */

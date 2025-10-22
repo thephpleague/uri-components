@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\ConversionFailed;
@@ -34,6 +35,7 @@ use function explode;
 use function filter_var;
 use function in_array;
 use function inet_pton;
+use function is_string;
 use function preg_match;
 use function preg_replace_callback;
 use function rawurldecode;
@@ -343,6 +345,22 @@ final class Host extends Component implements IpHostInterface
     public function value(): ?string
     {
         return $this->host;
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     public function toAscii(): ?string

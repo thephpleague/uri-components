@@ -19,6 +19,7 @@ use League\Uri\Components\Directives\Directive;
 use League\Uri\Components\Directives\GenericDirective;
 use League\Uri\Components\Directives\TextDirective;
 use League\Uri\Contracts\FragmentInterface;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
@@ -42,6 +43,7 @@ use function explode;
 use function implode;
 use function in_array;
 use function is_bool;
+use function is_string;
 use function sprintf;
 use function str_replace;
 use function strlen;
@@ -52,7 +54,7 @@ use const ARRAY_FILTER_USE_BOTH;
 /**
  * @implements IteratorAggregate<int, Directive>
  */
-final class FragmentDirective implements FragmentInterface, IteratorAggregate, Countable
+final class FragmentDirectives implements FragmentInterface, IteratorAggregate, Countable
 {
     public const DELIMITER = ':~:';
     public const SEPARATOR = '&';
@@ -235,11 +237,32 @@ final class FragmentDirective implements FragmentInterface, IteratorAggregate, C
         return [] !== $offsets;
     }
 
+    public function isEmpty(): bool
+    {
+        return [] === $this->directives;
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
+    }
+
     public function indexOf(Directive|Stringable|string $directive): ?int
     {
-        $directive = self::filterDirective($directive)->toString();
+        $directive = self::filterDirective($directive);
         foreach ($this->directives as $offset => $innerDirective) {
-            if ($innerDirective->toString() === $directive) {
+            if ($innerDirective->equals($directive)) {
                 return $offset;
             }
         }
@@ -255,11 +278,11 @@ final class FragmentDirective implements FragmentInterface, IteratorAggregate, C
     /**
      * Append one or more Directives to the fragment.
      */
-    public function append(FragmentDirective|Directive|Stringable|string ...$directives): self
+    public function append(FragmentDirectives|Directive|Stringable|string ...$directives): self
     {
         $items = [];
         foreach ($directives as $directive) {
-            if ($directive instanceof FragmentDirective) {
+            if ($directive instanceof FragmentDirectives) {
                 $items = [...$items, ...$directive];
                 continue;
             }
@@ -276,11 +299,11 @@ final class FragmentDirective implements FragmentInterface, IteratorAggregate, C
     /**
      * Prepend one or more Directives to the fragment.
      */
-    public function prepend(FragmentDirective|Directive|Stringable|string ...$directives): self
+    public function prepend(FragmentDirectives|Directive|Stringable|string ...$directives): self
     {
         $items = [];
         foreach ($directives as $directive) {
-            if ($directive instanceof FragmentDirective) {
+            if ($directive instanceof FragmentDirectives) {
                 $items = [...$items, ...$directive];
                 continue;
             }
@@ -365,7 +388,7 @@ final class FragmentDirective implements FragmentInterface, IteratorAggregate, C
         null !== $currentDirective || throw new OffsetOutOfBounds(sprintf('The key `%s` is invalid.', $offset));
 
         $directive = self::filterDirective($directive);
-        if ($currentDirective->toString() === $directive->toString() && $directive::class === $currentDirective::class) {
+        if ($directive::class === $currentDirective::class && $currentDirective->equals($directive)) {
             return $this;
         }
 

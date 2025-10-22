@@ -16,6 +16,7 @@ namespace League\Uri\Components;
 use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\PortInterface;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
@@ -25,6 +26,7 @@ use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
 use function filter_var;
+use function is_string;
 
 use const FILTER_VALIDATE_INT;
 
@@ -106,6 +108,22 @@ final class Port extends Component implements PortInterface
             $this->port => $this->port,
             default => (string) $this->port,
         };
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     public function getUriComponent(): string

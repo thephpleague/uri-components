@@ -161,6 +161,11 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->path->value();
     }
 
+    public function equals(mixed $value): bool
+    {
+        return $this->path->equals($value);
+    }
+
     public function decoded(): string
     {
         return $this->path->decoded();

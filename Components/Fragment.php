@@ -15,6 +15,7 @@ namespace League\Uri\Components;
 
 use Deprecated;
 use League\Uri\Contracts\FragmentInterface;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
@@ -24,6 +25,7 @@ use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
+use function is_string;
 use function str_replace;
 
 final class Fragment extends Component implements FragmentInterface
@@ -96,6 +98,22 @@ final class Fragment extends Component implements FragmentInterface
         }
 
         return  str_replace('%20', ' ', $this->fragment);
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     public function normalize(): self

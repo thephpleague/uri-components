@@ -17,13 +17,13 @@ use Deprecated;
 use finfo;
 use League\Uri\Contracts\DataPathInterface;
 use League\Uri\Contracts\PathInterface;
-use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\FeatureDetection;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
 use Stringable;
+use Throwable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
@@ -185,7 +185,7 @@ final class DataPath extends Component implements DataPathInterface
     {
         try {
             return self::new($uri);
-        } catch (UriException) {
+        } catch (Throwable) {
             return null;
         }
     }
@@ -232,6 +232,11 @@ final class DataPath extends Component implements DataPathInterface
     public function value(): ?string
     {
         return $this->path->value();
+    }
+
+    public function equals(mixed $value): bool
+    {
+        return $this->path->equals($value);
     }
 
     public function getData(): string

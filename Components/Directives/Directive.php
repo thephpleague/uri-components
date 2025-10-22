@@ -44,4 +44,10 @@ interface Directive extends Stringable
      * @see Directive::toString()
      */
     public function __toString(): string;
+
+    /**
+     * Tells whether the submitted value is equals to the string
+     * representation of the given directive.
+     */
+    public function equals(mixed $directive): bool;
 }

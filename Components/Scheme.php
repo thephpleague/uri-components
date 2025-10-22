@@ -14,16 +14,18 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use Deprecated;
-use League\Uri\Contracts\UriException;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Throwable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
 use function in_array;
+use function is_string;
 use function preg_match;
 use function sprintf;
 use function strtolower;
@@ -171,7 +173,7 @@ final class Scheme extends Component
     {
         try {
             return self::new($uri);
-        } catch (UriException) {
+        } catch (Throwable) {
             return null;
         }
     }
@@ -201,6 +203,22 @@ final class Scheme extends Component
     public function getUriComponent(): string
     {
         return $this->value().(null === $this->scheme ? '' : ':');
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     /**

@@ -15,14 +15,18 @@ namespace League\Uri\Components;
 
 use Deprecated;
 use League\Uri\Contracts\PathInterface;
-use League\Uri\Contracts\UriException;
+use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Throwable;
+use Uri\Rfc3986\Uri as Rfc3986Uri;
+use Uri\WhatWg\Url as WhatWgUrl;
 
+use function is_string;
 use function substr;
 
 final class Path extends Component implements PathInterface
@@ -62,7 +66,7 @@ final class Path extends Component implements PathInterface
     {
         try {
             return self::new($uri);
-        } catch (UriException) {
+        } catch (Throwable) {
             return null;
         }
     }
@@ -70,13 +74,13 @@ final class Path extends Component implements PathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(\Uri\WhatWg\Url|\Uri\Rfc3986\Uri|Stringable|string $uri): self
+    public static function fromUri(Rfc3986Uri|WhatwgUrl|Stringable|string $uri): self
     {
-        if ($uri instanceof \Uri\Rfc3986\Uri) {
+        if ($uri instanceof Rfc3986Uri) {
             return self::new($uri->getRawPath());
         }
 
-        if ($uri instanceof \Uri\WhatWg\Url) {
+        if ($uri instanceof WhatwgUrl) {
             return self::new($uri->getPath());
         }
 
@@ -95,6 +99,22 @@ final class Path extends Component implements PathInterface
     public function value(): ?string
     {
         return Encoder::encodePath($this->path);
+    }
+
+    public function equals(mixed $value): bool
+    {
+        if (!$value instanceof Stringable && !is_string($value)) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew($value);
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     public function decoded(): string

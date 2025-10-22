@@ -16,6 +16,7 @@ namespace League\Uri\Components\Directives;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 #[CoversClass(TextDirective::class)]
 final class TextDirectiveTest extends TestCase
@@ -78,5 +79,17 @@ final class TextDirectiveTest extends TestCase
         self::assertNull($directive->end);
         self::assertSame('prefix-,st&art,-suffix', $directive->value());
         self::assertSame('text=prefix-,st%26art,-suffix', $directive->toString());
+    }
+
+    public function test_it_can_tell_if_its_value_are_identical(): void
+    {
+        $directive = new TextDirective('st&art', prefix: 'prefix', suffix: 'suffix');
+        $inputText = $directive->toString();
+
+        self::assertTrue($directive->equals($inputText));
+        self::assertTrue($directive->equals(TextDirective::fromString($inputText)));
+        self::assertTrue($directive->equals(GenericDirective::fromString($inputText)));
+        self::assertFalse($directive->equals('unknownDirective'));
+        self::assertFalse($directive->equals(new stdClass()));
     }
 }

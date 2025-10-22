@@ -16,8 +16,10 @@ namespace League\Uri\Components\Directives;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use Stringable;
+use Throwable;
 
 use function explode;
+use function is_string;
 use function preg_match;
 use function str_replace;
 
@@ -134,6 +136,23 @@ final class TextDirective implements Directive
     public function __toString(): string
     {
         return $this->toString();
+    }
+
+    public function equals(mixed $directive): bool
+    {
+        if (!$directive instanceof Stringable && !is_string($directive)) {
+            return false;
+        }
+
+        if (!$directive instanceof Directive) {
+            try {
+                $directive = self::fromString($directive);
+            } catch (Throwable) {
+                return false;
+            }
+        }
+
+        return $directive->toString() === $this->toString();
     }
 
     /**

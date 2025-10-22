@@ -118,6 +118,11 @@ final class Domain extends Component implements DomainHostInterface
         return $this->host->value();
     }
 
+    public function equals(mixed $value): bool
+    {
+        return $this->host->equals($value);
+    }
+
     public function toAscii(): ?string
     {
         return $this->host->toAscii();
