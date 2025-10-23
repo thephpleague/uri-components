@@ -16,8 +16,7 @@ namespace League\Uri\Components;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Components\Directives\Directive;
-use League\Uri\Components\Directives\GenericDirective;
-use League\Uri\Components\Directives\TextDirective;
+use League\Uri\Components\Directives\Factory;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
@@ -46,12 +45,13 @@ use function is_bool;
 use function is_string;
 use function sprintf;
 use function str_replace;
-use function strlen;
 use function substr;
 
 use const ARRAY_FILTER_USE_BOTH;
 
 /**
+ * @see https://wicg.github.io/scroll-to-text-fragment/
+ *
  * @implements IteratorAggregate<int, Directive>
  */
 final class FragmentDirectives implements FragmentInterface, IteratorAggregate, Countable
@@ -60,7 +60,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     public const SEPARATOR = '&';
 
     /** @var list<Directive> */
-    private array $directives;
+    private readonly array $directives;
 
     public function __construct(Directive|Stringable|string ...$directives)
     {
@@ -81,13 +81,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
         $value = (string) $value;
         str_starts_with($value, self::DELIMITER) || throw new SyntaxError('The value "'.$value.'" is not a valid fragment directive.');
 
-        return new self(...array_map(
-            self::filterDirective(...),
-            explode(
-                self::SEPARATOR,
-                substr($value, strlen(self::DELIMITER))
-            )
-        ));
+        return new self(...explode(self::SEPARATOR, substr($value, 3)));
     }
 
     private static function filterDirective(Directive|Stringable|string $directive): Directive
@@ -96,9 +90,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             return $directive;
         }
 
-        $directive = (string) $directive;
-
-        return str_starts_with($directive, 'text=') ? TextDirective::fromString($directive) : GenericDirective::fromString($directive);
+        return Factory::parse($directive);
     }
 
     public static function tryNew(Stringable|string|null $value): ?self
@@ -293,7 +285,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             return $this;
         }
 
-        return new self(...$this->directives, ...array_map(self::filterDirective(...), $items));
+        return new self(...$this->directives, ...$items);
     }
 
     /**
@@ -314,7 +306,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             return $this;
         }
 
-        return new self(...array_map(self::filterDirective(...), $items), ...$this->directives);
+        return new self(...$items, ...$this->directives);
     }
 
     /**

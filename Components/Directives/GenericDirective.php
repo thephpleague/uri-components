@@ -23,8 +23,13 @@ use function str_replace;
 
 final class GenericDirective implements Directive
 {
-    private function __construct(private string $name, private ?string $value = null)
-    {
+    /**
+     * @param non-empty-string $name
+     */
+    private function __construct(
+        private readonly string $name,
+        private readonly ?string $value = null,
+    ) {
     }
 
     /**
@@ -33,7 +38,7 @@ final class GenericDirective implements Directive
     public static function fromString(Stringable|string $value): self
     {
         [$name, $value] = explode('=', (string) $value, 2) + [1 => null];
-        (null !== $name && !str_contains($name, '&')) || throw new SyntaxError('The submitted text is not a valid directive.');
+        (null !== $name && '' !== $name && !str_contains($name, '&')) || throw new SyntaxError('The submitted text is not a valid directive.');
 
         return new self($name, $value);
     }

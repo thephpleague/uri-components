@@ -34,12 +34,20 @@ final class TextDirective implements Directive
         (?:,-(?<suffix>.+))?     # optional suffix (to end)
     $/x';
 
+    /**
+     * @param non-empty-string $start
+     * @param ?non-empty-string $end
+     * @param ?non-empty-string $prefix
+     * @param ?non-empty-string $suffix
+     */
     public function __construct(
         public readonly string $start,
         public readonly ?string $end = null,
         public readonly ?string $prefix = null,
         public readonly ?string $suffix = null,
     ) {
+        ('' !== $this->start && '' !== $this->end && '' !== $this->prefix && '' !== $this->suffix)
+        || throw new SyntaxError('The start part can not be the empty string.');
     }
 
     /**
@@ -64,18 +72,20 @@ final class TextDirective implements Directive
             $matches['prefix'] = null;
         }
 
-        $matches['suffix'] ??= null;
+        /** @var non-empty-string $start */
+        $start = (string) self::decode($matches['start']);
+        /** @var ?non-empty-string $prefix */
+        $prefix = self::decode($matches['prefix']);
+        /** @var ?non-empty-string $suffix */
+        $suffix = self::decode($matches['suffix'] ?? null);
         $matches['end'] ??= null;
         if ('' === $matches['end']) {
             $matches['end'] = null;
         }
+        /** @var ?non-empty-string $end */
+        $end = self::decode($matches['end']);
 
-        return new self(
-            (string) self::decode($matches['start']),
-            self::decode($matches['end']),
-            self::decode($matches['prefix']),
-            self::decode($matches['suffix']),
-        );
+        return new self($start, $end, $prefix, $suffix);
     }
 
     private static function encode(?string $value): ?string
@@ -85,7 +95,11 @@ final class TextDirective implements Directive
 
     private static function decode(?string $value): ?string
     {
-        return null !== $value ? str_replace('%20', ' ', (string) Encoder::decodeFragment($value)) : null;
+        if (null === $value) {
+            return null;
+        }
+
+        return str_replace('%20', ' ', (string) Encoder::decodeFragment($value));
     }
 
     public function name(): string
@@ -162,6 +176,8 @@ final class TextDirective implements Directive
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the new start portion.
+     *
+     * @param non-empty-string $text
      */
     public function startsWith(string $text): self
     {
@@ -179,6 +195,8 @@ final class TextDirective implements Directive
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the new end portion.
+     *
+     * @param ?non-empty-string $text
      */
     public function endsWith(?string $text): self
     {
@@ -196,6 +214,8 @@ final class TextDirective implements Directive
      *
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the new suffix portion.
+     *
+     * @param ?non-empty-string $text
      */
     public function followedBy(?string $text): self
     {
@@ -211,6 +231,8 @@ final class TextDirective implements Directive
      *
      *  This method MUST retain the state of the current instance, and return
      *  an instance that contains the new prefix portion.
+     *
+     * @param ?non-empty-string $text
      */
     public function precededBy(?string $text): self
     {
