@@ -1006,7 +1006,7 @@ final class ModifierTest extends TestCase
     ): void {
         self::assertSame(
             $expectedFragment,
-            Modifier::from($uri)->appendDirectives($directive)->uri()->getFragment()
+            Modifier::from($uri)->appendFragmentDirectives($directive)->uri()->getFragment()
         );
     }
 
@@ -1039,7 +1039,7 @@ final class ModifierTest extends TestCase
     ): void {
         self::assertSame(
             $expectedFragment,
-            Modifier::from($uri)->prependDirectives($directive)->uri()->getFragment()
+            Modifier::from($uri)->prependFragmentDirectives($directive)->uri()->getFragment()
         );
     }
 

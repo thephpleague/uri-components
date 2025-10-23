@@ -103,9 +103,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function toDisplayString(): string
     {
-        $uri = $this->uri instanceof Uri ? $this->uri : Uri::new($this->uri);
-
-        return $uri->toDisplayString();
+        return ($this->uri instanceof Uri ? $this->uri : Uri::new($this->toString()))->toDisplayString();
     }
 
     public function withScheme(Stringable|string|null $scheme): static
@@ -1040,32 +1038,32 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      * Fragment modifier methods
      *********************************/
 
-    public function appendDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
+    public function appendFragmentDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->uri())->append(...$directives));
     }
 
-    public function prependDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
+    public function prependFragmentDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->uri())->prepend(...$directives));
     }
 
-    public function removeDirectives(int ...$offset): static
+    public function removeFragmentDirectives(int ...$offset): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->uri())->remove(...$offset));
     }
 
-    public function replaceDirective(int $offset, Directive|Stringable|string $directive): static
+    public function replaceFragmentDirective(int $offset, Directive|Stringable|string $directive): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->uri())->replace($offset, $directive));
     }
 
-    public function sliceDirectives(int $offset, ?int $length): static
+    public function sliceFragmentDirectives(int $offset, ?int $length): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->uri())->slice($offset, $length));
     }
 
-    public function filterDirectives(callable $callback): static
+    public function filterFragmentDirectives(callable $callback): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->uri())->filter($callback));
     }
