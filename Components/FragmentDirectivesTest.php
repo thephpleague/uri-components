@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\Directives\Directive;
-use League\Uri\Components\Directives\GenericDirective;
-use League\Uri\Components\Directives\TextDirective;
+use League\Uri\Components\FragmentDirectives\Directive;
+use League\Uri\Components\FragmentDirectives\GenericDirective;
+use League\Uri\Components\FragmentDirectives\TextDirective;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 

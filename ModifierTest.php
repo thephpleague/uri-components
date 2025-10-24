@@ -13,9 +13,9 @@ namespace League\Uri;
 
 use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
-use League\Uri\Components\Directives\Directive;
-use League\Uri\Components\Directives\TextDirective;
 use League\Uri\Components\FragmentDirectives;
+use League\Uri\Components\FragmentDirectives\Directive;
+use League\Uri\Components\FragmentDirectives\TextDirective;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\Attributes\CoversClass;

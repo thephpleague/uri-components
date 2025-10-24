@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Components\Directives;
 
-use League\Uri\Components\Directives\GenericDirective;
+use League\Uri\Components\FragmentDirectives\GenericDirective;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;

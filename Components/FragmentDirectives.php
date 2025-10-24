@@ -15,8 +15,8 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Components\Directives\Directive;
-use League\Uri\Components\Directives\Factory;
+use League\Uri\Components\FragmentDirectives\Directive;
+use League\Uri\Components\FragmentDirectives\Factory;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;

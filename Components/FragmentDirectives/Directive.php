@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace League\Uri\Components\Directives;
+namespace League\Uri\Components\FragmentDirectives;
 
 use Stringable;
 
