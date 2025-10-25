@@ -14,6 +14,9 @@ declare(strict_types=1);
 namespace League\Uri;
 
 use Deprecated;
+use Dom\HTMLDocument;
+use DOMDocument;
+use DOMException;
 use JsonSerializable;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\Domain;
@@ -41,16 +44,23 @@ use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
+use ValueError;
 
+use function class_exists;
 use function filter_var;
 use function get_object_vars;
+use function implode;
 use function in_array;
+use function is_array;
 use function is_bool;
+use function is_string;
 use function ltrim;
 use function rtrim;
 use function str_ends_with;
 use function str_starts_with;
 
+use function strtolower;
+use function trim;
 use const FILTER_FLAG_IPV4;
 use const FILTER_VALIDATE_IP;
 
@@ -104,6 +114,54 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function toDisplayString(): string
     {
         return ($this->uri instanceof Uri ? $this->uri : Uri::new($this->toString()))->toDisplayString();
+    }
+
+    /**
+     * Returns the Markdown string representation of the anchor tag with the current instance as its href attribute.
+     */
+    public function toMarkdownAnchor(?string $linkTextTemplate = null): string
+    {
+        return '['.strtr($linkTextTemplate ?? '{uri}', ['{uri}' => $this->toDisplayString()]).']('.$this->toString().')';
+    }
+
+    /**
+     * Returns the HTML string representation of the anchor tag with the current instance as its href attribute.
+     *
+     * @param iterable<string, string|null|array<string>> $attributes an ordered map of key value. you must quote the value if needed
+     *
+     * @throws DOMException
+     */
+    public function toHtmlAnchor(?string $linkTextTemplate = null, iterable $attributes = []): string
+    {
+        FeatureDetection::supportsDom();
+
+        $doc = class_exists(HTMLDocument::class) ? HTMLDocument::createEmpty() : new DOMDocument(encoding:'utf-8');
+        $element = $doc->createElement('a');
+        $element->setAttribute('href', $this->toString());
+        $element->appendChild($doc->createTextNode(strtr($linkTextTemplate ?? '{uri}', ['{uri}' => $this->toDisplayString()])));
+
+        foreach ($attributes as $name => $value) {
+            if ('href' === strtolower($name) || null === $value) {
+                continue;
+            }
+
+            if (is_array($value)) {
+                $value = implode(' ', $value);
+            }
+
+            is_string($value) || throw new ValueError('The attribute `'.$name.'` contains an invalid value.');
+            $value = trim($value);
+            if ('' === $value) {
+                continue;
+            }
+
+            $element->setAttribute($name, $value);
+        }
+
+        $html = $doc->saveHTML($element);
+        false !== $html || throw new DOMException('The HTML generation failed.');
+
+        return $html;
     }
 
     public function withScheme(Stringable|string|null $scheme): static
