@@ -164,6 +164,60 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return $html;
     }
 
+    public function resolve(Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface|Stringable|string $uri): static
+    {
+        $uriString = match (true) {
+            $uri instanceof Rfc3986Uri,
+            $uri instanceof UriInterface => $uri->toString(),
+            $uri instanceof WhatWgUrl => $uri->toAsciiString(),
+            default => (string) $uri,
+        };
+
+        if (!$this->uri instanceof Psr7UriInterface) {
+            return new static($this->uri->resolve($uriString));
+        }
+
+        $components = UriString::parse(UriString::resolve($uriString, $this->toString()));
+
+        return new static(
+            $this->uri
+                ->withFragment($components['fragment'] ?? '')
+                ->withQuery($components['query'] ?? '')
+                ->withPath($components['path'] ?? '')
+                ->withHost($components['host'] ?? '')
+                ->withPort($components['port'] ?? null)
+                ->withUserInfo($components['user'] ?? '', $components['pass'] ?? null)
+                ->withScheme($components['scheme'] ?? '')
+        );
+    }
+
+    public function normalize(): static
+    {
+        if ($this->uri instanceof WhatWgUrl) {
+            return $this;
+        }
+
+        if ($this->uri instanceof Rfc3986Uri) {
+            return new static(new Rfc3986Uri($this->uri->toString()));
+        }
+
+        if ($this->uri instanceof UriInterface) {
+            return new static($this->uri->normalize());
+        }
+
+        $uri = Uri::new($this->uri->__toString())->normalize();
+        if ($uri->toString() === $this->uri->__toString()) {
+            return $this;
+        }
+
+        return new static(
+            $this->uri
+                ->withPath($uri->getPath())
+                ->withHost($uri->getHost() ?? '')
+                ->withUserInfo($uri->getUsername() ?? '', $uri->getPassword())
+        );
+    }
+
     public function withScheme(Stringable|string|null $scheme): static
     {
         return new static($this->uri->withScheme(self::normalizeComponent($scheme, $this->uri)));
@@ -205,7 +259,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function withQuery(Stringable|string|null $query): static
     {
         $query = self::normalizeComponent($query, $this->uri);
-
         $query = match (true) {
             $this->uri instanceof Rfc3986Uri => match (true) {
                 Encoder::isQueryEncoded($query) => $query,

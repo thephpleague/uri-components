@@ -35,6 +35,7 @@ use const PHP_QUERY_RFC3986;
 #[Group('resolution')]
 final class ModifierTest extends TestCase
 {
+    private const BASE_URI = 'http://a/b/c/d;p?q';
     private readonly string $uri;
     private readonly Modifier $modifier;
 
@@ -1061,6 +1062,57 @@ final class ModifierTest extends TestCase
             'uri' => 'http://host/path#:~:unknownDirective',
             'directive' => new TextDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd&unknownDirective",
+        ];
+    }
+
+    #[DataProvider('resolveProvider')]
+    public function testCreateResolve(string $baseUri, string $uri, string $expected): void
+    {
+        self::assertSame($expected, Modifier::from(Utils::uriFor($baseUri))->resolve($uri)->toString());
+    }
+
+    public static function resolveProvider(): array
+    {
+        return [
+            'base uri'                => [self::BASE_URI, '',              self::BASE_URI],
+            'scheme'                  => [self::BASE_URI, 'http://d/e/f',  'http://d/e/f'],
+            'path 1'                  => [self::BASE_URI, 'g',             'http://a/b/c/g'],
+            'path 2'                  => [self::BASE_URI, './g',           'http://a/b/c/g'],
+            'path 3'                  => [self::BASE_URI, 'g/',            'http://a/b/c/g/'],
+            'path 4'                  => [self::BASE_URI, '/g',            'http://a/g'],
+            'authority'               => [self::BASE_URI, '//g',           'http://g'],
+            'query'                   => [self::BASE_URI, '?y',            'http://a/b/c/d;p?y'],
+            'path + query'            => [self::BASE_URI, 'g?y',           'http://a/b/c/g?y'],
+            'fragment'                => [self::BASE_URI, '#s',            'http://a/b/c/d;p?q#s'],
+            'path + fragment'         => [self::BASE_URI, 'g#s',           'http://a/b/c/g#s'],
+            'path + query + fragment' => [self::BASE_URI, 'g?y#s',         'http://a/b/c/g?y#s'],
+            'single dot 1'            => [self::BASE_URI, '.',             'http://a/b/c/'],
+            'single dot 2'            => [self::BASE_URI, './',            'http://a/b/c/'],
+            'single dot 3'            => [self::BASE_URI, './g/.',         'http://a/b/c/g/'],
+            'single dot 4'            => [self::BASE_URI, 'g/./h',         'http://a/b/c/g/h'],
+            'double dot 1'            => [self::BASE_URI, '..',            'http://a/b/'],
+            'double dot 2'            => [self::BASE_URI, '../',           'http://a/b/'],
+            'double dot 3'            => [self::BASE_URI, '../g',          'http://a/b/g'],
+            'double dot 4'            => [self::BASE_URI, '../..',         'http://a/'],
+            'double dot 5'            => [self::BASE_URI, '../../',        'http://a/'],
+            'double dot 6'            => [self::BASE_URI, '../../g',       'http://a/g'],
+            'double dot 7'            => [self::BASE_URI, '../../../g',    'http://a/g'],
+            'double dot 8'            => [self::BASE_URI, '../../../../g', 'http://a/g'],
+            'double dot 9'            => [self::BASE_URI, 'g/../h' ,       'http://a/b/c/h'],
+            'mulitple slashes'        => [self::BASE_URI, 'foo////g',      'http://a/b/c/foo////g'],
+            'complex path 1'          => [self::BASE_URI, ';x',            'http://a/b/c/;x'],
+            'complex path 2'          => [self::BASE_URI, 'g;x',           'http://a/b/c/g;x'],
+            'complex path 3'          => [self::BASE_URI, 'g;x?y#s',       'http://a/b/c/g;x?y#s'],
+            'complex path 4'          => [self::BASE_URI, 'g;x=1/./y',     'http://a/b/c/g;x=1/y'],
+            'complex path 5'          => [self::BASE_URI, 'g;x=1/../y',    'http://a/b/c/y'],
+            'dot segments presence 1' => [self::BASE_URI, '/./g',          'http://a/g'],
+            'dot segments presence 2' => [self::BASE_URI, '/../g',         'http://a/g'],
+            'dot segments presence 3' => [self::BASE_URI, 'g.',            'http://a/b/c/g.'],
+            'dot segments presence 4' => [self::BASE_URI, '.g',            'http://a/b/c/.g'],
+            'dot segments presence 5' => [self::BASE_URI, 'g..',           'http://a/b/c/g..'],
+            'dot segments presence 6' => [self::BASE_URI, '..g',           'http://a/b/c/..g'],
+            'origin uri without path' => ['http://h:b@a', 'b/../y',        'http://h:b@a/y'],
+            'not same origin'         => [self::BASE_URI, 'ftp://a/b/c/d', 'ftp://a/b/c/d'],
         ];
     }
 }
