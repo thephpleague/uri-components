@@ -223,10 +223,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return new static($this->uri->withScheme(self::normalizeComponent($scheme, $this->uri)));
     }
 
-    public function withUserInfo(Stringable|string|null $user, Stringable|string|null $password): static
+    public function withUserInfo(Stringable|string|null $username, Stringable|string|null $password): static
     {
         if ($this->uri instanceof Rfc3986Uri) {
-            $userInfo = Encoder::encodeUser($user);
+            $userInfo = Encoder::encodeUser($username);
             if (null !== $password) {
                 $userInfo .= ':'.Encoder::encodePassword($password);
             }
@@ -235,23 +235,23 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         }
 
         if ($this->uri instanceof WhatWgUrl) {
-            if (null !== $user) {
-                $user = (string) $user;
+            if (null !== $username) {
+                $username = (string) $username;
             }
 
             if (null !== $password) {
                 $password = (string) $password;
             }
 
-            return new static($this->uri->withUsername($user)->withPassword($password));
+            return new static($this->uri->withUsername($username)->withPassword($password));
         }
 
-        if (null == $user && $this->uri instanceof Psr7UriInterface) {
-            $user = '';
+        if (null == $username && $this->uri instanceof Psr7UriInterface) {
+            $username = '';
         }
 
         return new static($this->uri->withUserInfo(
-            $user instanceof Stringable ? (string) $user : $user,
+            $username instanceof Stringable ? (string) $username : $username,
             $password instanceof Stringable ? (string) $password : $password,
         ));
     }
