@@ -104,7 +104,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
         if ($uri instanceof Modifier) {
-            $uri = $uri->uri();
+            $uri = $uri->unwrap();
         }
 
         if ($uri instanceof Rfc3986Uri) {

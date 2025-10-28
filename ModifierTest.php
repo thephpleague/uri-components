@@ -42,7 +42,7 @@ final class ModifierTest extends TestCase
     protected function setUp(): void
     {
         $this->uri = 'http://www.example.com/path/to/the/sky.php?kingkong=toto&foo=bar%20baz#doc3';
-        $this->modifier = Modifier::from($this->uri);
+        $this->modifier = Modifier::wrap($this->uri);
     }
 
     /*****************************
@@ -51,7 +51,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validMergeQueryProvider')]
     public function testMergeQuery(string $query, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->mergeQuery($query)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->mergeQuery($query)->unwrap()->getQuery());
     }
 
     public static function validMergeQueryProvider(): array
@@ -65,7 +65,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validMergeQueryPairsProvider')]
     public function testMergeQueryPairs(iterable $pairs, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->mergeQueryPairs($pairs)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->mergeQueryPairs($pairs)->unwrap()->getQuery());
     }
 
     public static function validMergeQueryPairsProvider(): array
@@ -85,7 +85,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validMergeQueryParametersProvider')]
     public function testMergeQueryParameters(iterable $parameters, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->mergeQueryParameters($parameters)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->mergeQueryParameters($parameters)->unwrap()->getQuery());
     }
 
     public static function validMergeQueryParametersProvider(): array
@@ -109,7 +109,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validAppendQueryProvider')]
     public function testAppendQuery(string $query, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->appendQuery($query)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->appendQuery($query)->unwrap()->getQuery());
     }
 
     public static function validAppendQueryProvider(): array
@@ -123,7 +123,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validAppendQueryPairsProvider')]
     public function testAppendQueryPairs(iterable $query, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->appendQueryPairs($query)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->appendQueryPairs($query)->unwrap()->getQuery());
     }
 
     public static function validAppendQueryPairsProvider(): array
@@ -143,7 +143,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validAppendQueryParametersProvider')]
     public function testAppendQueryParameters(iterable $query, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->appendQueryParameters($query)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->appendQueryParameters($query)->unwrap()->getQuery());
     }
 
     public static function validAppendQueryParametersProvider(): array
@@ -163,13 +163,13 @@ final class ModifierTest extends TestCase
     public function testKsortQuery(): void
     {
         $uri = Http::new('http://example.com/?kingkong=toto&foo=bar%20baz&kingkong=ape');
-        self::assertSame('foo=bar%20baz&kingkong=toto&kingkong=ape', Modifier::from($uri)->sortQuery()->uri()->getQuery());
+        self::assertSame('foo=bar%20baz&kingkong=toto&kingkong=ape', Modifier::wrap($uri)->sortQuery()->unwrap()->getQuery());
     }
 
     #[DataProvider('validWithoutQueryValuesProvider')]
     public function testWithoutQueryValuesProcess(array $input, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeQueryPairsByKey(...$input)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->removeQueryPairsByKey(...$input)->unwrap()->getQuery());
     }
 
     public static function validWithoutQueryValuesProvider(): array
@@ -183,7 +183,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validWithoutQueryPairByValueProvider')]
     public function testvalidWithoutQueryPairByValue(array $values, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeQueryPairsByValue(...$values)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->removeQueryPairsByValue(...$values)->unwrap()->getQuery());
     }
 
     public static function validWithoutQueryPairByValueProvider(): array
@@ -197,7 +197,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validWithoutQueryPairByKeyValueProvider')]
     public function testvalidWithoutQueryPairByKeyValue(array $values, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeQueryPairsByKeyValue(...$values)->uri()->getQuery());
+        self::assertSame($expected, $this->modifier->removeQueryPairsByKeyValue(...$values)->unwrap()->getQuery());
     }
 
     public static function validWithoutQueryPairByKeyValueProvider(): array
@@ -212,7 +212,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('removeParamsProvider')]
     public function testWithoutQueryParams(string $uri, array $input, ?string $expected): void
     {
-        self::assertSame($expected, Modifier::from($uri)->removeQueryParameters(...$input)->uri()->getQuery());
+        self::assertSame($expected, Modifier::wrap($uri)->removeQueryParameters(...$input)->unwrap()->getQuery());
     }
 
     public static function removeParamsProvider(): array
@@ -239,7 +239,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('removeQueryParameterIndicesProvider')]
     public function testWithoutQueryParameterIndices(string $uri, string $expected): void
     {
-        self::assertSame($expected, Modifier::from($uri)->removeQueryParameterIndices()->uri()->getQuery());
+        self::assertSame($expected, Modifier::wrap($uri)->removeQueryParameterIndices()->unwrap()->getQuery());
     }
 
     public static function removeQueryParameterIndicesProvider(): array
@@ -263,8 +263,8 @@ final class ModifierTest extends TestCase
     #[DataProvider('removeEmptyPairsProvider')]
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void
     {
-        self::assertSame($expected, Modifier::from(Uri::fromBaseUri($uri))->removeEmptyQueryPairs()->toString());
-        self::assertSame($expected, Modifier::from(Http::fromBaseUri($uri))->removeEmptyQueryPairs()->toString());
+        self::assertSame($expected, Modifier::wrap(Uri::fromBaseUri($uri))->removeEmptyQueryPairs()->toString());
+        self::assertSame($expected, Modifier::wrap(Http::fromBaseUri($uri))->removeEmptyQueryPairs()->toString());
     }
 
     public static function removeEmptyPairsProvider(): iterable
@@ -305,7 +305,7 @@ final class ModifierTest extends TestCase
         );
 
         self::assertSame(
-            $this->modifier->encodeQuery(PHP_QUERY_RFC1738)->uri()->getQuery(),
+            $this->modifier->encodeQuery(PHP_QUERY_RFC1738)->unwrap()->getQuery(),
             'kingkong=toto&foo=bar+baz'
         );
     }
@@ -343,7 +343,7 @@ final class ModifierTest extends TestCase
     {
         $uri = 'http://www.localhost.co.uk/path/to/the/sky/';
 
-        self::assertSame('http://www.localhost/path/to/the/sky/', Modifier::from($uri)->sliceLabels(2, 2)->toString());
+        self::assertSame('http://www.localhost/path/to/the/sky/', Modifier::wrap($uri)->sliceLabels(2, 2)->toString());
     }
 
     public function testAppendLabelWithIpv4Host(): void
@@ -352,7 +352,7 @@ final class ModifierTest extends TestCase
 
         self::assertSame(
             '127.0.0.1.localhost',
-            $this->getHost(Modifier::from($uri)->appendLabel('.localhost'))
+            $this->getHost(Modifier::wrap($uri)->appendLabel('.localhost'))
         );
     }
 
@@ -360,7 +360,7 @@ final class ModifierTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Modifier::from(Http::new('http://[::1]/foo/bar'))->appendLabel('.localhost');
+        Modifier::wrap(Http::new('http://[::1]/foo/bar'))->appendLabel('.localhost');
     }
 
     public function testPrependLabelWithIpv4Host(): void
@@ -369,7 +369,7 @@ final class ModifierTest extends TestCase
 
         self::assertSame(
             'localhost.127.0.0.1',
-            $this->getHost(Modifier::from($uri)->prependLabel('localhost.'))
+            $this->getHost(Modifier::wrap($uri)->prependLabel('localhost.'))
         );
     }
 
@@ -377,21 +377,21 @@ final class ModifierTest extends TestCase
     {
         $uri = Uri::new('http://127.0.0.1');
 
-        self::assertSame($uri, Modifier::from($uri)->appendLabel(null)->uri());
+        self::assertSame($uri, Modifier::wrap($uri)->appendLabel(null)->unwrap());
     }
 
     public function testPrependLabelThrowsWithOtherIpHost(): void
     {
         $this->expectException(SyntaxError::class);
 
-        Modifier::from(Http::new('http://[::1]/foo/bar'))->prependLabel('.localhost');
+        Modifier::wrap(Http::new('http://[::1]/foo/bar'))->prependLabel('.localhost');
     }
 
     public function testPrependNullLabel(): void
     {
         $uri = Uri::new('http://127.0.0.1');
 
-        self::assertSame($uri, Modifier::from($uri)->prependLabel(null)->uri());
+        self::assertSame($uri, Modifier::wrap($uri)->prependLabel(null)->unwrap());
     }
 
     public function testHostToAsciiProcess(): void
@@ -400,7 +400,7 @@ final class ModifierTest extends TestCase
 
         self::assertSame(
             'http://xn--mgbh0fb.xn--kgbechtv/where/to/go',
-            (string)  Modifier::from($uri)->hostToAscii()
+            (string)  Modifier::wrap($uri)->hostToAscii()
         );
     }
 
@@ -410,7 +410,7 @@ final class ModifierTest extends TestCase
 
         self::assertSame(
             'http://[fe80::1234]/path/to/the/sky.php',
-            (string) Modifier::from($uri)->removeZoneId()
+            (string) Modifier::wrap($uri)->removeZoneId()
         );
     }
 
@@ -434,7 +434,7 @@ final class ModifierTest extends TestCase
 
     public function testModifyingTheHostKeepHostUnicode(): void
     {
-        $modifier = Modifier::from(Utils::uriFor('http://shop.bébé.be'));
+        $modifier = Modifier::wrap(Utils::uriFor('http://shop.bébé.be'));
 
         self::assertSame('http://shop.bébé', $modifier->removeLabels(0)->toString());
         self::assertSame('http://www.bébé.be', $modifier->replaceLabel(-1, 'www')->toString());
@@ -443,7 +443,7 @@ final class ModifierTest extends TestCase
         self::assertSame('http://shop.bébé.be', $modifier->hostToUnicode()->toString());
         self::assertSame('http://shop.xn--bb-bjab.be', $modifier->hostToAscii()->toString());
 
-        $modifier = Modifier::from(Utils::uriFor('http://shop.bebe.be'));
+        $modifier = Modifier::wrap(Utils::uriFor('http://shop.bebe.be'));
 
         self::assertSame('http://xn--bb-bjab.bebe.be', $modifier->replaceLabel(-1, 'bébé')->toString());
         self::assertSame('http://xn--bb-bjab.shop.bebe.be', $modifier->prependLabel('bébé')->toString());
@@ -474,7 +474,7 @@ final class ModifierTest extends TestCase
     {
         $uriString = 'http://bébé.be';
         $uri = (string) Http::new($uriString);
-        $modifier = Modifier::from(Utils::uriFor($uri));
+        $modifier = Modifier::wrap(Utils::uriFor($uri));
 
         self::assertSame('http://xn--bb-bjab.be', $uri);
         self::assertSame('http://xn--bb-bjab.be', (string) $modifier);
@@ -486,7 +486,7 @@ final class ModifierTest extends TestCase
         $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
         $expected = 'http://192.168.0.1/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->hostToDecimal()->toString());
+        self::assertSame($expected, Modifier::wrap($uri)->hostToDecimal()->toString());
     }
 
     public function testICanNormalizeIPv4HostToOctal(): void
@@ -494,7 +494,7 @@ final class ModifierTest extends TestCase
         $uri = 'http://0300.0250.0.1/path/to/the/sky.php';
         $expected = 'http://0300.0250.0000.0001/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->hostToOctal()->toString());
+        self::assertSame($expected, Modifier::wrap($uri)->hostToOctal()->toString());
     }
 
     public function testICanNormalizeIPv4HostToHexadecimal(): void
@@ -502,28 +502,28 @@ final class ModifierTest extends TestCase
         $uri = 'http://0300.0250.0000.0001/path/to/the/sky.php';
         $expected = 'http://0xc0a801/path/to/the/sky.php';
 
-        self::assertSame($expected, Modifier::from($uri)->hostToHexadecimal()->toString());
+        self::assertSame($expected, Modifier::wrap($uri)->hostToHexadecimal()->toString());
     }
 
     public function testIpv4NormalizeHostWithPsr7Uri(): void
     {
         $uri = Http::new('http://0/test');
-        $newUri = Modifier::from($uri)->hostToDecimal()->uri();
+        $newUri = Modifier::wrap($uri)->hostToDecimal()->unwrap();
         self::assertSame('0.0.0.0', $newUri instanceof Url ? $newUri->getAsciiHost() : $newUri->getHost());
 
         $uri = Http::new('http://11.be/test');
-        $unchangedUri = Modifier::from($uri)->hostToDecimal()->uri();
+        $unchangedUri = Modifier::wrap($uri)->hostToDecimal()->unwrap();
         self::assertSame($uri, $unchangedUri);
     }
 
     public function testIpv4NormalizeHostWithLeagueUri(): void
     {
         $uri = Uri::new('http://0/test');
-        $newUri = Modifier::from($uri)->hostToDecimal()->uri();
+        $newUri = Modifier::wrap($uri)->hostToDecimal()->unwrap();
         self::assertSame('0.0.0.0', $newUri instanceof Url ? $newUri->getAsciiHost() : $newUri->getHost());
 
         $uri = Http::new('http://11.be/test');
-        $unchangedUri = Modifier::from($uri)->hostToDecimal()->uri();
+        $unchangedUri = Modifier::wrap($uri)->hostToDecimal()->unwrap();
         self::assertSame($uri, $unchangedUri);
     }
 
@@ -533,13 +533,13 @@ final class ModifierTest extends TestCase
     #[DataProvider('fileProvider')]
     public function testToBinary(Uri $binary, Uri $ascii): void
     {
-        self::assertSame($binary->toString(), Modifier::from($ascii)->dataPathToBinary()->toString());
+        self::assertSame($binary->toString(), Modifier::wrap($ascii)->dataPathToBinary()->toString());
     }
 
     #[DataProvider('fileProvider')]
     public function testToAscii(Uri $binary, Uri $ascii): void
     {
-        self::assertSame($ascii->toString(), Modifier::from($binary)->dataPathToAscii()->toString());
+        self::assertSame($ascii->toString(), Modifier::wrap($binary)->dataPathToAscii()->toString());
     }
 
     public static function fileProvider(): array
@@ -566,14 +566,14 @@ final class ModifierTest extends TestCase
         $uri = Uri::new('data:text/plain;charset=us-ascii,Bonjour%20le%20monde!');
         self::assertSame(
             'text/plain;coco=chanel,Bonjour%20le%20monde!',
-            Modifier::from($uri)->replaceDataUriParameters('coco=chanel')->uri()->getPath()
+            Modifier::wrap($uri)->replaceDataUriParameters('coco=chanel')->unwrap()->getPath()
         );
     }
 
     #[DataProvider('appendSegmentProvider')]
     public function testAppendProcess(string $segment, string $append): void
     {
-        self::assertSame($append, $this->modifier->appendSegment($segment)->uri()->getPath());
+        self::assertSame($append, $this->modifier->appendSegment($segment)->unwrap()->getPath());
     }
 
     public static function appendSegmentProvider(): array
@@ -587,7 +587,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validAppendSegmentProvider')]
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
-        self::assertSame($expected, Modifier::from($uri)->appendSegment($segment)->toString());
+        self::assertSame($expected, Modifier::wrap($uri)->appendSegment($segment)->toString());
     }
 
     public static function validAppendSegmentProvider(): array
@@ -619,7 +619,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('validBasenameProvider')]
     public function testBasename(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) Modifier::from(Uri::new($uri))->replaceBasename($path));
+        self::assertSame($expected, (string) Modifier::wrap(Uri::new($uri))->replaceBasename($path));
     }
 
     public static function validBasenameProvider(): array
@@ -636,13 +636,13 @@ final class ModifierTest extends TestCase
     {
         $this->expectException(SyntaxError::class);
 
-        Modifier::from(Uri::new('http://example.com'))->replaceBasename('foo/baz');
+        Modifier::wrap(Uri::new('http://example.com'))->replaceBasename('foo/baz');
     }
 
     #[DataProvider('validDirnameProvider')]
     public function testDirname(string $path, string $uri, string $expected): void
     {
-        self::assertSame($expected, (string) Modifier::from(Uri::new($uri))->replaceDirname($path));
+        self::assertSame($expected, (string) Modifier::wrap(Uri::new($uri))->replaceDirname($path));
     }
 
     public static function validDirnameProvider(): array
@@ -659,7 +659,7 @@ final class ModifierTest extends TestCase
     public function testPrependProcess(string $uri, string $segment, string $expectedPath): void
     {
         $uri = Uri::new($uri);
-        self::assertSame($expectedPath, Modifier::from($uri)->prependSegment($segment)->uri()->getPath());
+        self::assertSame($expectedPath, Modifier::wrap($uri)->prependSegment($segment)->unwrap()->getPath());
     }
 
     public static function prependSegmentProvider(): array
@@ -691,7 +691,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('replaceSegmentProvider')]
     public function testReplaceSegmentProcess(string $segment, int $key, string $append, string $prepend, string $replace): void
     {
-        self::assertSame($replace, $this->modifier->replaceSegment($key, $segment)->uri()->getPath());
+        self::assertSame($replace, $this->modifier->replaceSegment($key, $segment)->unwrap()->getPath());
     }
 
     public static function replaceSegmentProvider(): array
@@ -705,7 +705,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('addBasepathProvider')]
     public function testaddBasepath(string $basepath, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->addBasePath($basepath)->uri()->getPath());
+        self::assertSame($expected, $this->modifier->addBasePath($basepath)->unwrap()->getPath());
     }
 
     public static function addBasepathProvider(): array
@@ -721,13 +721,13 @@ final class ModifierTest extends TestCase
     public function testaddBasepathWithRelativePath(): void
     {
         $uri = Http::new('base/path');
-        self::assertSame('/base/path', Modifier::from($uri)->addBasePath('/base/path')->uri()->getPath());
+        self::assertSame('/base/path', Modifier::wrap($uri)->addBasePath('/base/path')->unwrap()->getPath());
     }
 
     #[DataProvider('removeBasePathProvider')]
     public function testRemoveBasePath(string $basepath, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeBasePath($basepath)->uri()->getPath());
+        self::assertSame($expected, $this->modifier->removeBasePath($basepath)->unwrap()->getPath());
     }
 
     public static function removeBasePathProvider(): array
@@ -743,13 +743,13 @@ final class ModifierTest extends TestCase
     public function testRemoveBasePathWithRelativePath(): void
     {
         $uri = Http::new('base/path');
-        self::assertSame('base/path', Modifier::from($uri)->removeBasePath('/base/path')->uri()->getPath());
+        self::assertSame('base/path', Modifier::wrap($uri)->removeBasePath('/base/path')->unwrap()->getPath());
     }
 
     #[DataProvider('validwithoutSegmentProvider')]
     public function testWithoutSegment(array $keys, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->removeSegments(...$keys)->uri()->getPath());
+        self::assertSame($expected, $this->modifier->removeSegments(...$keys)->unwrap()->getPath());
     }
 
     public static function validwithoutSegmentProvider(): array
@@ -764,7 +764,7 @@ final class ModifierTest extends TestCase
         $uri = Http::new(
             'http://www.example.com/path/../to/the/./sky.php?kingkong=toto&foo=bar+baz#doc3'
         );
-        self::assertSame('/to/the/sky.php', Modifier::from($uri)->removeDotSegments()->uri()->getPath());
+        self::assertSame('/to/the/sky.php', Modifier::wrap($uri)->removeDotSegments()->unwrap()->getPath());
     }
 
     public function testWithoutEmptySegmentsProcess(): void
@@ -772,19 +772,19 @@ final class ModifierTest extends TestCase
         $uri = Http::new(
             'http://www.example.com/path///to/the//sky.php?kingkong=toto&foo=bar+baz#doc3'
         );
-        self::assertSame('/path/to/the/sky.php', Modifier::from($uri)->removeEmptySegments()->uri()->getPath());
+        self::assertSame('/path/to/the/sky.php', Modifier::wrap($uri)->removeEmptySegments()->unwrap()->getPath());
     }
 
     public function testWithoutTrailingSlashProcess(): void
     {
         $uri = Http::new('http://www.example.com/');
-        self::assertSame('', Modifier::from($uri)->removeTrailingSlash()->uri()->getPath());
+        self::assertSame('', Modifier::wrap($uri)->removeTrailingSlash()->unwrap()->getPath());
     }
 
     #[DataProvider('validExtensionProvider')]
     public function testExtensionProcess(string $extension, string $expected): void
     {
-        self::assertSame($expected, $this->modifier->replaceExtension($extension)->uri()->getPath());
+        self::assertSame($expected, $this->modifier->replaceExtension($extension)->unwrap()->getPath());
     }
 
     public static function validExtensionProvider(): array
@@ -797,21 +797,21 @@ final class ModifierTest extends TestCase
 
     public function testWithTrailingSlashProcess(): void
     {
-        self::assertSame('/path/to/the/sky.php/', $this->modifier->addTrailingSlash()->uri()->getPath());
+        self::assertSame('/path/to/the/sky.php/', $this->modifier->addTrailingSlash()->unwrap()->getPath());
     }
 
     public function testWithoutLeadingSlashProcess(): void
     {
         $uri = Http::new('/foo/bar?q=b#h');
 
-        self::assertSame('foo/bar?q=b#h', (string) Modifier::from($uri)->removeLeadingSlash());
+        self::assertSame('foo/bar?q=b#h', (string) Modifier::wrap($uri)->removeLeadingSlash());
     }
 
     public function testWithLeadingSlashProcess(): void
     {
         $uri = Http::new('foo/bar?q=b#h');
 
-        self::assertSame('/foo/bar?q=b#h', (string) Modifier::from($uri)->addLeadingSlash());
+        self::assertSame('/foo/bar?q=b#h', (string) Modifier::wrap($uri)->addLeadingSlash());
     }
 
     public function testReplaceSegmentConstructorFailed2(): void
@@ -838,7 +838,7 @@ final class ModifierTest extends TestCase
     {
         $uri = 'http://www.localhost.com/path/to/the/sky/';
 
-        self::assertSame('http://www.localhost.com/the/sky/', Modifier::from($uri)->sliceSegments(2, 2)->toString());
+        self::assertSame('http://www.localhost.com/the/sky/', Modifier::wrap($uri)->sliceSegments(2, 2)->toString());
     }
 
     #[DataProvider('ipv6NormalizationUriProvider')]
@@ -847,7 +847,7 @@ final class ModifierTest extends TestCase
         string $compressedUri,
         string $expandedUri,
     ): void {
-        $uri = Modifier::from(Http::new($inputUri));
+        $uri = Modifier::wrap(Http::new($inputUri));
 
         self::assertSame($compressedUri, $uri->hostToIpv6Compressed()->toString());
         self::assertSame($expandedUri, $uri->hostToIpv6Expanded()->toString());
@@ -883,9 +883,9 @@ final class ModifierTest extends TestCase
     #[Test]
     public function it_will_remove_empty_pairs_fix_issue_133(): void
     {
-        $removeEmptyPairs = fn (string $str): ?string => Modifier::from($str)
+        $removeEmptyPairs = fn (string $str): ?string => Modifier::wrap($str)
             ->removeEmptyQueryPairs()
-            ->uri()
+            ->unwrap()
             ->getQuery();
 
         self::assertNull($removeEmptyPairs('https://a.b/c?d='));
@@ -897,7 +897,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('normalizedHostProvider')]
     public function it_will_convert_uri_host_following_whatwg_rules(?string $expectedHost, UriInterface|Psr7UriInterface|string $uri): void
     {
-        $newUri = Modifier::from($uri)->normalizeHost()->uri();
+        $newUri = Modifier::wrap($uri)->normalizeHost()->unwrap();
 
         self::assertSame($expectedHost, $newUri instanceof Url ? $newUri->getAsciiHost() : $newUri->getHost());
     }
@@ -967,8 +967,8 @@ final class ModifierTest extends TestCase
         string $expectedString,
         string $expectedDisplayString
     ): void {
-        self::assertSame($expectedString, Modifier::from($uri)->toString());
-        self::assertSame($expectedDisplayString, Modifier::from($uri)->toDisplayString());
+        self::assertSame($expectedString, Modifier::wrap($uri)->toString());
+        self::assertSame($expectedDisplayString, Modifier::wrap($uri)->toDisplayString());
     }
 
     public static function providesUriToDisplay(): iterable
@@ -994,7 +994,7 @@ final class ModifierTest extends TestCase
 
     private function getHost(Modifier $modifier): ?string
     {
-        $uri = $modifier->uri();
+        $uri = $modifier->unwrap();
 
         return $uri instanceof Url ? $uri->getAsciiHost() : $uri->getHost();
     }
@@ -1007,7 +1007,7 @@ final class ModifierTest extends TestCase
     ): void {
         self::assertSame(
             $expectedFragment,
-            Modifier::from($uri)->appendFragmentDirectives($directive)->uri()->getFragment()
+            Modifier::wrap($uri)->appendFragmentDirectives($directive)->unwrap()->getFragment()
         );
     }
 
@@ -1040,7 +1040,7 @@ final class ModifierTest extends TestCase
     ): void {
         self::assertSame(
             $expectedFragment,
-            Modifier::from($uri)->prependFragmentDirectives($directive)->uri()->getFragment()
+            Modifier::wrap($uri)->prependFragmentDirectives($directive)->unwrap()->getFragment()
         );
     }
 
@@ -1068,7 +1068,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('resolveProvider')]
     public function testCreateResolve(string $baseUri, string $uri, string $expected): void
     {
-        self::assertSame($expected, Modifier::from(Utils::uriFor($baseUri))->resolve($uri)->toString());
+        self::assertSame($expected, Modifier::wrap(Utils::uriFor($baseUri))->resolve($uri)->toString());
     }
 
     public static function resolveProvider(): array

@@ -15,7 +15,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::normalizeIp` returns the host normalized for IPv6 and IPv4 addresses
 - `Modifier::normalizeHost` returns the host as normalized by the WHATWG algorithm
 - `Modifier::with*` method from the underlying `Uri` object are proxy to improve DX.
-- `Modifier::uri` method which returns the underlying URI object used by the Modifier class.
+- `Modifier::wrap` static method which wraps the underlying URI object used by the Modifier class.
+- `Modifier::unwrap` method which returns the underlying URI object used by the Modifier class.
 - `Modifier::prefixQueryPairs` and `Modifier::prefixQueryParameters` to prefix Query using the pair key or the parameter names
 - `tryNew` named constructor added to all classes to return a new instance on success or `null` on failure.
 - `Query::decoded` the string representation of the component decoded.
@@ -39,6 +40,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::getIdnUriString` use `Modifier::toDisplayString` instead
 - `Modifier::getUriString` use  `Modifier::toString` instead
 - `Modifier::getUri` use `Modifier::uri` instead
+- `Modifier::from` use `Modifier::wrap` instead
 
 ### Removed
 

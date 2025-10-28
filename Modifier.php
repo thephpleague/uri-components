@@ -70,10 +70,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     {
     }
 
-    /**
-     * @param UriFactoryInterface|null $uriFactory deprecated, will be removed in the next major release
-     */
-    public static function from(Rfc3986Uri|WhatWgUrl|Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
+    public static function wrap(Rfc3986Uri|WhatWgUrl|Stringable|string $uri): static
     {
         return new static(match (true) {
             $uri instanceof self => $uri->uri,
@@ -81,12 +78,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             $uri instanceof UriInterface,
             $uri instanceof Rfc3986Uri,
             $uri instanceof WhatWgUrl => $uri,
-            $uriFactory instanceof UriFactoryInterface => $uriFactory->createUri((string) $uri),  // using UriFactoryInterface is deprecated
             default => Uri::new($uri),
         });
     }
 
-    public function uri(): Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface
+    public function unwrap(): Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface
     {
         return $this->uri;
     }
@@ -1151,32 +1147,56 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function appendFragmentDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->uri())->append(...$directives));
+        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->append(...$directives));
     }
 
     public function prependFragmentDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->uri())->prepend(...$directives));
+        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->prepend(...$directives));
     }
 
     public function removeFragmentDirectives(int ...$offset): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->uri())->remove(...$offset));
+        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->remove(...$offset));
     }
 
     public function replaceFragmentDirective(int $offset, Directive|Stringable|string $directive): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->uri())->replace($offset, $directive));
+        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->replace($offset, $directive));
     }
 
     public function sliceFragmentDirectives(int $offset, ?int $length): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->uri())->slice($offset, $length));
+        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->slice($offset, $length));
     }
 
     public function filterFragmentDirectives(callable $callback): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->uri())->filter($callback));
+        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->filter($callback));
+    }
+
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.6.0
+     * @codeCoverageIgnore
+     * @see Modifier::wrap()
+     *
+     * @param UriFactoryInterface|null $uriFactory deprecated, will be removed in the next major release
+     */
+    #[Deprecated(message:'use League\Uri\Modifier::wrap() instead', since:'league/uri-components:7.6.0')]
+    public static function from(Rfc3986Uri|WhatWgUrl|Stringable|string $uri, ?UriFactoryInterface $uriFactory = null): static
+    {
+        return new static(match (true) {
+            $uri instanceof self => $uri->uri,
+            $uri instanceof Psr7UriInterface,
+            $uri instanceof UriInterface,
+            $uri instanceof Rfc3986Uri,
+            $uri instanceof WhatWgUrl => $uri,
+            $uriFactory instanceof UriFactoryInterface => $uriFactory->createUri((string) $uri),  // using UriFactoryInterface is deprecated
+            default => Uri::new($uri),
+        });
     }
 
     /**
@@ -1247,7 +1267,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @deprecated Since version 7.6.0
      * @codeCoverageIgnore
-     * @see Modifier::uri()
+     * @see Modifier::unwrap()
      *
      * Remove query data according to their key name.
      */
