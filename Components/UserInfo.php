@@ -115,7 +115,7 @@ final class UserInfo extends Component implements UserInfoInterface
     }
 
     /**
-     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     * Create a new instance from a string or a stringable structure or returns null on failure.
      */
     public static function tryNew(Stringable|string|null $uri = null): ?self
     {
