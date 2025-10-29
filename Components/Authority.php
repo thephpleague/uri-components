@@ -22,7 +22,6 @@ use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
@@ -86,11 +85,30 @@ final class Authority extends Component implements AuthorityInterface
     public static function fromUri(WhatwgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
+        if ($uri instanceof Rfc3986Uri) {
+            return new self($uri->getHost(), $uri->getPort(), $uri->getUserInfo());
+        }
 
-        return match (true) {
-            $uri instanceof UriInterface => self::new($uri->getAuthority()),
-            default => self::new(Uri::new($uri)->getAuthority()),
-        };
+        if ($uri instanceof WhatWgUrl) {
+            $userInfo = $uri->getUsername();
+            if (null !== ($password = $uri->getPassword())) {
+                $userInfo .= ':'.$password;
+            }
+
+            return new self($uri->getUnicodeHost(), $uri->getPort(), $userInfo);
+        }
+
+        if ($uri instanceof Psr7UriInterface) {
+            $components = UriString::parse($uri);
+            $userInfo = $components['user'];
+            if (null !== ($password = $components['pass'])) {
+                $userInfo .= ':'.$password;
+            }
+
+            return new self($components['host'], $components['port'], $userInfo);
+        }
+
+        return self::new($uri->getAuthority());
     }
 
     /**

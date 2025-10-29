@@ -20,7 +20,7 @@ use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Encoder;
-use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
@@ -51,20 +51,18 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public static function fromUri(Rfc3986Uri|WhatWgUrl|Stringable|string $uri): self
     {
+        $uri = self::filterUri($uri);
         if ($uri instanceof Rfc3986Uri) {
             return new self($uri->getRawUsername(), $uri->getRawPassword());
         }
 
-        if ($uri instanceof WhatWgUrl) {
+        if ($uri instanceof WhatWgUrl || $uri instanceof UriInterface) {
             return new self($uri->getUsername(), $uri->getPassword());
         }
 
-        $uri = self::filterUri($uri);
+        $components = UriString::parse($uri);
 
-        return match (true) {
-            $uri instanceof UriInterface => new self($uri->getUsername(), $uri->getPassword()),
-            default => self::new(Uri::new($uri)->getUserInfo()),
-        };
+        return new self($components['user'], $components['pass']);
     }
 
     /**

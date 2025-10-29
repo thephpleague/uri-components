@@ -18,7 +18,6 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
-use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -76,6 +75,7 @@ final class Path extends Component implements PathInterface
      */
     public static function fromUri(WhatwgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
+        $uri = self::filterUri($uri);
         if ($uri instanceof Rfc3986Uri) {
             return self::new($uri->getRawPath());
         }
@@ -84,9 +84,6 @@ final class Path extends Component implements PathInterface
             return self::new($uri->getPath());
         }
 
-        if (!$uri instanceof UriInterface) {
-            $uri = Uri::new($uri);
-        }
         $path = $uri->getPath();
         $authority = $uri->getAuthority();
 

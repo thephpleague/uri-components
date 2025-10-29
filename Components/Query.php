@@ -23,7 +23,7 @@ use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
-use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Traversable;
@@ -131,23 +131,12 @@ final class Query extends Component implements QueryInterface
      */
     public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof Rfc3986Uri) {
-            return new self($uri->getRawQuery());
-        }
-
-        if ($uri instanceof WhatWgUrl) {
-            return new self($uri->getQuery());
-        }
-
-        if ($uri instanceof UriInterface) {
-            return new self($uri->getQuery());
-        }
-
         $uri = self::filterUri($uri);
 
         return match (true) {
-            $uri instanceof UriInterface => new self($uri->getQuery()),
-            default => new self(Uri::new($uri)->getQuery()),
+            $uri instanceof Rfc3986Uri => new self($uri->getRawQuery()),
+            $uri instanceof Psr7UriInterface => new self(UriString::parse($uri)['query']),
+            default => new self($uri->getQuery()),
         };
     }
 

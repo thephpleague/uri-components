@@ -25,7 +25,7 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Idna\Converter as IdnConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
 use League\Uri\IPv4Normalizer;
-use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
@@ -315,19 +315,13 @@ final class Host extends Component implements IpHostInterface
      */
     public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof Rfc3986Uri) {
-            return new self($uri->getRawHost());
-        }
-
-        if ($uri instanceof WhatWgUrl) {
-            return new self($uri->getAsciiHost());
-        }
-
         $uri = self::filterUri($uri);
 
         return match (true) {
-            $uri instanceof UriInterface => new self($uri->getHost()),
-            default => new self(Uri::new($uri)->getHost()),
+            $uri instanceof Rfc3986Uri => new self($uri->getRawHost()),
+            $uri instanceof WhatWgUrl => new self($uri->getAsciiHost()),
+            $uri instanceof Psr7UriInterface => new self(UriString::parse($uri)['host']),
+            default => new self($uri->getHost()),
         };
     }
 

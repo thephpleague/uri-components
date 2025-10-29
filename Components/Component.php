@@ -57,12 +57,19 @@ abstract class Component implements UriComponentInterface, Conditionable
 
     final protected static function filterUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): WhatWgUrl|Rfc3986Uri|UriInterface|Psr7UriInterface
     {
-        return match (true) {
-            $uri instanceof Modifier => $uri->unwrap(),
-            $uri instanceof Psr7UriInterface, $uri instanceof UriInterface => $uri,
-            $uri instanceof WhatWgUrl => Uri::new($uri->toAsciiString()),
-            default => Uri::new($uri),
-        };
+        if ($uri instanceof Modifier) {
+            return $uri->unwrap();
+        }
+
+        if ($uri instanceof Rfc3986Uri
+            || $uri instanceof WhatWgUrl
+            || $uri instanceof PSR7UriInterface
+            || $uri instanceof UriInterface
+        ) {
+            return $uri;
+        }
+
+        return Uri::new($uri);
     }
 
     /**

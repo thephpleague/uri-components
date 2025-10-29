@@ -19,7 +19,7 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
-use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
@@ -62,19 +62,12 @@ final class Fragment extends Component implements FragmentInterface
      */
     public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof Rfc3986Uri) {
-            return new self($uri->getRawFragment());
-        }
-
-        if ($uri instanceof WhatWgUrl) {
-            return new self($uri->getFragment());
-        }
-
         $uri = self::filterUri($uri);
 
         return match (true) {
-            $uri instanceof UriInterface => new self($uri->getFragment()),
-            default => new self(Uri::new($uri)->getFragment()),
+            $uri instanceof Rfc3986Uri => new self($uri->getRawFragment()),
+            $uri instanceof Psr7UriInterface => new self(UriString::parse($uri)['fragment']),
+            default => new self($uri->getFragment()),
         };
     }
 

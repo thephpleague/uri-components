@@ -17,7 +17,7 @@ use Deprecated;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
-use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Throwable;
@@ -77,6 +77,7 @@ final class Scheme extends Component
         'steam' => null,
         'svn' => 3690,
         'telnet' => 23,
+        'tn3270' => 23,
         'ventrilo' => 3784,
         'vnc' => 5900,
         'wais' => 210,
@@ -183,16 +184,13 @@ final class Scheme extends Component
      */
     public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof Rfc3986Uri || $uri instanceof WhatWgUrl) {
-            return new self($uri->getScheme());
-        }
-
         $uri = self::filterUri($uri);
 
-        return match (true) {
-            $uri instanceof UriInterface => new self($uri->getScheme()),
-            default => new self(Uri::new($uri)->getScheme()),
-        };
+        return new self(
+            $uri instanceof Psr7UriInterface
+            ? UriString::parse($uri)['scheme']
+            : $uri->getScheme()
+        );
     }
 
     public function value(): ?string

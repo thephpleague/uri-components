@@ -27,6 +27,8 @@ use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
 use League\Uri\Uri;
+use League\Uri\UriString;
+use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
@@ -217,13 +219,10 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof WhatWgUrl) {
-            return new self(Query::fromPairs(QueryString::parseFromValue($uri->getQuery(), Converter::fromFormData())));
-        }
-
         $query = match (true) {
             $uri instanceof Rfc3986Uri => $uri->getRawQuery(),
-            $uri instanceof UriInterface => $uri->getQuery(),
+            $uri instanceof WhatWgUrl, $uri instanceof UriInterface => $uri->getQuery(),
+            $uri instanceof Psr7UriInterface => UriString::parse($uri)['query'],
             default => Uri::new($uri)->getQuery(),
         };
 

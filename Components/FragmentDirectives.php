@@ -25,6 +25,7 @@ use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Modifier;
 use League\Uri\Uri;
+use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Throwable;
@@ -107,21 +108,12 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             $uri = $uri->unwrap();
         }
 
-        if ($uri instanceof Rfc3986Uri) {
-            return self::new($uri->getRawFragment());
-        }
-
-        if ($uri instanceof Psr7UriInterface) {
-            $fragment = $uri->getFragment();
-
-            return self::new('' === $fragment ? null : $fragment);
-        }
-
-        if ($uri instanceof UriInterface || $uri instanceof WhatWgUrl) {
-            return self::new($uri->getFragment());
-        }
-
-        return self::new(Uri::new($uri)->getFragment());
+        return match (true) {
+            $uri instanceof Psr7UriInterface => self::new(UriString::parse($uri)['fragment']),
+            $uri instanceof Rfc3986Uri => self::new($uri->getRawFragment()),
+            $uri instanceof UriInterface, $uri instanceof WhatWgUrl => self::new($uri->getFragment()),
+            default => self::new(Uri::new($uri)->getFragment()),
+        };
     }
 
     public function count(): int

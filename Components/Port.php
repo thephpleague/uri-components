@@ -64,10 +64,6 @@ final class Port extends Component implements PortInterface
      */
     public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
     {
-        if ($uri instanceof Rfc3986Uri || $uri instanceof WhatWgUrl || $uri instanceof UriInterface || $uri instanceof Psr7UriInterface) {
-            return new self($uri->getPort());
-        }
-
         return new self(self::filterUri($uri)->getPort());
     }
 
