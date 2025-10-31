@@ -18,6 +18,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::wrap` static method which wraps the underlying URI object used by the Modifier class.
 - `Modifier::unwrap` method which returns the underlying URI object used by the Modifier class.
 - `Modifier::prefixQueryPairs` and `Modifier::prefixQueryParameters` to prefix Query using the pair key or the parameter names
+- `Modifier::toMarkdownAnchor` returns the Markdown string representation of the anchor tag with the current instance as its href attribute.
+- `Modifier::toHtmlAnchor` returns the HTML string representation of the anchor tag with the current instance as its href attribute.
 - `tryNew` named constructor added to all classes to return a new instance on success or `null` on failure.
 - `Query::decoded` the string representation of the component decoded.
 - `Query::normalized`

@@ -11,6 +11,7 @@
 
 namespace League\Uri;
 
+use DOMException;
 use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\FragmentDirectives;
@@ -1114,5 +1115,102 @@ final class ModifierTest extends TestCase
             'origin uri without path' => ['http://h:b@a', 'b/../y',        'http://h:b@a/y'],
             'not same origin'         => [self::BASE_URI, 'ftp://a/b/c/d', 'ftp://a/b/c/d'],
         ];
+    }
+
+    #[Test]
+    #[DataProvider('providesUriToMarkdown')]
+    public function it_will_generate_the_markdown_code_for_the_instance(string $uri, ?string $content, string $expected): void
+    {
+        self::assertSame($expected, Modifier::wrap($uri)->toMarkdownAnchor($content));
+    }
+
+    public static function providesUriToMarkdown(): iterable
+    {
+        yield 'empty string' => [
+            'uri' => '',
+            'content' => '',
+            'expected' => '[]()',
+        ];
+
+        yield 'URI with a specific content' => [
+            'uri' => 'http://example.com/foo/bar',
+            'content' => 'this is a link',
+            'expected' => '[this is a link](http://example.com/foo/bar)',
+        ];
+
+        yield 'URI without content' => [
+            'uri' => 'http://Bébé.be',
+            'content' => null,
+            'expected' => '[http://bébé.be](http://xn--bb-bjab.be)',
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('providesUriToAnchorTagHTML')]
+    public function it_will_generate_the_html_anchor_tag_code_for_the_instance(string $uri, ?string $content, array $parameters, string $expected): void
+    {
+        self::assertSame($expected, Modifier::wrap($uri)->toHtmlAnchor($content, $parameters));
+    }
+
+    public static function providesUriToAnchorTagHTML(): iterable
+    {
+        yield 'empty string' => [
+            'uri' => '',
+            'content' => '',
+            'parameters' => [],
+            'expected' => '<a href=""></a>',
+        ];
+
+        yield 'URI with a specific content' => [
+            'uri' => 'http://example.com/foo/bar',
+            'content' => 'this is a link',
+            'parameters' => [],
+            'expected' => '<a href="http://example.com/foo/bar">this is a link</a>',
+        ];
+
+        yield 'URI without content' => [
+            'uri' => 'http://Bébé.be',
+            'content' => null,
+            'parameters' => [],
+            'expected' => '<a href="http://xn--bb-bjab.be">http://bébé.be</a>',
+        ];
+
+        yield 'URI without content and with class' => [
+            'uri' => 'http://Bébé.be',
+            'content' => null,
+            'parameters' => [
+                'class' => ['foo', 'bar'],
+                'target' => null,
+            ],
+            'expected' => '<a href="http://xn--bb-bjab.be" class="foo bar">http://bébé.be</a>',
+        ];
+
+        yield 'URI without content and with target' => [
+            'uri' => 'http://Bébé.be',
+            'content' => null,
+            'parameters' => [
+                'class' => null,
+                'target' => '_blank',
+            ],
+            'expected' => '<a href="http://xn--bb-bjab.be" target="_blank">http://bébé.be</a>',
+        ];
+
+        yield 'URI without content, with target and class' => [
+            'uri' => 'http://Bébé.be',
+            'content' => null,
+            'parameters' => [
+                'class' => 'foo bar',
+                'target' => '_blank',
+            ],
+            'expected' => '<a href="http://xn--bb-bjab.be" class="foo bar" target="_blank">http://bébé.be</a>',
+        ];
+    }
+
+    #[Test]
+    public function it_will_fail_to_generate_an_anchor_tag_html_for_the_instance(): void
+    {
+        $this->expectException(DOMException::class);
+
+        Modifier::wrap('https://example.com')->toHtmlAnchor(attributes: ["bébé\r\n" => 'yes']);
     }
 }

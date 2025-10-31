@@ -115,9 +115,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Returns the Markdown string representation of the anchor tag with the current instance as its href attribute.
      */
-    public function toMarkdownAnchor(?string $linkTextTemplate = null): string
+    public function toMarkdownAnchor(?string $textContent = null): string
     {
-        return '['.strtr($linkTextTemplate ?? '{uri}', ['{uri}' => $this->toDisplayString()]).']('.$this->toString().')';
+        return '['.strtr($textContent ?? '{uri}', ['{uri}' => $this->toDisplayString()]).']('.$this->toString().')';
     }
 
     /**
@@ -127,14 +127,20 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @throws DOMException
      */
-    public function toHtmlAnchor(?string $linkTextTemplate = null, iterable $attributes = []): string
+    public function toHtmlAnchor(Stringable|string|null $textContent = null, iterable $attributes = []): string
     {
         FeatureDetection::supportsDom();
-
-        $doc = class_exists(HTMLDocument::class) ? HTMLDocument::createEmpty() : new DOMDocument(encoding:'utf-8');
+        $uriString = $this->toString();
+        $rfc3987String = UriString::toIriString($uriString);
+        $doc = class_exists(HTMLDocument::class)
+            ? HTMLDocument::createEmpty() /* @phpstan-ignore-line */
+            : new DOMDocument(encoding:'utf-8');
         $element = $doc->createElement('a');
-        $element->setAttribute('href', $this->toString());
-        $element->appendChild($doc->createTextNode(strtr($linkTextTemplate ?? '{uri}', ['{uri}' => $this->toDisplayString()])));
+        $element->setAttribute('href', $uriString);
+        $element->appendChild(match (true) {
+            null === $textContent => $doc->createTextNode($rfc3987String),
+            default => $doc->createTextNode(strtr((string) $textContent, ['{uri}' => $rfc3987String])),
+        });
 
         foreach ($attributes as $name => $value) {
             if ('href' === strtolower($name) || null === $value) {
@@ -154,8 +160,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             $element->setAttribute($name, $value);
         }
 
-        $html = $doc->saveHTML($element);
-        false !== $html || throw new DOMException('The HTML generation failed.');
+        false !== ($html = $doc->saveHTML($element)) || throw new DOMException('The HTML generation failed.');
 
         return $html;
     }
