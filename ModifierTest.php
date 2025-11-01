@@ -264,8 +264,8 @@ final class ModifierTest extends TestCase
     #[DataProvider('removeEmptyPairsProvider')]
     public function testRemoveEmptyPairs(string $uri, ?string $expected): void
     {
-        self::assertSame($expected, Modifier::wrap(Uri::fromBaseUri($uri))->removeEmptyQueryPairs()->toString());
-        self::assertSame($expected, Modifier::wrap(Http::fromBaseUri($uri))->removeEmptyQueryPairs()->toString());
+        self::assertSame($expected, Modifier::wrap(Uri::new($uri))->removeEmptyQueryPairs()->toString());
+        self::assertSame($expected, Modifier::wrap(Http::new($uri))->removeEmptyQueryPairs()->toString());
     }
 
     public static function removeEmptyPairsProvider(): iterable
