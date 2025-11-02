@@ -15,8 +15,8 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Components\FragmentDirectives\Directive;
 use League\Uri\Components\FragmentDirectives\Factory;
+use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
@@ -53,17 +53,17 @@ use const ARRAY_FILTER_USE_BOTH;
 /**
  * @see https://wicg.github.io/scroll-to-text-fragment/
  *
- * @implements IteratorAggregate<int, Directive>
+ * @implements IteratorAggregate<int, FragmentDirective>
  */
 final class FragmentDirectives implements FragmentInterface, IteratorAggregate, Countable
 {
     public const DELIMITER = ':~:';
     public const SEPARATOR = '&';
 
-    /** @var list<Directive> */
+    /** @var list<FragmentDirective> */
     private readonly array $directives;
 
-    public function __construct(Directive|Stringable|string ...$directives)
+    public function __construct(FragmentDirective|Stringable|string ...$directives)
     {
         $this->directives = array_values(array_map(self::filterDirective(...), $directives));
     }
@@ -85,9 +85,9 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
         return new self(...explode(self::SEPARATOR, substr($value, 3)));
     }
 
-    private static function filterDirective(Directive|Stringable|string $directive): Directive
+    private static function filterDirective(FragmentDirective|Stringable|string $directive): FragmentDirective
     {
-        return $directive instanceof Directive ? $directive : Factory::parse($directive);
+        return $directive instanceof FragmentDirective ? $directive : Factory::parse($directive);
     }
 
     public static function tryNew(Stringable|string|null $value): ?self
@@ -142,7 +142,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             ? null
             : self::DELIMITER.implode(
                 self::SEPARATOR,
-                array_map(fn (Directive $directive): string => $directive->toString(), $this->directives)
+                array_map(fn (FragmentDirective $directive): string => $directive->toString(), $this->directives)
             );
     }
 
@@ -170,7 +170,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
      *
      * Negative offsets are supported.
      */
-    public function nth(int $offset): ?Directive
+    public function nth(int $offset): ?FragmentDirective
     {
         if ($offset < 0) {
             $offset += count($this->directives);
@@ -182,7 +182,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      * The first Directive defined on the fragment or null if none are defined.
      */
-    public function first(): ?Directive
+    public function first(): ?FragmentDirective
     {
         return $this->nth(0);
     }
@@ -190,7 +190,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      * The last Directive defined on the fragment or null if none are defined.
      */
-    public function last(): ?Directive
+    public function last(): ?FragmentDirective
     {
         return $this->nth(-1);
     }
@@ -237,7 +237,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
         return $value->getUriComponent() === $this->getUriComponent();
     }
 
-    public function indexOf(Directive|Stringable|string $directive): ?int
+    public function indexOf(FragmentDirective|Stringable|string $directive): ?int
     {
         $directive = self::filterDirective($directive);
         foreach ($this->directives as $offset => $innerDirective) {
@@ -249,7 +249,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
         return null;
     }
 
-    public function contains(Directive|Stringable|string $directive): bool
+    public function contains(FragmentDirective|Stringable|string $directive): bool
     {
         return null !== $this->indexOf($directive);
     }
@@ -257,7 +257,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      * Append one or more Directives to the fragment.
      */
-    public function append(FragmentDirectives|Directive|Stringable|string ...$directives): self
+    public function append(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): self
     {
         $items = self::implodeDirectives(...$directives);
 
@@ -267,7 +267,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      * Prepend one or more Directives to the fragment.
      */
-    public function prepend(FragmentDirectives|Directive|Stringable|string ...$directives): self
+    public function prepend(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): self
     {
         $items = self::implodeDirectives(...$directives);
 
@@ -275,9 +275,9 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     }
 
     /**
-     * @return list<Directive|Stringable|string>
+     * @return list<FragmentDirective|Stringable|string>
      */
-    private static function implodeDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): array
+    private static function implodeDirectives(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): array
     {
         return array_merge(...array_map(fn ($d) => $d instanceof FragmentDirectives ? [...$d] : [$d], $directives));
     }
@@ -305,7 +305,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
 
         $deletedKeys = array_keys(array_count_values($deletedKeys));
 
-        return $this->filter(fn (Directive $directive, int $offset): bool => !in_array($offset, $deletedKeys, true)); /* @phpstan-ignore-line */
+        return $this->filter(fn (FragmentDirective $directive, int $offset): bool => !in_array($offset, $deletedKeys, true)); /* @phpstan-ignore-line */
     }
 
     /**
@@ -323,7 +323,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      * Filter the Directives to return a new instance based on the callback.
      *
-     * @param callable(Directive, int=): bool $callback
+     * @param callable(FragmentDirective, int=): bool $callback
      */
     public function filter(callable $callback): self
     {
@@ -338,7 +338,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
      *
      * If no Directive is found to the specified offset, an exception is thrown
      */
-    public function replace(int $offset, Directive|Stringable|string $directive): self
+    public function replace(int $offset, FragmentDirective|Stringable|string $directive): self
     {
         $currentDirective = $this->nth($offset);
         null !== $currentDirective || throw new OffsetOutOfBounds(sprintf('The key `%s` is invalid.', $offset));

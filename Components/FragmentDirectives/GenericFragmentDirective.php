@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components\FragmentDirectives;
 
+use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use Stringable;
@@ -21,7 +22,7 @@ use Throwable;
 use function explode;
 use function str_replace;
 
-final class GenericDirective implements Directive
+final class GenericFragmentDirective implements FragmentDirective
 {
     /**
      * @param non-empty-string $name
@@ -82,7 +83,7 @@ final class GenericDirective implements Directive
             return false;
         }
 
-        if (!$directive instanceof Directive) {
+        if (!$directive instanceof FragmentDirective) {
             try {
                 $directive = self::fromString($directive);
             } catch (Throwable) {

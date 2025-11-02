@@ -18,42 +18,42 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-#[CoversClass(TextDirective::class)]
+#[CoversClass(TextFragmentDirective::class)]
 final class TextDirectiveTest extends TestCase
 {
     #[DataProvider('provideValidFragmentTextDirectives')]
-    public function testToString(TextDirective $fragmentTextDirective, string $expected): void
+    public function testToString(TextFragmentDirective $fragmentTextDirective, string $expected): void
     {
         self::assertSame($expected, (string) $fragmentTextDirective);
     }
 
     #[DataProvider('provideValidFragmentTextDirectives')]
-    public function test_it_can_be_created_from_string(TextDirective $fragmentTextDirective, string $expected): void
+    public function test_it_can_be_created_from_string(TextFragmentDirective $fragmentTextDirective, string $expected): void
     {
-        self::assertEquals($fragmentTextDirective, TextDirective::fromString($expected));
+        self::assertEquals($fragmentTextDirective, TextFragmentDirective::fromString($expected));
     }
 
     public function testToStringEncodesSpecialCharacters(): void
     {
-        $fragmentTextDirective = new TextDirective('st&rt', 'e,nd', 'prefix-', '-&suffix');
+        $fragmentTextDirective = new TextFragmentDirective('st&rt', 'e,nd', 'prefix-', '-&suffix');
 
         self::assertSame('text=prefix%2D-,st%26rt,e%2Cnd,-%2D%26suffix', (string) $fragmentTextDirective);
     }
 
     public static function provideValidFragmentTextDirectives(): iterable
     {
-        yield [new TextDirective('start'), 'text=start'];
-        yield [new TextDirective('start', 'end'), 'text=start,end'];
-        yield [new TextDirective('start', 'end', 'prefix'), 'text=prefix-,start,end'];
-        yield [new TextDirective('start', 'end', 'prefix', 'suffix'), 'text=prefix-,start,end,-suffix'];
-        yield [new TextDirective('start', prefix: 'prefix', suffix: 'suffix'), 'text=prefix-,start,-suffix'];
-        yield [new TextDirective('start', suffix: 'suffix'), 'text=start,-suffix'];
-        yield [new TextDirective('start', prefix: 'prefix'), 'text=prefix-,start'];
+        yield [new TextFragmentDirective('start'), 'text=start'];
+        yield [new TextFragmentDirective('start', 'end'), 'text=start,end'];
+        yield [new TextFragmentDirective('start', 'end', 'prefix'), 'text=prefix-,start,end'];
+        yield [new TextFragmentDirective('start', 'end', 'prefix', 'suffix'), 'text=prefix-,start,end,-suffix'];
+        yield [new TextFragmentDirective('start', prefix: 'prefix', suffix: 'suffix'), 'text=prefix-,start,-suffix'];
+        yield [new TextFragmentDirective('start', suffix: 'suffix'), 'text=start,-suffix'];
+        yield [new TextFragmentDirective('start', prefix: 'prefix'), 'text=prefix-,start'];
     }
 
     public static function testClasswithers(): void
     {
-        $directive = (new TextDirective('foo'))
+        $directive = (new TextFragmentDirective('foo'))
             ->startsWith('start')
             ->startsWith('start')
             ->endsWith('end')
@@ -71,7 +71,7 @@ final class TextDirectiveTest extends TestCase
 
     public function test_it_can_return_the_default_properties(): void
     {
-        $directive = new TextDirective('st&art', prefix: 'prefix', suffix: 'suffix');
+        $directive = new TextFragmentDirective('st&art', prefix: 'prefix', suffix: 'suffix');
         self::assertSame('text', $directive->name());
         self::assertSame('st&art', $directive->start);
         self::assertSame('prefix', $directive->prefix);
@@ -83,12 +83,12 @@ final class TextDirectiveTest extends TestCase
 
     public function test_it_can_tell_if_its_value_are_identical(): void
     {
-        $directive = new TextDirective('st&art', prefix: 'prefix', suffix: 'suffix');
+        $directive = new TextFragmentDirective('st&art', prefix: 'prefix', suffix: 'suffix');
         $inputText = $directive->toString();
 
         self::assertTrue($directive->equals($inputText));
-        self::assertTrue($directive->equals(TextDirective::fromString($inputText)));
-        self::assertTrue($directive->equals(GenericDirective::fromString($inputText)));
+        self::assertTrue($directive->equals(TextFragmentDirective::fromString($inputText)));
+        self::assertTrue($directive->equals(GenericFragmentDirective::fromString($inputText)));
         self::assertFalse($directive->equals('unknownDirective'));
         self::assertFalse($directive->equals(new stdClass()));
     }

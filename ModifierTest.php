@@ -15,8 +15,8 @@ use DOMException;
 use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\FragmentDirectives;
-use League\Uri\Components\FragmentDirectives\Directive;
-use League\Uri\Components\FragmentDirectives\TextDirective;
+use League\Uri\Components\FragmentDirectives\TextFragmentDirective;
+use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -1003,7 +1003,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('providesDirectivesToAppend')]
     public function test_it_can_append_the_fragment(
         string $uri,
-        Directive|Stringable|string $directive,
+        FragmentDirective|Stringable|string $directive,
         string $expectedFragment
     ): void {
         self::assertSame(
@@ -1022,13 +1022,13 @@ final class ModifierTest extends TestCase
 
         yield 'add a directive instance on null fragment' => [
             'uri' => 'http://host/path',
-            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd",
         ];
 
         yield 'append a directive on existing fragment directive' => [
             'uri' => 'http://host/path#:~:unknownDirective',
-            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:unknownDirective&text=start,en'd",
         ];
     }
@@ -1036,7 +1036,7 @@ final class ModifierTest extends TestCase
     #[DataProvider('providesDirectivesToPrepend')]
     public function test_it_can_prepend_the_fragment(
         string $uri,
-        Directive|Stringable|string $directive,
+        FragmentDirective|Stringable|string $directive,
         string $expectedFragment
     ): void {
         self::assertSame(
@@ -1055,13 +1055,13 @@ final class ModifierTest extends TestCase
 
         yield 'add a directive instance on null fragment' => [
             'uri' => 'http://host/path',
-            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd",
         ];
 
         yield 'append a directive on existing fragment directive' => [
             'uri' => 'http://host/path#:~:unknownDirective',
-            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd&unknownDirective",
         ];
     }

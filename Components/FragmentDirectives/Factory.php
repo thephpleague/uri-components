@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components\FragmentDirectives;
 
+use League\Uri\Contracts\FragmentDirective;
 use Stringable;
 
 final class Factory
@@ -24,13 +25,13 @@ final class Factory
      * separator `=` is not present when no value
      * is attached to it
      */
-    public static function parse(Stringable|string $directive): Directive
+    public static function parse(Stringable|string $directive): FragmentDirective
     {
         $directive = (string) $directive;
 
         return match (true) {
-            str_starts_with($directive, 'text=') => TextDirective::fromString($directive),
-            default => GenericDirective::fromString($directive),
+            str_starts_with($directive, 'text=') => TextFragmentDirective::fromString($directive),
+            default => GenericFragmentDirective::fromString($directive),
         };
     }
 }

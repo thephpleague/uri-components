@@ -22,13 +22,13 @@ use League\Uri\Components\DataPath;
 use League\Uri\Components\Domain;
 use League\Uri\Components\Fragment;
 use League\Uri\Components\FragmentDirectives;
-use League\Uri\Components\FragmentDirectives\Directive;
 use League\Uri\Components\HierarchicalPath;
 use League\Uri\Components\Host;
 use League\Uri\Components\Path;
 use League\Uri\Components\Query;
 use League\Uri\Components\URLSearchParams;
 use League\Uri\Contracts\Conditionable;
+use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriAccess;
@@ -290,7 +290,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function withFragment(Stringable|string|null $fragment): static
     {
-        if ($fragment instanceof Directive) {
+        if ($fragment instanceof FragmentDirective) {
             $fragment = new FragmentDirectives($fragment);
         }
 
@@ -1150,12 +1150,12 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      * Fragment modifier methods
      *********************************/
 
-    public function appendFragmentDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
+    public function appendFragmentDirectives(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->append(...$directives));
     }
 
-    public function prependFragmentDirectives(FragmentDirectives|Directive|Stringable|string ...$directives): static
+    public function prependFragmentDirectives(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->prepend(...$directives));
     }
@@ -1165,7 +1165,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->remove(...$offset));
     }
 
-    public function replaceFragmentDirective(int $offset, Directive|Stringable|string $directive): static
+    public function replaceFragmentDirective(int $offset, FragmentDirective|Stringable|string $directive): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->replace($offset, $directive));
     }

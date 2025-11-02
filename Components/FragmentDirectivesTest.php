@@ -13,30 +13,28 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\FragmentDirectives\Directive;
-use League\Uri\Components\FragmentDirectives\GenericDirective;
-use League\Uri\Components\FragmentDirectives\TextDirective;
+use League\Uri\Components\FragmentDirectives\GenericFragmentDirective;
+use League\Uri\Components\FragmentDirectives\TextFragmentDirective;
+use League\Uri\Contracts\FragmentDirective;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-
-use function PHPUnit\Framework\assertInstanceOf;
 
 final class FragmentDirectivesTest extends TestCase
 {
     public function test_it_can_be_instantiated_with_the_constructor(): void
     {
         $fragment = new FragmentDirectives(
-            new TextDirective(start:'linked URL', end:"-'s format"),
-            new TextDirective(start: 'attributes', end: 'attribute', prefix: 'Deprecated'),
+            new TextFragmentDirective(start:'linked URL', end:"-'s format"),
+            new TextFragmentDirective(start: 'attributes', end: 'attribute', prefix: 'Deprecated'),
             'mydirectives=bbrown',
             'mydirection=maitreGims'
         );
 
         self::assertCount(4, $fragment);
-        self::assertCount(2, $fragment->filter(fn (Directive $directive): bool =>  $directive instanceof GenericDirective));
-        self::assertInstanceOf(Directive::class, $fragment->last());
+        self::assertCount(2, $fragment->filter(fn (FragmentDirective $directive): bool =>  $directive instanceof GenericFragmentDirective));
+        self::assertInstanceOf(FragmentDirective::class, $fragment->last());
         self::assertSame('maitreGims', $fragment->last()->value());
-        self::assertInstanceOf(Directive::class, $fragment->first());
+        self::assertInstanceOf(FragmentDirective::class, $fragment->first());
         self::assertSame('text', $fragment->first()->name());
         self::assertSame(
             "#:~:text=linked%20URL,%2D's%20format&text=Deprecated-,attributes,attribute&mydirectives=bbrown&mydirection=maitreGims",
@@ -52,7 +50,7 @@ final class FragmentDirectivesTest extends TestCase
         $removedFragment = $fragment->remove(0, 2);
 
         self::assertCount(2, $removedFragment);
-        assertInstanceOf(Directive::class, $fragment->nth(1));
+        self::assertInstanceOf(FragmentDirective::class, $fragment->nth(1));
         self::assertTrue($removedFragment->contains($fragment->nth(1)));
         self::assertFalse($removedFragment->contains($fragment->first()));
         self::assertSame($fragment->last(), $removedFragment->nth(1));
