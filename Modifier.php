@@ -132,7 +132,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         FeatureDetection::supportsDom();
         $uriString = $this->toString();
         $rfc3987String = UriString::toIriString($uriString);
-        $doc = class_exists(HTMLDocument::class) ? HTMLDocument::createEmpty() : new DOMDocument(encoding:'utf-8');
+        $doc = class_exists(HTMLDocument::class) ? HTMLDocument::createEmpty() : new DOMDocument(encoding:'utf-8'); /* @phpstan-ignore-line */
         $element = $doc->createElement('a');
         $element->setAttribute('href', $uriString);
         $element->appendChild(match (true) {
