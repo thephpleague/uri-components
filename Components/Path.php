@@ -93,7 +93,7 @@ final class Path extends Component implements PathInterface
         };
     }
 
-    public function value(): ?string
+    public function value(): string
     {
         return Encoder::encodePath($this->path);
     }

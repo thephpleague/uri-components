@@ -110,7 +110,7 @@ final class DataPath extends Component implements DataPathInterface
     private function filterMimeType(string $mimetype): string
     {
         return match (true) {
-            '' == $mimetype => self::DEFAULT_MIMETYPE,
+            '' === $mimetype => self::DEFAULT_MIMETYPE,
             1 === preg_match(self::REGEXP_MIMETYPE, $mimetype) =>  $mimetype,
             default => throw new SyntaxError(sprintf('Invalid mimeType, `%s`.', $mimetype)),
         };
@@ -135,7 +135,7 @@ final class DataPath extends Component implements DataPathInterface
             $isBinaryData = true;
         }
 
-        $params = array_filter(explode(';', $parameters));
+        $params = array_filter(explode(';', $parameters), fn (string $param) => '' !== $param);
         if ([] !== array_filter($params, $this->validateParameter(...))) {
             throw new SyntaxError(sprintf('Invalid mediatype parameters, `%s`.', $parameters));
         }
@@ -150,7 +150,7 @@ final class DataPath extends Component implements DataPathInterface
     {
         $properties = explode('=', $parameter);
 
-        return 2 != count($properties) || self::BINARY_PARAMETER === strtolower($properties[0]);
+        return 2 !== count($properties) || self::BINARY_PARAMETER === strtolower($properties[0]);
     }
 
     /**
@@ -319,7 +319,7 @@ final class DataPath extends Component implements DataPathInterface
         bool $isBinaryData,
         string $data
     ): string {
-        if ('' != $parameters) {
+        if ('' !== $parameters) {
             $parameters = ';'.$parameters;
         }
 

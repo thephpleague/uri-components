@@ -145,6 +145,7 @@ final class Scheme extends Component
 
         $fScheme = strtolower($scheme);
 
+        /** @var array<string> $inMemoryCache */
         static $inMemoryCache = [];
         if (isset($inMemoryCache[$fScheme])) {
             return $fScheme;

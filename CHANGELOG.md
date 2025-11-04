@@ -6,7 +6,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- `UriComponentInterfac::equals` method
+- `UriComponentInterface::equals` method
 - `FragmentDirectives` support
 - `Component::when` conditional method to ease component building logic.
 - `URLSearchParams::when` conditional method to ease component building logic.
