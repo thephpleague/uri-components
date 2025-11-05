@@ -17,12 +17,12 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-#[CoversClass(GenericFragmentDirective::class)]
+#[CoversClass(GenericDirective::class)]
 final class GenericDirectiveTest extends TestCase
 {
     public function test_it_can_access_its_properties(): void
     {
-        $directive = GenericFragmentDirective::fromString('text=prefix-,st%26art,-suffix');
+        $directive = GenericDirective::fromString('text=prefix-,st%26art,-suffix');
 
         self::assertSame('text=prefix-,st%26art,-suffix', $directive->toString());
         self::assertSame('prefix-,st&art,-suffix', $directive->value());
@@ -31,7 +31,7 @@ final class GenericDirectiveTest extends TestCase
 
     public function test_it_can_access_its_properties_with_no_value(): void
     {
-        $directive = GenericFragmentDirective::fromString('unknownDirective');
+        $directive = GenericDirective::fromString('unknownDirective');
 
         self::assertSame('unknownDirective', (string) $directive);
         self::assertNull($directive->value());
@@ -41,10 +41,10 @@ final class GenericDirectiveTest extends TestCase
     public function test_it_can_tell_if_its_value_are_identical(): void
     {
         $inputText = 'unknownDirective';
-        $directive = GenericFragmentDirective::fromString('unknownDirective');
+        $directive = GenericDirective::fromString('unknownDirective');
 
         self::assertTrue($directive->equals($inputText));
-        self::assertTrue($directive->equals(GenericFragmentDirective::fromString($inputText)));
+        self::assertTrue($directive->equals(GenericDirective::fromString($inputText)));
         self::assertFalse($directive->equals(new stdClass()));
         self::assertFalse($directive->equals('text=foo'));
         self::assertFalse($directive->equals('invalid&text=foo'));

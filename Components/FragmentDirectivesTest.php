@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
-use League\Uri\Components\FragmentDirectives\GenericFragmentDirective;
-use League\Uri\Components\FragmentDirectives\TextFragmentDirective;
+use League\Uri\Components\FragmentDirectives\GenericDirective;
+use League\Uri\Components\FragmentDirectives\TextDirective;
 use League\Uri\Contracts\FragmentDirective;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -24,14 +24,14 @@ final class FragmentDirectivesTest extends TestCase
     public function test_it_can_be_instantiated_with_the_constructor(): void
     {
         $fragment = new FragmentDirectives(
-            new TextFragmentDirective(start:'linked URL', end:"-'s format"),
-            new TextFragmentDirective(start: 'attributes', end: 'attribute', prefix: 'Deprecated'),
+            new TextDirective(start:'linked URL', end:"-'s format"),
+            new TextDirective(start: 'attributes', end: 'attribute', prefix: 'Deprecated'),
             'mydirectives=bbrown',
             'mydirection=maitreGims'
         );
 
         self::assertCount(4, $fragment);
-        self::assertCount(2, $fragment->filter(fn (FragmentDirective $directive): bool =>  $directive instanceof GenericFragmentDirective));
+        self::assertCount(2, $fragment->filter(fn (FragmentDirective $directive): bool =>  $directive instanceof GenericDirective));
         self::assertInstanceOf(FragmentDirective::class, $fragment->last());
         self::assertSame('maitreGims', $fragment->last()->value());
         self::assertInstanceOf(FragmentDirective::class, $fragment->first());

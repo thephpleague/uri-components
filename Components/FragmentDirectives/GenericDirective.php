@@ -22,7 +22,7 @@ use Throwable;
 use function explode;
 use function str_replace;
 
-final class GenericFragmentDirective implements FragmentDirective
+final class GenericDirective implements FragmentDirective
 {
     /**
      * @param non-empty-string $name

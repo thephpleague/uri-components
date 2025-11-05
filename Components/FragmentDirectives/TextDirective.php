@@ -24,7 +24,7 @@ use function is_string;
 use function preg_match;
 use function str_replace;
 
-final class TextFragmentDirective implements FragmentDirective
+final class TextDirective implements FragmentDirective
 {
     private const NAME = 'text';
 

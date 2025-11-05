@@ -15,7 +15,7 @@ use DOMException;
 use GuzzleHttp\Psr7\Utils;
 use League\Uri\Components\DataPath;
 use League\Uri\Components\FragmentDirectives;
-use League\Uri\Components\FragmentDirectives\TextFragmentDirective;
+use League\Uri\Components\FragmentDirectives\TextDirective;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
@@ -1022,13 +1022,13 @@ final class ModifierTest extends TestCase
 
         yield 'add a directive instance on null fragment' => [
             'uri' => 'http://host/path',
-            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd",
         ];
 
         yield 'append a directive on existing fragment directive' => [
             'uri' => 'http://host/path#:~:unknownDirective',
-            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:unknownDirective&text=start,en'd",
         ];
     }
@@ -1055,13 +1055,13 @@ final class ModifierTest extends TestCase
 
         yield 'add a directive instance on null fragment' => [
             'uri' => 'http://host/path',
-            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd",
         ];
 
         yield 'append a directive on existing fragment directive' => [
             'uri' => 'http://host/path#:~:unknownDirective',
-            'directive' => new TextFragmentDirective(start: 'start', end: "en'd"),
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd&unknownDirective",
         ];
     }

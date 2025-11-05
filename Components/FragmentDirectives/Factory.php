@@ -30,8 +30,8 @@ final class Factory
         $directive = (string) $directive;
 
         return match (true) {
-            str_starts_with($directive, 'text=') => TextFragmentDirective::fromString($directive),
-            default => GenericFragmentDirective::fromString($directive),
+            str_starts_with($directive, 'text=') => TextDirective::fromString($directive),
+            default => GenericDirective::fromString($directive),
         };
     }
 }
