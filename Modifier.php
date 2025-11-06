@@ -46,6 +46,8 @@ use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 use ValueError;
 
+use function array_reduce;
+use function array_unshift;
 use function class_exists;
 use function filter_var;
 use function get_object_vars;
@@ -58,7 +60,9 @@ use function ltrim;
 use function rtrim;
 use function str_ends_with;
 use function str_starts_with;
+use function strpos;
 use function strtolower;
+use function substr;
 use function trim;
 
 use const FILTER_FLAG_IPV4;
@@ -294,7 +298,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         if (!$fragment instanceof FragmentInterface) {
             $fragment = str_starts_with((string) $fragment, FragmentDirectives::DELIMITER)
-                ? FragmentDirectives::new($fragment)
+                ? FragmentDirectives::fromFragment($fragment)
                 : Fragment::new($fragment);
         }
 
@@ -1150,34 +1154,63 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
     public function appendFragmentDirectives(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->append(...$directives));
+        return $this->applyFragmentChanges(FragmentDirectives::fromUri($this->unwrap())->append(...$directives));
+    }
+
+    final protected function applyFragmentChanges(FragmentDirectives $fragmentDirectives): static
+    {
+        $fValue = Fragment::fromUri($this->unwrap())->value();
+        if (null === $fValue) {
+            return $this->withFragment($fragmentDirectives);
+        }
+
+        $pos = strpos($fValue, FragmentDirectives::DELIMITER);
+        if (false === $pos) {
+            return $this->withFragment($fValue.$fragmentDirectives->value());
+        }
+
+        return $this->withFragment(substr($fValue, 0, $pos).$fragmentDirectives->value());
     }
 
     public function prependFragmentDirectives(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->prepend(...$directives));
+        return $this->applyFragmentChanges(FragmentDirectives::fromUri($this->unwrap())->prepend(...$directives));
     }
 
     public function removeFragmentDirectives(int ...$offset): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->remove(...$offset));
+        return $this->applyFragmentChanges(FragmentDirectives::fromUri($this->unwrap())->remove(...$offset));
     }
 
     public function replaceFragmentDirective(int $offset, FragmentDirective|Stringable|string $directive): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->replace($offset, $directive));
+        return $this->applyFragmentChanges(FragmentDirectives::fromUri($this->unwrap())->replace($offset, $directive));
     }
 
     public function sliceFragmentDirectives(int $offset, ?int $length): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->slice($offset, $length));
+        return $this->applyFragmentChanges(FragmentDirectives::fromUri($this->unwrap())->slice($offset, $length));
     }
 
     public function filterFragmentDirectives(callable $callback): static
     {
-        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap())->filter($callback));
+        return $this->applyFragmentChanges(FragmentDirectives::fromUri($this->unwrap())->filter($callback));
     }
 
+    public function stripFragmentDirectives(): static
+    {
+        $fragment = Fragment::fromUri($this->unwrap())->value();
+        if (null === $fragment || (false === ($pos = strpos($fragment, FragmentDirectives::DELIMITER))))  {
+            return $this;
+        }
+
+        return $this->withFragment(substr($fragment, 0, $pos));
+    }
+
+    public function retainFragmentDirectives(): static
+    {
+        return $this->withFragment(FragmentDirectives::fromUri($this->unwrap()));
+    }
 
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.

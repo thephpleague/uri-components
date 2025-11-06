@@ -15,7 +15,7 @@ namespace League\Uri\Components;
 
 use Countable;
 use IteratorAggregate;
-use League\Uri\Components\FragmentDirectives\Factory;
+use League\Uri\Components\FragmentDirectives\DirectiveString;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriComponentInterface;
@@ -38,6 +38,7 @@ use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_slice;
+use function array_values;
 use function count;
 use function explode;
 use function implode;
@@ -46,6 +47,7 @@ use function is_bool;
 use function is_string;
 use function sprintf;
 use function str_replace;
+use function strpos;
 use function substr;
 
 use const ARRAY_FILTER_USE_BOTH;
@@ -69,25 +71,42 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     }
 
     /**
-     * Create a new instance.
+     * Create a new instance from a Fragment
      *
-     * @throws SyntaxError
+     * If no delimiter is found, an empty collection is returned
      */
-    public static function new(Stringable|string|null $value): self
+    public static function fromFragment(Stringable|string|null $fragment): self
     {
-        if (null === $value) {
+        if ($fragment instanceof UriComponentInterface) {
+            $fragment = $fragment->value();
+        }
+
+        if (null === $fragment) {
             return new self();
         }
 
-        $value = (string) $value;
-        str_starts_with($value, self::DELIMITER) || throw new SyntaxError('The value "'.$value.'" is not a valid fragment directive.');
+        $fragment = (string) $fragment;
+        $pos = strpos($fragment, self::DELIMITER);
+        if (false === $pos) {
+            return new self();
+        }
 
-        return new self(...explode(self::SEPARATOR, substr($value, 3)));
+        return self::new(substr($fragment, $pos + 3));
+    }
+
+    /**
+     * Create a new instance from a string which only contains directives.
+     */
+    public static function new(Stringable|string|null $value): self
+    {
+        return null === $value
+             ? new self()
+             : new self(...explode(self::SEPARATOR, (string) $value));
     }
 
     private static function filterDirective(FragmentDirective|Stringable|string $directive): FragmentDirective
     {
-        return $directive instanceof FragmentDirective ? $directive : Factory::parse($directive);
+        return $directive instanceof FragmentDirective ? $directive : DirectiveString::resolve($directive);
     }
 
     public static function tryNew(Stringable|string|null $value): ?self
@@ -108,12 +127,12 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             $uri = $uri->unwrap();
         }
 
-        return match (true) {
-            $uri instanceof Psr7UriInterface => self::new(UriString::parse($uri)['fragment']),
-            $uri instanceof Rfc3986Uri => self::new($uri->getRawFragment()),
-            $uri instanceof UriInterface, $uri instanceof WhatWgUrl => self::new($uri->getFragment()),
-            default => self::new(Uri::new($uri)->getFragment()),
-        };
+        return self::fromFragment(match (true) {
+            $uri instanceof Psr7UriInterface => UriString::parse($uri)['fragment'],
+            $uri instanceof Rfc3986Uri => $uri->getRawFragment(),
+            $uri instanceof UriInterface, $uri instanceof WhatWgUrl => $uri->getFragment(),
+            default => Uri::new($uri)->getFragment(),
+        });
     }
 
     public function count(): int

@@ -1064,6 +1064,12 @@ final class ModifierTest extends TestCase
             'directive' => new TextDirective(start: 'start', end: "en'd"),
             'expectedFragment' => ":~:text=start,en'd&unknownDirective",
         ];
+
+        yield 'append a directive on existing generic fragment' => [
+            'uri' => 'http://host/path#section2:~:unknownDirective',
+            'directive' => new TextDirective(start: 'start', end: "en'd"),
+            'expectedFragment' => "section2:~:text=start,en'd&unknownDirective",
+        ];
     }
 
     #[DataProvider('resolveProvider')]
@@ -1212,5 +1218,31 @@ final class ModifierTest extends TestCase
         $this->expectException(DOMException::class);
 
         Modifier::wrap('https://example.com')->toHtmlAnchor(attributes: ["bébé\r\n" => 'yes']);
+    }
+
+    public function test_it_can_strip_fragment_directives_from_fragment(): void
+    {
+        $uri = 'http://example.com/foo/bar#section2:~:text=just%20the%20two%20of%20us';
+        $fragment = Modifier::wrap($uri)->stripFragmentDirectives()->unwrap()->getFragment();
+
+        self::assertSame('section2', $fragment);
+    }
+
+    public function test_it_can_retain_fragment_directives_from_fragment(): void
+    {
+        $uri = 'http://example.com/foo/bar#section2:~:text=just%20the%20two%20of%20us';
+        $fragment = Modifier::wrap($uri)->retainFragmentDirectives()->unwrap()->getFragment();
+
+        self::assertSame(':~:text=just%20the%20two%20of%20us', $fragment);
+    }
+
+    public function test_it_completely_removes_the_fragment_if_retains_found_no_directives_from_fragment(): void
+    {
+        $uri = 'http://example.com/foo/bar#section2';
+
+        self::assertSame(
+            'http://example.com/foo/bar',
+            Modifier::wrap($uri)->retainFragmentDirectives()->toString()
+        );
     }
 }

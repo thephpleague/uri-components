@@ -13,12 +13,16 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use League\Uri\Components\FragmentDirectives\DirectiveString;
 use League\Uri\Components\FragmentDirectives\GenericDirective;
 use League\Uri\Components\FragmentDirectives\TextDirective;
 use League\Uri\Contracts\FragmentDirective;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
+#[CoversClass(FragmentDirectives::class)]
+#[CoversClass(DirectiveString::class)]
 final class FragmentDirectivesTest extends TestCase
 {
     public function test_it_can_be_instantiated_with_the_constructor(): void
@@ -55,20 +59,28 @@ final class FragmentDirectivesTest extends TestCase
         self::assertFalse($removedFragment->contains($fragment->first()));
         self::assertSame($fragment->last(), $removedFragment->nth(1));
 
-        $fragmentBis = FragmentDirectives::new(":~:text=linked%20URL,%2D's%20format&text=Deprecated-,attributes,attribute&mydirectives=bbrown&mydirection=maitreGims");
+        $fragmentBis = FragmentDirectives::fromFragment(":~:text=linked%20URL,%2D's%20format&text=Deprecated-,attributes,attribute&mydirectives=bbrown&mydirection=maitreGims");
         self::assertSame($fragmentBis->value(), $fragment->value());
 
-        self::assertNull(FragmentDirectives::tryNew('foobar'));
+        self::assertNull(FragmentDirectives::tryNew('text'));
     }
 
     public function test_it_can_tell_if_its_value_are_identical(): void
     {
-        $inputText = ':~:text=linked%20URL,%2Ds%20format';
+        $inputText = 'text=linked%20URL,%2Ds%20format';
         $fragment =  FragmentDirectives::new($inputText);
 
         self::assertTrue($fragment->equals($inputText));
         self::assertFalse($fragment->equals(':~:unknownDirective'));
         self::assertFalse($fragment->equals('invalid fragment'));
         self::assertFalse($fragment->equals(new stdClass()));
+    }
+
+    public function test_it_can_resolve_the_fragment_from_uri(): void
+    {
+        $fragment1 = FragmentDirectives::fromUri('http://example.com/#:~:text=foo,bar');
+        $fragment2 = FragmentDirectives::fromUri('http://example.com/#section1:~:text=foo,bar');
+
+        self::assertTrue($fragment1->equals($fragment2));
     }
 }

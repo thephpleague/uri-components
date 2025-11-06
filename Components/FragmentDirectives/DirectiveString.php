@@ -16,7 +16,9 @@ namespace League\Uri\Components\FragmentDirectives;
 use League\Uri\Contracts\FragmentDirective;
 use Stringable;
 
-final class Factory
+use function preg_match;
+
+final class DirectiveString
 {
     /**
      * Parse a Directive string representation.
@@ -25,12 +27,12 @@ final class Factory
      * separator `=` is not present when no value
      * is attached to it
      */
-    public static function parse(Stringable|string $directive): FragmentDirective
+    public static function resolve(Stringable|string $directive): FragmentDirective
     {
         $directive = (string) $directive;
 
         return match (true) {
-            str_starts_with($directive, 'text=') => TextDirective::fromString($directive),
+            1 === preg_match('/^text(?:=|$)/i', $directive) => TextDirective::fromString($directive),
             default => GenericDirective::fromString($directive),
         };
     }
