@@ -46,8 +46,6 @@ use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 use ValueError;
 
-use function array_reduce;
-use function array_unshift;
 use function class_exists;
 use function filter_var;
 use function get_object_vars;
@@ -1200,7 +1198,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function stripFragmentDirectives(): static
     {
         $fragment = Fragment::fromUri($this->unwrap())->value();
-        if (null === $fragment || (false === ($pos = strpos($fragment, FragmentDirectives::DELIMITER))))  {
+        if (null === $fragment || (false === ($pos = strpos($fragment, FragmentDirectives::DELIMITER)))) {
             return $this;
         }
 

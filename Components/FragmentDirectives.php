@@ -22,7 +22,6 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
-use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Modifier;
 use League\Uri\Uri;
 use League\Uri\UriString;
@@ -71,7 +70,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     }
 
     /**
-     * Create a new instance from a Fragment
+     * Create a new instance from a Fragment.
      *
      * If no delimiter is found, an empty collection is returned
      */
