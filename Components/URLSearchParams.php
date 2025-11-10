@@ -174,7 +174,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * The input will be parsed from application/x-www-form-urlencoded format.
      * The leading '?' character if present is ignored.
      */
-    public static function new(Stringable|string|null $query): self
+    public static function new(Stringable|string|null $query = null): self
     {
         return new self(Query::fromFormData(self::formatQuery($query)));
     }
