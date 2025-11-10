@@ -791,4 +791,155 @@ final class QueryTest extends TestCase
 
         self::assertSame('', $query->value());
     }
+
+    #[DataProvider('provideIndexOfPairs')]
+    public function test_index_of(array $pairs, string $key, int $nth, ?int $expected): void
+    {
+        self::assertSame($expected, Query::fromPairs($pairs)->indexOf($key, $nth));
+    }
+
+    public static function provideIndexOfPairs(): array
+    {
+        return [
+            // --- Empty dataset ---
+            'empty array' => [
+                'pairs' => [],
+                'key' => 'a',
+                'nth' => 0,
+                'expected' => null,
+            ],
+
+            // --- Single occurrence ---
+            'single match' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 3]],
+                'key' => 'a',
+                'nth' => 0,
+                'expected' => 0,
+            ],
+            'single no match' => [
+                'pairs' =>[['a', 1], ['b', 2], ['c', 3]],
+                'key' =>  'x',
+                'nth' => 0,
+                'expected' => null,
+            ],
+
+            // --- Multiple matches ---
+            'first occurrence' => [
+                'pairs' =>[['a', 1], ['b', 2], ['a', 3], ['c', 4], ['a', 5]],
+                'key' => 'a',
+                'nth' => 0,
+                'expected' =>  0,
+            ],
+            'second occurrence' => [
+                'pairs' =>[['a', 1], ['b', 2], ['a', 3], ['c', 4], ['a', 5]],
+                'key' => 'a',
+                'nth' => 1,
+                'expected' => 2,
+            ],
+            'third occurrence' => [
+                'pairs' => [['a', 1], ['b', 2], ['a', 3], ['c', 4], ['a', 5]],
+                'key' => 'a',
+                'nth' => 2,
+                'expected' => 4,
+            ],
+            'out of bounds positive' => [
+                'pairs' => [['a', 1], ['a', 2]],
+                'key' => 'a',
+                'nth' => 2,
+                'expected' => null,
+            ],
+
+            // --- Negative nth (count from end) ---
+            'last occurrence (-1)' => [
+                'pairs' => [['a', 1], ['b', 2], ['a', 3], ['a', 4]],
+                'key' => 'a',
+                'nth' => -1,
+                'expected' => 3,
+            ],
+            'second-to-last (-2)' => [
+                'pairs' => [['a', 1], ['b', 2], ['a', 3], ['a', 4]],
+                'key' => 'a',
+                'nth' => -2,
+                'expected' => 2,
+            ],
+            'negative out of bounds' => [
+                'pairs' => [['a', 1], ['b', 2]],
+                'key' => 'a',
+                'nth' => -3,
+                'expected' => null,
+            ],
+            'negative no matches' => [
+                'pairs' => [['x', 1], ['y', 2]],
+                'key' => 'z',
+                'nth' => -1,
+                'expected' => null,
+            ],
+        ];
+    }
+
+    public function testReplaceExistingPair(): void
+    {
+        $query = Query::new('a=1&b=2&c=3');
+        $result = $query->replace(1, 'b', 99);
+
+        self::assertNotSame($query, $result, 'replace() should return a new instance');
+        self::assertSame('a=1&b=2&c=3', $query->toString(), 'Original instance must not be modified');
+        self::assertSame('a=1&b=99&c=3', $result->toString());
+    }
+
+    public function testReplaceWithSamePairReturnsSameInstance(): void
+    {
+        $query = Query::new('a=1&b=2');
+        $result = $query->replace(0, 'a', 1);
+
+        self::assertSame($query, $result, 'Should return the same instance when nothing changes');
+    }
+
+    public function testReplaceWithNullValue(): void
+    {
+        $query = Query::new('a=1&b=2');
+        $result = $query->replace(1, 'b', null);
+
+        self::assertSame('a=1&b', $result->toString());
+    }
+
+    public function testReplaceLastPairUsingNegativeOffset(): void
+    {
+        $query = Query::new('a=1&b=2&c=3');
+        $result = $query->replace(-1, 'c', 99);
+
+        self::assertSame('a=1&b=2&c=99', $result->toString());
+    }
+
+    public function testReplaceSecondToLastUsingNegativeOffset(): void
+    {
+        $query = Query::new('a=1&b=2&c=3');
+        $result = $query->replace(-2, 'b', 88);
+
+        self::assertSame('a=1&b=88&c=3', $result->toString());
+    }
+
+    public function testReplaceWithPositiveOutOfBoundsOffsetThrows(): void
+    {
+        $query = Query::new('a=1&b=2');
+
+        $this->expectException(\ValueError::class);
+        $query->replace(5, 'x', 10);
+    }
+
+    public function testReplaceWithNegativeOutOfBoundsOffsetThrows(): void
+    {
+        $query = Query::new('a=1&b=2');
+
+        $this->expectException(\ValueError::class);
+        $query->replace(-3, 'x', 10);
+    }
+
+    public function testReplaceDoesNotMutateOriginal(): void
+    {
+        $query = Query::new('a=1&b=2');
+        $query->replace(1, 'b', 5);
+
+        self::assertSame('a=1&b=2', $query->toString(), 'Original instance must remain unchanged');
+    }
 }

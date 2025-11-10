@@ -30,6 +30,7 @@ use Traversable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
+use ValueError;
 use function array_column;
 use function array_count_values;
 use function array_filter;
@@ -39,6 +40,7 @@ use function array_is_list;
 use function array_map;
 use function array_merge;
 use function count;
+use function dd;
 use function http_build_query;
 use function implode;
 use function is_int;
@@ -492,7 +494,7 @@ final class Query extends Component implements QueryInterface
     /**
      * Validate the given pair.
      *
-     * To be valid the pair must be the null value, a scalar or a collection of scalar and null values.
+     * To be valid, the pair must be the null value, a scalar or a collection of scalar and null values.
      */
     private function filterPair(Stringable|string|int|float|bool|null $value): ?string
     {
@@ -566,6 +568,68 @@ final class Query extends Component implements QueryInterface
             $pairs  => $this,
             default => self::fromPairs(array_filter($pairs, $this->filterEmptyValue(...)), $this->separator),
         };
+    }
+
+    public function prepend(Stringable|string|null $query): QueryInterface
+    {
+        return Query::new($query)->append($this);
+    }
+
+    /**
+     * Replace a pair based on its offset.
+     */
+    public function replace(int $offset, string $key, Stringable|string|int|float|bool|null $value): QueryInterface
+    {
+        $index = $offset < 0 ? count($this->pairs) + $offset : $offset;
+        $pair = $this->pairs[$index] ?? [];
+        [] !== $pair || throw new ValueError('The given offset "'.$offset.'" does not exist');
+
+        $newPair = [$key, $this->filterPair($value)];
+        if ($pair === $newPair) {
+            return $this;
+        }
+
+        $newPairs = $this->pairs;
+        $newPairs[$index] = $newPair;
+
+        return self::fromPairs($newPairs, $this->separator);
+    }
+
+    /**
+     * Returns the offset of the pair based on its key and its nth occurrence.
+     *
+     * negative occurrences are supported
+     */
+    public function indexOf(string $key, int $nth = 0): ?int
+    {
+        if ([] === $this->pairs) {
+            return null;
+        }
+
+        if ($nth < 0) {
+            $matchCount = 0;
+            for ($offset = count($this->pairs) - 1; $offset >= 0; --$offset) {
+                if ($this->pairs[$offset][0] === $key) {
+                    if (++$matchCount === -$nth) {
+                        return $offset;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        $matchCount = 0;
+        foreach ($this->pairs as $offset => $pair) {
+            if ($pair[0] === $key) {
+                if ($nth === $matchCount) {
+                    return $offset;
+                }
+                ++$matchCount;
+            }
+        }
+
+        return null;
     }
 
     /**
