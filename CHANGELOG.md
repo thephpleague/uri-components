@@ -25,6 +25,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Query::normalized`
 - `Query::fromPairs` and `Query::fromVariable` takes a optional `$prefix` parameter to update the query pair keys or parameter names
 - `Query::indexOf` and `Query::replace`
+- `Query::prepend`
 - `URLSearchParams::decoded` the string representation of the component decoded.
 - `Path::nornalized`
 - `Fragment::normalized`
