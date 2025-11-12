@@ -10,7 +10,9 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `FragmentDirectives` support
 - `Component::when` conditional method to ease component building logic.
 - `URLSearchParams::when` conditional method to ease component building logic.
-- `Modifier::prependQueryParameters` returns a modifier which prepends query parameters
+- `Modifier::prependQueryParameters` returns a modifier with prepended query parameters
+- `Modifier::replaceQueryParameter` returns a modifier with part of its query string replaced
+- `Modifier::replaceQueryPair` returns a modifier with part of its query string replaced
 - `Modifier::when` conditional method to ease component building logic.
 - `Modifier::normalizeIp` returns the host normalized for IPv6 and IPv4 addresses
 - `Modifier::normalizeHost` returns the host as normalized by the WHATWG algorithm
@@ -25,6 +27,9 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Query::normalized`
 - `Query::fromPairs` and `Query::fromVariable` takes a optional `$prefix` parameter to update the query pair keys or parameter names
 - `Query::indexOf` and `Query::replace`
+- `Query::mergeParameters`
+- `Query::replaceParameter`
+- `Query::replacePair`
 - `Query::prepend`
 - `URLSearchParams::decoded` the string representation of the component decoded.
 - `Path::nornalized`

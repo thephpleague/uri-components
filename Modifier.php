@@ -424,6 +424,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return $this->withQuery(Query::fromVariable($parameters, prefix: $prefix)->append(Query::fromUri($this->uri)->value())->value());
     }
 
+    public function replaceQueryParameter(string $name, mixed $value): self
+    {
+        return $this->withQuery(Query::fromUri($this->uri)->replaceParameter($name, $value)->value());
+    }
+
     /**
      * Merge a new query with the existing URI query.
      */
@@ -454,18 +459,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     public function mergeQueryParameters(object|array $parameters, string $prefix = ''): self
     {
-        $parameters = match (true) {
-            is_object($parameters) => get_object_vars($parameters),
-            default => $parameters,
-        };
-
-        $currentParameters = Query::fromUri($this->uri)->parameters();
-
-        return match (true) {
-            [] === $parameters,
-            $currentParameters === $parameters => $this,
-            default => $this->withQuery(Query::fromVariable([...$currentParameters, ...$parameters], prefix: $prefix)->value()),
-        };
+        return $this->withQuery(Query::fromUri($this->uri)->mergeParameters($parameters, prefix: $prefix)->value());
     }
 
     /**
@@ -553,6 +547,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             $query->value() => $this,
             default => $this->withQuery($newQuery),
         };
+    }
+
+    public function replaceQueryPair(int $offset, string $key, Stringable|string|int|float|bool|null $value): static
+    {
+        return $this->withQuery(Query::fromUri($this->uri)->replace($offset, $key, $value)->value());
     }
 
     /*********************************

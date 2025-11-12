@@ -41,9 +41,12 @@ use function array_map;
 use function array_merge;
 use function count;
 use function dd;
+use function get_object_vars;
 use function http_build_query;
 use function implode;
+use function in_array;
 use function is_int;
+use function is_object;
 use function is_string;
 use function preg_match;
 use function preg_quote;
@@ -304,6 +307,33 @@ final class Query extends Component implements QueryInterface
         }
 
         return [] !== $names;
+    }
+
+    public function mergeParameters(object|array $parameter, string $prefix = ''): self
+    {
+        $params = is_object($parameter) ? get_object_vars($parameter) : $parameter;
+        $data = [];
+        foreach ($params as $name => $value) {
+            $data[$prefix.$name] = $value;
+        }
+
+        return in_array($data, [$this->parameters, []], true) ? $this: new self(
+            http_build_query(data: array_merge($this->parameters, $data), arg_separator: $this->separator),
+            Converter::fromRFC1738($this->separator)
+        );
+    }
+
+    public function replaceParameter(string $name, mixed $parameter): self
+    {
+        $this->hasParameter($name) || throw new ValueError('The specified name does not exist');
+        if ($parameter === $this->parameters[$name]) {
+            return $this;
+        }
+
+        $parameters = $this->parameters;
+        $parameters[$name] = $parameter;
+
+        return new self(http_build_query(data: $parameters, arg_separator: $this->separator), Converter::fromRFC1738($this->separator));
     }
 
     public function withSeparator(string $separator): self
