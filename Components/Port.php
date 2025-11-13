@@ -20,6 +20,7 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\UriScheme;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
@@ -33,6 +34,7 @@ use const FILTER_VALIDATE_INT;
 final class Port extends Component implements PortInterface
 {
     private readonly ?int $port;
+    private ?array $cachedDefaultSchemes = null;
 
     /**
      * New instance.
@@ -133,6 +135,22 @@ final class Port extends Component implements PortInterface
     public function toInt(): ?int
     {
         return $this->port;
+    }
+
+    public function defaultScheme(): ?Scheme
+    {
+        return $this->defaultSchemes()[0] ?? null;
+    }
+
+    /**
+     * @return list<Scheme>
+     */
+    public function defaultSchemes(): array
+    {
+        return $this->cachedDefaultSchemes ??= array_map(
+            fn (UriScheme $schemePort): Scheme => Scheme::new($schemePort->value),
+            UriScheme::fromPort($this->port)
+        );
     }
 
     /**

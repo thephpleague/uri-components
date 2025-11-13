@@ -22,6 +22,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use ValueError;
 
 use function json_encode;
 
@@ -817,7 +818,7 @@ final class QueryTest extends TestCase
                 'expected' => 0,
             ],
             'single no match' => [
-                'pairs' =>[['a', 1], ['b', 2], ['c', 3]],
+                'pairs' => [['a', 1], ['b', 2], ['c', 3]],
                 'key' =>  'x',
                 'nth' => 0,
                 'expected' => null,
@@ -825,13 +826,13 @@ final class QueryTest extends TestCase
 
             // --- Multiple matches ---
             'first occurrence' => [
-                'pairs' =>[['a', 1], ['b', 2], ['a', 3], ['c', 4], ['a', 5]],
+                'pairs' => [['a', 1], ['b', 2], ['a', 3], ['c', 4], ['a', 5]],
                 'key' => 'a',
                 'nth' => 0,
                 'expected' =>  0,
             ],
             'second occurrence' => [
-                'pairs' =>[['a', 1], ['b', 2], ['a', 3], ['c', 4], ['a', 5]],
+                'pairs' => [['a', 1], ['b', 2], ['a', 3], ['c', 4], ['a', 5]],
                 'key' => 'a',
                 'nth' => 1,
                 'expected' => 2,
@@ -923,7 +924,7 @@ final class QueryTest extends TestCase
     {
         $query = Query::new('a=1&b=2');
 
-        $this->expectException(\ValueError::class);
+        $this->expectException(ValueError::class);
         $query->replace(5, 'x', 10);
     }
 
@@ -931,7 +932,7 @@ final class QueryTest extends TestCase
     {
         $query = Query::new('a=1&b=2');
 
-        $this->expectException(\ValueError::class);
+        $this->expectException(ValueError::class);
         $query->replace(-3, 'x', 10);
     }
 

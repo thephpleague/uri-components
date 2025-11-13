@@ -17,6 +17,7 @@ use Deprecated;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\UriScheme;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -32,62 +33,6 @@ use function strtolower;
 
 final class Scheme extends Component
 {
-    /**
-     * Supported schemes and corresponding default port.
-     * @see https://github.com/python-hyper/hyperlink/blob/master/src/hyperlink/_url.py for the curating list definition
-     * @see https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml
-     * @see https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
-     *
-     * @var array<string, int|null>
-     */
-    private const SCHEME_DEFAULT_PORT = [
-        'data' => null,
-        'file' => null,
-        'ftp' => 21,
-        'gopher' => 70,
-        'http' => 80,
-        'https' => 443,
-        'ws' => 80,
-        'wss' => 443,
-        'imap' => 143,
-        'ipp' => 631,
-        'ipps' => 631,
-        'irc' => 194,
-        'ircs' => 6697,
-        'ldap' => 389,
-        'ldaps' => 636,
-        'mms' => 1755,
-        'msrp' => 2855,
-        'msrps' => null,
-        'mtqp' => 1038,
-        'nfs' => 111,
-        'nntp' => 119,
-        'nntps' => 563,
-        'pop' => 110,
-        'prospero' => 1525,
-        'redis' => 6379,
-        'rsync' => 873,
-        'rtsp' => 554,
-        'rtsps' => 322,
-        'rtspu' => 5005,
-        'sftp' => 22,
-        'smb' => 445,
-        'snmp' => 161,
-        'ssh' => 22,
-        'steam' => null,
-        'svn' => 3690,
-        'telnet' => 23,
-        'tn3270' => 23,
-        'ventrilo' => 3784,
-        'vnc' => 5900,
-        'wais' => 210,
-        'xmpp' => null,
-        'acap' => 674,
-        'afp' => 548,
-        'dict' => 2628,
-        'dns' => 53,
-    ];
-
     private const REGEXP_SCHEME = ',^[a-z]([-a-z0-9+.]+)?$,i';
 
     private readonly ?string $scheme;
@@ -128,7 +73,15 @@ final class Scheme extends Component
 
     public function defaultPort(): Port
     {
-        return Port::new(self::SCHEME_DEFAULT_PORT[$this->scheme] ?? null);
+        return Port::new(UriScheme::tryFrom($this->scheme ?? '')?->port());
+    }
+
+    public function hasDefaultPort(): bool
+    {
+        static $emptyPort = null;
+        $emptyPort ??= Port::new();
+
+        return !$emptyPort->equals($this->defaultPort());
     }
 
     /**

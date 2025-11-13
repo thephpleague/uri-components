@@ -29,8 +29,8 @@ use Stringable;
 use Traversable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
-
 use ValueError;
+
 use function array_column;
 use function array_count_values;
 use function array_filter;
@@ -40,7 +40,6 @@ use function array_is_list;
 use function array_map;
 use function array_merge;
 use function count;
-use function dd;
 use function get_object_vars;
 use function http_build_query;
 use function implode;
@@ -317,7 +316,7 @@ final class Query extends Component implements QueryInterface
             $data[$prefix.$name] = $value;
         }
 
-        return in_array($data, [$this->parameters, []], true) ? $this: new self(
+        return in_array($data, [$this->parameters, []], true) ? $this : new self(
             http_build_query(data: array_merge($this->parameters, $data), arg_separator: $this->separator),
             Converter::fromRFC1738($this->separator)
         );

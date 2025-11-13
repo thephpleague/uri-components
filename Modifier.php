@@ -48,7 +48,6 @@ use ValueError;
 
 use function class_exists;
 use function filter_var;
-use function get_object_vars;
 use function implode;
 use function in_array;
 use function is_array;
