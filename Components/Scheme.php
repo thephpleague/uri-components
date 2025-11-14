@@ -58,9 +58,9 @@ final class Scheme extends Component
         return in_array($this->scheme, ['https', 'wss'], true);
     }
 
-    public function isSpecial(): bool
+    public function isWhatWgSpecial(): bool
     {
-        return UriScheme::tryFrom($this->scheme ?? '')?->isSpecial() ?? false;
+        return UriScheme::tryFrom($this->scheme ?? '')?->isWhatWgSpecial() ?? false;
     }
 
     public function defaultPort(): Port

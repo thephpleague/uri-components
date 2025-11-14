@@ -122,7 +122,7 @@ final class SchemeTest extends TestCase
         self::assertSame($isHttp, $schemeObject->isHttp());
         self::assertSame($isWebsocket, $schemeObject->isWebsocket());
         self::assertSame($isSsl, $schemeObject->isSsl());
-        self::assertSame($isSpecial, $schemeObject->isSpecial());
+        self::assertSame($isSpecial, $schemeObject->isWhatWgSpecial());
         self::assertSame($defaultPort, $schemeObject->defaultPort());
     }
 
