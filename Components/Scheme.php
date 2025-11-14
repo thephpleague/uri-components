@@ -37,10 +37,12 @@ final class Scheme extends Component
     private const REGEXP_SCHEME = ',^[a-z]([-a-z0-9+.]+)?$,i';
 
     private readonly ?string $scheme;
+    private readonly ?UriScheme $uriScheme;
 
     private function __construct(Stringable|string|null $scheme)
     {
         $this->scheme = $this->validate($scheme);
+        $this->uriScheme = UriScheme::tryFrom((string) $this->scheme);
     }
 
     public function isWebsocket(): bool
@@ -58,14 +60,19 @@ final class Scheme extends Component
         return in_array($this->scheme, ['https', 'wss'], true);
     }
 
+    public function isSpecial(): bool
+    {
+        return $this->isWhatWgSpecial() || in_array($this->scheme, ['data', 'file'], true);
+    }
+
     public function isWhatWgSpecial(): bool
     {
-        return UriScheme::tryFrom($this->scheme ?? '')?->isWhatWgSpecial() ?? false;
+        return $this->uriScheme?->isWhatWgSpecial() ?? false;
     }
 
     public function defaultPort(): Port
     {
-        return Port::new(UriScheme::tryFrom($this->scheme ?? '')?->port());
+        return Port::new($this->uriScheme?->port());
     }
 
     public function hasDefaultPort(): bool
@@ -78,7 +85,7 @@ final class Scheme extends Component
 
     public function type(): SchemeType
     {
-        return UriScheme::tryFrom($this->scheme ?? '')?->type() ?? SchemeType::Unknown;
+        return $this->uriScheme?->type() ?? SchemeType::Unknown;
     }
 
     /**

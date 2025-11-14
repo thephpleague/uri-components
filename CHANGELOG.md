@@ -38,6 +38,11 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Datapath::normalized`
 - Support for `Uri\Rfc3986\Uri`
 - Support for `Uri\WhatWg\Url`
+- `Port::defaultSchemes`
+- `Port::defaultScheme`
+- `Scheme::isWhatWgSpecial`
+- `Scheme::defaultPort`
+- `Scheme::hasDefaultPort`
 
 ### Fixed
 
