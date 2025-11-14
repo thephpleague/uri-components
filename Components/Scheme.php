@@ -17,6 +17,7 @@ use Deprecated;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\SchemeType;
 use League\Uri\UriScheme;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -59,16 +60,7 @@ final class Scheme extends Component
 
     public function isSpecial(): bool
     {
-        return in_array($this->scheme, [
-            'data',
-            'file',
-            'ftp',
-            'gopher',
-            'http',
-            'https',
-            'ws',
-            'wss',
-        ], true);
+        return UriScheme::tryFrom($this->scheme ?? '')?->isSpecial() ?? false;
     }
 
     public function defaultPort(): Port
@@ -82,6 +74,11 @@ final class Scheme extends Component
         $emptyPort ??= Port::new();
 
         return !$emptyPort->equals($this->defaultPort());
+    }
+
+    public function type(): SchemeType
+    {
+        return UriScheme::tryFrom($this->scheme ?? '')?->type() ?? SchemeType::Unknown;
     }
 
     /**
