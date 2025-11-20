@@ -1303,7 +1303,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * Remove query data according to their key name.
      */
-    #[Deprecated(message:'use League\Uri\Modifier::uri() instead', since:'league/uri-components:7.6.0')]
+    #[Deprecated(message:'use League\Uri\Modifier::unwrap() instead', since:'league/uri-components:7.6.0')]
     public function getUri(): Psr7UriInterface|UriInterface
     {
         if ($this->uri instanceof Rfc3986Uri || $this->uri instanceof WhatWgUrl) {
