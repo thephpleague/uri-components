@@ -2,6 +2,24 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+### [Next](https://github.com/thephpleague/uri-components/compare/7.6.0...master) - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- Fix deprecation message for `Modifier::uri()` method [166](https://github.com/thephpleague/uri-src/pull/166) by [meyerbaptiste](https://github.com/meyerbaptiste) 
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
 ## [7.6.0](https://github.com/thephpleague/uri-components/compare/7.5.1...7.6.0) - 2025-11-18
 
 ### Added
