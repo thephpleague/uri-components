@@ -11,6 +11,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - Fix deprecation message for `Modifier::uri()` method [166](https://github.com/thephpleague/uri-src/pull/166) by [meyerbaptiste](https://github.com/meyerbaptiste) 
+- Fix missing SensitiveParameter usage on `Modifier::withUserInfo` method
 
 ### Deprecated
 

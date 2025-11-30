@@ -41,6 +41,7 @@ use League\Uri\IPv6\Converter as IPv6Converter;
 use League\Uri\KeyValuePair\Converter as KeyValuePairConverter;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
+use SensitiveParameter;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
@@ -223,8 +224,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return new static($this->uri->withScheme(self::normalizeComponent($scheme, $this->uri)));
     }
 
-    public function withUserInfo(Stringable|string|null $username, Stringable|string|null $password): static
-    {
+    public function withUserInfo(
+        Stringable|string|null $username,
+        #[SensitiveParameter] Stringable|string|null $password
+    ): static {
         if ($this->uri instanceof Rfc3986Uri) {
             $userInfo = Encoder::encodeUser($username);
             if (null !== $password) {
