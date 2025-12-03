@@ -44,6 +44,7 @@ final class QueryTest extends TestCase
         self::assertSame('&', $query->getSeparator());
         self::assertSame(';', $newQuery->getSeparator());
         self::assertSame('foo=bar;kingkong=toto', $newQuery->value());
+        self::assertFalse($query->isEmpty());
 
         $this->expectException(SyntaxError::class);
         $newQuery->withSeparator('');
@@ -86,6 +87,8 @@ final class QueryTest extends TestCase
         self::assertSame('', Query::new()->getUriComponent());
         self::assertSame('?', Query::new('')->getUriComponent());
         self::assertSame('?foo=bar', Query::new('foo=bar')->getUriComponent());
+        self::assertTrue(Query::new()->isEmpty());
+        self::assertFalse(Query::new('')->isEmpty());
     }
 
     public function testCreateFromPairsWithIterable(): void
@@ -161,10 +164,14 @@ final class QueryTest extends TestCase
         $query = Query::new('kingkong=toto&kingkong=barbaz&&=&=b');
 
         self::assertNull($query->get('togo'));
+        self::assertNull($query->first('togo'));
+        self::assertNull($query->last('togo'));
         self::assertSame([], $query->getAll('togo'));
         self::assertSame('toto', $query->get('kingkong'));
         self::assertNull($query->get(''));
         self::assertSame(['toto', 'barbaz'], $query->getAll('kingkong'));
+        self::assertSame('toto', $query->first('kingkong'));
+        self::assertSame('barbaz', $query->last('kingkong'));
         self::assertSame([null, '', 'b'], $query->getAll(''));
     }
 

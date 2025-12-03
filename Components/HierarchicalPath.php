@@ -206,6 +206,38 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return pathinfo($basename, PATHINFO_EXTENSION);
     }
 
+    public function first(): ?string
+    {
+        return $this->get(0);
+    }
+
+    public function last(): ?string
+    {
+        return $this->get(-1);
+    }
+
+    public function indexOf(string $segment): ?int
+    {
+        return $this->keys($segment)[0] ?? null;
+    }
+
+    public function lastIndexOf(string $segment): ?int
+    {
+        $res = $this->keys($segment);
+
+        return $res[count($res) - 1] ?? null;
+    }
+
+    public function contains(string $segment): bool
+    {
+        return [] !== $this->keys($segment);
+    }
+
+    public function isEmpty(): bool
+    {
+        return '' === $this->path->value();
+    }
+
     public function get(int $offset): ?string
     {
         if ($offset < 0) {

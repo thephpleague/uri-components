@@ -75,6 +75,7 @@ final class URLSearchParamsTest extends TestCase
         self::assertTrue($params->has('id'), 'Search params object has name "id"');
         self::assertTrue($params->has('value'), 'Search params object has name "value"');
         self::assertSame('0', $params->get('id'));
+        self::assertSame('0', $params->first('id'));
         self::assertSame('%', $params->get('value'));
 
         $params = new URLSearchParams('b=%2sf%2a');
@@ -257,6 +258,10 @@ final class URLSearchParamsTest extends TestCase
         $params->append('first', 10);
         self::assertSame('1', $params->get('first'));
         self::assertSame(['1', '10', '10'], [...$params->getAll('first')]);
+        self::assertSame('1', $params->first('first'));
+        self::assertSame('10', $params->last('first'));
+        self::assertNull($params->last('fourth'));
+        self::assertNull($params->first('fourth'));
     }
 
     public function testDeleteBasics(): void

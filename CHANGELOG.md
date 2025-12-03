@@ -6,7 +6,23 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- None
+- `Domain::first` returns the first domain label
+- `Domain::last`  returns the last domain label
+- `Domain::contains` tells wether the label is present in the domain
+- `Domain::indexOf` returns the index of the first occurrence of the label or null
+- `Domain::lastIndexOf` returns the index of the last occurrence of the label or null
+- `Domain::isEmpty` tells whether the domain is empty or not (contains at least on label)
+- `HierarchicalPath::first` returns the first segment
+- `HierarchicalPath::last`  returns the last segment
+- `HierarchicalPath::contains` tells whether the segment is present in the path
+- `HierarchicalPath::indexOf` returns the index of the first occurrence of the segment or null
+- `HierarchicalPath::lastIndexOf` returns the index of the last occurrence of the segment or null
+- `HierarchicalPath::isEmpty` tells whether the path is empty or not (contains at least on segment)
+- `Query::first` returns the first value for a given query key pair
+- `Query::last` returns the last value for a given query key pair
+- `Query::isEmpty` tells whether the query is empty or not
+- `URLSearchParams::first` returns the first value for a given query key pair
+- `URLSearchParams::last` returns the last value for a given query key pair
 
 ### Fixed
 

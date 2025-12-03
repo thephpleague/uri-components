@@ -34,6 +34,15 @@ final class HierarchicalPathTest extends TestCase
     {
         $path = HierarchicalPath::new('/5.0/components/path');
 
+        self::assertTrue($path->contains('5.0'));
+        self::assertFalse($path->contains('7.0'));
+        self::assertSame(0, $path->indexOf('5.0'));
+        self::assertNull($path->indexOf('7.0'));
+        self::assertSame($path->lastIndexOf('path'), $path->indexOf('path'));
+        self::assertFalse($path->isEmpty());
+        self::assertSame('5.0', $path->first());
+        self::assertSame('path', $path->last());
+
         self::assertEquals(['5.0', 'components', 'path'], iterator_to_array($path));
     }
 

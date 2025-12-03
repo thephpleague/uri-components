@@ -173,6 +173,38 @@ final class Domain extends Component implements DomainHostInterface
         yield from $this->labels;
     }
 
+    public function first(): ?string
+    {
+        return $this->get(0);
+    }
+
+    public function last(): ?string
+    {
+        return $this->get(-1);
+    }
+
+    public function indexOf(string $label): ?int
+    {
+        return $this->keys($label)[0] ?? null;
+    }
+
+    public function lastIndexOf(string $label): ?int
+    {
+        $res = $this->keys($label);
+
+        return $res[count($res) - 1] ?? null;
+    }
+
+    public function contains(string $label): bool
+    {
+        return [] !== $this->keys($label);
+    }
+
+    public function isEmpty(): bool
+    {
+        return null === $this->host->value();
+    }
+
     public function get(int $offset): ?string
     {
         if ($offset < 0) {

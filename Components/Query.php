@@ -217,6 +217,11 @@ final class Query extends Component implements QueryInterface
         };
     }
 
+    public function isEmpty(): bool
+    {
+        return [] === $this->pairs;
+    }
+
     public function jsonSerialize(): ?string
     {
         return $this->toFormData();
@@ -264,6 +269,18 @@ final class Query extends Component implements QueryInterface
         }
 
         return null;
+    }
+
+    public function first(string $key): ?string
+    {
+        return $this->get($key);
+    }
+
+    public function last(string $key): ?string
+    {
+        $res = $this->getAll($key);
+
+        return $res[count($res) - 1] ?? null;
     }
 
     public function getAll(string $key): array

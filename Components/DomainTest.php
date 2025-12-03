@@ -33,6 +33,15 @@ final class DomainTest extends TestCase
         $host = Host::new('uri.thephpleague.com');
         $domain = Domain::new($host);
 
+        self::assertTrue($domain->contains('uri'));
+        self::assertFalse($domain->contains('period'));
+        self::assertSame(2, $domain->indexOf('uri'));
+        self::assertNull($domain->indexOf('period'));
+        self::assertSame($domain->lastIndexOf('uri'), $domain->indexOf('uri'));
+        self::assertFalse($domain->isEmpty());
+        self::assertSame('com', $domain->first());
+        self::assertSame('uri', $domain->last());
+
         self::assertSame('uri.thephpleague.com', $domain->value());
     }
 

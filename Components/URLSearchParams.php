@@ -375,6 +375,22 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         };
     }
 
+    public function first(?string $name): ?string
+    {
+        return $this->get($name);
+    }
+
+    public function last(?string $name): ?string
+    {
+        if (!$this->has($name)) {
+            return null;
+        }
+
+        $res = $this->pairs->getAll(self::uvString($name));
+
+        return $res[count($res) - 1] ?? null;
+    }
+
     /**
      * Returns all the values associated with a given search parameter as an array.
      *
