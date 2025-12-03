@@ -25,6 +25,11 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `URLSearchParams::last` returns the last value for a given query key pair
 - `URLSearchParams::hasValue` an alias of using `URLSearchParams::has` with 2 parameters
 - `URLSearchParams::deleteValue` an alias of using `URLSearchParams::delete` with 2 parameters
+- `Modifier::redactUserInfo` redacts the user info component if present
+- `Modifier::redactPathSegments` redacts specific path segments if present
+- `Modifier::redactPathNextSegments` redacts specific path next segments if present
+- `Modifier::redactPathSegmentsByOffset` redacts specific path segments by offset if present
+- `Modifier::redactQueryPairs` redacts specific query pair if present
 
 ### Fixed
 
