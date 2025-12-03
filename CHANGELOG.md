@@ -23,6 +23,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Query::isEmpty` tells whether the query is empty or not
 - `URLSearchParams::first` returns the first value for a given query key pair
 - `URLSearchParams::last` returns the last value for a given query key pair
+- `URLSearchParams::hasValue` an alias of using `URLSearchParams::has` with 2 parameters
+- `URLSearchParams::deleteValue` an alias of using `URLSearchParams::delete` with 2 parameters
 
 ### Fixed
 

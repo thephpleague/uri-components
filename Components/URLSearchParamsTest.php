@@ -318,7 +318,7 @@ final class URLSearchParamsTest extends TestCase
         $params->append('a', 'b');
         $params->append('a', 'c');
         $params->append('a', 'd');
-        $params->delete('a', 'c');
+        $params->deleteValue('a', 'c');
         self::assertSame($params->toString(), 'a=b&a=d');
         self::assertCount(2, $params);
     }
@@ -696,17 +696,17 @@ JSON;
     public function testHasMethodSupportsTwoVariables(): void
     {
         $params = new URLSearchParams('a=b&a=d&c&e&');
-        self::assertTrue($params->has('a', 'b'));
-        self::assertFalse($params->has('a', 'c'));
-        self::assertTrue($params->has('a', 'd'));
-        self::assertTrue($params->has('e', ''));
+        self::assertTrue($params->hasValue('a', 'b'));
+        self::assertFalse($params->hasValue('a', 'c'));
+        self::assertTrue($params->hasValue('a', 'd'));
+        self::assertTrue($params->hasValue('e', ''));
 
         $params->append('first', null);
-        self::assertFalse($params->has('first', ''));
-        self::assertTrue($params->has('first', 'null'));
+        self::assertFalse($params->hasValue('first', ''));
+        self::assertTrue($params->hasValue('first', 'null'));
 
-        $params->delete('a', 'b');
-        self::assertTrue($params->has('a', 'd'));
+        $params->deleteValue('a', 'b');
+        self::assertTrue($params->hasValue('a', 'd'));
     }
 
     public function testInvalidHasUsageWithoutMoreThanTwoArguments(): void

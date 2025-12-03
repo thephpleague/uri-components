@@ -365,6 +365,21 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     }
 
     /**
+     * Tells whether the specified pair is in the search parameters.
+     *
+     * The method requires at least one parameter as the pair name (string or null)
+     * and an optional second and last parameter as the pair value (Stringable|string|float|int|bool|null)
+     * <code>
+     * $params = new URLSearchParams('a=b&c);
+     * $params->has('a', 'b'); // return true
+     * </code>
+     */
+    public function hasValue(?string $name, Stringable|string|float|int|bool|null $value): bool
+    {
+        return $this->has($name, $value);
+    }
+
+    /**
      * Returns the first value associated to the given search parameter or null if none exists.
      */
     public function get(?string $name): ?string
@@ -508,8 +523,8 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Deletes specified parameters and their associated value(s) from the list of all search parameters.
      *
-     *  The method requires at least one parameter as the pair name (string or null)
-     *  and an optional second and last parameter as the pair value (Stringable|string|float|int|bool|null)
+     * The method requires at least one parameter as the pair name (string or null)
+     * and an optional second and last parameter as the pair value (Stringable|string|float|int|bool|null)
      * <code>
      * $params = new URLSearchParams('a=b&c);
      * $params->delete('c'); //delete all parameters with the key 'c'
@@ -525,6 +540,18 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             2 => $this->pairs->withoutPairByKeyValue($name, self::uvString(func_get_arg(1))), /* @phpstan-ignore-line */
             default => throw new ArgumentCountError(__METHOD__.' requires at least one argument as the pair name and a second optional argument as the pair value.'),
         });
+    }
+
+    /**
+     * Deletes all pair with the specified name and associated value from the list of all search parameters.
+     *
+     * <code>
+     * $params->deleteValue('a', 'b') //delete all pairs with the key 'a' and the value 'b'
+     * </code>
+     */
+    public function deleteValue(?string $name, Stringable|string|float|int|bool|null $value): void
+    {
+        $this->delete($name, $value);
     }
 
     /**
