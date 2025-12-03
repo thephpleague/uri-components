@@ -47,8 +47,11 @@ use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 use ValueError;
 
+use function array_keys;
 use function class_exists;
+use function count;
 use function filter_var;
+use function http_build_query;
 use function implode;
 use function in_array;
 use function is_array;
@@ -68,6 +71,8 @@ use const FILTER_VALIDATE_IP;
 
 class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 {
+    private const MASK = '*****';
+
     final public function __construct(protected readonly Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface $uri)
     {
     }
@@ -259,23 +264,28 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         ));
     }
 
-    public function withQuery(Stringable|string|null $query): static
+    /**
+     * Returns a new instance with the entire UserInfo component redacted.
+     *
+     * Examples:
+     *   http://user:pass@host → http://[REDACTED]@host
+     *   http://user@host      → http://[REDACTED]@host
+     */
+    public function redactUserInfo(): static
     {
-        $query = self::normalizeComponent($query, $this->uri);
-        $query = match (true) {
-            $this->uri instanceof Rfc3986Uri => match (true) {
-                Encoder::isQueryEncoded($query) => $query,
-                default => Encoder::encodeQueryOrFragment($query),
-            },
-            $this->uri instanceof WhatWgUrl => URLSearchParams::new($query)->value(),
-            default => $query,
-        };
+        if ($this->uri instanceof WhatWgUrl) {
+            if (null !== $this->uri->getUsername() || null !== $this->uri->getPassword()) {
+                return new static($this->uri->withUsername(self::MASK)->withPassword(null));
+            }
 
-        return match (true) {
-            $this->uri instanceof Rfc3986Uri && $query === $this->uri->getRawQuery(),
-            $query === $this->uri->getQuery() => $this,
-            default => new static($this->uri->withQuery($query)),
-        };
+            return $this;
+        }
+
+        if (null === $this->uri->getUserInfo()) {
+            return $this;
+        }
+
+        return new static($this->uri->withUserInfo(self::MASK));
     }
 
     public function withHost(Stringable|string|null $host): static
@@ -340,6 +350,25 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /*********************************
      * Query modifier methods
      *********************************/
+
+    public function withQuery(Stringable|string|null $query): static
+    {
+        $query = self::normalizeComponent($query, $this->uri);
+        $query = match (true) {
+            $this->uri instanceof Rfc3986Uri => match (true) {
+                Encoder::isQueryEncoded($query) => $query,
+                default => Encoder::encodeQueryOrFragment($query),
+            },
+            $this->uri instanceof WhatWgUrl => URLSearchParams::new($query)->value(),
+            default => $query,
+        };
+
+        return match (true) {
+            $this->uri instanceof Rfc3986Uri && $query === $this->uri->getRawQuery(),
+            $query === $this->uri->getQuery() => $this,
+            default => new static($this->uri->withQuery($query)),
+        };
+    }
 
     /**
      * Change the encoding of the query.
@@ -440,7 +469,35 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     }
 
     /**
-     * Merge query paris with the existing URI query.
+     * Returns a new instance with the specified query values redacted.
+     *
+     * Only values are redacted. Missing keys are ignored.
+     *
+     * Example: redactQueryPairs(token)
+     *   ?token=abc&mode=edit  → token=[REDACTED]&mode=edit (when 'token' is passed)
+     */
+    public function redactQueryPairs(string ...$keys): static
+    {
+        if ([] === $keys) {
+            return $this;
+        }
+
+        $hasChanged = false;
+        $pairs = [];
+        foreach (Query::fromUri($this->uri) as $pair) {
+            if (in_array($pair[0], $keys, true)) {
+                $hasChanged = true;
+                $pair[1] = self::MASK;
+            }
+
+            $pairs[] = $pair[0].'='.$pair[1];
+        }
+
+        return $hasChanged ? $this->withQuery(implode('&', $pairs)) : $this;
+    }
+
+    /**
+     * Merge query pairs with the existing URI query.
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      */
@@ -1043,6 +1100,97 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function sliceSegments(int $offset, ?int $length = null): static
     {
         return $this->withPath(HierarchicalPath::fromUri($this->uri)->slice($offset, $length));
+    }
+
+    /**
+     * Returns a new instance with specific path segments redacted by index.
+     *
+     * Indexing starts at 0 for the first segment after the leading slash.
+     * Negative indexing is supported>
+     * Out-of-range offsets are ignored.
+     *
+     * Example: redactPathSegmentsByOffset(2, -2)
+     *   /api/users/john/orders/55/details → /api/users/[REDACTED]/orders/[REDACTED]/details
+     */
+    public function redactPathSegmentsByOffset(int ...$offsets): static
+    {
+        if ([] === $offsets || [] === ($path = [...HierarchicalPath::fromUri($this->uri)])) {
+            return $this;
+        }
+
+        $nbSegments = count($path);
+        $hasChanged = false;
+        foreach ($offsets as $offset) {
+            if ($offset < - $nbSegments - 1 || $offset > $nbSegments) {
+                continue;
+            }
+
+            if (0 > $offset) {
+                $offset += $nbSegments;
+            }
+
+            if (!in_array($path[$offset] ?? null, [null, self::MASK], true)) {
+                $hasChanged = true;
+                $path[$offset] = self::MASK;
+            }
+        }
+
+        return !$hasChanged ? $this : $this->withPath(implode('/', $path));
+    }
+
+    /**
+     * Returns a new instance with all path segments matching the given names redacted.
+     *
+     * Matching is strict string comparison on raw (decoded) segments.
+     *
+     * Example: redactPathSegments('john')
+     *  /api/user/john/orders -> /api/user/[REDACTED]/orders
+     */
+    public function redactPathSegments(string ...$segments): static
+    {
+        if ([] === $segments || [] === ($path = [...HierarchicalPath::fromUri($this->uri)])) {
+            return $this;
+        }
+
+        $hasChanged = false;
+        foreach ($segments as $segment) {
+            foreach (array_keys($path, $segment, true) as $key) {
+                $hasChanged = true;
+                $path[$key] = self::MASK;
+            }
+        }
+
+        return !$hasChanged ? $this : $this->withPath(implode('/', $path));
+    }
+
+    /**
+     * Returns a new instance where, for each matched segment,
+     * the **immediately following** segment is redacted.
+     *
+     * Only the next segment is masked — not all subsequent ones.
+     * If no following segment exists, it is ignored.
+     *
+     * Example: redactPathNextSegments('john')
+     *   /api/users/john/orders/55/details → /api/users/john/[REDACTED]/55/details
+     */
+    public function redactPathNextSegments(string ...$segments): static
+    {
+        if ([] === $segments || [] === ($path = [...HierarchicalPath::fromUri($this->uri)])) {
+            return $this;
+        }
+
+        $hasChanged = false;
+        foreach ($segments as $segment) {
+            foreach (array_keys($path, $segment, true) as $key) {
+                $nextKey = $key + 1;
+                if (!in_array($path[$nextKey] ?? null, [null, self::MASK], true)) {
+                    $hasChanged = true;
+                    $path[$nextKey] = self::MASK;
+                }
+            }
+        }
+
+        return !$hasChanged ? $this : $this->withPath(implode('/', $path));
     }
 
     /**

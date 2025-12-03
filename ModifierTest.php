@@ -1245,4 +1245,105 @@ final class ModifierTest extends TestCase
             Modifier::wrap($uri)->retainFragmentDirectives()->toString()
         );
     }
+
+    /****
+     * Redact API
+     ****/
+
+    public function testRedactUserInfo(): void
+    {
+        $uri = Modifier::wrap('http://john:secret@example.com/path');
+
+        self::assertSame(
+            'http://*****@example.com/path',
+            $uri->redactUserInfo()->toString()
+        );
+    }
+
+    public function testRedactUserInfoWithOnlyUsername(): void
+    {
+        $uri = Modifier::wrap('http://john@example.com/path');
+
+        self::assertSame(
+            'http://*****@example.com/path',
+            $uri->redactUserInfo()->toString()
+        );
+    }
+
+    public function testRedactQueryPairs(): void
+    {
+        $uri = Modifier::wrap('https://example.com/page?token=abc&mode=edit&user=bob');
+
+        self::assertSame(
+            'https://example.com/page?token=*****&mode=edit&user=*****',
+            $uri->redactQueryPairs('token', 'user')->toString()
+        );
+    }
+
+    public function testRedactSegments(): void
+    {
+        $uri = Modifier::wrap('https://example.com/api/users/john/orders/55');
+
+        self::assertSame(
+            'https://example.com/api/users/*****/orders/*****',
+            $uri->redactPathSegments('john', '55')->toString()
+        );
+    }
+
+    public function testRedactNextSegment(): void
+    {
+        $uri = Modifier::wrap('https://example.com/api/users/john/orders/55/details');
+
+        self::assertSame(
+            'https://example.com/api/users/john/*****/55/details',
+            $uri->redactPathNextSegments('john')->toString()
+        );
+    }
+
+    public function testRedactNextSegmentsIgnoresMissingSegment(): void
+    {
+        $uri = Modifier::wrap('https://example.com/api/users/john');
+
+        self::assertSame(
+            'https://example.com/api/users/john',
+            $uri->redactPathNextSegments('missing')->toString()
+        );
+    }
+
+    public function testRedactSegmentsByKey(): void
+    {
+        $uri = Modifier::wrap('https://example.com/api/users/john/orders/55/details');
+
+        // segments: 0:api, 1:users, 2:john, 3:orders, 4:55, 5:details
+        $redacted = $uri->redactPathSegmentsByOffset(2, 4);
+
+        self::assertSame(
+            'https://example.com/api/users/*****/orders/*****/details',
+            $redacted->toString()
+        );
+    }
+
+    public function testRedactionProducesNewInstance(): void
+    {
+        $uri = Modifier::wrap('https://example.com/user/john');
+
+        self::assertNotSame(
+            $uri->toString(),
+            $uri->redactPathSegments('john')->toString()
+        );
+    }
+
+    public function testMultipleRedactionsCanBeChained(): void
+    {
+        $uri = Modifier::wrap('http://bob:pass@example.com/api/user/john?token=123');
+
+        self::assertSame(
+            'http://*****@example.com/api/user/*****?token=*****',
+            $uri
+                ->redactUserInfo()
+                ->redactPathSegments('john')
+                ->redactQueryPairs('token')
+                ->toString()
+        );
+    }
 }
