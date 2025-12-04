@@ -211,7 +211,7 @@ final class Host extends Component implements IpHostInterface
 
     public function isDomain(): bool
     {
-        return $this->host->isDomainName();
+        return $this->host->isDomainType();
     }
 
     public function isIp(): bool
