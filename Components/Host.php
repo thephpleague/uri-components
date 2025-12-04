@@ -19,9 +19,10 @@ use League\Uri\Contracts\IpHostInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
-use League\Uri\Exceptions\ConversionFailed;
 use League\Uri\Exceptions\MissingFeature;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\HostRecord;
+use League\Uri\HostType;
 use League\Uri\Idna\Converter as IdnConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
 use League\Uri\IPv4Normalizer;
@@ -33,10 +34,7 @@ use Uri\WhatWg\Url as WhatWgUrl;
 
 use function explode;
 use function filter_var;
-use function in_array;
-use function inet_pton;
 use function is_string;
-use function preg_match;
 use function preg_replace_callback;
 use function rawurldecode;
 use function rawurlencode;
@@ -46,220 +44,18 @@ use function strtolower;
 use function strtoupper;
 use function substr;
 
-use const FILTER_FLAG_IPV4;
 use const FILTER_FLAG_IPV6;
 use const FILTER_VALIDATE_IP;
 
 final class Host extends Component implements IpHostInterface
 {
-    protected const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
+    private readonly ?string $value;
+    private readonly HostRecord $host;
 
-    /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * invalid characters in host regular expression
-     */
-    private const REGEXP_INVALID_HOST_CHARS = '/
-        [:\/?#\[\]@ ]  # gen-delims characters as well as the space character
-    /ix';
-
-    /**
-     * General registered name regular expression.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     * @see https://regex101.com/r/fptU8V/1
-     */
-    private const REGEXP_REGISTERED_NAME = '/
-    (?(DEFINE)
-        (?<unreserved>[a-z0-9_~\-])   # . is missing as it is used to separate labels
-        (?<sub_delims>[!$&\'()*+,;=])
-        (?<encoded>%[A-F0-9]{2})
-        (?<reg_name>(?:(?&unreserved)|(?&sub_delims)|(?&encoded))*)
-    )
-        ^(?:(?&reg_name)\.)*(?&reg_name)\.?$
-    /ix';
-
-    /**
-     * Domain name regular expression.
-     *
-     * Everything but the domain name length is validated
-     *
-     * @see https://tools.ietf.org/html/rfc1034#section-3.5
-     * @see https://tools.ietf.org/html/rfc1123#section-2.1
-     * @see https://regex101.com/r/71j6rt/1
-     */
-    private const REGEXP_DOMAIN_NAME = '/
-    (?(DEFINE)
-        (?<let_dig> [a-z0-9])                         # alpha digit
-        (?<let_dig_hyp> [a-z0-9-])                    # alpha digit and hyphen
-        (?<ldh_str> (?&let_dig_hyp){0,61}(?&let_dig)) # domain label end
-        (?<label> (?&let_dig)((?&ldh_str))?)          # domain label
-        (?<domain> (?&label)(\.(?&label)){0,126}\.?)  # domain name
-    )
-        ^(?&domain)$
-    /ix';
-
-    /**
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2.2
-     *
-     * IPvFuture regular expression
-     */
-    private const REGEXP_IP_FUTURE = '/^
-        v(?<version>[A-F0-9]+)\.
-        (?:
-            (?<unreserved>[a-z0-9_~\-\.])|
-            (?<sub_delims>[!$&\'()*+,;=:])  # also include the : character
-        )+
-    $/ix';
-    private const REGEXP_GEN_DELIMS = '/[:\/?#\[\]@]/';
-    private const ADDRESS_BLOCK = "\xfe\x80";
-
-    private readonly ?string $host;
-    private readonly bool $isDomain;
-    private readonly ?string $ipVersion;
-    private readonly bool $hasZoneIdentifier;
-
-    private function __construct(Stringable|int|string|null $host)
+    private function __construct(Stringable|string|null $host)
     {
-        [
-            'host' => $this->host,
-            'is_domain' => $this->isDomain,
-            'ip_version' => $this->ipVersion,
-            'has_zone_identifier' => $this->hasZoneIdentifier,
-        ] = $this->parse($host);
-    }
-
-    /**
-     * @throws ConversionFailed if the submitted IDN host cannot be converted to a valid ascii form
-     *
-     * @return array{host:string|null, is_domain:bool, ip_version:string|null, has_zone_identifier:bool}
-     */
-    private function parse(Stringable|int|string|null $host): array
-    {
-        $host = self::filterComponent($host);
-
-        if (null === $host) {
-            return [
-                'host' => null,
-                'is_domain' => true,
-                'ip_version' => null,
-                'has_zone_identifier' => false,
-            ];
-        }
-
-        if ('' === $host) {
-            return [
-                'host' => '',
-                'is_domain' => false,
-                'ip_version' => null,
-                'has_zone_identifier' => false,
-            ];
-        }
-
-        static $inMemoryCache = [];
-        if (isset($inMemoryCache[$host])) {
-            return $inMemoryCache[$host];
-        }
-
-        if (100 < count($inMemoryCache)) {
-            unset($inMemoryCache[array_key_first($inMemoryCache)]);
-        }
-
-        if (false !== filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return $inMemoryCache[$host] = [
-                'host' => $host,
-                'is_domain' => false,
-                'ip_version' => '4',
-                'has_zone_identifier' => false,
-            ];
-        }
-
-        if ('[' === $host[0] && str_ends_with($host, ']')) {
-            $ip_host = substr($host, 1, -1);
-            if ($this->isValidIpv6Hostname($ip_host)) {
-                return $inMemoryCache[$host] = [
-                    'host' => $host,
-                    'is_domain' => false,
-                    'ip_version' => '6',
-                    'has_zone_identifier' => str_contains($ip_host, '%'),
-                ];
-            }
-
-            if (1 === preg_match(self::REGEXP_IP_FUTURE, $ip_host, $matches) && !in_array($matches['version'], ['4', '6'], true)) {
-                return $inMemoryCache[$host] = [
-                    'host' => $host,
-                    'is_domain' => false,
-                    'ip_version' => $matches['version'],
-                    'has_zone_identifier' => false,
-                ];
-            }
-
-            throw new SyntaxError(sprintf('`%s` is an invalid IP literal format.', $host));
-        }
-
-        $domainName = rawurldecode($host);
-        $isAscii = false;
-        if (1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $domainName)) {
-            $domainName = strtolower($domainName);
-            $isAscii = true;
-        }
-
-        if (1 === preg_match(self::REGEXP_REGISTERED_NAME, $domainName)) {
-            return $inMemoryCache[$domainName] = [
-                'host' => $domainName,
-                'is_domain' => $this->isValidDomain($domainName),
-                'ip_version' => null,
-                'has_zone_identifier' => false,
-            ];
-        }
-
-        if ($isAscii || 1 === preg_match(self::REGEXP_INVALID_HOST_CHARS, $domainName)) {
-            throw new SyntaxError(sprintf('`%s` is an invalid domain name : the host contains invalid characters.', $host));
-        }
-
-        $host = IdnConverter::toAsciiOrFail($domainName);
-
-        return $inMemoryCache[$host] = [
-            'host' => $host,
-            'is_domain' => $this->isValidDomain($host),
-            'ip_version' => null,
-            'has_zone_identifier' => false,
-        ];
-    }
-
-    /**
-     * Tells whether the registered name is a valid domain name according to RFC1123.
-     *
-     * @see http://man7.org/linux/man-pages/man7/hostname.7.html
-     * @see https://tools.ietf.org/html/rfc1123#section-2.1
-     */
-    private function isValidDomain(string $hostname): bool
-    {
-        $domainMaxLength = str_ends_with($hostname, '.') ? 254 : 253;
-
-        return !isset($hostname[$domainMaxLength])
-            && 1 === preg_match(self::REGEXP_DOMAIN_NAME, $hostname);
-    }
-
-    /**
-     * Validates an Ipv6 as Host.
-     *
-     * @see http://tools.ietf.org/html/rfc6874#section-2
-     * @see http://tools.ietf.org/html/rfc6874#section-4
-     */
-    private function isValidIpv6Hostname(string $host): bool
-    {
-        [$ipv6, $scope] = explode('%', $host, 2) + [1 => null];
-        if (null === $scope) {
-            return (bool) filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
-        }
-
-        $scope = rawurldecode('%'.$scope);
-
-        return 1 !== preg_match(self::REGEXP_NON_ASCII_PATTERN, $scope)
-            && 1 !== preg_match(self::REGEXP_GEN_DELIMS, $scope)
-            && false !== filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
-            && str_starts_with((string)inet_pton((string)$ipv6), self::ADDRESS_BLOCK);
+        $this->host = HostRecord::from($host);
+        $this->value = $this->host->toAscii();
     }
 
     public static function new(Stringable|string|null $value = null): self
@@ -338,7 +134,7 @@ final class Host extends Component implements IpHostInterface
 
     public function value(): ?string
     {
-        return $this->host;
+        return $this->value;
     }
 
     public function equals(mixed $value): bool
@@ -364,43 +160,39 @@ final class Host extends Component implements IpHostInterface
 
     public function toUnicode(): ?string
     {
-        return match (true) {
-            null !== $this->ipVersion,
-            null === $this->host => $this->host,
-            default => IdnConverter::toUnicode($this->host)->domain(),
-        };
+        return $this->host->toUnicode();
     }
 
     public function encoded(): ?string
     {
-        return match (true) {
-            null !== $this->ipVersion,
-            null === $this->host => $this->host,
-            default => (string) preg_replace_callback(
-                '/%[0-9A-F]{2}/i',
-                fn (array $matches) => strtoupper($matches[0]),
-                strtolower(rawurlencode(IdnConverter::toUnicode($this->host)->domain()))
-            ),
-        };
+        if (null === $this->value || '' === $this->value || HostType::RegisteredName !== $this->host->type) {
+            return $this->value;
+        }
+
+        return (string) preg_replace_callback(
+            '/%[0-9A-F]{2}/i',
+            fn (array $matches): string => strtoupper($matches[0]),
+            strtolower(rawurlencode(IdnConverter::toUnicode($this->value)->domain()))
+        );
     }
 
     public function getIpVersion(): ?string
     {
-        return $this->ipVersion;
+        return $this->host->ipVersion();
     }
 
     public function getIp(): ?string
     {
-        if (null === $this->ipVersion) {
+        if (HostType::RegisteredName === $this->host->type) {
             return null;
         }
 
-        if ('4' === $this->ipVersion) {
-            return $this->host;
+        if (HostType::Ipv4 === $this->host->type) {
+            return $this->value;
         }
 
-        $ip = substr((string) $this->host, 1, -1);
-        if ('6' !== $this->ipVersion) {
+        $ip = substr((string) $this->value, 1, -1);
+        if (HostType::Ipv6 !== $this->host->type) {
             return substr($ip, (int) strpos($ip, '.') + 1);
         }
 
@@ -419,41 +211,41 @@ final class Host extends Component implements IpHostInterface
 
     public function isDomain(): bool
     {
-        return $this->isDomain;
+        return $this->host->isDomainName();
     }
 
     public function isIp(): bool
     {
-        return null !== $this->ipVersion;
+        return HostType::RegisteredName !== $this->host->type;
     }
 
     public function isIpv4(): bool
     {
-        return '4' === $this->ipVersion;
+        return HostType::Ipv4 === $this->host->type;
     }
 
     public function isIpv6(): bool
     {
-        return '6' === $this->ipVersion;
+        return HostType::Ipv6 === $this->host->type;
     }
 
     public function isIpFuture(): bool
     {
-        return !in_array($this->ipVersion, [null, '4', '6'], true);
+        return HostType::IpvFuture === $this->host->type;
     }
 
     public function hasZoneIdentifier(): bool
     {
-        return $this->hasZoneIdentifier;
+        return $this->host->hasZoneIdentifier();
     }
 
     public function withoutZoneIdentifier(): IpHostInterface
     {
-        if (!$this->hasZoneIdentifier) {
+        if (!$this->host->hasZoneIdentifier()) {
             return $this;
         }
 
-        [$ipv6] = explode('%', substr((string) $this->host, 1, -1));
+        [$ipv6] = explode('%', substr((string) $this->value, 1, -1));
 
         return self::fromIp($ipv6);
     }

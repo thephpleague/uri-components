@@ -24,6 +24,8 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 
+use function str_repeat;
+
 #[CoversClass(Domain::class)]
 #[Group('host')]
 final class DomainTest extends TestCase
@@ -470,5 +472,12 @@ final class DomainTest extends TestCase
         $this->expectException(OffsetOutOfBounds::class);
 
         Domain::new('ulb.ac.be')->slice(5);
+    }
+
+    public function testCreateFromComponentsThrowsException7(): void
+    {
+        self::expectException(SyntaxError::class);
+
+        Domain::new(str_repeat('A', 255));
     }
 }

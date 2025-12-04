@@ -51,7 +51,6 @@ use function array_keys;
 use function class_exists;
 use function count;
 use function filter_var;
-use function http_build_query;
 use function implode;
 use function in_array;
 use function is_array;
