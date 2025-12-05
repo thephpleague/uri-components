@@ -39,7 +39,6 @@ use function preg_replace_callback;
 use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
-use function strpos;
 use function strtolower;
 use function strtoupper;
 use function substr;
@@ -183,30 +182,12 @@ final class Host extends Component implements IpHostInterface
 
     public function getIp(): ?string
     {
-        if (HostType::RegisteredName === $this->host->type) {
-            return null;
-        }
-
-        if (HostType::Ipv4 === $this->host->type) {
-            return $this->value;
-        }
-
-        $ip = substr((string) $this->value, 1, -1);
-        if (HostType::Ipv6 !== $this->host->type) {
-            return substr($ip, (int) strpos($ip, '.') + 1);
-        }
-
-        $pos = strpos($ip, '%');
-        if (false === $pos) {
-            return $ip;
-        }
-
-        return substr($ip, 0, $pos).'%'.rawurldecode(substr($ip, $pos + 3));
+        return $this->host->ipValue();
     }
 
     public function isRegisteredName(): bool
     {
-        return !$this->isIp();
+        return HostType::RegisteredName === $this->host->type;
     }
 
     public function isDomain(): bool
