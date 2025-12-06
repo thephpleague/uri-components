@@ -30,13 +30,13 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::redactPathNextSegments` redacts specific path next segments if present
 - `Modifier::redactPathSegmentsByOffset` redacts specific path segments by offset if present
 - `Modifier::redactQueryPairs` redacts specific query pair if present
-- `Modifier::withPath` improve handling of path leading slash presence
 
 ### Fixed
 
 - Fix deprecation message for `Modifier::uri()` method [166](https://github.com/thephpleague/uri-src/pull/166) by [meyerbaptiste](https://github.com/meyerbaptiste) 
 - Fix missing SensitiveParameter usage on `Modifier::withUserInfo` method
 - Fix Host resolution using the new `HostRecord` class
+- Fix `Modifier::withPath` improve handling of path leading slash presence
 
 ### Deprecated
 
