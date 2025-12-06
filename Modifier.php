@@ -1200,29 +1200,17 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      */
     final protected static function normalizePath(WhatWgUrl|Rfc3986Uri|Psr7UriInterface|UriInterface $uri, PathInterface $path): WhatWgUrl|Rfc3986Uri|Psr7UriInterface|UriInterface
     {
+        if (!$uri instanceof Psr7UriInterface) {
+            return $uri->withPath($path->toString());
+        }
+
         $pathString = $path->toString();
         if ('' === $pathString) {
             return $uri->withPath($pathString);
         }
 
-        $authority = match (true) {
-            $uri instanceof Rfc3986Uri => UriString::buildAuthority([
-                'host' => $uri->getHost(),
-                'port' => $uri->getPort(),
-                'user' => $uri->getUsername(),
-                'pass' => $uri->getPassword(),
-            ]),
-            $uri instanceof WhatWgUrl => UriString::buildAuthority([
-                'host' => $uri->getAsciiHost(),
-                'port' => $uri->getPort(),
-                'user' => $uri->getUsername(),
-                'pass' => $uri->getPassword(),
-            ]),
-            $uri instanceof Psr7UriInterface => '' === $uri->getAuthority() ? null : $uri->getAuthority(),
-            default => $uri->getAuthority(),
-        };
-
-        if (null !== $authority) {
+        $authority = $uri->getAuthority();
+        if ('' !== $authority) {
             return $uri->withPath(str_starts_with($pathString, '/') ? $pathString : '/'.$pathString);
         }
 
@@ -1231,13 +1219,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             return $uri->withPath('/.'.$pathString);
         }
 
-        $scheme = $uri->getScheme();
-        if ($uri instanceof Psr7UriInterface && '' === $scheme) {
-            $scheme = null;
-        }
-
         $colonPos = strpos($pathString, ':');
-        if (false !== $colonPos && null === $scheme) {
+        if (false !== $colonPos && '' === $uri->getScheme()) {
             // In the absence of a scheme and of an authority,
             // the first path segment cannot contain a colon (":") character.'
             $slashPos = strpos($pathString, '/');
