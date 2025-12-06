@@ -411,11 +411,19 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     }
 
     /**
-     * Add the new query data to the existing URI query.
+     * Append the new query data to the existing URI query.
      */
     public function appendQuery(Stringable|string|null $query): static
     {
         return $this->withQuery(Query::fromUri($this->uri)->append($query)->value());
+    }
+
+    /**
+     * Prepend the new query data to the existing URI query.
+     */
+    public function prependQuery(Stringable|string|null $query): static
+    {
+        return $this->withQuery(Query::fromUri($this->uri)->prepend($query)->value());
     }
 
     /**
