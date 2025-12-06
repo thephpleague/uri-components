@@ -1201,6 +1201,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     final protected static function normalizePath(WhatWgUrl|Rfc3986Uri|Psr7UriInterface|UriInterface $uri, PathInterface $path): WhatWgUrl|Rfc3986Uri|Psr7UriInterface|UriInterface
     {
         $pathString = $path->toString();
+        if ('' === $pathString) {
+            return $uri->withPath($pathString);
+        }
+
         $authority = match (true) {
             $uri instanceof Rfc3986Uri => UriString::buildAuthority([
                 'host' => $uri->getHost(),
@@ -1214,16 +1218,35 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
                 'user' => $uri->getUsername(),
                 'pass' => $uri->getPassword(),
             ]),
+            $uri instanceof Psr7UriInterface => '' === $uri->getAuthority() ? null : $uri->getAuthority(),
             default => $uri->getAuthority(),
         };
 
-        return match (true) {
-            '' === $pathString,
-            '/' === $pathString[0],
-            null === $authority,
-            '' === $authority => $uri->withPath($pathString),
-            default => $uri->withPath('/'.$pathString),
-        };
+        if (null !== $authority) {
+            return $uri->withPath(str_starts_with($pathString, '/') ? $pathString : '/'.$pathString);
+        }
+
+        // If there is no authority, the path cannot start with `//`
+        if (str_starts_with($pathString, '//')) {
+            return $uri->withPath('/.'.$pathString);
+        }
+
+        $scheme = $uri->getScheme();
+        if ($uri instanceof Psr7UriInterface && '' === $scheme) {
+            $scheme = null;
+        }
+
+        $colonPos = strpos($pathString, ':');
+        if (false !== $colonPos && null === $scheme) {
+            // In the absence of a scheme and of an authority,
+            // the first path segment cannot contain a colon (":") character.'
+            $slashPos = strpos($pathString, '/');
+            (false !== $slashPos && $colonPos > $slashPos) || throw new SyntaxError(
+                'In absence of the scheme and authority components, the first path segment cannot contain a colon (":") character.'
+            );
+        }
+
+        return $uri->withPath($pathString);
     }
 
     /**

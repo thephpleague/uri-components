@@ -30,6 +30,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Modifier::redactPathNextSegments` redacts specific path next segments if present
 - `Modifier::redactPathSegmentsByOffset` redacts specific path segments by offset if present
 - `Modifier::redactQueryPairs` redacts specific query pair if present
+- `Modifier::withPath` improve handling of path leading slash presence
 
 ### Fixed
 
