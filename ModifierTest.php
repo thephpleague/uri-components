@@ -571,13 +571,13 @@ final class ModifierTest extends TestCase
         );
     }
 
-    #[DataProvider('appendSegmentProvider')]
+    #[DataProvider('appendPathProvider')]
     public function testAppendProcess(string $segment, string $append): void
     {
-        self::assertSame($append, $this->modifier->appendSegment($segment)->unwrap()->getPath());
+        self::assertSame($append, $this->modifier->appendPath($segment)->unwrap()->getPath());
     }
 
-    public static function appendSegmentProvider(): array
+    public static function appendPathProvider(): array
     {
         return [
             ['toto', '/path/to/the/sky.php/toto'],
@@ -585,13 +585,13 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    #[DataProvider('validAppendSegmentProvider')]
+    #[DataProvider('validAppendPathProvider')]
     public function testAppendProcessWithRelativePath(string $uri, string $segment, string $expected): void
     {
-        self::assertSame($expected, Modifier::wrap($uri)->appendSegment($segment)->toString());
+        self::assertSame($expected, Modifier::wrap($uri)->appendPath($segment)->toString());
     }
 
-    public static function validAppendSegmentProvider(): array
+    public static function validAppendPathProvider(): array
     {
         return [
             'uri with trailing slash' => [
@@ -656,14 +656,14 @@ final class ModifierTest extends TestCase
         ];
     }
 
-    #[DataProvider('prependSegmentProvider')]
-    public function testPrependProcess(string $uri, string $segment, string $expectedPath): void
+    #[DataProvider('prependPathProvider')]
+    public function testPrependPathProcess(string $uri, string $segment, string $expectedPath): void
     {
         $uri = Uri::new($uri);
-        self::assertSame($expectedPath, Modifier::wrap($uri)->prependSegment($segment)->unwrap()->getPath());
+        self::assertSame($expectedPath, Modifier::wrap($uri)->prependPath($segment)->unwrap()->getPath());
     }
 
-    public static function prependSegmentProvider(): array
+    public static function prependPathProvider(): array
     {
         return [
             [

@@ -31,6 +31,7 @@ use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\PathInterface;
+use League\Uri\Contracts\SegmentedPathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\MissingFeature;
@@ -968,11 +969,39 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     }
 
     /**
-     * Append a new segment or a new path to the URI path.
+     * Append a new path or add a path to the URI path.
      */
-    public function appendSegment(Stringable|string $segment): static
+    public function appendPath(Stringable|string $path): static
     {
-        return $this->withPath(HierarchicalPath::fromUri($this->uri)->append($segment));
+        return $this->withPath(HierarchicalPath::fromUri($this->uri)->append($path));
+    }
+
+    /**
+     * Prepend a path or add a new path to the URI path.
+     */
+    public function prependPath(Stringable|string $path): static
+    {
+        return $this->withPath(HierarchicalPath::fromUri($this->uri)->prepend($path));
+    }
+
+    /**
+     * Append a list of segments or a new path to the URI path.
+     *
+     * @param iterable<Stringable|string> $segments
+     */
+    public function appendSegments(iterable $segments): static
+    {
+        return $this->withPath(HierarchicalPath::fromUri($this->uri)->appendSegments($segments));
+    }
+
+    /**
+     * Prepend a list of segments or a new path to the URI path.
+     *
+     * @param iterable<Stringable|string> $segments
+     */
+    public function prependSegments(iterable $segments): static
+    {
+        return $this->withPath(HierarchicalPath::fromUri($this->uri)->prependSegments($segments));
     }
 
     /**
@@ -989,14 +1018,6 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function dataPathToBinary(): static
     {
         return $this->withPath(DataPath::fromUri($this->uri)->toBinary()->toString());
-    }
-
-    /**
-     * Prepend a new segment or a new path to the URI path.
-     */
-    public function prependSegment(Stringable|string $segment): static
-    {
-        return$this->withPath(HierarchicalPath::fromUri($this->uri)->prepend($segment));
     }
 
     /**
@@ -1370,6 +1391,32 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function retainFragmentDirectives(): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->unwrap()));
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.7.0
+     * @codeCoverageIgnore
+     * @see Modifier::appendPath
+     */
+    #[Deprecated(message:'use League\Uri\Modifier::appendPath() instead', since:'league/uri-components:7.7.0')]
+    public function appendSegment(Stringable|string $segment): static
+    {
+        return $this->appendPath($segment);
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.7.0
+     * @codeCoverageIgnore
+     * @see Modifier::prependPath
+     */
+    #[Deprecated(message:'use League\Uri\Modifier::prependPath() instead', since:'league/uri-components:7.7.0')]
+    public function prependSegment(Stringable|string $segment): static
+    {
+        return $this->prependPath($segment);
     }
 
     /**
