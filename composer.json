@@ -37,11 +37,11 @@
         "ext-fileinfo": "to create Data URI from file contennts",
         "ext-gmp": "to improve IPV4 host parsing",
         "ext-intl": "to handle IDN host with the best performance",
-        "jeremykendall/php-domain-parser": "to resolve Public Suffix and Top Level Domain",
+        "jeremykendall/php-domain-parser": "to be used after getting the host (getHost()) to further parse it and to resolve Public Suffix and Top Level Domain",
         "league/uri-polyfill" : "Needed to backport the PHP URI extension for older versions of PHP",
         "php-64bit": "to improve IPV4 host parsing",
         "symfony/polyfill-intl-idn": "to handle IDN host via the Symfony polyfill if ext-intl is not present",
-        "rowbot/url": "to handle WHATWG URL",
+        "rowbot/url": "to get an alternative way of handling URLs compliant with WHATWG URL Living Standard",
         "bakame/aide-uri": "A polyfill for PHP8.1 until PHP8.4 to add support to PHP Native URI parser"
     },
     "autoload": {
