@@ -31,7 +31,6 @@ use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\PathInterface;
-use League\Uri\Contracts\SegmentedPathInterface;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\MissingFeature;

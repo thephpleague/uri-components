@@ -27,12 +27,11 @@ use Stringable;
 use TypeError;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
-
 use ValueError;
+
 use function array_count_values;
 use function array_filter;
 use function array_keys;
-use function array_map;
 use function array_pop;
 use function array_unshift;
 use function count;
@@ -324,7 +323,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * @param iterable<Stringable|string> $segments
      *
-     * @return SegmentedPathInterface
      */
     public function appendSegments(iterable $segments): SegmentedPathInterface
     {
@@ -351,7 +349,6 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * @param iterable<Stringable|string> $segments
      *
-     * @return SegmentedPathInterface
      */
     public function prependSegments(iterable $segments): SegmentedPathInterface
     {
