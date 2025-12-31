@@ -6,11 +6,17 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
-- None
+- `Query::hasList`
+- `Query::getList`
+- `Query::withList`
+- `Query::appendList`
+- `Query::withoutList`
+- `Query::withoutLists`
+- `Query::onlyLists`
 
 ### Fixed
 
-- None
+- `Query` related parameters method can opt to switch to different query string representations using the new `$queryBuildigMode` parameter.
 
 ### Deprecated
 

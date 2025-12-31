@@ -15,6 +15,7 @@ use ArrayIterator;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
+use League\Uri\QueryBuildingMode;
 use League\Uri\Uri;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -200,8 +201,8 @@ final class QueryTest extends TestCase
         $query = Query::new('foo[]=bar&foo[]=baz');
 
         self::assertCount(1, $query->parameters());
-        self::assertSame(['bar', 'baz'], $query->parameter('foo'));
-        self::assertNull($query->parameter('foo[]'));
+        self::assertSame(['bar', 'baz'], $query->getList('foo'));
+        self::assertSame([], $query->getList('foo[]'));
     }
 
     #[DataProvider('withoutKeyPairProvider')]
@@ -350,7 +351,13 @@ final class QueryTest extends TestCase
     #[DataProvider('withoutParamProvider')]
     public function testwithoutParam(array $origin, array $without, string $expected): void
     {
-        self::assertSame($expected, Query::fromVariable($origin)->withoutParameters(...$without)->toString());
+        self::assertSame(
+            $expected,
+            Query::fromVariable($origin)
+                ->withoutList(...$without)
+                ->withoutPairByKey(...$without)
+                ->toString()
+        );
     }
 
     public static function withoutParamProvider(): array
@@ -412,11 +419,11 @@ final class QueryTest extends TestCase
         $query = Query::fromVariable($data);
         self::assertSame('foo%5B0%5D=bar&foo%5B1%5D=baz', $query->value());
 
-        self::assertTrue($query->hasParameter('foo'));
-        self::assertFalse($query->hasParameter('bar'));
-        self::assertFalse($query->hasParameter('foo', 'bar'));
+        self::assertTrue($query->hasList('foo'));
+        self::assertFalse($query->hasList('bar'));
+        self::assertFalse($query->hasList('foo', 'bar'));
 
-        $newQuery = $query->withoutParameters('foo[0]');
+        $newQuery = $query->withoutPairByKey('foo[0]');
 
         self::assertSame('foo%5B1%5D=baz', $newQuery->value());
         self::assertSame(['foo' => [1 => 'baz']], $newQuery->parameters());
@@ -426,7 +433,7 @@ final class QueryTest extends TestCase
     {
         $query = Query::new('foo&bar=baz');
 
-        self::assertSame($query, $query->withoutParameters());
+        self::assertSame($query, $query->withoutPairByKey());
     }
 
     public function testCreateFromParamsWithTraversable(): void
@@ -885,6 +892,91 @@ final class QueryTest extends TestCase
         ];
     }
 
+    #[DataProvider('provideIndexOfValues')]
+    public function test_index_of_value(array $pairs, ?string $value, int $nth, ?int $expected): void
+    {
+        self::assertSame($expected, Query::fromPairs($pairs)->indexOfValue($value, $nth));
+    }
+
+    public static function provideIndexOfValues(): array
+    {
+        return [
+            // --- Empty dataset ---
+            'empty array' => [
+                'pairs' => [],
+                'value' => '1',
+                'nth' => 0,
+                'expected' => null,
+            ],
+
+            // --- Single occurrence ---
+            'single match' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 3]],
+                'value' => '1',
+                'nth' => 0,
+                'expected' => 0,
+            ],
+            'single no match' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 3]],
+                'value' => '42',
+                'nth' => 0,
+                'expected' => null,
+            ],
+
+            // --- Multiple matches ---
+            'first occurrence' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 1], ['d', 3], ['e', 1]],
+                'value' => '1',
+                'nth' => 0,
+                'expected' => 0,
+            ],
+            'second occurrence' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 1], ['d', 3], ['e', 1]],
+                'value' => '1',
+                'nth' => 1,
+                'expected' => 2,
+            ],
+            'third occurrence' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 1], ['d', 3], ['e', 1]],
+                'value' => '1',
+                'nth' => 2,
+                'expected' => 4,
+            ],
+            'out of bounds positive' => [
+                'pairs' => [['a', 1], ['b', 1]],
+                'value' => '1',
+                'nth' => 2,
+                'expected' => null,
+            ],
+
+            // --- Negative nth (count from end) ---
+            'last occurrence (-1)' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 1], ['d', 1]],
+                'value' => '1',
+                'nth' => -1,
+                'expected' => 3,
+            ],
+            'second-to-last (-2)' => [
+                'pairs' => [['a', 1], ['b', 2], ['c', 1], ['d', 1]],
+                'value' => '1',
+                'nth' => -2,
+                'expected' => 2,
+            ],
+            'negative out of bounds' => [
+                'pairs' => [['a', 1], ['b', 2]],
+                'value' => '1',
+                'nth' => -3,
+                'expected' => null,
+            ],
+            'negative no matches' => [
+                'pairs' => [['x', 1], ['y', 2]],
+                'value' => '42',
+                'nth' => -1,
+                'expected' => null,
+            ],
+        ];
+    }
+
     public function testReplaceExistingPair(): void
     {
         $query = Query::new('a=1&b=2&c=3');
@@ -949,5 +1041,41 @@ final class QueryTest extends TestCase
         $query->replace(1, 'b', 5);
 
         self::assertSame('a=1&b=2', $query->toString(), 'Original instance must remain unchanged');
+    }
+
+    public function test_it_can_add_parameters(): void
+    {
+        $query = Query::new('a=1&b=2')->withList('c', [1, 2, 3]);
+
+        self::assertSame('a=1&b=2&c%5B0%5D=1&c%5B1%5D=2&c%5B2%5D=3', $query->toString());
+
+        $query = Query::new('a=1&b=2')->withList('c', [1, 2, 3], QueryBuildingMode::Safe);
+
+        self::assertSame('a=1&b=2&c%5B%5D=1&c%5B%5D=2&c%5B%5D=3', $query->toString());
+    }
+
+    public function test_it_can_add_parameters_without_deleting_non_array_like_parameters(): void
+    {
+        $query = Query::new('a=1&b=2')->withList('a', [1, 2, 3]);
+
+        self::assertSame('a=1&b=2&a%5B0%5D=1&a%5B1%5D=2&a%5B2%5D=3', $query->toString());
+    }
+
+    public function test_it_can_remove_parameters_list_like_parameters(): void
+    {
+        $query = Query::new('a=1&b=2&a%5B0%5D=1&a%5B1%5D=2&a%5B2%5D=3');
+
+        self::assertTrue($query->has('a'));
+        self::assertTrue($query->has('b'));
+        self::assertTrue($query->hasList('a'));
+        self::assertFalse($query->hasList('b'));
+
+        $altQuery = $query->withoutList('a');
+
+        self::assertSame('a=1&b=2', $altQuery->toString());
+        self::assertTrue($altQuery->has('a'));
+        self::assertTrue($altQuery->has('b'));
+        self::assertFalse($altQuery->hasList('a'));
+        self::assertFalse($altQuery->hasList('b'));
     }
 }

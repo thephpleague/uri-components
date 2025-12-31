@@ -441,30 +441,30 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return $this->withQuery(Query::fromPairs(Query::fromUri($this->uri), prefix: $prefix));
     }
 
-    public function prefixQueryParameters(string $prefix): self
+    public function prefixQueryParameters(string $prefix, QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native): self
     {
-        return $this->withQuery(Query::fromVariable(Query::fromUri($this->uri)->parameters(), prefix: $prefix));
+        return $this->withQuery(Query::fromVariable(Query::fromUri($this->uri)->parameters(), prefix: $prefix, queryBuildingMode: $queryBuildingMode));
     }
 
     /**
      * Append PHP query parameters to the existing URI query.
      */
-    public function appendQueryParameters(object|array $parameters, string $prefix = ''): self
+    public function appendQueryParameters(object|array $parameters, string $prefix = '', QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native): self
     {
-        return $this->appendQuery(Query::fromVariable($parameters, prefix: $prefix)->value());
+        return $this->appendQuery(Query::fromVariable($parameters, prefix: $prefix, queryBuildingMode: $queryBuildingMode)->value());
     }
 
     /**
      * Prepend PHP query parameters to the existing URI query.
      */
-    public function prependQueryParameters(object|array $parameters, string $prefix = ''): self
+    public function prependQueryParameters(object|array $parameters, string $prefix = '', QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native): self
     {
-        return $this->withQuery(Query::fromVariable($parameters, prefix: $prefix)->append(Query::fromUri($this->uri)->value())->value());
+        return $this->withQuery(Query::fromVariable($parameters, prefix: $prefix, queryBuildingMode: $queryBuildingMode)->append(Query::fromUri($this->uri)->value())->value());
     }
 
-    public function replaceQueryParameter(string $name, mixed $value): self
+    public function replaceQueryParameter(string $name, mixed $value, QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native): self
     {
-        return $this->withQuery(Query::fromUri($this->uri)->replaceParameter($name, $value)->value());
+        return $this->withQuery(Query::fromUri($this->uri)->replaceParameter($name, $value, $queryBuildingMode)->value());
     }
 
     /**
@@ -523,9 +523,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Merge PHP query parameters with the existing URI query.
      */
-    public function mergeQueryParameters(object|array $parameters, string $prefix = ''): self
+    public function mergeQueryParameters(object|array $parameters, string $prefix = '', QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native): self
     {
-        return $this->withQuery(Query::fromUri($this->uri)->mergeParameters($parameters, prefix: $prefix)->value());
+        return $this->withQuery(Query::fromUri($this->uri)->mergeParameters($parameters, prefix: $prefix, queryBuildingMode: $queryBuildingMode)->value());
     }
 
     /**
@@ -534,12 +534,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function removeQueryPairsByKey(string ...$keys): static
     {
         $query = Query::fromUri($this->uri);
-        $newQuery = $query->withoutPairByKey(...$keys)->value();
+        $newQuery = $query->withoutPairByKey(...$keys);
 
-        return match ($query->value()) {
-            $newQuery => $this,
-            default => $this->withQuery($newQuery),
-        };
+        return $newQuery->value() === $query->value() ? $this : $this->withQuery($newQuery);
     }
 
     /**
@@ -548,12 +545,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function removeQueryPairsByValue(Stringable|string|int|float|bool|null ...$values): static
     {
         $query = Query::fromUri($this->uri);
-        $newQuery = $query->withoutPairByValue(...$values)->value();
+        $newQuery = $query->withoutPairByValue(...$values);
 
-        return match ($query->value()) {
-            $newQuery => $this,
-            default => $this->withQuery($newQuery),
-        };
+        return $newQuery->value() === $query->value() ? $this : $this->withQuery($newQuery);
     }
 
     /**
@@ -562,12 +556,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function removeQueryPairsByKeyValue(string $key, Stringable|string|int|bool|null $value): static
     {
         $query = Query::fromUri($this->uri);
-        $newQuery = $query->withoutPairByKeyValue($key, $value)->value();
+        $newQuery = $query->withoutPairByKeyValue($key, $value);
 
-        return match ($newQuery) {
-            $query->value() => $this,
-            default => $this->withQuery($newQuery),
-        };
+        return $newQuery->value() === $query->value() ? $this : $this->withQuery($newQuery);
     }
 
     /**
@@ -576,12 +567,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function removeQueryParameters(string ...$keys): static
     {
         $query = Query::fromUri($this->uri);
-        $newQuery = $query->withoutParameters(...$keys)->value();
+        $newQuery = $query->withoutParameters(...$keys);
 
-        return match ($newQuery) {
-            $query->value() => $this,
-            default => $this->withQuery($newQuery),
-        };
+        return $newQuery->value() === $query->value() ? $this : $this->withQuery($newQuery);
     }
 
     /**
