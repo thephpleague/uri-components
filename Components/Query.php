@@ -25,6 +25,7 @@ use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryBuildingMode;
+use League\Uri\QueryParsingMode;
 use League\Uri\QueryString;
 use League\Uri\UriString;
 use OutOfBoundsException;
@@ -46,7 +47,6 @@ use function array_is_list;
 use function array_map;
 use function array_merge;
 use function array_reduce;
-use function array_values;
 use function count;
 use function get_object_vars;
 use function http_build_query;
@@ -89,7 +89,10 @@ final class Query extends Component implements QueryInterface
         $this->pairs = QueryString::parseFromValue($query, $converter);
         $this->separator = $converter->separator();
         $this->parameters = QueryString::extractFromValue($query, $converter);
-        $this->list = QueryString::convert(array_values(array_filter($this->pairs, static fn (array $pair): bool => 1 === preg_match(self::REGXP_FILTER_LIST, $pair[0]))));
+        $this->list = QueryString::convert(
+            array_filter($this->pairs, static fn (array $pair): bool => 1 === preg_match(self::REGXP_FILTER_LIST, $pair[0])),
+            QueryParsingMode::PreserveNull,
+        );
     }
 
     /**
@@ -850,11 +853,9 @@ final class Query extends Component implements QueryInterface
 
     public function onlyLists(): QueryInterface
     {
-        $pairs = array_values(
-            array_filter(
-                $this->pairs,
-                static fn (array $pair): bool => 1 === preg_match(self::REGXP_FILTER_LIST, $pair[0])
-            )
+        $pairs = array_filter(
+            $this->pairs,
+            static fn (array $pair): bool => 1 === preg_match(self::REGXP_FILTER_LIST, $pair[0])
         );
 
         return $pairs === $this->pairs ? $this : self::fromPairs($pairs, $this->separator);
@@ -866,11 +867,9 @@ final class Query extends Component implements QueryInterface
             return $this;
         }
 
-        $pairs = array_values(
-            array_filter(
-                $this->pairs,
-                static fn (array $pair): bool => 1 !== preg_match(self::REGXP_FILTER_LIST, $pair[0])
-            )
+        $pairs = array_filter(
+            $this->pairs,
+            static fn (array $pair): bool => 1 !== preg_match(self::REGXP_FILTER_LIST, $pair[0])
         );
 
         return self::fromPairs($pairs, $this->separator);
