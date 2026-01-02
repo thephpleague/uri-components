@@ -15,7 +15,7 @@ use ArrayIterator;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
-use League\Uri\QueryBuildingMode;
+use League\Uri\QueryComposeMode;
 use League\Uri\Uri;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -1049,7 +1049,7 @@ final class QueryTest extends TestCase
 
         self::assertSame('a=1&b=2&c%5B0%5D=1&c%5B1%5D=2&c%5B2%5D=3', $query->toString());
 
-        $query = Query::new('a=1&b=2')->withList('c', [1, 2, 3], QueryBuildingMode::Safe);
+        $query = Query::new('a=1&b=2')->withList('c', [1, 2, 3], QueryComposeMode::Safe);
 
         self::assertSame('a=1&b=2&c%5B%5D=1&c%5B%5D=2&c%5B%5D=3', $query->toString());
     }

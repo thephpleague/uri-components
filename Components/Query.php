@@ -24,8 +24,8 @@ use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
-use League\Uri\QueryBuildingMode;
-use League\Uri\QueryParsingMode;
+use League\Uri\QueryComposeMode;
+use League\Uri\QueryExtractMode;
 use League\Uri\QueryString;
 use League\Uri\UriString;
 use OutOfBoundsException;
@@ -61,6 +61,7 @@ use function preg_match;
 use function preg_quote;
 use function preg_replace;
 
+use const ARRAY_FILTER_USE_BOTH;
 use const JSON_PRESERVE_ZERO_FRACTION;
 use const PREG_SPLIT_NO_EMPTY;
 
@@ -91,7 +92,7 @@ final class Query extends Component implements QueryInterface
         $this->parameters = QueryString::extractFromValue($query, $converter);
         $this->list = QueryString::convert(
             array_filter($this->pairs, static fn (array $pair): bool => 1 === preg_match(self::REGXP_FILTER_LIST, $pair[0])),
-            QueryParsingMode::PreserveNull,
+            QueryExtractMode::LossLess,
         );
     }
 
@@ -124,9 +125,9 @@ final class Query extends Component implements QueryInterface
         object|array $parameters,
         string $separator = '&',
         string $prefix = '',
-        QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native
+        QueryComposeMode $composeMode = QueryComposeMode::Native
     ): self {
-        if ($parameters instanceof UnitEnum && QueryBuildingMode::Compatible !== $queryBuildingMode) {
+        if ($parameters instanceof UnitEnum && QueryComposeMode::Compatible !== $composeMode) {
             throw new TypeError('Enum can not be used as arguments.');
         }
 
@@ -138,7 +139,7 @@ final class Query extends Component implements QueryInterface
         }
 
         return new self(
-            QueryString::compose(data: $data, separator: $separator, queryBuildingMode: $queryBuildingMode),
+            QueryString::compose(data: $data, separator: $separator, composeMode: $composeMode),
             Converter::fromRFC1738($separator)
         );
     }
@@ -521,6 +522,30 @@ final class Query extends Component implements QueryInterface
     }
 
     /**
+     * @param callable(array{0:array-key, 1:mixed}, array-key=): bool $callback
+     */
+    public function filter(callable $callback): QueryInterface
+    {
+        $pairs = array_filter($this->pairs, $callback, ARRAY_FILTER_USE_BOTH);
+
+        return $pairs === $this->pairs ? $this : self::fromPairs($pairs, $this->separator);
+    }
+
+    /**
+     * @template TReturn
+     *
+     * @param callable(array{0:array-key, 1:mixed}, array-key=): TReturn $callback
+     *
+     * @return Iterator<TReturn>
+     */
+    public function map(callable $callback): Iterator
+    {
+        foreach ($this->pairs as $offset => $pair) {
+            yield $offset => $callback($pair, $offset);
+        }
+    }
+
+    /**
      * Adds a query pair only if it is not already present in a given array.
      */
     private function removeDuplicates(array $pairs, array $pair): array
@@ -737,13 +762,13 @@ final class Query extends Component implements QueryInterface
     public function appendList(
         string $name,
         array $values,
-        QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native
+        QueryComposeMode $composeMode = QueryComposeMode::Native
     ): QueryInterface {
         return $this->append(
             QueryString::composeFromValue(
                 data: [$name => $values],
                 converter: Converter::fromRFC3986($this->separator),
-                queryBuildingMode: $queryBuildingMode,
+                composeMode: $composeMode,
             )
         );
     }
@@ -791,7 +816,7 @@ final class Query extends Component implements QueryInterface
     public function withList(
         string $name,
         array $values,
-        QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native
+        QueryComposeMode $composeMode = QueryComposeMode::Native
     ): QueryInterface {
         if ([] === $values) {
             return $this;
@@ -801,7 +826,7 @@ final class Query extends Component implements QueryInterface
             QueryString::composeFromValue(
                 data: [$name => $values],
                 converter: Converter::fromRFC3986($this->separator),
-                queryBuildingMode: $queryBuildingMode,
+                composeMode: $composeMode,
             ),
             Converter::fromRFC3986($this->separator),
         );
@@ -853,26 +878,12 @@ final class Query extends Component implements QueryInterface
 
     public function onlyLists(): QueryInterface
     {
-        $pairs = array_filter(
-            $this->pairs,
-            static fn (array $pair): bool => 1 === preg_match(self::REGXP_FILTER_LIST, $pair[0])
-        );
-
-        return $pairs === $this->pairs ? $this : self::fromPairs($pairs, $this->separator);
+        return $this->filter(static fn (array $pair): bool => 1 === preg_match(self::REGXP_FILTER_LIST, $pair[0]));
     }
 
     public function withoutLists(): QueryInterface
     {
-        if ([] === $this->list) {
-            return $this;
-        }
-
-        $pairs = array_filter(
-            $this->pairs,
-            static fn (array $pair): bool => 1 !== preg_match(self::REGXP_FILTER_LIST, $pair[0])
-        );
-
-        return self::fromPairs($pairs, $this->separator);
+        return [] === $this->list ? $this : $this->filter(static fn (array $pair): bool => 1 !== preg_match(self::REGXP_FILTER_LIST, $pair[0]));
     }
 
     public function parameters(): array
@@ -880,7 +891,7 @@ final class Query extends Component implements QueryInterface
         return $this->parameters;
     }
 
-    public function mergeParameters(object|array $parameter, string $prefix = '', QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native): self
+    public function mergeParameters(object|array $parameter, string $prefix = '', QueryComposeMode $composeMode = QueryComposeMode::Native): self
     {
         $params = is_object($parameter) ? get_object_vars($parameter) : $parameter;
         $data = [];
@@ -889,12 +900,12 @@ final class Query extends Component implements QueryInterface
         }
 
         return in_array($data, [$this->parameters, []], true) ? $this : new self(
-            QueryString::compose(data: array_merge($this->parameters, $data), separator: $this->separator, queryBuildingMode: $queryBuildingMode),
+            QueryString::compose(data: array_merge($this->parameters, $data), separator: $this->separator, composeMode: $composeMode),
             Converter::fromRFC1738($this->separator)
         );
     }
 
-    public function replaceParameter(string $name, mixed $parameter, QueryBuildingMode $queryBuildingMode = QueryBuildingMode::Native): self
+    public function replaceParameter(string $name, mixed $parameter, QueryComposeMode $composeMode = QueryComposeMode::Native): self
     {
         $this->has($name) || $this->hasList($name) || throw new ValueError('The specified name does not exist');
         if ($parameter === $this->parameters[$name]) {
@@ -905,7 +916,7 @@ final class Query extends Component implements QueryInterface
         $parameters[$name] = $parameter;
 
         return new self(
-            QueryString::compose(data: $parameters, separator: $this->separator, queryBuildingMode: $queryBuildingMode),
+            QueryString::compose(data: $parameters, separator: $this->separator, composeMode: $composeMode),
             Converter::fromRFC1738($this->separator)
         );
     }
