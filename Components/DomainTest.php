@@ -218,7 +218,7 @@ final class DomainTest extends TestCase
     }
 
     #[DataProvider('countableProvider')]
-    public function testCountable(string $host, int $nblabels): void
+    public function testCountable(string $host, int $nblabels, array $labels): void
     {
         self::assertCount($nblabels, Domain::new($host));
     }

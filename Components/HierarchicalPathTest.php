@@ -747,7 +747,6 @@ final class HierarchicalPathTest extends TestCase
             [
                 '',
                 '',
-                '',
             ],
             [
                 '"bad"',
