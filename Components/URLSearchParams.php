@@ -438,13 +438,9 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Returns the total number of distinct search parameter keys.
      */
-    public function uniqueKeyCount(): int
+    public function countDistinctKeys(): int
     {
-        return count(
-            array_count_values(
-                array_column([...$this->pairs], 0)
-            )
-        );
+        return $this->pairs->countDistinctKeys();
     }
 
     /**
@@ -582,11 +578,24 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
+     * @deprecated Since version 7.8.0
+     * @see URLSearchParams::countDistinctKeys()
+     *
+     * @codeCoverageIgnore
+     */
+    #[Deprecated(message:'use League\Uri\Components\URLSearchParams::countDistinctKeys() instead', since:'league/uri-components:7.8.0')]
+    public function uniqueKeyCount(): int
+    {
+        return $this->countDistinctKeys();
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
      * @deprecated Since version 7.4.0
      * @see URLSearchParams::fromVariable()
      *
      * @codeCoverageIgnore
-     *
      */
     #[Deprecated(message:'use League\Uri\Components\URLSearchParams::fromVariable() instead', since:'league/uri-components:7.4.0')]
     public static function fromParameters(object|array $parameters): self

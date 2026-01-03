@@ -13,14 +13,24 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Query::withoutList`
 - `Query::withoutLists`
 - `Query::onlyLists`
+- `Query::countDistinctKeys`
+- `Query::isNotEmpty`
+- `Query::map`
+- `Query::filter`
+- `Query::indexOfValue`
+- `Query::valueAt`
+- `Query::keyAt`
+- `Query::pair`
+- `URLSearchParams::countDistinctKeys`
 
 ### Fixed
 
-- `Query` related parameters method can opt to switch to different query string representations using the new `$queryBuildigMode` parameter.
+- `Query` related parameters method can opt to switch to different query string extraction using the new `$extractMode` parameter.
+- `Query` related parameters method can opt to switch to different query string composition using the new `$composeMode` parameter.
 
 ### Deprecated
 
-- None
+- `URLSearchParams::uniqueKeyCount` use `URLSearchParams::countDistinctKeys` instead
 
 ### Removed
 

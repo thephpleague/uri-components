@@ -16,6 +16,8 @@ namespace League\Uri\Components;
 use BackedEnum;
 use Deprecated;
 use Iterator;
+use IteratorAggregate;
+use IteratorIterator;
 use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
@@ -257,6 +259,11 @@ final class Query extends Component implements QueryInterface
         return [] === $this->pairs;
     }
 
+    public function isNotEmpty(): bool
+    {
+        return ! $this->isEmpty();
+    }
+
     public function jsonSerialize(): ?string
     {
         return $this->toFormData();
@@ -270,6 +277,14 @@ final class Query extends Component implements QueryInterface
     public function getIterator(): Iterator
     {
         yield from $this->pairs;
+    }
+
+    /**
+     * Returns the total number of distinct keys.
+     */
+    public function countDistinctKeys(): int
+    {
+        return count(array_flip(array_column($this->pairs, 0)));
     }
 
     public function pairs(): iterable
@@ -492,7 +507,7 @@ final class Query extends Component implements QueryInterface
 
     public function withoutDuplicates(): self
     {
-        if (count($this->pairs) === count(array_count_values(array_column($this->pairs, 0)))) {
+        if (count($this->pairs) === $this->countDistinctKeys()) {
             return $this;
         }
 
@@ -556,22 +571,9 @@ final class Query extends Component implements QueryInterface
         };
     }
 
-    public function withoutEmptyPairs(): self
+    public function withoutEmptyPairs(): QueryInterface
     {
-        $pairs = array_filter($this->pairs, $this->filterEmptyPair(...));
-
-        return match ($this->pairs) {
-            $pairs => $this,
-            default => self::fromPairs($pairs),
-        };
-    }
-
-    /**
-     * Empty Pair filtering.
-     */
-    private function filterEmptyPair(array $pair): bool
-    {
-        return '' !== $pair[0] && null !== $pair[1] && '' !== $pair[1];
+        return $this->filter(fn (array $pair): bool => '' !== $pair[0] && null !== $pair[1] && '' !== $pair[1]);
     }
 
     public function withoutNumericIndices(): self
@@ -710,40 +712,29 @@ final class Query extends Component implements QueryInterface
         }
 
         $keysToRemove = array_intersect($keys, array_column($this->pairs, 0));
+        if ([] === $keysToRemove) {
+            return $this;
+        }
 
-        return match ([]) {
-            $keysToRemove => $this,
-            default => self::fromPairs(
-                array_filter($this->pairs, static fn (array $pair): bool => !in_array($pair[0], $keysToRemove, true)),
-                $this->separator
-            ),
-        };
+        return $this->filter(fn (array $pair): bool => !in_array($pair[0], $keysToRemove, true));
     }
 
-    public function withoutPairByValue(BackedEnum|Stringable|string|int|float|bool|null ...$values): self
+    public function withoutPairByValue(BackedEnum|Stringable|string|int|float|bool|null ...$values): QueryInterface
     {
         if ([] === $values) {
             return $this;
         }
 
         $values = array_map(self::filterPair(...), $values);
-        $newPairs = array_filter($this->pairs, fn (array $pair) => !in_array($pair[1], $values, true));
 
-        return match ($this->pairs) {
-            $newPairs => $this,
-            default => self::fromPairs($newPairs, $this->separator),
-        };
+        return $this->filter(fn (array $pair) => !in_array($pair[1], $values, true));
     }
 
-    public function withoutPairByKeyValue(string $key, BackedEnum|Stringable|string|int|float|bool|null $value): self
+    public function withoutPairByKeyValue(string $key, BackedEnum|Stringable|string|int|float|bool|null $value): QueryInterface
     {
         $pair = [$key, self::filterPair($value)];
-        $newPairs = array_filter($this->pairs, fn (array $currentPair) => $currentPair !== $pair);
 
-        return match ($this->pairs) {
-            $newPairs => $this,
-            default => self::fromPairs($newPairs, $this->separator),
-        };
+        return $this->filter(fn (array $currentPair) => $currentPair !== $pair);
     }
 
     public function appendTo(string $key, BackedEnum|Stringable|string|int|float|bool|null ...$value): QueryInterface
@@ -867,13 +858,8 @@ final class Query extends Component implements QueryInterface
 
         $mapper = static fn (string $offset): string => preg_quote($offset, ',').'(\[.*\].*)';
         $regexp = ',^('.implode('|', array_map($mapper, $names)).')?$,';
-        $filter = fn (array $pair): bool => 1 !== preg_match($regexp, $pair[0]);
-        $pairs = array_filter($this->pairs, $filter);
 
-        return match ($this->pairs) {
-            $pairs => $this,
-            default => self::fromPairs($pairs, $this->separator),
-        };
+        return $this->filter(fn (array $pair): bool => 1 !== preg_match($regexp, $pair[0]));
     }
 
     public function onlyLists(): QueryInterface
@@ -945,13 +931,8 @@ final class Query extends Component implements QueryInterface
 
         $mapper = static fn (string $offset): string => preg_quote($offset, ',').'(\[.*\].*)?';
         $regexp = ',^('.implode('|', array_map($mapper, $names)).')?$,';
-        $filter = fn (array $pair): bool => 1 !== preg_match($regexp, $pair[0]);
-        $pairs = array_filter($this->pairs, $filter);
 
-        return match ($this->pairs) {
-            $pairs => $this,
-            default => self::fromPairs($pairs, $this->separator),
-        };
+        return $this->filter(fn (array $pair): bool => 1 !== preg_match($regexp, $pair[0]));
     }
 
     /**
