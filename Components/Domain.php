@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Deprecated;
 use Iterator;
 use League\Uri\Contracts\AuthorityInterface;
@@ -227,7 +228,7 @@ final class Domain extends Component implements DomainHostInterface
         return count($this->labels) > 1 && '' === $this->labels[array_key_first($this->labels)];
     }
 
-    public function prepend(Stringable|string|int|null $label): DomainHostInterface
+    public function prepend(BackedEnum|Stringable|string|int|null $label): DomainHostInterface
     {
         $label = self::filterComponent($label);
         $value = $this->value();
@@ -240,7 +241,7 @@ final class Domain extends Component implements DomainHostInterface
         };
     }
 
-    public function append(Stringable|string|int|null $label): DomainHostInterface
+    public function append(BackedEnum|Stringable|string|int|null $label): DomainHostInterface
     {
         $label = self::filterComponent($label);
         $value = $this->value();
@@ -295,7 +296,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * @throws OffsetOutOfBounds
      */
-    public function withLabel(int $key, Stringable|string|int|null $label): DomainHostInterface
+    public function withLabel(int $key, BackedEnum|Stringable|string|int|null $label): DomainHostInterface
     {
         $nbLabels = count($this->labels);
         if ($key < - $nbLabels - 1 || $key > $nbLabels) {
@@ -315,7 +316,11 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         if (!$label instanceof HostInterface && null !== $label) {
-            $label = Host::new((string) $label)->value();
+            if (is_int($label)) {
+                $label = (string) $label;
+            }
+
+            $label = Host::new($label)->value();
         }
 
         if ($label === $this->labels[$key]) {

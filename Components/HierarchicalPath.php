@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Deprecated;
 use Iterator;
 use League\Uri\Contracts\PathInterface;
@@ -60,7 +61,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /** @var array<string> */
     private readonly array $segments;
 
-    private function __construct(Stringable|string $path)
+    private function __construct(BackedEnum|Stringable|string $path)
     {
         if (!$path instanceof PathInterface) {
             $path = Path::new($path);
@@ -78,7 +79,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(Stringable|string $value = ''): self
+    public static function new(BackedEnum|Stringable|string $value = ''): self
     {
         return new self($value);
     }
@@ -308,7 +309,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         };
     }
 
-    public function append(Stringable|string $path): SegmentedPathInterface
+    public function append(BackedEnum|Stringable|string $path): SegmentedPathInterface
     {
         /** @var string $path */
         $path = self::filterComponent($path);
@@ -321,7 +322,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param iterable<Stringable|string> $segments
+     * @param iterable<BackedEnum|Stringable|string> $segments
      *
      */
     public function appendSegments(iterable $segments): SegmentedPathInterface
@@ -334,7 +335,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->append(implode('/', $newSegments));
     }
 
-    public function prepend(Stringable|string $path): SegmentedPathInterface
+    public function prepend(BackedEnum|Stringable|string $path): SegmentedPathInterface
     {
         /** @var string $path */
         $path = self::filterComponent($path);
@@ -347,7 +348,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     }
 
     /**
-     * @param iterable<Stringable|string> $segments
+     * @param iterable<BackedEnum|Stringable|string> $segments
      *
      */
     public function prependSegments(iterable $segments): SegmentedPathInterface
@@ -360,7 +361,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->prepend(implode('/', $newSegments));
     }
 
-    public function withSegment(int $key, Stringable|string $segment): SegmentedPathInterface
+    public function withSegment(int $key, BackedEnum|Stringable|string $segment): SegmentedPathInterface
     {
         $nbSegments = count($this->segments);
         if ($key < - $nbSegments - 1 || $key > $nbSegments) {
@@ -456,7 +457,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         };
     }
 
-    public function withDirname(Stringable|string $path): SegmentedPathInterface
+    public function withDirname(BackedEnum|Stringable|string $path): SegmentedPathInterface
     {
         if (!$path instanceof PathInterface) {
             $path = Path::new($path);
@@ -475,7 +476,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         );
     }
 
-    public function withBasename(Stringable|string $basename): SegmentedPathInterface
+    public function withBasename(BackedEnum|Stringable|string $basename): SegmentedPathInterface
     {
         /** @var string $basename */
         $basename = $this->validateComponent($basename);
@@ -486,7 +487,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         };
     }
 
-    public function withExtension(Stringable|string $extension): SegmentedPathInterface
+    public function withExtension(BackedEnum|Stringable|string $extension): SegmentedPathInterface
     {
         /** @var string $extension */
         $extension = $this->validateComponent($extension);

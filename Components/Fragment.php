@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Deprecated;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\UriComponentInterface;
@@ -35,12 +36,12 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * New instance.
      */
-    private function __construct(Stringable|string|null $fragment)
+    private function __construct(BackedEnum|Stringable|string|null $fragment)
     {
         $this->fragment = $this->validateComponent($fragment);
     }
 
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(BackedEnum|Stringable|string|null $value = null): self
     {
         return new self($value);
     }
@@ -48,7 +49,7 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -60,7 +61,7 @@ final class Fragment extends Component implements FragmentInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
 
@@ -95,7 +96,7 @@ final class Fragment extends Component implements FragmentInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!$value instanceof Stringable && !$value instanceof BackedEnum && !is_string($value) && null !== $value) {
             return false;
         }
 

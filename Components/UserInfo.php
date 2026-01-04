@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\UriComponentInterface;
@@ -68,7 +69,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(Stringable|string|null $authority): self
+    public static function fromAuthority(BackedEnum|Stringable|string|null $authority): self
     {
         return match (true) {
             $authority instanceof AuthorityInterface => self::new($authority->getUserInfo()),
@@ -97,10 +98,14 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Creates a new instance from an encoded string.
      */
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(BackedEnum|Stringable|string|null $value = null): self
     {
         if ($value instanceof UriComponentInterface) {
             $value = $value->value();
+        }
+
+        if ($value instanceof BackedEnum) {
+            $value = $value->value;
         }
 
         if (null === $value) {
@@ -117,7 +122,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from a string or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -136,7 +141,7 @@ final class UserInfo extends Component implements UserInfoInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!$value instanceof Stringable && !$value instanceof BackedEnum && !is_string($value) && null !== $value) {
             return false;
         }
 
@@ -186,7 +191,7 @@ final class UserInfo extends Component implements UserInfoInterface
         ];
     }
 
-    public function withUser(Stringable|string|null $username): self
+    public function withUser(BackedEnum|Stringable|string|null $username): self
     {
         $username = $this->validateComponent($username);
         if ($this->username === $username) {
@@ -196,7 +201,7 @@ final class UserInfo extends Component implements UserInfoInterface
         return new self($username, $this->password);
     }
 
-    public function withPass(#[SensitiveParameter] Stringable|string|null $password): self
+    public function withPass(#[SensitiveParameter] BackedEnum|Stringable|string|null $password): self
     {
         $password = $this->validateComponent($password);
         if ($password === $this->password) {

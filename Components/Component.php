@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
@@ -27,6 +28,7 @@ use Uri\WhatWg\Url as WhatWgUrl;
 
 use function is_bool;
 use function preg_match;
+use function similar_text;
 use function sprintf;
 
 abstract class Component implements UriComponentInterface, Conditionable
@@ -55,7 +57,7 @@ abstract class Component implements UriComponentInterface, Conditionable
         return $this->toString();
     }
 
-    final protected static function filterUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): WhatWgUrl|Rfc3986Uri|UriInterface|Psr7UriInterface
+    final protected static function filterUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): WhatWgUrl|Rfc3986Uri|UriInterface|Psr7UriInterface
     {
         if ($uri instanceof Modifier) {
             return $uri->unwrap();
@@ -75,7 +77,7 @@ abstract class Component implements UriComponentInterface, Conditionable
     /**
      * Validate the component content.
      */
-    protected function validateComponent(Stringable|int|string|null $component): ?string
+    protected function validateComponent(BackedEnum|Stringable|int|string|null $component): ?string
     {
         return Encoder::decodeNecessary($component);
     }
@@ -85,10 +87,17 @@ abstract class Component implements UriComponentInterface, Conditionable
      *
      * @throws SyntaxError If the component cannot be converted to a string or null
      */
-    final protected static function filterComponent(Stringable|int|string|null $component): ?string
+    final protected static function filterComponent(BackedEnum|Stringable|int|string|null $component): ?string
     {
+        if ($component instanceof UriComponentInterface) {
+            $component = $component->value();
+        }
+
+        if ($component instanceof BackedEnum) {
+            $component = (string) $component->value;
+        }
+
         return match (true) {
-            $component instanceof UriComponentInterface => $component->value(),
             null === $component => null,
             1 === preg_match(self::REGEXP_INVALID_URI_CHARS, (string) $component) => throw new SyntaxError(sprintf('Invalid component string: %s.', $component)),
             default => (string) $component,
@@ -106,5 +115,15 @@ abstract class Component implements UriComponentInterface, Conditionable
             null !== $onFail => $onFail($this),
             default => $this,
         } ?? $this;
+    }
+
+    /**
+     * @param callable(self): void $callback A callback that receives this builder
+     */
+    final public function tap(callable $callback): self
+    {
+        $callback($this);
+
+        return $this;
     }
 }

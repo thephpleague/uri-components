@@ -576,6 +576,16 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     }
 
     /**
+     * @param callable(self): void $callback A callback that receives this builder
+     */
+    public function tap(callable $callback): self
+    {
+        $callback($this);
+
+        return $this;
+    }
+
+    /**
      * DEPRECATION WARNING! This method will be removed in the next major point release.
      *
      * @deprecated Since version 7.8.0

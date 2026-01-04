@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Deprecated;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
@@ -53,15 +54,19 @@ final class Path extends Component implements PathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(Stringable|string $value = ''): self
+    public static function new(BackedEnum|Stringable|string $value = ''): self
     {
+        if ($value instanceof BackedEnum) {
+            $value = (string) $value->value;
+        }
+
         return new self($value);
     }
 
     /**
      * Create a new instance from a string or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string $uri = ''): ?self
+    public static function tryNew(BackedEnum|Stringable|string $uri = ''): ?self
     {
         try {
             return self::new($uri);
@@ -73,7 +78,7 @@ final class Path extends Component implements PathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatwgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatwgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
         if ($uri instanceof Rfc3986Uri) {

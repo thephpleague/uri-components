@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Components\FragmentDirectives\DirectiveString;
@@ -64,7 +65,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /** @var list<FragmentDirective> */
     private readonly array $directives;
 
-    public function __construct(FragmentDirective|Stringable|string ...$directives)
+    public function __construct(FragmentDirective|BackedEnum|Stringable|string ...$directives)
     {
         $this->directives = array_values(array_map(self::filterDirective(...), $directives));
     }
@@ -74,10 +75,14 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
      *
      * If no delimiter is found, an empty collection is returned
      */
-    public static function fromFragment(Stringable|string|null $fragment): self
+    public static function fromFragment(BackedEnum|Stringable|string|null $fragment): self
     {
         if ($fragment instanceof UriComponentInterface) {
             $fragment = $fragment->value();
+        }
+
+        if ($fragment instanceof BackedEnum) {
+            $fragment = $fragment->value;
         }
 
         if (null === $fragment) {
@@ -96,19 +101,23 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      * Create a new instance from a string which only contains directives.
      */
-    public static function new(Stringable|string|null $value): self
+    public static function new(BackedEnum|Stringable|string|null $value): self
     {
+        if ($value instanceof BackedEnum) {
+            $value = $value->value;
+        }
+
         return null === $value
              ? new self()
              : new self(...explode(self::SEPARATOR, (string) $value));
     }
 
-    private static function filterDirective(FragmentDirective|Stringable|string $directive): FragmentDirective
+    private static function filterDirective(FragmentDirective|BackedEnum|Stringable|string $directive): FragmentDirective
     {
         return $directive instanceof FragmentDirective ? $directive : DirectiveString::resolve($directive);
     }
 
-    public static function tryNew(Stringable|string|null $value): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $value): ?self
     {
         try {
             return self::new($value);
@@ -120,7 +129,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      *  Create a new instance from a URI string or object.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         if ($uri instanceof Modifier) {
             $uri = $uri->unwrap();
@@ -241,7 +250,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!$value instanceof Stringable && !$value instanceof BackedEnum && !is_string($value) && null !== $value) {
             return false;
         }
 
@@ -255,7 +264,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
         return $value->getUriComponent() === $this->getUriComponent();
     }
 
-    public function indexOf(FragmentDirective|Stringable|string $directive): ?int
+    public function indexOf(FragmentDirective|BackedEnum|Stringable|string $directive): ?int
     {
         $directive = self::filterDirective($directive);
         foreach ($this->directives as $offset => $innerDirective) {
@@ -267,7 +276,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
         return null;
     }
 
-    public function contains(FragmentDirective|Stringable|string $directive): bool
+    public function contains(FragmentDirective|BackedEnum|Stringable|string $directive): bool
     {
         return null !== $this->indexOf($directive);
     }
@@ -275,7 +284,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     /**
      * Append one or more Directives to the fragment.
      */
-    public function append(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): self
+    public function append(FragmentDirectives|FragmentDirective|BackedEnum|Stringable|string ...$directives): self
     {
         $items = self::implodeDirectives(...$directives);
 
@@ -293,9 +302,9 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
     }
 
     /**
-     * @return list<FragmentDirective|Stringable|string>
+     * @return list<FragmentDirective|BackedEnum|Stringable|string>
      */
-    private static function implodeDirectives(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): array
+    private static function implodeDirectives(FragmentDirectives|FragmentDirective|BackedEnum|Stringable|string ...$directives): array
     {
         return array_merge(...array_map(fn ($d) => $d instanceof FragmentDirectives ? [...$d] : [$d], $directives));
     }
@@ -356,7 +365,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
      *
      * If no Directive is found to the specified offset, an exception is thrown
      */
-    public function replace(int $offset, FragmentDirective|Stringable|string $directive): self
+    public function replace(int $offset, FragmentDirective|BackedEnum|Stringable|string $directive): self
     {
         $currentDirective = $this->nth($offset);
         null !== $currentDirective || throw new OffsetOutOfBounds(sprintf('The key `%s` is invalid.', $offset));
@@ -387,5 +396,15 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             null !== $onFail => $onFail($this),
             default => $this,
         } ?? $this;
+    }
+
+    /**
+     * @param callable(self): void $callback A callback that receives this builder
+     */
+    public function tap(callable $callback): self
+    {
+        $callback($this);
+
+        return $this;
     }
 }

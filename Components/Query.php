@@ -86,7 +86,7 @@ final class Query extends Component implements QueryInterface
      *
      * @throws SyntaxError
      */
-    private function __construct(Stringable|string|null $query, ?Converter $converter = null)
+    private function __construct(BackedEnum|Stringable|string|null $query, ?Converter $converter = null)
     {
         $converter ??= Converter::fromRFC3986();
         $this->pairs = QueryString::parseFromValue($query, $converter);
@@ -101,7 +101,7 @@ final class Query extends Component implements QueryInterface
     /**
      * @throws SyntaxError
      */
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(BackedEnum|Stringable|string|null $value = null): self
     {
         return self::fromRFC3986($value);
     }
@@ -109,7 +109,7 @@ final class Query extends Component implements QueryInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -171,12 +171,13 @@ final class Query extends Component implements QueryInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         return match (true) {
             $uri instanceof Rfc3986Uri => new self($uri->getRawQuery(), Converter::fromRFC3986()),
             $uri instanceof WhatWgUrl => new self($uri->getQuery(), Converter::fromFormData()),
             $uri instanceof UriInterface  => new self($uri->getQuery(), Converter::fromRFC3986()),
+            $uri instanceof BackedEnum => new self($uri, Converter::fromRFC3986()),
             default => new self(UriString::parse($uri)['query'], Converter::fromRFC3986()),
         };
     }
@@ -186,7 +187,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromRFC3986(Stringable|string|null $query = null, string $separator = '&'): self
+    public static function fromRFC3986(BackedEnum|Stringable|string|null $query = null, string $separator = '&'): self
     {
         return new self($query, Converter::fromRFC3986($separator));
     }
@@ -196,7 +197,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromRFC1738(Stringable|string|null $query = null, string $separator = '&'): self
+    public static function fromRFC1738(BackedEnum|Stringable|string|null $query = null, string $separator = '&'): self
     {
         return new self($query, Converter::fromRFC1738($separator));
     }
@@ -206,7 +207,7 @@ final class Query extends Component implements QueryInterface
      *
      * @param non-empty-string $separator
      */
-    public static function fromFormData(Stringable|string|null $query = null, string $separator = '&'): self
+    public static function fromFormData(BackedEnum|Stringable|string|null $query = null, string $separator = '&'): self
     {
         return new self($query, Converter::fromFormData($separator));
     }
@@ -674,7 +675,7 @@ final class Query extends Component implements QueryInterface
         return $pairs;
     }
 
-    public function merge(Stringable|string|null $query): QueryInterface
+    public function merge(BackedEnum|Stringable|string|null $query): QueryInterface
     {
         $pairs = $this->pairs;
         foreach (QueryString::parse(self::filterComponent($query), $this->separator) as $pair) {
@@ -764,10 +765,14 @@ final class Query extends Component implements QueryInterface
         );
     }
 
-    public function append(Stringable|string|null $query): QueryInterface
+    public function append(BackedEnum|Stringable|string|null $query): QueryInterface
     {
         if ($query instanceof UriComponentInterface) {
             $query = $query->value();
+        }
+
+        if ($query instanceof BackedEnum) {
+            $query = (string) $query->value;
         }
 
         return null === $query ? $this : self::fromPairs(
@@ -779,7 +784,7 @@ final class Query extends Component implements QueryInterface
         );
     }
 
-    public function prepend(Stringable|string|null $query): QueryInterface
+    public function prepend(BackedEnum|Stringable|string|null $query): QueryInterface
     {
         return Query::new($query)->append($this);
     }

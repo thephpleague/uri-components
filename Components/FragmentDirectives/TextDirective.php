@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components\FragmentDirectives;
 
+use BackedEnum;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
@@ -54,8 +55,12 @@ final class TextDirective implements FragmentDirective
     /**
      * Create a new instance from a string without the Directive delimiter (:~:) or a separator (&).
      */
-    public static function fromString(Stringable|string $value): self
+    public static function fromString(BackedEnum|Stringable|string $value): self
     {
+        if ($value instanceof BackedEnum) {
+            $value = (string) $value->value;
+        }
+
         [$name, $value] = explode('=', (string) $value, 2) + [1 => ''];
         self::NAME === $name || throw new SyntaxError('The submitted text is not a text directive.');
 
@@ -65,8 +70,12 @@ final class TextDirective implements FragmentDirective
     /**
      * Create a new instance from a string without the Directive name and the separator (=).
      */
-    public static function fromValue(Stringable|string $text): self
+    public static function fromValue(BackedEnum|Stringable|string $text): self
     {
+        if ($text instanceof BackedEnum) {
+            $text = (string) $text->value;
+        }
+
         '' !== $text || throw new SyntaxError('The text directive value can not be the empty string.');
         1 === preg_match(self::REGEXP_PATTERN, (string) $text, $matches) || throw new SyntaxError('The text directive is malformed.');
         if ('' === $matches['prefix']) {
@@ -155,7 +164,7 @@ final class TextDirective implements FragmentDirective
 
     public function equals(mixed $directive): bool
     {
-        if (!$directive instanceof Stringable && !is_string($directive)) {
+        if (!$directive instanceof Stringable && !$directive instanceof BackedEnum && !is_string($directive)) {
             return false;
         }
 
@@ -178,13 +187,20 @@ final class TextDirective implements FragmentDirective
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the new start portion.
      *
-     * @param non-empty-string $text
+     * @param BackedEnum|Stringable|non-empty-string $text
      */
-    public function startsWith(string $text): self
+    public function startsWith(BackedEnum|Stringable|string $text): self
     {
+        if ($text instanceof BackedEnum) {
+            $text = $text->value;
+        }
+
+        $text = (string) $text;
         if ($this->start === $text) {
             return $this;
         }
+
+        '' !== $text || throw new SyntaxError('The start part can not be the empty string.');
 
         return new self($text, $this->end, $this->prefix, $this->suffix);
     }
@@ -197,13 +213,20 @@ final class TextDirective implements FragmentDirective
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the new end portion.
      *
-     * @param ?non-empty-string $text
+     * @param BackedEnum|Stringable|non-empty-string|null $text
      */
-    public function endsWith(?string $text): self
+    public function endsWith(BackedEnum|Stringable|string|null $text): self
     {
+        if ($text instanceof BackedEnum) {
+            $text = $text->value;
+        }
+
+        $text = (string) $text;
         if ($this->end === $text) {
             return $this;
         }
+
+        '' !== $text || throw new SyntaxError('The end part can not be the empty string.');
 
         return new self($this->start, $text, $this->prefix, $this->suffix);
     }
@@ -216,13 +239,20 @@ final class TextDirective implements FragmentDirective
      * This method MUST retain the state of the current instance, and return
      * an instance that contains the new suffix portion.
      *
-     * @param ?non-empty-string $text
+     * @param BackedEnum|Stringable|non-empty-string|null $text
      */
-    public function followedBy(?string $text): self
+    public function followedBy(BackedEnum|Stringable|string|null $text): self
     {
+        if ($text instanceof BackedEnum) {
+            $text = $text->value;
+        }
+
+        $text = (string) $text;
         if ($this->suffix === $text) {
             return $this;
         }
+
+        '' !== $text || throw new SyntaxError('The suffix part can not be the empty string.');
 
         return new self($this->start, $this->end, $this->prefix, $text);
     }
@@ -232,14 +262,19 @@ final class TextDirective implements FragmentDirective
      *
      *  This method MUST retain the state of the current instance, and return
      *  an instance that contains the new prefix portion.
-     *
-     * @param ?non-empty-string $text
      */
-    public function precededBy(?string $text): self
+    public function precededBy(BackedEnum|Stringable|string|null $text): self
     {
+        if ($text instanceof BackedEnum) {
+            $text = $text->value;
+        }
+
+        $text = (string) $text;
         if ($this->prefix === $text) {
             return $this;
         }
+
+        '' !== $text || throw new SyntaxError('The prefix part can not be the empty string.');
 
         return new self($this->start, $this->end, $text, $this->suffix);
     }

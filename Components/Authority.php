@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\HostInterface;
@@ -38,9 +39,9 @@ final class Authority extends Component implements AuthorityInterface
     private readonly UserInfoInterface $userInfo;
 
     public function __construct(
-        Stringable|string|null $host,
-        Stringable|string|int|null $port = null,
-        #[SensitiveParameter] Stringable|string|null $userInfo = null
+        BackedEnum|Stringable|string|null $host,
+        BackedEnum|Stringable|string|int|null $port = null,
+        #[SensitiveParameter] BackedEnum|Stringable|string|null $userInfo = null
     ) {
         $this->host = !$host instanceof HostInterface ? Host::new($host) : $host;
         $this->port = !$port instanceof PortInterface ? Port::new($port) : $port;
@@ -53,7 +54,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * @throws SyntaxError If the component contains invalid HostInterface part.
      */
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(BackedEnum|Stringable|string|null $value = null): self
     {
         $components = UriString::parseAuthority(self::filterComponent($value));
 

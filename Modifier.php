@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri;
 
+use BackedEnum;
 use Deprecated;
 use Dom\HTMLDocument;
 use DOMDocument;
@@ -76,7 +77,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     {
     }
 
-    public static function wrap(Rfc3986Uri|WhatWgUrl|Stringable|string $uri): static
+    public static function wrap(Rfc3986Uri|WhatWgUrl|BackedEnum|Stringable|string $uri): static
     {
         return new static(match (true) {
             $uri instanceof self => $uri->uri,
@@ -169,12 +170,13 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return $html;
     }
 
-    public function resolve(Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface|Stringable|string $uri): static
+    public function resolve(Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface|BackedEnum|Stringable|string $uri): static
     {
         $uriString = match (true) {
             $uri instanceof Rfc3986Uri,
             $uri instanceof UriInterface => $uri->toString(),
             $uri instanceof WhatWgUrl => $uri->toAsciiString(),
+            $uri instanceof BackedEnum => (string) $uri->value,
             default => (string) $uri,
         };
 
@@ -223,7 +225,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         );
     }
 
-    public function withScheme(Stringable|string|null $scheme): static
+    public function withScheme(BackedEnum|Stringable|string|null $scheme): static
     {
         return new static($this->uri->withScheme(self::normalizeComponent($scheme, $this->uri)));
     }
@@ -243,10 +245,16 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         if ($this->uri instanceof WhatWgUrl) {
             if (null !== $username) {
+                if ($username instanceof BackedEnum) {
+                    $username = $username->value;
+                }
                 $username = (string) $username;
             }
 
             if (null !== $password) {
+                if ($password instanceof BackedEnum) {
+                    $password = $password->value;
+                }
                 $password = (string) $password;
             }
 
@@ -255,6 +263,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         if (null == $username && $this->uri instanceof Psr7UriInterface) {
             $username = '';
+        }
+
+        if ($username instanceof BackedEnum) {
+            $username = (string) $username->value;
+        }
+
+        if ($password instanceof BackedEnum) {
+            $password = (string) $password->value;
         }
 
         return new static($this->uri->withUserInfo(
@@ -287,7 +303,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return new static($this->uri->withUserInfo(self::MASK));
     }
 
-    public function withHost(Stringable|string|null $host): static
+    public function withHost(BackedEnum|Stringable|string|null $host): static
     {
         $host = self::normalizeComponent($host, $this->uri);
         if ($this->uri instanceof Rfc3986Uri) {
@@ -299,10 +315,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return new static($this->uri->withHost($host));
     }
 
-    public function withFragment(Stringable|string|null $fragment): static
+    public function withFragment(BackedEnum|Stringable|string|null $fragment): static
     {
         if ($fragment instanceof FragmentDirective) {
             $fragment = new FragmentDirectives($fragment);
+        }
+
+        if ($fragment instanceof BackedEnum) {
+            $fragment = (string) $fragment->value;
         }
 
         if (!$fragment instanceof FragmentInterface) {
@@ -323,9 +343,8 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return new static($this->uri->withPort($port));
     }
 
-    public function withPath(Stringable|string $path): static
+    public function withPath(BackedEnum|Stringable|string $path): static
     {
-        $path = (string) $path;
         if ($this->uri instanceof Rfc3986Uri) {
             $path = Encoder::encodePath($path);
         }
@@ -346,11 +365,21 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         } ?? $this;
     }
 
+    /**
+     * @param callable(self): void $callback A callback that receives this builder
+     */
+    public function tap(callable $callback): self
+    {
+        $callback($this);
+
+        return $this;
+    }
+
     /*********************************
      * Query modifier methods
      *********************************/
 
-    public function withQuery(Stringable|string|null $query): static
+    public function withQuery(BackedEnum|Stringable|string|null $query): static
     {
         $query = self::normalizeComponent($query, $this->uri);
         $query = match (true) {
@@ -413,7 +442,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Append the new query data to the existing URI query.
      */
-    public function appendQuery(Stringable|string|null $query): static
+    public function appendQuery(BackedEnum|Stringable|string|null $query): static
     {
         return $this->withQuery(Query::fromUri($this->uri)->append($query)->value());
     }
@@ -421,7 +450,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Prepend the new query data to the existing URI query.
      */
-    public function prependQuery(Stringable|string|null $query): static
+    public function prependQuery(BackedEnum|Stringable|string|null $query): static
     {
         return $this->withQuery(Query::fromUri($this->uri)->prepend($query)->value());
     }
@@ -470,7 +499,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Merge a new query with the existing URI query.
      */
-    public function mergeQuery(Stringable|string|null $query): static
+    public function mergeQuery(BackedEnum|Stringable|string|null $query): static
     {
         return $this->withQuery(Query::fromUri($this->uri)->merge($query)->value());
     }
@@ -542,7 +571,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Remove query pair according to their value.
      */
-    public function removeQueryPairsByValue(Stringable|string|int|float|bool|null ...$values): static
+    public function removeQueryPairsByValue(BackedEnum|Stringable|string|int|float|bool|null ...$values): static
     {
         $query = Query::fromUri($this->uri);
         $newQuery = $query->withoutPairByValue(...$values);
@@ -553,7 +582,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Remove query-pair according to their key/value name.
      */
-    public function removeQueryPairsByKeyValue(string $key, Stringable|string|int|bool|null $value): static
+    public function removeQueryPairsByKeyValue(string $key, BackedEnum|Stringable|string|int|bool|null $value): static
     {
         $query = Query::fromUri($this->uri);
         $newQuery = $query->withoutPairByKeyValue($key, $value);
@@ -603,7 +632,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         };
     }
 
-    public function replaceQueryPair(int $offset, string $key, Stringable|string|int|float|bool|null $value): static
+    public function replaceQueryPair(int $offset, string $key, BackedEnum|Stringable|string|int|float|bool|null $value): static
     {
         return $this->withQuery(Query::fromUri($this->uri)->replace($offset, $key, $value)->value());
     }
@@ -631,7 +660,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @throws SyntaxError If the host cannot be appended
      */
-    public function appendLabel(Stringable|string|null $label): static
+    public function appendLabel(BackedEnum|Stringable|string|null $label): static
     {
         $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
@@ -764,7 +793,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @throws SyntaxError If the host cannot be prepended
      */
-    public function prependLabel(Stringable|string|null $label): static
+    public function prependLabel(BackedEnum|Stringable|string|null $label): static
     {
         $host = $this->uri instanceof WhatWgUrl ? $this->uri->getAsciiHost() : $this->uri->getHost();
         $isAsciiDomain = null === $host || IdnaConverter::toAscii($host)->domain() === $host;
@@ -916,7 +945,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Add a new base path to the URI path.
      */
-    public function addBasePath(Stringable|string $path): static
+    public function addBasePath(BackedEnum|Stringable|string $path): static
     {
         /** @var HierarchicalPath $path */
         $path = HierarchicalPath::new($path)->withLeadingSlash();
@@ -958,7 +987,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Append a new path or add a path to the URI path.
      */
-    public function appendPath(Stringable|string $path): static
+    public function appendPath(BackedEnum|Stringable|string $path): static
     {
         return $this->withPath(HierarchicalPath::fromUri($this->uri)->append($path));
     }
@@ -966,7 +995,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Prepend a path or add a new path to the URI path.
      */
-    public function prependPath(Stringable|string $path): static
+    public function prependPath(BackedEnum|Stringable|string $path): static
     {
         return $this->withPath(HierarchicalPath::fromUri($this->uri)->prepend($path));
     }
@@ -974,7 +1003,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Append a list of segments or a new path to the URI path.
      *
-     * @param iterable<Stringable|string> $segments
+     * @param iterable<BackedEnum|Stringable|string> $segments
      */
     public function appendSegments(iterable $segments): static
     {
@@ -984,7 +1013,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Prepend a list of segments or a new path to the URI path.
      *
-     * @param iterable<Stringable|string> $segments
+     * @param iterable<BackedEnum|Stringable|string> $segments
      */
     public function prependSegments(iterable $segments): static
     {
@@ -1010,7 +1039,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Remove a base path from the URI path.
      */
-    public function removeBasePath(Stringable|string $path): static
+    public function removeBasePath(BackedEnum|Stringable|string $path): static
     {
         $basePath = HierarchicalPath::new($path)->withLeadingSlash()->toString();
         $currentPath = HierarchicalPath::fromUri($this->uri)->withLeadingSlash()->toString();
@@ -1072,7 +1101,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Replace the URI path basename.
      */
-    public function replaceBasename(Stringable|string $basename): static
+    public function replaceBasename(BackedEnum|Stringable|string $basename): static
     {
         return $this->withPath(HierarchicalPath::fromUri($this->uri)->withBasename($basename));
     }
@@ -1080,7 +1109,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Replace the data URI path parameters.
      */
-    public function replaceDataUriParameters(Stringable|string $parameters): static
+    public function replaceDataUriParameters(BackedEnum|Stringable|string $parameters): static
     {
         return $this->withPath(DataPath::fromUri($this->uri)->withParameters($parameters)->toString());
     }
@@ -1088,7 +1117,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Replace the URI path dirname.
      */
-    public function replaceDirname(Stringable|string $dirname): static
+    public function replaceDirname(BackedEnum|Stringable|string $dirname): static
     {
         return $this->withPath(HierarchicalPath::fromUri($this->uri)->withDirname($dirname));
     }
@@ -1096,7 +1125,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Replace the URI path basename extension.
      */
-    public function replaceExtension(Stringable|string $extension): static
+    public function replaceExtension(BackedEnum|Stringable|string $extension): static
     {
         return $this->withPath(HierarchicalPath::fromUri($this->uri)->withExtension($extension)->toString());
     }
@@ -1104,7 +1133,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Replace a segment from the URI path according its offset.
      */
-    public function replaceSegment(int $offset, Stringable|string $segment): static
+    public function replaceSegment(int $offset, BackedEnum|Stringable|string $segment): static
     {
         return $this->withPath(HierarchicalPath::fromUri($this->uri)->withSegment($offset, $segment)->toString());
     }
@@ -1161,7 +1190,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      * Example: redactPathSegments('john')
      *  /api/user/john/orders -> /api/user/[REDACTED]/orders
      */
-    public function redactPathSegments(string ...$segments): static
+    public function redactPathSegments(BackedEnum|Stringable|string ...$segments): static
     {
         if ([] === $segments || [] === ($path = [...HierarchicalPath::fromUri($this->uri)])) {
             return $this;
@@ -1169,7 +1198,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         $hasChanged = false;
         foreach ($segments as $segment) {
-            foreach (array_keys($path, $segment, true) as $key) {
+            if ($segment instanceof BackedEnum) {
+                $segment = $segment->value;
+            }
+
+            foreach (array_keys($path, (string) $segment, true) as $key) {
                 $hasChanged = true;
                 $path[$key] = self::MASK;
             }
@@ -1188,7 +1221,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      * Example: redactPathNextSegments('john')
      *   /api/users/john/orders/55/details → /api/users/john/[REDACTED]/55/details
      */
-    public function redactPathNextSegments(string ...$segments): static
+    public function redactPathNextSegments(BackedEnum|Stringable|string ...$segments): static
     {
         if ([] === $segments || [] === ($path = [...HierarchicalPath::fromUri($this->uri)])) {
             return $this;
@@ -1196,7 +1229,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         $hasChanged = false;
         foreach ($segments as $segment) {
-            foreach (array_keys($path, $segment, true) as $key) {
+            if ($segment instanceof BackedEnum) {
+                $segment = $segment->value;
+            }
+            foreach (array_keys($path, (string) $segment, true) as $key) {
                 $nextKey = $key + 1;
                 if (!in_array($path[$nextKey] ?? null, [null, self::MASK], true)) {
                     $hasChanged = true;
@@ -1253,9 +1289,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * null value MUST be converted to the empty string if a Psr7 UriInterface is being manipulated.
      */
-    final protected static function normalizeComponent(Stringable|string|null $component, Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface $uri): ?string
+    final protected static function normalizeComponent(BackedEnum|Stringable|string|null $component, Rfc3986Uri|WhatWgUrl|Psr7UriInterface|UriInterface $uri): ?string
     {
         return match (true) {
+            $component instanceof BackedEnum => (string) $component->value,
             $uri instanceof Psr7UriInterface,
             $component instanceof Stringable => (string) $component,
             default => $component,
@@ -1280,47 +1317,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return Uri::new($this->uri)->toDisplayString();
     }
 
-    /**
-     * DEPRECATION WARNING! This method will be removed in the next major point release.
-     *
-     * @deprecated Since version 7.6.0
-     * @codeCoverageIgnore
-     * @see Modifier::displayUriString()
-     *
-     * Remove query data according to their key name.
-     */
-    #[Deprecated(message:'use League\Uri\Modifier::displayUriString() instead', since:'league/uri-components:7.6.0')]
-    public function getIdnUriString(): string
-    {
-        if ($this->uri instanceof WhatWgUrl) {
-            return $this->uri->toUnicodeString();
-        }
-
-        $currentHost = $this->uri->getHost();
-        if (null === $currentHost || '' === $currentHost) {
-            return $this->toString();
-        }
-
-        $host = IdnaConverter::toUnicode($currentHost)->domain();
-        if ($host === $currentHost) {
-            return $this->toString();
-        }
-
-        $components = match (true) {
-            $this->uri instanceof Rfc3986Uri => UriString::parse($this->uri->toRawString()),
-            $this->uri instanceof UriInterface => $this->uri->toComponents(),
-            default => UriString::parse($this->uri),
-        };
-        $components['host'] = $host;
-
-        return UriString::build($components);
-    }
-
     /*********************************
      * Fragment modifier methods
      *********************************/
 
-    public function appendFragmentDirectives(FragmentDirectives|FragmentDirective|Stringable|string ...$directives): static
+    public function appendFragmentDirectives(FragmentDirectives|FragmentDirective|BackedEnum|Stringable|string ...$directives): static
     {
         return $this->applyFragmentChanges(FragmentDirectives::fromUri($this->unwrap())->append(...$directives));
     }
@@ -1378,6 +1379,42 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     public function retainFragmentDirectives(): static
     {
         return $this->withFragment(FragmentDirectives::fromUri($this->unwrap()));
+    }
+
+    /**
+     * DEPRECATION WARNING! This method will be removed in the next major point release.
+     *
+     * @deprecated Since version 7.6.0
+     * @codeCoverageIgnore
+     * @see Modifier::displayUriString()
+     *
+     * Remove query data according to their key name.
+     */
+    #[Deprecated(message:'use League\Uri\Modifier::displayUriString() instead', since:'league/uri-components:7.6.0')]
+    public function getIdnUriString(): string
+    {
+        if ($this->uri instanceof WhatWgUrl) {
+            return $this->uri->toUnicodeString();
+        }
+
+        $currentHost = $this->uri->getHost();
+        if (null === $currentHost || '' === $currentHost) {
+            return $this->toString();
+        }
+
+        $host = IdnaConverter::toUnicode($currentHost)->domain();
+        if ($host === $currentHost) {
+            return $this->toString();
+        }
+
+        $components = match (true) {
+            $this->uri instanceof Rfc3986Uri => UriString::parse($this->uri->toRawString()),
+            $this->uri instanceof UriInterface => $this->uri->toComponents(),
+            default => UriString::parse($this->uri),
+        };
+        $components['host'] = $host;
+
+        return UriString::build($components);
     }
 
     /**

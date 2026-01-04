@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components\FragmentDirectives;
 
+use BackedEnum;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
@@ -36,8 +37,12 @@ final class GenericDirective implements FragmentDirective
     /**
      * Create a new instance from a string without the Directive delimiter (:~:) or a separator (&).
      */
-    public static function fromString(Stringable|string $value): self
+    public static function fromString(BackedEnum|Stringable|string $value): self
     {
+        if ($value instanceof BackedEnum) {
+            $value = (string) $value->value;
+        }
+
         [$name, $value] = explode('=', (string) $value, 2) + [1 => null];
         (null !== $name && '' !== $name && !str_contains($name, '&')) || throw new SyntaxError('The submitted text is not a valid directive.');
 

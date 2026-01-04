@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace League\Uri\Components;
 
+use BackedEnum;
 use Deprecated;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\IpHostInterface;
@@ -51,13 +52,13 @@ final class Host extends Component implements IpHostInterface
     private readonly ?string $value;
     private readonly HostRecord $host;
 
-    private function __construct(Stringable|string|null $host)
+    private function __construct(BackedEnum|Stringable|string|null $host)
     {
         $this->host = HostRecord::from($host);
         $this->value = $this->host->toAscii();
     }
 
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(BackedEnum|Stringable|string|null $value = null): self
     {
         return new self($value);
     }
