@@ -366,7 +366,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     }
 
     /**
-     * @param callable(self): void $callback A callback that receives this builder
+     * Executes the given callback with the current instance
+     * and returns the current instance.
+     *
+     * @param callable(self): void $callback
      */
     public function tap(callable $callback): self
     {

@@ -28,7 +28,6 @@ use Uri\WhatWg\Url as WhatWgUrl;
 
 use function is_bool;
 use function preg_match;
-use function similar_text;
 use function sprintf;
 
 abstract class Component implements UriComponentInterface, Conditionable
@@ -118,7 +117,10 @@ abstract class Component implements UriComponentInterface, Conditionable
     }
 
     /**
-     * @param callable(self): void $callback A callback that receives this builder
+     * Executes the given callback with the current instance
+     * and returns the current instance.
+     *
+     * @param callable(self): void $callback
      */
     final public function tap(callable $callback): self
     {

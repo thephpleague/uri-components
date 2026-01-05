@@ -16,8 +16,6 @@ namespace League\Uri\Components;
 use BackedEnum;
 use Deprecated;
 use Iterator;
-use IteratorAggregate;
-use IteratorIterator;
 use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
@@ -41,7 +39,6 @@ use Uri\WhatWg\Url as WhatWgUrl;
 use ValueError;
 
 use function array_column;
-use function array_count_values;
 use function array_filter;
 use function array_flip;
 use function array_intersect;
