@@ -82,6 +82,11 @@ final class GenericDirective implements FragmentDirective
         return $this->toString();
     }
 
+    public function toFragmentValue(): string
+    {
+        return ':~:'.$this->toString();
+    }
+
     public function equals(mixed $directive): bool
     {
         if (!$directive instanceof Stringable && !is_string($directive)) {

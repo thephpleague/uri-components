@@ -162,6 +162,11 @@ final class TextDirective implements FragmentDirective
         return $this->toString();
     }
 
+    public function toFragmentValue(): string
+    {
+        return ':~:'.$this->toString();
+    }
+
     public function equals(mixed $directive): bool
     {
         if (!$directive instanceof Stringable && !$directive instanceof BackedEnum && !is_string($directive)) {
