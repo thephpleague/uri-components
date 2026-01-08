@@ -115,17 +115,4 @@ abstract class Component implements UriComponentInterface, Conditionable
             default => $this,
         } ?? $this;
     }
-
-    /**
-     * Executes the given callback with the current instance
-     * and returns the current instance.
-     *
-     * @param callable(self): void $callback
-     */
-    final public function tap(callable $callback): self
-    {
-        $callback($this);
-
-        return $this;
-    }
 }
