@@ -48,7 +48,7 @@ final class Domain extends Component implements DomainHostInterface
     /** @var string[] */
     private readonly array $labels;
 
-    private function __construct(Stringable|string|null $host)
+    private function __construct(BackedEnum|Stringable|string|null $host)
     {
         $host = match (true) {
             $host instanceof HostInterface => $host,
@@ -67,7 +67,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(Stringable|string|null $value = null): self
+    public static function new(BackedEnum|Stringable|string|null $value = null): self
     {
         return new self($value);
     }
@@ -75,7 +75,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -87,7 +87,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Returns a new instance from an iterable structure.
      */
-    public static function fromLabels(Stringable|string ...$labels): self
+    public static function fromLabels(BackedEnum|Stringable|string ...$labels): self
     {
         return new self(match ([]) {
             $labels => null,
@@ -101,7 +101,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         return self::new(Host::fromUri($uri));
     }
@@ -109,7 +109,7 @@ final class Domain extends Component implements DomainHostInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(Stringable|string $authority): self
+    public static function fromAuthority(BackedEnum|Stringable|string $authority): self
     {
         return self::new(Host::fromAuthority($authority));
     }
@@ -215,8 +215,12 @@ final class Domain extends Component implements DomainHostInterface
         return $this->labels[$offset] ?? null;
     }
 
-    public function keys(?string $label = null): array
+    public function keys(BackedEnum|Stringable|string|null $label = null): array
     {
+        if ($label instanceof BackedEnum) {
+            $label = (string) $label->value;
+        }
+
         return match (null) {
             $label => array_keys($this->labels),
             default => array_keys($this->labels, $label, true),

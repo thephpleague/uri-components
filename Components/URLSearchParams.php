@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use ArgumentCountError;
+use BackedEnum;
 use Closure;
 use Countable;
 use Deprecated;
@@ -74,6 +75,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         $pairs = self::filterPairs(match (true) {
             $init instanceof self,
             $init instanceof QueryInterface => $init,
+            $init instanceof BackedEnum => self::parsePairs($init),
             $init instanceof UriComponentInterface => self::parsePairs($init->value()),
             is_iterable($init) => self::formatIterable($init),
             $init instanceof Stringable, !is_object($init) => self::parsePairs(self::formatQuery($init)),
@@ -86,7 +88,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * @return array<int, array{0:string, 1:string|null}>
      */
-    private static function parsePairs(string|null $query): array
+    private static function parsePairs(BackedEnum|Stringable|string|null $query): array
     {
         return QueryString::parseFromValue($query, Converter::fromFormData());
     }
@@ -143,13 +145,18 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         }
     }
 
-    private static function formatQuery(Stringable|string|null $query): string
+    private static function formatQuery(BackedEnum|Stringable|string|null $query): string
     {
-        return match (true) {
-            null === $query => '',
-            str_starts_with((string) $query, '?') => substr((string) $query, 1),
-            default => (string) $query,
-        };
+        if ($query instanceof BackedEnum) {
+            $query = $query->value;
+        }
+
+        $query = (string) $query;
+        if (str_starts_with($query, '?')) {
+            return substr($query, 1);
+        }
+
+        return $query;
     }
 
     /**
@@ -174,7 +181,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * The input will be parsed from application/x-www-form-urlencoded format.
      * The leading '?' character if present is ignored.
      */
-    public static function new(Stringable|string|null $query = null): self
+    public static function new(BackedEnum|Stringable|string|null $query = null): self
     {
         return new self(Query::fromFormData(self::formatQuery($query)));
     }
@@ -182,7 +189,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -217,7 +224,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Returns a new instance from a URI.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         $query = match (true) {
             $uri instanceof Rfc3986Uri => $uri->getRawQuery(),

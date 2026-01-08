@@ -71,7 +71,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -83,7 +83,7 @@ final class Authority extends Component implements AuthorityInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatwgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatwgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
         if ($uri instanceof Rfc3986Uri) {
@@ -210,7 +210,7 @@ final class Authority extends Component implements AuthorityInterface
         ];
     }
 
-    public function withHost(Stringable|string|null $host): AuthorityInterface
+    public function withHost(BackedEnum|Stringable|string|null $host): AuthorityInterface
     {
         if (!$host instanceof HostInterface) {
             $host = Host::new($host);
@@ -222,7 +222,7 @@ final class Authority extends Component implements AuthorityInterface
         };
     }
 
-    public function withPort(Stringable|string|int|null $port): AuthorityInterface
+    public function withPort(BackedEnum|Stringable|string|int|null $port): AuthorityInterface
     {
         if (!$port instanceof PortInterface) {
             $port = Port::new($port);
@@ -234,8 +234,10 @@ final class Authority extends Component implements AuthorityInterface
         };
     }
 
-    public function withUserInfo(Stringable|string|null $user, #[SensitiveParameter] Stringable|string|null $password = null): AuthorityInterface
-    {
+    public function withUserInfo(
+        BackedEnum|Stringable|string|null $user,
+        #[SensitiveParameter] BackedEnum|Stringable|string|null $password = null
+    ): AuthorityInterface {
         $userInfo = new UserInfo($user, $password);
 
         return match ($this->userInfo->value()) {

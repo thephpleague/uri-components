@@ -40,8 +40,8 @@ final class UserInfo extends Component implements UserInfoInterface
      * New instance.
      */
     public function __construct(
-        Stringable|string|null $username,
-        #[SensitiveParameter] Stringable|string|null $password = null,
+        BackedEnum|Stringable|string|null $username,
+        #[SensitiveParameter] BackedEnum|Stringable|string|null $password = null,
     ) {
         $this->username = $this->validateComponent($username);
         $this->password = $this->validateComponent($password);
@@ -50,7 +50,7 @@ final class UserInfo extends Component implements UserInfoInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(Rfc3986Uri|WhatWgUrl|Stringable|string $uri): self
+    public static function fromUri(Rfc3986Uri|WhatWgUrl|BackedEnum|Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
         if ($uri instanceof Rfc3986Uri) {

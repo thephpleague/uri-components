@@ -81,8 +81,12 @@ final class Host extends Component implements IpHostInterface
      * @throws MissingFeature If detecting IPv4 is not possible
      * @throws SyntaxError If the $ip cannot be converted into a Host
      */
-    public static function fromIp(Stringable|string $ip, string $version = ''): self
+    public static function fromIp(BackedEnum|Stringable|string $ip, string $version = ''): self
     {
+        if ($ip instanceof BackedEnum) {
+            $ip = $ip->value;
+        }
+
         if ('' !== $version) {
             return new self('[v'.$version.'.'.$ip.']');
         }
@@ -109,7 +113,7 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         $uri = self::filterUri($uri);
 
@@ -124,7 +128,7 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(Stringable|string $authority): self
+    public static function fromAuthority(BackedEnum|Stringable|string $authority): self
     {
         return match (true) {
             $authority instanceof AuthorityInterface => new self($authority->getHost()),

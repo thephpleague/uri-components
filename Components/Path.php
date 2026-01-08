@@ -38,7 +38,7 @@ final class Path extends Component implements PathInterface
     /**
      * New instance.
      */
-    private function __construct(Stringable|string $path)
+    private function __construct(BackedEnum|Stringable|string $path)
     {
         $this->path = $this->validate($path);
     }
@@ -46,7 +46,7 @@ final class Path extends Component implements PathInterface
     /**
      * Validate the component content.
      */
-    private function validate(Stringable|string $path): string
+    private function validate(BackedEnum|Stringable|string $path): string
     {
         return (string) $this->validateComponent($path);
     }
@@ -56,10 +56,6 @@ final class Path extends Component implements PathInterface
      */
     public static function new(BackedEnum|Stringable|string $value = ''): self
     {
-        if ($value instanceof BackedEnum) {
-            $value = (string) $value->value;
-        }
-
         return new self($value);
     }
 

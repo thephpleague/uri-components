@@ -68,7 +68,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * New instance.
      */
-    private function __construct(Stringable|string $path)
+    private function __construct(BackedEnum|Stringable|string $path)
     {
         /** @var string $path */
         $path = self::filterComponent($path);
@@ -174,7 +174,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Returns a new instance from a string or a stringable object.
      */
-    public static function new(Stringable|string $value = ''): self
+    public static function new(BackedEnum|Stringable|string $value = ''): self
     {
         return new self($value);
     }
@@ -182,7 +182,7 @@ final class DataPath extends Component implements DataPathInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string $uri = ''): ?self
+    public static function tryNew(BackedEnum|Stringable|string $uri = ''): ?self
     {
         try {
             return self::new($uri);

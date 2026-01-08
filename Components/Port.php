@@ -53,7 +53,7 @@ final class Port extends Component implements PortInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -65,7 +65,7 @@ final class Port extends Component implements PortInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         return new self(self::filterUri($uri)->getPort());
     }
@@ -73,7 +73,7 @@ final class Port extends Component implements PortInterface
     /**
      * Create a new instance from an Authority object.
      */
-    public static function fromAuthority(Stringable|string $authority): self
+    public static function fromAuthority(BackedEnum|Stringable|string|null $authority): self
     {
         return match (true) {
             $authority instanceof AuthorityInterface => new self($authority->getPort()),
@@ -111,7 +111,7 @@ final class Port extends Component implements PortInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
             return false;
         }
 

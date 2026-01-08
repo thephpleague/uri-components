@@ -87,7 +87,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string $uri = ''): ?self
+    public static function tryNew(BackedEnum|Stringable|string $uri = ''): ?self
     {
         try {
             return self::new($uri);
@@ -99,7 +99,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     /**
      * Create a new instance from a URI object.
      */
-    public static function fromUri(WhatWgUrl|Rfc3986Uri|Stringable|string $uri): self
+    public static function fromUri(WhatWgUrl|Rfc3986Uri|BackedEnum|Stringable|string $uri): self
     {
         return new self(Path::fromUri($uri));
     }
@@ -218,19 +218,19 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->get(-1);
     }
 
-    public function indexOf(string $segment): ?int
+    public function indexOf(BackedEnum|Stringable|string $segment): ?int
     {
         return $this->keys($segment)[0] ?? null;
     }
 
-    public function lastIndexOf(string $segment): ?int
+    public function lastIndexOf(BackedEnum|Stringable|string $segment): ?int
     {
         $res = $this->keys($segment);
 
         return $res[count($res) - 1] ?? null;
     }
 
-    public function contains(string $segment): bool
+    public function contains(BackedEnum|Stringable|string $segment): bool
     {
         return [] !== $this->keys($segment);
     }
@@ -249,7 +249,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         return $this->segments[$offset] ?? null;
     }
 
-    public function keys(Stringable|string|null $segment = null): array
+    public function keys(BackedEnum|Stringable|string|null $segment = null): array
     {
         $segment = self::filterComponent($segment);
 
