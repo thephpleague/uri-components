@@ -39,6 +39,7 @@ use function count;
 use function explode;
 use function implode;
 use function sprintf;
+use function str_ends_with;
 
 final class Domain extends Component implements DomainHostInterface
 {
@@ -230,6 +231,76 @@ final class Domain extends Component implements DomainHostInterface
     public function isAbsolute(): bool
     {
         return count($this->labels) > 1 && '' === $this->labels[array_key_first($this->labels)];
+    }
+
+    public function isSubdomainOf(BackedEnum|Stringable|string|null $parentHost): bool
+    {
+        if ($this->isEmpty()) {
+            return false;
+        }
+
+        if (!$parentHost instanceof self) {
+            $parentHost = self::tryNew($parentHost);
+        }
+
+        return null !== $parentHost
+            && !$parentHost->isEmpty()
+            && count($this) > count($parentHost)
+            && str_ends_with((string) $this->withoutRootLabel()->toAscii(), '.'.$parentHost->withoutRootLabel()->toAscii());
+    }
+
+    public function hasSubdomain(BackedEnum|Stringable|string|null $childHost): bool
+    {
+        if (!$childHost instanceof self) {
+            $childHost = self::tryNew($childHost);
+        }
+
+        return ($childHost?->isSubdomainOf($this)) ?? false;
+    }
+
+    public function isSiblingOf(BackedEnum|Stringable|string|null $siblingHost): bool
+    {
+        if (!$siblingHost instanceof self) {
+            $siblingHost = self::tryNew($siblingHost);
+        }
+
+        return null !== $siblingHost
+            && count($this) >= 1
+            && count($siblingHost) >= 1
+            && !$this->equals($siblingHost)
+            && $this->parentHost()->equals($siblingHost->parentHost());
+    }
+
+    public function parentHost(): DomainHostInterface
+    {
+        return $this
+            ->withoutRootLabel()
+            ->slice(0, -1);
+    }
+
+    public function commonAncestorWith(BackedEnum|Stringable|string|null $other): DomainHostInterface
+    {
+        if (!$other instanceof self) {
+            $other = self::tryNew($other);
+        }
+
+        if (null === $other) {
+            return Domain::new();
+        }
+
+        $other = $other->withoutRootLabel();
+        $current = $this->withoutRootLabel();
+        $labels = [];
+        /** @var int $offset */
+        foreach ($current as $offset => $label) {
+            if ($label !== $other->get($offset)) {
+                break;
+            }
+
+            $labels[] = $label;
+        }
+
+        return Domain::fromLabels(...$labels);
     }
 
     public function prepend(BackedEnum|Stringable|string|int|null $label): DomainHostInterface

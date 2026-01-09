@@ -6,6 +6,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Added
 
+- Added support for `BackedEnum`
 - `Query::hasList`
 - `Query::getList`
 - `Query::withList`
@@ -22,8 +23,12 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Query::keyAt`
 - `Query::pair`
 - `URLSearchParams::countDistinctKeys`
-- Added support for `BackedEnum`
-- Added `tap` method to All Uri Component classes
+- `URLSearchParams::tap`
+- `Domain::isSubdomainOf`
+- `Domain::hasSubdomain`
+- `Domain::isSiblingOf`
+- `Domain::parentHos`
+- `Domain::commonAncestorWith`
 
 ### Fixed
 

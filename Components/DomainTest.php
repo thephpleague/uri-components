@@ -21,6 +21,7 @@ use League\Uri\Uri;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 
@@ -479,5 +480,314 @@ final class DomainTest extends TestCase
         self::expectException(SyntaxError::class);
 
         Domain::new(str_repeat('A', 255));
+    }
+
+    #[DataProvider('provideSubdomainCases')]
+    public function test_is_subdomain_of(
+        string $child,
+        string $parent,
+        bool $expected
+    ): void {
+        $domain = Domain::tryNew($child);
+
+        self::assertInstanceOf(Domain::class, $domain);
+        self::assertSame($expected, $domain->isSubdomainOf($parent), sprintf('"%s" isSubDomainOf "%s"', $child, $parent));
+    }
+
+    public static function provideSubdomainCases(): iterable
+    {
+        yield 'direct subdomain' => [
+            'foo.example.com',
+            'example.com',
+            true,
+        ];
+
+        yield 'nested subdomain' => [
+            'bar.foo.example.com',
+            'example.com',
+            true,
+        ];
+
+        yield 'identical domain' => [
+            'example.com',
+            'example.com',
+            false,
+        ];
+
+        yield 'parent is child' => [
+            'example.com',
+            'foo.example.com',
+            false,
+        ];
+
+        yield 'sibling domain' => [
+            'foo.example.com',
+            'bar.example.com',
+            false,
+        ];
+
+        yield 'similar suffix but not subdomain' => [
+            'evil-example.com',
+            'example.com',
+            false,
+        ];
+
+        yield 'tld only parent' => [
+            'example.com',
+            'com',
+            true,
+        ];
+
+        yield 'invalid parent domain' => [
+            'foo.example.com',
+            'not a domain',
+            false,
+        ];
+    }
+
+    #[DataProvider('provideHasSubdomainCases')]
+    public function test_has_subdomain(
+        string $parent,
+        string $child,
+        bool $expected
+    ): void {
+        $domain = Domain::tryNew($parent);
+
+        self::assertInstanceOf(Domain::class, $domain);
+        self::assertSame($expected, $domain->hasSubdomain($child), sprintf('"%s" hasSubdomain "%s"', $parent, $child));
+    }
+
+    public static function provideHasSubdomainCases(): iterable
+    {
+        yield 'direct subdomain' => [
+            'example.com',
+            'foo.example.com',
+            true,
+        ];
+
+        yield 'nested subdomain' => [
+            'example.com',
+            'bar.foo.example.com',
+            true,
+        ];
+
+        yield 'identical domain' => [
+            'example.com',
+            'example.com',
+            false,
+        ];
+
+        yield 'parent passed as child' => [
+            'foo.example.com',
+            'example.com',
+            false,
+        ];
+
+        yield 'sibling domain' => [
+            'foo.example.com',
+            'bar.example.com',
+            false,
+        ];
+
+        yield 'unrelated domain' => [
+            'example.com',
+            'evil.com',
+            false,
+        ];
+
+        yield 'suffix collision' => [
+            'example.com',
+            'evil-example.com',
+            false,
+        ];
+    }
+
+    public function test_symmetry_with_is_subdomain_of_with_idn_and_rooted_hosts(): void
+    {
+        $parent = Domain::new('bébê.com');
+        $child = Domain::new('foo.xn--bb-bjaf.com.');
+
+        self::assertTrue($child->isSubdomainOf($parent));
+        self::assertTrue($parent->hasSubdomain($child));
+        self::assertFalse($parent->isSubdomainOf($child));
+        self::assertFalse($child->hasSubdomain($parent));
+    }
+
+    public function test_sibling_is_symmetric(): void
+    {
+        $a = Domain::new('foo.example.com');
+        $b = Domain::new('bar.example.com');
+
+        self::assertTrue($a->isSiblingOf($b));
+        self::assertTrue($b->isSiblingOf($a));
+    }
+
+    public function test_parent_and_child_are_not_siblings(): void
+    {
+        $parent = Domain::new('example.com');
+        $child  = Domain::new('foo.example.com');
+
+        self::assertFalse($parent->isSiblingOf($child));
+        self::assertFalse($child->isSiblingOf($parent));
+    }
+
+    public function test_identical_domains_are_not_siblings(): void
+    {
+        $domain = Domain::new('foo.example.com');
+
+        self::assertFalse($domain->isSiblingOf($domain));
+    }
+
+    #[DataProvider('provideSiblingCases')]
+    public function test_is_sibling_of(string $hostA, string $hostB, bool $expected): void
+    {
+        self::assertSame(
+            $expected,
+            Domain::new($hostA)->isSiblingOf($hostB),
+            sprintf('"%s" isSiblingOf "%s"', $hostA, $hostB)
+        );
+    }
+
+    public static function provideSiblingCases(): iterable
+    {
+        // ✅ True siblings
+        yield 'simple siblings' => [
+            'foo.example.com',
+            'bar.example.com',
+            true,
+        ];
+
+        yield 'multi-level siblings' => [
+            'a.b.example.com',
+            'c.b.example.com',
+            true,
+        ];
+
+        // ❌ Parent vs child
+        yield 'parent vs child' => [
+            'example.com',
+            'foo.example.com',
+            false,
+        ];
+
+        yield 'child vs parent' => [
+            'foo.example.com',
+            'example.com',
+            false,
+        ];
+
+        // ❌ Identical hosts
+        yield 'identical hosts' => [
+            'foo.example.com',
+            'foo.example.com',
+            false,
+        ];
+
+        // ❌ Different parents
+        yield 'different parents' => [
+            'foo.example.com',
+            'bar.example.org',
+            false,
+        ];
+
+        // ✅ Only TLDs
+        yield 'only tld hosts' => [
+            'com',
+            'org',
+            true,
+        ];
+
+        // ✅ IDN siblings
+        yield 'idn siblings' => [
+            'bébê.com',
+            'fôo.com',
+            true,
+        ];
+
+        // ✅ Trailing dots
+        yield 'siblings with trailing dots' => [
+            'foo.example.com.',
+            'bar.example.com.',
+            true,
+        ];
+
+        // ❌ Multi-level vs shallow
+        yield 'grandchild vs child' => [
+            'baz.foo.example.com',
+            'bar.example.com',
+            false,
+        ];
+    }
+
+    #[Test]
+    public function it_returns_the_lowest_common_ancestor_of_two_domains(): void
+    {
+        $a = Domain::new('foo.example.com');
+        $b = Domain::new('bar.example.com');
+
+        self::assertSame('example.com', $a->commonAncestorWith($b)->toAscii());
+    }
+
+    #[Test]
+    public function it_returns_the_deepest_shared_parent(): void
+    {
+        $a = Domain::new('a.b.example.com');
+        $b = Domain::new('c.b.example.com');
+
+        self::assertSame('b.example.com', $a->commonAncestorWith($b)->toAscii());
+    }
+
+    #[Test]
+    public function it_returns_the_parent_when_one_domain_is_a_subdomain_of_the_other(): void
+    {
+        $parent = Domain::new('example.com');
+        $child  = Domain::new('foo.example.com');
+
+        self::assertSame('example.com', $parent->commonAncestorWith($child)->toAscii());
+        self::assertSame('example.com', $child->commonAncestorWith($parent)->toAscii());
+    }
+
+    #[Test]
+    public function it_returns_itself_when_domains_are_identical(): void
+    {
+        $domain = Domain::new('foo.example.com');
+
+        self::assertSame('foo.example.com', $domain->commonAncestorWith($domain)->toAscii());
+    }
+
+    #[Test]
+    public function it_returns_the_root_when_there_is_no_common_ancestor(): void
+    {
+        $a = Domain::new('example.com');
+        $b = Domain::new('example.org');
+
+        self::assertTrue($a->commonAncestorWith($b)->isEmpty());
+    }
+
+    #[Test]
+    public function it_supports_idn_and_trailing_dot_normalization(): void
+    {
+        $a = Domain::new('foo.bébê.com');
+        $b = Domain::new('bar.xn--bb-bjaf.com.');
+
+        self::assertSame('xn--bb-bjaf.com', $a->commonAncestorWith($b)->toAscii());
+    }
+
+    #[Test]
+    public function it_returns_root_when_other_host_is_null_or_invalid(): void
+    {
+        $domain = Domain::new('example.com');
+
+        self::assertTrue($domain->commonAncestorWith(null)->isEmpty());
+        self::assertTrue($domain->commonAncestorWith('not a host')->isEmpty());
+    }
+
+    #[Test]
+    public function it_is_symmetric(): void
+    {
+        $a = Domain::new('a.b.example.com');
+        $b = Domain::new('c.b.example.com');
+
+        self::assertTrue($a->commonAncestorWith($b)->equals($b->commonAncestorWith($a)));
     }
 }

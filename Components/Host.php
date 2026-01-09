@@ -66,7 +66,7 @@ final class Host extends Component implements IpHostInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
     {
         try {
             return self::new($uri);
@@ -143,7 +143,7 @@ final class Host extends Component implements IpHostInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
             return false;
         }
 
@@ -154,7 +154,7 @@ final class Host extends Component implements IpHostInterface
             }
         }
 
-        return $value->getUriComponent() === $this->getUriComponent();
+        return rtrim($value->getUriComponent(), '.') === rtrim($this->getUriComponent(), '.');
     }
 
     public function toAscii(): ?string
