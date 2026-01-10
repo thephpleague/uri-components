@@ -185,7 +185,7 @@ final class Authority extends Component implements AuthorityInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
             return false;
         }
 

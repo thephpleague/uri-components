@@ -185,19 +185,19 @@ final class Domain extends Component implements DomainHostInterface
         return $this->get(-1);
     }
 
-    public function indexOf(string $label): ?int
+    public function indexOf(BackedEnum|Stringable|string $label): ?int
     {
         return $this->keys($label)[0] ?? null;
     }
 
-    public function lastIndexOf(string $label): ?int
+    public function lastIndexOf(BackedEnum|Stringable|string $label): ?int
     {
         $res = $this->keys($label);
 
         return $res[count($res) - 1] ?? null;
     }
 
-    public function contains(string $label): bool
+    public function contains(BackedEnum|Stringable|string $label): bool
     {
         return [] !== $this->keys($label);
     }
@@ -246,7 +246,7 @@ final class Domain extends Component implements DomainHostInterface
         return null !== $parentHost
             && !$parentHost->isEmpty()
             && count($this) > count($parentHost)
-            && str_ends_with((string) $this->withoutRootLabel()->toAscii(), '.'.$parentHost->withoutRootLabel()->toAscii());
+            && str_ends_with(''.$this->withoutRootLabel()->toAscii(), '.'.$parentHost->withoutRootLabel()->toAscii());
     }
 
     public function hasSubdomain(BackedEnum|Stringable|string|null $childHost): bool
@@ -265,17 +265,15 @@ final class Domain extends Component implements DomainHostInterface
         }
 
         return null !== $siblingHost
-            && count($this) >= 1
-            && count($siblingHost) >= 1
+            && !$this->isEmpty()
+            && !$siblingHost->isEmpty()
             && !$this->equals($siblingHost)
             && $this->parentHost()->equals($siblingHost->parentHost());
     }
 
     public function parentHost(): DomainHostInterface
     {
-        return $this
-            ->withoutRootLabel()
-            ->slice(0, -1);
+        return $this->withoutRootLabel()->slice(0, -1);
     }
 
     public function commonAncestorWith(BackedEnum|Stringable|string|null $other): DomainHostInterface

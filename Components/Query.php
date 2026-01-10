@@ -448,7 +448,7 @@ final class Query extends Component implements QueryInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
             return false;
         }
 

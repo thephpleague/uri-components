@@ -101,7 +101,7 @@ final class Path extends Component implements PathInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !is_string($value)) {
+        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value)) {
             return false;
         }
 

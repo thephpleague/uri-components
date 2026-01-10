@@ -164,7 +164,7 @@ final class Scheme extends Component
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof Stringable && !$value instanceof BackedEnum && !is_string($value) && null !== $value) {
+        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
             return false;
         }
 
