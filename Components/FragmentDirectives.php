@@ -17,8 +17,10 @@ use BackedEnum;
 use Countable;
 use IteratorAggregate;
 use League\Uri\Components\FragmentDirectives\DirectiveString;
+use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\FragmentInterface;
+use League\Uri\Contracts\Transformable;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
@@ -57,7 +59,7 @@ use const ARRAY_FILTER_USE_BOTH;
  *
  * @implements IteratorAggregate<int, FragmentDirective>
  */
-final class FragmentDirectives implements FragmentInterface, IteratorAggregate, Countable
+final class FragmentDirectives implements FragmentInterface, IteratorAggregate, Countable, Conditionable, Transformable
 {
     public const DELIMITER = ':~:';
     public const SEPARATOR = '&';
@@ -385,7 +387,7 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
         return new self(...$directives);
     }
 
-    public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): self
+    public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): static
     {
         if (!is_bool($condition)) {
             $condition = $condition($this);
@@ -396,5 +398,10 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
             null !== $onFail => $onFail($this),
             default => $this,
         } ?? $this;
+    }
+
+    public function transform(callable $callback): static
+    {
+        return $callback($this);
     }
 }

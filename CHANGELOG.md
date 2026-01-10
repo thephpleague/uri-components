@@ -29,6 +29,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 - `Domain::isSiblingOf`
 - `Domain::parentHos`
 - `Domain::commonAncestorWith`
+- Added `transform` method to Immutable classes
 
 ### Fixed
 

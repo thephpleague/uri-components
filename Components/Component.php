@@ -15,6 +15,7 @@ namespace League\Uri\Components;
 
 use BackedEnum;
 use League\Uri\Contracts\Conditionable;
+use League\Uri\Contracts\Transformable;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
@@ -30,7 +31,7 @@ use function is_bool;
 use function preg_match;
 use function sprintf;
 
-abstract class Component implements UriComponentInterface, Conditionable
+abstract class Component implements UriComponentInterface, Conditionable, Transformable
 {
     protected const REGEXP_INVALID_URI_CHARS = '/[\x00-\x1f\x7f]/';
 
@@ -114,5 +115,10 @@ abstract class Component implements UriComponentInterface, Conditionable
             null !== $onFail => $onFail($this),
             default => $this,
         } ?? $this;
+    }
+
+    final public function transform(callable $callback): static
+    {
+        return $callback($this);
     }
 }
