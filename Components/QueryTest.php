@@ -16,6 +16,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Http;
 use League\Uri\QueryComposeMode;
+use League\Uri\StringCoercionMode;
 use League\Uri\Uri;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -250,9 +251,9 @@ final class QueryTest extends TestCase
      * @param list<Stringable|string|int|bool|null> $values
      */
     #[DataProvider('providePairsValuesToBeRemoved')]
-    public function testWithoutPairByValue(string $query, array $values, string $expected): void
+    public function testWithoutPairByValue(string $query, array $values, StringCoercionMode $coercionMode, string $expected): void
     {
-        self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByValue(...$values)->value());
+        self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByValue($values, $coercionMode)->value());
     }
 
     public static function providePairsValuesToBeRemoved(): iterable
@@ -260,42 +261,49 @@ final class QueryTest extends TestCase
         yield 'remove nothing' => [
             'query' => 'foo=bar&foo=baz',
             'values' => [],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=bar&foo=baz',
         ];
 
         yield 'remove nothing if the value is not found' => [
             'query' => 'foo=bar&foo=baz',
             'values' => ['fdasfdsdsafsd'],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=bar&foo=baz',
         ];
 
         yield 'remove null value pairs' => [
             'query' => 'foo=bar&foo=baz&foo',
             'values' => [null],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=bar&foo=baz',
         ];
 
         yield 'remove empty value pairs' => [
             'query' => 'foo=bar&foo=baz&foo=',
             'values' => [''],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=bar&foo=baz',
         ];
 
         yield 'remove multi match value pairs' => [
             'query' => 'toto=bar&margo=bar&bar=toto',
             'values' => ['bar'],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'bar=toto',
         ];
 
         yield 'remove boolean false value' => [
             'query' => 'toto=false&margo=true&bar=toto',
             'values' => [false],
+            'coercionMode' => StringCoercionMode::Ecmascript,
             'expected' => 'margo=true&bar=toto',
         ];
 
         yield 'remove boolean true value' => [
             'query' => 'toto=false&margo=true&bar=toto',
             'values' => [true],
+            'coercionMode' => StringCoercionMode::Ecmascript,
             'expected' => 'toto=false&bar=toto',
         ];
     }
@@ -304,9 +312,9 @@ final class QueryTest extends TestCase
      * @param list{0:string, 1:Stringable|string|int|bool|null} $pair
      */
     #[DataProvider('providePairsToBeRemoved')]
-    public function testWithoutPairByKeyValue(string $query, array $pair, string $expected): void
+    public function testWithoutPairByKeyValue(string $query, array $pair, StringCoercionMode $coercionMode, string $expected): void
     {
-        self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByKeyValue(...$pair)->value());
+        self::assertSame($expected, Query::fromRFC3986($query)->withoutPairByKeyValue($pair[0], $pair[1], $coercionMode)->value());
     }
 
     public static function providePairsToBeRemoved(): iterable
@@ -314,36 +322,42 @@ final class QueryTest extends TestCase
         yield 'remove nothing' => [
             'query' => 'foo=bar&foo=baz',
             'pair' => ['foo', 'fdasfdsdsafsd'],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=bar&foo=baz',
         ];
 
         yield 'remove pair without value' => [
             'query' => 'foo=bar&foo=baz&foo',
             'pair' => ['foo', null],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=bar&foo=baz',
         ];
 
         yield 'remove only one pair' => [
             'query' => 'foo=bar&foo=baz',
             'pair' => ['foo', 'bar'],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=baz',
         ];
 
         yield 'remove multiple matching pairs' => [
             'query' => 'foo=bar&foo=baz&foo=bar',
             'pair' => ['foo', 'bar'],
+            'coercionMode' => StringCoercionMode::Native,
             'expected' => 'foo=baz',
         ];
 
         yield 'remove boolean false matching pairs' => [
             'query' => 'foo=bar&foo=false&foo=true',
             'pair' => ['foo', false],
+            'coercionMode' => StringCoercionMode::Ecmascript,
             'expected' => 'foo=bar&foo=true',
         ];
 
         yield 'remove boolean true matching pairs' => [
             'query' => 'foo=bar&foo=true&foo=false',
             'pair' => ['foo', true],
+            'coercionMode' => StringCoercionMode::Ecmascript,
             'expected' => 'foo=bar&foo=false',
         ];
     }
@@ -570,9 +584,9 @@ final class QueryTest extends TestCase
     }
 
     #[DataProvider('provideWithPairData')]
-    public function testWithPair(?string $query, string $key, string|null|bool $value, array $expected): void
+    public function testWithPair(?string $query, string $key, string|null|bool $value, StringCoercionMode $coercionMode = StringCoercionMode::Native, array $expected = []): void
     {
-        self::assertSame($expected, Query::new($query)->withPair($key, $value)->getAll($key));
+        self::assertSame($expected, Query::new($query)->withPair($key, $value, $coercionMode)->getAll($key));
     }
 
     public static function provideWithPairData(): array
@@ -582,24 +596,28 @@ final class QueryTest extends TestCase
                 null,
                 'foo',
                 'bar',
+                StringCoercionMode::Native,
                 ['bar'],
             ],
             [
                 'foo=bar',
                 'foo',
                 'bar',
+                StringCoercionMode::Native,
                 ['bar'],
             ],
             [
                 'foo=bar',
                 'foo',
                 null,
+                StringCoercionMode::Native,
                 [null],
             ],
             [
                 'foo=bar',
                 'foo',
                 false,
+                StringCoercionMode::Ecmascript,
                 ['false'],
             ],
         ];

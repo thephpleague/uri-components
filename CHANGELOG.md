@@ -33,8 +33,9 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- `Query` related parameters method can opt to switch to different query string extraction using the new `$extractMode` parameter.
-- `Query` related parameters method can opt to switch to different query string composition using the new `$composeMode` parameter.
+- `Query` and `Modifier` methods can opt to switch to different query string extraction using the new `$extractMode` parameter.
+- `Query` and `Modifier` methods can opt to switch to different query string composition using the new `$composeMode` parameter.
+- `Query` and `Modifier` methods can opt to switch to different type coercion using the new `$coercionMode` parameter.
 
 ### Deprecated
 

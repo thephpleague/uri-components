@@ -27,6 +27,7 @@ use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryComposeMode;
 use League\Uri\QueryExtractMode;
 use League\Uri\QueryString;
+use League\Uri\StringCoercionMode;
 use League\Uri\UriString;
 use OutOfBoundsException;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -61,7 +62,6 @@ use function preg_quote;
 use function preg_replace;
 
 use const ARRAY_FILTER_USE_BOTH;
-use const JSON_PRESERVE_ZERO_FRACTION;
 use const PREG_SPLIT_NO_EMPTY;
 
 final class Query extends Component implements QueryInterface
@@ -149,7 +149,7 @@ final class Query extends Component implements QueryInterface
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      * @param non-empty-string $separator
      */
-    public static function fromPairs(iterable $pairs, string $separator = '&', string $prefix = ''): self
+    public static function fromPairs(iterable $pairs, string $separator = '&', string $prefix = '', StringCoercionMode $coercionMode = StringCoercionMode::Native): self
     {
         $data = [];
         foreach ($pairs as $pair) {
@@ -162,7 +162,7 @@ final class Query extends Component implements QueryInterface
 
         $converter = Converter::fromRFC3986($separator);
 
-        return new self(QueryString::buildFromPairs($data, $converter), $converter);
+        return new self(QueryString::buildFromPairs($data, $converter, $coercionMode), $converter);
     }
 
     /**
@@ -600,8 +600,12 @@ final class Query extends Component implements QueryInterface
         return $pair;
     }
 
-    public function withPair(string $key, BackedEnum|Stringable|string|int|float|bool|null ...$value): QueryInterface
+    public function withPair(string $key, array|BackedEnum|Stringable|string|int|float|bool|null $value, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
         [] !== $value || throw new ValueError('The value list can not be empty.');
 
         $found = false;
@@ -617,8 +621,12 @@ final class Query extends Component implements QueryInterface
             }
 
             foreach ($value as $val) {
-                $pairs[] = [$key, self::filterPair($val)];
+                $val = is_array($val) ? $value : [$val];
+                foreach ($val as $v) {
+                    $pairs[] = [$key, $v];
+                }
             }
+
             $found = true;
 
             return $pairs;
@@ -627,13 +635,13 @@ final class Query extends Component implements QueryInterface
         $pairs = array_reduce($this->pairs, $reducer, []);
         if (!$found) {
             foreach ($value as $val) {
-                $pairs[] = [$key, self::filterPair($val)];
+                $pairs[] = [$key, $val];
             }
         }
 
         return match ($this->pairs) {
             $pairs => $this,
-            default => self::fromPairs($pairs, $this->separator),
+            default => self::fromPairs($pairs, $this->separator, coercionMode: $coercionMode),
         };
     }
 
@@ -672,34 +680,16 @@ final class Query extends Component implements QueryInterface
         return $pairs;
     }
 
-    public function merge(BackedEnum|Stringable|string|null $query): QueryInterface
+    public function merge(BackedEnum|Stringable|string|null $query, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
         $pairs = $this->pairs;
-        foreach (QueryString::parse(self::filterComponent($query), $this->separator) as $pair) {
+        foreach (QueryString::parseFromValue(self::filterComponent($query), Converter::fromRFC3986($this->separator)) as $pair) {
             $pairs = $this->addPair($pairs, $pair);
         }
 
         return match ($this->pairs) {
             $pairs => $this,
-            default => self::fromPairs($pairs, $this->separator),
-        };
-    }
-
-    /**
-     * Validate the given pair.
-     *
-     * To be valid, the pair must be the null value, a scalar or a collection of scalar and null values.
-     */
-    private static function filterPair(BackedEnum|Stringable|string|int|float|bool|null $value): ?string
-    {
-        return match (true) {
-            $value instanceof BackedEnum => (string) $value->value,
-            $value instanceof UriComponentInterface => $value->value(),
-            null === $value => null,
-            true === $value => 'true',
-            false === $value => 'false',
-            is_float($value) => (string) json_encode($value, JSON_PRESERVE_ZERO_FRACTION),
-            default => (string) $value,
+            default => self::fromPairs($pairs, $this->separator, coercionMode: $coercionMode),
         };
     }
 
@@ -717,35 +707,43 @@ final class Query extends Component implements QueryInterface
         return $this->filter(fn (array $pair): bool => !in_array($pair[0], $keysToRemove, true));
     }
 
-    public function withoutPairByValue(BackedEnum|Stringable|string|int|float|bool|null ...$values): QueryInterface
+    public function withoutPairByValue(array|BackedEnum|Stringable|string|int|float|bool|null $values, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
+        if (!is_array($values)) {
+            $values = [$values];
+        }
+
         if ([] === $values) {
             return $this;
         }
 
-        $values = array_map(self::filterPair(...), $values);
+        $values = array_map($coercionMode->coerce(...), $values);
 
         return $this->filter(fn (array $pair) => !in_array($pair[1], $values, true));
     }
 
-    public function withoutPairByKeyValue(string $key, BackedEnum|Stringable|string|int|float|bool|null $value): QueryInterface
+    public function withoutPairByKeyValue(string $key, BackedEnum|Stringable|string|int|float|bool|null $value, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
-        $pair = [$key, self::filterPair($value)];
+        $pair = [$key, $coercionMode->coerce($value)];
 
         return $this->filter(fn (array $currentPair) => $currentPair !== $pair);
     }
 
-    public function appendTo(string $key, BackedEnum|Stringable|string|int|float|bool|null ...$value): QueryInterface
+    public function appendTo(string $key, array|BackedEnum|Stringable|string|int|float|bool|null $value, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
         [] !== $value || throw new ValueError('Missing values to append');
 
         $converter = function (iterable $values) use ($key) {
             foreach ($values as $value) {
-                yield [$key, self::filterPair($value)];
+                yield [$key, $value];
             }
         };
 
-        return self::fromPairs([...$this->pairs, ...$converter($value)], $this->separator);
+        return self::fromPairs([...$this->pairs, ...$converter($value)], $this->separator, coercionMode: $coercionMode);
     }
 
     public function appendList(
@@ -762,40 +760,33 @@ final class Query extends Component implements QueryInterface
         );
     }
 
-    public function append(BackedEnum|Stringable|string|null $query): QueryInterface
+    public function append(BackedEnum|Stringable|string|null $query, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
-        if ($query instanceof UriComponentInterface) {
-            $query = $query->value();
-        }
-
-        if ($query instanceof BackedEnum) {
-            $query = (string) $query->value;
-        }
-
         return null === $query ? $this : self::fromPairs(
             array_filter(
-                array_merge($this->pairs, QueryString::parse($query, $this->separator)),
+                array_merge($this->pairs, QueryString::parseFromValue($query, Converter::fromRFC3986($this->separator))),
                 static fn (array $pair): bool => '' !== $pair[0] || null !== $pair[1]
             ),
-            $this->separator
+            $this->separator,
+            coercionMode: $coercionMode,
         );
     }
 
-    public function prepend(BackedEnum|Stringable|string|null $query): QueryInterface
+    public function prepend(BackedEnum|Stringable|string|null $query, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
-        return Query::new($query)->append($this);
+        return Query::new($query)->append($this, $coercionMode);
     }
 
     /**
      * Replace a pair based on its offset.
      */
-    public function replace(int $offset, string $key, BackedEnum|Stringable|string|int|float|bool|null $value): QueryInterface
+    public function replace(int $offset, string $key, BackedEnum|Stringable|string|int|float|bool|null $value, StringCoercionMode $coercionMode = StringCoercionMode::Native): QueryInterface
     {
         $index = $offset < 0 ? count($this->pairs) + $offset : $offset;
         $pair = $this->pairs[$index] ?? [];
         [] !== $pair || throw new ValueError('The given offset "'.$offset.'" does not exist');
 
-        $newPair = [$key, self::filterPair($value)];
+        $newPair = [$key, $coercionMode->coerce($value)];
         if ($pair === $newPair) {
             return $this;
         }

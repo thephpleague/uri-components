@@ -391,7 +391,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Change the encoding of the query.
      */
-    public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int|null $from = null): static
+    public function encodeQuery(KeyValuePairConverter|int $to, KeyValuePairConverter|int|null $from = null, StringCoercionMode $coercionMode = StringCoercionMode::Native): static
     {
         if (!$to instanceof KeyValuePairConverter) {
             $to = KeyValuePairConverter::fromEncodingType($to);
@@ -413,7 +413,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         }
 
         /** @var string $query */
-        $query = QueryString::buildFromPairs(QueryString::parseFromValue($originalQuery, $from), $to);
+        $query = QueryString::buildFromPairs(QueryString::parseFromValue($originalQuery, $from), $to, $coercionMode);
         if ($query === $originalQuery) {
             return $this;
         }
@@ -432,17 +432,17 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Append the new query data to the existing URI query.
      */
-    public function appendQuery(BackedEnum|Stringable|string|null $query): static
+    public function appendQuery(BackedEnum|Stringable|string|null $query, StringCoercionMode $coercionMode = StringCoercionMode::Native): static
     {
-        return $this->withQuery(Query::fromUri($this->uri)->append($query)->value());
+        return $this->withQuery(Query::fromUri($this->uri)->append($query, $coercionMode)->value());
     }
 
     /**
      * Prepend the new query data to the existing URI query.
      */
-    public function prependQuery(BackedEnum|Stringable|string|null $query): static
+    public function prependQuery(BackedEnum|Stringable|string|null $query, StringCoercionMode $coercionMode = StringCoercionMode::Native): static
     {
-        return $this->withQuery(Query::fromUri($this->uri)->prepend($query)->value());
+        return $this->withQuery(Query::fromUri($this->uri)->prepend($query, $coercionMode)->value());
     }
 
     /**
@@ -450,14 +450,14 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      */
-    public function appendQueryPairs(iterable $pairs, string $prefix = ''): self
+    public function appendQueryPairs(iterable $pairs, string $prefix = '', StringCoercionMode $coercionMode = StringCoercionMode::Native): self
     {
-        return $this->appendQuery(Query::fromPairs($pairs, prefix: $prefix)->value());
+        return $this->appendQuery(Query::fromPairs($pairs, prefix: $prefix, coercionMode: $coercionMode)->value());
     }
 
-    public function prefixQueryPairs(string $prefix): self
+    public function prefixQueryPairs(string $prefix, StringCoercionMode $coercionMode = StringCoercionMode::Native): self
     {
-        return $this->withQuery(Query::fromPairs(Query::fromUri($this->uri), prefix: $prefix));
+        return $this->withQuery(Query::fromPairs(Query::fromUri($this->uri), prefix: $prefix, coercionMode: $coercionMode)->value());
     }
 
     public function prefixQueryParameters(string $prefix, QueryComposeMode $composeMode = QueryComposeMode::Native): self
@@ -489,9 +489,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Merge a new query with the existing URI query.
      */
-    public function mergeQuery(BackedEnum|Stringable|string|null $query): static
+    public function mergeQuery(BackedEnum|Stringable|string|null $query, StringCoercionMode $coercionMode = StringCoercionMode::Native): static
     {
-        return $this->withQuery(Query::fromUri($this->uri)->merge($query)->value());
+        return $this->withQuery(Query::fromUri($this->uri)->merge($query, $coercionMode)->value());
     }
 
     /**
@@ -527,7 +527,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
      *
      * @param iterable<int, array{0:string, 1:string|null}> $pairs
      */
-    public function mergeQueryPairs(iterable $pairs, string $prefix = ''): self
+    public function mergeQueryPairs(iterable $pairs, string $prefix = '', StringCoercionMode $coercionMode = StringCoercionMode::Native): self
     {
         $currentPairs = [...Query::fromUri($this->uri)->pairs()];
         $pairs = [...$pairs];
@@ -535,7 +535,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         return match (true) {
             [] === $pairs,
             $currentPairs === $pairs => $this,
-            default => $this->mergeQuery(Query::fromPairs($pairs, prefix: $prefix)->value()),
+            default => $this->mergeQuery(Query::fromPairs($pairs, prefix: $prefix, coercionMode: $coercionMode)->value()),
         };
     }
 
@@ -561,10 +561,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Remove query pair according to their value.
      */
-    public function removeQueryPairsByValue(BackedEnum|Stringable|string|int|float|bool|null ...$values): static
+    public function removeQueryPairsByValue(array|BackedEnum|Stringable|string|int|float|bool|null $values, StringCoercionMode $coercionMode = StringCoercionMode::Native): static
     {
         $query = Query::fromUri($this->uri);
-        $newQuery = $query->withoutPairByValue(...$values);
+        $newQuery = $query->withoutPairByValue($values, $coercionMode);
 
         return $newQuery->value() === $query->value() ? $this : $this->withQuery($newQuery);
     }
@@ -572,10 +572,10 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
     /**
      * Remove query-pair according to their key/value name.
      */
-    public function removeQueryPairsByKeyValue(string $key, BackedEnum|Stringable|string|int|bool|null $value): static
+    public function removeQueryPairsByKeyValue(string $key, BackedEnum|Stringable|string|int|bool|null $value, StringCoercionMode $coercionMode = StringCoercionMode::Native): static
     {
         $query = Query::fromUri($this->uri);
-        $newQuery = $query->withoutPairByKeyValue($key, $value);
+        $newQuery = $query->withoutPairByKeyValue($key, $value, $coercionMode);
 
         return $newQuery->value() === $query->value() ? $this : $this->withQuery($newQuery);
     }
@@ -622,9 +622,9 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         };
     }
 
-    public function replaceQueryPair(int $offset, string $key, BackedEnum|Stringable|string|int|float|bool|null $value): static
+    public function replaceQueryPair(int $offset, string $key, BackedEnum|Stringable|string|int|float|bool|null $value, StringCoercionMode $coercionMode = StringCoercionMode::Native): static
     {
-        return $this->withQuery(Query::fromUri($this->uri)->replace($offset, $key, $value)->value());
+        return $this->withQuery(Query::fromUri($this->uri)->replace($offset, $key, $value, $coercionMode)->value());
     }
 
     /*********************************

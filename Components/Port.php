@@ -53,7 +53,7 @@ final class Port extends Component implements PortInterface
     /**
      * Create a new instance from a string.or a stringable structure or returns null on failure.
      */
-    public static function tryNew(BackedEnum|Stringable|string|null $uri = null): ?self
+    public static function tryNew(BackedEnum|Stringable|string|int|null $uri = null): ?self
     {
         try {
             return self::new($uri);

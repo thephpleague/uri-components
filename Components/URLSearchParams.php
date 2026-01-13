@@ -27,6 +27,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
 use League\Uri\QueryString;
+use League\Uri\StringCoercionMode;
 use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -48,11 +49,8 @@ use function is_iterable;
 use function is_object;
 use function is_scalar;
 use function iterator_to_array;
-use function json_encode;
 use function spl_object_hash;
 use function str_starts_with;
-
-use const JSON_PRESERVE_ZERO_FRACTION;
 
 /**
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
@@ -114,14 +112,14 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * If an iterable is given, foreach will loop over the iterable structure
      * If an object is give, foreach will loop over the object public properties if they are defined
      *
-     * @param object|iterable<array-key, Stringable|string|float|int|bool|null> $associative
+     * @param object|iterable<array-key, mixed> $associative
      *
      * @return Iterator<int, array{0:string, 1:string}>
      */
     private static function yieldPairs(object|array $associative): Iterator
     {
         foreach ($associative as $key => $value) { /* @phpstan-ignore-line */
-            yield [self::uvString($key), self::uvString($value)];
+            yield [self::usvString($key), self::usvString($value)];
         }
     }
 
@@ -133,8 +131,8 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         $filter = static fn ($pair): ?array => match (true) {
             !is_array($pair),
             [0, 1] !== array_keys($pair) => throw new SyntaxError('A pair must be a sequential array starting at `0` and containing two elements.'),
-            null !== $pair[1] => [self::uvString($pair[0]), self::uvString($pair[1])],
-            '' !== $pair[0] => [self::uvString($pair[0]), ''],
+            null !== $pair[1] => [self::usvString($pair[0]), self::usvString($pair[1])],
+            '' !== $pair[0] => [self::usvString($pair[0]), ''],
             default => null,
         };
 
@@ -160,19 +158,13 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     }
 
     /**
-     * Normalizes type to UVString.
+     * Normalizes type to USVString.
      *
      * @see https://webidl.spec.whatwg.org/#idl-USVString
      */
-    private static function uvString(Stringable|string|float|int|bool|null $value): string
+    private static function usvString(mixed $value): string
     {
-        return match (true) {
-            null === $value => 'null',
-            false === $value => 'false',
-            true === $value => 'true',
-            is_float($value) => (string) json_encode($value, JSON_PRESERVE_ZERO_FRACTION),
-            default => (string) $value,
-        };
+        return (string) StringCoercionMode::Ecmascript->coerce($value);
     }
 
     /**
@@ -206,7 +198,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public static function fromPairs(iterable $pairs): self
     {
-        return new self(Query::fromPairs($pairs));
+        return new self(Query::fromPairs($pairs, coercionMode: StringCoercionMode::Ecmascript));
     }
 
     /**
@@ -218,7 +210,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public static function fromAssociative(object|array $associative): self
     {
-        return new self(Query::fromPairs(self::yieldPairs($associative)));
+        return new self(Query::fromPairs(self::yieldPairs($associative), coercionMode: StringCoercionMode::Ecmascript));
     }
 
     /**
@@ -233,7 +225,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             default => Uri::new($uri)->getQuery(),
         };
 
-        return new self(Query::fromPairs(QueryString::parseFromValue($query, Converter::fromFormData())));
+        return new self(Query::fromPairs(QueryString::parseFromValue($query, Converter::fromFormData()), coercionMode: StringCoercionMode::Ecmascript));
     }
 
     /**
@@ -273,7 +265,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             $pairs = match (true) {
                 is_array($value),
                 is_object($value) => [...$pairs, ...self::parametersToPairs($value, $name, $recursive)],
-                is_scalar($value) => [...$pairs, [$name, self::uvString($value)]],
+                is_scalar($value) => [...$pairs, [$name, self::usvString($value)]],
                 default => $pairs,
             };
         }
@@ -362,11 +354,11 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public function has(?string $name): bool
     {
-        $name = self::uvString($name);
+        $name = self::usvString($name);
 
         return match (func_num_args()) {
             1 => $this->pairs->has($name),
-            2 => $this->pairs->hasPair($name, self::uvString(func_get_arg(1))), /* @phpstan-ignore-line */
+            2 => $this->pairs->hasPair($name, self::usvString(func_get_arg(1))),
             default => throw new ArgumentCountError(__METHOD__.' requires at least one argument as the pair name and a second optional argument as the pair value.'),
         };
     }
@@ -381,7 +373,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * $params->has('a', 'b'); // return true
      * </code>
      */
-    public function hasValue(?string $name, Stringable|string|float|int|bool|null $value): bool
+    public function hasValue(?string $name, mixed $value): bool
     {
         return $this->has($name, $value);
     }
@@ -392,7 +384,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     public function get(?string $name): ?string
     {
         return match (true) {
-            $this->has($name) => $this->pairs->get(self::uvString($name)) ?? '',
+            $this->has($name) => $this->pairs->get(self::usvString($name)) ?? '',
             default => null,
         };
     }
@@ -408,7 +400,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
             return null;
         }
 
-        $res = $this->pairs->getAll(self::uvString($name));
+        $res = $this->pairs->getAll(self::usvString($name));
 
         return $res[count($res) - 1] ?? null;
     }
@@ -422,7 +414,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     {
         return array_map(
             fn (?string $value): string => $value ?? '',
-            $this->pairs->getAll(self::uvString($name))
+            $this->pairs->getAll(self::usvString($name))
         );
     }
 
@@ -510,17 +502,17 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * If there were several matching values, this method deletes the others.
      * If the search parameter doesn't exist, this method creates it.
      */
-    public function set(?string $name, Stringable|string|float|int|bool|null $value): void
+    public function set(?string $name, mixed $value): void
     {
-        $this->updateQuery($this->pairs->withPair(self::uvString($name), self::uvString($value)));
+        $this->updateQuery($this->pairs->withPair(self::usvString($name), self::usvString($value)));
     }
 
     /**
      * Appends a specified key/value pair as a new search parameter.
      */
-    public function append(?string $name, Stringable|string|float|int|bool|null $value): void
+    public function append(?string $name, mixed $value): void
     {
-        $this->updateQuery($this->pairs->appendTo(self::uvString($name), self::uvString($value)));
+        $this->updateQuery($this->pairs->appendTo(self::usvString($name), self::usvString($value)));
     }
 
     /**
@@ -536,11 +528,11 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      */
     public function delete(?string $name): void
     {
-        $name = self::uvString($name);
+        $name = self::usvString($name);
 
         $this->updateQuery(match (func_num_args()) {
             1 => $this->pairs->withoutPairByKey($name),
-            2 => $this->pairs->withoutPairByKeyValue($name, self::uvString(func_get_arg(1))), /* @phpstan-ignore-line */
+            2 => $this->pairs->withoutPairByKeyValue($name, self::usvString(func_get_arg(1))),
             default => throw new ArgumentCountError(__METHOD__.' requires at least one argument as the pair name and a second optional argument as the pair value.'),
         });
     }
@@ -552,9 +544,14 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * $params->deleteValue('a', 'b') //delete all pairs with the key 'a' and the value 'b'
      * </code>
      */
-    public function deleteValue(?string $name, Stringable|string|float|int|bool|null $value): void
+    public function deleteValue(?string $name, mixed $value): void
     {
-        $this->delete($name, $value);
+        $this->updateQuery(
+            $this->pairs->withoutPairByKeyValue(
+                self::usvString($name),
+                self::usvString($value),
+            )
+        );
     }
 
     /**
