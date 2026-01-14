@@ -21,6 +21,7 @@ use Deprecated;
 use Iterator;
 use IteratorAggregate;
 use League\Uri\Contracts\QueryInterface;
+use League\Uri\Contracts\Transformable;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
@@ -57,7 +58,7 @@ use function str_starts_with;
  *
  * @implements IteratorAggregate<array{0:string, 1:string}>
  */
-final class URLSearchParams implements Countable, IteratorAggregate, UriComponentInterface
+final class URLSearchParams implements Countable, IteratorAggregate, UriComponentInterface, Transformable
 {
     private QueryInterface $pairs;
 
@@ -583,13 +584,11 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
      * Executes the given callback with the current instance
      * and returns the current instance.
      *
-     * @param callable(self): void $callback
+     * @param callable(self): self $callback
      */
-    public function tap(callable $callback): self
+    public function transform(callable $callback): static
     {
-        $callback($this);
-
-        return $this;
+        return $callback($this);
     }
 
     /**
