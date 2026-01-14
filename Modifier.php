@@ -32,6 +32,7 @@ use League\Uri\Contracts\Conditionable;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Contracts\FragmentInterface;
 use League\Uri\Contracts\PathInterface;
+use League\Uri\Contracts\Transformable;
 use League\Uri\Contracts\UriAccess;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\MissingFeature;
@@ -44,6 +45,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
+use Traversable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 use ValueError;
@@ -69,7 +71,7 @@ use function trim;
 use const FILTER_FLAG_IPV4;
 use const FILTER_VALIDATE_IP;
 
-class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
+class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable, Transformable
 {
     private const MASK = '*****';
 
@@ -350,6 +352,11 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         }
 
         return new static(self::normalizePath($this->uri, Path::new($path)));
+    }
+
+    final public function transform(callable $callback): static
+    {
+        return $callback($this);
     }
 
     final public function when(callable|bool $condition, callable $onSuccess, ?callable $onFail = null): static
