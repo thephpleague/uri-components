@@ -27,6 +27,7 @@ use League\Uri\HostType;
 use League\Uri\Idna\Converter as IdnConverter;
 use League\Uri\IPv4\Converter as IPv4Converter;
 use League\Uri\IPv4Normalizer;
+use League\Uri\StringCoercionMode;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -35,10 +36,10 @@ use Uri\WhatWg\Url as WhatWgUrl;
 
 use function explode;
 use function filter_var;
-use function is_string;
 use function preg_replace_callback;
 use function rawurldecode;
 use function rawurlencode;
+use function rtrim;
 use function sprintf;
 use function strtolower;
 use function strtoupper;
@@ -143,12 +144,12 @@ final class Host extends Component implements IpHostInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!StringCoercionMode::Native->isCoercible($value)) {
             return false;
         }
 
         if (!$value instanceof UriComponentInterface) {
-            $value = self::tryNew($value);
+            $value = self::tryNew(StringCoercionMode::Native->coerce($value));
             if (null === $value) {
                 return false;
             }

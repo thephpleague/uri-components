@@ -21,6 +21,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\Modifier;
+use League\Uri\StringCoercionMode;
 use League\Uri\Uri;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -89,18 +90,12 @@ abstract class Component implements UriComponentInterface, Conditionable, Transf
      */
     final protected static function filterComponent(BackedEnum|Stringable|int|string|null $component): ?string
     {
-        if ($component instanceof UriComponentInterface) {
-            $component = $component->value();
-        }
-
-        if ($component instanceof BackedEnum) {
-            $component = (string) $component->value;
-        }
+        $component = StringCoercionMode::Native->coerce($component);
 
         return match (true) {
             null === $component => null,
-            1 === preg_match(self::REGEXP_INVALID_URI_CHARS, (string) $component) => throw new SyntaxError(sprintf('Invalid component string: %s.', $component)),
-            default => (string) $component,
+            1 === preg_match(self::REGEXP_INVALID_URI_CHARS, $component) => throw new SyntaxError(sprintf('Invalid component string: %s.', $component)),
+            default => $component,
         };
     }
 

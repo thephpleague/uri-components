@@ -19,6 +19,7 @@ use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\SchemeType;
+use League\Uri\StringCoercionMode;
 use League\Uri\UriScheme;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -27,8 +28,8 @@ use Throwable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
+use function count;
 use function in_array;
-use function is_string;
 use function preg_match;
 use function sprintf;
 use function strtolower;
@@ -147,8 +148,8 @@ final class Scheme extends Component
 
         return new self(
             $uri instanceof Psr7UriInterface
-            ? UriString::parse($uri)['scheme']
-            : $uri->getScheme()
+                ? UriString::parse($uri)['scheme']
+                : $uri->getScheme()
         );
     }
 
@@ -164,12 +165,12 @@ final class Scheme extends Component
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!StringCoercionMode::Native->isCoercible($value)) {
             return false;
         }
 
         if (!$value instanceof UriComponentInterface) {
-            $value = self::tryNew($value);
+            $value = self::tryNew(StringCoercionMode::Native->coerce($value));
             if (null === $value) {
                 return false;
             }

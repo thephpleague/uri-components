@@ -52,6 +52,7 @@ use function is_scalar;
 use function iterator_to_array;
 use function spl_object_hash;
 use function str_starts_with;
+use function substr;
 
 /**
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
@@ -146,11 +147,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
 
     private static function formatQuery(BackedEnum|Stringable|string|null $query): string
     {
-        if ($query instanceof BackedEnum) {
-            $query = $query->value;
-        }
-
-        $query = (string) $query;
+        $query = (string) StringCoercionMode::Native->coerce($query);
         if (str_starts_with($query, '?')) {
             return substr($query, 1);
         }
@@ -281,7 +278,18 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
 
     public function equals(mixed $value): bool
     {
-        return $this->pairs->equals($value);
+        if (!StringCoercionMode::Ecmascript->isCoercible($value)) {
+            return false;
+        }
+
+        if (!$value instanceof UriComponentInterface) {
+            $value = self::tryNew(StringCoercionMode::Ecmascript->coerce($value));
+            if (null === $value) {
+                return false;
+            }
+        }
+
+        return $value->getUriComponent() === $this->getUriComponent();
     }
 
     /**

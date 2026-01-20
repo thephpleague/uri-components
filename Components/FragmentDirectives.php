@@ -26,6 +26,7 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Modifier;
+use League\Uri\StringCoercionMode;
 use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -46,7 +47,6 @@ use function explode;
 use function implode;
 use function in_array;
 use function is_bool;
-use function is_string;
 use function sprintf;
 use function str_replace;
 use function strpos;
@@ -79,19 +79,11 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
      */
     public static function fromFragment(BackedEnum|Stringable|string|null $fragment): self
     {
-        if ($fragment instanceof UriComponentInterface) {
-            $fragment = $fragment->value();
-        }
-
-        if ($fragment instanceof BackedEnum) {
-            $fragment = $fragment->value;
-        }
-
+        $fragment = StringCoercionMode::Native->coerce($fragment);
         if (null === $fragment) {
             return new self();
         }
 
-        $fragment = (string) $fragment;
         $pos = strpos($fragment, self::DELIMITER);
         if (false === $pos) {
             return new self();
@@ -252,12 +244,12 @@ final class FragmentDirectives implements FragmentInterface, IteratorAggregate, 
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!StringCoercionMode::Native->isCoercible($value)) {
             return false;
         }
 
         if (!$value instanceof UriComponentInterface) {
-            $value = self::tryNew($value);
+            $value = self::tryNew(StringCoercionMode::Native->coerce($value));
             if (null === $value) {
                 return false;
             }

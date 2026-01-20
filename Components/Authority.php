@@ -23,14 +23,13 @@ use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\StringCoercionMode;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
 use Stringable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
-
-use function is_string;
 
 final class Authority extends Component implements AuthorityInterface
 {
@@ -185,12 +184,12 @@ final class Authority extends Component implements AuthorityInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!StringCoercionMode::Native->isCoercible($value)) {
             return false;
         }
 
         if (!$value instanceof UriComponentInterface) {
-            $value = self::tryNew($value);
+            $value = self::tryNew(StringCoercionMode::Native->coerce($value));
             if (null === $value) {
                 return false;
             }

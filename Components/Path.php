@@ -19,6 +19,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriComponentInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
+use League\Uri\StringCoercionMode;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
@@ -26,7 +27,6 @@ use Throwable;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
-use function is_string;
 use function substr;
 
 final class Path extends Component implements PathInterface
@@ -101,12 +101,12 @@ final class Path extends Component implements PathInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value)) {
+        if (null === $value || !StringCoercionMode::Native->isCoercible($value)) {
             return false;
         }
 
         if (!$value instanceof UriComponentInterface) {
-            $value = self::tryNew($value);
+            $value = self::tryNew((string) StringCoercionMode::Native->coerce($value));
             if (null === $value) {
                 return false;
             }

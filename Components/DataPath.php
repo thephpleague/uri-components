@@ -21,6 +21,7 @@ use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\FeatureDetection;
+use League\Uri\StringCoercionMode;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SplFileObject;
 use Stringable;
@@ -391,10 +392,7 @@ final class DataPath extends Component implements DataPathInterface
 
     public function withParameters(BackedEnum|Stringable|string $parameters): DataPathInterface
     {
-        if ($parameters instanceof BackedEnum) {
-            $parameters = $parameters->value;
-        }
-        $parameters = (string) $parameters;
+        $parameters = (string) StringCoercionMode::Native->coerce($parameters);
 
         return match ($this->getParameters()) {
             $parameters => $this,

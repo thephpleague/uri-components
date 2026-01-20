@@ -17,11 +17,11 @@ use BackedEnum;
 use League\Uri\Contracts\FragmentDirective;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\StringCoercionMode;
 use Stringable;
 use Throwable;
 
 use function explode;
-use function is_string;
 use function preg_match;
 use function str_replace;
 
@@ -169,13 +169,13 @@ final class TextDirective implements FragmentDirective
 
     public function equals(mixed $directive): bool
     {
-        if (!$directive instanceof Stringable && !$directive instanceof BackedEnum && !is_string($directive)) {
+        if (null === $directive || ! StringCoercionMode::Native->isCoercible($directive)) {
             return false;
         }
 
         if (!$directive instanceof FragmentDirective) {
             try {
-                $directive = self::fromString($directive);
+                $directive = self::fromString((string) StringCoercionMode::Native->coerce($directive));
             } catch (Throwable) {
                 return false;
             }

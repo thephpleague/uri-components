@@ -55,11 +55,13 @@ use function in_array;
 use function is_array;
 use function is_int;
 use function is_object;
-use function is_string;
 use function iterator_to_array;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
+use function preg_split;
+use function strcmp;
+use function uksort;
 
 use const ARRAY_FILTER_USE_BOTH;
 use const PREG_SPLIT_NO_EMPTY;
@@ -448,12 +450,12 @@ final class Query extends Component implements QueryInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!StringCoercionMode::Native->isCoercible($value)) {
             return false;
         }
 
         if (!$value instanceof UriComponentInterface) {
-            $value = self::tryNew($value);
+            $value = self::tryNew(StringCoercionMode::Native->coerce($value));
             if (null === $value) {
                 return false;
             }

@@ -21,6 +21,7 @@ use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Contracts\UserInfoInterface;
 use League\Uri\Encoder;
+use League\Uri\StringCoercionMode;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use SensitiveParameter;
@@ -29,7 +30,6 @@ use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
 use function explode;
-use function is_string;
 
 final class UserInfo extends Component implements UserInfoInterface
 {
@@ -100,19 +100,10 @@ final class UserInfo extends Component implements UserInfoInterface
      */
     public static function new(BackedEnum|Stringable|string|null $value = null): self
     {
-        if ($value instanceof UriComponentInterface) {
-            $value = $value->value();
-        }
-
-        if ($value instanceof BackedEnum) {
-            $value = $value->value;
-        }
-
+        $value = StringCoercionMode::Native->coerce($value);
         if (null === $value) {
             return new self(null);
         }
-
-        $value = (string) $value;
 
         [$user, $pass] = explode(':', $value, 2) + [1 => null];
 
@@ -141,12 +132,12 @@ final class UserInfo extends Component implements UserInfoInterface
 
     public function equals(mixed $value): bool
     {
-        if (!$value instanceof BackedEnum && !$value instanceof Stringable && !is_string($value) && null !== $value) {
+        if (!StringCoercionMode::Native->isCoercible($value)) {
             return false;
         }
 
         if (!$value instanceof UriComponentInterface) {
-            $value = self::tryNew($value);
+            $value = self::tryNew(StringCoercionMode::Native->coerce($value));
             if (null === $value) {
                 return false;
             }
