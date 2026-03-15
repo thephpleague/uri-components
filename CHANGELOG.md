@@ -10,7 +10,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- None
+- Update requirement to use `uri` 7.8.1
 
 ### Deprecated
 
