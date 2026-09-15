@@ -516,16 +516,16 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
 
         $hasChanged = false;
         $pairs = [];
-        foreach (Query::fromUri($this->uri) as $pair) {
+        foreach (QueryString::parse($this->uri->getQuery()) as $pair) {
             if (in_array($pair[0], $keys, true)) {
                 $hasChanged = true;
                 $pair[1] = self::MASK;
             }
 
-            $pairs[] = $pair[0].'='.$pair[1];
+            $pairs[] = $pair;
         }
 
-        return $hasChanged ? $this->withQuery(implode('&', $pairs)) : $this;
+        return $hasChanged ? $this->withQuery(QueryString::build($pairs)) : $this;
     }
 
     /**

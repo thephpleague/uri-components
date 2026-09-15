@@ -1275,7 +1275,7 @@ final class ModifierTest extends TestCase
         $uri = Modifier::wrap('https://example.com/page?token=abc&mode=edit&user=bob');
 
         self::assertSame(
-            'https://example.com/page?token=*****&mode=edit&user=*****',
+            'https://example.com/page?token=%2A%2A%2A%2A%2A&mode=edit&user=%2A%2A%2A%2A%2A',
             $uri->redactQueryPairs('token', 'user')->toString()
         );
     }
@@ -1338,7 +1338,7 @@ final class ModifierTest extends TestCase
         $uri = Modifier::wrap('http://bob:pass@example.com/api/user/john?token=123');
 
         self::assertSame(
-            'http://*****@example.com/api/user/*****?token=*****',
+            'http://*****@example.com/api/user/*****?token=%2A%2A%2A%2A%2A',
             $uri
                 ->redactUserInfo()
                 ->redactPathSegments('john')
