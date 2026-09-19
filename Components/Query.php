@@ -14,6 +14,9 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use BackedEnum;
+use DateInvalidTimeZoneException;
+use DateTimeImmutable;
+use DateTimeZone;
 use Deprecated;
 use Iterator;
 use League\Uri\Contracts\QueryInterface;
@@ -28,6 +31,7 @@ use League\Uri\QueryComposeMode;
 use League\Uri\QueryExtractMode;
 use League\Uri\QueryString;
 use League\Uri\StringCoercionMode;
+use League\Uri\TypeConverter;
 use League\Uri\UriString;
 use OutOfBoundsException;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
@@ -332,6 +336,95 @@ final class Query extends Component implements QueryInterface
     public function getAll(string $key): array
     {
         return array_column(array_filter($this->pairs, fn (array $pair): bool => $key === $pair[0]), 1);
+    }
+
+    public function string(int|string $name, ?string $default = null): ?string
+    {
+        return TypeConverter::toString($this->get((string) $name)) ?? $default;
+    }
+
+    public function strings(int|string $name, ?string $default = null): array
+    {
+        return TypeConverter::toStrings($this->getAll((string) $name), $default);
+    }
+
+    public function integer(int|string $name, ?int $default = null): ?int
+    {
+        return TypeConverter::toInteger($this->get((string) $name)) ?? $default;
+    }
+
+    /**
+     * @return array<int>
+     */
+    public function integers(int|string $name, ?int $default = null): array
+    {
+        return TypeConverter::toIntegers($this->getAll((string) $name), $default);
+    }
+
+    public function float(int|string $name, ?float $default = null): ?float
+    {
+        return TypeConverter::toFloat($this->get((string) $name)) ?? $default;
+    }
+
+    /**
+     * @return array<float>
+     */
+    public function floats(int|string $name, ?float $default = null): array
+    {
+        return TypeConverter::toFloats($this->getAll((string) $name), $default);
+    }
+
+    public function boolean(int|string $name, ?bool $default = null): ?bool
+    {
+        return TypeConverter::toBoolean($this->get((string) $name)) ?? $default;
+    }
+
+    /**
+     * @return array<bool>
+     */
+    public function booleans(int|string $name, ?bool $default = null): array
+    {
+        return TypeConverter::toBooleans($this->getAll((string) $name), $default);
+    }
+
+    /**
+     * @param class-string<UnitEnum> $enumClass
+     */
+    public function enum(int|string $name, string $enumClass): ?UnitEnum
+    {
+        return TypeConverter::toEnum($this->get((string) $name), $enumClass);
+    }
+
+    /**
+     * @param class-string<UnitEnum> $enumClass
+     *
+     * @return array<UnitEnum>
+     */
+    public function enums(int|string $name, string $enumClass, ?UnitEnum $default = null): array
+    {
+        return TypeConverter::toEnums($this->getAll((string) $name), $enumClass, $default);
+    }
+
+    /**
+     * @param non-empty-string $format
+     *
+     * @throws DateInvalidTimeZoneException
+     */
+    public function date(int|string $name, string $format, DateTimeZone|string|null $timezone = null): ?DateTimeImmutable
+    {
+        return TypeConverter::toDateTimeImmutable($this->get((string) $name), $format, $timezone);
+    }
+
+    /**
+     * @param non-empty-string $format
+     *
+     * @throws DateInvalidTimeZoneException
+     *
+     * @return array<DateTimeImmutable>
+     */
+    public function dates(int|string $name, string $format, DateTimeZone|string|null $timezone = null): array
+    {
+        return TypeConverter::toDateTimeImmutables($this->getAll((string) $name), $format, $timezone);
     }
 
     public function indexOf(string $key, int $nth = 0): ?int
