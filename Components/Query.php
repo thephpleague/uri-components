@@ -27,6 +27,7 @@ use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
+use League\Uri\Occurrence;
 use League\Uri\QueryComposeMode;
 use League\Uri\QueryExtractMode;
 use League\Uri\QueryString;
@@ -338,61 +339,71 @@ final class Query extends Component implements QueryInterface
         return array_column(array_filter($this->pairs, fn (array $pair): bool => $key === $pair[0]), 1);
     }
 
-    public function string(int|string $name, ?string $default = null): ?string
+    private function getValue(int|string $key, Occurrence $occurrence): ?string
     {
-        return TypeConverter::toString($this->get((string) $name)) ?? $default;
+        $key = (string) $key;
+
+        return match ($occurrence) {
+            Occurrence::First => $this->first($key),
+            Occurrence::Last => $this->last($key),
+        };
     }
 
-    public function strings(int|string $name, ?string $default = null): array
+    public function string(int|string $key, ?string $default = null, Occurrence $occurrence = Occurrence::First): ?string
     {
-        return TypeConverter::toStrings($this->getAll((string) $name), $default);
+        return TypeConverter::toString($this->getValue($key, $occurrence)) ?? $default;
     }
 
-    public function integer(int|string $name, ?int $default = null): ?int
+    public function strings(int|string $key, ?string $default = null): array
     {
-        return TypeConverter::toInteger($this->get((string) $name)) ?? $default;
+        return TypeConverter::toStrings($this->getAll((string) $key), $default);
+    }
+
+    public function integer(int|string $key, ?int $default = null, Occurrence $occurrence = Occurrence::First): ?int
+    {
+        return TypeConverter::toInteger($this->getValue($key, $occurrence)) ?? $default;
     }
 
     /**
      * @return array<int>
      */
-    public function integers(int|string $name, ?int $default = null): array
+    public function integers(int|string $key, ?int $default = null): array
     {
-        return TypeConverter::toIntegers($this->getAll((string) $name), $default);
+        return TypeConverter::toIntegers($this->getAll((string) $key), $default);
     }
 
-    public function float(int|string $name, ?float $default = null): ?float
+    public function float(int|string $key, ?float $default = null, Occurrence $occurrence = Occurrence::First): ?float
     {
-        return TypeConverter::toFloat($this->get((string) $name)) ?? $default;
+        return TypeConverter::toFloat($this->getValue($key, $occurrence)) ?? $default;
     }
 
     /**
      * @return array<float>
      */
-    public function floats(int|string $name, ?float $default = null): array
+    public function floats(int|string $key, ?float $default = null): array
     {
-        return TypeConverter::toFloats($this->getAll((string) $name), $default);
+        return TypeConverter::toFloats($this->getAll((string) $key), $default);
     }
 
-    public function boolean(int|string $name, ?bool $default = null): ?bool
+    public function boolean(int|string $key, ?bool $default = null, Occurrence $occurrence = Occurrence::First): ?bool
     {
-        return TypeConverter::toBoolean($this->get((string) $name)) ?? $default;
+        return TypeConverter::toBoolean($this->get((string) $key)) ?? $default;
     }
 
     /**
      * @return array<bool>
      */
-    public function booleans(int|string $name, ?bool $default = null): array
+    public function booleans(int|string $key, ?bool $default = null): array
     {
-        return TypeConverter::toBooleans($this->getAll((string) $name), $default);
+        return TypeConverter::toBooleans($this->getAll((string) $key), $default);
     }
 
     /**
      * @param class-string<UnitEnum> $enumClass
      */
-    public function enum(int|string $name, string $enumClass): ?UnitEnum
+    public function enum(int|string $key, string $enumClass, Occurrence $occurrence = Occurrence::First): ?UnitEnum
     {
-        return TypeConverter::toEnum($this->get((string) $name), $enumClass);
+        return TypeConverter::toEnum($this->getValue($key, $occurrence), $enumClass);
     }
 
     /**
@@ -400,9 +411,9 @@ final class Query extends Component implements QueryInterface
      *
      * @return array<UnitEnum>
      */
-    public function enums(int|string $name, string $enumClass, ?UnitEnum $default = null): array
+    public function enums(int|string $key, string $enumClass, ?UnitEnum $default = null): array
     {
-        return TypeConverter::toEnums($this->getAll((string) $name), $enumClass, $default);
+        return TypeConverter::toEnums($this->getAll((string) $key), $enumClass, $default);
     }
 
     /**
@@ -410,9 +421,9 @@ final class Query extends Component implements QueryInterface
      *
      * @throws DateInvalidTimeZoneException
      */
-    public function date(int|string $name, string $format, DateTimeZone|string|null $timezone = null): ?DateTimeImmutable
+    public function date(int|string $key, string $format, DateTimeZone|string|null $timezone = null, Occurrence $occurrence = Occurrence::First): ?DateTimeImmutable
     {
-        return TypeConverter::toDateTimeImmutable($this->get((string) $name), $format, $timezone);
+        return TypeConverter::toDateTimeImmutable($this->getValue($key, $occurrence), $format, $timezone);
     }
 
     /**
@@ -422,9 +433,9 @@ final class Query extends Component implements QueryInterface
      *
      * @return array<DateTimeImmutable>
      */
-    public function dates(int|string $name, string $format, DateTimeZone|string|null $timezone = null): array
+    public function dates(int|string $key, string $format, DateTimeZone|string|null $timezone = null): array
     {
-        return TypeConverter::toDateTimeImmutables($this->getAll((string) $name), $format, $timezone);
+        return TypeConverter::toDateTimeImmutables($this->getAll((string) $key), $format, $timezone);
     }
 
     public function indexOf(string $key, int $nth = 0): ?int
