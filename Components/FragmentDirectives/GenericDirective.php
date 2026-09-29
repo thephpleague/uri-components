@@ -15,14 +15,12 @@ namespace League\Uri\Components\FragmentDirectives;
 
 use BackedEnum;
 use League\Uri\Contracts\FragmentDirective;
-use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\StringCoercionMode;
 use Stringable;
 use Throwable;
 
 use function explode;
-use function str_replace;
 
 final class GenericDirective implements FragmentDirective
 {
@@ -50,22 +48,17 @@ final class GenericDirective implements FragmentDirective
         return new self($name, $value);
     }
 
-    private static function decode(?string $value): ?string
-    {
-        return null !== $value ? str_replace('%20', ' ', (string) Encoder::decodeFragment($value)) : null;
-    }
-
     public function name(): string
     {
         /** @var non-empty-string $name */
-        $name = (string) self::decode($this->name);
+        $name = (string) Encoder::decode($this->name);
 
         return $name;
     }
 
     public function value(): ?string
     {
-        return self::decode($this->value);
+        return Encoder::decode($this->value);
     }
 
     public function toString(): string

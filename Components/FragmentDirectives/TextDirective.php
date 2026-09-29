@@ -15,7 +15,6 @@ namespace League\Uri\Components\FragmentDirectives;
 
 use BackedEnum;
 use League\Uri\Contracts\FragmentDirective;
-use League\Uri\Encoder;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\StringCoercionMode;
 use Stringable;
@@ -23,7 +22,6 @@ use Throwable;
 
 use function explode;
 use function preg_match;
-use function str_replace;
 
 final class TextDirective implements FragmentDirective
 {
@@ -83,33 +81,19 @@ final class TextDirective implements FragmentDirective
         }
 
         /** @var non-empty-string $start */
-        $start = (string) self::decode($matches['start']);
+        $start = (string) Encoder::decode($matches['start']);
         /** @var ?non-empty-string $prefix */
-        $prefix = self::decode($matches['prefix']);
+        $prefix = Encoder::decode($matches['prefix']);
         /** @var ?non-empty-string $suffix */
-        $suffix = self::decode($matches['suffix'] ?? null);
+        $suffix = Encoder::decode($matches['suffix'] ?? null);
         $matches['end'] ??= null;
         if ('' === $matches['end']) {
             $matches['end'] = null;
         }
         /** @var ?non-empty-string $end */
-        $end = self::decode($matches['end']);
+        $end = Encoder::decode($matches['end']);
 
         return new self($start, $end, $prefix, $suffix);
-    }
-
-    private static function encode(?string $value): ?string
-    {
-        return null !== $value ? strtr((string) Encoder::encodeQueryOrFragment($value), ['-' => '%2D', ',' => '%2C', '&' => '%26']) : null;
-    }
-
-    private static function decode(?string $value): ?string
-    {
-        if (null === $value) {
-            return null;
-        }
-
-        return str_replace('%20', ' ', (string) Encoder::decodeFragment($value));
     }
 
     public function name(): string
@@ -137,19 +121,18 @@ final class TextDirective implements FragmentDirective
 
     public function toString(): string
     {
-        $encodedValue = (string) self::encode($this->start);
-
-        $prefix = self::encode($this->prefix);
+        $encodedValue = (string) Encoder::encode($this->start);
+        $prefix = Encoder::encode($this->prefix);
         if (null !== $prefix) {
             $encodedValue = $prefix.'-,'.$encodedValue;
         }
 
-        $end = self::encode($this->end);
+        $end = Encoder::encode($this->end);
         if (null !== $end) {
             $encodedValue .= ','.$end;
         }
 
-        $suffix = self::encode($this->suffix);
+        $suffix = Encoder::encode($this->suffix);
         if (null !== $suffix) {
             $encodedValue .= ',-'.$suffix;
         }
