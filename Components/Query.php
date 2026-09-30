@@ -14,10 +14,11 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use BackedEnum;
-use DateInvalidTimeZoneException;
 use DateTimeImmutable;
+use DateTimeInterface;
 use DateTimeZone;
 use Deprecated;
+use Exception;
 use Iterator;
 use League\Uri\Contracts\QueryInterface;
 use League\Uri\Contracts\UriComponentInterface;
@@ -401,9 +402,11 @@ final class Query extends Component implements QueryInterface
     /**
      * @param class-string<UnitEnum> $enumClass
      */
-    public function enum(int|string $key, string $enumClass, Occurrence $occurrence = Occurrence::First): ?UnitEnum
+    public function enum(int|string $key, string $enumClass, ?UnitEnum $default = null, Occurrence $occurrence = Occurrence::First): ?UnitEnum
     {
-        return TypeConverter::toEnum($this->getValue($key, $occurrence), $enumClass);
+        null === $default || $default instanceof $enumClass || throw new ValueError('The default value must be an instance of '.$enumClass.'; '.get_debug_type($default).' given.');
+
+        return TypeConverter::toEnum($this->getValue($key, $occurrence), $enumClass) ?? $default;
     }
 
     /**
@@ -419,23 +422,41 @@ final class Query extends Component implements QueryInterface
     /**
      * @param non-empty-string $format
      *
-     * @throws DateInvalidTimeZoneException
+     * @throws Exception
      */
-    public function date(int|string $key, string $format, DateTimeZone|string|null $timezone = null, Occurrence $occurrence = Occurrence::First): ?DateTimeImmutable
-    {
-        return TypeConverter::toDateTimeImmutable($this->getValue($key, $occurrence), $format, $timezone);
+    public function date(
+        int|string $key,
+        string $format,
+        DateTimeZone|string|null $timezone = null,
+        ?DateTimeInterface $default = null,
+        Occurrence $occurrence = Occurrence::First
+    ): ?DateTimeImmutable {
+        return TypeConverter::toDateTimeImmutable($this->getValue($key, $occurrence), $format, $timezone) ?? (
+            null !== $default && !$default instanceof DateTimeImmutable
+                ? DateTimeImmutable::createFromInterface($default)
+                : null
+        );
     }
 
     /**
      * @param non-empty-string $format
      *
-     * @throws DateInvalidTimeZoneException
+     * @throws Exception
      *
      * @return array<DateTimeImmutable>
      */
-    public function dates(int|string $key, string $format, DateTimeZone|string|null $timezone = null): array
-    {
-        return TypeConverter::toDateTimeImmutables($this->getAll((string) $key), $format, $timezone);
+    public function dates(
+        int|string $key,
+        string $format,
+        DateTimeZone|string|null $timezone = null,
+        ?DateTimeInterface $default = null,
+    ): array {
+        return TypeConverter::toDateTimeImmutables(
+            values: $this->getAll((string) $key),
+            format: $format,
+            timezone: $timezone,
+            default: $default,
+        );
     }
 
     public function indexOf(string $key, int $nth = 0): ?int
