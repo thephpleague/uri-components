@@ -427,7 +427,7 @@ final class Query extends Component implements QueryInterface
     public function date(
         int|string $key,
         string $format,
-        DateTimeZone|string|null $timezone = null,
+        DateTimeZone|string $timezone = 'UTC',
         ?DateTimeInterface $default = null,
         Occurrence $occurrence = Occurrence::First
     ): ?DateTimeImmutable {
@@ -448,7 +448,7 @@ final class Query extends Component implements QueryInterface
     public function dates(
         int|string $key,
         string $format,
-        DateTimeZone|string|null $timezone = null,
+        DateTimeZone|string $timezone = 'UTC',
         ?DateTimeInterface $default = null,
     ): array {
         return TypeConverter::toDateTimeImmutables(
