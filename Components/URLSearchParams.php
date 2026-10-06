@@ -17,7 +17,11 @@ use ArgumentCountError;
 use BackedEnum;
 use Closure;
 use Countable;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
 use Deprecated;
+use Exception;
 use Iterator;
 use IteratorAggregate;
 use League\Uri\Contracts\QueryInterface;
@@ -27,14 +31,18 @@ use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\KeyValuePair\Converter;
+use League\Uri\Occurrence;
 use League\Uri\QueryString;
 use League\Uri\StringCoercionMode;
+use League\Uri\TypeConverter;
 use League\Uri\Uri;
 use League\Uri\UriString;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use UnitEnum;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
+use ValueError;
 
 use function array_is_list;
 use function array_key_exists;
@@ -424,6 +432,125 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
         return array_map(
             fn (?string $value): string => $value ?? '',
             $this->pairs->getAll(self::usvString($name))
+        );
+    }
+
+    private function getValue(int|string $key, Occurrence $occurrence): ?string
+    {
+        $key = (string) $key;
+
+        return match ($occurrence) {
+            Occurrence::First => $this->first($key),
+            Occurrence::Last => $this->last($key),
+        };
+    }
+
+    public function string(int|string $key, ?string $default = null, Occurrence $occurrence = Occurrence::First): ?string
+    {
+        return TypeConverter::toString($this->getValue($key, $occurrence)) ?? $default;
+    }
+
+    public function strings(int|string $key, ?string $default = null): array
+    {
+        return TypeConverter::toStrings($this->getAll((string) $key), $default);
+    }
+
+    public function integer(int|string $key, ?int $default = null, Occurrence $occurrence = Occurrence::First): ?int
+    {
+        return TypeConverter::toInteger($this->getValue($key, $occurrence)) ?? $default;
+    }
+
+    /**
+     * @return array<int>
+     */
+    public function integers(int|string $key, ?int $default = null): array
+    {
+        return TypeConverter::toIntegers($this->getAll((string) $key), $default);
+    }
+
+    public function float(int|string $key, ?float $default = null, Occurrence $occurrence = Occurrence::First): ?float
+    {
+        return TypeConverter::toFloat($this->getValue($key, $occurrence)) ?? $default;
+    }
+
+    /**
+     * @return array<float>
+     */
+    public function floats(int|string $key, ?float $default = null): array
+    {
+        return TypeConverter::toFloats($this->getAll((string) $key), $default);
+    }
+
+    public function boolean(int|string $key, ?bool $default = null, Occurrence $occurrence = Occurrence::First): ?bool
+    {
+        return TypeConverter::toBoolean($this->get((string) $key)) ?? $default;
+    }
+
+    /**
+     * @return array<bool>
+     */
+    public function booleans(int|string $key, ?bool $default = null): array
+    {
+        return TypeConverter::toBooleans($this->getAll((string) $key), $default);
+    }
+
+    /**
+     * @param class-string<UnitEnum> $enumClass
+     */
+    public function enum(int|string $key, string $enumClass, ?UnitEnum $default = null, Occurrence $occurrence = Occurrence::First): ?UnitEnum
+    {
+        null === $default || $default instanceof $enumClass || throw new ValueError('The default value must be an instance of '.$enumClass.'; '.get_debug_type($default).' given.');
+
+        return TypeConverter::toEnum($this->getValue($key, $occurrence), $enumClass) ?? $default;
+    }
+
+    /**
+     * @param class-string<UnitEnum> $enumClass
+     *
+     * @return array<UnitEnum>
+     */
+    public function enums(int|string $key, string $enumClass, ?UnitEnum $default = null): array
+    {
+        return TypeConverter::toEnums($this->getAll((string) $key), $enumClass, $default);
+    }
+
+    /**
+     * @param non-empty-string $format
+     *
+     * @throws Exception
+     */
+    public function date(
+        int|string $key,
+        string $format,
+        DateTimeZone|string $timezone = 'UTC',
+        ?DateTimeInterface $default = null,
+        Occurrence $occurrence = Occurrence::First
+    ): ?DateTimeImmutable {
+        return TypeConverter::toDateTimeImmutable($this->getValue($key, $occurrence), $format, $timezone) ?? (
+            null !== $default && !$default instanceof DateTimeImmutable
+                ? DateTimeImmutable::createFromInterface($default)
+                : null
+        );
+    }
+
+    /**
+     * @param non-empty-string $format
+     *
+     * @throws Exception
+     *
+     * @return array<DateTimeImmutable>
+     */
+    public function dates(
+        int|string $key,
+        string $format,
+        DateTimeZone|string $timezone = 'UTC',
+        ?DateTimeInterface $default = null,
+    ): array {
+        return TypeConverter::toDateTimeImmutables(
+            values: $this->getAll((string) $key),
+            format: $format,
+            timezone: $timezone,
+            default: $default,
         );
     }
 

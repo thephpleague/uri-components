@@ -14,7 +14,11 @@ declare(strict_types=1);
 namespace League\Uri\Components;
 
 use BackedEnum;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
 use Deprecated;
+use Exception;
 use Iterator;
 use League\Uri\Contracts\PathInterface;
 use League\Uri\Contracts\SegmentedPathInterface;
@@ -23,9 +27,11 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Encoder;
 use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
+use League\Uri\TypeConverter;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
 use TypeError;
+use UnitEnum;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 use ValueError;
@@ -216,6 +222,54 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
     public function last(): ?string
     {
         return $this->get(-1);
+    }
+
+    public function string(int $key, ?string $default = null): ?string
+    {
+        return TypeConverter::toString($this->get($key)) ?? $default;
+    }
+
+    public function integer(int $key, ?int $default = null): ?int
+    {
+        return TypeConverter::toInteger($this->get($key)) ?? $default;
+    }
+
+    public function float(int $key, ?float $default = null): ?float
+    {
+        return TypeConverter::toFloat($this->get($key)) ?? $default;
+    }
+
+    public function boolean(int $key, ?bool $default = null): ?bool
+    {
+        return TypeConverter::toBoolean($this->get($key)) ?? $default;
+    }
+
+    /**
+     * @param class-string<UnitEnum> $enumClass
+     */
+    public function enum(int $key, string $enumClass, ?UnitEnum $default = null): ?UnitEnum
+    {
+        null === $default || $default instanceof $enumClass || throw new ValueError('The default value must be an instance of '.$enumClass.'; '.get_debug_type($default).' given.');
+
+        return TypeConverter::toEnum($this->get($key), $enumClass) ?? $default;
+    }
+
+    /**
+     * @param non-empty-string $format
+     *
+     * @throws Exception
+     */
+    public function date(
+        int $key,
+        string $format,
+        DateTimeZone|string $timezone = 'UTC',
+        ?DateTimeInterface $default = null,
+    ): ?DateTimeImmutable {
+        return TypeConverter::toDateTimeImmutable($this->get($key), $format, $timezone) ?? (
+            null !== $default && !$default instanceof DateTimeImmutable
+            ? DateTimeImmutable::createFromInterface($default)
+            : null
+        );
     }
 
     public function indexOf(BackedEnum|Stringable|string $segment): ?int

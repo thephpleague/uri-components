@@ -7,6 +7,8 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Added
 
 - `Query` parameter type conversion
+- `HierarchicalPath` parameter type conversion
+- `URLSearchParams` parameter type conversion
 
 ### Fixed
 
