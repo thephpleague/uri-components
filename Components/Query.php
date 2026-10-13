@@ -600,10 +600,16 @@ final class Query extends Component implements QueryInterface
 
     public function sort(): self
     {
-        $codepoints = fn (?string $str): string => in_array($str, ['', null], true) ? '' : implode('.', array_map(
-            mb_ord(...), /* @phpstan-ignore-line */
-            (array) preg_split(pattern:'//u', subject: $str, flags: PREG_SPLIT_NO_EMPTY)
-        ));
+        $codepoints = static function (?string $str): string {
+            if (null === $str || '' === $str) {
+                return '';
+            }
+
+            $characters = preg_split('//u', $str, flags: PREG_SPLIT_NO_EMPTY);
+            false !== $characters || throw new ValueError('The string must contain valid UTF-8.');
+
+            return implode('.', array_map(mb_ord(...), $characters));
+        };
 
         $compare = fn (string $name1, string $name2): int => match (1) {
             preg_match(self::REGEXP_NON_ASCII_PATTERN, $name1.$name2) => strcmp($codepoints($name1), $codepoints($name2)),

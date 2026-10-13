@@ -29,6 +29,7 @@ use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
 
 use function array_map;
+use function array_values;
 use function filter_var;
 
 use const FILTER_VALIDATE_INT;
@@ -36,11 +37,7 @@ use const FILTER_VALIDATE_INT;
 final class Port extends Component implements PortInterface
 {
     private readonly ?int $port;
-    private ?array $cachedDefaultSchemes = null;
 
-    /**
-     * New instance.
-     */
     private function __construct(BackedEnum|Stringable|string|int|null $port = null)
     {
         $this->port = $this->validate($port);
@@ -149,10 +146,14 @@ final class Port extends Component implements PortInterface
      */
     public function defaultSchemes(): array
     {
-        return $this->cachedDefaultSchemes ??= array_map(
-            fn (UriScheme $schemePort): Scheme => Scheme::new($schemePort->value),
+        static $defaultSchemes;
+
+        $defaultSchemes ??= array_values(array_map(
+            static fn (UriScheme $schemePort): Scheme => Scheme::new($schemePort->value),
             UriScheme::fromPort($this->port)
-        );
+        ));
+
+        return $defaultSchemes;
     }
 
     /**

@@ -15,7 +15,6 @@ namespace League\Uri\Components;
 
 use BackedEnum;
 use Deprecated;
-use Iterator;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\DomainHostInterface;
 use League\Uri\Contracts\HostInterface;
@@ -26,6 +25,7 @@ use League\Uri\Exceptions\OffsetOutOfBounds;
 use League\Uri\Exceptions\SyntaxError;
 use Psr\Http\Message\UriInterface as Psr7UriInterface;
 use Stringable;
+use Traversable;
 use TypeError;
 use Uri\Rfc3986\Uri as Rfc3986Uri;
 use Uri\WhatWg\Url as WhatWgUrl;
@@ -170,7 +170,10 @@ final class Domain extends Component implements DomainHostInterface
         return count($this->labels);
     }
 
-    public function getIterator(): Iterator
+    /**
+     * @return Traversable<int, string>
+     */
+    public function getIterator(): Traversable
     {
         yield from $this->labels;
     }
@@ -396,7 +399,7 @@ final class Domain extends Component implements DomainHostInterface
             $label = Host::new($label)->value();
         }
 
-        if ($label === $this->labels[$key]) {
+        if ($label === ($this->labels[$key] ?? null)) {
             return $this;
         }
 

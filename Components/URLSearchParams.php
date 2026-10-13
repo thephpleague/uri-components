@@ -580,6 +580,8 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
 
     /**
      * Returns the total number of search parameter entries.
+     *
+     * @return int<0, max>
      */
     public function size(): int
     {

@@ -439,7 +439,7 @@ final class HierarchicalPath extends Component implements SegmentedPathInterface
         }
 
         $segment = Encoder::decodeAll($segment);
-        if ($segment === $this->segments[$key]) {
+        if ($segment === ($this->segments[$key] ?? null)) {
             return $this;
         }
 

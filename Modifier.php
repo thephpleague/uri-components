@@ -140,7 +140,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
         FeatureDetection::supportsDom();
         $uriString = $this->toString();
         $rfc3987String = UriString::toIriString($uriString);
-        $doc = class_exists(HTMLDocument::class) ? HTMLDocument::createEmpty() : new DOMDocument(encoding:'utf-8'); /* @phpstan-ignore-line */
+        $doc = class_exists(HTMLDocument::class) ? HTMLDocument::createEmpty() : new DOMDocument(encoding:'utf-8');
         $element = $doc->createElement('a');
         $element->setAttribute('href', $uriString);
         $element->appendChild(match (true) {
@@ -262,7 +262,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             return new static($this->uri->withUsername($username)->withPassword($password));
         }
 
-        if (null == $username && $this->uri instanceof Psr7UriInterface) {
+        if (null === $username && $this->uri instanceof Psr7UriInterface) {
             $username = '';
         }
 
@@ -409,6 +409,7 @@ class Modifier implements Stringable, JsonSerializable, UriAccess, Conditionable
             default => $from,
         };
 
+        /* @phpstan-ignore-next-line */
         if ($to == $from) {
             return $this;
         }

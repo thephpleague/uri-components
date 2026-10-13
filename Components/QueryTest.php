@@ -95,7 +95,6 @@ final class QueryTest extends TestCase
 
     public function testCreateFromPairsWithIterable(): void
     {
-        /** @var iterable<int, array{0:string, 1:string|null}> $iterable */
         $iterable = (function (): iterable {
             $data = [['john', 'doe the john'], ['john', null]];
 

@@ -231,7 +231,7 @@ final class DataPath extends Component implements DataPathInterface
         return self::new(Path::fromUri($uri)->toString());
     }
 
-    public function value(): ?string
+    public function value(): string
     {
         return $this->path->value();
     }
@@ -283,7 +283,7 @@ final class DataPath extends Component implements DataPathInterface
 
     public function normalize(): self
     {
-        return new self((string) $this->path->normalize()->value());
+        return new self($this->path->normalize()->value());
     }
 
     /**
