@@ -2,17 +2,19 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
-## [Next](https://github.com/thephpleague/uri-components/compare/7.8.1...master) - TBD
+## [7.9.0](https://github.com/thephpleague/uri-components/compare/7.8.1...7.9.0) - 2026-10-16
 
 ### Added
 
 - `Query` parameter type conversion
 - `HierarchicalPath` parameter type conversion
 - `URLSearchParams` parameter type conversion
+- `FragmentDirectibes\Encoder` to improve encoding for fragment directives
 
 ### Fixed
 
 - Update requirement to use `uri` 7.9.0
+- `Modifier::redactQueryPairs()`
 
 ### Deprecated
 
