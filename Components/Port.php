@@ -15,10 +15,10 @@ namespace League\Uri\Components;
 
 use BackedEnum;
 use Deprecated;
+use Exception;
 use League\Uri\Contracts\AuthorityInterface;
 use League\Uri\Contracts\PortInterface;
 use League\Uri\Contracts\UriComponentInterface;
-use League\Uri\Contracts\UriException;
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Exceptions\SyntaxError;
 use League\Uri\StringCoercionMode;
@@ -31,6 +31,7 @@ use Uri\WhatWg\Url as WhatWgUrl;
 use function array_map;
 use function array_values;
 use function filter_var;
+use function ltrim;
 
 use const FILTER_VALIDATE_INT;
 
@@ -49,13 +50,13 @@ final class Port extends Component implements PortInterface
     }
 
     /**
-     * Create a new instance from a string.or a stringable structure or returns null on failure.
+     * Create a new instance from a string or a stringable structure or returns null on failure.
      */
     public static function tryNew(BackedEnum|Stringable|string|int|null $uri = null): ?self
     {
         try {
             return self::new($uri);
-        } catch (UriException) {
+        } catch (Exception) {
             return null;
         }
     }
@@ -91,20 +92,21 @@ final class Port extends Component implements PortInterface
             return null;
         }
 
-        $fport = filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-        if (false !== $fport) {
-            return $fport;
+        $filteredPort = ltrim($port, '0');
+        if ('' === $filteredPort) {
+            return 0;
         }
 
-        throw new SyntaxError('Expected port to be a positive integer or 0; received '.$port.'.');
+        $filteredPort = filter_var($filteredPort, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+
+        return false !== $filteredPort
+            ? $filteredPort
+            : throw new SyntaxError('Expected port to be a positive integer or 0; received '.$port.'.');
     }
 
     public function value(): ?string
     {
-        return match (null) {
-            $this->port => $this->port,
-            default => (string) $this->port,
-        };
+        return null === $this->port ? null : (string) $this->port;
     }
 
     public function equals(mixed $value): bool

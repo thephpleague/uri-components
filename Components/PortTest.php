@@ -58,6 +58,13 @@ final class PortTest extends TestCase
                 }
             }, 23, '23', ':23'],
             [Port::new(23), 23, '23', ':23'],
+            [new class () {
+                public function __toString(): string
+                {
+                    return '00000023';
+                }
+            }, 23, '23', ':23'],
+            ['00000000000', 0, '0', ':0'],
         ];
     }
 

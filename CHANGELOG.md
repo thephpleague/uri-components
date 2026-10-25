@@ -11,6 +11,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - Bump `uri-interfaces` requirement.
+- `Port` validation normalized against integer value.
 
 ### Deprecated
 
