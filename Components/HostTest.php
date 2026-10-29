@@ -139,6 +139,12 @@ final class HostTest extends TestCase
                 'test..example.com',
                 'test..example.com',
             ],
+            'encoded hostname to allow invalid characters' => [
+                '%ef%bc%85%ef%bc%94%ef%bc%91.com',
+                '%EF%BC%85%EF%BC%94%EF%BC%91.com',
+                '%ef%bc%85%ef%bc%94%ef%bc%91.com',
+                '%EF%BC%85%EF%BC%94%EF%BC%91.com',
+            ],
         ];
     }
 
@@ -170,7 +176,6 @@ final class HostTest extends TestCase
             'invalid IPFuture' => ['[v4.1.2.3]'],
             'invalid host with mix content' => ['_b%C3%A9bé.be-'],
             'invalid Host with fullwith (1)' =>  ['％００.com'],
-            'invalid host with fullwidth escaped' => ['%ef%bc%85%ef%bc%94%ef%bc%91.com'],
         ];
     }
 

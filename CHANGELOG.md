@@ -2,6 +2,27 @@
 
 All Notable changes to `League\Uri\Components` will be documented in this file
 
+## [Next](https://github.com/thephpleague/uri-components/compare/7.9.1...master) - TBD
+
+### Added
+
+- None
+
+### Fixed
+
+- Bump `uri` requirement.
+- `Encoder::normalizeHost` Host encoding and normalization [#230](https://github.com/thephpleague/uri-src/issues/230)
+- `HostRecord` Host validation and Unicode/Ascii convertion [#230](https://github.com/thephpleague/uri-src/issues/230)
+- `Encoder::isQueryEncoded` Should follow the rules from RFC3986  [#229](https://github.com/thephpleague/uri-src/issues/229)
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
 ## [7.9.1](https://github.com/thephpleague/uri-components/compare/7.9.0...7.9.1) - 2026-10-27
 
 ### Added
@@ -10,7 +31,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 
 ### Fixed
 
-- Bump `uri-interfaces` requirement.
+- Bump `uri` requirement.
 - `Port` validation normalized against integer value.
 
 ### Deprecated

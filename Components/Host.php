@@ -41,7 +41,6 @@ use function rawurldecode;
 use function rawurlencode;
 use function rtrim;
 use function sprintf;
-use function strtolower;
 use function strtoupper;
 use function substr;
 
@@ -174,10 +173,14 @@ final class Host extends Component implements IpHostInterface
             return $this->value;
         }
 
+        $domain = IdnConverter::toUnicode($this->value)->domain();
+
         return (string) preg_replace_callback(
-            '/%[0-9A-F]{2}/i',
-            fn (array $matches): string => strtoupper($matches[0]),
-            strtolower(rawurlencode(IdnConverter::toUnicode($this->value)->domain()))
+            '/%[0-9A-F]{2}|[^A-Za-z0-9\-._~]/i',
+            static fn (array $matches): string => str_starts_with($matches[0], '%')
+                ? strtoupper($matches[0])
+                : rawurlencode($matches[0]),
+            $domain,
         );
     }
 
