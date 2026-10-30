@@ -11,9 +11,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - Bump `uri` requirement.
-- `Encoder::normalizeHost` Host encoding and normalization [#230](https://github.com/thephpleague/uri-src/issues/230)
-- `HostRecord` Host validation and Unicode/Ascii convertion [#230](https://github.com/thephpleague/uri-src/issues/230)
-- `Encoder::isQueryEncoded` Should follow the rules from RFC3986  [#229](https://github.com/thephpleague/uri-src/issues/229)
+- `Host::encoded` encoding is improved.
 
 ### Deprecated
 

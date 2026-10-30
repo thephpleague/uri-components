@@ -140,9 +140,9 @@ final class HostTest extends TestCase
                 'test..example.com',
             ],
             'encoded hostname to allow invalid characters' => [
-                '%ef%bc%85%ef%bc%94%ef%bc%91.com',
                 '%EF%BC%85%EF%BC%94%EF%BC%91.com',
-                '%ef%bc%85%ef%bc%94%ef%bc%91.com',
+                '%EF%BC%85%EF%BC%94%EF%BC%91.com',
+                '%EF%BC%85%EF%BC%94%EF%BC%91.com',
                 '%EF%BC%85%EF%BC%94%EF%BC%91.com',
             ],
         ];
