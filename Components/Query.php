@@ -68,13 +68,12 @@ use function preg_match;
 use function preg_quote;
 use function preg_replace;
 use function strcmp;
-use function uksort;
+use function usort;
 
 use const ARRAY_FILTER_USE_BOTH;
 
 final class Query extends Component implements QueryInterface
 {
-    private const REGEXP_NON_ASCII_PATTERN = '/[^\x20-\x7f]/';
     private const REGXP_FILTER_LIST = '/^
         [^\[\]]+        # base key (no [ or ])
         (?:\[[^\]]*\])+ # one or more bracket groups
@@ -433,8 +432,8 @@ final class Query extends Component implements QueryInterface
     ): ?DateTimeImmutable {
         return TypeConverter::toDateTimeImmutable($this->getValue($key, $occurrence), $format, $timezone) ?? (
             null !== $default && !$default instanceof DateTimeImmutable
-                ? DateTimeImmutable::createFromInterface($default)
-                : null
+            ? DateTimeImmutable::createFromInterface($default)
+            : null
         );
     }
 
@@ -600,39 +599,18 @@ final class Query extends Component implements QueryInterface
 
     public function sort(): self
     {
-        $toUtf16 = static function (?string $str): string {
-            if (null === $str || '' === $str) {
-                return '';
-            }
-
-            mb_check_encoding($str, 'UTF-8') || throw new ValueError('The string must contain valid UTF-8.');
-
-            return mb_convert_encoding($str, 'UTF-16BE', 'UTF-8');
-        };
-
-        $compare = fn (string $name1, string $name2): int => match (1) {
-            preg_match(self::REGEXP_NON_ASCII_PATTERN, $name1.$name2) => strcmp($toUtf16($name1), $toUtf16($name2)),
-            default => strcmp($name1, $name2),
-        };
-
-        $parameters = array_reduce($this->pairs, function (array $carry, array $pair) {
-            $carry[$pair[0]] ??= [];
-            $carry[$pair[0]][] = $pair[1];
-
-            return $carry;
-        }, []);
-
-        uksort($parameters, $compare);
-
-        $pairs = [];
-        foreach ($parameters as $key => $values) {
-            $pairs = [...$pairs, ...array_map(fn ($value) => [$key, $value], $values)];
+        if (2 > count($this->pairs)) {
+            return $this;
         }
 
-        return match ($this->pairs) {
-            $pairs  => $this,
-            default => self::fromPairs($pairs),
-        };
+        $toUtf16 = static fn (string $str): string => mb_check_encoding($str, 'UTF-8')
+            ? mb_convert_encoding($str, 'UTF-16BE', 'UTF-8')
+            : throw new ValueError('The parameter name (hex: '.bin2hex($str).') must contain valid UTF-8 characters.');
+        $parameters = array_map(static fn (array $pair): array => ['pair' => $pair, 'name' => $toUtf16($pair[0])], $this->pairs);
+        usort($parameters, static fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
+        $pairs = array_column($parameters, 'pair');
+
+        return $pairs === $this->pairs ? $this : self::fromPairs($pairs, $this->separator);
     }
 
     public function withoutDuplicates(): self
