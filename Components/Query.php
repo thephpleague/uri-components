@@ -62,15 +62,15 @@ use function is_array;
 use function is_int;
 use function is_object;
 use function iterator_to_array;
+use function mb_check_encoding;
+use function mb_convert_encoding;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
-use function preg_split;
 use function strcmp;
 use function uksort;
 
 use const ARRAY_FILTER_USE_BOTH;
-use const PREG_SPLIT_NO_EMPTY;
 
 final class Query extends Component implements QueryInterface
 {
@@ -600,19 +600,18 @@ final class Query extends Component implements QueryInterface
 
     public function sort(): self
     {
-        $codepoints = static function (?string $str): string {
+        $toUtf16 = static function (?string $str): string {
             if (null === $str || '' === $str) {
                 return '';
             }
 
-            $characters = preg_split('//u', $str, flags: PREG_SPLIT_NO_EMPTY);
-            false !== $characters || throw new ValueError('The string must contain valid UTF-8.');
+            mb_check_encoding($str, 'UTF-8') || throw new ValueError('The string must contain valid UTF-8.');
 
-            return implode('.', array_map(mb_ord(...), $characters));
+            return mb_convert_encoding($str, 'UTF-16BE', 'UTF-8');
         };
 
         $compare = fn (string $name1, string $name2): int => match (1) {
-            preg_match(self::REGEXP_NON_ASCII_PATTERN, $name1.$name2) => strcmp($codepoints($name1), $codepoints($name2)),
+            preg_match(self::REGEXP_NON_ASCII_PATTERN, $name1.$name2) => strcmp($toUtf16($name1), $toUtf16($name2)),
             default => strcmp($name1, $name2),
         };
 

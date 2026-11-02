@@ -695,7 +695,7 @@ final class URLSearchParams implements Countable, IteratorAggregate, UriComponen
     /**
      * Sorts all key/value pairs contained in this object in place and returns undefined.
      *
-     * The sort order is according to Unicode code points of the keys. This method
+     * The sort order is according to UTF-16 code units of the keys. This method
      * uses a stable sorting algorithm (i.e. the relative order between
      * key/value pairs with equal keys will be preserved).
      */

@@ -609,6 +609,10 @@ final class URLSearchParamsTest extends TestCase
     "output": [["🌈", ""], ["ﬃ", ""]]
   },
   {
+    "input": "é&e\uFFFD&e\u0301",
+    "output": [["e\u0301", ""], ["e\uFFFD", ""], ["é", ""]]
+  },
+  {
     "input": "z=z&a=a&z=y&a=b&z=x&a=c&z=w&a=d&z=v&a=e&z=u&a=f&z=t&a=g",
     "output": [["a", "a"], ["a", "b"], ["a", "c"], ["a", "d"], ["a", "e"], ["a", "f"], ["a", "g"], ["z", "z"], ["z", "y"], ["z", "x"], ["z", "w"], ["z", "v"], ["z", "u"], ["z", "t"]]
   },
@@ -623,6 +627,10 @@ final class URLSearchParamsTest extends TestCase
   {
     "input": "a🌈&a💩",
     "output": [["a🌈", ""], ["a💩", ""]]
+  },
+  {
+    "input": "あ=1&い=2&a=3",
+    "output": [["a", "3"], ["あ", "1"], ["い", "2"]]
   }
 ]
 JSON;

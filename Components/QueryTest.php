@@ -565,6 +565,13 @@ final class QueryTest extends TestCase
         self::assertNotEquals($sortedQuery, $query);
     }
 
+    public function testSortThrowsOnInvalidUtf8Name(): void
+    {
+        $this->expectException(ValueError::class);
+
+        Query::new('%FF=1&%C3%A9=2')->sort();
+    }
+
     #[DataProvider('sameQueryAfterSortingProvider')]
     public function testSortReturnSameInstance(?string $query): void
     {
