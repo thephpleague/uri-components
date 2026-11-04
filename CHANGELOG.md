@@ -11,7 +11,7 @@ All Notable changes to `League\Uri\Components` will be documented in this file
 ### Fixed
 
 - Bump `uri` requirement.
-- `Host::encoded` encoding is improved.
+- `Host::encoded` encoding is improved
 - `Query::sort` and `URLSearchParams::sort` compare names by UTF-16 code units as required by the WHATWG URL Standard.
 
 ### Deprecated
